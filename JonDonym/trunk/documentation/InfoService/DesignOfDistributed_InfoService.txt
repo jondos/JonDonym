@@ -1,0 +1,207 @@
+Hallo,
+
+ich habe die Änderungen jetzt ins CVS eingecheckt.
+Ich werden von dem Studenten zunächst noch folgende Anpassungen vornehmen lassen:
+
+1. Die XML-Struktur zur Beschreibung eine InfoService wird an die der Mix angepasst, also statt:
+<InfoService name=".." url=".." expire="...">
+<Ports>
+<Item Port="..."/>
+<Item Port="..."/>
+<Item Port="..."/>
+</Ports>
+</InfoService>
+
+eher:
+
+<InfoService id="...">
+ <Network>
+    <ListenerInterfaces>
+      <ListenerInterface>
+        <Type>HTTP/TCP</Type>
+        <Port>..</Port>
+        <Host>..</Host>
+        <IP>..</IP>
+      </ListenerInterface>
+    </ListenerInterfaces>
+  </Network>
+ <Expire>...</Expire>
+</InfoService>
+
+2. ownhost und ownports entfallen in der Konfigurationsdatei, da diese Angaben bereits unter Listeners gemacht werden
+3. Der name ist doch eher als eindeutige ID zu verstehn um die InfoServices zu unterscheiden oder ?
+
+Generelle Bemerkung: Ist es wirklich zu vertreten, dass jeder an jeden alles sendet ? Ist dies nicht eine zu grosse Netzwerk Belastung ? --> Insbesonder wenn der InfoService im Zuuge z.B. der Blockierungsresistenz weiter Daten bereitsstellt z.B. Informationen über JAP's die bereits sind als Zugangspunkt zu dienen.
+Auf Dauer scheint es mir besser zu sein hier vielleich Algorithmen aus der Graphen-Theori zu bemühen --> da ja jeder InfoService eine komplette Liste aller InfoServices besitzt ist es doch möglich das sich quais automatisch eine ideale Zusammenschaltung der InfoServices ergibt, die nur umkonfiguriert wird, wenn neue hinzukommen bzw. nicht mehr zu erreichen sind...
+
+4. Das der InfoService Nachrichten nur jede Minute weiterleitet ist eventuell eine zu grosse Verzögerung -> so sind die Statusmeldungen dann ja schon veraltet...
+Eventuell muss man hier zweigleisig fahren: für "HELO" Nachrichten reicht es, wenn sie mit einer Verzögerungszeit von einer Minute weitergesendet werden, bei Statusmeldungen geht dies jedoch nicht.
+
+5. Sollte man wohl die Meldungen des Mixes so abändern, dass der InfoService nichts eigenes mehr hinzufügen muss --> also die Meldungen direkt übernehmen kann. Damit muss er sich auch nicht um die Bedeutung der einzelnen Felder kümmern...
+
+
+> Hier eine kurze Doku:
+> 
+> Über http://server:port/infoserver lässt sich eine aktuelle
+> Liste der verfügbaren Infoservices herunterladen.
+> 
+> Leider akzeptiert die InfoServiece-Version aus irgend einem Grund die
+> Signaturen der Mixe unter den Statusnachrichten 
+> (Helo/Feedback-Meldungen)
+> nicht immer (liegt laut Stefan an bestimmten Java-Versionen), so dass
+> mitunter die Kaskade (der Kaskadenname) nicht angegeben
+> wird.
+> 
+> Zudem gibt es jetzt neben der anfrage "feedback" auch "signedfeedback"
+> (Klasse infoservicecommands und dafür änderungen in den 
+> *DBentry-Klassen und
+> database, um die vom Mix gesendete XML-Struktur direkt 
+> abzuspeichern. Bei
+> den Datenbankentry'S gibts jetzt also meist neben zwei 
+> xmlstrukturen ... die
+> empfangene und die selbstgenerierte). Der
+> Unterschied ist, dass die Kaskaden-Statusmeldung direkt wie vom mix
+> empfangen (also signiert) an JAP gegeben wird. Enthält aber nicht das
+> Anonlevel, da sich dieses bisher der Infoservice ausdenkt.
+> 
+> Funktionsweise:
+> 
+> in der Datei InfoService.properties (Klasse Configuration) 
+> gibt es neue
+> Einträge:
+> 
+> ###########################################################
+> #Distributed InfoService Properties
+> #
+> # ownname ... set the own name, host and the listener ports
+> # ownhost     to publish to other infoservices
+> # ownports
+> # ownhourstoexpire ... set expire of own InfoServer entity
+> #
+> # neighbours ... host:port of known other InfoServers received status
+> #                messages will be send to it's server
+> #
+> ###########################################################
+> 
+> ownname=Test-InfoService
+> ownhost=barna.inf.fu-berlin.de
+> ownports=6544
+> ownhourstoexpire=240
+> 
+> neighbours=itsec2.inf.fu-berlin.de:6543,infoservice.inf.tu-dre
+sden.de:80
+> 
+> 
+> man gibt also an, wer man selbst ist und einen oder mehrere andere
+> InfoServices.
+> (der eigene Eintrag wird in InfoserverDBEntry gespeichert und wie die
+> anderen DBEntry von Database verwaltet)
+> 
+> 
+>  Nach dem Start meldet sich der eigene InfoService bei diesen
+> an, indem er seinen eigenen InfoServer-Eintrag mit "POST /infoserver"
+> hinschickt (und dies alle 10 Minuten wiederholt).
+> (beim Emfang einer POST /infoserver meldung wird diese von
+> InfoServiceCommands ausgewertet und ein InfoServerDBEntry erzeugt. In
+> Database wird der Entry in die InfoServer-Datenbank aufgenommen)
+> 
+> Jeder InfoService leitet empfangene Meldungen (Status, Mix, 
+> MixCaskade,
+> Infoserver-Einträge) an alle anderen ihm bekannten 
+> InfoSerices weiter (die
+> in der Konfiguration angegebenen Nachbarn sind dabei nur der 
+> Startwert,
+> sobald sich die eigene Infoserverliste Einträge enthält, wird an diese
+> weiterversendet).
+> Dazu wird bei neu eingehenden *DBEntry's ein neu Flag gesetzt. In
+> DistributedInfoService gibt es einen Thread, der regelmäßig 
+> (1x/Minute) die
+> Datenbanken nach neuen Einträgen durchsucht und diese an alle 
+> bekannten
+> Infoservices weiterschickt.
+> 
+> Um ein unendliches Kreise von Meldungen zu verhindern,
+> werden nur Einträge weitergeleitet und lokal gespeichert, die 
+> einen neueren
+> Zeitstempel enthalten (neu hinzugefügt in *DBEntry).
+> 
+> Für InfoServer-Einträge gilt wie für Mixmeldungen,
+> dass der Eintrag nach 11 Minuten gelöscht wird, falls er 
+> nicht aktualisiert
+> wurde. Die angezeigte Liste ist somit immer aktuell.
+> 
+> Zusätzlich enthält jeder InfoServer-Eintrag ein "expire" 
+> Feld. Dies ist
+> dafür gedacht, das Clients und Mixe veraltete Einträge 
+> löschen können. Der
+> Wert dieses Eintrags sollte mehrere Tage (Wochen) in der 
+> Zukunft liegen,
+> damit ein
+> JAP, der einige Zeit offline war, die anderen Infoserver noch 
+> erreicht,
+> falls der normalerweise von ihm benutzte ausgefallen ist.
+> 
+> D.h. im JAP sollen InfoServereinträge erst dann gelöscht 
+> werden, wenn expire
+> abgelaufen. JAP sollte zumindest
+> einmal täglich die aktuelle InfoServerliste downloaden. (GET 
+> /infoserver).
+> Idealerweise genau einmal täglich, so könnten
+> wir leicht eine Statistik der Anzahl der am Tag aktiven JAP's 
+> ermitteln.
+> (ToDo: Zähler in infoService einbauen)
+> 
+> ToDo:
+> 
+> - InfoServer-Einträge signieren und testen (ist bereits 
+> vorbereitet , aber
+> ein Signierschlüssel für Infoserver erforderlich - am besten ein
+> root-Zertifikat für den gesamten Dienst) ansonsten
+> kann sich jeder beliebige in das Netz der Infoserver 
+> einklinken, einfach
+> durch senden von "POST /infoserver ..." dies ist problematisch, da der
+> Aufwand mit der Anzahl der Infoserver quadratisch wächst
+> 
+> - Implementierung in JAP und den Mixen: Es sollte
+> regelmäßig (z.B. einmal täglich) die Liste der verfügbaren 
+> InfoServices
+> abgefragt und lokal gespeichert werden. Erreicht der Client den
+> normalerweise verwendeten Infoservice nicht, soll die Liste 
+> durchprobiert
+> werden, bis der Kontakt zu einem Server hergestellt ist. 
+> Dieser sollte dann
+> als Standardserver eingetragen werden.
+> (Die Datenstruktur InfoServerDBEntry und einiges drumherum 
+> kann sicherlich
+> wiederverwendet werden, ein extra Thread zum Löschen alter 
+> Einträge ist
+> sicherlich nicht erforderlich, sollte beim Beenden (Abspeichern in
+> Configuration geschehen, damit beim Start noch möglichst 
+> viele Infoserver in
+> der Liste stehen. Können ja probiert werden, auch wenn sie offiziell
+> veraltet sind. Fehlversuche und damit Wartezeit treten ja eh' 
+> nur auf, wenn
+> der bisher verwendete InfoService ausgefallen ist) gestehen)
+> 
+> Zudem muss das Konfigurationsblatt "Infoservice" geändert werden:
+> - Tabelle verfügbarer InfoServices
+> - Eingabefeld zum manuellen hinzufügen
+> - ggf. Lösch-Taste
+> - Direktauswahl des aktuellen InfoService (z.b. durch checkboxen)
+> 
+> Zusammenfassend: Das weiterleiten aller Nachrichten an alle bekannten
+> InfoServer stellt eine quadratischen Aufwand dar aber bietet maximale
+> Fehlertoleranz. In Anbetracht der Tatsache, dass es im 
+> Verhältnis zu den
+> Nutzer immer sehr wenig InfoServer bzw. Mixe 
+> (Nachrichtenverursacher) geben
+> wird erscheint mir dies vertretbar. In jedem Fall vereinfacht dieses
+> Vorgehen die Konfiguration (man muss sich keine Gedanken über 
+> die Struktur
+> des Netzes machen. Solange die Infoserver-Meldungen nicht 
+> signiert sind,
+> sollte das System nicht im heißen Betrieb verwendet werden.
+> 
+> Beiliegende Quellen sind noch nicht eingecheckt ...
+> 
+> 

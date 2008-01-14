@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+<JAPRouting>
+  <Protocol version="1" />
+  <Request subject="connection" msg="offer">
+    <AllowedCascades>
+      <MixCascade id="141.76.1.120%3A6544">
+        <Name>Dresden-Dresden</Name> 
+        <Network>
+          <ListenerInterfaces>
+            <ListenerInterface>
+              <Type>RAW/TCP</Type> 
+              <Port>6544</Port> 
+              <Host>mix.inf.tu-dresden.de</Host>
+              <IP>141.76.1.120</IP> 
+            </ListenerInterface>
+            <ListenerInterface>
+              <Type>RAW/TCP</Type> 
+              <Port>443</Port> 
+              <Host>mix.inf.tu-dresden.de</Host> 
+              <IP>141.76.1.120</IP> 
+            </ListenerInterface>
+            <ListenerInterface>
+              <Type>RAW/TCP</Type> 
+              <Port>80</Port>
+              <Host>mix.inf.tu-dresden.de</Host>
+              <IP>141.76.1.120</IP>
+            </ListenerInterface>
+          </ListenerInterfaces>
+        </Network>
+        <Mixes count="2">
+          <Mix id="141.76.1.120%3A6544" /> 
+          <Mix id="141.76.1.120%3A6545" />
+        </Mixes>
+        <LastUpdate>1085589234875</LastUpdate>
+        <Signature>
+          <SignedInfo>
+            <Reference URI="">
+              <DigestValue>N4aDp5DZ1iXeeCGH5QxKOqtELDo=</DigestValue> 
+            </Reference>
+          </SignedInfo>
+          <SignatureValue>g7/xcbMNY6IKczkqwVG+hOqXa+FqG/sQXFV6LO3dttA4HSCjnItzSA==</SignatureValue> 
+          <KeyInfo>
+            <X509Data>
+              <X509Certificate>MIIDgTCCAz+gAwIBAgIBATAJBgcqhkjOOAQDMIHhMREwDwYDVQQDEwhKQVAtVGVh bTEkMCIGCSqGSIb3DQEJARYVamFwQGluZi50dS1kcmVzZGVuLmRlMQswCQYDVQQG EwJERTEPMA0GA1UECBMGU2F4b255MSowKAYDVQQKEyFEcmVzZGVuLCBVbml2ZXJz aXR5IG9mIFRlY2hub2xvZ3kxEDAOBgNVBAcTB0RyZXNkZW4xSjBIBgNVBAsTQURl cGFydG1lbnQgb2YgQ29tcHV0ZXIgU2NpZW5jZSwgSW5zdGl0dXRlIGZvciBTeXN0 ZW0gQXJjaGl0ZWN0dXJlMB4XDTAyMDMxODE5MjgxMFoXDTAyMDMxODE5MjgxMFow KjEoMCYGA1UEAxMfPE1peCBpZD0iMTQxLjc2LjEuMTIwJTNBNjU0NCIvPjCCAbcw ggEsBgcqhkjOOAQBMIIBHwKBgQD9f1OBHXUSKVLfSpwu7OTn9hG3UjzvRADDHj+A tlEmaUVdQCJR+1k9jVj6v8X1ujD2y5tVbNeBO4AdNG/yZmC3a5lQpaSfn+gEexAi wk+7qdf+t8Yb+DtX58aophUPBPuD9tPFHsMCNVQTWhaRMvZ1864rYdcq7/IiAxmd 0UgBxwIVAJdgUI8VIwvMspK5gqLrhAvwWBz1AoGBAPfhoIXWmz3ey7yrXDa4V7l5 lK+7+jrqgvlXTAs9B4JnUVlXjrrUWU/mcQcQgYC0SRZxI+hMKBYTt88JMozIpuE8 FnqLVHyNKOCjrh4rs6Z1kW6jfwv6ITVi8ftiegEkO8yk8b6oUZCJqIPf4VrlnwaS i2ZegHtVJWQBTDv+z0kqA4GEAAKBgD9NV5AQTmFc+SKgJi4+JJdaXMdccgU+XQjL e5YtNpKbO64XK3MkNsCqBfDrBQjTLyAPpra2sYLyqGgb55Z1M2tWsTPp/zhjUtOC LzXABQKNSgMzq8395me6CED52Tzgyf0YFWZEuLaTpIeAFrvkzEeQr7bv96IvjK2N Gq2/hyZ6oz8wPTA7BgNVHREBAf8EMTAvoC0GCisGAQQB4FgFAgIWHzxNaXggaWQ9 IjE0MS43Ni4xLjEyMCUzQTY1NDQiLz4wCQYHKoZIzjgEAwMxADAuAhUA04wqIs9H 7jJePzS3DMll91vSndACFQD7eABByrx6oMC7sWjUfgJkF3OFLw==</X509Certificate>
+            </X509Data>
+          </KeyInfo>
+        </Signature>
+      </MixCascade>
+      <MixCascade id="msh-g_k8wxj">
+        <Name>Regensburg - HU/IWI</Name>
+        <Network>
+          <ListenerInterfaces>
+            <ListenerInterface>
+              <Type>RAW/TCP</Type> 
+              <Port>3000</Port> 
+              <Host>132.199.134.2</Host>
+              <IP>132.199.134.2</IP>
+            </ListenerInterface>
+          </ListenerInterfaces>
+        </Network>
+        <Mixes count="2">
+          <Mix id="msh-g_k8wxj" />
+          <Mix id="mvnv8y2n7xf" />
+        </Mixes>
+        <LastUpdate>1085588300891</LastUpdate> 
+        <Signature>
+          <SignedInfo>
+            <Reference URI="">
+              <DigestValue>j+c5OVrCIc+y/Em4hPkghxMcX5Q=</DigestValue>
+            </Reference>
+          </SignedInfo>
+          <SignatureValue>MtLqGOtfWRdm7g27qInNJQiouzkljz/sU6VYmd7TU3t5EzwcxtLZpQ==</SignatureValue>
+          <KeyInfo>
+            <X509Data>
+              <X509Certificate>MIIDNDCCAvOgAwIBAgIBATAJBgcqhkjOOAQDMIHhMREwDwYDVQQDEwhKQVAtVGVh bTEkMCIGCSqGSIb3DQEJARYVamFwQGluZi50dS1kcmVzZGVuLmRlMQswCQYDVQQG EwJERTEPMA0GA1UECBMGU2F4b255MSowKAYDVQQKEyFEcmVzZGVuLCBVbml2ZXJz aXR5IG9mIFRlY2hub2xvZ3kxEDAOBgNVBAcTB0RyZXNkZW4xSjBIBgNVBAsTQURl cGFydG1lbnQgb2YgQ29tcHV0ZXIgU2NpZW5jZSwgSW5zdGl0dXRlIGZvciBTeXN0 ZW0gQXJjaGl0ZWN0dXJlMB4XDTAzMTEyMTEwMTQyNloXDTA1MTEyMTEwMTQyNlow IDEeMBwGA1UEAxMVPE1peCBpZD1tc2gtZ19rOHd4ai8+MIIBtjCCASsGByqGSM44 BAEwggEeAoGBAIvgN+k3TBtsIO8wNiSlkjEK9Ykx/1c/Xoch+XS1t0U/bDCLxjPs B2/3GUJ5eqCyj23HLj3AlQQx6ZpMr2IQEkxwVxEuILCaGxqne6In1ih2Y5GxnoKn 2PQp/ZJ6g0YLyYaa90Vis5x4jhZhsnq9yS6M1K3JbHslknhNp+PrJ1NlAhUApGu7 Ue+ALhmM9U25mRDF2RXiCF8CgYBFOSkWdwU5pJ/DsP+2LNw7PQCHR4COI2yv+82q 6Ln1qUOnZ1iCm9Jpbkj7g05tZLXrbWKhFm/UqAByUWFqyUm2MUJ0d4hYoaR1DpHQ K0NI9eO8ufaky2sfKJDcfV9oW67fsway0PhRzttg4kSzX+FepIalqFPQ02rHmPFb UCFRjAOBhAACgYBAZdrMFsdm0EqefoVO+oU5JGsK5viEjj6QWtzGMXZhKEd5dJrZ 7s0W+7wq0728tDw8+f7bvPVNEA2ZdY8gOOTQjRLYcPxOw3Xo8+pUf22lDMx6KDTP Vp6lwuvEasvM3kBwhlebPnjALfHO203zI9sep/fxZU05HmUpWFrGU9gbjzAJBgcq hkjOOAQDAzAAMC0CFQC5SHLzfNy9KeU1yKeZ4Dt6GWk3RwIUdCt0VSQd3Sl0I5LD 6WaptZpwDWc=</X509Certificate>
+            </X509Data>
+          </KeyInfo>
+        </Signature>
+      </MixCascade>
+    </AllowedCascades>
+    <QualityOfService>
+      <MaximumBandwidth>20000</MaximumBandwidth>
+      <GuaranteedBandwidth>4000</GuaranteedBandwidth>
+    </QualityOfService>
+    <DummyTraffic interval="-1" />
+  </Request>
+</JAPRouting> 

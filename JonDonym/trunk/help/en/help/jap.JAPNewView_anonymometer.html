@@ -1,0 +1,37 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>Explanation for the possible states of the anonymity gauge</H2>
+
+<table>
+<tr>
+<td><img src="jap.JAPNewView_meter10.gif"></td>
+<td>A picture like this shows that you are connected to an anonymizer service. 
+	The gauge displays an approximate value for anonymity.
+	The more users are on a cascade, and the more traffic they generate, 
+	the higher your anonymity is on this cascade.
+</td>
+</tr>
+<tr>
+<td><img src="jap.JAPNewView_meterAnonDeactivated.gif"></td>
+<td>This picture appears if anonymity is switched off. Depending on the settings you specified <A href="services_general.html">here</A>, all internet traffic will be blocked or is allowed after <a href="jap.JAPController_allowunprotected.html">confirmation</a> only.</td>
+</tr>
+<tr>
+<td><img src="jap.JAPNewView_meterNoMeasure.gif"></td>
+<td>If this picture is displayed, a connection to the service is established and you can surf anonymously, nevertheless no information could be gathered about the amount of users and traffic of this cascade. This could be because of an error in the InfoService, because of a slow internet connection or since you have <a href="infoservice_advanced.html">forbidden JonDo to do automatic InfoService requests</a>. </td>
+</tr>
+<tr>
+<td><img src="jap.JAPNewView_meterConnecting.gif"></td>
+<td>While JonDo is tying to connect to an anonymizer service, this picture is being shown.
+	 Meanwhile, no connection via HTTP/HTTPS/FTP to the internet is passed through JonDo.
+	 This is only possible again if JonDo has connected or if the connection attempt has been aborted.</td>
+</tr>
+</table>
+<!--#include virtual="/footer.html"-->
+
+</body>
+</html>
