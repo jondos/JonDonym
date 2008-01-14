@@ -1,0 +1,32 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>InfoService: Erweiterte Einstellungen</H2>
+
+<i>Dieses Panel steht nur in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung</i>.<P>
+Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i>, w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>InfoService</i> und &ouml;ffnen anschlie&szlig;end den Tab <i>Erweiterte Einstellungen</i>.<br>
+<UL>
+    <LI><B>Automatische InfoService-Anfragen durchf&uuml;hren</B><BR>
+    Der JonDo versucht an einigen Stellen automatisch eine Verbindung zum InfoService aufzubauen und Abfragen durchzuf&uuml;hren. Wenn dieses Feld nicht markiert ist, unterbleiben diese automatischen Abfragen.
+    <P>
+  <LI><B>Nicht-Anonymisierte Verbindungen zu InfoServices erlauben</B><BR>
+    Ist diese Option aktiviert, kann JonDo Verbindungen zu den InfoServices herstellen, auch wenn Sie gerade nicht anonym surfen.<br>
+    Wird diese Option nicht aktiviert, k&ouml;nnen nur &uuml;ber anonymisierte Verbindungen Informationen von den InfoServices abgerufen werden.<br>
+    Es wird deshalb empfohlen, diese Option zu aktivieren.
+    <P>
+  <LI><B>Redundante Anfragen an verschiedene InfoServices stellen</B><BR>
+    Legen Sie fest, von wievielen InfoServices Informationen geholt werden sollen. Legen Sie z.B. als Anzahl "3" fest, so wird JonDo immer versuchen, 3 InfoServices zu erreichen. F&auml;llt einer aus, wird versucht einen anderen als Ersatz zu erreichen.
+    Je mehr InfoServices Sie festlegen, desto robuster wird JonDo gegen St&ouml;rungen in den InfoServices, desto l&auml;nger dauert die Abfrage aber auch.<br>
+    <em>Entwicklerversion:
+  Es wird empfohlen, diese Option zu aktivieren.</em>
+  <P>
+  <LI><B>Verbindungs-Timeout</B><br>
+    Sollten Ihre Internetanbindung zu langsam sein, so kann ein zu geringes Timeout bei der Abfrage der InfoService-Informationen dazu f&uuml;hren, dass keine Verbindung aufgebaut wird und sie keine Informationen &uuml;ber Dienste, Updates, InfoServices usw. erhalten. Ein zu hohes Timeout f&uuml;hrt unter Umst&auml;nden zu hohen Wartezeiten beim Abruf der Informationen, wenn ein oder mehrere abgefragte InfoServices zu langsam oder nicht verf&uuml;gbar sind. Stellen Sie das Timeout deshalb bei Bedarf h&ouml;her oder niedriger ein.
+</UL>
+<!--#include virtual="/footer.html"-->
+</body>
+</html>

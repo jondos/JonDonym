@@ -1,0 +1,63 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>Payment</H2>
+
+<P>
+To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>Payment</i> from the list to the left, then open the tab <i>Accounts</i>.<br>
+In this dialog you can set any preferences that are necessary to use a payment cascade.
+<P>
+
+<H3>Accounts</H3>
+<P>
+In this list you can see all accounts you have created. When you access this dialog for the first time, the list will be empty.
+<p>
+Next to the account list you can see the creation date, the date of the last balance update and the expiry date of the selected account. After your account has expired, you cannot use it any more.  In order to pay again, you will have to create a new account.
+If next to the list there is a hint which reads "No backup done", then you didn't backup the selected account. Clicking on the hint has the same effect as clicking on the button "Export".
+<p> 
+You can take the following actions:
+<UL>
+    <LI><B>Create account </B><BR>
+    Lets you create a new account. The process of creating a new account may take a while because a complex cryptographic process has to be started. During the creation process you may be asked a security riddle. Please follow the on-screen instructions to solve it.<br>
+    When your account has been successfully created it will appear in the account list.
+    <P>
+      <LI><B>Transactions</B><BR>
+  Here you can view a list of the charging actions you have taken.
+    <P>
+    <LI><B>Change password</B><BR>
+    By clicking this button you can provide a new password for encrypting your account data. The password is valid for all of your accounts.
+    <br>If you want to erase your password, click <i>Change password</i> and enter nothing for your new password.
+    <P>
+  <LI><B>Import</B><BR>
+  Here you can import a formerly exported account.  
+</UL>
+
+<H3>Information about account balance</H3>
+<P>
+In this section you can see how many bytes you have paid in to your account in total. You can also see the total consumption and the resulting balance.
+<P>
+You can take the following actions:<br> 
+<UL>
+    <LI><B>Activate</B><BR>
+  With this button you can activate the selected account. The active account is marked in bold font and will be used to pay a cascade. <br>
+  If your accounts are protected by password and you didn't supply your password on startup, then you may activate your accounts by clicking this button and entering your password.
+  <P>
+          
+    <LI><B>Reload</B><BR>
+    By choosing this button, the account balance will be fetched from the Payment Instance.<br>
+    <P>
+  
+    <LI><B>Delete</B><BR>
+  Deletes your account.<br>
+  <b>ATTENTION:</b> If there is any positive balance on your account it will be <b>irretrievably lost</b> if you did not make a backup copy.
+  <P>
+    <LI><B>Export</B><BR>
+    This button saves your account data to an external file. It is useful to do this to be able to regain access to your account if your hard disc has crashed or you have reinstalled JonDo. You should copy the exported file to external media (such as USB-sticks). You are recommended to export a newly created account.    
+</UL>
+<!--#include virtual="/footer.html"-->
+</body>
+</html>
