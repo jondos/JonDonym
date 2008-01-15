@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--Projektgruppe-->
-<projectgroup>
-  <project path="JAP.jpx"/>
-  <project path="InfoService.jpx"/>
-  <project path="BezahlInstanz.jpx"/>
-  <project path="All.jpx"/>
-</projectgroup>
