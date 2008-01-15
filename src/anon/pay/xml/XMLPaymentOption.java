@@ -141,9 +141,9 @@ public class XMLPaymentOption implements IXMLEncodable
 		m_generic = a_generic;
 		m_minJapVersion = a_japVersion;
 		m_markup = a_markup;
-		if (a_maxClicks < 0)
+		if (a_maxClicks <= 0)
 		{
-			a_maxClicks = 0;
+			a_maxClicks = MAX_CLICKS_UNLIMITED;
 		}
 		m_maxClicks = a_maxClicks;
 	}

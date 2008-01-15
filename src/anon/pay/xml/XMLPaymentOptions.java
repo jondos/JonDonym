@@ -178,6 +178,31 @@ public class XMLPaymentOptions implements IXMLEncodable
 		return sortedOptions;
 	}
 
+	public XMLPaymentOption getOption(String a_name)
+	{
+		for (int i = 0; i < m_paymentOptions.size(); i++)
+		{
+			try
+			{
+				XMLPaymentOption option = (XMLPaymentOption) m_paymentOptions.elementAt(i);
+				if (option.getName().equalsIgnoreCase(a_name))
+				{
+					return option;
+				}
+
+			}
+			catch (Exception e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
+							  "Could not get payment option with name: " + a_name);
+			}
+
+		}
+		LogHolder.log(LogLevel.NOTICE, LogType.PAY,
+							  "Could not get payment option with name: " + a_name);
+		return null;
+	}
+
 	/**
 	 * Gets a XMLPaymentOption object for the provided heading
 	 * @param a_heading String
@@ -206,6 +231,10 @@ public class XMLPaymentOptions implements IXMLEncodable
 			}
 
 		}
+		LogHolder.log(LogLevel.NOTICE, LogType.PAY,
+							  "Could not get payment option for heading: " + a_heading + " in language " +
+							  a_language);
+
 		return null;
 	}
 
