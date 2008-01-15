@@ -1,0 +1,26 @@
+Some remark about the french translation of JAP
+===============================================
+
+// frc  2003/04/17 09:25:26
+
+1) This the first version of the french version of JAP. Despite my
+   best efforts, this files probably contains typo or errors. If
+   somebody finds errors, please let me know 
+
+2) I've tried to make a pragmatic translation of the messages. This
+   mean that sometimes I've used the english words (e.g "proxy"
+   instead of "serveur de proximité") since these words are more often
+   used, at least in the french part of Switzerland
+
+3) Up to now, I've never find a tranlation of the term
+   "Anonymizer". Therefore sometimes, when it was appropriate, I've
+   used the sentence "Serveur d'anonymat" and sometimes I've let the
+   english word. Maybe this should be fixed after some feedback of
+   users.
+
+4) No idea how to translate "listener" in french... I will ask my
+   colleagues
+
+5) Message "lang3" (line 21) should be "Français", but, since you have
+   "German" instead "Deutsch" for "lang2"...
+

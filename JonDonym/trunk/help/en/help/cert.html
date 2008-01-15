@@ -1,0 +1,35 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>Certificate Authorities</H2>
+<i>This panel is only available in <a href="appearance.html#expertView">Extended View</a>.</i><P>
+To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>Certificate Authorities</i> from the list to the left.
+<P> A certificate is a (digital) container for a public encryption key, digitally signed by a certification authority (e.g. the JonDo team), that approves for third parties by the signature that this key belongs to a given person or organisation. If this approval for certificates didn't exist, anyone could pretend to be the JonDo team or a trusted Mix operator, and may operate honypot Mixes, for example, or may engage in the communication between users and really trusted Mixes/operators and read all data.  Moreover, the insertion of faked update messages would be easy.
+ (<a href="certificates.html">Further infromation concerning certificates...</a>)
+<UL>
+    <LI><B>I only want to use servers certified by the following authorities:</B><BR>
+    This list contains all certification authorities that you trust.
+    <P>
+    <LI><B>Import...</B><BR>
+    With this button, you can add certification authorities to the list of trusted authorities.  The appropriate certificate should be chosen in the dialog field that appears.
+    <P>
+    <LI><B>Remove</B><BR>
+    This button removes an entry from the list.
+    <P>
+    <LI><B>Disable</B><BR>
+    By clicking this button, you can deactivate an entry without removing it from the list.
+    <P>
+    <LI><B>Details...</B><BR>
+    Click on this button to the the certificate of the selected entry.
+    <P>
+</UL>
+<H3>Certificate Authority Information</H3>
+Here you see detailed information about the currently selected certification authority.
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>
