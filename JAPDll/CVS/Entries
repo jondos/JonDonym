@@ -1,0 +1,16 @@
+/.cvsignore/1.2/Wed Dec  6 19:59:00 2006//
+D/Debug////
+/JAPDll.rc/1.8/Mon Sep 24 13:37:09 2007//
+/JAPDll_VC80.sln/1.1/Mon Sep 24 13:37:10 2007//
+/JAPDll_VC80.vcproj/1.2/Mon Oct 22 15:21:30 2007//
+/JAPDll_VC90.sln/1.1/Mon Sep 24 13:37:11 2007//
+/JAPDll_VC90.vcproj/1.2/Tue Sep 25 07:30:05 2007//
+/README/1.1/Tue Sep 25 07:32:09 2007//
+D/Release////
+D/buildtools////
+/dllversion.h/1.2/Fri Nov  9 17:08:53 2007//
+/jap.ico/1.5/Tue Mar  7 08:25:13 2006/-kb/
+/jap_blink.ico/1.5/Wed May 17 15:57:20 2006/-kb/
+/japdll.c/1.1/Tue Sep 25 07:32:27 2007//
+/japdll_jni.h/1.7/Wed Dec  6 19:59:15 2006//
+/resource.h/1.5/Mon Sep 24 13:37:12 2007//
