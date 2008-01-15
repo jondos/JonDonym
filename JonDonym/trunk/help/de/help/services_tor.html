@@ -1,0 +1,46 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>Dienste: Tor</H2>
+<i>Dieses Panel steht nur in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung. (Nur in der Entwicklerversion von JonDo sichtbar)</i>
+<P>
+Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i>, w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Dienste</i> und &ouml;ffnen anschlie&szlig;end den Tab <i>Tor</i>.
+Auf dieser Seite sehen Sie Informationen und Einstellungen die sich auf das Tor-Anonymisierungsnetzwerk beziehen.<BR>
+Wenn Sie den JonDo als Zugang zum Tor-Netzwerk nutzen wollen, m&uuml;ssen Sie ihn als Socks-Proxy (nicht als HTTP/HTTPS-Proxy) bei Ihrem Browser eintragen.
+
+<UL>
+    <LI><B>Aktivieren</B><BR>
+    Der Zugriff auf das Tor-Netzwerk &uuml;ber JonDo ist noch experimentell. Wenn Sie diese Option deaktivieren, verringern Sie den Speicherverbrauch von JonDo und verhindern eine ungewollte Nutzung von Tor.
+    <P>
+    <LI><B>Verf&uuml;gbare Tor Knoten:</B><BR>
+    In diesem Feld werden Ihnen Rechner angezeigt, die eine Verbindung ins Tor-Netzwerk zur Verf&uuml;gung stellen.
+    <P>
+    <LI><B>Neu laden:</B><BR>
+    Mit diesem Knopf wird die Liste der verf&uuml;gbaren Knoten aktualisiert.
+    <P>
+    <LI><B>Einstellungen f&uuml;r die anonymen Routen:</B><BR>
+    <P>
+    <UL>
+        <LI><B>Minimale Knoten pro Verbindung:</B><BR>
+        Hier stellen Sie ein, &uuml;ber wie viele Tor-Knoten eine Verbindung mindestens geleitet werden soll, bevor Sie an ihr eigentliches Ziel geschickt wird. Je mehr Knoten genutzt werden, desto zuverl&auml;ssiger ist die Anonymisierung der Verbindung.
+        <P>
+        <LI><B>Maximale Knoten pro Verbindung:</B><BR>
+        Mit diesem Schieberegler stellen Sie die maximale Anzahl von Tor-Knoten f&uuml;r eine Verbindung ein. Je gr&ouml;&szlig;er diese Zahl ist, desto langsamer ist die Verbindung.
+        <P>
+        <LI><B>Wechsel der Route alle x Verbindungen:</B><BR>
+        Hier legen Sie fest, wie oft eine neue Route aufgebaut werden soll. Immer, wenn so viele Verbindungen erstellt wurden, wie die hier eingestellte Zahl, dann wird die alte Route abgebaut und eine neue Route durch das Tor-Netzwerk erzeugt.
+        <P>
+        <LI><B>Anonyme Route im Voraus erstellen:</B><BR>
+        Wenn dieses Feld markiert ist, erstellt der JonDo gleich nach dem Start eine Route durch das Tor-Netzwerk. Ist das Feld nicht markiert, wird erst eine Route erstellt, wenn ein Verbindungswunsch vorliegt.
+    </UL>
+</UL>
+
+
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>

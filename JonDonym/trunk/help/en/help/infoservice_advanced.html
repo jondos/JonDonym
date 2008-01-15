@@ -1,0 +1,35 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>InfoService</H2>
+
+<H3>Advanced Settings</H3>
+<i>This panel is only available in <a href="appearance.html#expertView">Extended View</a></i>.<P>
+To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>InfoService</i> from the list to the left, then open the tab <i>Advanced Settings</i>.<br>
+<UL>
+    <LI><B>Enable automatic InfoService Requests</B><BR>
+    JonDo occassionally attempts to automatically connect to the InfoService to request information.  If this checkbox is activated, these automatic connections are also activated.
+    <P>
+    <LI><B>Allow non-anonymous connections to InfoServices</B><BR>
+    If activated, JonDo can connect to InfoServices even if you have no anonymized connection currently established.<br>
+    If this option is deactivated, information from InfoServices may be gathered through anonymized connections only.<br>
+    Thus, it is recommended to activate this option, since no other InfoService will be used if this one is offline.
+    <P>
+    <LI><B>Do redundant requests on different InfoServices</B><br>
+    Define how many InfoServices will be queried. If you set this value to "3", for example, JonDo will always try to reach 3 InfoServices. Should one of them appear to be offline, JonDo will try to reach a substitute.
+    The higher the value, the more fail safe JonDo will become, the more time these queries will consume, however.  <br>
+    <em>Developer version: </em><em> It is recommended to activate this option.</em>
+    <P>
+      
+    <LI><B>Connection timeout</B><br>
+  If your internet connection is too slow, a too short timeout for the requests of infoService informations may lead prevent JonDo from establishing the connection and receiving the information about services, updates, InfoServices and so on. A too high timeout may cause long waiting times when receiving the information if one or more InfoServices are slow or not available. Therefore set the timeout lower or higher as you need.
+  </UL>
+
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>
