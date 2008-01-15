@@ -1,0 +1,137 @@
+##############################################################################
+# This is the sample JPI configuration file version 0.5
+#
+# 2004-2006 Bastian Voigt, Tobias Bayer
+# last modification 2006-03-08
+#
+##############################################################################
+
+# Unique ID
+id=PIJapTeam
+
+# Name
+name=JAP Team PI
+
+# InfoServices where to send information about the payment instance
+infoservices=infoservice.inf.tu-dresden.de:80,132.199.134.2:6543
+
+# Listener interfaces where JPI listens for JAP connections
+# host:port(,host2:port2...)
+japlisteners=anon.inf.tu-dresden.de:2342,141.76.46.94:443,141.76.46.94:80
+
+# Listener interface (only one!) where the JPI listens for AI connections
+# host:port
+ailistener=anon.inf.tu-dresden.de:4223
+
+# Maximum concurrent connections per interface
+aiconnections=10
+japconnections=25
+
+# To connect to the PostgreSQL server the JPI needs to know
+# the hostname of the server, the tcp port, the database name,
+# the username and password.
+# Note that the JPI supports only TCP connections to the database.
+# Even if it is running on the same host, UNIX Domain sockets cannot
+# be used at the moment.
+#
+# It is not recommended to store the database password in this file.
+# Please do this only if you absolutely need to start the JPI without
+# user interaction. If you do not specify a password here, the JPI
+# will ask you for the password on startup
+dbhost=localhost
+dbport=5432
+dbname=BIdb
+dbusername=bi
+#dbpassword=
+
+# keyfile: name of the PKCS#12 file which contains the JPI private signkey
+# keyfilepassword: the password for the signkey file.
+#
+# The keyfile can be generated using the MixConfig tool
+# It is not recommended to store the signkey password in this file.
+# Please do this only if you absolutely need to start the JPI without
+# user interaction. If you do not specify a password here, the JPI
+# will ask you for the password on startup.
+
+keyfile=BI.pfx
+#keyfilepassword 
+
+# Logger configuration
+# The BI contains an internal Logger which can send log output to stderr and
+# to a file. The logger supports the LogLevels from 0 to 7(all)
+#
+# You can define a threshold, and only messages with a loglevel >= threshold
+# will be logged. So, the smaller you choose the threshold, the more messages
+# will be logged. The default is to send all output including debug information
+# to stderr, and send everything >= LOG_INFO to the logfile.
+#
+logfilename=BI.log
+logfilethreshold=7
+logstderrthreshold=0
+
+# Name of the helper class for porcessing credit card payments.
+# Only the first part of the name is needed here. (DummyCreditCardHelper.class)
+creditcardhelper=Dummy
+
+# Accepted credit cards (comma-seperated)
+acceptedcards=VISA,MasterCard,AMEX
+
+# Price per Megabyte in cents (may be fractional, e.g. 1.5)
+ratepermb=1
+
+# Accepted currencies
+currency1=EUR
+#currency2=USD
+
+# Payment options
+option1name=CreditCard
+option1type=passive
+option1heading1=Kreditkarte (Spielgeld)
+option1headinglang1=de
+option1heading2=Credit card (Fictional money)
+option1headinglang2=en
+option1detailedinfo1=Bitte geben Sie die ben&ouml;tigten Daten ein.<br>W&auml;hrend der Testphase k&ouml;nnen Sie<br>Ihr Konto mit fiktiven Daten aufladen.
+option1detailedinfolang1=de
+option1detailedinfo2=Please enter the necessary data.<br>During test phase you can<br>charge your account by supplying fictional data.
+option1detailedinfolang2=en
+option1input1=Kreditkarte
+option1inputlang1=de
+option1inputref1=creditcardtype
+option1input2=Credit card 
+option1inputlang2=en
+option1inputref2=creditcardtype
+option1input3=Nummer
+option1inputlang3=de
+option1inputref3=number
+option1input4=Number
+option1inputlang4=en
+option1inputref4=number
+option1input5=G&uuml;ltig bis (MM/JJ)
+option1inputlang5=de
+option1inputref5=valid
+option1input6=Valid to (MM/YY)
+option1inputlang6=en
+option1inputref6=valid
+option1input7=Inhaber
+option1inputlang7=de
+option1inputref7=owner
+option1input8=Owner
+option1inputlang8=en
+option1inputref8=owner
+
+option2name=MoneyTransfer
+option2type=active
+option2heading1=&Uuml;berweisung (Demo, ohne Funktion)
+option2headinglang1=de
+option2heading2=Money transfer (Demo, no payment possible)
+option2headinglang2=en
+option2detailedinfo1=Diese Daten sind Testdaten.<br>Bitte verwenden Sie w&auml;hrend der Testphase<br>die Bezahloption Kreditkarte.
+option2detailedinfolang1=de
+option2detailedinfo2=This is test data.<br>Please use the payment option credit card<br>during the test phase.
+option2detailedinfolang2=en
+option2extrainfo1=Inhaber: JAP-Team<br>Kontonummer: 12345<br>BLZ: 3456778<br>Sparkasse Hintamberg<br> <br>Verwendungszweck: %t<br>Betrag: %a %c
+option2extrainfolang1=de
+option2extrainfotype1=text
+option2extrainfo2=Holder: JAP-Team<br>Account: 12345<br>Bank number: 3456778<br>Sparkasse Hintamberg<br> <br>Reference: %t<br>Amount: %a %c
+option2extrainfolang2=en
+option2extrainfotype2=text

@@ -1,0 +1,86 @@
+Für Betrieb zwingend nötige Kommandos:
+
+  - alle 4 POST-Kommando-Informationen können auch von einem anderen Infoservice forwarded
+    sein
+
+  /infoserver: POST: von einem anderen Infoservice mit Informationen über ihn
+  /infoservices: GET: XML-Struktur mit allen Infoservices erhalten, welche der Infoservice
+                      kennt
+
+  /paymentinstance: POST: von einer Payment Instance oder einem anderen Infoservice mit Informationen über eine Payment Instance
+  /paymentinstance/ID: GET: von JAP - gibt Infos über Payment Instance mit ID zurück
+  /paymentinstances: GET: XML-Struktur mit allen Payment-Instanzen, welche der Infoservice
+                      kennt
+
+  /cascade: POST:
+  	 - entweder vom ersten Mix einer Kaskade mit allen Informationen über die Kaskade
+	 - oder vom letzten Mix einer Kaskade mit der Anforderung, eine neue Kaskade zu erstellen
+	 (XML-Format in beiden Fällen identisch; im 2. Fall hat das Wurzelelement das Attribut
+	 'create="true"')
+
+  /cascades: GET: XML-Struktur mit allen Kaskaden erhalten, welche der Infoservice kennt
+                  (neues Format)
+
+  /cascadeserials: GET: XML structure with all cascade serials the IS knows
+
+  /helo: POST: von einem Mix mit Informationen über ihn
+  /mixinfo/mixid: GET: Informationen über den Mix mit der ID mixid erhalten
+
+  /feedback: POST: vom ersten Mix einer Kaskade mit Informationen über den derzeitigen
+                   Status (Verkehr)
+  /mixcascadestatus/cascadeid: GET: Informationen über den derzeitigen Status der Kaskade
+                                    mit der ID cascadeid erhalten
+
+  /configure: POST: Anfrage von einem Mix, die zugehörige Kaskadenkonfiguration zu senden
+
+Zusatzkommandos (Komfortfunktionen):
+
+  /status: GET: Informationen über den Status aller Kaskaden zur Ansicht als HTML-Datei
+  /mixes: GET: Informationen über die Mixe aller Kaskaden
+  /cascadeinfo/cascadeid: GET: Informationen über die Kaskade mit der ID cascadeid (es
+                               sind die gleichen Informationen wie bei /cascades nur für
+                               eine einzelne Kaskade)
+  /tornodes: GET: liefert Informationen über aktive TOR-Nodes (falls aktiviert)
+  /compressedtornodes: GET: liefert Informationen über aktive TOR-Nodes (falls aktiviert)
+                            in komprimierter Form (BZip2), dekomprimiert ergeben sich die
+                            gleichen Nutzdaten wie bei /tornodes
+
+  /compressedmixminionnodes: GET: Liefert Informationen ueber aktive MixMinion-Nodes - komprimiert mit gzip
+
+Zusatzkommandos (JAP forwarding):
+
+  /addforwarder: POST: fügt neuen Forwarder in Datenbank ein und liefert Status-Infos zurück (falls aktiviert)
+  /renewforwarder: POST: verlängert Forwarder-Eintrag und liefert Erfolgsinformation zurück (falls aktiviert)
+  /getforwarder: GET: gibt Captcha mit Informationen über einen Forwarder zurück
+
+
+Zusatzkommandos (JAP-Update):
+  /currentjavaversion: GET: returns the latest known java versions ordered by vendors
+                       POST: receives the latst known java versions from another info service
+  /currentjapversion: GET: liefert die Versionsnummer der aktuellen JAP-Version in einer
+                           XML-Struktur
+                      POST: Empfang der minimal nötigen JAP Version von einem anderen
+                            Infoservice
+  /japRelease.jnlp bzw. /japDevelopment.jnlp: GET: liefert die Java-Webstart-Files der
+                                                   aktuellen JAP-Client-Software
+                                              HEAD: schreibt nur einen HTTP-Header für die
+                                                    JNLP-Dateien ohne sie zu übertragen
+                                                    (wird von Java WebStart so gebraucht)
+                                              POST: Empfang der Java-Webstart-Files von
+                                                    einem anderen InfoService
+
+Kompatibilitätsfunktionen für alte JAP-Clients:
+
+  - diese Funktionen werden in Zukunft wohl entfernt werden und sind deshalb nicht mehr
+    zu verwenden
+
+  /servers: GET: wie /cascades nur im alten Format [REMOVED!]
+  /feedback/cascadeid: GET: wie /statusinfo/cascadeid nur im alten Format [REMOVED!]
+  /forward/URL: GET: forwarded eine GET-Anfrage nach der URL und liefert deren Antwort,
+                     wurde für Java-Webstart-JAP-Update verwendet [REMOVED!]
+  /aktVersion: GET: liefert Versionsnummer der neuesten JAP-Client-Software (nn.nn.nnn) als
+                    Plain-Text und wurde von alten JAP-Clients verwendet [REMOVED!]
+  /proxyAddresses: GET: liefert Adressen der Proxy-Server am Ende der Kaskaden als
+                        Plain-Text (1:1 aus Properties-Datei übernommen), wird von
+                        irgendwelchen alten Auswertungsscripten verwendet
+

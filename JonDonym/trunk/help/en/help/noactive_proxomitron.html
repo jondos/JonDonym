@@ -1,0 +1,122 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+<H2>Avoid data trails on the internet: Usage of a filter proxy</H2>
+<B>Proxomitron</B><P>
+Proxomitron officially is Windows - only, though it is claimed by the developer to run on linux, too, if <A href="http://www.winehq.com/">WINE</A> is used.
+<UL>
+<LI><B>Installation</B><br>
+Get the latest .zip file from <A href="http://proxomitron.info/files/index.html">this site</A>. You can also try <A href="http://proxomitron.info/files/download/ProxN45j.zip">this link</A> to download it directly.
+<br>Proxomitron doesn't need to be installed. Just unzip the file into a newly created directory, say <i>C:\Programme\Proxomitron</i>.
+<P>
+<LI><B>Filter configuration</B><br>
+There is a configuration for Proxomitron which comes with lots of extra filters and features. To get it, download the installer from <A href="http://anon.inf.tu-dresden.de/help/proxomitron/JDList_10-24-03.exe">here</A>. Start the installer by double-clicking the file and follow the installation instructions.
+For those of you who do not trust any .exe file, there is also a .zip version. Download it from <A href="http://anon.inf.tu-dresden.de/help/proxomitron/JDList_10-24-03.zip">here</A> and read the included README for installation instructions.
+<P>
+<LI><B>Setup</B><br>
+<br>You may either use a ready-to-use config file which is <A href="./proxomitron/default.cfg">included in the help</A> or <A href="http://www.jondos.de/en/help/proxomitron/default.cfg">online</A> and place it into Proxomitron's directory <b>or</b> do the following guide (in case you want to alter an existing proxomitron configuration):
+<HR><center>--------------Start of guide--------------</center><HR>
+Start Proxomitron by double-clicking <i>Proxomitron.exe</i>. Proxomitron's window will appear.
+<br>We will use a configuration level from the downloaded filter pack. Open menu <i>File</i> -> <i>Load config file</i> and choose <i>JD_Extra.cfg</i>.
+<br>Now do this in the menu: <i>File</i> -> <i>Save default settings</i>. This way, you created new default settings which will be loaded every time you start Proxomitron.
+<br>Now load these default settings by clicking <i>File</i> -> <i>Reload default settings</i>. This way, all changes will be applied to default settings.
+<br>
+<center><img src="proxomitron1.gif"></center>
+<br>
+Make sure the following entries are activated:<P>
+<UL>
+<LI>Web Page Filters
+<LI>Outgoing Header Filters
+<LI>Incoming Header Filters
+<LI>Use Remote Proxy
+</UL>
+<P>
+To combine Proxomitron with JonDo, press the button <i>Proxy</i>. In the window that appears, click <i>Add</i>.
+<br>
+<center><img src="proxomitron2.gif"></center>
+<br>
+Enter "127.0.0.1:4001".
+<br><B>Note:</B> If you set a different <A HREF="portlistener.html">listener port</A> in JonDo, you'll have to enter this port here too, rather than 4001.
+<br>Confirm by pressing <i>OK</i>. Klick the button <i>Test</i>. Maybe Proxomitron will be blocked by your firewall; admit access permanently. This test may fail in spite of correct firewall settings, never mind. Confirm again by pressing <i>OK</i>.
+<br>Due to these settings, Proxomitron won't fetch traffic directly from Internet, but from JonDo. Unchecking <i>Use Remote Proxy</i> enables you to use Proxomitron without JonDo (and without anonymity), so this is <b>not</b> recommended.
+<P>
+<LI><B>Filters</B><br>
+Now the filters need to be configured in a way that enhances anonymity.
+<br>Click <i>Headers</i>.
+Activate the following (check the column <i>Out</i> or <i>In</i>, depending on what type the filter is (indicated in brackets)):
+<br><b>Note:</b> Enter a part of the name of the filter into the field <i>Find:</i> and Proxomitron will only show filters that match the search expression.
+	<UL>
+		<LI>"Referer: Fake All Referrer Info - URL (Out) {7}"
+		<LI><u>Optionally</u><b> *1)</b>: Cookie managagement
+		<UL>
+			<LI>"Set-Cookie:  Never Accept Unwanted Cookies (in) {5.c1}"
+			<LI>"Cookie: Kill Unwanted Cookies (Out)  {5.c1}"
+		</UL>
+	</UL>
+	Confirm by clicking <i>OK</i>.
+	<P>
+	You can find a description of all header filters <A href="http://www.jd5000.net/proxo/Help/Filters.htm">here</A>.
+	<P>
+<b>(*1)</b> Cookie management using Proxomitron is recommended if you have no other cookie management software. All websites from which cookies will be accepted need to be added to a text file. This list can be found in Proxomitron's directory -> <i>Lists</i> -> <i>CookieList.txt</i>. A more comfortable approach is similar to the one described at <a href="#Applets">Java Applets</a>, only use the list <i>CookieList</i> instead.
+<P>Now press <i>Web page</i>. Some filters need to be activated additionally:
+	<UL>
+		<LI>"Jump:  Out of Invisible Frames {7.d}"
+		<LI>"Block:  Javascript Trackers {8}"
+		<LI>"Block:  Image Trackers {8}"
+		<LI>"Block:  Meta Cookies {5.c1}"
+		<LI>"Block:  Javascript Cookies {5.c1.js}"
+		<LI>"Block:  VB and Encoded Scripts {8.d.js}"
+		<LI>"View: Cookies Set and Sent {4.d.in}"
+		<LI>"Hide:  Extra Browser Details {9.d.js}"
+		<LI>"Disable:  Scripts {10.e.a}"
+		<LI>"Disable:  ActiveX {8.e.js}"
+		<LI>"Disable:  Java Applets {8.e.js}" <b>*2)</b>
+		<LI>"Inject Style Sheet:  Show Kills {2.a.in}"
+	</UL>
+<P>
+You can find a description of all web page filters <A href="http://www.jd5000.net/proxo/Help/Filters.htm">here</A>.
+<HR><center>--------------End of guide--------------</center><HR>
+<P>
+<b>(*2) Info:</b> Some users might want to use an alternative for blocking all Java Applets that are not on their Allow list: The Filter called "Toggle:  Java {4.d}". This is more insecure, since on some browsers Java Applets will still be loaded and only hidden from view. So this is <b>not</b> recommended.
+<P>
+<br>For this filter you will need to declare exceptions to the rule in order to view trusted applets. Before that, we will do browser setup.
+<P>
+<LI><b>Browser Setup</b><br>
+Empty your browser's cache to ensure that all content will be received freshly through Proxomitron.
+<br>Now Proxomitron will become your browser's proxy. The approach is similar to the one <A href="browser.html">described here</A> (choose your browser), only this time you use Proxomitron's port, which is 8080 by default. Users of Firefox with installed <i>SwitchProxy Toolbar</i> Plugin should do these settings in the plugin.
+<P>
+<a name="Applets"><b>Declare Exceptions</b></a><br>
+<b>Note:</b> This approach is exemplary for setting exceptions for Java (list: <i>Allow-Java</i>). You can also set Exceptions for JavaScript(<i>Allow-JS</i>), Cookies(<i>CookieList</i>), Flash(<i>Allow-Flash</i>), JonDo(<i>Bypass-Proxy</i>) etc or to several blocklists together by adding an address to <i>Trusted</i>. Read <i>Trusted.txt</i> to learn which lists are affected. Sites in <i>Trusted</i> will bypass JonDo!
+<br>If you want to declare a specific site as trustworthy for Java applets, just copy the site's address from your browser's address field into the clipboard. Right-click on Proxomitron's icon in the system tray and choose <i>Add to Blockfile</i> -> <i>Allow-Java</i>. Note that the address is automatically inserted into the field <b>without</b> the protocol (e.g. "http://"). Don't insert the protocol, elsewise this entry will not work correctly.
+<P>Example: In order to enable Java for "http://anon.inf.tu-dresden.de/" the correct entry would be:
+<br>
+<br>
+<center><img src="proxomitron5.gif"></center>
+<br>
+Confirm by clicking <i>OK</i>.
+<br><b>Attention:</b>Doing that, Java will be enabled for every address starting with "anon.inf.tu-dresden.de/", e.g. for all sites of this domain.
+<P>
+<LI><b>Disable URL Commands</b><br>
+Click <i>Config</i>, choose the tab <i>Access</i> and make sure <i>Disable URL based Proxomitron commands</i> is checked. Read the help on URL Commands in order to learn why URL Commands are a security risk. To display Proxomitron's help, go to menu <i>Help</i> -> <i>View Help</i>.
+<P>
+<LI><b>Optionally: SSL support</b><br>
+<b>Attention:</b> Usage of this library is discouraged. Since Proxomitron cannot decide on it's own whether a received certificate is valid or not, it will decrypt every SSL connection and provide data with it's own security before passing it to the browser. Thus, the user will only see Proxomitron's certificate (which he trusts of course) and won't be able to recognize invalid certificates.
+<br>Proxomitron cannot process SSL encrypted transmissions by default. In order to activate this feature, additional libraries are required.
+	<UL>
+	<LI><b>Download</b><br>
+	Get the <i>OpenSSL_DLLs.zip</i> from <A href="http://www.proxomitron.info/files/index.html">this site</A> and unzip all three libraries (libeay32.dll, msvcr70.dll, ssleay32.dll) into Proxomitron's directory.
+	<P>
+	<LI><b>Activation</b><br>
+	Click <i>Config</i> in Proxomitron's main window. Choose tab <i>HTTP</i> and activate <i>Use SSLeay/OpenSSL to filter secure pages</i>. Confirm by clicking <i>OK</i>.
+	<br>Save the configuration by pressing <img src="proxomitron3.gif">.
+	</UL>
+</UL>
+
+Click <A href="security_test.html">here</A> in order to learn how to check the anonymity level of settings.
+<!--#include virtual="/footer.html"-->
+
+</body>
+</html>
