@@ -1,0 +1,85 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>JonDo User Interface</H2>
+<B>Activate Anonymity</B><br>
+
+To surf anonymously, JonDo must first be started.  Then, the button "On" in the "Anonymity" area must be activated.  If the connection process was successful, the needle in the Anonym-O-Meter will show an indication.  Furthermore, the number of users of the currently selected mix cascade is shown.
+<P>
+<B>Indication for required updates</B><br>
+
+In the upper right corner of the window next to JonDo's logo you can see a hint indicating that either Java or JonDo has to be updated, or both. Clicking on it will show you which one to update. In case JonDo needed an update, the update wizard will show up. In case of Java, a popup will show up telling you that a new Java version is available. Clicking "Help" in this window will explain to you <A href="updateJava.html">how to update Java</A>.
+<br>If you see no such hint, your JonDo as well as your Java is up to date.
+<P>
+<B>Service selection</B><br>
+
+A list allowing for the selection of <a href="jap.JAPConfTrust.html">service filters</a> is just beneath JonDo's logo. If you choose a mix cascade within one of these filters, JonDo will connect to this cascade and block connection to all other cascades outside this filter (the filter is activated). <P>The symbol to the right updates this list.
+  The button "Details" will show you a <a href="services_anon.html">settings</a> window of JonDo where you can learn more about available services.
+<P><!--<b>Filter</b><br>
+  This setting allows you to describe how much trust you are willing to give to the anonymizer services offered by JonDo in general. The more restrictive this setting is, the harder JonDo will filter out services that are not seen as absolutely trusted by you. You may change the <a href="jap.JAPConfTrust.html">trust settings</a> in detail by a click on the button &quot;Edit&quot;.
+<P>
+-->
+<B>Anonym-O-Meter</B><br>
+
+The Anonym-O-Meter shows the user the current load of the anonymity service. This consists of:
+<UL>
+	<LI>The number of currently active users connected to the internet via JonDo.
+	<LI>The traffic situation, in other words, the amount of data processed and forwarded per unit of time by the mix cascade.
+</UL>
+
+From this information, a partly subjective observation risk and the achievable anonymity can be inferred.  The more users are active and the more messages sent or received by them, the greater the anonymity of each individual message sent through the internet, since potentially any user could have sent the message.  If one assumes that an attacker controls a certain number of users or personally simulates fake users, it becomes increasingly difficult for such an attacker to control all but one user as the number of users increases.  In later versions of JonDo, this type of attack will be prevented by users registering a so-called ticket at the mix cascade.  This ticket is a digital authorization code that uses a blind digital signature.
+<P>Click <A href="jap.JAPNewView_anonymometer.html">here</A> to view an explanation for the possible states of the Anonym-O-Meter.
+<P>
+<B>Balance</B><br>
+Cascades with costs will debit your <A href="payment_account.html">account</A> for traffic you created.
+<i>The following information is only visible in <a href="appearance.html#expertView">Extended View</a>.</i><P>
+Here you can see ...
+<UL>
+<LI>how much you spent during this session
+<LI>how much you spent all in all
+<LI>at what time your account information has been updated
+</UL>
+<P>
+<B>Own anonymized Data</B><br>
+To the user's information and to double check JonDo's functioning, the amount of data transferred by the user via the anonymity service during the current session is shown.
+<i>The following information is only visible in <a href="appearance.html#expertView">Extended View</a>.</i><P>
+This information is separated by:
+<UL>
+<LI>World Wide Web
+<LI>other internet services
+</UL>
+<P>
+<B>Forwarder</B><br>
+<i>This information is only visible in <a href="appearance.html#expertView">Extended View</a>.</i><P>
+With the <A HREF="forwarding_server.html">forwarding function</A>, you can allow other JonDo users to connect to the anonymization service via your system.  This is helpful if the other JonDo user's internet provider or government has blocked access to the anonymization service.
+<BR>
+<B>Attention:</B> There is a risk that you could be suspected of a crime that another JonDo user commits if your system was used as the forwarding system for that crime.
+<br>The following information belonging to the forwarder is being displayed:
+<UL>
+<LI>How many <b>forwarded connections</b>
+	<UL>
+	<LI>are currently running
+	<LI>have been accepted
+	<LI>have been rejected
+	</UL>
+<LI>What amount of <b>forwarded traffic</b> has resulted from the forwarder
+<LI>What <b>bandwidth</b> is used.
+</UL>
+<P>
+<B>Additional buttons</B>
+<UL>
+<LI>The <img src="miniwindow_button1.gif"> button will shrink JonDo to a minimalistic window showing only the most important information. This window will automatically dock to screen's edge. You can then activate or deactivate Anonymity by clicking JonDo's icon.
+You may also activate <A href="miniwindow.html">iconified window</A> by double clicking anywhere in JonDo's main window.
+<LI><b>Help</b> opens JonDo's help
+<LI><b>Assistant</b> will guide you through JonDo's setup process
+<LI><b>Config</b> opens JonDo's configuration window
+<LI><b>Exit</b> will disconnect from all services and close JonDo
+</UL>
+<BR>
+<!--#include virtual="/footer.html"-->
+</body>
+</html>

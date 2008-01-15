@@ -1,0 +1,35 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>Update der JAPDll</H2>
+
+After a JonDo update it can be necessary to use a new version of the japdll.dll.
+When you try to update the dll there can occure the following promlems:<br>
+(Note: when no dll is loaded at JonDo-Startup, then there will be no attempt to update it. The dll is not required for a smooth use of JonDo, but it gives you some graphical features. e.g. minimizing to the symbolbar)
+
+<UL>
+
+<LI>An existing japdll.dll could not be updated, because the necessary writing privileges are missing.
+<br><b>Solution: </b> Ensure to have the necessary writing privileges. To do the JonDo update you can either start JonDo (one-time) as administrator, or ask your administrator to update the japdll.dll.
+
+<LI> At JonDo start a japdll.dll was loaded from an unknown place. Probably a japdll.dll is in your windows-system-directory or somewhere else in the PATH. The place was not able to be located. It is tried to update the japdll.dll in the directory where the JAP.jar is lying If there is no japdll.dll, the update will result in an error.
+<br><b>Solution: </b> Replace the existing japdll.dll on your system with the new Version of the japdll.dll. Or delete the existing japdll.dll on your system and save the new version of the japdll.dll to the directory where the JAP.jar is lying.
+
+<LI> At JonDo start a japdll.dll was loaded from an unknown place. Probably a japdll.dll is in your windows-system-directory or somewhere else in the PATH. The place was not able to be located.
+A japdll.dll exists in the directory where JAP.jar is lying. At first the update of the file is successfull and the japdll.dll will be replaced by the new version. Nevertheless at JonDo start not this (new) japdll.dll is loaded, but again the old version from the unknown place.
+<br><b>Solution: </b> Replace the existing japdll.dll on your system by the new version of the japdll.dll. Or delete the existing japdll.dll on your system. At the next JonDo start the (new) japdll.dll version from the JAP.jar Directory will be loaded.
+
+
+
+</UL>
+
+<P>
+
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>

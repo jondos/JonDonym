@@ -1,0 +1,60 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>Proxy Einstellungen f&uuml;r Browser: Mozilla Firefox 2.x </H2>
+
+Um JonDo in Mozilla-Firefox einzurichten gehen Sie folgenderma&szlig;en vor :
+<BR><BR>
+1.) W&auml;hlen Sie im Men&uuml; "Extras" das Untermen&uuml; "Einstellungen...". Danach &ouml;ffnet sich das Einstellungsfenster. W&auml;hlen Sie in diesem den Punkt "Erweitert" und dort den Tab "Netzwerk":
+<BR><BR>
+<CENTER><IMG SRC="firefox3.gif"></CENTER>
+<BR><BR>
+2.) Um den Proxyserver einzustellen klicken Sie auf die Schaltfl&auml;che "Einstellungen...". In dem Fenster das sich nun &ouml;ffnet w&auml;hlen Sie "Manuelle Proxy-Konfiguration" aus. W&auml;hlen Sie "F&uuml;r alle Protokolle diesen Proxyserver verwenden" und tragen sie nun "127.0.0.1" als Server und 4001 als Port ein :
+<BR><BR>
+<CENTER><IMG SRC="firefox2.gif"></CENTER>
+<BR><BR>
+Wollen Sie Adressen festlegen, f&uuml;r die JonDo nicht verwendet werden soll, so k&ouml;nnen Sie im Feld <i>Kein Proxy f&uuml;r:</i> Ausnahmen festlegen, jeweils durch ein normales Komma getrennt.
+<br>Beachten Sie bitte, dass solche Ausnahmen flexibler bei einem Filterproxy wie <a href="noactive_proxomitron.html">Proxomitron</a> vorgenommen werden k&ouml;nnen.
+<BR><B>Hinweis:</B> Falls Sie im JonDo einen anderen <A HREF="portlistener.html">Listenerport</A> eingestellt haben m&uuml;ssen Sie diesen anstatt 4001 eintragen.
+<BR><BR>
+<P><B>Empfohlene Plugins f&uuml;r Mozilla-Firefox</B>
+<br>
+F&uuml;r Firefox wird das Plugin <i>SwitchProxy</i> empfohlen.
+
+Diese Erweiterung installiert eine Toolbar in Firefox, welche das schnelle Umschalten zwischen Proxies erm&ouml;glicht. So kann schnell zwischen dem Gebrauch von JonDo und nichtanonymen Surfen umgestellt werden.
+
+<UL>
+<LI><B>Installation</B><P>
+<UL>Es gibt zwei M&ouml;glichkeiten, um auf die Installationsseite des Plugins zu gelangen:<P>
+<LI>&Ouml;ffnen Sie <A href="https://addons.mozilla.org/firefox/125/">diesen Link</A> um direkt zur Installationsseite des Plugins zu gelangen.
+<P><B>ODER</B><P>
+<LI>Klicken Sie im Men&uuml; <i>Extras</i> auf <i>Erweiterungen</i>. Ein Fenster mit allen installierten Plugins &ouml;ffnet sich. Klicken Sie auf <i>Erweiterungen herunterladen</i> um auf die Pluginseite f&uuml;r Firefox zu gelangen. Suchen sie dort nach "SwitchProxy Tool".<P>
+</UL>
+Klicken Sie jetzt auf den Link "Install Now". Best&auml;tigen Sie die Installation und starten Sie ihren Browser neu.
+<P>
+<LI><B>Einrichtung</B><P>
+Sie sollten jetzt eine neue Toolbar sehen:
+<BR>
+<CENTER><IMG SRC="switchproxy.gif"></CENTER>
+<BR>
+Klicken Sie in der Toolbar auf <i>Add</i>, um einen neuen Proxy einzurichten. W&auml;hlen Sie die den Proxytyp <i>Standard</i> und klicken Sie auf <i>Next</i>.
+<br>Geben Sie als <i>Proxy Label</i> z.B. "JonDo" ein, die Bezeichnung ist irrelevant. Geben Sie nun f&uuml;r jeden Proxytyp au&szlig;er SOCKS (HTTP, SSL, FTP, Gopher) die Adresse "127.0.0.1" und den Port 4001 an:
+<BR>
+<CENTER><IMG SRC="switchproxy2.gif"></CENTER>
+<BR>
+Best&auml;tigen Sie mit <i>OK</i>.
+<P>
+<LI><B>Optionale Einstellungen</B><P>
+Sie k&ouml;nnen die SwitchProxy Toolbar ausblenden, damit Sie keinen Platz wegnimmt. S&auml;mtliche Funktionalit&auml;t bleibt erreichbar &uuml;ber das Kontextmen&uuml; (Rechtsklick) sowie &uuml;ber den Men&uuml;punkt <i>Extras</i> -> <i>SwitchProxy</i>.
+<br>Um die Toolbar auszublenden, klicken Sie auf <i>Preferences</i> in der Toolbar <b>oder</b> &ouml;ffnen Sie &uuml;ber <i>Extras</i> -> <i>Erweiterungen</i> das Fenster mit allen Erweiterungen, w&auml;hlen das Plugin <i>SwitchProxy</i> aus und klicken auf <i>Einstellungen</i>.
+<br>Haken Sie <i>Show toolbar</i> ab, lassen Sie <i>Show Context Menu</i> und <i>Show in Status Bar</i> aktiviert.
+
+</UL>
+<!--#include virtual="/footer.html"-->
+
+</body>
+</html>

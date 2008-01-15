@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProxyInterface>
+    <!--This xml structure has been created by anon.infoservice.ProxyInterface.-->
+    <!--The calling test class was anon.infoservice.test.ProxyInterfaceTest.-->
+    <Type>HTTP/TCP</Type>
+    <Port>525</Port>
+    <Host>localhost</Host>
+    <AuthenticationUserID>Bob</AuthenticationUserID>
+    <UseAuthentication>false</UseAuthentication>
+    <UseProxy>true</UseProxy>
+</ProxyInterface>
