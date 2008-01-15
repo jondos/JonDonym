@@ -1,0 +1,67 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>InfoService</H2>
+<i>This panel is only available in <a href="appearance.html#expertView">Extended View</a>.</i><P>
+To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>InfoService</i> from the list to the left, then open the tab <i>Settings</i>.<br>
+The Info Service is used to provide JonDo with necessary information about
+the anonymity service. At the moment this includes:
+
+<UL>
+    <LI> The current JonDo version number to allow automatic updates.
+    <LI> The address of the first mix.
+    <LI> Information on the mix cascade, e.g. the public keys of the
+    mixes.
+    <LI> Information on the service's capacity and the
+     level of anonymity achieved by JonDo.
+</UL>
+
+Please note that the correct information for the InfoService is already set by default.  Changes to these settings could cause JonDo to no longer find the anonymization service.
+
+<P>
+
+<H3>Configuration</H3>
+On this page, you can see the InfoServices that are known to your JonDo client.  The currently preferred InfoService appears in bold.  You can take the following actions:
+<UL>
+    <LI><B>Download list...</B><BR>
+    Here you can download a new list of InfoServices from the internet.
+    <P>
+    <LI><B>Set as default</B><BR>
+    By clicking this button, the selected InfoService will be chosen as the preferred InfoService
+    <P>
+    <LI><B>Certificate:</B><BR>
+    A click on this button will show the certificate for this InfoService.
+    <P>
+    <LI><B>Add...</B><BR>
+    When you choose this action, an additional dialog area for manually adding an InfoService appears below.
+    <P>
+    <UL>
+        <LI><B>InfoService host</B><BR>
+        Enter the host name or IP address of the InfoService that you want to add here.
+        <P>
+        <LI><B>InfoService port</B><BR>
+        Enter the port of the new InfoService here.
+        <P>
+        <LI><B>InfoService name</B><BR>
+        If you would like, you can enter a name for the InfoService here.  The new InfoService then appears under this name in the list of known InfoServices.  If this field is left empty, the InfoService is listed as a combination of host name and port.
+        <P>
+        <LI><B>Add</B><BR>
+        Click this button to confirm your entry and insert the new InfoService.
+        <P>
+        <LI><B>Cancel</B><BR>
+        With this button, the entries for the new InfoService will be discarded and you will return to the previous window.
+    </UL>
+    <P>
+    This part of the window also appears if you select an InfoService which has already been entered manually. You may then change this InfoService's data or delete it.
+    <P>
+    <LI><B>Remove</B><BR>
+    When you click on this button, the selected InfoService will be removed from the list of known InfoServices.
+</UL>
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>

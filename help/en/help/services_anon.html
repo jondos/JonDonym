@@ -1,0 +1,90 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>Services: JonDonym</H2>
+To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>Services</i> from the list to the left, then open the tab <i>JonDonym</i>.
+Here you can find information about the JonDonym project's anonymization service.
+<UL>
+    <LI><B>Available services</B><BR>
+    This list contains the names of all anonymization services that can currently be accessed.  The service selected in your JonDo client is highlighted in bold font.  You may block single services by unchecking the checkbox to the left of the service. JonDo does not connect to blocked services, and they are not listed in the choice menus. This is useful if you do not trust single services, or their service quality (speed/stability) seems to low. <br>
+    <br>
+    If you click on a service name, you can see further information about that service.
+    <P>
+    <UL>
+        <LI><B>Users</B><BR>
+        This field shows the number of users that are currently connected to the selected service.
+        <P>
+        <LI><B>Reachable by</B><BR>
+        Here you can see the host name or IP address under which the service can be reached.  This address must be open in your firewall for outgoing connections if you want to use that service.
+        <P>
+        <LI><B>Ports</B><BR>
+        The service accepts connections on these port numbers.  at least one of these ports needs to be open on your firewall for the address above.
+		<P>
+		<LI><B>Further information</B><em><B><br>
+        </B>With costs: </em>You have to <a href="payment.html">pay</a> for this service.<br>
+        <em>Excluded by filter :</em>         JonDo prevents the connection to this cascade because of the current <a href="jap.JAPConfTrust.html">service filter settings</a>.<br>
+        <em>Excluded by yourself :</em> As you have manually deselected this service, it is currently in the blacklist. JonDo cannot connect to this service as long as you do not unblock it.<BR>
+    </UL>
+    <P>
+    <LI><B>Reload</B><BR>
+    Clicking this button causes JonDo to request a new list of available services from the InfoService.
+    <P>
+    <LI><B>Select</B><BR>
+    This button sets the currently selected service to the activated service.  JonDo will try to set up a connection to this service when it is turned to "On" in the main window.
+    <P>
+    <LI><B>Manual</B><BR>
+    If a service is not recognized as available by the InfoService, you can manually add the service with this button, if you know the login information for that service.  After clicking on the button, the following fields appear in the bottom half of the window:
+    <P>
+    <UL>
+        <LI><B>Host</B><BR>
+        Enter the host name or IP address of the service here.
+        <P>
+        <LI><B>Port</B><BR>
+        Enter the port number of the service here.
+        <P>
+        <LI><B>Ok</B><BR>
+        Click this button to enter the service into the list of available services.
+        <P>
+        <LI><B>Cancel</B><BR>
+        Click this button to cancel the procedure and discard the information entered.  The new service name is also discarded from the list.
+        <P>
+	</UL>
+  <LI><B>Delete</B><BR>
+        This button is only active if you have selected a manually-entered service from the list of available services.  By clicking on this button, you can remove the service from the list.
+</UL>
+
+The bottom part of the window depends on whether a manually-entered service or a registered service from the InfoService is selected.
+<P>
+If a manually-entered service is selected, you can change its configuration data or delete it from the list.
+<P>
+If a service that is registered at the InfoService is selected, you will see the following additional information about that service:
+<UL>
+    <LI><B>Number of servers in the service</B><BR>
+    You see a graphic depiction of the individual servers in the selected service.  The number of server icons represents the number of servers.  By clicking on one of the server icons, you can obtain the following information, which is listed below the server icons:
+    <P>
+    <UL>
+    	<LI><B>Position</B><BR>
+        Here you see the position which the chosen server takes.
+        <P>
+        <LI><B>Operator</B><BR>
+        Here you see the name of the organization that operates that server. Hovering over it with the mouse will show the URL of the operator's homepage, clickin on it will open the page in your browser.
+        <P>
+	<LI><B>Email</B><BR>
+        This email address belongs to the contact person of the selected server. Clicking on it will open you email client.
+        <P>
+      <LI><B>Location</B><BR>
+        The geographic location of the server is displayed here. Clicking on it opens a map.
+	<P>
+	<LI><B>Certificate</B><BR>
+        Here you can see whether the certificate of the server could be verified and whether it is still valid or expired. A click on it will show the certificate.
+(<a href="certificates.html">Further infromation concerning certificates...</a>)    </UL>
+</UL>
+
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>

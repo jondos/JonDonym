@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListenerInterface>
+    <!--This xml structure has been created by anon.infoservice.ListenerInterface.-->
+    <!--The calling test class was anon.infoservice.test.ListenerInterfaceTest.-->
+    <Type>https</Type>
+    <Port>443</Port>
+    <Host>127.0.0.1</Host>
+</ListenerInterface>

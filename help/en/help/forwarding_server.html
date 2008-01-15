@@ -1,0 +1,38 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>Forwarding Server</H2>
+<i>This panel is only available in <a href="appearance.html#expertView">Extended View</a>.</i><P>
+To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>Forwarding Server</i> from the list to the left.<br>
+In this window, you can change how JonDo acts as a forwarding server.  With this function, other JonDo users who cannot connect directly to the anonymization service can still get a connection using your JonDo as an access point.  Please note, however, that there is a risk that you could be suspected of a crime that another JonDo user commits if your system was used as the forwarding system for that crime.
+
+<H3>Forwarding Server Settings</H3>
+<UL>
+    <LI><B>Server Port for Forwarding</B><BR>
+    Enter the port number that your JonDo program uses for incoming forwarding connections.  This port must be open for incoming connections in your firewall.
+
+    <P>
+    <LI><B>My internet connection</B><BR>
+    Select the type and speed of your internet connection.  The value in the field "Max. bandwidth" is automatically set.
+    <P>
+    <LI><B>Percentage for Forwarding</B><BR>
+    Choose a percentage from this field to set how much of your total upstream bandwidth should be used forwarding.
+    <P>
+    <LI><B>Max. used bandwidth</B><BR>
+    The bandwidth actually used for forwarding based on the settings above is shown here.
+</UL>
+
+<H3>Supported Mixcascades</H3>
+This section allows you to make changes to two settings.  Either you allow all clients that use your JonDo as a forwarder to access all JonDo cascades known by your own client ("Allow client access to all available mixcascades"), or you only allow access to certain cascades.  Which cascades are allowed to be accessed is determined by the buttons "Add to allowed cascades" and "Remove from allowed cascades".  Access is then allowed only for the cascades found in the "Allowed mixcascades" list.
+
+<H3>InfoService registration</H3>
+In order for JonDo users that require a forwarding server to find your JonDo forwarding server, your JonDo must be registered as a forwarder by at least one InfoService.  You can register at all InfoServices or only at certain ones.  The procedure is analogous to that for Supported Mixcascades.
+
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>
