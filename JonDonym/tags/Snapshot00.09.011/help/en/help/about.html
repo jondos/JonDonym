@@ -1,0 +1,104 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+
+<H2>About JonDo</H2>
+
+<h3><B>The JonDo anonymity proxy</B>
+  
+</h3>
+<P>
+JonDo (enhancement of <a href="http://anon.inf.tu-dresden.de/index_en.html" target="_blank">JAP</a>) provides the functionality to surf the web without
+being observed. This means that neither the requested server nor any
+observer on the Internet can know which user has viewed which web page - in short, <em>anonymity</em>. 
+<P>
+JonDo has to be installed on the user's computer to allow him to surf the
+internet anonymously and without being observed. This is necessary since
+all requests and all of the servers' answers have to be sent not directly to
+the web server, rather via a so-called <em>Mix Cascade</em>. These mixes are
+interposed stations, and all messages are directed through these stations.
+
+<P>
+Since many users make use of the anon service at the same time, the
+internet connections of each user are hidden among those of all the other
+users. Every user could have been responsible for any connection. Nobody,
+no outstanding person, no other user, not even the operator of the JonDonym
+service can determine which internet connections were requested by a
+certain user.
+<P>JonDo fakes your <a href="http://www.whatismyip.com" target="_blank">IP address</a> against websites, and replaces it by another, fixed IP of the JonDonym system. Unfortunately this alone is not enough to ensure the web surfer's anonymity. On many websites there are so-called active contents that may lead to the disclosure of the IP address, and the web browsers send data that may be used for profiling. Currently, JonDo does not block such content yet, but this may be done by <a href="noactive.html">additional applications</a>. 
+<h3>Anonymity - why? </h3>
+<p>Access to the Internet is usually only possible by dialing in (for example via modem, DSL or UMTS) to a so-called <em>Internet Service Provider</em> (ISP). Some of these ISP are not really worried about the data of their users, as the example AOL shows: the US provider <a href="http://www.techcrunch.com/2006/08/06/aol-proudly-releases-massive-amounts-of-user-search-data" target="_blank">published</a>, without costs and accessable by anyone, a total of 20 million search requests of 650 000 AOL users for research purposes. This actually well-meant action shows on the one hand, how low-founded knowledge about privacy problems is at those people who carry a lot of responsibilities, and on the other hand how asy sensitive information may get in wrong hands. If you track the search engine requests and refer them to individuals, you may easy create personal profiles. You could even read the names of such web searchers or the names of their friends and relatives in cleartext from their search requests. Of course, not only providers store such search requests, but also the search engine operators themselves. Unfortunately, internet users cannot control or check whether this data is forwared or sold to others, or if it is adequately protected (e.g. against theft by hackers). In principle, this is true for all data that is accumulated during surfing, this means traffic data and communication contents. </p>
+<P>As the usage of earlier collected data data is very hard to control, and therefore the own surf profile may easily get to criminals or competitors, already the census of this information must be made as hard as possible. Enterprises should therefore have a look at the protection of their connection data and content, as this may give valuable indications to competitors about their own intentions (planned patents, fusions, requests for special employees, exchange of business secrets etc.) Individuals, that use the internet to get very private information, like for health, psychic, social or financial subjects, are also well advised not to publish their surf behaviour to everyone. Possibly, the captured data contributes into scoring models of enterprises that are used for giving credits or for an individual pricing: those who have got a bad &quot;score value&quot; possibly have to pay a lot for that (in &euro;). Hereafter, employers who like to hire new employees may get their personal profiles beforehand from internet agencies, that created these profiles from the possible employees' traces on the net. Basically, all citizens should have a very strong interest to get far from the glances of curious internet watchers: Those who feel observed, talk and act in a different way as if they would be completely anonymous. Just critical voices would possibly get silenced without anonymity, because of (conscious or unconscious) fear from reprisals. This fear is nourished by a more and more strict internet observation done by certain states, justified with the &quot;arguments&quot;, that terrorism had to be fought and child pornography had to be stemmed this way. 
+<h3>Anonymity costs </h3>
+<P>Strong anonymity is not for free - although the base service is offered without payment, users have to sustain a low speed. There won't be an anonyisation at DSL 10000. Otherwise, server with hundreds of GB per second would have to be offered in order to really supply thousands of users at the same time. This would be far too expensive for the operators and is unrealistic, as this would need hundresds of users, each of them paying hundreds of Euros per month, only to cover the server costs.
+<P>We decided to make a compromise between speed and costs for users: our commercial servers offer bandwidths between 64 and 128 kbit/s (ISDN speed), what should be enough for an untroubled web experience. For the allocation of this service quality, we request a little fee that is affordable for most people. Moreover, there will is a (remarkable) slower base service, that may be used without paying.
+<P>For those who would like to support JonDonym, maybe with free servers or servers with costs as a new operator, with translations, programming efforts or donations, there is still the <a href="http://anon.inf.tu-dresden.de/kosten.html">possibility for participation</a>, of course.
+<h3>
+<B>The JonDonym service</B>
+</h3>
+<P>
+The JonDonym service, where JonDo connects to in order to establish an anonymous web access, consists of several choosable Mix cascades whose Mixes are generally operated by different and independent organisations. These institutions  have declared in a
+  <a href="http://anon.inf.tu-dresden.de/operators/help/operatorCommitment.html">voluntary commitment</a>  to neither store log files of the transported
+connections nor exchange sensitive data with other Mix  operators. Moreover, the mix operators are <a href="certificates.html">certified</a>, so that their identity is always checkable.
+<P>
+However, since none of the interposed stations should be trusted completely,
+all data to be sent is encrypted several times (once per mix station). The encryption of the requests and the decryption of the answers take place
+in the JonDo program. The user only has to <A HREF="browser.html">configure</A> the
+browser in a way that all web requests are directed through JonDo.
+
+<P>
+The users' anonymization takes place by sending each request in multiply
+encrypted form via a series of in-between stations based on the mix concept
+of David Chaum. Since all users' behavior is the same in the final version
+(sending the same amount of data per time unit via the same cascade of
+mixes) as long as at least one mix is not cooperating with a global
+attacker, a single user's actions cannot be reconstructed.
+
+<P>
+Our goal is to provide a service that truly meets these criteria.
+
+<P>
+<B>Attention!</B> The current version does not yet reach this security level,
+because the software is still under development! However, this version already
+guarantees a much higher security standard than systems that work as simple
+<a href="proxy_overview.html">proxy servers</a>.
+Moreover, we do not know <em>any</em> commercial system that roughly reaches the security of JonDonym. As non-commercial system, only <a href="http://tor.eff.org" target="_blank">Tor</a> provides a comparable security and is equally well documented and examined. 
+<P>
+This version of JonDo provides protection against local attackers
+(e.g. the provider, web server, your manager or boss). In addition, it
+provides protection against the mix operators. Dependent on what mix an operator
+operates, he can only get information on which IP address uses the service
+<b>or</b> which requests have been sent to the web, but no combination of these
+two possibilities.
+
+<P>
+The current version does not provide protection against attackers who
+observe all Internet lines or controls the first and the last mix.
+
+<P>
+For the following reasons we want to offer the system prior to the final
+version:
+
+<UL>
+    <LI> We want to gather experience with a running system in order to
+    properly improve the system.
+    <LI> For being able to offer a secure service, we need a large and stable
+    anonymity group from the beginning. We hope to gain such a group already
+    now and be able to maintain it during further development.
+</UL>
+
+<P>
+To achieve this aim, we need your help. We would be very grateful if you
+used the anon service regularly and told us about your problems,
+opinions, and suggestions.
+
+<P>
+For further information please view our project web site: <BR>
+<a href="http://www.anon-online.de">http://www.anon-online.de</a>
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>
