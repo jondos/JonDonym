@@ -151,6 +151,16 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	private boolean m_bFromCascade;
 
+	/** The average response time on this cascade. */
+	private long delay;
+	/** The average data throughput on this cascade. */
+	private double throughput;
+
+	/** An array that holds the past few measured delay times to calculate the average delay. */
+	private long[] delays;
+	/** An array that holds the past few measured throughputs to calculate the average throughput. */
+	private double[] throughputs;
+
 	/**
 	 * Maps the position of a Mix in a cascade to a concrete Mix ID.
 	 */
@@ -1102,15 +1112,21 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				// country bonus
 				operatorCountryCode = currentCertificate.getSubject().getCountryCode();
 				mixCountryCode = getMixInfo(i).getCertificate().getSubject().getCountryCode();
-				if (operatorCountryCode != null && operatorCountryCode != null &&
+				if (operatorCountryCode != null && mixCountryCode != null &&
 					!operatorCountries.containsKey(operatorCountryCode) &&
 					!mixCountries.containsKey(mixCountryCode))
 				{
 					// operator and Mix are located in different countries than the others in the cascade
 					m_nrCountries++;
 				}
-				operatorCountries.put(operatorCountryCode, operatorCountryCode);
-				mixCountries.put(mixCountryCode, mixCountryCode);
+				if (operatorCountryCode != null)
+				{
+					operatorCountries.put(operatorCountryCode, operatorCountryCode);
+				}
+				if (mixCountryCode != null)
+				{
+					mixCountries.put(mixCountryCode, mixCountryCode);
+				}
 
 				// operator bonus
 				operatorCertificates.put(currentCertificate.getId(), currentCertificate);
@@ -1217,5 +1233,25 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			m_strMixIds += m_mixIds.elementAt(i);
 		}
+	}
+
+	public void setDelay(long pDelay) {
+		if(delays == null)
+			delays = new long[3]; // TODO: Make number of fixings configurable
+		delay = 0;
+		for(int i=1;i < delays.length;i++)
+			delay += (delays[i-1] = delays[i]);
+		delays[delays.length-1] = pDelay;
+		delay = (delay + pDelay) / delays.length;
+	}
+
+	public void setThroughput(double pThroughput) {
+		if(throughputs == null)
+			throughputs = new double[3]; // TODO: Make number of fixings configurable
+		throughput = 0.0;
+		for(int i=1; i < throughputs.length; i++)
+			throughput += (throughputs[i-1] = throughputs[i]);
+		throughputs[throughputs.length] = pThroughput;
+		throughput = (throughput + pThroughput) / throughputs.length;
 	}
 }

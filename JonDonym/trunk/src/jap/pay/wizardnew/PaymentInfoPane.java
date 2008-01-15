@@ -84,6 +84,8 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 		getName() + "_buttonopen";
 	public static final String MSG_PAYPAL_ITEM_NAME = PaymentInfoPane.class.getName() + "_paypalitemname";
 	private static final String MSG_COULD_OPEN = PaymentInfoPane.class.getName() + "_reminderLink";
+	private static final String MSG_REMINDER_PAYMENT = PaymentInfoPane.class.getName() + "_reminderPayment";
+	private static final String MSG_REMINDER_PAYMENT_EXPLAIN = PaymentInfoPane.class.getName() + "_reminderPaymentExplain";
 	private static final String MSG_EXPLAIN_COULD_OPEN =
 		PaymentInfoPane.class.getName() + "_reminderLinkExplain";
 	private static final String MSG_NO_FURTHER_PAYMENT = PaymentInfoPane.class.getName() + "_noFurtherPayment";
@@ -99,6 +101,7 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 	private JCheckBox m_linkOpenedInBrowser;
 	private JLabel m_imageLabel;
 	private LinkMouseListener.ILinkGenerator m_paymentLinkGenerator;
+	private boolean m_bURL;
 
 
 	public PaymentInfoPane(JAPDialog a_parentDialog, DialogContentPane a_previousContentPane)
@@ -259,7 +262,7 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 
 		final String strExtraInfo = selectedOption.getExtraInfo(m_language);
 
-		boolean isURL = false;
+		m_bURL = false;
 		if (strExtraInfo != null)
 		{
 
@@ -358,8 +361,8 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 			m_bttnCopy.setEnabled(false);
 
 
-			isURL = selectedOption.getExtraInfoType(m_language).equalsIgnoreCase(XMLPaymentOption.EXTRA_LINK);
-			if (isURL)
+			m_bURL = selectedOption.getExtraInfoType(m_language).equalsIgnoreCase(XMLPaymentOption.EXTRA_LINK);
+			if (m_bURL)
 			{
 				m_bttnOpen.setVisible(true);
 				if (m_selectedOption.getMaxClicks() > 0)
@@ -391,6 +394,22 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 		m_c.gridy++;
 		m_rootPanel.add(new JLabel(" "), m_c);
 
+		setText(htmlExtraInfo);
+		m_c.gridy++;
+		m_c.anchor = GridBagConstraints.SOUTH;
+		m_c.gridwidth = 2;
+		m_rootPanel.add(m_linkOpenedInBrowser, m_c);
+
+		if (m_bURL)
+		{
+			m_linkOpenedInBrowser.setText(JAPMessages.getString(MSG_COULD_OPEN));
+		}
+		else
+		{
+			m_linkOpenedInBrowser.setText(JAPMessages.getString(MSG_REMINDER_PAYMENT));
+		}
+
+		/*
         if (isURL)
 		{
 			setText(htmlExtraInfo);
@@ -402,10 +421,15 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 		}
 		else
 		{
+			MSG_REMINDER_PAYMENT
 			m_linkOpenedInBrowser.setSelected(true);
 			setText(htmlExtraInfo);
-		}
-		if (isURL) setMouseListener(new LinkMouseListener());
+		}*/
+	  /*
+		if (m_bURL)
+		{
+			setMouseListener(new LinkMouseListener());
+		}*/
 	}
 
 	public XMLTransCert getTransCert()
@@ -532,7 +556,6 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 				}
 				else if (e.getSource() == m_bttnOpen)
 				{
-					m_bttnCopy.setEnabled(true);
 					openURL();
 				}
 			}
@@ -551,6 +574,10 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 				m_imageLabel = null;
 			}
 		}
+		else
+		{
+			m_bttnCopy.setEnabled(true);
+		}
 	}
 	public CheckError[] checkUpdate()
 	{
@@ -563,8 +590,22 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 	{
 		if (!m_linkOpenedInBrowser.isSelected())
 		{
-			return new CheckError[]{new CheckError(
-		 JAPMessages.getString(MSG_EXPLAIN_COULD_OPEN), LogType.PAY)};
+			if (m_bURL)
+			{
+				return new CheckError[]
+					{
+					new CheckError(
+									   JAPMessages.getString(MSG_EXPLAIN_COULD_OPEN), LogType.PAY)};
+			}
+			else
+			{
+				return new CheckError[]
+					{
+					new CheckError(
+						JAPMessages.getString(MSG_REMINDER_PAYMENT_EXPLAIN), LogType.PAY)};
+
+			}
+
 		}
 		return null;
 	}
