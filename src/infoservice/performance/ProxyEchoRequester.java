@@ -69,7 +69,7 @@ class ProxyEchoRequester implements Runnable {
 		try {
 			stream = socket.getOutputStream();
 			stream.write(dataToSend);
-			stream.close();
+			//stream.close();
 		} catch (IOException e) {
 			exception = e;
 			try {

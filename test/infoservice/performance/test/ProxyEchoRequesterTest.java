@@ -1,4 +1,4 @@
-package infoservice.performance;
+package infoservice.performance.test;
 
 import junitx.framework.PrivateTestCase;
 
