@@ -27,8 +27,11 @@
  */
 package infoservice.performance;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -57,14 +60,14 @@ public class PerformanceMeter implements Runnable {
 	private byte[] testdata;
 
 	/**
-	 * @param pTestDataSize
-	 * @param pInterval
-	 * @param pRequestsPerInterval
+	 * @param a_testDataSize
+	 * @param a_interval
+	 * @param a_requestsPerInterval
 	 */
-	public PerformanceMeter(int pTestDataSize, int pInterval, int pRequestsPerInterval) {
-		interval = pInterval;
-		requestsPerInterval = pRequestsPerInterval;
-		testdata = new byte[pTestDataSize];
+	public PerformanceMeter(int a_testDataSize, int a_interval, int a_requestsPerInterval) {
+		interval = a_interval;
+		requestsPerInterval = a_requestsPerInterval;
+		testdata = new byte[a_testDataSize];
 		new Random().nextBytes(testdata);
 	}
 
@@ -110,6 +113,7 @@ public class PerformanceMeter implements Runnable {
 	        	}
 	        	catch(Exception e) {
 	        		// TODO: Log exception
+	        		e.printStackTrace();
 	        	}
 	        }
 		}
@@ -122,8 +126,10 @@ public class PerformanceMeter implements Runnable {
 	}
 
 
-	private Socket getExitPointSocket(MixCascade cascade) {
-		// TODO Auto-generated method stub
-		return null;
+	private Socket getExitPointSocket(MixCascade cascade) throws IOException {
+		// TODO: This is only a dummy; it contacts localhost:7
+		InetAddress localhost = InetAddress.getLocalHost();
+		Socket socket = new Socket(localhost, 7);
+		return socket;
 	}
 }

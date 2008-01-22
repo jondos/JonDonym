@@ -1112,21 +1112,15 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				// country bonus
 				operatorCountryCode = currentCertificate.getSubject().getCountryCode();
 				mixCountryCode = getMixInfo(i).getCertificate().getSubject().getCountryCode();
-				if (operatorCountryCode != null && mixCountryCode != null &&
+				if (operatorCountryCode != null && operatorCountryCode != null &&
 					!operatorCountries.containsKey(operatorCountryCode) &&
 					!mixCountries.containsKey(mixCountryCode))
 				{
 					// operator and Mix are located in different countries than the others in the cascade
 					m_nrCountries++;
 				}
-				if (operatorCountryCode != null)
-				{
-					operatorCountries.put(operatorCountryCode, operatorCountryCode);
-				}
-				if (mixCountryCode != null)
-				{
-					mixCountries.put(mixCountryCode, mixCountryCode);
-				}
+				operatorCountries.put(operatorCountryCode, operatorCountryCode);
+				mixCountries.put(mixCountryCode, mixCountryCode);
 
 				// operator bonus
 				operatorCertificates.put(currentCertificate.getId(), currentCertificate);
@@ -1251,7 +1245,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		throughput = 0.0;
 		for(int i=1; i < throughputs.length; i++)
 			throughput += (throughputs[i-1] = throughputs[i]);
-		throughputs[throughputs.length] = pThroughput;
+		throughputs[throughputs.length-1] = pThroughput;
 		throughput = (throughput + pThroughput) / throughputs.length;
 	}
 }
