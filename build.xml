@@ -7,6 +7,7 @@
   <property name="certificates" location="certificates"/>
   
   <property name="excludesSrcJap" value="jpi/** infoservice/** misc/**"/>
+  <property name="infoservice-excludes" value="jpi/** infoservice/performance/** misc/**"/>
   <property name="build" location="build"/>
   <property name="build.libs" location="build/libs"/>
   <property name="dist" location="dist"/>
@@ -14,12 +15,16 @@
   <property name="japtomcat" location="/home/tomcat/webapps/jap/"/>
   <property name="japweb" location="/var/www/JapWeb/"/>
   <property name="japkeystore" location="/home/compile/.keystore"/>
+  
+  
   <property name="classpath_httplib_file_name" location="${build.libs}/HTTPClient.jar"/>
   <property name="classpath_xmllib_file_name" location="${build.libs}/xml.jar"/>
   <property name="classpath_ftplib_file_name" location="${build.libs}/ApacheFTPClient.jar"/>
   <property name="classpath_log4j_file_name" location="${build.libs}/log4j.jar"/>
   <property name="classpath_bouncy_file_name" location="${build.libs}/BouncyCastleLightForJAP.jar"/>
   <property name="classpath_xmlrpc_file_name" location="${build.libs}/apache-xml-rpc-1.1.jar"/>
+  <property name="classpath_jaf_file_name" location="${build.libs}/activation.jar"/>
+	
   <path id="classpath_httplib" location="${classpath_httplib_file_name}"/>
   <path id="classpath_ftplib" location="${classpath_ftplib_file_name}"/>
   <path id="classpath_xml-rpc" location="${classpath_xmlrpc_file_name}"/>
@@ -30,6 +35,8 @@
   <path id="classpath_swing" location="${build.libs}/swingall.jar"/>
   <path id="classpath_log4j" location="${classpath_log4j_file_name}"/>
   <path id="classpath_bouncycastle_jap" location="${classpath_bouncy_file_name}"/>
+  <path id="classpath_jaf" location="${classpath_jaf_file_name}"/>
+	
   <path id="classpath_all">
     <path refid="classpath_swing"/>
     <path refid="classpath_httplib"/>
@@ -41,6 +48,7 @@
     <path refid="classpath_mrj"/>
     <path refid="classpath_aje"/>
     <path refid="classpath_bouncycastle_jap"/>
+  	<path refid="classpath_jaf"/>
   </path>
   <path id="java_1_1_boot_classes" location="${build.libs}/java_1_1_classes.zip"/>
   <target name="init-dirs">
@@ -63,8 +71,9 @@
     <get src="http://anon.inf.tu-dresden.de/develop/log4j.jar" verbose="true" dest="${classpath_log4j_file_name}">    </get>
     <get src="http://anon.inf.tu-dresden.de/develop/MRJClasses.zip" verbose="true" dest="${build.libs}/MRJClasses.zip">    </get>
     <get src="http://anon.inf.tu-dresden.de/develop/AppleJavaExtensions.jar" verbose="true" dest="${build.libs}/AppleJavaExtensions.jar">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/japdll.dll" verbose="true" dest="${build.libs}/japdll.dll">
-    </get>
+    <get src="http://anon.inf.tu-dresden.de/develop/japdll.dll" verbose="true" dest="${build.libs}/japdll.dll"> </get>
+    <get src="http://anon.inf.tu-dresden.de/develop/activation.jar" verbose="true" dest="${build.libs}/activation.jar"> </get>
+   
     <get src="http://anon.inf.tu-dresden.de/develop/japdllversion.txt" verbose="true" dest="${build.libs}/japdllversion.txt">
     </get>
   </target>
@@ -133,8 +142,8 @@
   </target>
   <target name="compile" depends="init" description="compile the source ">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac sourcepath="" compiler="${mycompilerversion}" executable="${mycompilerexecutable}" fork="yes" target="1.1" source="1.2" srcdir="${src}" excludes="${excludesSrcJap}"
-    destdir="${build}" bootclasspathref="java_1_1_boot_classes" classpathref="classpath_all">
+    <javac sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
+    destdir="${build}"  classpathref="classpath_all">
     <include name="**/*.java"/>
     </javac>
 
@@ -252,4 +261,42 @@
     <delete dir="${src}/misc"/>
     
   </target>
+	
+	
+	<target name="infoservice-init" depends="clean" 
+			description="initializes folder structure for infoservice distribution">
+		<mkdir dir="${build}" />
+		<mkdir dir="${build}/infoservice" />
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/infoservice" />
+	</target>
+	
+	<target name="infoservice-compile" depends="infoservice-init, init-libs"
+			description="compiles infoservices sources">
+		
+		<javac 	srcdir="${src}" 
+				destdir="${build}" 
+				excludes="${infoservice-excludes}" 
+				classpathref="classpath_all">
+			
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+	
+	<target name="infoservice-dist" depends="infoservice-compile"
+				description="creates infoservice binary distribution">
+			
+			<jar jarfile="${dist}/InfoService.jar" manifest="manifest_info.mf">
+				<fileset dir="${build}" includes="**/*.class">
+				        
+				</fileset>
+				<zipfileset src="${classpath_httplib_file_name}"/>
+				<zipfileset src="${classpath_xmllib_file_name}"/>
+				<zipfileset src="${classpath_ftplib_file_name}"/>
+				<zipfileset src="${classpath_log4j_file_name}"/>
+				<zipfileset src="${classpath_bouncy_file_name}"/>
+				<zipfileset src="${classpath_xmlrpc_file_name}"/>
+			
+			</jar>
+	</target>
 </project>
