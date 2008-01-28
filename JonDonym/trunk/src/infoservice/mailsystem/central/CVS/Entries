@@ -1,15 +1,15 @@
-/AbstractMailSystemCommand.java/1.1/Mon Jul 25 08:27:36 2005//
-/BannedMailAddressDBEntry.java/1.4/Mon Oct  2 20:53:42 2006//
-/CommandFactory.java/1.1/Mon Jul 25 08:27:36 2005//
-/MailAddressDBEntry.java/1.4/Mon Oct  2 20:53:43 2006//
-/MailContext.java/1.2/Thu Oct  5 17:32:00 2006//
-/MailHandler.java/1.1/Mon Jul 25 08:27:36 2005//
-/MailMessages.java/1.1/Mon Jul 25 08:27:36 2005//
-/MailSystem.java/1.1/Mon Jul 25 08:27:36 2005//
-/MailSystemLog.java/1.1/Mon Jul 25 08:27:36 2005//
-/MailSystemServerImplementation.java/1.1/Mon Jul 25 08:27:36 2005//
-/MailSystemServerImplementationFactory.java/1.1/Mon Jul 25 08:27:36 2005//
 D/commands////
 D/messages////
 D/server////
 D/.svn////
+/AbstractMailSystemCommand.java/1.1/Tue Jan 15 15:40:49 2008//
+/BannedMailAddressDBEntry.java/1.4/Tue Jan 15 15:40:49 2008//
+/CommandFactory.java/1.1/Tue Jan 15 15:40:49 2008//
+/MailAddressDBEntry.java/1.4/Tue Jan 15 15:40:49 2008//
+/MailContext.java/1.2/Tue Jan 15 15:40:49 2008//
+/MailHandler.java/1.1/Tue Jan 15 15:40:49 2008//
+/MailMessages.java/1.1/Tue Jan 15 15:40:49 2008//
+/MailSystem.java/1.1/Tue Jan 15 15:40:49 2008//
+/MailSystemLog.java/1.1/Tue Jan 15 15:40:49 2008//
+/MailSystemServerImplementation.java/1.1/Tue Jan 15 15:40:49 2008//
+/MailSystemServerImplementationFactory.java/1.1/Tue Jan 15 15:40:49 2008//
