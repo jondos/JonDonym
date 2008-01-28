@@ -20,7 +20,6 @@
 /IMutableProxyInterface.java/1.4/Thu Oct 12 08:08:27 2006//
 /ImmutableListenerInterface.java/1.6/Thu Mar 24 07:01:41 2005//
 /ImmutableProxyInterface.java/1.4/Mon Jan 24 14:17:42 2005//
-/InfoServiceDBEntry.java/1.93/Mon Oct 22 10:01:33 2007//
 /InfoServiceHolder.java/1.69/Fri Sep  7 18:13:57 2007//
 /InfoServiceHolderMessage.java/1.1/Mon Mar 21 13:12:13 2005//
 /InfoServiceIDEntry.java/1.1/Tue Nov 21 11:02:10 2006//
@@ -29,7 +28,6 @@
 /JavaVersionDBEntry.java/1.8/Fri Jul  6 14:36:59 2007//
 /ListenerInterface.java/1.28/Sat Aug 11 19:50:51 2007//
 /MessageDBEntry.java/1.8/Mon Sep 17 17:29:01 2007//
-/MixCascade.java/1.81/Mon Nov  5 09:01:14 2007//
 /MixInfo.java/1.34/Fri Jul  6 14:36:59 2007//
 /NewCascadeIDEntry.java/1.2/Tue Aug 22 15:44:56 2006//
 /PreviouslyKnownCascadeIDEntry.java/1.1/Mon Dec 11 16:05:48 2006//
@@ -39,3 +37,7 @@
 /ServiceSoftware.java/1.9/Tue Oct  3 12:02:25 2006//
 /SimpleMixCascadeContainer.java/1.5/Sun Sep 17 19:04:19 2006//
 /StatusInfo.java/1.25/Wed Jul 25 20:36:34 2007//
+/.cvsignore/1.1/Fri Jan 25 16:52:50 2008//
+/InfoServiceDBEntry.java/1.94/Fri Jan 25 12:08:30 2008//
+/MixCascade.java/1.83/Fri Jan 25 18:47:20 2008//
+D

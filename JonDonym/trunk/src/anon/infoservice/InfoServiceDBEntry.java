@@ -58,6 +58,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.pay.*;
+import java.net.SocketException;
 
 /**
  * Holds the information for an infoservice.
@@ -72,6 +73,10 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	private static final int BLOCK_FACTOR_IF_UNREACHABLE = 5;
 
 	private static int m_getXmlConnectionTimeout = DEFAULT_GET_XML_CONNECTION_TIMEOUT;
+
+	private static long m_timeFirstJVMSocketError = Long.MAX_VALUE;
+	private static long m_timeHandleAfterJVMSocketError = Long.MAX_VALUE;
+	private static Runnable m_threadHandleAfterJVMSocketError;
 
 	/**
 	 * A proxy interface that is used for all connections and may change over time.
@@ -427,6 +432,25 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	public static void setMutableProxyInterface(IMutableProxyInterface a_proxyInterface)
 	{
 		m_proxyInterface = a_proxyInterface;
+	}
+
+	/**
+	 * Sets the options for handling a JVM socket error that cannot be recovered.
+	 * @param a_threadRestartAfterJVMSocketError Runnable
+	 * @param a_timeRestartAfterJVMSocketError long
+	 */
+	public static void setJVMNetworkErrorHandling(Runnable a_threadRestartAfterJVMSocketError, long a_timeRestartAfterJVMSocketError)
+	{
+		if (a_timeRestartAfterJVMSocketError >= 0 && a_threadRestartAfterJVMSocketError != null)
+		{
+			m_threadHandleAfterJVMSocketError = a_threadRestartAfterJVMSocketError;
+			m_timeHandleAfterJVMSocketError = a_timeRestartAfterJVMSocketError;
+		}
+		else
+		{
+			throw new IllegalArgumentException("Runnable: " + a_threadRestartAfterJVMSocketError + " " +
+											   "Timeout: " + a_timeRestartAfterJVMSocketError);
+		}
 	}
 
 	/**
@@ -879,6 +903,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 								// thread was interrupted
 								throw (new InterruptedIOException("Communication was interrupted."));
 							}
+
+							m_timeFirstJVMSocketError = Long.MAX_VALUE;
 						}/*
 						catch (SocketTimeoutException a_e)
 						{
@@ -915,6 +941,32 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 								// java too old
 
 								/** @todo handling for other error situations */
+							}
+							if (a_e instanceof SocketException && a_e.getMessage() != null &&
+								a_e.getMessage().indexOf("JVM_GetSockName failed") >= 0)
+							{
+								/**
+								 * This is a really bad error - the JVM cannot get in contact with the network layer.
+								 * Watch this for some time, if the error is remaining perform the given
+								 * operation (usually application restart).
+								 */
+								if (m_timeFirstJVMSocketError > System.currentTimeMillis())
+								{
+									LogHolder.log(LogLevel.ALERT, LogType.NET, "JVM error detected!");
+									m_timeFirstJVMSocketError = System.currentTimeMillis();
+								}
+								else if (System.currentTimeMillis() - m_timeFirstJVMSocketError >= m_timeHandleAfterJVMSocketError)
+								{
+									LogHolder.log(LogLevel.ALERT, LogType.NET, "JVM error detected! Further network access seems to be impossible...");
+									if (m_threadHandleAfterJVMSocketError != null)
+									{
+										new Thread(m_threadHandleAfterJVMSocketError).start();
+									}
+								}
+							}
+							else
+							{
+								m_timeFirstJVMSocketError = Long.MAX_VALUE;
 							}
 						}
 					}

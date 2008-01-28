@@ -1,14 +1,7 @@
 /JAP.java/1.195/Wed Nov 28 13:13:02 2007//
 /JAPMacintosh.java/1.11/Mon Nov  5 15:19:08 2007//
-/JAPMessages_ar.properties/1.40/Mon Jan 14 14:54:32 2008//
 /JAPMessages_ca.properties/1.1/Mon Jan 14 14:54:08 2008//
-/JAPMessages_cs.properties/1.52/Mon Jan 14 14:54:32 2008//
-/JAPMessages_de.properties/1.422/Mon Jan 14 14:54:32 2008//
-/JAPMessages_en.properties/1.359/Mon Jan 14 14:54:32 2008//
 /JAPMessages_es.properties/1.40/Mon Jan 14 14:54:32 2008//
-/JAPMessages_fr.properties/1.200/Mon Jan 14 14:54:32 2008//
-/JAPMessages_nl.properties/1.22/Mon Jan 14 14:54:32 2008//
-/JAPMessages_pt.properties/1.182/Mon Jan 14 14:54:32 2008//
 D/anon////
 D/captcha////
 D/forward////
@@ -25,3 +18,11 @@ D/platform////
 D/proxy////
 D/tor////
 D/update////
+/.cvsignore/1.1/Fri Jan 25 16:45:52 2008//
+/JAPMessages_ar.properties/1.41/Fri Jan 25 19:13:47 2008//
+/JAPMessages_cs.properties/1.53/Fri Jan 25 19:13:50 2008//
+/JAPMessages_de.properties/1.423/Fri Jan 25 19:13:52 2008//
+/JAPMessages_en.properties/1.360/Fri Jan 25 19:13:55 2008//
+/JAPMessages_fr.properties/1.201/Fri Jan 25 19:13:57 2008//
+/JAPMessages_nl.properties/1.23/Fri Jan 25 19:14:00 2008//
+/JAPMessages_pt.properties/1.183/Fri Jan 25 19:14:01 2008//

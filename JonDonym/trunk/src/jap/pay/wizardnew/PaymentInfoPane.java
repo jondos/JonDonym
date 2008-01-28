@@ -609,5 +609,4 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 		}
 		return null;
 	}
-
 }

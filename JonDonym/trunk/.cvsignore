@@ -18,3 +18,5 @@ classes_all
 public.cer
 classes
 InfoService_update.log
+.svn
+build

@@ -35,11 +35,11 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.09.012"; //Never change the layout of this line!
-	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-01-15 15:49:52 $";
+	public static final String aktVersion = "00.09.013"; //Never change the layout of this line!
+	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-01-25 19:14:11 $";
 
 	//Warning: This is a little bit tricky,
-	//because CVS will expand the $Date: 2008-01-15 15:49:52 $
+	//because CVS will expand the $Date: 2008-01-25 19:14:11 $
 	//to the date of the last commmit of this file
 
 	//Never change the layout of the next two lines as serveal automated tools use these lines to do fancy things...
@@ -304,6 +304,12 @@ public final class JAPConstants
 
 	/** Supported non-generic payment names. Comma-separated list. e.g. "CreditCard,DirectDebit"*/
 	public final static String PAYMENT_NONGENERIC="CreditCard";
+
+	/**
+	 * Restart after unrecoverable socket errors. Sets the time when such an error is seen as
+	 * unrecoverable.
+	 */
+	public static final long TIME_RESTART_AFTER_SOCKET_ERROR = 1000 * 60;
 
 	/** Paysafecard: Payment confirmation timeout in minutes (older open psc payments should not be shown as usable)
 	 *  Correct value depends on the contract with the paysafecard company */

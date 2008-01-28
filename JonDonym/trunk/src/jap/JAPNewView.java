@@ -439,7 +439,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 				Enumeration entries = vecVersions.elements();
 				JavaVersionDBEntry versionEntry = null;
-				if (!JAPController.getInstance().hasPortableJava())
+				if (!JAPController.getInstance().hasPortableJava() &&
+					JAPModel.getInstance().isReminderForJavaUpdateActivated())
 				{
 					versionEntry = JavaVersionDBEntry.getNewJavaVersion();
 				}
@@ -2101,14 +2102,17 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				final JavaVersionDBEntry entry = (JavaVersionDBEntry) message.getMessageData();
 				if (JavaVersionDBEntry.isJavaTooOld(entry))
 				{
-					synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
+					if (JAPModel.getInstance().isReminderForJavaUpdateActivated())
 					{
-						if (m_updateAvailableID < 0)
+						synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
 						{
-							m_updateAvailableID = m_StatusPanel.addStatusMsg(
-								JAPMessages.getString(MSG_UPDATE),
-								JAPDialog.MESSAGE_TYPE_INFORMATION,
-								false, m_listenerUpdate);
+							if (m_updateAvailableID < 0)
+							{
+								m_updateAvailableID = m_StatusPanel.addStatusMsg(
+									JAPMessages.getString(MSG_UPDATE),
+									JAPDialog.MESSAGE_TYPE_INFORMATION,
+									false, m_listenerUpdate);
+							}
 						}
 					}
 
@@ -2607,6 +2611,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		if ( (vi != null && vi.getJapVersion() != null &&
 			  vi.getJapVersion().compareTo(JAPConstants.aktVersion) > 0) ||
 			 ( !JAPController.getInstance().hasPortableJava() &&
+			   JAPModel.getInstance().isReminderForJavaUpdateActivated() &&
 			   JavaVersionDBEntry.getNewJavaVersion() != null))
 		{
 			synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
