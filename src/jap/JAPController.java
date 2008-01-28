@@ -288,6 +288,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 			}
 		});
 
+		// set recover timeout
+		InfoServiceDBEntry.setJVMNetworkErrorHandling(new Runnable()
+		{
+			public void run()
+			{
+				JAPController.getInstance().goodBye(false);
+			}
+		},
+			JAPConstants.TIME_RESTART_AFTER_SOCKET_ERROR);
+
 		// initialise IS update threads
 		m_feedback = new JAPFeedback();
 		m_AccountUpdater = new AccountUpdater();

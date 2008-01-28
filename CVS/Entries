@@ -1,5 +1,4 @@
 /.classpath/1.14/Mon Nov  5 14:09:26 2007//
-/.cvsignore/1.19/Thu May  3 15:46:48 2007//
 /.project/1.1/Fri Sep  9 08:07:30 2005//
 /All.jpx/1.24/Mon Apr  9 10:32:29 2007//
 /BezahlInstanz.jpx/1.18/Thu Apr 19 07:58:43 2007//
@@ -16,7 +15,6 @@ D/JAPDll////
 D/Rijndael////
 /StatusWebMixe.txt/1.9/Tue May 29 15:46:36 2001//
 D/anon////
-/build.xml/1.65/Thu Nov  8 19:04:47 2007//
 D/certificates////
 /changelogJAP_de.txt/1.2/Wed Aug 30 08:59:50 2006//
 /changelogJAP_en.txt/1.2/Wed Aug 30 08:59:50 2006//
@@ -45,3 +43,6 @@ D/src////
 D/test////
 D/tor////
 D/update////
+/build.xml/1.66/Fri Jan 25 10:30:07 2008//
+D/build////
+/.cvsignore/1.20/Fri Jan 25 18:56:50 2008//

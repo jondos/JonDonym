@@ -27,8 +27,6 @@
 /JAPConfTrust.java/1.4/Sun Dec  3 22:07:24 2006//
 /JAPConfUI.java/1.51/Mon Jan 14 14:54:27 2008//
 /JAPConfUpdate.java/1.32/Fri Sep  7 18:13:48 2007//
-/JAPConstants.java/1.934/Mon Jan 14 15:06:33 2008//
-/JAPController.java/1.411/Wed Nov 28 13:27:55 2007//
 /JAPControllerMessage.java/1.3/Mon Nov 27 23:12:48 2006//
 /JAPDebug.java/1.23/Sun Jul 29 14:25:50 2007//
 /JAPFeedback.java/1.24/Tue Oct 24 07:59:28 2006//
@@ -36,7 +34,6 @@
 /JAPInfoServiceListModel.java/1.2/Fri Feb 11 16:17:18 2005//
 /JAPMixCascadeComboBox.java/1.15/Fri Sep 14 20:02:41 2007//
 /JAPModel.java/1.110/Sun Oct 21 20:18:55 2007//
-/JAPNewView.java/1.232/Fri Nov  2 13:35:00 2007//
 /JAPObserver.java/1.6/Thu Sep  7 12:08:39 2006//
 /JAPSplash.java/1.19/Wed Oct 24 18:53:38 2007//
 /JAPUtil.java/1.43/Fri Aug 17 17:36:24 2007//
@@ -55,3 +52,7 @@
 D/forward////
 D/pay////
 D/platform////
+/.cvsignore/1.1/Fri Jan 25 16:56:50 2008//
+/JAPController.java/1.412/Fri Jan 25 12:17:02 2008//
+/JAPNewView.java/1.233/Fri Jan 25 15:49:00 2008//
+/JAPConstants.java/1.937/Fri Jan 25 19:14:11 2008//
