@@ -295,6 +295,7 @@ public final class AnonProxyRequest implements Runnable
 				// "+Integer.toString(m_Channel.hashCode())+" Request Len: "+re+" Read:
 				// "+len);
 				m_Proxy.transferredBytes(len - aktPos, m_iProtocol);
+				Thread.yield();
 			}
 		}
 		catch (Exception e)
@@ -380,6 +381,7 @@ public final class AnonProxyRequest implements Runnable
 						}
 					}
 					m_Proxy.transferredBytes(len, m_iProtocol);
+					Thread.yield();
 				}
 			}
 			catch (Exception e)
