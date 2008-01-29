@@ -20,3 +20,4 @@ classes
 InfoService_update.log
 .svn
 build
+.classpath
