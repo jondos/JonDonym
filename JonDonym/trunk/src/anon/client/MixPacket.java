@@ -82,8 +82,16 @@ public class MixPacket {
     /* read the packet from the origin stream */
     byte[] rawPacket = new byte[PACKET_SIZE];
     DataInputStream sourceStream = new DataInputStream(a_inputStream);
-    sourceStream.readFully(rawPacket);
-    /* do stream-decryption */
+    try 
+    {
+    	sourceStream.readFully(rawPacket);
+    }
+    catch(EOFException eofe)
+    {
+    	LogHolder.log(LogLevel.WARNING, LogType.NET, Thread.currentThread().getName()+": received a truncated packet from a mix: ", e);
+    	throw eofe;
+    }
+    	/* do stream-decryption */
     if (a_inputStreamCipher != null) {
       a_inputStreamCipher.encryptAES(rawPacket, 0, rawPacket, 0, 16);
     }
