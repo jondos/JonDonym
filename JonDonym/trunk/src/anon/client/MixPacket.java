@@ -35,10 +35,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Vector;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 import anon.client.crypto.SymCipher;
 
@@ -88,7 +93,7 @@ public class MixPacket {
     }
     catch(EOFException eofe)
     {
-    	LogHolder.log(LogLevel.WARNING, LogType.NET, Thread.currentThread().getName()+": received a truncated packet from a mix: ", e);
+    	LogHolder.log(LogLevel.WARNING, LogType.NET, Thread.currentThread().getName()+": received a truncated packet from a mix: ", eofe);
     	throw eofe;
     }
     	/* do stream-decryption */
