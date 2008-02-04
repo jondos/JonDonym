@@ -30,6 +30,10 @@ package anon.pay.xml;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -173,6 +177,7 @@ public class XMLAccountInfo implements IXMLEncodable //extends XMLDocument
 	{
 		if (!elemRoot.getTagName().equals("AccountInfo"))
 		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, "invalid XML structure: "+XMLUtil.toString(elemRoot));
 			throw new Exception("XMLAccountInfo wrong XML structure");
 		}
 		Element elemBalance = (Element) XMLUtil.getFirstChildByName(elemRoot, "Balance");
