@@ -943,7 +943,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 								/** @todo handling for other error situations */
 							}
 							if (a_e instanceof SocketException && a_e.getMessage() != null &&
-								a_e.getMessage().indexOf("JVM_GetSockName failed") >= 0)
+								//a_e.getMessage().indexOf("JVM_GetSockName failed") >= 0)
+								a_e.getMessage().toLowerCase().indexOf("getsockname") >= 0)
 							{
 								/**
 								 * This is a really bad error - the JVM cannot get in contact with the network layer.
