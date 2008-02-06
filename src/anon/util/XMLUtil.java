@@ -1186,6 +1186,11 @@ public class XMLUtil
 				XMLParseException.ROOT_TAG, "Could not parse XML document: " + ex.getMessage());
 		}
 	}
+	
+	public static Document toXMLDocument(char[] a_xmlDocument) throws XMLParseException
+	{
+		return toXMLDocument(new String(a_xmlDocument));
+	}
 
 	/**
 	 * Transforms a byte array into an XML document. The byte array must be
