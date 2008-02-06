@@ -56,7 +56,13 @@ public class XMLDescription implements IXMLEncodable // extends XMLDocument
 		Document doc = XMLUtil.toXMLDocument(data);
 		setValues(doc);
 	}
-
+	
+	public XMLDescription(char[] data) throws Exception
+	{
+		Document doc = XMLUtil.toXMLDocument(data);
+		setValues(doc);
+	}
+	
 	public XMLDescription(String data) throws Exception
 	{
 		m_strDescription = data;

@@ -172,7 +172,12 @@ public class XMLEmail implements IXMLEncodable
 		setValues(doc.getDocumentElement());
 		m_docTheEmail = doc;
 	}
-
+	
+	public XMLEmail(char[] xmldata) throws Exception
+	{
+		this(new String(xmldata));
+	}
+	
 	public XMLEmail(byte[] xmldata) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xmldata);

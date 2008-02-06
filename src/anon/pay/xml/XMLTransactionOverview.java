@@ -79,7 +79,12 @@ public class XMLTransactionOverview implements IXMLEncodable
 	{
 		m_language = a_language;
 	}
-
+	
+	public XMLTransactionOverview(char[] xml) throws Exception
+	{
+		this(new String(xml));
+	}
+	
 	public XMLTransactionOverview(byte[] xml) throws Exception
 	{
 		Document doc = XMLUtil.toXMLDocument(xml);
