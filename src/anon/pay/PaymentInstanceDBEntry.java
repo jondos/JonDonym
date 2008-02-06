@@ -129,9 +129,10 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 
 		/* get the ID */
 		m_strPaymentInstanceId = elemRoot.getAttribute(XML_ATTR_ID);
-		checkId();
-
-
+		if(!checkId() ) {
+			throw new XMLParseException(elemRoot.getNodeName(),"Invalid Payment-Instance ID: " + m_strPaymentInstanceId );
+		}
+			
 		m_name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, XML_ELEM_NAME), "");
 
 		/* get the creation timestamp */
