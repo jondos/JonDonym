@@ -99,7 +99,12 @@ public class XMLPassivePayment implements IXMLEncodable
 	{
 		setValues(XMLUtil.toXMLDocument(xml).getDocumentElement());
 	}
-
+	
+	public XMLPassivePayment(char[] xml) throws XMLParseException
+	{
+		this(new String(xml));
+	}
+	
 	/**
 	 * Constructor. Creates object from an XML bytearray .
 	 * @param xml byte[]

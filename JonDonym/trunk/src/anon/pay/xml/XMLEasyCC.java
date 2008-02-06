@@ -117,7 +117,12 @@ public class XMLEasyCC implements IXMLEncodable
 		setValues(doc.getDocumentElement());
 		m_docTheEasyCC = doc;
 	}
-
+	
+	public XMLEasyCC(char[] data) throws Exception
+	{
+		this(new String(data));
+	}
+	
 	public XMLEasyCC(Element xml) throws Exception
 	{
 		//System.out.println(XMLUtil.toString(xml)  + "\n");

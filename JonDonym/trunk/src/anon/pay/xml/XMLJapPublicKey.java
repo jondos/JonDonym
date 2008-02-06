@@ -80,12 +80,17 @@ public class XMLJapPublicKey implements IXMLEncodable //extends XMLDocument
 		setPubKey(doc.getDocumentElement());
 	}
 
+	public XMLJapPublicKey(char[] data) throws Exception
+	{
+		this(new String(data));
+	}
+	
 	public XMLJapPublicKey(String data) throws Exception
 	{
         Document doc = XMLUtil.toXMLDocument(data);
 		setPubKey(doc.getDocumentElement());
 	}
-
+	
 	public XMLJapPublicKey(Element elemKey) throws Exception
 	{
 		setPubKey(elemKey);

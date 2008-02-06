@@ -72,7 +72,12 @@ public class XMLTransferRequest implements IXMLEncodable
 		setValues(doc.getDocumentElement());
 		m_docTheRequest = doc;
 	}
-
+	
+	public XMLTransferRequest(char[] xmldata) throws Exception
+	{
+		this(new String(xmldata));
+	}
+	
 	public XMLTransferRequest(byte[] xmldata) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xmldata);

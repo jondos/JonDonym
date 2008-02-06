@@ -195,7 +195,12 @@ public class XMLPriceCertificate implements IXMLEncodable
 		m_docThePriceCert = doc;
 		m_hashValue = XMLSignature.getHashValueOfElement(m_docThePriceCert);
 	}
-
+	
+	public XMLPriceCertificate(char[] xmldata) throws Exception
+	{
+		this(new String(xmldata));
+	}
+	
 	public XMLPriceCertificate(byte[] xmldata) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xmldata);

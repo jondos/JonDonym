@@ -62,7 +62,12 @@ public class XMLExternalChargeRequest implements IXMLEncodable
 		Document doc = XMLUtil.toXMLDocument(xml);
 		setValues(doc.getDocumentElement());
 	}
-
+	
+	public XMLExternalChargeRequest(char[] xml) throws Exception
+	{
+		this(new String(xml));
+	}
+	
 	public XMLExternalChargeRequest(byte[] xml) throws Exception
 	{
 		setValues(XMLUtil.toXMLDocument(xml).getDocumentElement());

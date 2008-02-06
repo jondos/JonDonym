@@ -69,7 +69,12 @@ public class XMLBankAccount implements IXMLEncodable
 		m_docTheBankAccount = XMLUtil.createDocument();
 		m_docTheBankAccount.appendChild(internal_toXmlElement(m_docTheBankAccount));
 	}
-
+	
+	public XMLBankAccount(char[] xml) throws Exception
+	{
+		this(new String(xml));
+	}
+	
 	public XMLBankAccount(String type, String details, String operatorCert)
 	{
 		m_type = type;
