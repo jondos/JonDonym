@@ -263,7 +263,7 @@
   </target>
 	
 	
-	<target name="infoservice-init" depends="clean" 
+	<target name="infoservice-init"
 			description="initializes folder structure for infoservice distribution">
 		<mkdir dir="${build}" />
 		<mkdir dir="${build}/infoservice" />
