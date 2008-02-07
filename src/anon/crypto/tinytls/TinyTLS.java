@@ -277,7 +277,7 @@ public class TinyTLS extends Socket
 				}
 				catch(EOFException eofe) {
 					/*Important: this method has to be meet the API specification of method InputStream.read
-					 * and hence return -1 if EOF occurs. readrecord() invokes readByte which throws EOFException in this case.
+					 * and hence return -1 if EOF occurs. readRecord() invokes readByte which throws EOFException in this case.
 					 */
 					return -1;
 				}
