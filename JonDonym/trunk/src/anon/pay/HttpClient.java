@@ -80,14 +80,14 @@ final public class HttpClient
 		/*SK13 removed because not Java 1.1. */
 		//	m_socket.shutdownInput();
 		//  m_socket.shutdownOutput();
-		if(m_reader != null)
+		/*if(m_reader != null)
 		{
 			m_reader.close();
 		}
 		if(m_OS != null)
 		{
 			m_OS.close();
-		}
+		}*/
 		if(m_socket != null)
 		{
 			m_socket.close();
