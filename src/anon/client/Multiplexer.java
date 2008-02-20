@@ -54,6 +54,8 @@ public class Multiplexer extends Observable implements Runnable
 	private Vector m_sendJobQueue;
 	private Vector m_controlMessageQueue;
 
+	private Object m_waitQueueObject;
+	
 	private ChannelTable m_channelTable;
 
 	private InputStream m_inputStream;
@@ -72,6 +74,7 @@ public class Multiplexer extends Observable implements Runnable
 		m_internalEventSynchronization = new Object();
 		m_sendJobQueue = new Vector();
 		m_controlMessageQueue = new Vector();
+		m_waitQueueObject = new Object();
 		
 		m_channelTable = new ChannelTable(new DefaultDataChannelFactory(a_keyExchangeManager, this),
 										  a_channelIdGenerator);
@@ -87,41 +90,40 @@ public class Multiplexer extends Observable implements Runnable
 	public void sendPacket(MixPacket a_mixPacket) throws IOException
 	{
 		Object ownSynchronizationObject = new Object();
-		Vector waitQueue;
-		/*boolean coChPacket = false;
-		if (m_channelTable.isControlChannelId(a_mixPacket.getChannelId()))
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.NET,
-					  "Received a control channel packet for channel '" +
-					  Integer.toString(a_mixPacket.getChannelId()) + "'.");
-			coChPacket = true;
-		}*/
+		boolean coChPacket = m_channelTable.isControlChannelId(a_mixPacket.getChannelId());
+		Vector waitQueue = coChPacket ? m_controlMessageQueue : m_sendJobQueue;;
 		
 		synchronized (ownSynchronizationObject)
 		{
 			boolean waitForAccess = false;
-			/* Different waitQueues for control and data channel packets */
-			waitQueue = m_channelTable.isControlChannelId(a_mixPacket.getChannelId()) ?
-								m_controlMessageQueue :
-								m_sendJobQueue;
-			
-			//synchronized (m_sendJobQueue)
-			synchronized (waitQueue)
+						
+			synchronized (m_waitQueueObject)
 			{
-				//m_sendJobQueue.addElement(ownSynchronizationObject);
 				waitQueue.addElement(ownSynchronizationObject);
-				/*if(coChPacket)
+				
+				if(!coChPacket)
 				{
-					LogHolder.log(LogLevel.WARNING, LogType.NET,
-							//m_sendJobQueue.size() + " to be handled before control channel packet" +
-							waitQueue.size() + " to be handled before control channel packet" +
-								Integer.toString(a_mixPacket.getChannelId()) + "'.");
-				}*/
-				//if (m_sendJobQueue.size() > 1)
-				if (waitQueue.size() > 1)
+					if((m_controlMessageQueue.size() > 1) 
+					|| (m_sendJobQueue.size() > 1)	)
+					{
+						/* data channel packets have to wait until 
+						 * control channel packets are processed
+						 */
+						waitForAccess = true;
+					}
+				}
+				else
 				{
-					/* we have to wait until the socket is available for our job */
-					waitForAccess = true;
+					if (m_controlMessageQueue.size() > 1)
+					{
+						/* control channel packets have higher priority and are processed 
+						 * before any data traffic can be transmitted so cost confirmations 
+						 * can be delivered at time in case of data congestion.
+						 */
+						waitForAccess = true;
+						LogHolder.log(LogLevel.WARNING, LogType.NET,
+								  "Control channel congestion");
+					}
 				}
 			}
 			if (waitForAccess)
@@ -134,24 +136,31 @@ public class Multiplexer extends Observable implements Runnable
 				{
 					/* stop waiting, if we get interrupted and remove ourself from the send-queue */
 					Object nextLockObject = null;
-					//synchronized (m_sendJobQueue)
-					synchronized (waitQueue)
+					synchronized (m_waitQueueObject)
 					{
 						//if (m_sendJobQueue.indexOf(ownSynchronizationObject) == 0)
 						if (waitQueue.indexOf(ownSynchronizationObject) == 0)
 						{
-							/* just in this moment we should get notified -> notify the next waiting
-							 * thread, if there is one
-							 */
-							//if (m_sendJobQueue.size() > 1)
-							if (waitQueue.size() > 1)
+							/*control channel messages have higher priority */
+							if ( (coChPacket && (m_controlMessageQueue.size() > 1)) ||		
+								 (!coChPacket && (m_controlMessageQueue.size() > 0)) )
 							{
-								/* there are more threads waiting to send packets */
-								//nextLockObject = m_sendJobQueue.elementAt(1);
-								nextLockObject = waitQueue.elementAt(1);
+								/* first wake up control channel packets */
+								nextLockObject = m_controlMessageQueue.elementAt(1);
+							}
+							else 
+							{
+								/* just in this moment we should get notified -> notify the next waiting
+								 * thread, if there is one
+								 */
+								if ( (!coChPacket && (m_sendJobQueue.size() > 1)) ||		
+									 (coChPacket && (m_sendJobQueue.size() > 0)) )
+								{
+									/* there are more threads waiting to send packets */
+									nextLockObject = m_sendJobQueue.elementAt(1);
+								}
 							}
 						}
-						//m_sendJobQueue.removeElement(ownSynchronizationObject);
 						waitQueue.removeElement(ownSynchronizationObject);
 					}
 					if (nextLockObject != null)
@@ -190,7 +199,7 @@ public class Multiplexer extends Observable implements Runnable
 			synchronized (m_internalEventSynchronization)
 			{
 				setChanged();
-				if (m_channelTable.isControlChannelId(a_mixPacket.getChannelId()))
+				if (coChPacket)
 				{
 					/* we've sent a packet on a control channel */
 					notifyObservers(new PacketProcessedEvent(PacketProcessedEvent.CODE_CONTROL_PACKET_SENT));
@@ -207,19 +216,27 @@ public class Multiplexer extends Observable implements Runnable
 			/* always wake up the next waiting thread */
 			Object nextLockObject = null;
 			
-			//synchronized (m_sendJobQueue)
-			synchronized (waitQueue)
+			synchronized (m_waitQueueObject)
 			{
 				/* remove our lock-object from the job-queue */
-				//m_sendJobQueue.removeElementAt(0);
 				waitQueue.removeElementAt(0);
 				
-				//if (m_sendJobQueue.size() > 0)
-				if (waitQueue.size() > 0)
+				/* first handle control channel packets that have higher priority */
+				if (m_controlMessageQueue.size() > 0)
 				{
 					/* there are more threads waiting to send packets */
-					//nextLockObject = m_sendJobQueue.firstElement();
-					nextLockObject = waitQueue.firstElement();
+					nextLockObject = m_controlMessageQueue.firstElement();
+				}
+				else
+				{
+					/* if there no control channel packets to be processed wake
+					 * up other Threads for data transmission
+					 */
+					if (m_sendJobQueue.size() > 0)
+					{
+						/* there are more threads waiting to send packets */
+						nextLockObject = m_sendJobQueue.firstElement();
+					}
 				}
 			}
 			if (nextLockObject != null)
