@@ -52,6 +52,7 @@ public class Multiplexer extends Observable implements Runnable
 {
 
 	private Vector m_sendJobQueue;
+	private Vector m_controlMessageQueue;
 
 	private ChannelTable m_channelTable;
 
@@ -70,6 +71,8 @@ public class Multiplexer extends Observable implements Runnable
 	{
 		m_internalEventSynchronization = new Object();
 		m_sendJobQueue = new Vector();
+		m_controlMessageQueue = new Vector();
+		
 		m_channelTable = new ChannelTable(new DefaultDataChannelFactory(a_keyExchangeManager, this),
 										  a_channelIdGenerator);
 		m_inputStream = a_inputStream;
@@ -84,13 +87,38 @@ public class Multiplexer extends Observable implements Runnable
 	public void sendPacket(MixPacket a_mixPacket) throws IOException
 	{
 		Object ownSynchronizationObject = new Object();
+		Vector waitQueue;
+		/*boolean coChPacket = false;
+		if (m_channelTable.isControlChannelId(a_mixPacket.getChannelId()))
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.NET,
+					  "Received a control channel packet for channel '" +
+					  Integer.toString(a_mixPacket.getChannelId()) + "'.");
+			coChPacket = true;
+		}*/
+		
 		synchronized (ownSynchronizationObject)
 		{
 			boolean waitForAccess = false;
-			synchronized (m_sendJobQueue)
+			/* Different waitQueues for control and data channel packets */
+			waitQueue = m_channelTable.isControlChannelId(a_mixPacket.getChannelId()) ?
+								m_controlMessageQueue :
+								m_sendJobQueue;
+			
+			//synchronized (m_sendJobQueue)
+			synchronized (waitQueue)
 			{
-				m_sendJobQueue.addElement(ownSynchronizationObject);
-				if (m_sendJobQueue.size() > 1)
+				//m_sendJobQueue.addElement(ownSynchronizationObject);
+				waitQueue.addElement(ownSynchronizationObject);
+				/*if(coChPacket)
+				{
+					LogHolder.log(LogLevel.WARNING, LogType.NET,
+							//m_sendJobQueue.size() + " to be handled before control channel packet" +
+							waitQueue.size() + " to be handled before control channel packet" +
+								Integer.toString(a_mixPacket.getChannelId()) + "'.");
+				}*/
+				//if (m_sendJobQueue.size() > 1)
+				if (waitQueue.size() > 1)
 				{
 					/* we have to wait until the socket is available for our job */
 					waitForAccess = true;
@@ -106,20 +134,25 @@ public class Multiplexer extends Observable implements Runnable
 				{
 					/* stop waiting, if we get interrupted and remove ourself from the send-queue */
 					Object nextLockObject = null;
-					synchronized (m_sendJobQueue)
+					//synchronized (m_sendJobQueue)
+					synchronized (waitQueue)
 					{
-						if (m_sendJobQueue.indexOf(ownSynchronizationObject) == 0)
+						//if (m_sendJobQueue.indexOf(ownSynchronizationObject) == 0)
+						if (waitQueue.indexOf(ownSynchronizationObject) == 0)
 						{
 							/* just in this moment we should get notified -> notify the next waiting
 							 * thread, if there is one
 							 */
-							if (m_sendJobQueue.size() > 1)
+							//if (m_sendJobQueue.size() > 1)
+							if (waitQueue.size() > 1)
 							{
 								/* there are more threads waiting to send packets */
-								nextLockObject = m_sendJobQueue.elementAt(1);
+								//nextLockObject = m_sendJobQueue.elementAt(1);
+								nextLockObject = waitQueue.elementAt(1);
 							}
 						}
-						m_sendJobQueue.removeElement(ownSynchronizationObject);
+						//m_sendJobQueue.removeElement(ownSynchronizationObject);
+						waitQueue.removeElement(ownSynchronizationObject);
 					}
 					if (nextLockObject != null)
 					{
@@ -136,6 +169,7 @@ public class Multiplexer extends Observable implements Runnable
 				}
 			}
 		}
+		
 		/* first call all SendCallbackHandlers to finalize the packet */
 		Enumeration sendCallbackHandlers = a_mixPacket.getSendCallbackHandlers().elements();
 		while (sendCallbackHandlers.hasMoreElements())
@@ -172,14 +206,20 @@ public class Multiplexer extends Observable implements Runnable
 		{
 			/* always wake up the next waiting thread */
 			Object nextLockObject = null;
-			synchronized (m_sendJobQueue)
+			
+			//synchronized (m_sendJobQueue)
+			synchronized (waitQueue)
 			{
 				/* remove our lock-object from the job-queue */
-				m_sendJobQueue.removeElementAt(0);
-				if (m_sendJobQueue.size() > 0)
+				//m_sendJobQueue.removeElementAt(0);
+				waitQueue.removeElementAt(0);
+				
+				//if (m_sendJobQueue.size() > 0)
+				if (waitQueue.size() > 0)
 				{
 					/* there are more threads waiting to send packets */
-					nextLockObject = m_sendJobQueue.firstElement();
+					//nextLockObject = m_sendJobQueue.firstElement();
+					nextLockObject = waitQueue.firstElement();
 				}
 			}
 			if (nextLockObject != null)
