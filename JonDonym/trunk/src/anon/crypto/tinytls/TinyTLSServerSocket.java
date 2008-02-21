@@ -263,14 +263,14 @@ public class TinyTLSServerSocket extends Socket
 		{
 			while (m_aktPendLen < 1)
 			{
-				try 
-				{
+				/*try 
+				{*/
 					readRecord();
-				}
+				/*}
 				catch (EOFException eofe)
 				{
 					return -1;
-				}
+				}*/
 				try
 				{
 					switch (m_aktTLSRecord.getType())
