@@ -80,14 +80,6 @@ final public class HttpClient
 		/*SK13 removed because not Java 1.1. */
 		//	m_socket.shutdownInput();
 		//  m_socket.shutdownOutput();
-		/*if(m_reader != null)
-		{
-			m_reader.close();
-		}
-		if(m_OS != null)
-		{
-			m_OS.close();
-		}*/
 		if(m_socket != null)
 		{
 			m_socket.close();
@@ -202,7 +194,6 @@ final public class HttpClient
 					break;
 				}
 				pos += ret;
-				String str = new String(data);
 			}
 			while (pos < contentLength);
 		}
@@ -227,43 +218,4 @@ final public class HttpClient
 		}
 		return XMLUtil.toXMLDocument(data);
 	}
-
-	/**
-	 * Hilfsfunktion zum Einlesen einer Textzeile.
-	 *
-	 * @param inputStream Eingabedatenstrom
-	 * @return Textzeile
-	 * @throws IOException
-	 * @deprecated This method doesn't work because readByte throws EOFExcpetion instead of returning -1 when EOF occurs
-	 * 				Use readLine method of BufferedReader instead.
-	 */
-	private String readLine(DataInputStream inputStream) throws IOException
-	{
-		
-		StringBuffer buff = new StringBuffer(256);
-		int count = 0;
-		try
-		{
-			int byteRead = inputStream.readByte();
-			while (byteRead != 10 && byteRead != -1)
-			{
-				if (byteRead != 13)
-				{
-					count++;
-					if (count > MAX_LINE_LENGTH)
-					{
-						throw new IOException("line to long");
-					}
-					buff.append( (char) byteRead);
-				}
-				byteRead = inputStream.read();
-			}
-		}
-		catch (IOException e)
-		{
-			throw e;
-		}
-		return buff.toString();
-	}
-
 }
