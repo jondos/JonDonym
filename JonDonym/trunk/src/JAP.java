@@ -178,6 +178,7 @@ public class JAP
 			System.out.println("Usage:");
 			System.out.println("--help, -h:                  Show this text.");
 			System.out.println("--console:                   Start JAP/JonDo in console-only mode.");
+			System.out.println("--allow-multiple, -a         Allow JAP to start multiple instances.");
 			System.out.println("--minimized, -m:             Minimize JAP/JonDo on startup.");
 			System.out.println("--version, -v:               Print version information.");
 			System.out.println("--showDialogFormat           Show and set dialog format options.");
@@ -200,18 +201,22 @@ public class JAP
 			bConsoleOnly = true;
 		}
 		
-		Vector activeVMs = AbstractOS.getInstance().getActiveVMs();
-		Object vm;
-		int numJAPInstances = 0;
-		for(int i = 0; i < activeVMs.size(); i++)
+		if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
 		{
-			vm = activeVMs.get(i);
-			if(vm != null && vm.toString() != null && vm.toString().equals("JAP")) numJAPInstances++;
-			if(numJAPInstances > 1)
+			// Try to decect running instances of JAP
+			Vector activeVMs = AbstractOS.getInstance().getActiveVMs();
+			Object vm;
+			int numJAPInstances = 0;
+			for(int i = 0; i < activeVMs.size(); i++)
 			{
-				// multiple instances of JAP have been started, what to do?
-				System.out.println("Multiple instances running... exiting.");
-				System.exit(0);
+				vm = activeVMs.get(i);
+				if(vm != null && vm.toString() != null && vm.toString().equals("JAP")) numJAPInstances++;
+				if(numJAPInstances > 1)
+				{
+					// multiple instances of JAP have been started, what to do?
+					System.out.println("Multiple instances running... exiting.");
+					System.exit(0);
+				}
 			}
 		}
 		
