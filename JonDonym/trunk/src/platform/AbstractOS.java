@@ -30,10 +30,13 @@ package platform;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.net.URL;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
@@ -103,7 +106,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		// This class will only be usable on some java runtimes
 		private boolean m_bUsable = false;
-		private sun.misc.Perf m_perf;
+		private Object m_perf;
 		
 		private int m_nextEntry;
 		private int m_numEntries;
@@ -114,29 +117,40 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		private static final int PERFDATA_ACCESSIBLE_POSITION = 7;
 		private static final int PERFDATA_ENTRYOFFSET_POSITION = 24;
 		private static final int PERFDATA_NUMENTRIES_POSITION = 28;
+		private static final int PERFDATA_MAGIC = 0xcafec0c0;
 		
-		// TODO: to change
 		public int m_vmId;
 		
 		public VMPerfDataFile(int a_vmId)
 		{
-			// SUN SUN SUN SUN SUN SUN 
-			// TODO: use reflection API
-			
 			m_vmId = a_vmId;
 			
 			try
 			{
+				/* 
+				Code without reflections:
+				
 				m_perf = (sun.misc.Perf) AccessController.doPrivileged(new sun.misc.Perf.GetPerfAction());
 				m_buff = m_perf.attach(a_vmId, "r");
+				*/
+				
+				Class perfAction = Class.forName("sun.misc.Perf$GetPerfAction");
+				Constructor c = perfAction.getConstructor();
+				
+				m_perf = AccessController.doPrivileged((PrivilegedAction) c.newInstance());
+				Method m = m_perf.getClass().getMethod("attach", new Class[] { int.class, String.class } );
+				m_buff = (ByteBuffer) m.invoke(m_perf, new Object[] { a_vmId, "r" } );
+				
+				if(m_buff == null) return;
 			}
-			catch(Exception ex) { }
-			
-			if(getMagic() != 0xcafec0c0)
+			catch(Exception ex)
 			{
-				m_bUsable = false;
+				ex.printStackTrace();
 				return;
 			}
+			
+			if(getMagic() != PERFDATA_MAGIC)
+				return;
 			
 			m_buff.order(getByteOrder());
 			m_bUsable = buildEntries();
@@ -144,6 +158,8 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		synchronized private boolean buildEntries()
 		{
+			if(m_buff == null) return false;
+			
 			// Sync with target VM, timeout is 1 second			
 			long timeout = System.currentTimeMillis() + 5000;
 			
@@ -173,6 +189,8 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		synchronized private boolean buildNextEntry()
 		{
+			if(m_buff == null) return false;
+			
 			// nextEntry MOD 4 must be 0
 			if(m_nextEntry % 4 != 0) return false;
 			
@@ -211,7 +229,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			}
 			else
 			{
-				// only parse string objects
+				// only parse string objects (typeCode = byte and units = STRING)
 				if(typeCode == 'B' && units == 5)
 				{
 					bytes = new byte[vectorLen];
@@ -223,7 +241,6 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 					
 					m_tblEntries.put(name, value);
 				}
-				
 			}
 			
 			m_nextEntry += entryLength;
@@ -233,13 +250,18 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		private boolean isAccessible()
 		{
+			if(m_buff == null) return false;
+			
 			m_buff.position(PERFDATA_ACCESSIBLE_POSITION);
 			byte value = m_buff.get();
+				
 			return value != 0;
 		}
 		
 		private int getMagic()
 		{
+			if(m_buff == null) return 0;
+			
 			ByteOrder order = m_buff.order();
 			m_buff.order(ByteOrder.BIG_ENDIAN);
 			
@@ -253,6 +275,8 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		private ByteOrder getByteOrder()
 		{
+			if(m_buff == null) return ByteOrder.BIG_ENDIAN;
+			
 			m_buff.position(PERFDATA_BYTEORDER_POSITION);
 			
 			byte order = m_buff.get();
@@ -265,12 +289,15 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		public String getMainClass()
 		{
+			if(!m_bUsable) return null;
+			
 			String value = (String) m_tblEntries.get("sun.rt.javaCommand");
 			if(value != null)
 			{
 				int i = value.indexOf(' ');
 				if(i > 0)
 					return value.substring(0, i);
+				else return value;					
 			}
 			
 			return null;
@@ -285,8 +312,6 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		{
 			return m_bUsable;
 		}
-		
-		
 	}
 
 	public static interface IURLOpener
@@ -468,8 +493,6 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	 */
 	public Vector getActiveVMs()
 	{
-		// TODO: check for Sun VM
-		
 		Vector r_vms = new Vector();
 		int id = 0;
 		
@@ -505,12 +528,8 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 					{
 						try 
 						{
-							if((id = Integer.parseInt(files[j].getName())) != 0) {
-								//r_ids.add(id);
+							if((id = Integer.parseInt(files[j].getName())) != 0)
 								r_vms.add(new VMPerfDataFile(id));
-								//getClassName(id);
-								
-							}
 						} 
 						catch(NumberFormatException e) { }
 					}
