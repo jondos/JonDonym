@@ -119,6 +119,8 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		private static final int PERFDATA_NUMENTRIES_POSITION = 28;
 		private static final int PERFDATA_MAGIC = 0xcafec0c0;
 		
+		private static final int PERFDATA_SYNC_TIMEOUT = 1000;
+		
 		public int m_vmId;
 		
 		public VMPerfDataFile(int a_vmId)
@@ -143,11 +145,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 				
 				if(m_buff == null) return;
 			}
-			catch(Exception ex)
-			{
-				ex.printStackTrace();
-				return;
-			}
+			catch(Exception ex) { return; }
 			
 			if(getMagic() != PERFDATA_MAGIC)
 				return;
@@ -160,8 +158,8 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		{
 			if(m_buff == null) return false;
 			
-			// Sync with target VM, timeout is 1 second			
-			long timeout = System.currentTimeMillis() + 5000;
+			// Sync with target VM		
+			long timeout = System.currentTimeMillis() + PERFDATA_SYNC_TIMEOUT;
 			
 			while(!isAccessible())
 			{
@@ -204,9 +202,15 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			int offsetName = m_buff.getInt();
 			int vectorLen = m_buff.getInt();
 			byte typeCode = m_buff.get();
-			byte flags = m_buff.get();
+			
+			// flags - not used
+			m_buff.get();
+			
 			byte units = m_buff.get();
-			byte var = m_buff.get();
+			
+			// variability - not used
+			m_buff.get();
+			
 			int offsetData = m_buff.getInt();
 			
 			// include possible padding
@@ -220,14 +224,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			
 			String name = new String(bytes, 0, nameLength);
 			
-			int dataSize = entryLength - offsetData;
 			m_buff.position(m_nextEntry + offsetData);
 			
-			if(vectorLen == 0)
-			{
-				// don't parse scalar objects (yet)
-			}
-			else
+			
+			// we're only parsing non-scalar objects for now
+			if(vectorLen > 0)
 			{
 				// only parse string objects (typeCode = byte and units = STRING)
 				if(typeCode == 'B' && units == 5)
@@ -489,7 +490,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	/**
 	 * Returns a vector of all running VMs. This only works on the Sun VM
 	 * 
-	 * @return a vector of all running Virtual Mashine
+	 * @return a vector of all running Virtual Machines
 	 */
 	public Vector getActiveVMs()
 	{
@@ -499,7 +500,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		if(!ms_tmpDir.isDirectory())
 			return r_vms;
 		
-		// Each user on has a distinct directory named hsperfdata_(user) which contains all VM performance data
+		// Each user has a distinct directory named hsperfdata_(user) which contains all VM performance data
 		final Matcher matcher = Pattern.compile("hsperfdata_\\S*").matcher("");
 		FilenameFilter filter = new FilenameFilter() 
 		{
@@ -531,12 +532,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 							if((id = Integer.parseInt(files[j].getName())) != 0)
 								r_vms.add(new VMPerfDataFile(id));
 						} 
-						catch(NumberFormatException e) { }
+						catch(NumberFormatException e) { continue; }
 					}
 				}
 			}
 		}
-		
 		
 		return r_vms;		
 	}
