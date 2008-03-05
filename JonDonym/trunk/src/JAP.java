@@ -203,7 +203,7 @@ public class JAP
 		
 		if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
 		{
-			// Try to decect running instances of JAP
+			// Try to detect running instances of JAP
 			Vector activeVMs = AbstractOS.getInstance().getActiveVMs();
 			Object vm;
 			int numJAPInstances = 0;
@@ -214,7 +214,7 @@ public class JAP
 				if(numJAPInstances > 1)
 				{
 					// multiple instances of JAP have been started, what to do?
-					System.out.println("Multiple instances running... exiting.");
+					System.out.println("There is already an instance of JAP running.");
 					System.exit(0);
 				}
 			}
