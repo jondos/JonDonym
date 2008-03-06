@@ -210,7 +210,7 @@ public class JAP
 			for(int i = 0; i < activeVMs.size(); i++)
 			{
 				vm = activeVMs.get(i);
-				if(vm != null && vm.toString() != null && (vm.toString().equals("JAP")) || vm.toString().equals("JAPMacintosh")) numJAPInstances++;
+				if(vm != null && vm.toString() != null && (vm.toString().equals("JAP")) || vm.toString().equals("JAP.jar") || vm.toString().equals("JAPMacintosh")) numJAPInstances++;
 				if(numJAPInstances > 1)
 				{
 					// multiple instances of JAP have been started, what to do?
