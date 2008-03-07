@@ -27,12 +27,16 @@
  */
 package anon.util;
 
+import jap.TrustModel;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.Vector;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
+
+import anon.infoservice.MixCascade;
 
 public final class Util
 {
@@ -383,6 +387,49 @@ public final class Util
 			quicksort(a_IDs, a_values, a_left, divisor - 1);
 			quicksort(a_IDs, a_values, divisor + 1, a_right);
 		}
+	}
+	
+	public interface Comparable
+	{
+		public int compare(Object a_obj1, Object a_obj2);
+	}
+	
+	public static void sort(Vector a_vec, Comparable c)
+	{
+		if(a_vec != null)
+			quicksort(a_vec, 0, a_vec.size() - 1, c);
+	}
+	
+	private static int divide(Vector a_mixCascades, int a_left, int a_right, Comparable c)
+	{
+		int index = a_left;
+		for (int pointer = a_left; pointer < a_right; pointer++)
+		{
+			if (c.compare((MixCascade)a_mixCascades.elementAt(pointer), (MixCascade)a_mixCascades.elementAt(a_right)) <= 0)
+			{
+				swap(a_mixCascades, index, pointer);
+				index++;
+			}
+		}
+		swap(a_mixCascades, index, a_right);
+		return index;
+	}
+
+	private static void quicksort(Vector a_mixCascades, int a_left, int a_right, Comparable c)
+	{
+		if (a_right > a_left)
+		{
+			int divisor = divide(a_mixCascades, a_left, a_right, c);
+			quicksort(a_mixCascades, a_left, divisor - 1, c);
+			quicksort(a_mixCascades, divisor + 1, a_right, c);
+		}
+	}
+	
+	private static void swap(Vector a_mixCascades, int a, int b)
+	{
+		Object temp = a_mixCascades.elementAt(a);
+		a_mixCascades.setElementAt(a_mixCascades.elementAt(b), a);
+		a_mixCascades.setElementAt(temp, b);
 	}
 
 	/**
