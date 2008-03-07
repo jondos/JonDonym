@@ -209,7 +209,7 @@ public class JAP
 			int numJAPInstances = 0;
 			for(int i = 0; i < activeVMs.size(); i++)
 			{
-				vm = activeVMs.get(i);
+				vm = activeVMs.elementAt(i);
 				if(vm != null && vm.toString() != null && (vm.toString().equals("JAP")) || vm.toString().equals("JAP.jar") || vm.toString().equals("JAPMacintosh")) numJAPInstances++;
 				if(numJAPInstances > 1)
 				{
