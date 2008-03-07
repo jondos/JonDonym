@@ -33,11 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.Vector;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -279,37 +275,36 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		if(!ms_tmpDir.isDirectory())
 			return r_vms;
 		
-		// Each user has a distinct directory named hsperfdata_(user) which contains all VM performance data
-		final Matcher matcher = Pattern.compile("hsperfdata_\\S*").matcher("");
-		FilenameFilter filter = new FilenameFilter() 
+		// Loop through all directories that match the filter
+		String[] dirs = ms_tmpDir.list(new FilenameFilter() 
 		{
 			public boolean accept(File a_dir, String a_name)
 			{
-				matcher.reset(a_name);
-				return matcher.lookingAt();
+				return a_name.startsWith("hsperfdata_");
 			}
-		};
+		});
+		if(dirs == null) return r_vms;
 		
-		// Loop through all directories that match the filter
-		File[] dirs = ms_tmpDir.listFiles(filter);
 		for(int i = 0; i < dirs.length; i++)
 		{
-			if(!dirs[i].isDirectory())
+			File dir = new File(ms_tmpDir + File.separator + dirs[i]);
+			if(!dir.isDirectory())
 				continue;
 			
 			// Loop through all files in the directory. Each file represents one VM
-			File[] files = dirs[i].listFiles();
+			String[] files = dir.list();
 			
 			if(files != null)
 			{
 				for(int j = 0; j < files.length; j++)
 				{
-					if(files[j].isFile() && files[j].canRead()) 
+					File file = new File(dir + File.separator + files[j]);
+					if(file.isFile() && file.canRead()) 
 					{
 						try 
 						{
-							if((id = Integer.parseInt(files[j].getName())) != 0)
-								r_vms.add(new VMPerfDataFile(id));
+							if((id = Integer.parseInt(file.getName())) != 0)
+								r_vms.addElement(new VMPerfDataFile(id));
 						} 
 						catch(NumberFormatException e) { continue; }
 					}
