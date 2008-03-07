@@ -72,27 +72,27 @@ public final class VMPerfDataFile
 	/**
 	 * Position of the magic integer
 	 */
-	private static final Integer PERFDATA_MAGIC_POSITION = 0;
+	private static final Integer PERFDATA_MAGIC_POSITION = new Integer(0);
 	
 	/**
 	 * Position of the byte order
 	 */
-	private static final Integer PERFDATA_BYTEORDER_POSITION = 4;
+	private static final Integer PERFDATA_BYTEORDER_POSITION = new Integer(4);
 	
 	/**
 	 * Position of the accessible byte
 	 */
-	private static final Integer PERFDATA_ACCESSIBLE_POSITION = 7;
+	private static final Integer PERFDATA_ACCESSIBLE_POSITION = new Integer(7);
 	
 	/**
 	 * Position of the data entries
 	 */
-	private static final Integer PERFDATA_ENTRYOFFSET_POSITION = 24;
+	private static final Integer PERFDATA_ENTRYOFFSET_POSITION = new Integer(24);
 	
 	/**
 	 * Position of the data entry count
 	 */
-	private static final Integer PERFDATA_NUMENTRIES_POSITION = 28;
+	private static final Integer PERFDATA_NUMENTRIES_POSITION = new Integer(28);
 	
 	/**
 	 * The magic integer
@@ -212,7 +212,7 @@ public final class VMPerfDataFile
 		 * m_nextEntry = m_buff.getInt();
 		 */
 		m_byteBufferPositionMethod.invoke(m_buff, new Object[] { PERFDATA_ENTRYOFFSET_POSITION });
-		m_nextEntry = (Integer) m_byteBufferGetIntMethod.invoke(m_buff, null);
+		m_nextEntry = ((Integer) m_byteBufferGetIntMethod.invoke(m_buff, null)).intValue();
 
 		/* 
 		 * m_buff.position(PERFDATA_NUMENTRIES_POSITION);
