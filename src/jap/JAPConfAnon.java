@@ -90,6 +90,7 @@ import anon.infoservice.ServiceOperator;
 import anon.infoservice.ServiceSoftware;
 import anon.infoservice.StatusInfo;
 import anon.util.Util;
+import anon.util.Util.Comparable;
 import gui.JAPHelp;
 import gui.CertDetailsDialog;
 import gui.CountryMapper;
@@ -2717,10 +2718,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					if (TrustModel.getCurrentTrustModel().isTrusted(cascade))
 					{
 						icon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_CASCADE_MANUELL, true);
+						this.setForeground(Color.black);
 					}
 					else
 					{
 						icon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_CASCADE_MANUAL_NOT_TRUSTED, true);
+						//icon = null;
+						this.setForeground(Color.gray);
 					}
 				}
 				else if (cascade.isPayment())
@@ -2728,10 +2732,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					if (TrustModel.getCurrentTrustModel().isTrusted(cascade))
 					{
 						icon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_CASCADE_PAYMENT, true);
+						this.setForeground(Color.black);
 					}
 					else
 					{
 						icon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_CASCADE_PAYMENT_NOT_TRUSTED, true);
+						//icon = null;
+						this.setForeground(Color.gray);
 					}
 				}
 				else
@@ -2739,10 +2746,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					if (TrustModel.getCurrentTrustModel().isTrusted(cascade))
 					{
 						icon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_CASCADE_INTERNET, true);
+						this.setForeground(Color.black);
 					}
 					else
 					{
 						icon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_CASCADE_INTERNET_NOT_TRUSTED, true);
+						//icon = null;
+						this.setForeground(Color.gray);
 					}
 				}
 
@@ -2805,8 +2815,23 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				m_vecCascades.addElement(currentCascade);
 			}
-
+			
+			Util.sort(m_vecCascades, new Comparable() {
+				public int compare(Object a_obj1, Object a_obj2)
+				{
+					if(a_obj1 == null && a_obj2 == null) return 0;
+					else if(a_obj1 == null) return 1;
+						
+					boolean b1 = TrustModel.getCurrentTrustModel().isTrusted((MixCascade) a_obj1);
+					boolean b2 = TrustModel.getCurrentTrustModel().isTrusted((MixCascade) a_obj2);
+					
+					if(b1 == b2) return a_obj1.toString().compareTo(a_obj2.toString());
+					else if(b1 && !b2) return -1;
+					else return 1;
+				}
+			});
 			fireTableDataChanged();
+			
 
 			synchronized (SYNC_UPDATE_SERVER_PANEL)
 			{
