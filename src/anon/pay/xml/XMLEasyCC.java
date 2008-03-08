@@ -258,15 +258,6 @@ public class XMLEasyCC implements IXMLEncodable
 			}
 			elemPriceCerts.appendChild(curElem);
 		}
-		/*
-		elem = a_doc.createElement("Overflow");
-		String overflow = "Overflow";
-		for (int i = 0; i < 100; i++)
-		{
-			overflow += overflow;
-		}
-		XMLUtil.setValue(elem, overflow);
-		elemRoot.appendChild(elem);*/
 
 		return elemRoot;
 	}
@@ -343,6 +334,7 @@ public class XMLEasyCC implements IXMLEncodable
 
 	/**
 	 * getAIName: returns the subjectkeyidentifier of the first Mix in the Cascade
+	 * @deprecated : use getConcatenatedPriceCertHashes() instead
 	 *
 	 * @return String
 	 */

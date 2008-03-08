@@ -272,10 +272,12 @@ public class TinyTLS extends Socket
 		{
 			while (m_aktPendLen < 1)
 			{
-				//try {
+				/*try
+				{*/
 					readRecord();
 				/*}
-				catch(EOFException eofe) {
+				catch(EOFException eofe)
+				{
 					return -1;
 				}*/
 				try

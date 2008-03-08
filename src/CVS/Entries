@@ -8,11 +8,8 @@ D/jarify////
 D/jpi////
 D/logging////
 D/misc////
-D/pay////
-D/payxml////
 D/platform////
 D/proxy////
-D/tor////
 D/update////
 /.cvsignore/1.1/Fri Jan 25 16:45:52 2008//
 /JAPMessages_ar.properties/1.41/Fri Jan 25 19:13:47 2008//
@@ -22,7 +19,7 @@ D/update////
 /JAPMessages_fr.properties/1.201/Fri Jan 25 19:13:57 2008//
 /JAPMessages_nl.properties/1.23/Fri Jan 25 19:14:00 2008//
 /JAPMessages_pt.properties/1.183/Fri Jan 25 19:14:01 2008//
-/JAP.java/1.195/Tue Jan 15 15:41:02 2008//
 /JAPMacintosh.java/1.11/Tue Jan 15 15:41:02 2008//
 /JAPMessages_ca.properties/1.1/Tue Jan 15 15:41:02 2008//
 /JAPMessages_es.properties/1.40/Tue Jan 15 15:41:02 2008//
+/JAP.java/1.196/Fri Mar  7 13:03:53 2008//

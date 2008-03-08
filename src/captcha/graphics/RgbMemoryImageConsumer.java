@@ -178,10 +178,12 @@ public class RgbMemoryImageConsumer implements ImageConsumer {
 
   /**
    * This method is only for compatibility with the ImageConsumer interface.
-   *
+   * ******* pre Java 5 *******
    * @param a_properties Some properties for the produced image.
    */
-  public void setProperties(Hashtable a_properties) {
+  public void setProperties(Hashtable a_properties) 
+  {
+	;
   }
 
   /**
