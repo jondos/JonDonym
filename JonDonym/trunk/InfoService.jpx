@@ -1,211 +1,210 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--JBuilder XML Project-->
 <project>
-  <property category="build" name="CopyExtensions.1" value="cer"/>
-  <property category="build" name="NoCopyExtensions.1" value="properties"/>
-  <property category="debug.0" name="SmartStepRedefineClasses" value="0"/>
-  <property category="debug.0" name="SmartStepSkipStaticInitializers" value="0"/>
-  <property category="debug.0" name="SmartStepSkipSynthetics" value="0"/>
-  <property category="debug.4" name="SmartStepRedefineClasses" value="0"/>
-  <property category="debug.5" name="ConnectionType" value="2"/>
-  <property category="debug.5" name="RemoteAttachArgumentNames.1" value="hostname"/>
-  <property category="debug.5" name="RemoteAttachArgumentNames.2" value="port"/>
-  <property category="debug.5" name="RemoteAttachArgumentValues.1" value="infoservice.inf.tu-dresden.de"/>
-  <property category="debug.5" name="RemoteAttachArgumentValues.2" value="4060"/>
-  <property category="debug.5" name="RemoteAttachTransport" value="dt_socket"/>
-  <property category="debug.5" name="RemoteDebug" value="1"/>
-  <property category="debug.5" name="RemoteDebugLaunch" value="0"/>
-  <property category="debug.5" name="RemoteHost" value="planet1.inf.tu-dresden.de"/>
-  <property category="debug.5" name="RemoteLaunchTransport" value="dt_socket"/>
-  <property category="debug.5" name="RemoteTransportAddress" value="58730"/>
-  <property category="generalFormatting" name="baseCodeStyle" value="java/JAP.codestyle"/>
-  <property category="generalFormatting" name="blockIndent" value="4"/>
-  <property category="generalFormatting" name="tabSize" value="4"/>
-  <property category="generalFormatting" name="useTabChar" value="1"/>
-  <property category="generalFormatting2" name="blockIndent" value="4"/>
-  <property category="generalFormatting2" name="overrideBasicFormatting" value="1"/>
-  <property category="generalFormatting2" name="tabSize" value="4"/>
-  <property category="generalFormatting2" name="useTabChar" value="1"/>
-  <property category="java" name="compiler" value="projectjavac"/>
-  <property category="javaFormatting" name="EventMatch" value="0"/>
-  <property category="javaFormatting" name="alwaysClasses" value="1"/>
-  <property category="javaFormatting" name="classBraceNextLine" value="1"/>
-  <property category="javaFormatting" name="extendsOnNewLine" value="0"/>
-  <property category="javaFormatting" name="implementsOnNewLine" value="0"/>
-  <property category="javaFormatting" name="methodBraceNextLine" value="1"/>
-  <property category="javaFormatting" name="otherBraceNextLine" value="1"/>
-  <property category="javaFormatting" name="packagePrefixGroups" value="java;javax;BLANK_LINE;java.awt;javax.swing;BLANK_LINE;org;(*)"/>
-  <property category="javaFormatting" name="wrapAtColumn" value="110"/>
-  <property category="javadoc" name="custom.tags.1" value="todo;a;To Do:"/>
-  <property category="optimize.0" name="OptimizableType" value="intuitive.ide.borland.jb10.ProfilerBootstrap"/>
-  <property category="optimize.0" name="oipr.EnableUnitTest" value="0"/>
-  <property category="optimize.0" name="oipr.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
-  <property category="optimize.4" name="OptimizableType" value="intuitive.ide.borland.jb10.ProfilerBootstrap"/>
-  <property category="optimize.4" name="oicc.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
-  <property category="optimize.4" name="oipr.EnableUnitTest" value="0"/>
-  <property category="optimize.4" name="oipr.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
-  <property category="optimize.4" name="oira.AttachHost" value="localhost"/>
-  <property category="optimize.4" name="oira.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
-  <property category="optimize.5" name="OptimizableType" value="com.jprofiler.integrations.jbuilder.A.B"/>
-  <property category="optimize.5" name="oicc.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
-  <property category="optimize.5" name="oipr.AttachProcess" value="1"/>
-  <property category="optimize.5" name="oipr.EnableUnitTest" value="0"/>
-  <property category="optimize.5" name="oipr.FilterFile" value="E:\Eigene Dateien\rolf\Coding\Jap\InfoService.oif"/>
-  <property category="optimize.5" name="oipr.HostAttach" value="132.199.134.2"/>
-  <property category="optimize.5" name="oipr.PortAttach" value="8000"/>
-  <property category="optimize.5" name="oipr.UseServerFilter" value="0"/>
-  <property category="optimize.5" name="oira.AttachHost" value="localhost"/>
-  <property category="optimize.5" name="oira.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
-  <property category="optimize.5" name="oitd.AttachProcess" value="1"/>
-  <property category="optimize.5" name="oitd.HostAttach" value="infoservice.inf.tu-dresden.de"/>
-  <property category="optimize.5" name="oitd.PortAttach" value="4060"/>
-  <property category="runtime" name="ConfigurationCount" value="5"/>
-  <property category="runtime.0" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
-  <property category="runtime.0" name="ConfigurationName" value="InfoService"/>
-  <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
-  <property category="runtime.0" name="application.class" value="infoservice.InfoService"/>
-  <property category="runtime.0" name="application.parameters" value="documentation/SampleConfiguration/InfoService.properties"/>
-  <property category="runtime.1" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
-  <property category="runtime.1" name="ConfigurationName" value="GenerateKey"/>
-  <property category="runtime.1" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
-  <property category="runtime.1" name="application.class" value="infoservice.InfoService"/>
-  <property category="runtime.1" name="application.parameters" value="--generatekey"/>
-  <property category="runtime.2" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
-  <property category="runtime.2" name="ConfigurationName" value="TestSig"/>
-  <property category="runtime.2" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
-  <property category="runtime.2" name="application.class" value="TestSig"/>
-  <property category="runtime.3" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
-  <property category="runtime.3" name="ConfigurationName" value="Version"/>
-  <property category="runtime.3" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
-  <property category="runtime.3" name="application.class" value="InfoService"/>
-  <property category="runtime.3" name="application.parameters" value="--version"/>
-  <property category="runtime.4" name="BuildTargetOnRun" value="&lt;None&gt;"/>
-  <property category="runtime.4" name="ConfigurationName" value="InfoService altervativ Config"/>
-  <property category="runtime.4" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
-  <property category="runtime.4" name="application.class" value="infoservice.InfoService"/>
-  <property category="runtime.4" name="application.parameters" value="InfoService.properties"/>
-  <property category="runtime.4" name="custom.init_required" value="0"/>
-  <property category="runtime.4" name="custom.jdk" value="java version 1.5.0-rc-b63"/>
-  <property category="runtime.4" name="custom.override_jdk" value="1"/>
-  <property category="runtime.4" name="custom.required.1" value="Log4j"/>
-  <property category="runtime.4" name="custom.required.10" value="Log4j"/>
-  <property category="runtime.4" name="custom.required.2" value="XML-1.1"/>
-  <property category="runtime.4" name="custom.required.3" value="BouncyCastleLightForJAP"/>
-  <property category="runtime.4" name="custom.required.4" value="junitx"/>
-  <property category="runtime.4" name="custom.required.5" value="JUnit"/>
-  <property category="runtime.4" name="custom.required.6" value="http"/>
-  <property category="runtime.4" name="custom.required.7" value="JavaMail"/>
-  <property category="runtime.4" name="custom.required.8" value="Jama"/>
-  <property category="runtime.4" name="custom.required.9" value="ApacheBzip2"/>
-  <property category="runtime.5" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
-  <property category="runtime.5" name="ConfigurationName" value="Remote Debug of Anon InfoService"/>
-  <property category="runtime.5" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
-  <property category="runtime.5" name="application.class" value="infoservice.InfoService"/>
-  <property category="runtime.5" name="custom.init_required" value="0"/>
-  <property category="runtime.5" name="custom.jdk" value="java version 1.5.0_01-b08"/>
-  <property category="runtime.5" name="custom.required.1" value="Log4j"/>
-  <property category="runtime.5" name="custom.required.10" value="Log4j"/>
-  <property category="runtime.5" name="custom.required.2" value="XML-1.1"/>
-  <property category="runtime.5" name="custom.required.3" value="BouncyCastleLightForJAP"/>
-  <property category="runtime.5" name="custom.required.4" value="junitx"/>
-  <property category="runtime.5" name="custom.required.5" value="JUnit"/>
-  <property category="runtime.5" name="custom.required.6" value="http"/>
-  <property category="runtime.5" name="custom.required.7" value="JavaMail"/>
-  <property category="runtime.5" name="custom.required.8" value="Jama"/>
-  <property category="runtime.5" name="custom.required.9" value="ApacheBzip2"/>
-  <property category="runtime.5" name="enable.tcpmonitor" value="0"/>
-  <property category="runtime.5" name="enable.wsimonitor" value="0"/>
-  <property category="runtime.5" name="tcpmonitor.listenport" value=""/>
-  <property category="runtime.5" name="tcpmonitor.targethost" value=""/>
-  <property category="runtime.5" name="tcpmonitor.targetport" value=""/>
-  <property category="runtime.5" name="wsimonitor.listenport" value=""/>
-  <property category="runtime.5" name="wsimonitor.logfile" value=""/>
-  <property category="runtime.5" name="wsimonitor.targethost" value=""/>
-  <property category="runtime.5" name="wsimonitor.targetport" value=""/>
-  <property category="serverservices" name="disabled.services" value=""/>
-  <property category="sys" name="AuthorLabel" value="@author"/>
-  <property category="sys" name="BackupPath" value="bak"/>
-  <property category="sys" name="CheckStable" value="1"/>
-  <property category="sys" name="Company" value=""/>
-  <property category="sys" name="CompanyLabel" value="Organisation:"/>
-  <property category="sys" name="Copyright" value="Copyright (c) 2001"/>
-  <property category="sys" name="CopyrightLabel" value="Copyright:"/>
-  <property category="sys" name="DefaultPath" value="src"/>
-  <property category="sys" name="Description" value=""/>
-  <property category="sys" name="DescriptionLabel" value="Beschreibung:"/>
-  <property category="sys" name="DocPath" value="doc/javadoc;doc"/>
-  <property category="sys" name="ExcludeClassEnabled" value="0"/>
-  <property category="sys" name="IncludeTestPath" value="1"/>
-  <property category="sys" name="JDK" value="java version 1.5.0_02-56"/>
-  <property category="sys" name="JvmVersion" value="1.4"/>
-  <property category="sys" name="LastTag" value="42"/>
-  <property category="sys" name="Libraries" value="Log4j;XML-1.1;BouncyCastleLightForJAP;junitx;JUnit;http;JavaMail;Jama"/>
-  <property category="sys" name="MakeStable" value="0"/>
-  <property category="sys" name="OutPath" value="classes_infoservice"/>
-  <property category="sys" name="SourcePath" value="src;test"/>
-  <property category="sys" name="TestPath" value="test"/>
-  <property category="sys" name="Title" value=""/>
-  <property category="sys" name="TitleLabel" value="\u00dcberschrift:"/>
-  <property category="sys" name="Version" value="1.0"/>
-  <property category="sys" name="VersionLabel" value="@version"/>
-  <property category="sys" name="WorkingDirectory" value="."/>
-  <property category="sys" name="enable.auto.packages" value="false"/>
-  <property category="team" name="ignorePath.0" value="bak"/>
-  <property category="team" name="ignorePath.1" value="classes"/>
-  <property category="team" name="ignorePath.10" value="InfoService.log"/>
-  <property category="team" name="ignorePath.11" value="InfoService_update.log"/>
-  <property category="team" name="ignorePath.12" value="JAP.refactor"/>
-  <property category="team" name="ignorePath.2" value="htdoc"/>
-  <property category="team" name="ignorePath.3" value="InfoService.jar"/>
-  <property category="team" name="ignorePath.4" value="InfoService.jpx.bak"/>
-  <property category="team" name="ignorePath.5" value="InfoService.sln"/>
-  <property category="team" name="ignorePath.6" value="InfoService.suo"/>
-  <property category="team" name="ignorePath.7" value="InfoService.vjp"/>
-  <property category="team" name="ignorePath.8" value="TODOs.txt"/>
-  <property category="team" name="ignorePath.9" value="codebase.dat"/>
-  <node name="certificates" type="NavigationDirectory">
-    <property category="directorynode" name="url" value="certificates"/>
-  </node>
-  <node name="InfoService" type="NavigationDirectory">
-    <property category="directorynode" name="url" value="documentation/InfoService"/>
-  </node>
-  <node name="SampleConfiguration" type="NavigationDirectory">
-    <property category="directorynode" name="url" value="documentation/SampleConfiguration"/>
-  </node>
-  <node name="anon.crypto" type="Package"/>
-  <node name="anon.infoservice" type="Package"/>
-  <node name="anon.tor.ordescription" type="Package"/>
-  <node name="anon.util" type="Package"/>
-  <node name="captcha" type="Package"/>
-  <node name="infoservice" type="Package"/>
-  <node name="infoservice.agreement" type="Package"/>
-  <node name="infoservice.agreement.common" type="Package"/>
-  <node name="infoservice.agreement.interfaces" type="Package"/>
-  <node name="infoservice.agreement.multicast" type="Package"/>
-  <node name="infoservice.agreement.paxos" type="Package"/>
-  <node name="infoservice.dynamic" type="Package"/>
-  <node name="infoservice.japforwarding" type="Package"/>
-  <node name="infoservice.mailsystem" type="Package"/>
-  <node name="infoservice.mailsystem" type="Package"/>
-  <node name="infoservice.tor" type="Package"/>
-  <node name="logging" type="Package"/>
-  <node name="InfoService.jar" type="Archive">
-    <property category="archiving" name="archiverClass" value="com.borland.jbuilder.wizard.archive.ApplicationArchiver"/>
-    <property category="archiving" name="buildWithProject" value="0"/>
-    <property category="archiving" name="contentRules.1" value="I:**/*.*"/>
-    <property category="archiving" name="libraryStates.1" value="3:Log4j"/>
-    <property category="archiving" name="libraryStates.2" value="1:XML-1.1"/>
-    <property category="archiving" name="libraryStates.3" value="3:BouncyCastleLightForJAP"/>
-    <property category="archiving" name="libraryStates.4" value="3:http"/>
-    <property category="archiving" name="libraryStates.5" value="1:JavaMail"/>
-    <property category="archiving" name="libraryStates.6" value="1:Jama"/>
-    <property category="archiving" name="libraryStates.7" value="1:ApacheBzip2"/>
-    <property category="archiving" name="manifestMainClass" value="infoservice.InfoService"/>
-    <property category="archiving" name="obfuscator" value="RetroGuard for J2ME"/>
-    <property category="archiving" name="targetCompressed" value="1"/>
-    <property category="archiving" name="targetPath" value="InfoService.jar"/>
-    <property category="archiving" name="usingRules" value="1"/>
-  </node>
-  <file path="documentation/InfoService/InfoserviceCommands.txt"/>
-  <file path="magicdraw.magicdraw"/>
+<property category="build" name="CopyExtensions.1" value="cer"/>
+<property category="build" name="NoCopyExtensions.1" value="properties"/>
+<property category="debug.0" name="SmartStepRedefineClasses" value="0"/>
+<property category="debug.0" name="SmartStepSkipStaticInitializers" value="0"/>
+<property category="debug.0" name="SmartStepSkipSynthetics" value="0"/>
+<property category="debug.4" name="SmartStepRedefineClasses" value="0"/>
+<property category="debug.5" name="ConnectionType" value="2"/>
+<property category="debug.5" name="RemoteAttachArgumentNames.1" value="hostname"/>
+<property category="debug.5" name="RemoteAttachArgumentNames.2" value="port"/>
+<property category="debug.5" name="RemoteAttachArgumentValues.1" value="infoservice.inf.tu-dresden.de"/>
+<property category="debug.5" name="RemoteAttachArgumentValues.2" value="4060"/>
+<property category="debug.5" name="RemoteAttachTransport" value="dt_socket"/>
+<property category="debug.5" name="RemoteDebug" value="1"/>
+<property category="debug.5" name="RemoteDebugLaunch" value="0"/>
+<property category="debug.5" name="RemoteHost" value="planet1.inf.tu-dresden.de"/>
+<property category="debug.5" name="RemoteLaunchTransport" value="dt_socket"/>
+<property category="debug.5" name="RemoteTransportAddress" value="58730"/>
+<property category="generalFormatting" name="baseCodeStyle" value="java/JAP.codestyle"/>
+<property category="generalFormatting" name="blockIndent" value="4"/>
+<property category="generalFormatting" name="tabSize" value="4"/>
+<property category="generalFormatting" name="useTabChar" value="1"/>
+<property category="generalFormatting2" name="blockIndent" value="4"/>
+<property category="generalFormatting2" name="overrideBasicFormatting" value="1"/>
+<property category="generalFormatting2" name="tabSize" value="4"/>
+<property category="generalFormatting2" name="useTabChar" value="1"/>
+<property category="javaFormatting" name="EventMatch" value="0"/>
+<property category="javaFormatting" name="alwaysClasses" value="1"/>
+<property category="javaFormatting" name="classBraceNextLine" value="1"/>
+<property category="javaFormatting" name="extendsOnNewLine" value="0"/>
+<property category="javaFormatting" name="implementsOnNewLine" value="0"/>
+<property category="javaFormatting" name="methodBraceNextLine" value="1"/>
+<property category="javaFormatting" name="otherBraceNextLine" value="1"/>
+<property category="javaFormatting" name="packagePrefixGroups" value="java;javax;BLANK_LINE;java.awt;javax.swing;BLANK_LINE;org;(*)"/>
+<property category="javaFormatting" name="wrapAtColumn" value="110"/>
+<property category="javadoc" name="custom.tags.1" value="todo;a;To Do:"/>
+<property category="optimize.0" name="OptimizableType" value="intuitive.ide.borland.jb10.ProfilerBootstrap"/>
+<property category="optimize.0" name="oipr.EnableUnitTest" value="0"/>
+<property category="optimize.0" name="oipr.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
+<property category="optimize.4" name="OptimizableType" value="intuitive.ide.borland.jb10.ProfilerBootstrap"/>
+<property category="optimize.4" name="oicc.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
+<property category="optimize.4" name="oipr.EnableUnitTest" value="0"/>
+<property category="optimize.4" name="oipr.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
+<property category="optimize.4" name="oira.AttachHost" value="localhost"/>
+<property category="optimize.4" name="oira.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
+<property category="optimize.5" name="OptimizableType" value="com.jprofiler.integrations.jbuilder.A.B"/>
+<property category="optimize.5" name="oicc.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
+<property category="optimize.5" name="oipr.AttachProcess" value="1"/>
+<property category="optimize.5" name="oipr.EnableUnitTest" value="0"/>
+<property category="optimize.5" name="oipr.FilterFile" value="E:\Eigene Dateien\rolf\Coding\Jap\InfoService.oif"/>
+<property category="optimize.5" name="oipr.HostAttach" value="132.199.134.2"/>
+<property category="optimize.5" name="oipr.PortAttach" value="8000"/>
+<property category="optimize.5" name="oipr.UseServerFilter" value="0"/>
+<property category="optimize.5" name="oira.AttachHost" value="localhost"/>
+<property category="optimize.5" name="oira.FilterFile" value="G:\projects\Jap\InfoService.oif"/>
+<property category="optimize.5" name="oitd.AttachProcess" value="1"/>
+<property category="optimize.5" name="oitd.HostAttach" value="infoservice.inf.tu-dresden.de"/>
+<property category="optimize.5" name="oitd.PortAttach" value="4060"/>
+<property category="runtime" name="ConfigurationCount" value="5"/>
+<property category="runtime.0" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
+<property category="runtime.0" name="ConfigurationName" value="InfoService"/>
+<property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+<property category="runtime.0" name="application.class" value="infoservice.InfoService"/>
+<property category="runtime.0" name="application.parameters" value="documentation/SampleConfiguration/InfoService.properties"/>
+<property category="runtime.1" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
+<property category="runtime.1" name="ConfigurationName" value="GenerateKey"/>
+<property category="runtime.1" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+<property category="runtime.1" name="application.class" value="infoservice.InfoService"/>
+<property category="runtime.1" name="application.parameters" value="--generatekey"/>
+<property category="runtime.2" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
+<property category="runtime.2" name="ConfigurationName" value="TestSig"/>
+<property category="runtime.2" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+<property category="runtime.2" name="application.class" value="TestSig"/>
+<property category="runtime.3" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
+<property category="runtime.3" name="ConfigurationName" value="Version"/>
+<property category="runtime.3" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+<property category="runtime.3" name="application.class" value="InfoService"/>
+<property category="runtime.3" name="application.parameters" value="--version"/>
+<property category="runtime.4" name="BuildTargetOnRun" value="&lt;None&gt;"/>
+<property category="runtime.4" name="ConfigurationName" value="InfoService altervativ Config"/>
+<property category="runtime.4" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+<property category="runtime.4" name="application.class" value="infoservice.InfoService"/>
+<property category="runtime.4" name="application.parameters" value="InfoService.properties"/>
+<property category="runtime.4" name="custom.init_required" value="0"/>
+<property category="runtime.4" name="custom.jdk" value="java version 1.5.0-rc-b63"/>
+<property category="runtime.4" name="custom.override_jdk" value="1"/>
+<property category="runtime.4" name="custom.required.1" value="Log4j"/>
+<property category="runtime.4" name="custom.required.10" value="Log4j"/>
+<property category="runtime.4" name="custom.required.2" value="XML-1.1"/>
+<property category="runtime.4" name="custom.required.3" value="BouncyCastleLightForJAP"/>
+<property category="runtime.4" name="custom.required.4" value="junitx"/>
+<property category="runtime.4" name="custom.required.5" value="JUnit"/>
+<property category="runtime.4" name="custom.required.6" value="http"/>
+<property category="runtime.4" name="custom.required.7" value="JavaMail"/>
+<property category="runtime.4" name="custom.required.8" value="Jama"/>
+<property category="runtime.4" name="custom.required.9" value="ApacheBzip2"/>
+<property category="runtime.5" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
+<property category="runtime.5" name="ConfigurationName" value="Remote Debug of Anon InfoService"/>
+<property category="runtime.5" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+<property category="runtime.5" name="application.class" value="infoservice.InfoService"/>
+<property category="runtime.5" name="custom.init_required" value="0"/>
+<property category="runtime.5" name="custom.jdk" value="java version 1.5.0_01-b08"/>
+<property category="runtime.5" name="custom.required.1" value="Log4j"/>
+<property category="runtime.5" name="custom.required.10" value="Log4j"/>
+<property category="runtime.5" name="custom.required.2" value="XML-1.1"/>
+<property category="runtime.5" name="custom.required.3" value="BouncyCastleLightForJAP"/>
+<property category="runtime.5" name="custom.required.4" value="junitx"/>
+<property category="runtime.5" name="custom.required.5" value="JUnit"/>
+<property category="runtime.5" name="custom.required.6" value="http"/>
+<property category="runtime.5" name="custom.required.7" value="JavaMail"/>
+<property category="runtime.5" name="custom.required.8" value="Jama"/>
+<property category="runtime.5" name="custom.required.9" value="ApacheBzip2"/>
+<property category="runtime.5" name="enable.tcpmonitor" value="0"/>
+<property category="runtime.5" name="enable.wsimonitor" value="0"/>
+<property category="runtime.5" name="tcpmonitor.listenport" value=""/>
+<property category="runtime.5" name="tcpmonitor.targethost" value=""/>
+<property category="runtime.5" name="tcpmonitor.targetport" value=""/>
+<property category="runtime.5" name="wsimonitor.listenport" value=""/>
+<property category="runtime.5" name="wsimonitor.logfile" value=""/>
+<property category="runtime.5" name="wsimonitor.targethost" value=""/>
+<property category="runtime.5" name="wsimonitor.targetport" value=""/>
+<property category="serverservices" name="disabled.services" value=""/>
+<property category="sys" name="AuthorLabel" value="@author"/>
+<property category="sys" name="BackupPath" value="bak"/>
+<property category="sys" name="CheckStable" value="1"/>
+<property category="sys" name="Company" value=""/>
+<property category="sys" name="CompanyLabel" value="Organisation:"/>
+<property category="sys" name="Copyright" value="Copyright (c) 2001"/>
+<property category="sys" name="CopyrightLabel" value="Copyright:"/>
+<property category="sys" name="DefaultPath" value="src"/>
+<property category="sys" name="Description" value=""/>
+<property category="sys" name="DescriptionLabel" value="Beschreibung:"/>
+<property category="sys" name="DocPath" value="doc/javadoc;doc"/>
+<property category="sys" name="ExcludeClassEnabled" value="0"/>
+<property category="sys" name="IncludeTestPath" value="1"/>
+<property category="sys" name="JDK" value="java version 1.5.0_03-b07"/>
+<property category="sys" name="JvmVersion" value="1.4"/>
+<property category="sys" name="LastTag" value="42"/>
+<property category="sys" name="Libraries" value="Log4j;XML-1.1;BouncyCastleLightForJAP;junitx;JUnit;http;JavaMail;Jama"/>
+<property category="sys" name="MakeStable" value="0"/>
+<property category="sys" name="OutPath" value="classes_infoservice"/>
+<property category="sys" name="SourcePath" value="src;test"/>
+<property category="sys" name="TestPath" value="test"/>
+<property category="sys" name="Title" value=""/>
+<property category="sys" name="TitleLabel" value="\u00dcberschrift:"/>
+<property category="sys" name="Version" value="1.0"/>
+<property category="sys" name="VersionLabel" value="@version"/>
+<property category="sys" name="WorkingDirectory" value="."/>
+<property category="sys" name="enable.auto.packages" value="false"/>
+<property category="team" name="ignorePath.0" value="bak"/>
+<property category="team" name="ignorePath.1" value="classes"/>
+<property category="team" name="ignorePath.10" value="InfoService.log"/>
+<property category="team" name="ignorePath.11" value="InfoService_update.log"/>
+<property category="team" name="ignorePath.12" value="JAP.refactor"/>
+<property category="team" name="ignorePath.2" value="htdoc"/>
+<property category="team" name="ignorePath.3" value="InfoService.jar"/>
+<property category="team" name="ignorePath.4" value="InfoService.jpx.bak"/>
+<property category="team" name="ignorePath.5" value="InfoService.sln"/>
+<property category="team" name="ignorePath.6" value="InfoService.suo"/>
+<property category="team" name="ignorePath.7" value="InfoService.vjp"/>
+<property category="team" name="ignorePath.8" value="TODOs.txt"/>
+<property category="team" name="ignorePath.9" value="codebase.dat"/>
+<node name="certificates" type="NavigationDirectory">
+<property category="directorynode" name="url" value="certificates"/>
+</node>
+<node name="InfoService" type="NavigationDirectory">
+<property category="directorynode" name="url" value="documentation/InfoService"/>
+</node>
+<node name="SampleConfiguration" type="NavigationDirectory">
+<property category="directorynode" name="url" value="documentation/SampleConfiguration"/>
+</node>
+<node name="anon.crypto" type="Package"/>
+<node name="anon.infoservice" type="Package"/>
+<node name="anon.tor.ordescription" type="Package"/>
+<node name="anon.util" type="Package"/>
+<node name="captcha" type="Package"/>
+<node name="infoservice" type="Package"/>
+<node name="infoservice.agreement" type="Package"/>
+<node name="infoservice.agreement.common" type="Package"/>
+<node name="infoservice.agreement.interfaces" type="Package"/>
+<node name="infoservice.agreement.multicast" type="Package"/>
+<node name="infoservice.agreement.paxos" type="Package"/>
+<node name="infoservice.dynamic" type="Package"/>
+<node name="infoservice.japforwarding" type="Package"/>
+<node name="infoservice.mailsystem" type="Package"/>
+<node name="infoservice.mailsystem" type="Package"/>
+<node name="infoservice.tor" type="Package"/>
+<node name="logging" type="Package"/>
+<node name="InfoService.jar" type="Archive">
+<property category="archiving" name="archiverClass" value="com.borland.jbuilder.wizard.archive.ApplicationArchiver"/>
+<property category="archiving" name="buildWithProject" value="0"/>
+<property category="archiving" name="contentRules.1" value="I:**/*.*"/>
+<property category="archiving" name="libraryStates.1" value="3:Log4j"/>
+<property category="archiving" name="libraryStates.2" value="1:XML-1.1"/>
+<property category="archiving" name="libraryStates.3" value="3:BouncyCastleLightForJAP"/>
+<property category="archiving" name="libraryStates.4" value="3:http"/>
+<property category="archiving" name="libraryStates.5" value="1:JavaMail"/>
+<property category="archiving" name="libraryStates.6" value="1:Jama"/>
+<property category="archiving" name="libraryStates.7" value="1:ApacheBzip2"/>
+<property category="archiving" name="manifestMainClass" value="infoservice.InfoService"/>
+<property category="archiving" name="obfuscator" value="RetroGuard for J2ME"/>
+<property category="archiving" name="targetCompressed" value="1"/>
+<property category="archiving" name="targetPath" value="InfoService.jar"/>
+<property category="archiving" name="usingRules" value="1"/>
+</node>
+<file path="documentation/InfoService/InfoserviceCommands.txt"/>
+<file path="magicdraw.magicdraw"/>
 </project>

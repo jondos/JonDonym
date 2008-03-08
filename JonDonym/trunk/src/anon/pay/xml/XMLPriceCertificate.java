@@ -238,6 +238,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 		}
 		catch (Exception e)
 		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, "Error signing the certificate: ",e);
 			return false;
 		}
 	}

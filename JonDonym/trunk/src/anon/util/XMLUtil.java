@@ -1230,9 +1230,15 @@ public class XMLUtil
 	{
 		Document doc;
 		Element element;
-
+		
 		element = toXMLElement(a_xmlEncodable);
+		if(element==null) {
+			LogHolder.log(LogLevel.ERR, LogType.PAY, "XML element is null");
+		}
 		doc = element.getOwnerDocument();
+		if(doc==null) {
+			LogHolder.log(LogLevel.ERR, LogType.PAY, "document is null");
+		}
 		doc.appendChild(element);
 
 		return doc;

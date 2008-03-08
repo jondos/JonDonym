@@ -59,7 +59,7 @@ public interface IXMLEncodable
 	// public static final String XML_ELEMENT_NAME = "ElementName";
 
 	/**
-	 * The name of the XML container elemene for elements constructed by this class.
+	 * The name of the XML container element for elements constructed by this class.
 	 * Only needed if this element needs a special container element and cannot exist without
 	 * it in an XML structure. Do not delete this comment!
      */

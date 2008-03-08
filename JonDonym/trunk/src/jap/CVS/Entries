@@ -1,6 +1,5 @@
 D/forward////
 D/pay////
-D/platform////
 /.cvsignore/1.1/Fri Jan 25 16:56:50 2008//
 /JAPController.java/1.412/Fri Jan 25 12:17:02 2008//
 /JAPNewView.java/1.233/Fri Jan 25 15:49:00 2008//
@@ -18,7 +17,6 @@ D/platform////
 /JAPAbout.java/1.18/Tue Jan 15 15:40:42 2008//
 /JAPAboutNew.java/1.4/Tue Jan 15 15:40:42 2008//
 /JAPConf.java/1.131/Tue Jan 15 15:40:42 2008//
-/JAPConfAnon.java/1.172/Tue Jan 15 15:40:43 2008//
 /JAPConfAnonGeneral.java/1.53/Tue Jan 15 15:40:42 2008//
 /JAPConfCert.java/1.49/Tue Jan 15 15:40:43 2008//
 /JAPConfCertSavePoint.java/1.2/Tue Jan 15 15:40:43 2008//
@@ -55,4 +53,5 @@ D/platform////
 /StatusPanel.java/1.9/Tue Jan 15 15:40:43 2008//
 /SystrayPopupMenu.java/1.12/Tue Jan 15 15:40:43 2008//
 /TrustModel.java/1.20/Tue Jan 15 15:40:43 2008//
-/JAPConstants.java/1.940/Thu Feb 21 14:41:26 2008//
+/JAPConfAnon.java/1.173/Fri Mar  7 13:03:53 2008//
+/JAPConstants.java/1.941/Sat Mar  8 12:49:56 2008//

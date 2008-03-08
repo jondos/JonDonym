@@ -39,7 +39,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  *
  * XML representation of a request by a JAP to buy a specific volume plan
  * The plan is identified by name, it's up to the JPI to get the corresponding information
- * from its database (reason: we don't want a JAP to supply modified values for e.g. price
+ * from its database (reason: we don't want a JAP to supply modified values for e.g. price)
  *
  */
 public class XMLVolumePlanPurchase implements IXMLEncodable

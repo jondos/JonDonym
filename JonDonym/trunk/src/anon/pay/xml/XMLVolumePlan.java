@@ -137,6 +137,7 @@ public class XMLVolumePlan implements IXMLEncodable
 	public XMLVolumePlan(String a_name, String a_displayName, int a_price, int a_duration, String a_durationUnit, long a_volumeLimit)
 	{
 		m_name = a_name;
+		m_displayName = a_displayName;
 		m_price = a_price;
 		m_durationLimited = true;
 		m_duration = a_duration;
@@ -150,10 +151,11 @@ public class XMLVolumePlan implements IXMLEncodable
 	/**
 	 * full set of parameters, as stored in database
 	 */
-	public XMLVolumePlan(String a_name, String a_displayname, int a_price,boolean a_durationLimited, boolean a_volumeLimited, int a_duration, String a_durationUnit,
+	public XMLVolumePlan(String a_name, String a_displayName, int a_price,boolean a_durationLimited, boolean a_volumeLimited, int a_duration, String a_durationUnit,
 						 long a_volumeLimit)
 	{
 		m_name = a_name;
+		m_displayName = a_displayName;
 		m_price = a_price;
 		m_durationLimited = a_durationLimited;
 		m_duration = a_duration;
