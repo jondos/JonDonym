@@ -509,14 +509,12 @@ public class AIControlChannel extends XmlControlChannel
 		  }
 	  }
 	  
-	  /*
-	   * -- No account attack --
 	  if (!PayAccountsFile.getInstance().signalAccountRequest(m_connectedCascade) ||
 		  PayAccountsFile.getInstance().getActiveAccount() == null)
 	  {
 		  return false;
 	  }
-	  */
+	  
 
 	  if (priceCerts.size() != mixIDs.size())
 	  {
@@ -549,13 +547,10 @@ public class AIControlChannel extends XmlControlChannel
 	  {
 		  LogHolder.log(LogLevel.ERR, LogType.PAY, message);
 		  
-		  /*
-		   * -- No account attack --
-		  
 		  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 		  PayAccountsFile.getInstance().signalAccountError(
 				  new XMLErrorMessage(XMLErrorMessage.ERR_INVALID_PRICE_CERTS, message)); 
-		   */
+		  
 		  
 		  return false;
 	  }
