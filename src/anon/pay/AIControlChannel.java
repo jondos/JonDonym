@@ -125,8 +125,8 @@ public class AIControlChannel extends XmlControlChannel
 	  //System.out.println(XMLUtil.toString(elemRoot));
 	  	 	  
 	  String tagName = elemRoot.getTagName();
-	  LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
-				"Thread "+ Thread.currentThread().getName()+" processing AI ControlMessage "+tagName);
+	  /*LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
+				"Thread "+ Thread.currentThread().getName()+" processing AI ControlMessage "+tagName);*/
 	  try
 	  {
 		  if (tagName.equals(XMLPayRequest.XML_ELEMENT_NAME))
@@ -138,9 +138,9 @@ public class AIControlChannel extends XmlControlChannel
 		  {
 			  XMLAiLoginConfirmation loginConfirm = 
 				  new XMLAiLoginConfirmation(elemRoot);
-			  LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
+			  /*LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
 						"Thread "+ Thread.currentThread().getName()+" getting AI Login Confirmation with code "
-						+loginConfirm.getCode()+" and message "+loginConfirm.getMessage());
+						+loginConfirm.getCode()+" and message "+loginConfirm.getMessage());*/
 			  int code = loginConfirm.getCode();
 			  
 			  synchronized(m_aiLoginSyncObject)
@@ -161,13 +161,12 @@ public class AIControlChannel extends XmlControlChannel
 			  if (error.getErrorCode() ==  XMLErrorMessage.ERR_ACCOUNT_EMPTY)
 			  {
 				  // find an account that is not empty - if possible...
-				  /*
-				   * -- Empty account attack --
-				  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
-				  processErrorMessage(new XMLErrorMessage(elemRoot));
-				  */
 				  
-				  /*updateBalance(PayAccountsFile.getInstance().getActiveAccount()); // show that account is empty
+				  /*getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
+				  processErrorMessage(new XMLErrorMessage(elemRoot));*/
+				  
+				  
+				 updateBalance(PayAccountsFile.getInstance().getActiveAccount()); // show that account is empty
 				  PayAccount currentAccount = PayAccountsFile.getInstance().getAlternativeNonEmptyAccount(
 								  m_connectedCascade.getPIID());
 				  				 				  
@@ -179,17 +178,13 @@ public class AIControlChannel extends XmlControlChannel
 				  {
 					  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 					  processErrorMessage(new XMLErrorMessage(elemRoot));
-				  }*/
-				  getServiceContainer().keepCurrentService(true);
+				  }
+				
 			  }
 			  else
 			  {
-				  /*
-				   * -- No account attack --
 				  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 				  processErrorMessage(new XMLErrorMessage(elemRoot));
-				  */
-				  getServiceContainer().keepCurrentService(true);
 			  }
 
 		  }
@@ -767,7 +762,7 @@ public class AIControlChannel extends XmlControlChannel
 	}
 	
 	public void multiplexerClosed() {
-		LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,"AIControlChannel noticed that the multiplexer is closed");
+		//LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,"AIControlChannel noticed that the multiplexer is closed");
 		synchronized(m_aiLoginSyncObject)
 		{
 			m_aiLoginSyncObject.notifyAll();
