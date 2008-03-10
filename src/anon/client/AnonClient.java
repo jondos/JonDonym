@@ -83,6 +83,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	// 4 errors in 5 seconds should be enough to be sure there is really a connection error
 	private static final int CONNECTION_ERROR_WAIT_COUNT = 4;
 
+	private static final int FIRST_MIX = 1;
+	
 	private static int m_loginTimeout = DEFAULT_LOGIN_TIMEOUT;
 
 	private Multiplexer m_multiplexer;
@@ -769,11 +771,11 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 												 m_keyExchangeManager.getConnectedCascade() );
 			if (errorCode != ErrorCodes.E_SUCCESS)
 			{
-
 				shutdown(!a_serviceContainer.isReconnectedAutomatically());
 				return errorCode;
 			}
-
+			
+						
 			//try
 			{
 				/* try to set infinite timeout */
@@ -783,32 +785,39 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			{
 				/* ignore it */
 			}
-
-			Thread notificationThread = new Thread(new Runnable()
-			{
-				public void run()
-				{
-					synchronized (m_eventListeners)
-					{
-						Enumeration eventListenersList = m_eventListeners.elements();
-						while (eventListenersList.hasMoreElements())
-						{
-							( (AnonServiceEventListener) (eventListenersList.nextElement())).
-								connectionEstablished(a_mixCascade);
-						}
-					}
-				}
-			}, "AnonClient: ConnectionEstablished notification");
-			notificationThread.setDaemon(true);
-			notificationThread.start();
-
-			LogHolder.log(LogLevel.DEBUG, LogType.NET,
-						  "Connect to MixCascade '" + a_mixCascade.toString() + "'!");
-
-			/* AnonClient successfully started */
-			m_connected = true;
+			
+			//if()
+			//{
+			connectionEstablished(a_mixCascade);
+			//}
 			return ErrorCodes.E_SUCCESS;
 		}
+	}
+	
+	public void connectionEstablished(final AnonServerDescription a_serverDescription)
+	{
+		Thread notificationThread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				synchronized (m_eventListeners)
+				{
+					Enumeration eventListenersList = m_eventListeners.elements();
+					while (eventListenersList.hasMoreElements())
+					{
+						( (AnonServiceEventListener) (eventListenersList.nextElement())).
+							connectionEstablished(a_serverDescription);
+					}
+				}
+			}
+		}, "AnonClient: ConnectionEstablished notification");
+		notificationThread.setDaemon(true);
+		notificationThread.start();
+
+		LogHolder.log(LogLevel.ERR, LogType.NET,
+					  "Connect to MixCascade '" + a_serverDescription.toString() + "'!");
+		/* AnonClient successfully started */
+		m_connected = true;
 	}
 
 	private int finishInitialization(Multiplexer a_multiplexer, KeyExchangeManager a_keyExchangeManager,
@@ -850,6 +859,25 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		m_paymentInstance = new Pay(aiControlChannel);
 		if (a_keyExchangeManager.isPaymentRequired())
 		{
+			
+			
+			MixCascade cascadeToConnectTo = a_keyExchangeManager.getConnectedCascade();
+			
+			String firstMixSoftwareVersion = 
+				cascadeToConnectTo.getMixInfo(FIRST_MIX).getServiceSoftware().getVersion();
+			
+			boolean synchedAILogin = false;
+			/* check the first mix software version to determine if client 
+			 * can already perform the new synchronized ai login procedure.
+			 * (for mix version >= 00.07.15)
+			 */
+			
+			if(firstMixSoftwareVersion!= null)
+			{
+				synchedAILogin =
+					firstMixSoftwareVersion.compareTo("00.07.15") >= 0;
+			}
+			aiControlChannel.setSynchronizedAILogin(synchedAILogin);
 			if (!aiControlChannel.sendAccountCert())
 			{
 				return ErrorCodes.E_INTERRUPTED;
