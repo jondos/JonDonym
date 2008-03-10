@@ -40,6 +40,7 @@ import anon.client.ChannelTable;
 import anon.client.Multiplexer;
 import anon.client.PacketCounter;
 import anon.client.XmlControlChannel;
+import anon.pay.xml.XMLAiLoginConfirmation;
 import anon.pay.xml.XMLChallenge;
 import anon.pay.xml.XMLEasyCC;
 import anon.pay.xml.XMLErrorMessage;
@@ -69,6 +70,7 @@ public class AIControlChannel extends XmlControlChannel
 {
 	public static final long MAX_PREPAID_INTERVAL = 3000000; // 3MB
 	public static final long MIN_PREPAID_INTERVAL = 5000; // 500 kb
+	public static final long AI_LOGIN_TIMEOUT = 180000; // 3 minutes
 
   //codes for AI events that can be fired
   private static final int EVENT_UNREAL = 1;
@@ -90,6 +92,9 @@ public class AIControlChannel extends XmlControlChannel
 
   private XMLEasyCC m_initialCC;
 
+  private Vector m_aiLoginSyncObject;
+  
+  private volatile boolean m_synchronizedAILogin;
 
   public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_proxy,
 						  PacketCounter a_packetCounter, IServiceContainer a_serviceContainer,
@@ -98,6 +103,8 @@ public class AIControlChannel extends XmlControlChannel
     m_proxys = a_proxy;
     m_packetCounter = a_packetCounter;
 	m_connectedCascade = a_connectedCascade;
+	m_aiLoginSyncObject = new Vector(1);
+	m_synchronizedAILogin =  true;
   }
 
   public void addAIListener(IAIEventListener a_aiListener) {
@@ -116,7 +123,10 @@ public class AIControlChannel extends XmlControlChannel
   {
 	  Element elemRoot = docMsg.getDocumentElement();
 	  //System.out.println(XMLUtil.toString(elemRoot));
+	  	 	  
 	  String tagName = elemRoot.getTagName();
+	  LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
+				"Thread "+ Thread.currentThread().getName()+" processing AI ControlMessage "+tagName);
 	  try
 	  {
 		  if (tagName.equals(XMLPayRequest.XML_ELEMENT_NAME))
@@ -124,17 +134,43 @@ public class AIControlChannel extends XmlControlChannel
 			  XMLPayRequest theRequest = new XMLPayRequest(elemRoot);
 			  processPayRequest(theRequest);
 		  }
+		  else if (tagName.equals(XMLAiLoginConfirmation.XML_ELEMENT_NAME))
+		  {
+			  XMLAiLoginConfirmation loginConfirm = 
+				  new XMLAiLoginConfirmation(elemRoot);
+			  LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
+						"Thread "+ Thread.currentThread().getName()+" getting AI Login Confirmation with code "
+						+loginConfirm.getCode()+" and message "+loginConfirm.getMessage());
+			  int code = loginConfirm.getCode();
+			  
+			  synchronized(m_aiLoginSyncObject)
+			  {
+				  if(loginConfirm.getCode()==XMLErrorMessage.ERR_OK)
+				  {
+					  m_aiLoginSyncObject.add(new Object());
+				  }
+				  m_aiLoginSyncObject.notifyAll();
+			  }
+		  }
 		  else if (tagName.equals(XMLErrorMessage.XML_ELEMENT_NAME))
 		  {
+			  
 			  XMLErrorMessage error = new XMLErrorMessage(elemRoot);
+			  LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
+						"processing AI ErrorMessage "+error.getErrorCode()+": "+error.getMessage());
 			  if (error.getErrorCode() ==  XMLErrorMessage.ERR_ACCOUNT_EMPTY)
 			  {
 				  // find an account that is not empty - if possible...
-
-				  updateBalance(PayAccountsFile.getInstance().getActiveAccount()); // show that account is empty
+				  /*
+				   * -- Empty account attack --
+				  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
+				  processErrorMessage(new XMLErrorMessage(elemRoot));
+				  */
+				  
+				  /*updateBalance(PayAccountsFile.getInstance().getActiveAccount()); // show that account is empty
 				  PayAccount currentAccount = PayAccountsFile.getInstance().getAlternativeNonEmptyAccount(
 								  m_connectedCascade.getPIID());
-
+				  				 				  
 				  if (currentAccount != null)
 				  {
 					  PayAccountsFile.getInstance().setActiveAccount(currentAccount);
@@ -143,12 +179,17 @@ public class AIControlChannel extends XmlControlChannel
 				  {
 					  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 					  processErrorMessage(new XMLErrorMessage(elemRoot));
-				  }
+				  }*/
+				  getServiceContainer().keepCurrentService(true);
 			  }
 			  else
 			  {
+				  /*
+				   * -- No account attack --
 				  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 				  processErrorMessage(new XMLErrorMessage(elemRoot));
+				  */
+				  getServiceContainer().keepCurrentService(true);
 			  }
 
 		  }
@@ -472,12 +513,15 @@ public class AIControlChannel extends XmlControlChannel
 			  }
 		  }
 	  }
-
+	  
+	  /*
+	   * -- No account attack --
 	  if (!PayAccountsFile.getInstance().signalAccountRequest(m_connectedCascade) ||
 		  PayAccountsFile.getInstance().getActiveAccount() == null)
 	  {
 		  return false;
 	  }
+	  */
 
 	  if (priceCerts.size() != mixIDs.size())
 	  {
@@ -509,16 +553,55 @@ public class AIControlChannel extends XmlControlChannel
 	  if (message != null)
 	  {
 		  LogHolder.log(LogLevel.ERR, LogType.PAY, message);
+		  
+		  /*
+		   * -- No account attack --
+		  
 		  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 		  PayAccountsFile.getInstance().signalAccountError(
-			  new XMLErrorMessage(XMLErrorMessage.ERR_INVALID_PRICE_CERTS, message));
+				  new XMLErrorMessage(XMLErrorMessage.ERR_INVALID_PRICE_CERTS, message)); 
+		   */
+		  
 		  return false;
 	  }
 
 	  PayAccountsFile.getInstance().getActiveAccount().resetCurrentBytes();
+	  LogHolder.log(LogLevel.ALERT, LogType.PAY, Thread.currentThread().getName()+": Now sending account cert and starting ai login procedure");
 	  sendXmlMessage(XMLUtil.toXMLDocument(PayAccountsFile.getInstance().getActiveAccount().getAccountCertificate()));
-
-	  return true;
+	  /* 
+	   * new ai login procedure: wait until all messages are 
+	   * exchanged or until login is timed out 
+	   */
+	  boolean aiLoginSuccess = true;
+	  synchronized(m_aiLoginSyncObject)
+	  {
+		  /* Only if the new synchronized AI login procedure is suppported by the first mix
+		   * (version >= 00.07.15) we wait until the mix confirms a successful/unsuccesful login or
+		   * the connection timed out. Otherwise for backward compatibility reasons
+		   * we still perform the old asynchronous login procedure. 
+		   */
+		  if(m_synchronizedAILogin)
+		  {
+			  LogHolder.log(LogLevel.WARNING, LogType.PAY, "Performing new synchronous AI login");
+			  try {
+				m_aiLoginSyncObject.wait(AI_LOGIN_TIMEOUT);
+			  } 
+			  catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			  }
+			  //LogHolder.log(LogLevel.ALERT, LogType.PAY, m_aiLoginSyncObject);
+			  aiLoginSuccess = m_aiLoginSyncObject.size() != 0;
+			  m_aiLoginSyncObject.clear();
+			  LogHolder.log(LogLevel.ALERT, LogType.PAY, "Now returning from ai login procedure which "+
+					  (aiLoginSuccess ? "was" : "was not")+" successful");
+		  }
+		  else
+		  {
+			  LogHolder.log(LogLevel.WARNING, LogType.PAY, "Old Mix version does not support synchronous AI login! Performing old asynchronous login procedure");
+		  }
+	  }
+	  return aiLoginSuccess;
   }
 
   private void fireAIEvent(int a_eventType, long a_additionalInfo) {
@@ -546,7 +629,7 @@ public class AIControlChannel extends XmlControlChannel
 	private synchronized void processInitialCC(XMLEasyCC a_cc) {
 		PayAccount currentAccount = PayAccountsFile.getInstance().getActiveAccount();
 		String msg = "AI has sent a INVALID last cost confirmation.";
-
+		
 		if (a_cc.verify(currentAccount.getPublicKey()))
 		{
 			try
@@ -681,5 +764,20 @@ public class AIControlChannel extends XmlControlChannel
 		getServiceContainer().keepCurrentService(false);
 		PayAccountsFile.getInstance().signalAccountError(
 			new XMLErrorMessage(XMLErrorMessage.ERR_WRONG_DATA, msg));
+	}
+	
+	public void multiplexerClosed() {
+		LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,"AIControlChannel noticed that the multiplexer is closed");
+		synchronized(m_aiLoginSyncObject)
+		{
+			m_aiLoginSyncObject.notifyAll();
+		}
+	}
+
+	public void setSynchronizedAILogin(boolean synchronizedAILogin) {
+		synchronized(m_aiLoginSyncObject)
+		{
+			m_synchronizedAILogin = synchronizedAILogin;
+		}
 	}
 }
