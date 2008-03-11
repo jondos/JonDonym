@@ -70,7 +70,7 @@ public class AIControlChannel extends XmlControlChannel
 {
 	public static final long MAX_PREPAID_INTERVAL = 3000000; // 3MB
 	public static final long MIN_PREPAID_INTERVAL = 5000; // 500 kb
-	public static final long AI_LOGIN_TIMEOUT = 180000; // 3 minutes
+	public static final long AI_LOGIN_TIMEOUT = 120000; // 2 minutes
 
   //codes for AI events that can be fired
   private static final int EVENT_UNREAL = 1;
@@ -572,7 +572,7 @@ public class AIControlChannel extends XmlControlChannel
 		   */
 		  if(m_synchronizedAILogin)
 		  {
-			  LogHolder.log(LogLevel.WARNING, LogType.PAY, "Performing new synchronous AI login");
+			  LogHolder.log(LogLevel.INFO, LogType.PAY, "Performing new synchronous AI login");
 			  try {
 				m_aiLoginSyncObject.wait(AI_LOGIN_TIMEOUT);
 			  } 
@@ -583,8 +583,6 @@ public class AIControlChannel extends XmlControlChannel
 			  //LogHolder.log(LogLevel.ALERT, LogType.PAY, m_aiLoginSyncObject);
 			  aiLoginSuccess = m_aiLoginSyncObject.size() != 0;
 			  m_aiLoginSyncObject.clear();
-			  LogHolder.log(LogLevel.ALERT, LogType.PAY, "Now returning from ai login procedure which "+
-					  (aiLoginSuccess ? "was" : "was not")+" successful");
 		  }
 		  else
 		  {
