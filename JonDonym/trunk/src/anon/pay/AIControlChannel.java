@@ -471,8 +471,8 @@ public class AIControlChannel extends XmlControlChannel
 	  XMLPriceCertificate priceCert;
 	  Timestamp now = new Timestamp(System.currentTimeMillis());
 	  PayAccount activeAccount = PayAccountsFile.getInstance().getActiveAccount();
-
-	  if (activeAccount == null || !activeAccount.isCharged(now) ||
+	  
+	  if (activeAccount == null || !activeAccount.isCharged(now) || (activeAccount.getBI() == null) ||
 		  !activeAccount.getBI().getId().equals(m_connectedCascade.getPIID()))
 	  {
 		  PayAccount currentAccount = null;
