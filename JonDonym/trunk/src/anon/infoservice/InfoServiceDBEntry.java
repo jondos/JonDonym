@@ -31,6 +31,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InterruptedIOException;
+import java.net.ConnectException;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -926,14 +927,22 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 										  a_httpRequest.getRequestFileName(), a_e);
 							try
 							{
-								Class classSocketTimeoutException =
-									Class.forName("java.net.SocketTimeoutException");
-								if (classSocketTimeoutException.isAssignableFrom(a_e.getClass()))
+								
+								if (a_e instanceof ConnectException)
 								{
 									// remove interface temporarily
-									currentInterface.blockInterface(
-										m_getXmlConnectionTimeout * BLOCK_FACTOR_IF_UNREACHABLE);
-
+									currentInterface.blockInterface(m_getXmlConnectionTimeout * BLOCK_FACTOR_IF_UNREACHABLE);
+								}
+								else
+								{
+									Class classSocketTimeoutException =
+										Class.forName("java.net.SocketTimeoutException");
+								
+									if(classSocketTimeoutException.isAssignableFrom(a_e.getClass()))
+									{
+										// remove interface temporarily
+										currentInterface.blockInterface(m_getXmlConnectionTimeout * BLOCK_FACTOR_IF_UNREACHABLE);
+									}
 								}
 							}
 							catch (ClassNotFoundException a_eClass)
