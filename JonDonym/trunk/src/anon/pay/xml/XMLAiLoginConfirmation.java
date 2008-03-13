@@ -46,7 +46,6 @@ public class XMLAiLoginConfirmation implements IXMLEncodable {
 		}
 	}
 	
-	@Override
 	public Element toXmlElement(Document a_doc) {
 		// TODO Auto-generated method stub
 		return null;
