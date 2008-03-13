@@ -566,7 +566,7 @@ public class AIControlChannel extends XmlControlChannel
 	  synchronized(m_aiLoginSyncObject)
 	  {
 		  /* Only if the new synchronized AI login procedure is suppported by the first mix
-		   * (version >= 00.07.15) we wait until the mix confirms a successful/unsuccesful login or
+		   * (version >= 00.07.19) we wait until the mix confirms a successful/unsuccessful login or
 		   * the connection timed out. Otherwise for backward compatibility reasons
 		   * we still perform the old asynchronous login procedure. 
 		   */
