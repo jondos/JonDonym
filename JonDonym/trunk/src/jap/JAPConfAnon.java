@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
 import java.util.Observer;
@@ -43,6 +44,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -58,16 +60,22 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.AbstractButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
@@ -107,7 +115,6 @@ import logging.LogType;
 import platform.AbstractOS;
 import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.pay.PayAccountsFile;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ListCellRenderer;
 
@@ -140,8 +147,27 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_EXPLAIN_PI_UNAVAILABLE = JAPConfAnon.class.getName() + "_explainPiUnavailable";
 	private static final String MSG_WHAT_IS_THIS = JAPConfAnon.class.getName() + "_whatIsThis";
 	private static final String MSG_FILTER = JAPConfAnon.class.getName() + "_filter";
+	private static final String MSG_EDIT_FILTER = JAPConfAnon.class.getName() + "_editFilter";
 	private static final String MSG_ANON_LEVEL = JAPConfAnon.class.getName() + "_anonLevel";
 	private static final String MSG_SUPPORTS_SOCKS = JAPConfAnon.class.getName() + "_socksSupported";
+	
+	private static final String MSG_FILTER_PAYMENT = JAPConfAnon.class.getName() + "_payment";
+	private static final String MSG_FILTER_CASCADES = JAPConfAnon.class.getName() + "_cascades";
+	private static final String MSG_FILTER_INTERNATIONALITY = JAPConfAnon.class.getName() + "_internationality";
+	private static final String MSG_FILTER_ANON_LEVEL = MSG_ANON_LEVEL;
+	private static final String MSG_FILTER_NEW_MIXES = JAPConfAnon.class.getName() + "_newMixes";
+	
+	private static final String MSG_FILTER_ALL = JAPConfAnon.class.getName() + "_all";
+	private static final String MSG_FILTER_PAYMENT_ONLY = JAPConfAnon.class.getName() + "_paymentOnly";
+	private static final String MSG_FILTER_NO_PAYMENT_ONLY = JAPConfAnon.class.getName() + "_noPaymentOnly";
+	private static final String MSG_FILTER_MIXCASCADES_ONLY = JAPConfAnon.class.getName() + "_mixCascadesOnly";
+	private static final String MSG_FILTER_SINGLECASCADES_ONLY = JAPConfAnon.class.getName() + "_singleCascadesOnly";
+	private static final String MSG_FILTER_AT_LEAST_2_COUNTRIES = JAPConfAnon.class.getName() + "_atLeast2Countries";
+	private static final String MSG_FILTER_AT_LEAST_3_COUNTRIES = JAPConfAnon.class.getName() + "_atLeast3Countries";
+	private static final String MSG_FILTER_AT_LEAST = JAPConfAnon.class.getName() + "_atLeast";
+	private static final String MSG_FILTER_NEW_MIXES_ONLY = JAPConfAnon.class.getName() + "_newMixesOnly";
+	private static final String MSG_FILTER_NO_NEW_MIXES = JAPConfAnon.class.getName() + "_noNewMixes";
+	
 
 
 	private static final String DEFAULT_MIX_NAME = "AN.ON Mix";
@@ -164,6 +190,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private ServerPanel m_serverPanel;
 	private JPanel m_serverInfoPanel;
 	private ManualPanel m_manualPanel;
+	private FilterPanel m_filterPanel;
 
 	private JLabel m_numOfUsersLabel;
 	private GridBagConstraints m_constrHosts, m_constrPorts;
@@ -201,9 +228,23 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JButton m_deleteCascadeButton;
 	private JButton m_cancelCascadeButton;
 	private JButton m_showEditPanelButton;
+	
+	private JButton m_cancelEditFilterButton;
+	private JButton m_okEditFilterButton;
+	private JButton m_showEditFilterButton;
 
 	private JTextField m_manHostField;
 	private JTextField m_manPortField;
+	
+	private JSlider m_filterAnonLevelSlider;
+	private JRadioButton m_filterAtLeast2Countries;
+	private JRadioButton m_filterAtLeast3Countries;
+	private JRadioButton m_filterAnonLevelSliderLabel;
+	private JTextField m_filterNameField;
+	private ButtonGroup m_filterPaymentGroup;
+	private ButtonGroup m_filterCascadeGroup;
+	private ButtonGroup m_filterInternationalGroup;
+	private ButtonGroup m_filterAnonLevelGroup;
 
 	private boolean mb_backSpacePressed;
 	private boolean mb_manualCascadeNew;
@@ -253,7 +294,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_manualPanel.setVisible(false);
 		}
-
+		
+		if(m_filterPanel != null && m_filterPanel.isVisible())
+		{
+			m_filterPanel.setVisible(false);
+		}
+		
 		if (m_serverPanel == null)
 		{
 			m_serverPanel = new ServerPanel(this);
@@ -276,6 +322,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	private void drawServerInfoPanel()
 	{
+		if(m_manualPanel != null)
+		{
+			m_manualPanel.setVisible(false);
+		}
+		
+		if(m_filterPanel != null)
+		{
+			m_filterPanel.setVisible(false);
+		}
+		
 		if (m_serverInfoPanel == null)
 		{
 			m_serverInfoPanel = new ServerInfoPanel(this);
@@ -301,7 +357,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_serverPanel.setVisible(false);
 			m_serverInfoPanel.setVisible(false);
 		}
-
+		
+		if(m_filterPanel != null)
+		{
+			m_filterPanel.setVisible(false);
+		}
+		
 		if (m_manualPanel == null)
 		{
 			m_manualPanel = new ManualPanel(this);
@@ -321,6 +382,77 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		pRoot.validate();
 
 	}
+	
+	private void drawFilterPanel()
+	{
+		if(m_serverPanel != null)
+		{
+			m_serverPanel.setVisible(false);
+			m_serverInfoPanel.setVisible(false);
+		}
+		
+		if(m_manualPanel != null)
+		{
+			m_manualPanel.setVisible(false);
+		}
+		
+		/// DEBU G////
+		if(m_filterPanel != null)
+		{
+			pRoot.remove(m_filterPanel);
+			m_filterPanel = null;
+		}
+	
+		if(m_filterPanel == null)
+		{
+			m_filterPanel = new FilterPanel(this);
+			
+			m_rootPanelConstraints.anchor = GridBagConstraints.NORTHWEST;
+			m_rootPanelConstraints.gridx = 0;
+			m_rootPanelConstraints.gridy = 3;
+			m_rootPanelConstraints.weightx = 1;
+			m_rootPanelConstraints.weighty = 1;
+			m_rootPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
+			pRoot.add(m_filterPanel, m_rootPanelConstraints);
+		}
+		
+		TrustModel model = TrustModel.getCurrentTrustModel();
+		
+		if(model != null)
+		{
+			m_filterNameField.setText(model.getName());
+						
+			m_filterPanel.selectRadioButton(m_filterPaymentGroup, 
+					String.valueOf(model.getAttribute(TrustModel.PaymentAttribute.class).getTrustCondition()));
+		
+			m_filterPanel.selectRadioButton(m_filterCascadeGroup, 
+					String.valueOf(model.getAttribute(TrustModel.SingleMixAttribute.class).getTrustCondition()));
+		
+			int trustCondition = model.getAttribute(TrustModel.InternationalAttribute.class).getTrustCondition();
+			int conditionValue = model.getAttribute(TrustModel.InternationalAttribute.class).getConditionValue();
+		
+			m_filterPanel.selectRadioButton(m_filterInternationalGroup, 
+					String.valueOf(trustCondition));
+		
+			if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue == 2)
+			{
+				m_filterInternationalGroup.setSelected(m_filterAtLeast2Countries.getModel(), true);
+			}
+			else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue == 3)
+			{
+				m_filterInternationalGroup.setSelected(m_filterAtLeast3Countries.getModel(), true);
+			}
+		
+			m_filterPanel.selectRadioButton(m_filterAnonLevelGroup, String.valueOf(model.getAttribute(TrustModel.AnonLevelAttribute.class).getTrustCondition()));
+			m_filterAnonLevelSlider.setValue(model.getAttribute(TrustModel.AnonLevelAttribute.class).getConditionValue());
+		}
+		
+		m_filterPanel.setVisible(true);
+		
+		pRoot.validate();
+	}
+	
+	
 
 	private void drawCascadesPanel()
 	{
@@ -340,18 +472,19 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 
 		JLabel l;
-		/*
+		
 		l = new JLabel(JAPMessages.getString(MSG_FILTER));
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 1;
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.insets = new Insets(0, 5, 5, 5);
-		m_cascadesPanel.add(l, c);*/
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(-5, 0, 0, 5);
+		m_cascadesPanel.add(l, c);
 
-		c.gridx = 0;
+		c.gridx = 1;
 		c.gridy = 0;
 		c.gridwidth = 1;
+		c.insets = new Insets(0, 0, 0, 0);
 		c.anchor = GridBagConstraints.NORTHWEST;
 		m_cmbCascadeFilter = new JComboBox(TrustModel.getTrustModels());
 		final JLabel renderLabel = new JLabel();
@@ -366,7 +499,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					renderLabel.setBackground(list.getSelectionBackground());
 					renderLabel.setForeground(list.getSelectionForeground());
 				}
-				else
+				else 
 				{
 					renderLabel.setBackground(list.getBackground());
 					renderLabel.setForeground(list.getForeground());
@@ -400,10 +533,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			public void actionPerformed(ActionEvent a_event)
 			{
 				TrustModel.setCurrentTrustModel((TrustModel)m_cmbCascadeFilter.getSelectedItem());
+				m_showEditFilterButton.setEnabled(((TrustModel)m_cmbCascadeFilter.getSelectedItem()).isEditable());
 				updateValues(false);
 			}
 		});
 		m_cascadesPanel.add(m_cmbCascadeFilter, c);
+		
+		m_showEditFilterButton = new JButton(JAPMessages.getString(MSG_EDIT_FILTER));
+		m_showEditFilterButton.addActionListener(this);
+		m_showEditFilterButton.setEnabled(TrustModel.getCurrentTrustModel().isEditable());
+		c.gridx = 2;
+		c.gridy = 0;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		c.insets = new Insets(0, 5, 0, 0);
+		m_cascadesPanel.add(m_showEditFilterButton, c);
 
 		m_listMixCascade = new JList();
 		m_tableMixCascade = new JTable();
@@ -411,7 +555,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_tableMixCascade.setTableHeader(null);
 		m_tableMixCascade.setIntercellSpacing(new Dimension(0,0));
 		m_tableMixCascade.setShowGrid(false);
-
+		
 		m_tableMixCascade.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		m_tableMixCascade.getColumnModel().getColumn(0).setMaxWidth(1);
 		m_tableMixCascade.getColumnModel().getColumn(0).setPreferredWidth(1);
@@ -420,12 +564,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_tableMixCascade.getSelectionModel().addListSelectionListener(this);
 		//m_tableMixCascade.add
 
-
 		m_listMixCascade.setFixedCellWidth(30);
 		c.gridx = 0;
 		c.gridy = 1;
 		c.gridheight = 6;
-		c.gridwidth = 1;
+		c.gridwidth = 2;
 		c.weightx = 1.0;
 		c.weighty = 1.0;
 		c.fill = GridBagConstraints.BOTH;
@@ -481,8 +624,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c1.gridx = 4;
 		c1.weightx = 1.0;
 		panelBttns.add(m_deleteCascadeButton, c1);
-
-
 
 		c.gridx = 0;
 		c.gridy = 7;
@@ -577,7 +718,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							JAPDialog.showMessageDialog(m_payLabel,
 								JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 								TrustModel.getCurrentTrustModel().getName()),
-								new JAPDialog.LinkedHelpContext(JAPConfTrust.class.getName())); //,
+								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName())); //,
 						}
 
 					}
@@ -600,15 +741,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_lblSocks.setIcon(GUIUtils.loadImageIcon("socks_icon.gif", true));
 		m_cascadesPanel.add(m_lblSocks, c);
 
-
-
 		c.insets = new Insets(5, 5, 0, 5);
 		c.gridwidth = 1;
 		c.gridx = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridy = 6;
 		m_cascadesPanel.add(new JLabel("                                               "), c);
-
+		
 		m_rootPanelConstraints.gridx = 0;
 		m_rootPanelConstraints.gridy = 0;
 		m_rootPanelConstraints.insets = new Insets(10, 10, 0, 10);
@@ -966,6 +1105,19 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				m_cancelCascadeButton.setEnabled(false);
 			}
 		}
+		else if(e.getSource() == m_cancelEditFilterButton)
+		{
+			m_filterPanel.setVisible(false);
+			m_serverPanel.setVisible(true);
+			m_serverInfoPanel.setVisible(true);
+		}
+		else if(e.getSource() == m_okEditFilterButton)
+		{
+			editFilter();
+			m_filterPanel.setVisible(false);
+			m_serverPanel.setVisible(true);
+			m_serverInfoPanel.setVisible(true);	
+		}
 		else if (e.getSource() == m_reloadCascadesButton)
 		{
 			// delete all non-manual cascades
@@ -996,9 +1148,17 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 			if (newCascade != null)
 			{
-				JAPController.getInstance().setCurrentMixCascade(newCascade);
-				m_selectCascadeButton.setEnabled(false);
-				m_tableMixCascade.repaint();
+				if(!TrustModel.getCurrentTrustModel().isTrusted(newCascade))
+				{
+					JAPDialog.showMessageDialog(m_payLabel,
+							JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
+							TrustModel.getCurrentTrustModel().getName()),
+							new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName()));
+				} else {
+					JAPController.getInstance().setCurrentMixCascade(newCascade);
+					m_selectCascadeButton.setEnabled(false);
+					m_tableMixCascade.repaint();
+				}
 			}
 		}
 		else if (e.getSource() == m_manualCascadeButton)
@@ -1037,6 +1197,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_cancelCascadeButton.setEnabled(false);
 			m_oldCascadeHost = m_manHostField.getText();
 			m_oldCascadePort = m_manPortField.getText();
+		}
+		else if (e.getSource() == m_showEditFilterButton)
+		{
+			drawFilterPanel();
 		}
 	}
 
@@ -1183,6 +1347,51 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot create cascade");
 		}
 	}
+	
+	/**
+	 * Edits the filter
+	 */
+	private void editFilter()
+	{
+		TrustModel model = TrustModel.getCurrentTrustModel();
+		if(!model.isEditable()) return;
+		
+		try
+		{
+			TrustModel newModel = new TrustModel(model);
+			
+			String cmd = m_filterPaymentGroup.getSelection().getActionCommand();
+			int value = 0;
+			newModel.setAttribute(TrustModel.PaymentAttribute.class, Integer.parseInt(cmd));
+			
+			cmd = m_filterCascadeGroup.getSelection().getActionCommand();
+			newModel.setAttribute(TrustModel.SingleMixAttribute.class, Integer.parseInt(cmd));
+			
+			cmd = m_filterInternationalGroup.getSelection().getActionCommand();
+			if(m_filterAtLeast2Countries.isSelected()) value = 2;
+			else if(m_filterAtLeast3Countries.isSelected()) value = 3;
+			newModel.setAttribute(TrustModel.InternationalAttribute.class, Integer.parseInt(cmd), value);
+			
+			cmd = m_filterAnonLevelGroup.getSelection().getActionCommand();
+			newModel.setAttribute(TrustModel.AnonLevelAttribute.class, Integer.parseInt(cmd), m_filterAnonLevelSlider.getValue());
+			
+			if(m_filterNameField.getText().length() > 0)
+				newModel.setName(m_filterNameField.getText());
+			
+			// Display a warning if the new model won't have any trusted cascades
+			if(newModel.hasTrustedCascades() || JAPDialog.showYesNoDialog(m_filterPanel, "Keine Kaskaden im Filter, trotzdem beibehalten?"))
+			{
+				model.copyFrom(newModel);
+			}
+			
+		}
+		catch(NumberFormatException ex)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.GUI, "Error parsing trust condition from filter settings");
+		}		
+		
+		updateValues(false);
+	}
 
 	public void mouseClicked(MouseEvent e)
 	{
@@ -1220,11 +1429,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 				if (c != null)
 				{
-					JAPController.getInstance().setCurrentMixCascade(c);
-					m_deleteCascadeButton.setEnabled(false);
-					m_showEditPanelButton.setEnabled(false);
+					if(!TrustModel.getCurrentTrustModel().isTrusted(c))
+					{
+						JAPDialog.showMessageDialog(m_payLabel,
+								JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
+								TrustModel.getCurrentTrustModel().getName()),
+								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName()));
+					} 
+					else 
+					{
+						JAPController.getInstance().setCurrentMixCascade(c);
+						m_deleteCascadeButton.setEnabled(false);
+						m_showEditPanelButton.setEnabled(false);
 
-					m_tableMixCascade.repaint();
+						m_tableMixCascade.repaint();
+					}
 				}
 				//m_listMixCascade.repaint();
 			}
@@ -1417,22 +1636,24 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 				if (m_infoService != null)
 				{
-					if (cascade.getNumberOfMixes() <= 1)
+					if(m_filterPanel == null || !m_filterPanel.isVisible())
 					{
-						drawServerPanel(3, "", false, 0);
-					}
-					else
-					{
-						if (!cascade.isUserDefined() && cascade.getNumberOfOperators() <= 1)
+						if (cascade.getNumberOfMixes() <= 1)
 						{
-							// this cascade is run by only one operator!
-							drawServerPanel(1, cascade.getName(), true, selectedMix);
+							drawServerPanel(3, "", false, 0);
 						}
 						else
 						{
-							drawServerPanel(cascade.getNumberOfMixes(), cascade.getName(), true, selectedMix);
+							if (!cascade.isUserDefined() && cascade.getNumberOfOperators() <= 1)
+							{
+								// this cascade is run by only one operator!
+								drawServerPanel(1, cascade.getName(), true, selectedMix);
+							}
+							else
+							{
+								drawServerPanel(cascade.getNumberOfMixes(), cascade.getName(), true, selectedMix);
+							}
 						}
-
 					}
 
 					m_numOfUsersLabel.setText(m_infoService.getAnonLevel(cascadeId));
@@ -1450,7 +1671,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					setPayLabel(cascade);
 					m_lblSocks.setVisible(cascade.isSocks5Supported());
 				}
-				drawServerInfoPanel();
+				if(m_filterPanel == null || !m_filterPanel.isVisible())
+					drawServerInfoPanel();
 
 				if (cascade.isUserDefined())
 				{
@@ -1511,7 +1733,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 		if (e.getSource() == m_manPortField)
 		{
-			if (e.getKeyCode() == e.VK_BACK_SPACE)
+			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE)
 			{
 				mb_backSpacePressed = true;
 			}
@@ -2358,11 +2580,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			add(m_manHostField, c);
 			m_manPortField = new JAPJIntField(ListenerInterface.PORT_MAX_VALUE);
 			c.gridy = 1;
-			c.fill = c.NONE;
+			c.fill = GridBagConstraints.NONE;
 			add(m_manPortField, c);
 			c.weightx = 0;
 			c.gridy = 2;
-			c.fill = c.HORIZONTAL;
+			c.fill = GridBagConstraints.HORIZONTAL;
 			c.gridx = 2;
 			c.gridwidth = 1;
 			c.fill = GridBagConstraints.NONE;
@@ -2691,6 +2913,219 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridwidth = 3;
 			add(new JLabel(), c);
 			*/
+		}
+	}
+	
+	private class FilterPanel extends JPanel implements ChangeListener
+	{
+		public FilterPanel(JAPConfAnon a_listener)
+		{
+			GridBagLayout layout = new GridBagLayout();
+			GridBagConstraints c = new GridBagConstraints();
+			setLayout(layout);
+			
+			JLabel l;
+			JPanel p;
+			JRadioButton r, s, t;
+			
+			l = new JLabel("Name:");
+			c.gridx = 0;
+			c.gridy = 0;
+			c.insets = new Insets(0, 0, 5, 5);
+			c.anchor = GridBagConstraints.WEST;
+			add(l, c);
+			
+			m_filterNameField = new JTextField();
+			c.gridx++;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.insets = new Insets(0, 0, 5, 0);
+			add(m_filterNameField, c);			
+			c.weightx = 0;
+			TitledBorder title = new TitledBorder(JAPMessages.getString(MSG_FILTER_PAYMENT));
+			p = new JPanel(new GridLayout(0, 1));
+			p.setBorder(title);
+			
+			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
+			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
+			r.setSelected(true);
+			p.add(r);
+			
+			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_PAYMENT_ONLY));
+			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			p.add(s);
+			
+			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_NO_PAYMENT_ONLY));
+			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
+			p.add(t);
+			
+			m_filterPaymentGroup = new ButtonGroup();
+			m_filterPaymentGroup.add(r);
+			m_filterPaymentGroup.add(s);
+			m_filterPaymentGroup.add(t);
+
+			c.anchor = GridBagConstraints.NORTHWEST;
+			c.fill = GridBagConstraints.BOTH;
+
+			c.gridwidth = 2;
+			c.gridx = 0;
+			c.gridy++;
+			c.weightx = 0.5;
+			add(p, c);
+			
+			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_CASCADES));
+			p = new JPanel(new GridLayout(0, 1));
+			p.setBorder(title);
+			
+			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
+			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
+			r.setSelected(true);
+			p.add(r, c);
+			
+			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_MIXCASCADES_ONLY));
+			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
+			p.add(s, c);
+			
+			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_SINGLECASCADES_ONLY));
+			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			p.add(t, c);
+			
+			m_filterCascadeGroup = new ButtonGroup();
+			m_filterCascadeGroup.add(r);
+			m_filterCascadeGroup.add(s);
+			m_filterCascadeGroup.add(t);
+			
+			c.gridx += 2;
+			c.gridwidth = 1;
+			c.weightx = 0.5;
+			add(p, c);
+			
+			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_INTERNATIONALITY));
+			p = new JPanel(new GridLayout(0, 1));
+			p.setBorder(title);
+			
+			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
+			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
+			r.setSelected(true);
+			p.add(r, c);
+			
+			m_filterAtLeast2Countries = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_2_COUNTRIES));
+			m_filterAtLeast2Countries.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
+			p.add(m_filterAtLeast2Countries);
+			
+			m_filterAtLeast3Countries = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_3_COUNTRIES));
+			m_filterAtLeast3Countries.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
+			p.add(m_filterAtLeast3Countries);
+			
+			m_filterInternationalGroup = new ButtonGroup();
+			m_filterInternationalGroup.add(r);
+			m_filterInternationalGroup.add(m_filterAtLeast2Countries);
+			m_filterInternationalGroup.add(m_filterAtLeast3Countries);
+			
+			c.gridx = 0;
+			c.gridy++;
+			c.weightx = 0.5;
+			c.gridwidth = 2;
+			add(p, c);
+			
+			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_ANON_LEVEL));
+			p = new JPanel(new GridBagLayout());
+			p.setBorder(title);
+			
+			GridBagConstraints c2 = new GridBagConstraints();
+			
+			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
+			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
+			r.setSelected(true);
+			c2.gridwidth = 2;
+			c2.gridx = 0;
+			c2.gridy = 0;
+			c2.weightx = 0.2;
+			c2.anchor = GridBagConstraints.WEST;
+			p.add(r, c2);
+			
+			m_filterAnonLevelSliderLabel = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST));
+			m_filterAnonLevelSliderLabel.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
+			c2.gridy++;
+			c2.gridx = 0;
+			c2.gridwidth = 1;
+			p.add(m_filterAnonLevelSliderLabel, c2);
+
+			m_filterAnonLevelSlider = new JSlider();	
+			m_filterAnonLevelSlider.setMinimum(StatusInfo.ANON_LEVEL_MIN);
+			m_filterAnonLevelSlider.setMaximum(StatusInfo.ANON_LEVEL_MAX);
+			m_filterAnonLevelSlider.setMajorTickSpacing(2);
+			m_filterAnonLevelSlider.setMinorTickSpacing(1);
+			m_filterAnonLevelSlider.setPaintLabels(true);
+			m_filterAnonLevelSlider.setPaintTicks(true);
+			m_filterAnonLevelSlider.addChangeListener(this);
+			m_filterAnonLevelSlider.setSnapToTicks(true);
+			c2.gridx++;
+			c2.weightx = 0.8;
+			c2.fill = GridBagConstraints.HORIZONTAL;
+			p.add(m_filterAnonLevelSlider, c2);
+			
+			/*m_filterAnonLevelField = new JAPJIntField(StatusInfo.ANON_LEVEL_MAX);
+			m_filterAnonLevelField.setText(String.valueOf(StatusInfo.ANON_LEVEL_LOW));
+			p.add(m_filterAnonLevelField);
+
+			l = new JLabel(" / " + StatusInfo.ANON_LEVEL_MAX);
+			p.add(l);*/
+			
+			// hack hack
+			// TODO: remodel with GridBagLayout
+			p.add(new JLabel(""));
+			
+			m_filterAnonLevelGroup = new ButtonGroup();
+			m_filterAnonLevelGroup.add(r);
+			m_filterAnonLevelGroup.add(m_filterAnonLevelSliderLabel);
+			
+			c.gridx += 2;
+			c.gridwidth = 1;
+			add(p, c);
+			
+			p = new JPanel(new GridBagLayout());
+			c2 = new GridBagConstraints();
+						
+			m_okEditFilterButton = new JButton(JAPMessages.getString("okButton"));
+			m_okEditFilterButton.addActionListener(a_listener);
+			c2.gridx = 0;
+			c2.gridy = 0;
+			p.add(m_okEditFilterButton, c2);
+			
+			m_cancelEditFilterButton = new JButton(JAPMessages.getString("cancelButton"));
+			m_cancelEditFilterButton.addActionListener(a_listener);
+			c2.gridx++;
+			p.add(m_cancelEditFilterButton, c2);
+			
+			c.gridx = 0;
+			c.gridy++;
+			c.gridwidth = 2;
+			c.weightx = 1.0;
+			c.fill = GridBagConstraints.NONE;
+			add(p, c);
+		}
+		
+		public void stateChanged(ChangeEvent e)
+		{
+			JSlider source = (JSlider) e.getSource();
+			/*if(!source.getValueIsAdjusting())
+			{*/
+				m_filterAnonLevelGroup.setSelected(m_filterAnonLevelSliderLabel.getModel(), true);
+			//}
+		}
+		
+		private void selectRadioButton(ButtonGroup a_group, String a_trustCondition)
+		{
+			Enumeration e = a_group.getElements();
+			while(e.hasMoreElements())
+			{
+				AbstractButton btn = ((AbstractButton) e.nextElement());
+				if(a_trustCondition.equals(btn.getActionCommand()))
+				{
+					a_group.setSelected(btn.getModel(), true);
+					break;
+				}
+			}			
 		}
 	}
 
