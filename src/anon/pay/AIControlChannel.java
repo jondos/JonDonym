@@ -147,7 +147,7 @@ public class AIControlChannel extends XmlControlChannel
 			  {
 				  if(loginConfirm.getCode()==XMLErrorMessage.ERR_OK)
 				  {
-					  m_aiLoginSyncObject.add(new Object());
+					  m_aiLoginSyncObject.addElement(new Object());
 				  }
 				  m_aiLoginSyncObject.notifyAll();
 			  }
@@ -582,7 +582,7 @@ public class AIControlChannel extends XmlControlChannel
 			  }
 			  //LogHolder.log(LogLevel.ALERT, LogType.PAY, m_aiLoginSyncObject);
 			  aiLoginSuccess = m_aiLoginSyncObject.size() != 0;
-			  m_aiLoginSyncObject.clear();
+			  m_aiLoginSyncObject.removeAllElements();
 		  }
 		  else
 		  {
