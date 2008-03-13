@@ -869,13 +869,13 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			boolean synchedAILogin = false;
 			/* check the first mix software version to determine if client 
 			 * can already perform the new synchronized ai login procedure.
-			 * (for mix version >= 00.07.15)
+			 * (for mix version >= 00.07.19)
 			 */
 			
 			if(firstMixSoftwareVersion!= null)
 			{
 				synchedAILogin =
-					firstMixSoftwareVersion.compareTo("00.07.15") >= 0;
+					firstMixSoftwareVersion.compareTo("00.07.19") >= 0;
 			}
 			aiControlChannel.setSynchronizedAILogin(synchedAILogin);
 			if (!aiControlChannel.sendAccountCert())
