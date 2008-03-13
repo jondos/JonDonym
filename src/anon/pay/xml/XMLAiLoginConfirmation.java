@@ -1,8 +1,10 @@
 package anon.pay.xml;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
+import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
 
@@ -11,7 +13,7 @@ public class XMLAiLoginConfirmation implements IXMLEncodable {
 	private int m_code;
 	private String m_message;
 	
-	public static final Object XML_ELEMENT_NAME = "LoginConfirmation";
+	public static final String XML_ELEMENT_NAME = "LoginConfirmation";
 	
 	public XMLAiLoginConfirmation(Element element) throws XMLParseException
 	{
@@ -22,24 +24,17 @@ public class XMLAiLoginConfirmation implements IXMLEncodable {
 	
 	private void setValues(Element elemRoot) throws XMLParseException
 	{
-		if (!elemRoot.getTagName().equals(XML_ELEMENT_NAME))
+		XMLUtil.assertNodeName((Node) elemRoot, XML_ELEMENT_NAME);
+		
+		m_code = XMLUtil.parseAttribute(elemRoot, "code", -1);
+		
+		if(m_code == -1)
 		{
-			throw new XMLParseException("Login confirmation has wrong format or wrong version number");
+			throw new XMLParseException("No or invalid confirmation code for login confirmation specified");
 		}
-		String codeStr = elemRoot.getAttribute("code");
-		if(codeStr.equals(""))
-		{
-			throw new XMLParseException("No confirmation code for login confirmation specified");
-		}
-		try 
-		{
-			m_code = Integer.parseInt(codeStr);
-		}
-		catch(NumberFormatException nfe)
-		{
-			throw new XMLParseException("Invalid login confirmation code specified");
-		}
-		m_message = elemRoot.getTextContent();
+		
+		m_message = XMLUtil.parseValue((Node) elemRoot, null);
+		
 		if(m_message==null)
 		{
 			throw new XMLParseException("No login confirmation message specified");
