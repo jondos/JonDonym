@@ -83,6 +83,7 @@ import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
+import anon.infoservice.StatusInfo;
 import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.infoservice.ProxyInterface;
 import anon.mixminion.MixminionServiceDescription;
@@ -1245,6 +1246,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 						nodeMix = nodeMix.getNextSibling();
 					}
 				}
+				
+				// load the stored statusinfos
+				Database.getInstance(StatusInfo.class).loadFromXml(
+						(Element) XMLUtil.getFirstChildByName(root, StatusInfo.XML_ELEMENT_CONTAINER_NAME));
 
 				// load deleted messages
 				Database.getInstance(DeletedMessageIDDBEntry.class).loadFromXml(
@@ -2299,6 +2304,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 			/* stores known cascades */
 			e.appendChild(Database.getInstance(CascadeIDEntry.class).toXmlElement(doc));
+			
+			// store status info
+			e.appendChild(Database.getInstance(StatusInfo.class).toXmlElement(doc));
+			
 			// known for the blacklist
 			e.appendChild(Database.getInstance(PreviouslyKnownCascadeIDEntry.class).toXmlElement(doc));
 
