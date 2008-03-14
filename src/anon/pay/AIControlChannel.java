@@ -577,8 +577,10 @@ public class AIControlChannel extends XmlControlChannel
 				m_aiLoginSyncObject.wait(AI_LOGIN_TIMEOUT);
 			  } 
 			  catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				/* This happens when a user pushes the anonymity off button before 
+				 * the synchronous login hasn't finished. Therefore just leave. false will be returned 
+				 * automatically.
+				 */ 
 			  }
 			  //LogHolder.log(LogLevel.ALERT, LogType.PAY, m_aiLoginSyncObject);
 			  aiLoginSuccess = m_aiLoginSyncObject.size() != 0;
