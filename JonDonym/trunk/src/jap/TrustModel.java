@@ -30,7 +30,6 @@ package jap;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Random;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -40,7 +39,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import anon.client.BasicTrustModel;
-import anon.client.ITrustModel.TrustException;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
@@ -52,7 +50,6 @@ import gui.JAPMessages;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-import anon.client.ITrustModel;
 import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.NewCascadeIDEntry;
 import anon.pay.PayAccountsFile;
@@ -109,15 +106,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String XML_ATTR_CURRENT_TRUST_MODEL = "currentTrustModel";
 	private static final String XML_ATTR_NAME = "name";
 	
-	private static final String MSG_CERTIFIED_CASCADES = TrustModel.class.getName() + "_certifiedCascades";
-	private static final String MSG_CASCADES_WITH_COSTS = TrustModel.class.getName() + "_cascadesWithCosts";
+		private static final String MSG_CASCADES_WITH_COSTS = TrustModel.class.getName() + "_cascadesWithCosts";
 	private static final String MSG_CASCADES_WITHOUT_COSTS = TrustModel.class.getName() + "_cascadesWithoutCosts";
 	private static final String MSG_CASCADES_USER_DEFINED = TrustModel.class.getName() + "_cascadesUserDefined";
 	private static final String MSG_CASCADES_NEW = TrustModel.class.getName() + "_cascadesNew";
 	private static final String MSG_CASCADES_FILTER = TrustModel.class.getName() + "_cascadesFilter";
 	private static final String MSG_SINGLE_MIXES = TrustModel.class.getName() + "_singleMixes";
-	private static final String MSG_ALL_CASCADES = TrustModel.class.getName() + "_allCascades";
-	private static final String MSG_INTERNATIONAL_CASCADES = TrustModel.class.getName() + "_internationalCascades";
 	private static final String MSG_ALL_SERVICES = TrustModel.class.getName() + "_allServices";
 	
 	private static Vector ms_trustModels = new Vector();
@@ -132,10 +126,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	}
 	private static InnerObservable m_trustModelObservable = new InnerObservable();
 
-	// TODO: remove
-	private int m_trustConditionPay = TRUST_ALWAYS;
-	private int m_trustConditionExpiredCerts = TRUST_ALWAYS;
-		
 	private Hashtable m_trustAttributes = new Hashtable();
 
 	private String m_strName;
@@ -178,16 +168,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			return m_conditionValue;
 		}
 		
-		public int setTrust(int a_trustCondition)
-		{
-			return m_trustCondition;
-		}
-		
-		public int setReserved(int a_reserved)
-		{
-			return m_conditionValue;
-		}
-
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			
@@ -382,7 +362,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	{
 		public AnonLevelAttribute(int a_trustCondition, int a_conditionValue)
 		{
-			super(a_trustCondition, a_conditionValue);
+			// MUST always be TRUST_IF_AT_LEAST
+			super(TRUST_IF_AT_LEAST, a_conditionValue);
 		}
 		
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
@@ -821,16 +802,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 
 		return elemTrustModel;
-	}
-
-	public int getTrustExpiredCerts()
-	{
-		return m_trustConditionExpiredCerts;
-	}
-
-	public int getTrustPay()
-	{
-		return m_trustConditionPay;
 	}
 
 	public boolean isPaymentForced()
