@@ -522,9 +522,9 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 
 	/**
 	 * If the entries of this database implement IXMLEncodable and has a proper value for the field
-	 * XML_ELEMENT_CONTAINER_NAME, this database is transormed into an XML element.
+	 * XML_ELEMENT_CONTAINER_NAME, this database is transformed into an XML element.
 	 * @param a_doc a Document
-	 * @return the database als XML Element or null if transformation was not possible
+	 * @return the database as XML Element or null if transformation was not possible
 	 */
 	public Element toXmlElement(Document a_doc)
 	{
