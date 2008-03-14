@@ -35,6 +35,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
@@ -47,9 +48,10 @@ import anon.util.XMLParseException;
 /**
  * Holds the information of a mixcascade status.
  */
-public final class StatusInfo extends AbstractDatabaseEntry implements IDistributable, IVerifyable
+public final class StatusInfo extends AbstractDatabaseEntry implements IDistributable, IVerifyable, IXMLEncodable
 {
 	public static final String XML_ELEMENT_NAME = "MixCascadeStatus";
+	public static final String XML_ELEMENT_CONTAINER_NAME = "MixCascadeStatusList";
 
 	public static final int ANON_LEVEL_MIN = 0;
 	public static final int ANON_LEVEL_LOW = 2;
@@ -104,11 +106,25 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 * requests the current status.
 	 */
 	private String m_statusXmlData;
-	//The same as above but as byte-array (this again is cached for faster processing...)
+	
+	/**
+	 * Stores the XML description as byte-array for fast processing
+	 */
 	private byte[] m_statusXmlDataBytes;
 
+	/**
+	 * The signature of the StatusInfo
+	 */
 	private XMLSignature m_signature;
+	
+	/**
+	 * The certificate path
+	 */
 	private CertPath m_certPath;
+	
+	/**
+	 * The associated certificate
+	 */
 	private JAPCertificate m_certificate;
 
 	/**
@@ -147,7 +163,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	{
 		this(a_statusNode, null);
 	}
-
+	
 	public StatusInfo(Element a_statusNode, MixCascade a_cascade) throws Exception
 	{
 		this(a_statusNode, a_cascade, -1);
@@ -161,6 +177,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 *                           calculating the anonymity level. If this value is smaller than 0,
 	 *                           no anonymity level is calculated and getAnonLevel() will return
 	 *                           -1.
+	 * @param a_timeout	A timeout.                     
 	 */
 	public StatusInfo(Element a_statusNode, MixCascade a_cascade, long a_timeout) throws Exception
 	{
@@ -177,7 +194,24 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		{
 			throw new XMLParseException(XMLParseException.ROOT_TAG);
 		}
-
+		
+		/* get all the attributes of MixCascadeStatus */
+		m_mixCascadeId = a_statusNode.getAttribute("id");
+	
+		/* Temporarily add the MixCascade certificate to the certificate store when loading from the XML file */		
+		int certificateLock = -1;
+		if(a_cascade == null)
+		{
+			a_cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(m_mixCascadeId);
+			
+			if (a_cascade != null && a_cascade.getCertPath() != null && a_cascade.getCertPath().getFirstCertificate() != null && a_cascade.getCertPath().verify())
+			{
+				/* add the cascade certificate to the certificate store */
+				certificateLock = SignatureVerifier.getInstance().getVerificationCertificateStore().
+					addCertificateWithoutVerification(a_cascade.getCertPath(),
+					JAPCertificate.CERTIFICATE_TYPE_MIX, false, false);
+			}
+		}		
 
 		// verify the signature
 		try
@@ -197,10 +231,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		{
 		}
 
-		/* get all the attributes of MixCascadeStatus */
-		m_mixCascadeId = a_statusNode.getAttribute("id");
-
-		//The following is a workaround becuase if signature check is disabled, then also
+		//The following is a workaround because if signature check is disabled, then also
 		//the certificate sent with the POST HELO message are not stored....
 		//we should change this....
 		if(SignatureVerifier.getInstance().isCheckSignatures()&&
@@ -217,20 +248,28 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 					throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Status-Entry for Mix ID: " + m_mixCascadeId);
 				}
 			}
+		
+		/* remove the lock on the certificate (if there is any) */
+		if (certificateLock != -1)
+		{
+			SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificateLock(
+				certificateLock);
+		}
+		
 		/* get the values */
 		m_currentRisk = Integer.parseInt(a_statusNode.getAttribute("currentRisk"));
 		m_mixedPackets = Long.parseLong(a_statusNode.getAttribute("mixedPackets"));
 		m_nrOfActiveUsers = Integer.parseInt(a_statusNode.getAttribute("nrOfActiveUsers"));
 		m_trafficSituation = Integer.parseInt(a_statusNode.getAttribute("trafficSituation"));
 		m_lastUpdate = Long.parseLong(a_statusNode.getAttribute("LastUpdate"));
-		/* calculate then anonymity level */
+		
+		/* calculate the anonymity level */
 		m_anonLevel = -1;
 		if (a_cascade != null && a_cascade.getNumberOfMixes() > 0 &&
 			getNrOfActiveUsers() >= 0 && getTrafficSituation() >= 0)
 		{
 			double userFactor = Math.min( ( (double) getNrOfActiveUsers()) / 500.0, 1.0);
-			double trafficFactor = Math.min( ( (double) getTrafficSituation()) / 100.0, 1.0);
-
+			//double trafficFactor = Math.min( ( (double) getTrafficSituation()) / 100.0, 1.0);
 
 			double countryFactor = Math.max(Math.min((double)a_cascade.getNumberOfCountries(), 3.0), 1.0);
 			double operatorFactor = Math.max(Math.min((double)a_cascade.getNumberOfOperators(), 3.0), 1.0);
@@ -241,7 +280,6 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			m_anonLevel = (int) (userFactor * (countryFactor + operatorFactor) +
 								  // "good" cascades always get a 40% minimum
 								(countryFactor - 1.0 + operatorFactor - 1.0));
-
 
 			// do not supersede the maximum or minimum anonymity level
 			m_anonLevel = Math.min(m_anonLevel, ANON_LEVEL_MAX);
@@ -522,5 +560,22 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		mixCascadeStatusNode.setAttribute("trafficSituation", Integer.toString(getTrafficSituation()));
 		mixCascadeStatusNode.setAttribute("LastUpdate", Long.toString(getLastUpdate()));
 		return mixCascadeStatusNode;
+	}
+	
+	/**
+	 * Returns an XML Node of the current StatusInfo using the stored XML String
+	 * 
+	 * @return the XML node
+	 */
+	public Element toXmlElement(Document a_doc)
+	{
+		try 
+		{
+			return (Element) XMLUtil.importNode(a_doc, (Node) XMLUtil.toXMLDocument(m_statusXmlDataBytes).getDocumentElement(), true);
+		}
+		catch(XMLParseException ex)
+		{
+			return null;
+		}
 	}
 }
