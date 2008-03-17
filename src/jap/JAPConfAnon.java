@@ -241,7 +241,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JTextField m_manHostField;
 	private JTextField m_manPortField;
 	
-	private JSlider m_filterAnonLevelSlider;
 	private JSlider m_filterSpeedSlider;
 	private JSlider m_filterLatencySlider;
 	private JRadioButton m_filterAtLeast2Countries;
@@ -440,18 +439,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					String.valueOf(m_trustModelCopy.getAttribute(TrustModel.SingleMixAttribute.class).getTrustCondition()));
 		
 			int trustCondition = m_trustModelCopy.getAttribute(TrustModel.InternationalAttribute.class).getTrustCondition();
-			int conditionValue = ((Integer) m_trustModelCopy.getAttribute(TrustModel.InternationalAttribute.class).getConditionValue()).intValue();
-		
+			Integer conditionValue = ((Integer) m_trustModelCopy.getAttribute(TrustModel.InternationalAttribute.class).getConditionValue());
+			
 			m_filterPanel.selectRadioButton(m_filterInternationalGroup, 
 					String.valueOf(trustCondition));
-		
-			if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue == 2)
+			
+			if(conditionValue != null)
 			{
-				m_filterInternationalGroup.setSelected(m_filterAtLeast2Countries.getModel(), true);
-			}
-			else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue == 3)
-			{
-				m_filterInternationalGroup.setSelected(m_filterAtLeast3Countries.getModel(), true);
+				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
+				{
+					m_filterInternationalGroup.setSelected(m_filterAtLeast2Countries.getModel(), true);
+				}
+				else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 3)
+				{
+					m_filterInternationalGroup.setSelected(m_filterAtLeast3Countries.getModel(), true);
+				}
 			}
 		
 			//m_filterAnonLevelSlider.setValue(((Integer)model.getAttribute(TrustModel.AnonLevelAttribute.class).getConditionValue()).intValue());
@@ -3006,13 +3008,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			r.setSelected(true);
 			p.add(r);
 			
-			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_PAYMENT_ONLY));
-			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_NO_PAYMENT_ONLY));
+			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
 			p.add(s);
 			
-			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_NO_PAYMENT_ONLY));
-			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
-			p.add(t);
+			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_PAYMENT_ONLY));
+			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			p.add(t);			
 			
 			m_filterPaymentGroup = new ButtonGroup();
 			m_filterPaymentGroup.add(r);
