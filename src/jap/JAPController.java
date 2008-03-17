@@ -1151,11 +1151,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 					LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 				}
 
-				/* load trust models */
-				TrustModel.fromXmlElement(
-								(Element)XMLUtil.getFirstChildByName(root,
-					TrustModel.XML_ELEMENT_CONTAINER_NAME));
-
 				/* load the list of blacklisted cascades */
 				Database.getInstance(BlacklistedCascadeIDEntry.class).loadFromXml(
 								(Element) XMLUtil.getFirstChildByName(root,
@@ -1246,6 +1241,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 						nodeMix = nodeMix.getNextSibling();
 					}
 				}
+				
+				/* load trust models */
+				TrustModel.fromXmlElement(
+								(Element)XMLUtil.getFirstChildByName(root,
+					TrustModel.XML_ELEMENT_CONTAINER_NAME));
 				
 				// load the stored statusinfos
 				Database.getInstance(StatusInfo.class).loadFromXml(

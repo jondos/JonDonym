@@ -194,7 +194,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_lastUpdate = 0;
 	  m_serial = 0;
 	  m_mixLocation = new ServiceLocation(null, m_mixCertificate);
-	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate());
+	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate(), 0);
 	  m_freeMix = false;
 	  m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
   }
@@ -212,7 +212,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_lastUpdate = 0;
 	  m_serial = 0;
 	  m_mixLocation = new ServiceLocation(null, m_mixCertificate);
-	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate());
+	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate(), 0);
 	  m_freeMix = false;
 	  //
 	  m_priceCert = a_priceCert;
@@ -356,13 +356,15 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  //get the Operator Certificate from the CertPath
 	  if (m_mixCertPath != null)
 	  {
-		  m_mixOperator = new ServiceOperator(operatorNode, m_mixCertPath.getSecondCertificate());
+		  m_mixOperator = new ServiceOperator(operatorNode, m_mixCertPath.getSecondCertificate(), m_lastUpdate);
 	  }
 	  else
 	  {
-		  m_mixOperator = new ServiceOperator(operatorNode, null);
+		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 
+	  Database.getInstance(ServiceOperator.class).update(m_mixOperator);
+	  
 	  /* as default no mix is free, only if we receive a configuration request from the mix and it
 	   * it is not already assigned to a cascade, this mix will be free
 	   */

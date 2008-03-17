@@ -27,7 +27,6 @@
  */
 package anon.infoservice;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import anon.crypto.JAPCertificate;
@@ -41,44 +40,65 @@ import java.net.URL;
 /**
  * Holds the information about the operator of a service.
  */
-public class ServiceOperator
+public class ServiceOperator extends AbstractDatabaseEntry
 {
 	private static final String XML_ELEM_EMAIL = "EMail";
 
 	/**
-	 * This is the name of the operator or organisation.
+	 * This is the name of the operator or organization.
 	 */
-	private String organisation;
+	private String m_strOrganization;
 
 	/**
-	 * This is the URL of the operators homepage.
+	 * This is the URL of the operators home page.
 	 */
-	private String url;
+	private String m_strUrl;
 
+	/**
+	 * This is the EMail address of the operator.
+	 */
 	private String m_strEmail;
-
+	
 	/**
-	 * Creates a new ServiceOperator from XML description (Operator node).
-	 *
-	 * @param operatorNode The Operator node from an XML document.
+	 * The last update time.
 	 */
-	public ServiceOperator(Node operatorNode, JAPCertificate operatorCertificate)
+	private long m_lastUpdate;
+	
+	/**
+	 * The operators certificate
+	 */
+	private JAPCertificate m_certificate;
+	
+	/**
+	 * Creates a new ServiceOperator an operator certificate or 
+	 * from an XML description (Operator node).
+	 *
+	 * @param a_node The operator node from an XML document.
+	 * @param a_certificate The operator certificate
+	 * @param a_lastUpdate Last update time.
+	 */
+	public ServiceOperator(Node a_node, JAPCertificate a_certificate, long a_lastUpdate)
 	{
+		super(Long.MAX_VALUE);
+		
 		Node node;
 		X509DistinguishedName subject;
 
-	    if(operatorCertificate != null)
+		m_certificate = a_certificate;
+		m_lastUpdate = a_lastUpdate;
+		
+	    if(a_certificate != null)
 		{
-			subject = operatorCertificate.getSubject();
-			/* get the organisation name */
-			organisation = subject.getOrganisation();
-			if(organisation == null || organisation.trim().length() == 0)
+			subject = a_certificate.getSubject();
+			/* get the organization name */
+			m_strOrganization = subject.getOrganisation();
+			if(m_strOrganization == null || m_strOrganization.trim().length() == 0)
 			{
-				// if no organisation is given, use the common name
-				organisation = subject.getCommonName();
+				// if no organization is given, use the common name
+				m_strOrganization = subject.getCommonName();
 			}
 
-			/* get the e-mail adress */
+			/* get the e-mail address */
 			m_strEmail = subject.getE_EmailAddress();
 			if(m_strEmail == null || m_strEmail.trim().length() == 0)
 			{
@@ -87,7 +107,7 @@ public class ServiceOperator
 
 			// get the URL
 			AbstractX509Extension extension =
-				operatorCertificate.getExtensions().getExtension(X509SubjectAlternativeName.IDENTIFIER);
+				a_certificate.getExtensions().getExtension(X509SubjectAlternativeName.IDENTIFIER);
 			if (extension != null && extension instanceof X509SubjectAlternativeName)
 			{
 				X509SubjectAlternativeName alternativeName = (X509SubjectAlternativeName) extension;
@@ -101,7 +121,7 @@ public class ServiceOperator
 						{
 							try
 							{
-								url = new URL(values.elementAt(i).toString()).toString();
+								m_strUrl = new URL(values.elementAt(i).toString()).toString();
 							}
 							catch (Exception a_e)
 							{
@@ -114,53 +134,99 @@ public class ServiceOperator
 			}
 		}
 
-		/* check if the the information from the cert is valid (not null oder empty)
+	    /**
+	     * @todo remove - Backwards compatibility only
+	     * 
+	     * older mixes seem to send no operator certificate
+	     * 
+	     * check if the the information from the cert is valid (not null oder empty)
 		 * and take the information from the XML-Structure if not
-		 */
-		if(organisation == null || organisation.trim().length() == 0)
+	     */
+		if(m_strOrganization == null || m_strOrganization.trim().length() == 0)
 		{
-			node = XMLUtil.getFirstChildByName(operatorNode, "Organisation");
-		    organisation = XMLUtil.parseValue(node, null);
+			node = XMLUtil.getFirstChildByName(a_node, "Organisation");
+		    m_strOrganization = XMLUtil.parseValue(node, null);
 		}
 
 		if(m_strEmail == null || m_strEmail.trim().length() == 0 ||
 		   !X509SubjectAlternativeName.isValidEMail(m_strEmail))
 		{
-			node = XMLUtil.getFirstChildByName(operatorNode, XML_ELEM_EMAIL);
+			node = XMLUtil.getFirstChildByName(a_node, XML_ELEM_EMAIL);
 		    m_strEmail = XMLUtil.parseValue(node, null);
 		}
-
-	    /* get the homepage url */
-		if (url == null)
+		if (m_strUrl == null)
 		{
-			node = XMLUtil.getFirstChildByName(operatorNode, "URL");
-			url = XMLUtil.parseValue(node, null);
+			node = XMLUtil.getFirstChildByName(a_node, "URL");
+			m_strUrl = XMLUtil.parseValue(node, null);
 		}
 	}
+	
+	/**
+	 * Returns version number which is used to determine the more recent infoservice entry, if two
+	 * entries are compared (higher version number -> more recent entry).
+	 *
+	 * @return The version number for this entry.
+	 */
+	public long getVersionNumber()
+	{
+		return m_lastUpdate;
+	}
+	
+	/**
+	 * Returns the time in milliseconds when this db entry was created from the origin instance.
+	 * 
+	 * @return the time in milliseconds when this db entry was created from the origin instance
+	 */
+	public long getLastUpdate()
+	{
+		return m_lastUpdate;
+	}
+	
+	/**
+	 * Returns a unique ID for a database entry.
+	 *
+	 * @return The ID of this database entry.
+	 */
+	public String getId()
+	{
+		return m_certificate != null ? m_certificate.getId() : "";
+	}
 
+	/**
+	 * Return the EMail address of the operator.
+	 * 
+	 * @return The EMail address of the operator.
+	 */
 	public String getEMail()
 	{
 		return m_strEmail;
 	}
 
 	/**
-	 * Returns the name of the operator or organisation.
+	 * Returns the name of the operator or organization.
 	 *
-	 * @return The name of the operator or organisation.
+	 * @return The name of the operator or organization.
 	 */
-	public String getOrganisation()
+	public String getOrganization()
 	{
-		return organisation;
+		return m_strOrganization;
 	}
 
 	/**
-	 * Returns the URL of the operators homepage.
+	 * Returns the URL of the operators home page.
 	 *
-	 * @return The URL of the operators homepage.
+	 * @return The URL of the operators home page.
 	 */
 	public String getUrl()
 	{
-		return url;
+		return m_strUrl;
 	}
 
+	public boolean equals(Object a_obj)
+	{
+		if(a_obj == null || m_certificate == null) return false;
+		
+		ServiceOperator op = (ServiceOperator) a_obj;
+		return m_certificate.equals(op.m_certificate);
+	}
 }

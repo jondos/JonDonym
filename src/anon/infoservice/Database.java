@@ -40,6 +40,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.crypto.MyRandom;
+import anon.util.Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import anon.util.IXMLEncodable;
@@ -584,6 +585,15 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 				entryList.addElement(serviceDatabaseElements.nextElement());
 			}
 		}
+		return entryList;
+	}
+	
+	public Vector getSortedEntryList(Util.Comparable c)
+	{
+		Vector entryList = getEntryList();
+		
+		anon.util.Util.sort(entryList, c);
+		
 		return entryList;
 	}
 

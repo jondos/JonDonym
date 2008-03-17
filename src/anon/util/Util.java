@@ -405,7 +405,7 @@ public final class Util
 		int index = a_left;
 		for (int pointer = a_left; pointer < a_right; pointer++)
 		{
-			if (c.compare((MixCascade)a_mixCascades.elementAt(pointer), (MixCascade)a_mixCascades.elementAt(a_right)) <= 0)
+			if (c.compare(a_mixCascades.elementAt(pointer), a_mixCascades.elementAt(a_right)) <= 0)
 			{
 				swap(a_mixCascades, index, pointer);
 				index++;
