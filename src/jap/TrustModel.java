@@ -837,7 +837,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		// TODO: NULL check
 		TrustAttribute attr = getAttribute(PaymentAttribute.class);
 		
-		return (attr == null) ? null : (attr.getTrustCondition() == TRUST_IF_TRUE);
+		return (attr == null) ? false : (attr.getTrustCondition() == TRUST_IF_TRUE);
 	}
 
 	public boolean isAdded()
