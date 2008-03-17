@@ -232,7 +232,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 					for(int i = 0; i < list.getLength(); i++)
 					{
 						// look for a matching ServiceOperator database entry
-						ServiceOperator op = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(XMLUtil.parseValue(list.item(0),null));
+						ServiceOperator op = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(XMLUtil.parseValue(list.item(i),null));
 						if(op != null) ((Vector) value).addElement(op);
 					}
 				}
@@ -431,13 +431,19 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			{
 				for(int i = 0; i < a_cascade.getNumberOfMixes(); i++)
 				{
-					for(int j = 0; j < ((Vector)m_conditionValue).size(); j++)
+					Vector list = (Vector) m_conditionValue;
+					
+					if(list.contains(a_cascade.getMixInfo(i).getServiceOperator()))
+					{
+						throw new TrustException("This cascade has a blacklisted mix!");
+					}
+					/*for(int j = 0; j < ((Vector)m_conditionValue).size(); j++)
 					{
 						if(((Vector)m_conditionValue).elementAt(j).equals(a_cascade.getMixInfo(i).getServiceOperator()))
 						{
 							throw new TrustException("This cascade has a blacklisted mix!");
 						}
-					}
+					}*/
 				}
 			}
 		}

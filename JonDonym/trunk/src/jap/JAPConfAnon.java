@@ -56,6 +56,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.ImageIcon;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -164,6 +166,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_SINGLECASCADES_ONLY = JAPConfAnon.class.getName() + "_singleCascadesOnly";
 	private static final String MSG_FILTER_AT_LEAST_2_COUNTRIES = JAPConfAnon.class.getName() + "_atLeast2Countries";
 	private static final String MSG_FILTER_AT_LEAST_3_COUNTRIES = JAPConfAnon.class.getName() + "_atLeast3Countries";
+	
+	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
 
 	private static final String DEFAULT_MIX_NAME = "AN.ON Mix";
 
@@ -232,6 +236,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	private JButton m_showEditFilterButton;
 
+	private JPopupMenu m_opPopupMenu;
+	
 	private JTextField m_manHostField;
 	private JTextField m_manPortField;
 	
@@ -1103,6 +1109,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	public void actionPerformed(ActionEvent e)
 	{
+		if (e.getSource() instanceof JMenuItem)
+		{
+			if(e.getActionCommand() != null && e.getActionCommand().equals(MSG_FILTER_SELECT_ALL_OPERATORS))
+			{
+				((OperatorsTableModel) m_listOperators.getModel()).reset();
+				m_listOperators.updateUI();
+			}
+		}
 		if (e.getSource() == m_cancelCascadeButton)
 		{
 			if (mb_manualCascadeNew)
@@ -1421,6 +1435,25 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			AbstractOS.getInstance().openEMail(getEMailFromLabel(m_emailLabel));
 		}
+		else if (e.getSource() == m_listOperators)
+		{
+			if(e.getClickCount() == 2)
+			{
+				ServiceOperator op = null;
+				synchronized(m_listOperators.getModel())
+				{
+					op = ((ServiceOperator) m_listOperators.getValueAt(
+							m_listOperators.rowAtPoint(e.getPoint()), 1));
+				}
+				if(op != null && op.getCertificate() != null)
+				{
+					CertDetailsDialog dialog = new CertDetailsDialog(getRootPanel().getParent(),
+							op.getCertificate(), true, JAPMessages.getLocale());
+						dialog.pack();
+						dialog.setVisible(true);					
+				}
+			}
+		}
 		else if (e.getSource() == m_tableMixCascade)
 		{
 			if (e.getClickCount() == 2)
@@ -1494,11 +1527,20 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	public void mousePressed(MouseEvent e)
 	{
+		maybeShowPopup(e);
 	}
 
 	public void mouseReleased(MouseEvent e)
 	{
+		maybeShowPopup(e);
 	}
+	
+	private void maybeShowPopup(MouseEvent e) {
+        if (e.isPopupTrigger() && e.getSource() == m_listOperators) 
+        {
+            m_opPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        }
+    }
 
 	public void mouseEntered(MouseEvent e)
 	{
@@ -2932,7 +2974,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			JLabel l;
 			JPanel p;
+			JMenuItem item;
 			JRadioButton r, s, t;
+			
+			m_opPopupMenu = new JPopupMenu();
+			item = new JMenuItem(JAPMessages.getString(MSG_FILTER_SELECT_ALL_OPERATORS));
+			item.addActionListener(a_listener);
+			item.setActionCommand(MSG_FILTER_SELECT_ALL_OPERATORS);
+			m_opPopupMenu.add(item);
 			
 			l = new JLabel("Name:");
 			c.gridx = 0;
@@ -3051,13 +3100,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_listOperators.setIntercellSpacing(new Dimension(0,0));
 			m_listOperators.setShowGrid(false);
 			m_listOperators.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			m_listOperators.addMouseListener(a_listener);
 			m_listOperators.getColumnModel().getColumn(0).setMaxWidth(1);
 			m_listOperators.getColumnModel().getColumn(0).setPreferredWidth(1);
 			m_listOperators.getColumnModel().getColumn(1).setCellRenderer(new OperatorsCellRenderer());
 			((OperatorsTableModel)m_listOperators.getModel()).update();
 			
 			JScrollPane scroll = new JScrollPane(m_listOperators);
-//			scroll.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_OPERATORS)));
 			scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			scroll.setPreferredSize(new Dimension(130, 30));
 			p.add(scroll);
@@ -3444,6 +3493,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			if(m_trustModelCopy != null)
 				m_vecBlacklist = (Vector) ((Vector) m_trustModelCopy.getAttribute(TrustModel.OperatorBlacklistAttribute.class).getConditionValue());
+		}
+		
+		public synchronized void reset()
+		{
+			m_trustModelCopy.setAttribute(TrustModel.OperatorBlacklistAttribute.class, TrustModel.TRUST_IF_NOT_IN_LIST, new Vector());
+			update();
 		}
 		
 		public Class getColumnClass(int columnIndex)
