@@ -212,6 +212,16 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		return m_strOrganization;
 	}
 
+	/** 
+	 * Returns the operator certificate.
+	 * 
+	 * @return The operator certificate.
+	 */
+	public JAPCertificate getCertificate()
+	{
+		return m_certificate;
+	}
+	
 	/**
 	 * Returns the URL of the operators home page.
 	 *
