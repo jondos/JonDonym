@@ -70,6 +70,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
@@ -145,6 +146,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_EXPLAIN_BLACKLISTED = JAPConfAnon.class.getName() + "_explainBlacklisted";
 	private static final String MSG_PI_UNAVAILABLE = JAPConfAnon.class.getName() + "_piUnavailable";
 	private static final String MSG_EXPLAIN_PI_UNAVAILABLE = JAPConfAnon.class.getName() + "_explainPiUnavailable";
+	private static final String MSG_EXPLAIN_NO_CASCADES = JAPConfAnon.class.getName() + "_explainNoCascades";
 	private static final String MSG_WHAT_IS_THIS = JAPConfAnon.class.getName() + "_whatIsThis";
 	private static final String MSG_FILTER = JAPConfAnon.class.getName() + "_filter";
 	private static final String MSG_FILTER_CANCEL = "cancelButton";
@@ -169,6 +171,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
 
+	
+	private static final int FILTER_SPEED_MAJOR_TICK = 32;
+	private static final int FILTER_SPEED_MINOR_TICK = 32;
+	private static final int FILTER_SPEED_MAX = 128;
+	
+	private static final int FILTER_LATENCY_MAJOR_TICK = 2;
+	private static final int FILTER_LATENCY_MAX = 8;
+	private static final int FILTER_LATENCY_MIN = 2;
+	
 	private static final String DEFAULT_MIX_NAME = "AN.ON Mix";
 
 	private static final int MAX_HOST_LENGTH = 30;
@@ -423,7 +434,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_rootPanelConstraints.gridx = 0;
 			m_rootPanelConstraints.gridy = 3;
 			m_rootPanelConstraints.weightx = 1;
-			m_rootPanelConstraints.weighty = 0.3;
+			m_rootPanelConstraints.weighty = 0.5;
 			m_rootPanelConstraints.fill = GridBagConstraints.BOTH;
 			pRoot.add(m_filterPanel, m_rootPanelConstraints);
 		}
@@ -455,6 +466,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					m_filterInternationalGroup.setSelected(m_filterAtLeast3Countries.getModel(), true);
 				}
 			}
+			
+			((OperatorsTableModel)m_listOperators.getModel()).update();
 		
 			//m_filterAnonLevelSlider.setValue(((Integer)model.getAttribute(TrustModel.AnonLevelAttribute.class).getConditionValue()).intValue());
 		}
@@ -1023,9 +1036,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		if(m_filterPanel != null && m_filterPanel.isVisible())
 		{
 			editFilter();
-			m_filterPanel.setVisible(false);
 			m_showEditFilterButton.setText(JAPMessages.getString(MSG_EDIT_FILTER));
 			drawServerInfoPanel();
+			m_filterPanel.setVisible(false);
 		}
 		
 		return true;
@@ -1221,6 +1234,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				drawFilterPanel();
 			else if(m_filterPanel != null && m_filterPanel.isVisible())
 			{
+				// revert changes
 				m_showEditFilterButton.setText(JAPMessages.getString(MSG_EDIT_FILTER));
 				m_filterPanel.setVisible(false);
 				m_serverPanel.setVisible(true);
@@ -1399,7 +1413,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				m_trustModelCopy.setName(m_filterNameField.getText());
 			
 			// Display a warning if the new model won't have any trusted cascades
-			if(m_trustModelCopy.hasTrustedCascades() || JAPDialog.showYesNoDialog(m_filterPanel, "Keine Kaskaden im Filter, trotzdem beibehalten?"))
+			if(m_trustModelCopy.hasTrustedCascades() || JAPDialog.showYesNoDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_NO_CASCADES)))
 			{
 				TrustModel.getCurrentTrustModel().copyFrom(m_trustModelCopy);
 			}
@@ -3039,12 +3053,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			r.setSelected(true);
 			p.add(r, c);
 			
-			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_MIXCASCADES_ONLY));
-			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
-			p.add(s, c);
+			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_SINGLECASCADES_ONLY));
+			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			p.add(s, c);			
 			
-			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_SINGLECASCADES_ONLY));
-			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_MIXCASCADES_ONLY));
+			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
 			p.add(t, c);
 			
 			m_filterCascadeGroup = new ButtonGroup();
@@ -3106,7 +3120,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_listOperators.getColumnModel().getColumn(0).setMaxWidth(1);
 			m_listOperators.getColumnModel().getColumn(0).setPreferredWidth(1);
 			m_listOperators.getColumnModel().getColumn(1).setCellRenderer(new OperatorsCellRenderer());
-			((OperatorsTableModel)m_listOperators.getModel()).update();
 			
 			JScrollPane scroll = new JScrollPane(m_listOperators);
 			scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -3120,12 +3133,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.weighty = 0.7;
 			add(p, c);
 			
-			m_filterSpeedSlider = new JSlider();
-			m_filterSpeedSlider.setEnabled(false);
+			m_filterSpeedSlider = new JSlider(SwingConstants.HORIZONTAL);
+			//m_filterSpeedSlider.setEnabled(false);
 			m_filterSpeedSlider.setMinimum(0);
-			m_filterSpeedSlider.setMaximum(0);
-			m_filterSpeedSlider.setMajorTickSpacing(2);
-			m_filterSpeedSlider.setMinorTickSpacing(1);
+			m_filterSpeedSlider.setMaximum(FILTER_SPEED_MAX);
+			m_filterSpeedSlider.setMajorTickSpacing(FILTER_SPEED_MAJOR_TICK);
+			m_filterSpeedSlider.setMinorTickSpacing(FILTER_SPEED_MINOR_TICK);
 			m_filterSpeedSlider.setPaintLabels(true);
 			m_filterSpeedSlider.setPaintTicks(true);
 			m_filterSpeedSlider.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_SPEED)));
@@ -3137,15 +3150,25 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			add(m_filterSpeedSlider, c);
 			
 			m_filterLatencySlider = new JSlider();
-			m_filterLatencySlider.setEnabled(false);
-			m_filterLatencySlider.setMinimum(0);
-			m_filterLatencySlider.setMaximum(0);
-			m_filterLatencySlider.setMajorTickSpacing(2);
-			m_filterLatencySlider.setMinorTickSpacing(1);
+			//m_filterLatencySlider.setEnabled(false);
+			m_filterLatencySlider.setMinimum(FILTER_LATENCY_MIN);
+			m_filterLatencySlider.setMaximum(FILTER_LATENCY_MAX);
+			m_filterLatencySlider.setMajorTickSpacing(FILTER_LATENCY_MAJOR_TICK);
 			m_filterLatencySlider.setPaintLabels(true);
 			m_filterLatencySlider.setPaintTicks(true);
+			m_filterLatencySlider.setInverted(true);
 			m_filterLatencySlider.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_LATENCY)));
 			m_filterLatencySlider.setSnapToTicks(true);
+			Hashtable ht = new Hashtable(5);
+			for (int i = 0; i < 5; i++)
+			{
+				if(i == 4) 
+					ht.put(new Integer(8), new JLabel("\u221E")); 
+				else
+				ht.put(new Integer(i * 2), new JLabel((i * 2) + "s"));
+				
+			}
+			m_filterLatencySlider.setLabelTable(ht);			
 			
 			c.gridx++;
 			c.weightx = 0.25;
@@ -3484,17 +3507,25 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		
 		public synchronized void update()
 		{
+			if(m_trustModelCopy != null)
+				m_vecBlacklist = (Vector) ((Vector) m_trustModelCopy.getAttribute(TrustModel.OperatorBlacklistAttribute.class).getConditionValue()).clone();
+			
 			m_vecOperators = Database.getInstance(ServiceOperator.class).getSortedEntryList(new Comparable()
 			{
 				public int compare(Object a_obj1, Object a_obj2)
 				{
 					if(a_obj1 == null || a_obj2 == null ) return 0;
-					return ((ServiceOperator) a_obj1).getOrganization().compareTo(((ServiceOperator)a_obj2).getOrganization());
+					boolean b1 = m_vecBlacklist.contains(a_obj1);
+					boolean b2 = m_vecBlacklist.contains(a_obj2);
+					
+					if(b1 == b2) 
+					{
+						return ((ServiceOperator) a_obj1).getOrganization().compareTo(((ServiceOperator)a_obj2).getOrganization());
+					}
+					else if(b1 && !b2) return -1;
+					else return 1;
 				}
 			});
-			
-			if(m_trustModelCopy != null)
-				m_vecBlacklist = (Vector) ((Vector) m_trustModelCopy.getAttribute(TrustModel.OperatorBlacklistAttribute.class).getConditionValue());
 		}
 		
 		public synchronized void reset()
