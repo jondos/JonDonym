@@ -83,7 +83,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	// 4 errors in 5 seconds should be enough to be sure there is really a connection error
 	private static final int CONNECTION_ERROR_WAIT_COUNT = 4;
 
-	private static final int FIRST_MIX = 1;
+	private static final int FIRST_MIX = 0;
+	private static final String SYNCH_AI_LOGIN_MIXVERSION = "00.07.20";
 	
 	private static int m_loginTimeout = DEFAULT_LOGIN_TIMEOUT;
 
@@ -869,13 +870,13 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			boolean synchedAILogin = false;
 			/* check the first mix software version to determine if client 
 			 * can already perform the new synchronized ai login procedure.
-			 * (for mix version >= 00.07.19)
+			 * (for mix version >= 00.07.20)
 			 */
 			
 			if(firstMixSoftwareVersion!= null)
 			{
 				synchedAILogin =
-					firstMixSoftwareVersion.compareTo("00.07.19") >= 0;
+					firstMixSoftwareVersion.compareTo(SYNCH_AI_LOGIN_MIXVERSION) >= 0;
 			}
 			aiControlChannel.setSynchronizedAILogin(synchedAILogin);
 			if (!aiControlChannel.sendAccountCert())
