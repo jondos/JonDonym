@@ -3026,7 +3026,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridx++;
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.insets = new Insets(0, 0, 5, 0);
-			c.gridwidth = 4;
+			c.gridwidth = 3;
 			add(m_filterNameField, c);
 			
 			c.weightx = 0;

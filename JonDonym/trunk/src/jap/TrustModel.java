@@ -61,7 +61,6 @@ import anon.pay.PayAccountsFile;
  * This is the general trust model for JAP.
  *
  * @author Rolf Wendolsky
- * @todo The trust settings must be fully pluggable!!! They are currently hard-coded in separate methods...
  */
 public class TrustModel extends BasicTrustModel implements IXMLEncodable
 {
@@ -357,10 +356,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			{
 				throw (new TrustException("This cascade does have too few different coutries!"));
 			}
-			/*else if(m_trustCondition == TRUST_IF_AT_MOST && a_cascade.getNumberOfCountries() > m_conditionValue)
-			{
-				throw (new TrustException("This cascade does have too many different countries!"));
-			}*/
 			else if (m_trustCondition == TRUST_IF_TRUE && a_cascade.getNumberOfCountries() <= 1)
 			{
 				throw (new TrustException("This cascade does not count as international!"));
@@ -489,17 +484,52 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		setCurrentTrustModel((TrustModel)ms_trustModels.elementAt(0));
 	}
 
+	/**
+	 * Creates a new TrustModel object with the specified name
+	 * 
+	 * @param a_strName	The name of the TrustModel
+	 */
 	public TrustModel(String a_strName)
 	{
 		m_id = ms_trustModels.size();		
 		m_strName = a_strName == null ? "Default trust model" : a_strName;
 	}
-	
+
+	/**
+	 * Creates a TrustModel object from another TrustModel object
+	 * 
+	 * @param a_trustModel	The TrustModel object to copy
+	 */
 	public TrustModel(TrustModel a_trustModel)
 	{
 		copyFrom(a_trustModel);
 	}
 
+	/**
+	 * Creates a TrustModel object from an XML element
+	 * 
+	 * @param a_trustModelElement	The XML element which holds the TrustModel data
+	 * 
+	 * @throws XMLParseException
+	 */
+	public TrustModel(Element a_trustModelElement) throws XMLParseException
+	{
+		XMLUtil.assertNodeName(a_trustModelElement, XML_ELEMENT_NAME);
+
+		XMLUtil.assertNotNull(a_trustModelElement, XML_ATTR_ID);
+		XMLUtil.assertNotNull(a_trustModelElement, XML_ATTR_NAME);
+
+		m_id = XMLUtil.parseAttribute(a_trustModelElement, XML_ATTR_ID, -1l);
+		m_strName = XMLUtil.parseAttribute(a_trustModelElement, XML_ATTR_NAME, null);
+		m_bEditable = true;
+
+		for(int i = 0; i < a_trustModelElement.getChildNodes().getLength(); i++)
+		{
+			Element el = (Element) a_trustModelElement.getChildNodes().item(i);
+			setAttribute(TrustAttribute.fromXmlElement(el));
+		}
+	}
+	
 	public void copyFrom(TrustModel a_trustModel)
 	{
 		if (a_trustModel == null)
@@ -515,26 +545,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			m_trustAttributes = (Hashtable) a_trustModel.m_trustAttributes.clone();
 		}
-	}
-
-	public TrustModel(Element a_trustModelElement) throws XMLParseException
-	{
-		XMLUtil.assertNodeName(a_trustModelElement, XML_ELEMENT_NAME);
-
-		//m_bShowWarning = XMLUtil.parseAttribute(a_trustModelElement, XML_ATTR_SHOW_WARNING, m_bShowWarning);
-		XMLUtil.assertNotNull(a_trustModelElement, XML_ATTR_ID);
-		XMLUtil.assertNotNull(a_trustModelElement, XML_ATTR_NAME);
-
-		m_id = XMLUtil.parseAttribute(a_trustModelElement, XML_ATTR_ID, -1l);
-		m_strName = XMLUtil.parseAttribute(a_trustModelElement, XML_ATTR_NAME, null);
-		m_bEditable = true;
-
-		for(int i = 0; i < a_trustModelElement.getChildNodes().getLength(); i++)
-		{
-			Element el = (Element) a_trustModelElement.getChildNodes().item(i);
-			setAttribute(TrustAttribute.fromXmlElement(el));
-		}
-	}
+	}	
 
 	public static Observable getObservable()
 	{
@@ -551,7 +562,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		m_trustModelObservable.deleteObserver(a_observer);
 	}
 
-
+	/**
+	 * Compares two TrustModel objects
+	 * 
+	 * @return true if the id's of the two objects match, false otherwise
+	 */
 	public boolean equals(Object a_trustModel)
 	{
 		if (a_trustModel == null || !(a_trustModel instanceof TrustModel))
@@ -782,14 +797,19 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		m_strName = a_strName;
 	}
 
+	/**
+	 * Returns the localized name of the TrustModel
+	 * 
+	 * @return The localized name of the TrustModel
+	 */
 	public String getName()
 	{
-		return m_strName;
+		return JAPMessages.getString(m_strName);
 	}
 
 	public String toString()
 	{
-		return JAPMessages.getString(getName());
+		return getName();
 	}
 
 	public long getId()
