@@ -168,7 +168,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_SINGLECASCADES_ONLY = JAPConfAnon.class.getName() + "_singleCascadesOnly";
 	private static final String MSG_FILTER_AT_LEAST_2_COUNTRIES = JAPConfAnon.class.getName() + "_atLeast2Countries";
 	private static final String MSG_FILTER_AT_LEAST_3_COUNTRIES = JAPConfAnon.class.getName() + "_atLeast3Countries";
-	
+	private static final String MSG_FILTER_AT_LEAST = JAPConfAnon.class.getName() + "_atLeast";
+	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
 
 	
@@ -177,8 +178,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final int FILTER_SPEED_MAX = 128;
 	
 	private static final int FILTER_LATENCY_MAJOR_TICK = 2;
-	private static final int FILTER_LATENCY_MAX = 8;
-	private static final int FILTER_LATENCY_MIN = 2;
+	private static final int FILTER_LATENCY_MAX = 6;
+	private static final int FILTER_LATENCY_MIN = 0;
 	
 	private static final String DEFAULT_MIX_NAME = "AN.ON Mix";
 
@@ -559,9 +560,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
-				TrustModel.setCurrentTrustModel((TrustModel)m_cmbCascadeFilter.getSelectedItem());
-				m_showEditFilterButton.setEnabled(((TrustModel)m_cmbCascadeFilter.getSelectedItem()).isEditable());
-				updateValues(false);
+				if(TrustModel.getCurrentTrustModel() != null || 
+						!TrustModel.getCurrentTrustModel().equals(m_cmbCascadeFilter.getSelectedItem()))
+				{
+					TrustModel.setCurrentTrustModel((TrustModel)m_cmbCascadeFilter.getSelectedItem());
+					m_showEditFilterButton.setEnabled(((TrustModel)m_cmbCascadeFilter.getSelectedItem()).isEditable());
+					updateValues(false);
+					
+					if(m_filterPanel != null && m_filterPanel.isVisible())
+					{
+						hideEditFilter();
+					}
+				}
 			}
 		});
 		m_cascadesPanel.add(m_cmbCascadeFilter, c);
@@ -600,7 +610,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.weightx = 1.0;
 		c.weighty = 1.0;
 		c.fill = GridBagConstraints.BOTH;
-		c.insets = new Insets(5, 5, 5, 5);
+		c.insets = new Insets(5, 5, 5, 0);
 		JScrollPane scroll;
 
 		scroll = new JScrollPane(m_listMixCascade);
@@ -1036,9 +1046,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		if(m_filterPanel != null && m_filterPanel.isVisible())
 		{
 			editFilter();
-			m_showEditFilterButton.setText(JAPMessages.getString(MSG_EDIT_FILTER));
-			drawServerInfoPanel();
-			m_filterPanel.setVisible(false);
+			hideEditFilter();
 		}
 		
 		return true;
@@ -1234,13 +1242,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				drawFilterPanel();
 			else if(m_filterPanel != null && m_filterPanel.isVisible())
 			{
-				// revert changes
-				m_showEditFilterButton.setText(JAPMessages.getString(MSG_EDIT_FILTER));
-				m_filterPanel.setVisible(false);
-				m_serverPanel.setVisible(true);
-				m_serverInfoPanel.setVisible(true);				
+				hideEditFilter();
 			}
 		}
+	}
+
+	private void hideEditFilter() {
+		m_showEditFilterButton.setText(JAPMessages.getString(MSG_EDIT_FILTER));
+		m_filterPanel.setVisible(false);
+		m_serverInfoPanel.setVisible(true);
+		m_serverPanel.setVisible(true);
 	}
 
 	private boolean isServerCertVerified()
@@ -2986,6 +2997,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			GridBagLayout layout = new GridBagLayout();
 			GridBagConstraints c = new GridBagConstraints();
+			GridBagConstraints c1;
 			setLayout(layout);
 			
 			JLabel l;
@@ -3010,6 +3022,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridx++;
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.insets = new Insets(0, 0, 5, 0);
+			c.gridwidth = 4;
 			add(m_filterNameField, c);
 			
 			c.weightx = 0;
@@ -3041,7 +3054,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridwidth = 2;
 			c.gridx = 0;
 			c.gridy++;
-			c.weightx = 0.5;
+			c.weightx = 0.4;
 			add(p, c);
 			
 			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_CASCADES));
@@ -3068,7 +3081,116 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			c.gridx += 2;
 			c.gridwidth = 1;
-			c.weightx = 0.25;
+			c.weightx = 0.15;
+			add(p, c);
+			
+			p = new JPanel(new GridBagLayout());
+			p.setEnabled(false);
+			p.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_SPEED)));
+			c1 = new GridBagConstraints();
+			c1.gridx = 0;
+			c1.gridy = 0;
+			c1.anchor = GridBagConstraints.NORTHWEST;
+			c1.insets = new Insets(0, 5, 5, 0);
+			c1.weightx = 1.0;
+			p.add(new JLabel(JAPMessages.getString(MSG_FILTER_AT_LEAST)), c1);
+			
+			m_filterSpeedSlider = new JSlider(SwingConstants.VERTICAL);
+			m_filterSpeedSlider.setEnabled(false);
+			m_filterSpeedSlider.setMinimum(0);
+			m_filterSpeedSlider.setMaximum(FILTER_SPEED_MAX);
+			m_filterSpeedSlider.setValue(0);
+			m_filterSpeedSlider.setMajorTickSpacing(FILTER_SPEED_MAJOR_TICK);
+			m_filterSpeedSlider.setMinorTickSpacing(FILTER_SPEED_MINOR_TICK);
+			m_filterSpeedSlider.setPaintLabels(true);
+			m_filterSpeedSlider.setPaintTicks(true);
+			m_filterSpeedSlider.setInverted(true);
+			m_filterSpeedSlider.setSnapToTicks(true);
+			Hashtable ht = new Hashtable(5);
+			for (int i = 0; i < 5; i++)
+			{
+				ht.put(new Integer(i * 32), new JLabel(String.valueOf(i * 32) + " kbit/s"));
+			}
+			m_filterSpeedSlider.setLabelTable(ht);
+			c1.gridy++;
+			c1.weighty = 1;
+			c1.fill = GridBagConstraints.VERTICAL;
+			p.add(m_filterSpeedSlider, c1);
+			
+			c.gridx++;
+			c.gridheight = 2;
+			c.weightx = 0.175;
+			add(p, c);
+			
+			p = new JPanel(new GridBagLayout());
+			p.setEnabled(false);
+			p.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_LATENCY)));
+			c1 = new GridBagConstraints();
+			c1.gridx = 0;
+			c1.gridy = 0;
+			c1.anchor = GridBagConstraints.NORTHWEST;
+			c1.weightx = 1.0;
+			c1.insets = new Insets(0, 5, 5, 0);
+			p.add(new JLabel(JAPMessages.getString(MSG_FILTER_AT_MOST)), c1);
+			
+			/* 
+			 * IMPORTANT: to get the correct value of this slider use 8 - getValue(),
+			 * if you get an 8 -> unlimited response time. This is a little trick to 
+			 * display the slider in the same direction as the speed slider even though
+			 * the original direction would be the other way around.
+			 */
+			m_filterLatencySlider = new JSlider(SwingConstants.VERTICAL);
+			m_filterLatencySlider.setEnabled(false);
+			m_filterLatencySlider.setMinimum(FILTER_LATENCY_MIN);
+			m_filterLatencySlider.setMaximum(FILTER_LATENCY_MAX);
+			m_filterLatencySlider.setValue(0);
+			m_filterLatencySlider.setMajorTickSpacing(FILTER_LATENCY_MAJOR_TICK);
+			m_filterLatencySlider.setPaintLabels(true);
+			m_filterLatencySlider.setPaintTicks(true);
+			m_filterLatencySlider.setInverted(true);
+			m_filterLatencySlider.setSnapToTicks(true);
+			ht = new Hashtable(4);
+			ht.put(new Integer(0), new JLabel("\u221E"));
+			ht.put(new Integer(2), new JLabel(6 + " s"));
+			ht.put(new Integer(4), new JLabel(4 + " s"));
+			ht.put(new Integer(6), new JLabel(2 + " s"));
+			m_filterLatencySlider.setLabelTable(ht);
+			
+			c1.gridy++;
+			c1.weighty = 1;
+			c1.fill = GridBagConstraints.VERTICAL;
+			p.add(m_filterLatencySlider, c1);
+			
+			c.gridx++;
+			c.gridheight = 2;
+			c.weightx = 0.275;
+			add(p, c);
+			
+			p = new JPanel(new GridLayout());
+			p.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_OPERATORS)));
+			
+			m_listOperators = new JTable();
+			m_listOperators.setModel(new OperatorsTableModel());
+			m_listOperators.setTableHeader(null);
+			m_listOperators.setIntercellSpacing(new Dimension(0,0));
+			m_listOperators.setShowGrid(false);
+			m_listOperators.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			m_listOperators.addMouseListener(a_listener);
+			m_listOperators.getColumnModel().getColumn(0).setMaxWidth(1);
+			m_listOperators.getColumnModel().getColumn(0).setPreferredWidth(1);
+			m_listOperators.getColumnModel().getColumn(1).setCellRenderer(new OperatorsCellRenderer());
+			
+			JScrollPane scroll = new JScrollPane(m_listOperators);
+			scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			scroll.setPreferredSize(new Dimension(130, 30));
+			p.add(scroll);
+			
+			c.gridx = 0;
+			c.gridy++;
+			c.gridwidth = 2;
+			c.gridheight = 1;
+			c.weightx = 0.4;
+			c.weighty = 0.7;
 			add(p, c);
 			
 			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_INTERNATIONALITY));
@@ -3093,86 +3215,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterInternationalGroup.add(m_filterAtLeast2Countries);
 			m_filterInternationalGroup.add(m_filterAtLeast3Countries);
 			
-			c.gridx++;
-			c.weightx = 0.25;
-			add(p, c);
-			
-			/*m_filterAnonLevelSlider = new JSlider();
-			m_filterAnonLevelSlider.setMinimum(StatusInfo.ANON_LEVEL_MIN);
-			m_filterAnonLevelSlider.setMaximum(StatusInfo.ANON_LEVEL_MAX);
-			m_filterAnonLevelSlider.setMajorTickSpacing(2);
-			m_filterAnonLevelSlider.setMinorTickSpacing(1);
-			m_filterAnonLevelSlider.setPaintLabels(true);
-			m_filterAnonLevelSlider.setPaintTicks(true);
-			m_filterAnonLevelSlider.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_ANON_LEVEL)));
-			m_filterAnonLevelSlider.setSnapToTicks(true);*/
-			
-			p = new JPanel(new GridLayout());
-			p.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_OPERATORS)));
-			
-			m_listOperators = new JTable();
-			m_listOperators.setModel(new OperatorsTableModel());
-			m_listOperators.setTableHeader(null);
-			m_listOperators.setIntercellSpacing(new Dimension(0,0));
-			m_listOperators.setShowGrid(false);
-			m_listOperators.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			m_listOperators.addMouseListener(a_listener);
-			m_listOperators.getColumnModel().getColumn(0).setMaxWidth(1);
-			m_listOperators.getColumnModel().getColumn(0).setPreferredWidth(1);
-			m_listOperators.getColumnModel().getColumn(1).setCellRenderer(new OperatorsCellRenderer());
-			
-			JScrollPane scroll = new JScrollPane(m_listOperators);
-			scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			scroll.setPreferredSize(new Dimension(130, 30));
-			p.add(scroll);
-			
-			c.gridx = 0;
-			c.gridy++;
-			c.gridwidth = 2;
-			c.weightx = 0.5;
-			c.weighty = 0.7;
-			add(p, c);
-			
-			m_filterSpeedSlider = new JSlider(SwingConstants.HORIZONTAL);
-			//m_filterSpeedSlider.setEnabled(false);
-			m_filterSpeedSlider.setMinimum(0);
-			m_filterSpeedSlider.setMaximum(FILTER_SPEED_MAX);
-			m_filterSpeedSlider.setMajorTickSpacing(FILTER_SPEED_MAJOR_TICK);
-			m_filterSpeedSlider.setMinorTickSpacing(FILTER_SPEED_MINOR_TICK);
-			m_filterSpeedSlider.setPaintLabels(true);
-			m_filterSpeedSlider.setPaintTicks(true);
-			m_filterSpeedSlider.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_SPEED)));
-			m_filterSpeedSlider.setSnapToTicks(true);
-			
 			c.gridx += 2;
 			c.gridwidth = 1;
-			c.weightx = 0.25;
-			add(m_filterSpeedSlider, c);
+			c.weightx = 0.15;
+			add(p, c);
 			
-			m_filterLatencySlider = new JSlider();
-			//m_filterLatencySlider.setEnabled(false);
-			m_filterLatencySlider.setMinimum(FILTER_LATENCY_MIN);
-			m_filterLatencySlider.setMaximum(FILTER_LATENCY_MAX);
-			m_filterLatencySlider.setMajorTickSpacing(FILTER_LATENCY_MAJOR_TICK);
-			m_filterLatencySlider.setPaintLabels(true);
-			m_filterLatencySlider.setPaintTicks(true);
-			m_filterLatencySlider.setInverted(true);
-			m_filterLatencySlider.setBorder(new TitledBorder(JAPMessages.getString(MSG_FILTER_LATENCY)));
-			m_filterLatencySlider.setSnapToTicks(true);
-			Hashtable ht = new Hashtable(5);
-			for (int i = 0; i < 5; i++)
-			{
-				if(i == 4) 
-					ht.put(new Integer(8), new JLabel("\u221E")); 
-				else
-				ht.put(new Integer(i * 2), new JLabel((i * 2) + "s"));
-				
-			}
-			m_filterLatencySlider.setLabelTable(ht);			
 			
-			c.gridx++;
-			c.weightx = 0.25;
-			add(m_filterLatencySlider, c);
 		}
 		
 		private void selectRadioButton(ButtonGroup a_group, String a_trustCondition)
