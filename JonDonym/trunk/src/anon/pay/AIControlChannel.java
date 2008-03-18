@@ -121,12 +121,8 @@ public class AIControlChannel extends XmlControlChannel
    */
   public void processXmlMessage(Document docMsg)
   {
-	  Element elemRoot = docMsg.getDocumentElement();
-	  //System.out.println(XMLUtil.toString(elemRoot));
-	  	 	  
+	  Element elemRoot = docMsg.getDocumentElement(); 	 	  
 	  String tagName = elemRoot.getTagName();
-	  /*LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
-				"Thread "+ Thread.currentThread().getName()+" processing AI ControlMessage "+tagName);*/
 	  try
 	  {
 		  if (tagName.equals(XMLPayRequest.XML_ELEMENT_NAME))
@@ -556,7 +552,6 @@ public class AIControlChannel extends XmlControlChannel
 	  }
 
 	  PayAccountsFile.getInstance().getActiveAccount().resetCurrentBytes();
-	  LogHolder.log(LogLevel.ALERT, LogType.PAY, Thread.currentThread().getName()+": Now sending account cert and starting ai login procedure");
 	  sendXmlMessage(XMLUtil.toXMLDocument(PayAccountsFile.getInstance().getActiveAccount().getAccountCertificate()));
 	  /* 
 	   * new ai login procedure: wait until all messages are 
@@ -566,7 +561,7 @@ public class AIControlChannel extends XmlControlChannel
 	  synchronized(m_aiLoginSyncObject)
 	  {
 		  /* Only if the new synchronized AI login procedure is suppported by the first mix
-		   * (version >= 00.07.19) we wait until the mix confirms a successful/unsuccessful login or
+		   * (version >= 00.07.20) we wait until the mix confirms a successful/unsuccessful login or
 		   * the connection timed out. Otherwise for backward compatibility reasons
 		   * we still perform the old asynchronous login procedure. 
 		   */
@@ -756,15 +751,16 @@ public class AIControlChannel extends XmlControlChannel
 			new XMLErrorMessage(XMLErrorMessage.ERR_WRONG_DATA, msg));
 	}
 	
-	public void multiplexerClosed() {
-		//LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,"AIControlChannel noticed that the multiplexer is closed");
+	public void multiplexerClosed() 
+	{
 		synchronized(m_aiLoginSyncObject)
 		{
 			m_aiLoginSyncObject.notifyAll();
 		}
 	}
 
-	public void setSynchronizedAILogin(boolean synchronizedAILogin) {
+	public void setSynchronizedAILogin(boolean synchronizedAILogin) 
+	{
 		synchronized(m_aiLoginSyncObject)
 		{
 			m_synchronizedAILogin = synchronizedAILogin;
