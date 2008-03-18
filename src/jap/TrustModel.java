@@ -39,6 +39,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import gui.JAPMessages;
 import anon.client.BasicTrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
@@ -48,7 +49,6 @@ import anon.infoservice.StatusInfo;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import gui.JAPMessages;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -114,7 +114,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String MSG_SERVICES_WITH_COSTS = TrustModel.class.getName() + "_servicesWithCosts";
 	private static final String MSG_SERVICES_WITHOUT_COSTS = TrustModel.class.getName() + "_servicesWithoutCosts";
 	private static final String MSG_SERVICES_USER_DEFINED = TrustModel.class.getName() + "_servicesUserDefined";
-	private static final String MSG_CASCADES_FILTER = TrustModel.class.getName() + "_cascadesFilter";
+	private static final String MSG_CASCADES_FILTER = TrustModel.class.getName() + "_servicesFilter";
 	private static final String MSG_ALL_SERVICES = TrustModel.class.getName() + "_allServices";
 	
 	private static Vector ms_trustModels = new Vector();
@@ -136,7 +136,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	
 	private boolean m_bEditable;
 
-	public static abstract class TrustAttribute implements IXMLEncodable, Cloneable
+	public static abstract class TrustAttribute implements IXMLEncodable
 	{
 		public static final int CATEGORY_DEFAULT = 0;
 		
@@ -454,21 +454,21 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		// Initialize basic trust models
 		TrustModel model;
 
-		model = new TrustModel(JAPMessages.getString(MSG_ALL_SERVICES));
+		model = new TrustModel(MSG_ALL_SERVICES);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		ms_trustModels.addElement(model);
 		
-		model = new TrustModel(JAPMessages.getString(MSG_SERVICES_WITH_COSTS));
+		model = new TrustModel(MSG_SERVICES_WITH_COSTS);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		ms_trustModels.addElement(model);
 
-		model = new TrustModel(JAPMessages.getString(MSG_SERVICES_WITHOUT_COSTS));
+		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		ms_trustModels.addElement(model);
 		
-		model = new TrustModel(JAPMessages.getString(MSG_SERVICES_USER_DEFINED))
+		model = new TrustModel(MSG_SERVICES_USER_DEFINED)
 		{
 			public boolean isAdded()
 			{
@@ -742,7 +742,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		
 		if(trustModelsAdded == 0)
 		{
-			TrustModel model = new TrustModel(JAPMessages.getString(MSG_CASCADES_FILTER));
+			TrustModel model = new TrustModel(MSG_CASCADES_FILTER);
 			model.setEditable(true);
 			addTrustModel(model);
 		}
@@ -789,7 +789,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	public String toString()
 	{
-		return getName();
+		return JAPMessages.getString(getName());
 	}
 
 	public long getId()
