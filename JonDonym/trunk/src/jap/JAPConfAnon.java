@@ -417,20 +417,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_manualPanel.setVisible(false);
 		}
 		
-		/// DEBU G////
-		if(m_filterPanel != null)
-		{
-			pRoot.remove(m_filterPanel);
-			m_filterPanel = null;
-		}
-		
-		// create a copy of the current trustmodel
+		// create a copy of the current trust model
 		m_trustModelCopy = new TrustModel(TrustModel.getCurrentTrustModel());		
 	
 		if(m_filterPanel == null)
 		{
 			m_filterPanel = new FilterPanel(this);
-			m_showEditFilterButton.setText(JAPMessages.getString(MSG_FILTER_CANCEL));
 			m_rootPanelConstraints.anchor = GridBagConstraints.SOUTHEAST;
 			m_rootPanelConstraints.gridx = 0;
 			m_rootPanelConstraints.gridy = 3;
@@ -473,6 +465,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			//m_filterAnonLevelSlider.setValue(((Integer)model.getAttribute(TrustModel.AnonLevelAttribute.class).getConditionValue()).intValue());
 		}
 		
+		m_showEditFilterButton.setText(JAPMessages.getString(MSG_FILTER_CANCEL));		
 		m_filterPanel.setVisible(true);
 		
 		pRoot.validate();
@@ -1038,7 +1031,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		//m_tfMixHost.setText(JAPConstants.DEFAULT_ANON_HOST);
 		//m_tfMixPortNumber.setText(Integer.toString(JAPConstants.DEFAULT_ANON_PORT_NUMBER));
-
+		if(m_filterPanel != null && m_filterPanel.isVisible())
+		{
+			hideEditFilter();
+		}
+	}
+	
+	protected void onCancelPressed()
+	{
+		if(m_filterPanel != null && m_filterPanel.isVisible())
+		{
+			hideEditFilter();
+		}		
 	}
 
 	public boolean onOkPressed()
