@@ -492,6 +492,14 @@ public class JAP
 					profilepath = getArgumentValue("--portable-browserprofile");
 					m_firefoxCommand += " -profile " + profilepath;
 				}
+				String fileSeparator = System.getProperty("file.separator");
+				if(!(m_firefoxCommand.startsWith(fileSeparator)) && 
+				   !(m_firefoxCommand.contains(":"+fileSeparator)) )
+				{
+					//path is relative
+					m_firefoxCommand = System.getProperty("user.dir") + fileSeparator + m_firefoxCommand;
+					
+				}
 			}
 		}
 
@@ -502,6 +510,7 @@ public class JAP
 
 		// keep this string unchangeable from "outside"
 		final String firefoxCommand = m_firefoxCommand;
+		LogHolder.log(LogLevel.WARNING, LogType.NET, "Firefox command: "+ firefoxCommand);
 		AbstractOS.getInstance().init(new AbstractOS.IURLErrorNotifier()
 		{
 			boolean m_bReset = false;
