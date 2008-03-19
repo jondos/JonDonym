@@ -276,7 +276,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	/** the Certificate of the selected Mix-Server */
 	private CertPath m_serverCert;
 	private MixInfo m_serverInfo;
-
+	
 	private Vector m_locationCoordinates;
 	
 	/**

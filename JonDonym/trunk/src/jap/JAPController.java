@@ -42,6 +42,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
 import java.util.Vector;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -278,11 +280,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	private DirectProxy.AllowUnprotectedConnectionCallback m_proxyCallback;
 
-	/** Holds the MsgID of the status message after the forwaring server was started.*/
+	/** Holds the MsgID of the status message after the forwarding server was started.*/
 	private int m_iStatusPanelMsgIdForwarderServerStatus;
 
 	private JAPController()
 	{
+		m_Model = JAPModel.getInstance();
+	}
+	
+	public void start() {
 		// simulate database distributor
 		Database.registerDistributor(new IDistributor()
 		{
@@ -312,7 +318,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_messageUpdater = new MessageUpdater();
 
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
-		m_Model = JAPModel.getInstance();
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
 		InfoServiceDBEntry.setMutableProxyInterface(m_Model.getInfoServiceProxyInterface());
 
@@ -839,37 +844,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 	public synchronized void loadConfigFile(String a_strJapConfFile, boolean loadPay,
 											final ISplashResponse a_splash)
 	{
-		String japConfFile = a_strJapConfFile;
-		boolean success = false;
-		if (japConfFile != null)
-		{
-			/* try the config file from the command line */
-			success = this.loadConfigFileCommandLine(japConfFile);
-		}
-		if (!success)
-		{
-			/* no config file found -> try to use the config file in the OS-specific location */
-			success = this.loadConfigFileOSdependent();
-		}
-		if (!success)
-		{
-			/* no config file found -> try to use the config file in the home directory of the user */
-			success = this.loadConfigFileHome();
-		}
-		if (!success)
-		{
-			/* no config file found -> try to use the config file in the current directory */
-			success = this.loadConfigFileCurrentDir();
-		}
-		if (!success)
-		{
-			/* no config file at any position->use OS-specific path for storing a new one*/
-			JAPModel.getInstance().setConfigFile(AbstractOS.getInstance().getConfigPath() +
-												 JAPConstants.XMLCONFFN);
-
-			/* As this is the first JAp start, show the config assistant */
-			m_bShowConfigAssistant = true;
-		}
+		// @todo: remove since we already looked for the confing file in preLoadConfigFile
+		boolean success = lookForConfigFile(a_strJapConfFile);
+		
 		if (a_strJapConfFile != null)
 		{
 			/* always try to use the config file specified on the command-line for storing the
@@ -885,11 +862,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 				 * exist -> store the configuration in the OS-specific directory
 				 */
 				JAPModel.getInstance().setConfigFile(AbstractOS.getInstance().getConfigPath() +
-					JAPConstants.XMLCONFFN);
+						JAPConstants.XMLCONFFN);
 			}
 		}
 		Document doc = null;
-
+		
 		if (success)
 		{
 			try
@@ -901,11 +878,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 				LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Error while loading the configuration file!");
 			}
 		}
+
 		if (doc == null)
 		{
 			doc = XMLUtil.createDocument();
 		}
-
 
 		//if (success)
 		{
@@ -1857,6 +1834,61 @@ public final class JAPController extends Observable implements IProxyListener, O
 	
 	public Process getPortableFirefoxProcess() {
 		return m_portableFirefoxProcess;
+	}
+
+	public void preLoadConfigFile(String a_strJapConfFile) 
+	{
+		if(lookForConfigFile(a_strJapConfFile))
+		{
+			try
+			{
+				BufferedReader br = new BufferedReader(new FileReader(m_Model.getConfigFile()));
+				
+				// skip the <?xml part
+				br.readLine();
+				Document doc = XMLUtil.toXMLDocument(br.readLine() + "</JAP>");
+				
+				m_Model.setHideSplashScreen(XMLUtil.parseAttribute(doc, "HideSplashScreen", false));
+			}
+			catch(Exception ex)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Unable to pre-load config file " + m_Model.getConfigFile() + ".");
+			}
+		}
+	}
+
+	public boolean lookForConfigFile(String a_strJapConfFile) {
+		boolean success = false;
+		if (a_strJapConfFile != null)
+		{
+			/* try the config file from the command line */
+			success = this.loadConfigFileCommandLine(a_strJapConfFile);
+		}
+		if (!success)
+		{
+			/* no config file found -> try to use the config file in the OS-specific location */
+			success = this.loadConfigFileOSdependent();
+		}
+		if (!success)
+		{
+			/* no config file found -> try to use the config file in the home directory of the user */
+			success = this.loadConfigFileHome();
+		}
+		if (!success)
+		{
+			/* no config file found -> try to use the config file in the current directory */
+			success = this.loadConfigFileCurrentDir();
+		}
+		if (!success)
+		{
+			/* no config file at any position->use OS-specific path for storing a new one*/
+			m_Model.setConfigFile(AbstractOS.getInstance().getConfigPath() +
+												 JAPConstants.XMLCONFFN);
+
+			/* As this is the first JAp start, show the config assistant */
+			m_bShowConfigAssistant = true;
+		}
+		return success;
 	}
 
 	public boolean startPortableFirefox(String[] cmds) {
