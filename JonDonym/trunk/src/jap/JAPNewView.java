@@ -596,13 +596,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				public void actionPerformed(ActionEvent e)
 				{
-					try
-					{
-							Runtime.getRuntime().exec(m_firefoxCommand);
-					}
-					catch (IOException ex)
-					{
-					}
+					//try
+					//{
+						//System.out.println(m_firefoxCommand);	
+						//Runtime.getRuntime().exec(m_firefoxCommand);
+						m_Controller.startPortableFirefox(new String[]{m_firefoxCommand});
+					//}
+					//catch (IOException ex)
+					//{
+					//}
 				}
 			});
 
