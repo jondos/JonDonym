@@ -30,6 +30,10 @@ package platform;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 /**
  * Util class to retrieve various details about running virtual machines.
  *
@@ -179,7 +183,7 @@ public final class VMPerfDataFile
 	
 			m_bUsable = buildEntries();
 		}
-		catch(Exception ex) { ex.printStackTrace(); }	
+		catch(Exception ex) { LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Java VM < 1.4 found, can't use multiple-instances feature."); }	
 	}
 	
 	/**
