@@ -744,7 +744,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		p.add(m_rbViewSystray, c);
 		
 		m_cbHideSplash = new JCheckBox(JAPMessages.getString("ngViewHideSplash"));
-		m_cbHideSplash.setEnabled(m_Model.getHideSplashDisabled());
+		m_cbHideSplash.setEnabled(JAPModel.getInstance().getHideSplashDisabled());
 		c.gridy = 3;
 		c.insets = new Insets(0, 10, 0, 10);
 		p.add(m_cbHideSplash, c);
