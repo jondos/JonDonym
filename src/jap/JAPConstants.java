@@ -315,4 +315,16 @@ public final class JAPConstants
 	 *  Correct value depends on the contract with the paysafecard company */
 	public final static int PAYSAFECARD_TIMEOUT = 60;
 
+	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr"}; // "ca", "es", "ru"}; //pt
+
+	public static String[] getSupportedLanguages()
+	{
+		String[] languages = new String[SUPPORTED_LANGUAGES.length];
+		for (int i = 0; i < languages.length; i++)
+		{
+			languages[i] = SUPPORTED_LANGUAGES[i];
+		}
+
+		return languages;
 	}
+}
