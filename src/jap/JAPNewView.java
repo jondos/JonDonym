@@ -162,6 +162,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private static final String MSG_OBSERVABLE_EXPLAIN = JAPNewView.class.getName() + "_observableExplain";
 	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";
+	private static final String MSG_EXPLAIN_NO_FIREFOX_FOUND = JAPNewView.class.getName() + "_explainNoFirefoxFound";
 
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
@@ -3251,12 +3252,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	
 	public void showChooseFirefoxPathDialog()
 	{
-		JFileChooser chooser = new JFileChooser();
-		if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+		if(JAPDialog.showYesNoDialog(this, JAPMessages.getString(MSG_EXPLAIN_NO_FIREFOX_FOUND)))
 		{
-			File f = chooser.getSelectedFile();
-			if(f != null)
-				m_Controller.startPortableFirefox(new String[] {f.getAbsolutePath()});
+			JFileChooser chooser = new JFileChooser();
+			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+			{
+				File f = chooser.getSelectedFile();
+				if(f != null)
+					m_Controller.startPortableFirefox(new String[] {f.getAbsolutePath()});
+				m_firefoxCommand = f.getAbsolutePath();
+			}
 		}
 	}
 
