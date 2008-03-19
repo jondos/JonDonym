@@ -292,9 +292,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private int m_msgIDInsecure;
 
-	private String m_firefoxCommand; //the CLI command for re-opening firefox, usually just the path to the executable
+	private String[] m_firefoxCommand; //the CLI command for re-opening firefox, usually just the path to the executable
 
-	public JAPNewView(String s, JAPController a_controller, String a_firefoxCommand)
+	public JAPNewView(String s, JAPController a_controller, String[] a_firefoxCommand)
 	{
 		super(s, a_controller);
 		m_bIsSimpleView = (JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED);
@@ -588,7 +588,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		constrVersion.insets = new Insets(0, 0, 0, 0);
 		m_pnlVersion.add(m_labelVersion, constrVersion);
 
-		if (getBrowserCommand() != null)
+		if (m_Controller.isPortableMode())
 		{
 			m_firefox = new JButton(GUIUtils.loadImageIcon("firefox.png", true, false));
 			m_firefox.setOpaque(false);
@@ -599,15 +599,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				public void actionPerformed(ActionEvent e)
 				{
-					//try
-					//{
-						//System.out.println(m_firefoxCommand);	
-						//Runtime.getRuntime().exec(m_firefoxCommand);
-						m_Controller.startPortableFirefox(new String[]{m_firefoxCommand});
-					//}
-					//catch (IOException ex)
-					//{
-					//}
+					m_Controller.startPortableFirefox(m_firefoxCommand);
 				}
 			});
 
@@ -2575,15 +2567,20 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_comboAnonServices.showPopup();
 	}
 
+	public String[] getCompleteBrowserCommand()
+	{
+		return m_firefoxCommand;
+	}
+	
 	public String getBrowserCommand()
 	{
-		if (m_firefoxCommand != null && !m_firefoxCommand.trim().equals(""))
+		if(m_firefoxCommand != null)
 		{
-			return m_firefoxCommand;
+			return m_firefoxCommand[0];	
 		}
 		return null;
 	}
-
+	
 	public void onUpdateValues()
 	{
 		synchronized (SYNC_ICONIFIED_VIEW)
@@ -3258,9 +3255,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 			{
 				File f = chooser.getSelectedFile();
+				if(m_firefoxCommand == null)
+				{
+					m_firefoxCommand = new String[1];
+				}
+				m_firefoxCommand[0] = f.getAbsolutePath();
 				if(f != null)
-					m_Controller.startPortableFirefox(new String[] {f.getAbsolutePath()});
-				m_firefoxCommand = f.getAbsolutePath();
+				{
+					m_Controller.startPortableFirefox(m_firefoxCommand);
+				}
+				
 			}
 		}
 	}
