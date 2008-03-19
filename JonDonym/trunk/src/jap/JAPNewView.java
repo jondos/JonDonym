@@ -27,6 +27,7 @@
  */
 package jap;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -72,6 +73,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.JFileChooser;
 
 import anon.AnonServerDescription;
 import anon.infoservice.BlacklistedCascadeIDEntry;
@@ -3244,6 +3246,17 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		else
 		{
 			m_StatusPanel.removeStatusMsg(messageId.intValue());
+		}
+	}
+	
+	public void showChooseFirefoxPathDialog()
+	{
+		JFileChooser chooser = new JFileChooser();
+		if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+		{
+			File f = chooser.getSelectedFile();
+			if(f != null)
+				m_Controller.startPortableFirefox(new String[] {f.getAbsolutePath()});
 		}
 	}
 
