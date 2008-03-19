@@ -197,6 +197,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static final String XML_ATTR_LOGIN_TIMEOUT = "loginTimeout";
 	private static final String XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT = "isConnectionTimeout";
 	private static final String XML_ATTR_ASK_SAVE_PAYMENT = "askIfNotSaved";
+	private static final String XML_ATTR_HIDE_SPLASH_SCREEN = "HideSplashScreen";
 
 	// store classpath as it may not be created successfully after update
 	private final String CLASS_PATH = ClassUtil.getClassPath().trim();
@@ -1848,7 +1849,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				br.readLine();
 				Document doc = XMLUtil.toXMLDocument(br.readLine() + "</JAP>");
 				
-				m_Model.setHideSplashScreen(XMLUtil.parseAttribute(doc, "HideSplashScreen", false));
+				m_Model.setHideSplashScreen(XMLUtil.parseAttribute(doc, XML_ATTR_HIDE_SPLASH_SCREEN, false));
 			}
 			catch(Exception ex)
 			{
@@ -2277,8 +2278,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 			Document doc = XMLUtil.createDocument();
 			Element e = doc.createElement("JAP");
 			doc.appendChild(e);
+			
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_VERSION, JAPConstants.CURRENT_CONFIG_VERSION);
-			XMLUtil.setAttribute(e, m_Model.DLL_VERSION_UPDATE, m_Model.getDLLupdate());
+			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.getDLLupdate());
 
 			XMLUtil.setAttribute(e, XML_ALLOW_NON_ANONYMOUS_UPDATE,
 								 JAPModel.getInstance().isUpdateViaDirectConnectionAllowed());
@@ -2293,6 +2295,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING,
 								 JAPModel.getInstance().isNonAnonymousSurfingDenied());
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_CONFIG_ASSISTANT, m_bShowConfigAssistant);
+			XMLUtil.setAttribute(e, XML_ATTR_HIDE_SPLASH_SCREEN, m_Model.getHideSplashScreen());
 
 			XMLUtil.setAttribute(e, XML_ATTR_LOGIN_TIMEOUT, AnonClient.getLoginTimeout());
 			XMLUtil.setAttribute(e, XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT,
