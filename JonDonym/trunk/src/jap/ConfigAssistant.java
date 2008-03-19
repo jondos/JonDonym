@@ -199,14 +199,11 @@ public class ConfigAssistant extends JAPDialog
 		tempLabel = new JLabel(JAPMessages.getString("settingsLanguage"));
 		contentPane.add(tempLabel, constraints);
 		final JComboBox comboLang = new JComboBox();
-		comboLang.addItem(new LanguageMapper("en", new Locale("en", "")));
-		comboLang.addItem(new LanguageMapper("de", new Locale("de", "")));
-		comboLang.addItem(new LanguageMapper("cs", new Locale("cs", "")));
-		comboLang.addItem(new LanguageMapper("nl", new Locale("nl", "")));
-		comboLang.addItem(new LanguageMapper("fr", new Locale("fr", "")));
-		comboLang.addItem(new LanguageMapper("ca", new Locale("ca", "")));
-		comboLang.addItem(new LanguageMapper("es", new Locale("es", "")));
-		//comboLang.addItem(new LanguageMapper("pt", new Locale("pt", "")));
+		String[] languages = JAPConstants.getSupportedLanguages();
+		for (int i = 0; i < languages.length; i++)
+		{
+			comboLang.addItem(new LanguageMapper(languages[i], new Locale(languages[i], "")));
+		}
 		comboLang.setSelectedItem(new LanguageMapper(JAPMessages.getLocale().getLanguage()));
 		constraints.gridx++;
 		constraints.insets = new Insets(0, 10, 0, 0);

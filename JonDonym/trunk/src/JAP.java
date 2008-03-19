@@ -200,7 +200,7 @@ public class JAP
 		{
 			bConsoleOnly = true;
 		}
-		
+
 		if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
 		{
 			// Try to detect running instances of JAP
@@ -215,12 +215,12 @@ public class JAP
 				if(numJAPInstances > 1)
 				{
 					// multiple instances of JAP have been started, what to do?
-					System.out.println("There is already an instance of JAP running.");
+					System.out.println("There is already an instance of JAP/JonDo running.");
 					System.exit(0);
 				}
 			}
 		}
-		
+
 		// Test (part 2) for right JVM....
 		if (vendor.startsWith("Transvirtual"))
 		{ // Kaffe
