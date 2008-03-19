@@ -1908,7 +1908,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.MISC,
 				"Portable Firefox process is still running!");
-				return false;
+				return true;
 			}
 		}
 		
@@ -4592,7 +4592,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "First browser start");
 				m_firstPortableFFStart = true;
 				/*@todo: should better get the browser command from JAPModel */
-				startPortableFirefox(new String[]{m_View.getBrowserCommand()});
+				startPortableFirefox(m_View.getCompleteBrowserCommand());
 			}
 		}
 	}
