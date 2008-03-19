@@ -94,7 +94,7 @@ public class JAP
 	
 	Hashtable m_arstrCmdnLnArgs = null;
 	String[] m_temp = null;
-	String m_firefoxCommand; //holds command to re-open firefox, to be parsed from args and passed to JAPNewView
+	String[] m_firefoxCommand; //holds command to re-open firefox, to be parsed from args and passed to JAPNewView
 
 	public JAP()
 	{
@@ -282,36 +282,12 @@ public class JAP
 		//String firepath="";
 		String profilepath = "";
 		boolean bPortable = false;
-	
-		if (isArgumentSet("--portable") )
+		m_firefoxCommand = buildPortableFFCommand();
+		
+		if(m_firefoxCommand != null)
 		{
 			bPortable = true;
-			m_controller.setPortableMode(true);			
-			m_firefoxCommand = getArgumentValue("--portable");
-			
-			if (m_firefoxCommand != null)
-			{
-				// portable configuration seems to be complete
-
-				if (isArgumentSet("--portable-browserprofile"))
-				{
-					profilepath = getArgumentValue("--portable-browserprofile");
-					m_firefoxCommand += " -profile " + profilepath;
-				}
-				String fileSeparator = System.getProperty("file.separator");
-
-				if(!(m_firefoxCommand.startsWith(fileSeparator)) && 
-				   !((m_firefoxCommand.substring(1,3)).equals(":"+fileSeparator)) )
-				{
-					//path is relative
-					m_firefoxCommand = System.getProperty("user.dir") + fileSeparator + m_firefoxCommand;
-					
-				}
-			}
-			else
-			{
-				m_firefoxCommand = "";
-			}
+			m_controller.setPortableMode(true);
 		}
 		
 		String configFileName = null;
@@ -373,7 +349,6 @@ public class JAP
 		{
 			splash = new ConsoleSplash();
 			splash.setText(splashText);
-			if (isArgumentSet("--noSplash") || isArgumentSet("-s")) JAPModel.getInstance().setHideSplashDisabled(true);
 		}
 		else
 		{
@@ -550,7 +525,7 @@ public class JAP
 		}
 
 		// keep this string unchangeable from "outside"
-		final String firefoxCommand = m_firefoxCommand;
+		final String[] firefoxCommand = m_firefoxCommand;
 		AbstractOS.getInstance().init(new AbstractOS.IURLErrorNotifier()
 		{
 			boolean m_bReset = false;
@@ -575,10 +550,12 @@ public class JAP
 				}
 				try
 				{
-					LogHolder.log(LogLevel.NOTICE, LogType.GUI, firefoxCommand + " " + a_url.toString());
-					Runtime.getRuntime().exec(new String[]
-											  {firefoxCommand, a_url.toString()});
-					return true;
+					firefoxCommand[firefoxCommand.length-1] = a_url.toString();
+					LogHolder.log(LogLevel.WARNING, LogType.GUI, firefoxCommand[0] + " " + a_url.toString());
+					return m_controller.startPortableFirefox(firefoxCommand);
+					/*Runtime.getRuntime().exec(new String[]
+											  {firefoxCommand, a_url.toString()});*/
+					//return true;
 				}
 				catch (Exception ex)
 				{
@@ -586,17 +563,6 @@ public class JAP
 				return false;
 			}
 		});
-
-		if (m_firefoxCommand != null)
-		{
-			if (isArgumentSet("--portable-help-path") && m_firefoxCommand != null)
-			{
-				m_firefoxCommand += " " + getArgumentValue("--portable-help-path");
-			}
-		}
-
-
-		
 
 		/* check, whether there is the -forwarding_state parameter, which extends
 		 * the configuration dialog
@@ -802,7 +768,87 @@ public class JAP
 	{
 		return m_arstrCmdnLnArgs.containsKey(a_argument);
 	}
-
+	
+	public String[] buildPortableFFCommand()
+	{
+		String[] pFFCommand = null;
+		String pFFExecutable = null;
+		String pFFprofile = null;
+		String pFFHelpPath = null;
+		int args_len = 0;
+		int argC = 0;
+		
+		if (!isArgumentSet("--portable") )
+		{
+			return null;
+		}
+		//--portable is set
+		pFFExecutable = getArgumentValue("--portable");
+		args_len++;
+		if (pFFExecutable != null)
+		{
+			// portable configuration seems to be complete
+			pFFExecutable = toAbsolutePath(pFFExecutable);
+		}
+		else
+		{
+			pFFExecutable = "";
+		}
+			
+		if (isArgumentSet("--portable-browserprofile"))
+		{
+			pFFprofile = getArgumentValue("--portable-browserprofile");
+			if(pFFprofile != null)
+			{
+				args_len += 2;
+			}
+		}
+		if (isArgumentSet("--portable-help-path"))
+		{
+			pFFHelpPath = getArgumentValue("--portable-help-path");
+		}
+		// One argument is reserved for the URL
+		args_len++;
+		pFFCommand = new String[args_len];
+		pFFCommand[argC] = pFFExecutable;
+		argC++;
+		if(pFFprofile != null)
+		{
+			pFFCommand[argC] = "-profile";
+			pFFCommand[argC+1] = toAbsolutePath(pFFprofile);
+			argC += 2;
+		}
+		if(pFFHelpPath != null)
+		{
+			pFFCommand[argC] = pFFHelpPath;
+		}
+		else
+		{
+			pFFCommand[argC] = "https://www.jondos.de";
+		}
+		return pFFCommand;
+	}
+	
+	public static String toAbsolutePath(String path)
+	{
+		if(path != null)
+		{
+			if(!(path.startsWith(File.separator)) && 
+			   !((path.substring(1,3)).equals(":"+File.separator)) )
+			{
+				//path is relative
+				return System.getProperty("user.dir") + File.separator + path;
+				
+			}
+			else
+			{
+				//path is already absolute
+				return path;
+			}
+		}
+		return null;
+	}
+	
 	public static void main(String[] argv)
 	{
 		// do NOT change anything in main!
