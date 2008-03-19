@@ -175,6 +175,7 @@ public final class JAPModel extends Observable
 	private JAPController.AnonConnectionChecker m_connectionChecker;
 
 	private boolean m_bHideSplashScreen;
+	private boolean m_bHideSplashDisabled = false;
 	
 	private Dimension m_iconifiedSize;
 	private Dimension m_configSize;
@@ -1266,6 +1267,16 @@ public final class JAPModel extends Observable
 	public boolean getHideSplashScreen()
 	{
 		return m_bHideSplashScreen;
+	}
+	
+	public void setHideSplashDisabled(boolean a_bDisabled)
+	{
+		m_bHideSplashDisabled = a_bDisabled;
+	}
+	
+	public boolean getHideSplashDisabled()
+	{
+		return m_bHideSplashDisabled;
 	}
 
 	public static class FontResize
