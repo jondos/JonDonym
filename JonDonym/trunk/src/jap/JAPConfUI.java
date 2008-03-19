@@ -743,7 +743,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		c.gridy = 2;
 		p.add(m_rbViewSystray, c);
 		
-		m_cbHideSplash = new JCheckBox("Splash-Screen verbergen");
+		m_cbHideSplash = new JCheckBox("ngViewHideSplash");
 		c.gridy = 3;
 		c.insets = new Insets(0, 10, 0, 10);
 		p.add(m_cbHideSplash, c);
