@@ -286,10 +286,11 @@ public class JAP
 		{
 			bPortable = true;
 			m_firefoxCommand = getArgumentValue("--portable");
+			m_controller.setPortableMode(true);
+			
 			if (m_firefoxCommand != null)
 			{
 				// portable configuration seems to be complete
-				m_controller.setPortableMode(true);
 
 				if (isArgumentSet("--portable-browserprofile"))
 				{
@@ -305,6 +306,10 @@ public class JAP
 					m_firefoxCommand = System.getProperty("user.dir") + fileSeparator + m_firefoxCommand;
 					
 				}
+			}
+			else
+			{
+				m_firefoxCommand = "";
 			}
 		}
 		
