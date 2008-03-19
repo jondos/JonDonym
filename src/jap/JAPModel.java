@@ -174,6 +174,8 @@ public final class JAPModel extends Observable
 	private boolean m_bUseProxyAuthentication = false;
 	private JAPController.AnonConnectionChecker m_connectionChecker;
 
+	private boolean m_bHideSplashScreen;
+	
 	private Dimension m_iconifiedSize;
 	private Dimension m_configSize;
 	private Dimension m_helpSize;
@@ -1254,6 +1256,16 @@ public final class JAPModel extends Observable
 
 	public boolean getDLLupdate() {
 		return m_bUpdateDll;
+	}
+
+	public void setHideSplashScreen(boolean a_bHide)
+	{
+		m_bHideSplashScreen = a_bHide;
+	}
+	
+	public boolean getHideSplashScreen()
+	{
+		return m_bHideSplashScreen;
 	}
 
 	public static class FontResize
