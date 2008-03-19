@@ -205,8 +205,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private final Object PROXY_SYNC = new Object();
 
 	private String m_commandLineArgs = "";
-	Process m_portableFirefoxProcess = null;
-	
+	private Process m_portableFirefoxProcess = null;
+	boolean m_firstPortableFFStart = false;
 	/**
 	 * Stores all MixCascades we know (information comes from infoservice or was entered by a user).
 	 * This list may or may not include the current active MixCascade.
@@ -4573,6 +4573,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_lastBalanceUpdateBytes = 0;
 		transferedBytes(0, IProxyListener.PROTOCOL_WWW);
 		transferedBytes(0, IProxyListener.PROTOCOL_OTHER);
+		if(isPortableMode())
+		{
+			if(!m_firstPortableFFStart)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, "First browser start");
+				m_firstPortableFFStart = true;
+				/*@todo: should better get the browser command from JAPModel */
+				startPortableFirefox(new String[]{m_View.getBrowserCommand()});
+			}
+		}
 	}
 
 	public void dataChainErrorSignaled()
