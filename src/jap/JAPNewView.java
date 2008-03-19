@@ -171,7 +171,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String IMG_ICONIFY = JAPNewView.class.getName() + "_iconify.gif";
 	private static final String IMG_ABOUT = JAPNewView.class.getName() + "_about.gif";
 
-	private static final String MSG_OPEN_FIREFOX = JAPMessages.getString(JAPNewView.class.getName() + "_openFirefox");
+	private static final String MSG_OPEN_FIREFOX = JAPNewView.class.getName() + "_openFirefox";
 
 
 
@@ -589,7 +589,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			m_firefox = new JButton(GUIUtils.loadImageIcon("firefox.png", true, false));
 			m_firefox.setOpaque(false);
-			m_firefox.setToolTipText(MSG_OPEN_FIREFOX);
+			m_firefox.setToolTipText(JAPMessages.getString(MSG_OPEN_FIREFOX));
 			m_firefox.setMnemonic('W');
 
 			m_firefox.addActionListener(new ActionListener()
