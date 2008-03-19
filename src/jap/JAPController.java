@@ -30,6 +30,7 @@ package jap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.URL;
@@ -201,7 +202,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private final Object PROXY_SYNC = new Object();
 
 	private String m_commandLineArgs = "";
-
+	Process m_portableFirefoxProcess = null;
+	
 	/**
 	 * Stores all MixCascades we know (information comes from infoservice or was entered by a user).
 	 * This list may or may not include the current active MixCascade.
@@ -1852,7 +1854,60 @@ public final class JAPController extends Observable implements IProxyListener, O
 		// fire event
 		notifyJAPObservers();
 	}
+	
+	public Process getPortableFirefoxProcess() {
+		return m_portableFirefoxProcess;
+	}
 
+	public boolean startPortableFirefox(String[] cmds) {
+		if(m_portableFirefoxProcess != null)
+		{
+			try
+			{
+				int ffExitValue = m_portableFirefoxProcess.exitValue();
+				LogHolder.log(LogLevel.INFO, LogType.MISC,
+					"previous portable firefox process exited "+
+					((ffExitValue == 0) ? "normally " : "anormally ")+
+					"(exit value "+ffExitValue+").");
+			}
+			catch(IllegalThreadStateException itse)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC,
+				"Portable Firefox process is still running!");
+				return false;
+			}
+		}
+		
+		try
+		{
+			m_portableFirefoxProcess = Runtime.getRuntime().exec(cmds);
+			return true;
+		} 
+		catch (SecurityException se)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC,
+					"You are not allowed to lauch portable firefox: ", se);
+			return false;
+		}
+		catch (IOException ioe) 
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC,
+			"Error occured while launching portable firefox with command "+cmds[0]+": ",ioe);
+		}
+		catch (NullPointerException npe) 
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC,
+			"Launching portable firefox failed because the firefox command is null");
+		}
+		catch (ArrayIndexOutOfBoundsException aioobe) 
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC,
+			"Launching portable firefox failed because the firefox command array is empty");
+		}
+		//@todo: open dialog and allow user to specify the firefox command
+		return false;
+	}
+	
 	/**
 	 * Tries to load the config file provided in the command line
 	 * @return FileInputStream
