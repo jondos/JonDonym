@@ -4584,11 +4584,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_lastBalanceUpdateBytes = 0;
 		transferedBytes(0, IProxyListener.PROTOCOL_WWW);
 		transferedBytes(0, IProxyListener.PROTOCOL_OTHER);
-		if(isPortableMode())
+		/* perhaps we should use this solution for all OSs */
+		if(isPortableMode() && (AbstractOS.getInstance() instanceof platform.MacOS))
 		{
 			if(!m_firstPortableFFStart)
 			{
-				LogHolder.log(LogLevel.WARNING, LogType.MISC, "First browser start");
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "First browser start");
 				m_firstPortableFFStart = true;
 				/*@todo: should better get the browser command from JAPModel */
 				startPortableFirefox(new String[]{m_View.getBrowserCommand()});
