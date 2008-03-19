@@ -274,6 +274,66 @@ public class JAP
 				System.exit(0);
 			}
 		}
+		
+		// init controller and preload config
+		m_controller = JAPController.getInstance();
+		
+		// Set path to Firefox for portable JAP
+		//String firepath="";
+		String profilepath = "";
+		boolean bPortable = false;
+		if (isArgumentSet("--portable") )
+		{
+			bPortable = true;
+			m_firefoxCommand = getArgumentValue("--portable");
+			if (m_firefoxCommand != null)
+			{
+				// portable configuration seems to be complete
+				m_controller.setPortableMode(true);
+
+				if (isArgumentSet("--portable-browserprofile"))
+				{
+					profilepath = getArgumentValue("--portable-browserprofile");
+					m_firefoxCommand += " -profile " + profilepath;
+				}
+				String fileSeparator = System.getProperty("file.separator");
+
+				if(!(m_firefoxCommand.startsWith(fileSeparator)) && 
+				   !((m_firefoxCommand.substring(1,3)).equals(":"+fileSeparator)) )
+				{
+					//path is relative
+					m_firefoxCommand = System.getProperty("user.dir") + fileSeparator + m_firefoxCommand;
+					
+				}
+			}
+		}
+		
+		String configFileName = null;
+		/* check, whether there is the -config parameter, which means the we use userdefined config
+		 * file
+		 */
+		if ( (configFileName = getArgumentValue("--config")) == null)
+		{
+			configFileName = getArgumentValue("-c");
+		}
+		if (configFileName == null && bPortable)
+		{
+			// load and create the config file in the current directory by default
+			File tempDir = ClassUtil.getClassDirectory(JAP.class);
+			if (tempDir != null)
+			{
+				configFileName =
+					ClassUtil.getClassDirectory(JAP.class).getParent() +
+					File.separator + JAPConstants.XMLCONFFN;
+			}
+		}
+
+		if (configFileName != null)
+		{
+			LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Loading config file '" + configFileName + "'.");
+		}
+		
+		m_controller.preLoadConfigFile(configFileName);
 		// Show splash screen
 		ISplashResponse splash;
 		String splashText;
@@ -303,7 +363,7 @@ public class JAP
 			splash = new ConsoleSplash();
 			splash.setText(splashText);
 		}
-		else if (isArgumentSet("--noSplash") || isArgumentSet("-s"))
+		else if (isArgumentSet("--noSplash") || isArgumentSet("-s") || JAPModel.getInstance().getHideSplashScreen())
 		{
 			splash = new ConsoleSplash();
 			splash.setText(splashText);
@@ -460,7 +520,7 @@ public class JAP
 
 		// Create the controller object
 		splash.setText(JAPMessages.getString(MSG_STARTING_CONTROLLER));
-		m_controller = JAPController.getInstance();
+		m_controller.start();
 		if (isArgumentSet("--presentation") || isArgumentSet("-p"))
 		{
 			m_controller.setPresentationMode(true);
@@ -475,35 +535,7 @@ public class JAP
 			m_controller.setCommandLineArgs(cmdArgs);
 		}
 
-		// Set path to Firefox for portable JAP
-		//String firepath="";
-		String profilepath = "";
-		boolean bPortable = false;
-		if (isArgumentSet("--portable") )
-		{
-			bPortable = true;
-			m_firefoxCommand = getArgumentValue("--portable");
-			if (m_firefoxCommand != null)
-			{
-				// portable configuration seems to be complete
-				m_controller.setPortableMode(true);
-
-				if (isArgumentSet("--portable-browserprofile"))
-				{
-					profilepath = getArgumentValue("--portable-browserprofile");
-					m_firefoxCommand += " -profile " + profilepath;
-				}
-				String fileSeparator = System.getProperty("file.separator");
-
-				if(!(m_firefoxCommand.startsWith(fileSeparator)) && 
-				   !((m_firefoxCommand.substring(1,3)).equals(":"+fileSeparator)) )
-				{
-					//path is relative
-					m_firefoxCommand = System.getProperty("user.dir") + fileSeparator + m_firefoxCommand;
-					
-				}
-			}
-		}
+		
 
 		if (isArgumentSet("--portable-jre"))
 		{
@@ -557,30 +589,7 @@ public class JAP
 		}
 
 
-		String configFileName = null;
-		/* check, whether there is the -config parameter, which means the we use userdefined config
-		 * file
-		 */
-		if ( (configFileName = getArgumentValue("--config")) == null)
-		{
-			configFileName = getArgumentValue("-c");
-		}
-		if (configFileName == null && bPortable)
-		{
-			// load and create the config file in the current directory by default
-			File tempDir = ClassUtil.getClassDirectory(JAP.class);
-			if (tempDir != null)
-			{
-				configFileName =
-					ClassUtil.getClassDirectory(JAP.class).getParent() +
-					File.separator + JAPConstants.XMLCONFFN;
-			}
-		}
-
-		if (configFileName != null)
-		{
-			LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Loading config file '" + configFileName + "'.");
-		}
+		
 
 		/* check, whether there is the -forwarding_state parameter, which extends
 		 * the configuration dialog
