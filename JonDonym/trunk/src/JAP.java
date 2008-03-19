@@ -373,7 +373,7 @@ public class JAP
 		{
 			splash = new ConsoleSplash();
 			splash.setText(splashText);
-			JAPModel.getInstance().setHideSplashDisabled(true);
+			if (isArgumentSet("--noSplash") || isArgumentSet("-s")) JAPModel.getInstance().setHideSplashDisabled(true);
 		}
 		else
 		{
