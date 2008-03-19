@@ -494,7 +494,7 @@ public class JAP
 				}
 				String fileSeparator = System.getProperty("file.separator");
 				if(!(m_firefoxCommand.startsWith(fileSeparator)) && 
-				   !(m_firefoxCommand.contains(":"+fileSeparator)) )
+				   !((m_firefoxCommand.substring(1,3)).equals(":"+fileSeparator)) )
 				{
 					//path is relative
 					m_firefoxCommand = System.getProperty("user.dir") + fileSeparator + m_firefoxCommand;
@@ -510,7 +510,6 @@ public class JAP
 
 		// keep this string unchangeable from "outside"
 		final String firefoxCommand = m_firefoxCommand;
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "Firefox command: "+ firefoxCommand);
 		AbstractOS.getInstance().init(new AbstractOS.IURLErrorNotifier()
 		{
 			boolean m_bReset = false;
