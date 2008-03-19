@@ -282,10 +282,11 @@ public class JAP
 		//String firepath="";
 		String profilepath = "";
 		boolean bPortable = false;
-		m_controller.setPortableMode(true);		
+	
 		if (isArgumentSet("--portable") )
 		{
 			bPortable = true;
+			m_controller.setPortableMode(true);			
 			m_firefoxCommand = getArgumentValue("--portable");
 			
 			if (m_firefoxCommand != null)
