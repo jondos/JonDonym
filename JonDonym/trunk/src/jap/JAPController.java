@@ -1892,7 +1892,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 		return success;
 	}
 
-	public boolean startPortableFirefox(String[] cmds) {
+	public boolean startPortableFirefox(String[] cmds) 
+	{
 		if(m_portableFirefoxProcess != null)
 		{
 			try
@@ -1926,18 +1927,28 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC,
 			"Error occured while launching portable firefox with command "+cmds[0]+": ",ioe);
+			// open dialog and allow user to specify the firefox command
+			if(m_View instanceof JAPNewView)
+			{
+				((JAPNewView) m_View).showChooseFirefoxPathDialog();
+			}			
 		}
 		catch (NullPointerException npe) 
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC,
 			"Launching portable firefox failed because the firefox command is null");
+			// open dialog and allow user to specify the firefox command
+			if(m_View instanceof JAPNewView)
+			{
+				((JAPNewView) m_View).showChooseFirefoxPathDialog();
+			}			
 		}
 		catch (ArrayIndexOutOfBoundsException aioobe) 
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC,
 			"Launching portable firefox failed because the firefox command array is empty");
 		}
-		//@todo: open dialog and allow user to specify the firefox command
+
 		return false;
 	}
 	
