@@ -112,7 +112,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 	private TitledBorder m_borderLookAndFeel, m_borderView;
 	private JComboBox m_comboLanguage, m_comboUI, m_comboDialogFormat;
 	private JCheckBox m_cbSaveWindowLocationMain, m_cbSaveWindowLocationIcon, m_cbSaveWindowLocationConfig,
-		m_cbSaveWindowLocationHelp, m_cbSaveWindowSizeConfig, m_cbSaveWindowSizeHelp, m_cbAfterStart;
+		m_cbSaveWindowLocationHelp, m_cbSaveWindowSizeConfig, m_cbSaveWindowSizeHelp, m_cbAfterStart, m_cbHideSplash;
 	private JRadioButton m_rbViewSimplified, m_rbViewNormal, m_rbViewMini, m_rbViewSystray;
 	private JCheckBox m_cbWarnOnClose, m_cbMiniOnTop;
 	private JSlider m_slidFontSize;
@@ -742,6 +742,11 @@ final class JAPConfUI extends AbstractJAPConfModule
 		p.add(m_rbViewMini, c);
 		c.gridy = 2;
 		p.add(m_rbViewSystray, c);
+		
+		m_cbHideSplash = new JCheckBox("Splash-Screen verbergen");
+		c.gridy = 3;
+		c.insets = new Insets(0, 10, 0, 10);
+		p.add(m_cbHideSplash, c);
 		return p;
 	}
 
@@ -783,6 +788,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 			m_cbAfterStart.isSelected());
 		JAPController.getInstance().setMoveToSystrayOnStartup(m_rbViewSystray.isSelected() &&
 			m_cbAfterStart.isSelected());
+		JAPModel.getInstance().setHideSplashScreen(m_cbHideSplash.isSelected());
 		JAPModel.getInstance().setNeverRemindGoodbye(!m_cbWarnOnClose.isSelected());
 		JAPModel.getInstance().setMiniViewOnTop(m_cbMiniOnTop.isSelected());
 
@@ -907,6 +913,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_rbViewMini.setSelected(JAPModel.getMinimizeOnStartup());
 		m_cbMiniOnTop.setSelected(JAPModel.getInstance().isMiniViewOnTop());
 		m_cbWarnOnClose.setSelected(!JAPModel.getInstance().isNeverRemindGoodbye());
+		m_cbHideSplash.setSelected(JAPModel.getInstance().getHideSplashScreen());
 		boolean b = JAPModel.getMoveToSystrayOnStartup() || JAPModel.getMinimizeOnStartup();
 		for (int i = 0; i < m_comboDialogFormat.getItemCount(); i++)
 		{
@@ -943,6 +950,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_rbViewSystray.setSelected(JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP);
 		m_rbViewMini.setSelected(true);
 		m_rbViewMini.setSelected(JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP);
+		m_cbHideSplash.setSelected(false);
 		m_cbWarnOnClose.setSelected(JAPConstants.DEFAULT_WARN_ON_CLOSE);
 		updateThirdPanel(JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP ||
 						 JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP);
