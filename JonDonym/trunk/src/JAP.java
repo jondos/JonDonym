@@ -89,9 +89,9 @@ public class JAP
 	private static final String MSG_INIT_RANDOM = JAP.class.getName() + "_initRandom";
 	private static final String MSG_FINISH_RANDOM = JAP.class.getName() + "_finishRandom";
 	private static final String MSG_START_LISTENER = JAP.class.getName() + "_startListener";
-
+	
 	private JAPController m_controller;
-
+	
 	Hashtable m_arstrCmdnLnArgs = null;
 	String[] m_temp = null;
 	String m_firefoxCommand; //holds command to re-open firefox, to be parsed from args and passed to JAPNewView
@@ -210,7 +210,8 @@ public class JAP
 			for(int i = 0; i < activeVMs.size(); i++)
 			{
 				vm = activeVMs.elementAt(i);
-				if(vm != null && vm.toString() != null && (vm.toString().equals("JAP")) || vm.toString().equals("JAP.jar") || vm.toString().equals("JAPMacintosh")) numJAPInstances++;
+				if(vm == null || vm.toString() == null ) continue;
+				if(vm.toString().equals("JAP") || vm.toString().equals("JAP.jar") || vm.toString().equals("JAPMacintosh")) numJAPInstances++;
 				if(numJAPInstances > 1)
 				{
 					// multiple instances of JAP have been started, what to do?
@@ -493,6 +494,7 @@ public class JAP
 					m_firefoxCommand += " -profile " + profilepath;
 				}
 				String fileSeparator = System.getProperty("file.separator");
+
 				if(!(m_firefoxCommand.startsWith(fileSeparator)) && 
 				   !((m_firefoxCommand.substring(1,3)).equals(":"+fileSeparator)) )
 				{
