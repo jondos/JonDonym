@@ -1896,6 +1896,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		if(m_portableFirefoxProcess != null)
 		{
+			boolean execSuccessful = false;
 			try
 			{
 				int ffExitValue = m_portableFirefoxProcess.exitValue();
@@ -1908,12 +1909,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.MISC,
 				"Portable Firefox process is still running!");
-				return true;
+				return false;
 			}
 		}
 		
 		try
 		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC,
+					"Starting PFF");
 			m_portableFirefoxProcess = Runtime.getRuntime().exec(cmds);
 			return true;
 		} 
@@ -1923,10 +1926,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 					"You are not allowed to lauch portable firefox: ", se);
 			return false;
 		}
-		catch (IOException ioe) 
+		catch (IOException ioe3) 
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC,
-			"Error occured while launching portable firefox with command "+cmds[0]+": ",ioe);
+			"Error occured while launching portable firefox with command "+cmds[0]+": ",ioe3);
 			// open dialog and allow user to specify the firefox command
 			if(m_View instanceof JAPNewView)
 			{
@@ -4592,7 +4595,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "First browser start");
 				m_firstPortableFFStart = true;
 				/*@todo: should better get the browser command from JAPModel */
-				startPortableFirefox(m_View.getCompleteBrowserCommand());
+				startPortableFirefox(m_View.getBrowserCommand());
 			}
 		}
 	}
