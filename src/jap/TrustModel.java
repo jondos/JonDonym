@@ -71,54 +71,54 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	public static final String XML_ELEMENT_NAME = "TrustModel";
 	public static final String XML_ELEMENT_CONTAINER_NAME = "TrustModels";
 	private static final String XML_ATTR_CURRENT_TRUST_MODEL = "currentTrustModel";
-	private static final String XML_ATTR_NAME = "name";	
+	private static final String XML_ATTR_NAME = "name";
 
 	/**
 	 * Always trust the cascade, regardless of the attribute
 	 */
 	public static final int TRUST_ALWAYS = 0;
-	
+
 	/**
-	 * Only trust the cascade if the attribute is NOT true 
+	 * Only trust the cascade if the attribute is NOT true
 	 */
 	public static final int TRUST_IF_NOT_TRUE = 1;
-	
+
 	/**
-	 * Only trust the cascade if the attribute is true 
+	 * Only trust the cascade if the attribute is true
 	 */
 	public static final int TRUST_IF_TRUE = 2;
-	
+
 	/**
 	 * Only trust the cascade if the attribute is greater than a specified value
 	 */
 	public static final int TRUST_IF_AT_LEAST = 3;
-	
+
 	/**
 	 * Only trust the cascade if the attribute is lesser than a specified value
 	 */
 	public static final int TRUST_IF_AT_MOST = 5;
-	
+
 	/**
 	 * Only trust the cascade if the attribute value is not within the specified list
 	 */
 	public static final int TRUST_IF_NOT_IN_LIST = 6;
-	
+
 	/**
 	 * Reserved for future use
 	 */
 	public static final int TRUST_RESERVED = 7;
-	
+
 	public static final long TRUST_MODEL_ALL = 0;
-	
+
 	private static final String MSG_SERVICES_WITH_COSTS = TrustModel.class.getName() + "_servicesWithCosts";
 	private static final String MSG_SERVICES_WITHOUT_COSTS = TrustModel.class.getName() + "_servicesWithoutCosts";
 	private static final String MSG_SERVICES_USER_DEFINED = TrustModel.class.getName() + "_servicesUserDefined";
 	private static final String MSG_CASCADES_FILTER = TrustModel.class.getName() + "_servicesFilter";
 	private static final String MSG_ALL_SERVICES = TrustModel.class.getName() + "_allServices";
-	
+
 	private static Vector ms_trustModels = new Vector();
 	private static TrustModel ms_currentTrustModel;
-	
+
 	private static class InnerObservable extends Observable
 	{
 		public void setChanged()
@@ -132,20 +132,20 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	private String m_strName;
 	private long m_id;
-	
+
 	private boolean m_bEditable;
 
 	public static abstract class TrustAttribute implements IXMLEncodable
 	{
 		public static final int CATEGORY_DEFAULT = 0;
-		
+
 		public static final String XML_ELEMENT_NAME = "TrustAttribute";
 		public static final String XML_VALUE_ELEMENT_NAME = "ConditionValue";
 		public static final String XML_VALUE_CONTAINER_ELEMENT_NAME = "ConditionValueList";
 		public static final String XML_ATTR_NAME = "name";
 		public static final String XML_ATTR_TRUST_CONDITION = "trustCondition";
 		public static final String XML_ATTR_CONDITION_VALUE = "conditonValue";
-		
+
 		private int m_category;
 		protected int m_trustCondition;
 		protected Object m_conditionValue;
@@ -156,40 +156,40 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			m_conditionValue = a_conditionValue;
 			m_category = CATEGORY_DEFAULT;
 		}
-		
+
 		public final int getCategory()
 		{
 			return m_category;
 		}
-		
+
 		public int getTrustCondition()
 		{
 			return m_trustCondition;
 		}
-		
+
 		public Object getConditionValue()
 		{
 			return m_conditionValue;
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			
+
 		}
-		
+
 		public Element toXmlElement(Document a_doc)
 		{
 			if(a_doc == null) return null;
-			
+
 			Element el = a_doc.createElement(XML_ELEMENT_NAME);
 			XMLUtil.setAttribute(el, XML_ATTR_NAME, this.getClass().getName());
 			XMLUtil.setAttribute(el, XML_ATTR_TRUST_CONDITION, m_trustCondition);
-			
+
 			if(m_conditionValue instanceof Integer)
 				XMLUtil.setAttribute(el, XML_ATTR_CONDITION_VALUE, ((Integer) m_conditionValue).intValue());
 			else if(m_conditionValue instanceof Vector)
 			{
-				Vector vec = (Vector) m_conditionValue; 
+				Vector vec = (Vector) m_conditionValue;
 				Element list = a_doc.createElement(XML_VALUE_CONTAINER_ELEMENT_NAME);
 				for(int i = 0; i < vec.size(); i++)
 				{
@@ -199,35 +199,35 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				}
 				el.appendChild(list);
 			}
-			
+
 			return el;
 		}
-		
+
 		public static TrustAttribute fromXmlElement(Element a_e) throws XMLParseException
 		{
 			if(a_e == null) return null;
-			
+
 			XMLUtil.assertNodeName(a_e, XML_ELEMENT_NAME);
 			XMLUtil.assertNotNull(a_e, XML_ATTR_NAME);
-			
+
 			String name = XMLUtil.parseAttribute(a_e, XML_ATTR_NAME, null);
 			int trustCondition = XMLUtil.parseAttribute(a_e, XML_ATTR_TRUST_CONDITION, TRUST_ALWAYS);
 			int conditionValue = XMLUtil.parseAttribute(a_e, XML_ATTR_CONDITION_VALUE, 0);
-			
+
 			TrustAttribute attr;
-			
+
 			try
 			{
 				Object value = null;
-				
+
 				if(trustCondition == TRUST_IF_NOT_IN_LIST)
 				{
 					Node n = XMLUtil.getFirstChildByName(a_e, XML_VALUE_CONTAINER_ELEMENT_NAME);
 					XMLUtil.assertNotNull(n);
-					
+
 					NodeList list = n.getChildNodes();
 					value = new Vector();
-					
+
 					for(int i = 0; i < list.getLength(); i++)
 					{
 						// look for a matching ServiceOperator database entry
@@ -239,7 +239,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				{
 					value = new Integer(conditionValue);
 				}
-				
+
 				attr = (TrustAttribute) Class.forName(name).getConstructor(new Class[] { int.class, Object.class })
 					.newInstance(new Object[] { new Integer(trustCondition), value });
 			}
@@ -247,18 +247,18 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			{
 				throw new XMLParseException(XML_ELEMENT_NAME);
 			}
-			
+
 			return attr;
 		}
 	}
-	
+
 	public static class PaymentAttribute extends TrustAttribute
 	{
 		public PaymentAttribute(int a_trustCondition, Object a_conditionValue)
 		{
 			super(a_trustCondition, a_conditionValue);
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			if (a_cascade.isPayment())
@@ -281,7 +281,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			super(a_trustCondition, a_conditionValue);
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			if (m_trustCondition == TRUST_IF_TRUE && a_cascade.getNumberOfOperators() > 1)
@@ -294,14 +294,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 		}
 	};
-	
+
 	public static class ExpiredCertsAttribute extends TrustAttribute
 	{
 		public ExpiredCertsAttribute(int a_trustCondition, Object a_conditionValue)
 		{
 			super(a_trustCondition, a_conditionValue);
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			if (a_cascade.getCertPath() != null && !a_cascade.getCertPath().checkValidity(new Date()))
@@ -310,17 +310,17 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				{
 					throw new TrustException("Expired certificates are not trusted!");
 				}
-			}			
+			}
 		}
 	};
-	
+
 	public static class UserDefinedAttribute extends TrustAttribute
 	{
 		public UserDefinedAttribute(int a_trustCondition, Object a_conditionValue)
 		{
 			super(a_trustCondition, a_conditionValue);
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			if (m_trustCondition == TRUST_IF_TRUE)
@@ -340,16 +340,16 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 					throw new TrustException("Only user-defined services allowed!");
 				}
 			}
-		}		
+		}
 	};
-	
+
 	public static class InternationalAttribute extends TrustAttribute
 	{
 		public InternationalAttribute(int a_trustCondition, Object a_conditionValue)
 		{
 			super(a_trustCondition, a_conditionValue);
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			if(m_trustCondition == TRUST_IF_AT_LEAST && a_cascade.getNumberOfCountries() < ((Integer) m_conditionValue).intValue())
@@ -366,14 +366,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 		}
 	};
-	
+
 	public static class NewAttribute extends TrustAttribute
 	{
 		public NewAttribute(int a_trustCondition, Object a_conditionValue)
 		{
 			super(a_trustCondition, a_conditionValue);
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			if (m_trustCondition == TRUST_IF_TRUE)
@@ -393,7 +393,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 		}
 	};
-	
+
 	public static class AnonLevelAttribute extends TrustAttribute
 	{
 		public AnonLevelAttribute(int a_trustCondition, Object a_conditionValue)
@@ -401,7 +401,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			// MUST always be TRUST_IF_AT_LEAST
 			super(TRUST_IF_AT_LEAST, a_conditionValue);
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			StatusInfo info = (StatusInfo) Database.getInstance(StatusInfo.class).getEntryById(a_cascade.getId());
@@ -411,7 +411,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 		}
 	}
-	
+
 	public static class OperatorBlacklistAttribute extends TrustAttribute
 	{
 		public OperatorBlacklistAttribute(int a_trustCondtion, Object a_conditionValue)
@@ -419,7 +419,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			// MUST always be TRUST_IF_NOT_IN_LIST and value must be a vector
 			super(TRUST_IF_NOT_IN_LIST, (a_conditionValue == null || !(a_conditionValue instanceof Vector)) ? new Vector() : a_conditionValue);
 		}
-		
+
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			if(m_trustCondition == TRUST_IF_NOT_IN_LIST)
@@ -427,7 +427,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				for(int i = 0; i < a_cascade.getNumberOfMixes(); i++)
 				{
 					Vector list = (Vector) m_conditionValue;
-					
+
 					if(list.contains(a_cascade.getMixInfo(i).getServiceOperator()))
 					{
 						throw new TrustException("This cascade has a blacklisted mix!");
@@ -443,27 +443,27 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 		}
 	}
-	
+
 	static
 	{
 		// Initialize basic trust models
 		TrustModel model;
 
-		model = new TrustModel(MSG_ALL_SERVICES);
+		model = new TrustModel(MSG_ALL_SERVICES, 0);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		ms_trustModels.addElement(model);
-		
-		model = new TrustModel(MSG_SERVICES_WITH_COSTS);
+
+		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		ms_trustModels.addElement(model);
 
-		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS);
+		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		ms_trustModels.addElement(model);
-		
-		model = new TrustModel(MSG_SERVICES_USER_DEFINED)
+
+		model = new TrustModel(MSG_SERVICES_USER_DEFINED, 4)
 		{
 			public boolean isAdded()
 			{
@@ -486,18 +486,19 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	/**
 	 * Creates a new TrustModel object with the specified name
-	 * 
+	 *
 	 * @param a_strName	The name of the TrustModel
 	 */
-	public TrustModel(String a_strName)
+	public TrustModel(String a_strName, long a_id)
 	{
-		m_id = ms_trustModels.size();		
+		//m_id = ms_trustModels.size();
+		m_id = a_id;
 		m_strName = a_strName == null ? "Default trust model" : a_strName;
 	}
 
 	/**
 	 * Creates a TrustModel object from another TrustModel object
-	 * 
+	 *
 	 * @param a_trustModel	The TrustModel object to copy
 	 */
 	public TrustModel(TrustModel a_trustModel)
@@ -507,9 +508,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	/**
 	 * Creates a TrustModel object from an XML element
-	 * 
+	 *
 	 * @param a_trustModelElement	The XML element which holds the TrustModel data
-	 * 
+	 *
 	 * @throws XMLParseException
 	 */
 	public TrustModel(Element a_trustModelElement) throws XMLParseException
@@ -529,23 +530,23 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			setAttribute(TrustAttribute.fromXmlElement(el));
 		}
 	}
-	
+
 	public void copyFrom(TrustModel a_trustModel)
 	{
 		if (a_trustModel == null)
 		{
 			throw new IllegalArgumentException("No argument given!");
 		}
-		
+
 		m_id = a_trustModel.m_id;
 		m_strName = a_trustModel.m_strName;
 		m_bEditable = a_trustModel.m_bEditable;
-		
+
 		synchronized(m_trustAttributes)
 		{
 			m_trustAttributes = (Hashtable) a_trustModel.m_trustAttributes.clone();
 		}
-	}	
+	}
 
 	public static Observable getObservable()
 	{
@@ -564,7 +565,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	/**
 	 * Compares two TrustModel objects
-	 * 
+	 *
 	 * @return true if the id's of the two objects match, false otherwise
 	 */
 	public boolean equals(Object a_trustModel)
@@ -614,28 +615,28 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 		return null;
 	}
-	
+
 	public TrustAttribute setAttribute(Class a_attr, int a_trustCondition)
 	{
 		return setAttribute(a_attr, a_trustCondition, null);
 	}
-	
+
 	public TrustAttribute setAttribute(Class a_attr, int a_trustCondition, int a_conditionValue)
 	{
 		return setAttribute(a_attr, a_trustCondition, new Integer(a_conditionValue));
 	}
-	
+
 	public void setEditable(boolean a_bEditable)
 	{
 		m_bEditable = a_bEditable;
 	}
-	
+
 	public boolean isEditable()
 	{
 		return m_bEditable;
 	}
-	
-	
+
+
 	public TrustAttribute setAttribute(Class a_attr, int a_trustCondition, Object a_conditionValue)
 	{
 		try
@@ -644,13 +645,13 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			 	.newInstance(new Object[] { new Integer(a_trustCondition), a_conditionValue}));
 		}
 		catch(Exception ex) { LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Could not create " + a_attr); return null; }}
-	
+
 	public TrustAttribute setAttribute(TrustAttribute a_attr)
 	{
 		synchronized(this)
 		{
 			TrustAttribute value;
-			
+
 			if((value = (TrustAttribute) m_trustAttributes.get(a_attr)) != null)
 			{
 				if(value.getTrustCondition() != a_attr.getTrustCondition() || value.getConditionValue() != a_attr.getConditionValue())
@@ -659,22 +660,22 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 					setChanged();
 				}
 			}
-			
+
 			m_trustAttributes.put(a_attr.getClass(), a_attr);
 			notifyObservers();
-			
+
 			return a_attr;
 		}
 	}
-	
+
 	public TrustAttribute getAttribute(Class a_attr)
 	{
 		synchronized(m_trustAttributes)
 		{
 			TrustAttribute attr = (TrustAttribute) m_trustAttributes.get(a_attr);
-			if(attr == null) 
+			if(attr == null)
 				return setAttribute(a_attr, TRUST_ALWAYS, null);
-			
+
 			return attr;
 		}
 	}
@@ -740,7 +741,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 
 		int trustModelsAdded = 0;
-		
+
 		NodeList elements = a_container.getElementsByTagName(XML_ELEMENT_NAME);
 		for (int i = 0; i < elements.getLength(); i++)
 		{
@@ -754,14 +755,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Could not load trust model from XML!", a_e);
 			}
 		}
-		
+
 		if(trustModelsAdded == 0)
 		{
-			TrustModel model = new TrustModel(MSG_CASCADES_FILTER);
+			TrustModel model = new TrustModel(MSG_CASCADES_FILTER, 5);
 			model.setEditable(true);
 			addTrustModel(model);
 		}
-		
+
 		setCurrentTrustModel(XMLUtil.parseAttribute(a_container, XML_ATTR_CURRENT_TRUST_MODEL, 0l));
 	}
 
@@ -799,7 +800,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	/**
 	 * Returns the localized name of the TrustModel
-	 * 
+	 *
 	 * @return The localized name of the TrustModel
 	 */
 	public String getName()
@@ -824,13 +825,13 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			return null;
 		}
-		
+
 		Element elemTrustModel = a_doc.createElement(XML_ELEMENT_NAME);
 
 		//XMLUtil.setAttribute(elemTrustModel, XML_ATTR_SHOW_WARNING, m_bSh owWarning);
 		XMLUtil.setAttribute(elemTrustModel, XML_ATTR_ID, m_id);
 		XMLUtil.setAttribute(elemTrustModel, XML_ATTR_NAME, getName());
-		
+
 		synchronized(m_trustAttributes)
 		{
 			synchronized(m_trustAttributes)
@@ -850,7 +851,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	{
 		// TODO: NULL check
 		TrustAttribute attr = getAttribute(PaymentAttribute.class);
-		
+
 		return (attr == null) ? false : (attr.getTrustCondition() == TRUST_IF_TRUE);
 	}
 
@@ -858,7 +859,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	{
 		return true;
 	}
-	
+
 	/**
 	 * Checks if the current trust model has any trusted cascades at all
 	 * @return true if the trust model has trusted cascades, false otherwise
@@ -866,12 +867,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	public boolean hasTrustedCascades()
 	{
 		Vector list = Database.getInstance(MixCascade.class).getEntryList();
-		
+
 		for(int i = 0; i < list.size(); i++)
 		{
 			if(isTrusted((MixCascade)list.elementAt(i))) return true;
 		}
-		
+
 		return false;
 	}
 
@@ -897,7 +898,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			super.checkTrust(a_cascade);
 		}
-		
+
 		// test if all mixes have valid certificates.
 		MixInfo info;
 		for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
