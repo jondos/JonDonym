@@ -887,11 +887,15 @@ public final class JAPModel extends Observable
 		buff.append("Config path: ");
 		buff.append(getConfigFile());
 		buff.append("\n");
-		s = JAPController.getInstance().getView().getBrowserCommand();
-		if (s != null)
+		String[] pFFCommand = JAPController.getInstance().getView().getBrowserCommand();
+		//s = JAPController.getInstance().getView().getBrowserCommand();
+		if (pFFCommand != null)
 		{
-			buff.append("Portable browser: ");
-			buff.append(s);
+			buff.append("Portable browser commandline: ");
+			for (int i = 0; i < pFFCommand.length; i++) {
+				buff.append(pFFCommand[i]+
+						((i != (pFFCommand.length-1)) ? " ":""));
+			}
 			buff.append("\n");
 		}
 		buff.append("HttpListenerPortNumber: ");
