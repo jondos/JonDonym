@@ -345,7 +345,7 @@ public class JAP
 			splash = new ConsoleSplash();
 			splash.setText(splashText);
 		}
-		else if (isArgumentSet("--noSplash") || isArgumentSet("-s") || JAPModel.getInstance().getHideSplashScreen())
+		else if (isArgumentSet("--noSplash") || isArgumentSet("-s") || !JAPModel.getInstance().getShowSplashScreen())
 		{
 			splash = new ConsoleSplash();
 			splash.setText(splashText);
