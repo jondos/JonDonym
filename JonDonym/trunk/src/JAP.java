@@ -553,9 +553,6 @@ public class JAP
 					firefoxCommand[firefoxCommand.length-1] = a_url.toString();
 					LogHolder.log(LogLevel.WARNING, LogType.GUI, firefoxCommand[0] + " " + a_url.toString());
 					return m_controller.startPortableFirefox(firefoxCommand);
-					/*Runtime.getRuntime().exec(new String[]
-											  {firefoxCommand, a_url.toString()});*/
-					//return true;
 				}
 				catch (Exception ex)
 				{
