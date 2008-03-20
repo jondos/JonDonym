@@ -673,13 +673,9 @@ final public class JAPDll {
 				}
 				public void onOpenBrowser()
 				{
-					try
-					{
-						Runtime.getRuntime().exec(JAPController.getInstance().getView().getBrowserCommand());
-					}
-					catch (IOException ex)
-					{
-					}
+					String[] pFFCommand = JAPController.getInstance().getView().getBrowserCommand();
+					JAPController.getInstance().startPortableFirefox(pFFCommand);
+					
 				}
 
 				public void onShowHelp()
