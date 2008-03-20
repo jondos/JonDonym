@@ -326,13 +326,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void onOpenBrowser()
 			{
-				try
-				{
-					Runtime.getRuntime().exec(m_firefoxCommand);
-				}
-				catch (IOException ex)
-				{
-				}
+				m_Controller.startPortableFirefox(m_firefoxCommand);
 			}
 
 			public boolean isBrowserAvailable()
@@ -371,13 +365,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					{
 						public void onOpenBrowser()
 						{
-							try
-							{
-								Runtime.getRuntime().exec(m_firefoxCommand);
-							}
-							catch (IOException ex)
-							{
-							}
+							m_Controller.startPortableFirefox(m_firefoxCommand);
 						}
 
 						public boolean isBrowserAvailable()
@@ -2567,18 +2555,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_comboAnonServices.showPopup();
 	}
 
-	public String[] getCompleteBrowserCommand()
+	public String[] getBrowserCommand()
 	{
 		return m_firefoxCommand;
-	}
-	
-	public String getBrowserCommand()
-	{
-		if(m_firefoxCommand != null)
-		{
-			return m_firefoxCommand[0];	
-		}
-		return null;
 	}
 	
 	public void onUpdateValues()

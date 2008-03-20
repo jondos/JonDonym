@@ -277,14 +277,7 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 
 						public void onOpenBrowser()
 						{
-							try
-							{
-								Runtime.getRuntime().exec(
-									m_mainView.getBrowserCommand());
-							}
-							catch (IOException ex)
-							{
-							}
+							m_Controller.startPortableFirefox(m_mainView.getBrowserCommand());
 						}
 
 						public void onShowSettings(String card, Object a_value)
