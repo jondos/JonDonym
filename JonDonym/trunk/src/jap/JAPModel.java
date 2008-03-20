@@ -174,8 +174,8 @@ public final class JAPModel extends Observable
 	private boolean m_bUseProxyAuthentication = false;
 	private JAPController.AnonConnectionChecker m_connectionChecker;
 
-	private boolean m_bHideSplashScreen;
-	private boolean m_bHideSplashDisabled = false;
+	private boolean m_bShowSplashScreen = true;
+	private boolean m_bShowSplashDisabled = false;
 	
 	private Dimension m_iconifiedSize;
 	private Dimension m_configSize;
@@ -1263,24 +1263,24 @@ public final class JAPModel extends Observable
 		return m_bUpdateDll;
 	}
 
-	public void setHideSplashScreen(boolean a_bHide)
+	public void setShowSplashScreen(boolean a_bHide)
 	{
-		m_bHideSplashScreen = a_bHide;
+		m_bShowSplashScreen = a_bHide;
 	}
 	
-	public boolean getHideSplashScreen()
+	public boolean getShowSplashScreen()
 	{
-		return m_bHideSplashScreen;
+		return m_bShowSplashScreen;
 	}
 	
-	public void setHideSplashDisabled(boolean a_bDisabled)
+	public void setShowSplashDisabled(boolean a_bDisabled)
 	{
-		m_bHideSplashDisabled = a_bDisabled;
+		m_bShowSplashDisabled = a_bDisabled;
 	}
 	
-	public boolean getHideSplashDisabled()
+	public boolean getShowSplashDisabled()
 	{
-		return m_bHideSplashDisabled;
+		return m_bShowSplashDisabled;
 	}
 
 	public static class FontResize

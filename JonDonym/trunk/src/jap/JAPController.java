@@ -197,7 +197,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static final String XML_ATTR_LOGIN_TIMEOUT = "loginTimeout";
 	private static final String XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT = "isConnectionTimeout";
 	private static final String XML_ATTR_ASK_SAVE_PAYMENT = "askIfNotSaved";
-	private static final String XML_ATTR_HIDE_SPLASH_SCREEN = "HideSplashScreen";
+	private static final String XML_ATTR_SHOW_SPLASH_SCREEN = "ShowSplashScreen";
 
 	// store classpath as it may not be created successfully after update
 	private final String CLASS_PATH = ClassUtil.getClassPath().trim();
@@ -1849,7 +1849,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				br.readLine();
 				Document doc = XMLUtil.toXMLDocument(br.readLine() + "</JAP>");
 				
-				m_Model.setHideSplashScreen(XMLUtil.parseAttribute(doc, XML_ATTR_HIDE_SPLASH_SCREEN, false));
+				m_Model.setShowSplashScreen(XMLUtil.parseAttribute(doc, XML_ATTR_SHOW_SPLASH_SCREEN, true));
 			}
 			catch(Exception ex)
 			{
@@ -2309,7 +2309,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING,
 								 JAPModel.getInstance().isNonAnonymousSurfingDenied());
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_CONFIG_ASSISTANT, m_bShowConfigAssistant);
-			XMLUtil.setAttribute(e, XML_ATTR_HIDE_SPLASH_SCREEN, m_Model.getHideSplashScreen());
+			XMLUtil.setAttribute(e, XML_ATTR_SHOW_SPLASH_SCREEN, m_Model.getShowSplashScreen());
 
 			XMLUtil.setAttribute(e, XML_ATTR_LOGIN_TIMEOUT, AnonClient.getLoginTimeout());
 			XMLUtil.setAttribute(e, XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT,
