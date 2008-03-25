@@ -1251,11 +1251,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 	}
 
-	private void hideEditFilter() {
+	private void hideEditFilter() 
+	{
 		m_showEditFilterButton.setText(JAPMessages.getString(MSG_EDIT_FILTER));
 		m_filterPanel.setVisible(false);
-		m_serverInfoPanel.setVisible(true);
 		m_serverPanel.setVisible(true);
+		m_serverInfoPanel.setVisible(true);
+		updateValues(false);
 	}
 
 	private boolean isServerCertVerified()

@@ -45,6 +45,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowEvent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -83,7 +85,7 @@ import java.awt.Dimension;
 import gui.GUIUtils;
 import anon.pay.PayAccount;
 
-final public class JAPConf extends JAPDialog implements ActionListener, Observer
+final public class JAPConf extends JAPDialog implements ActionListener, Observer, WindowListener
 {
 
 	/** Messages */
@@ -330,8 +332,45 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		confUI.afterPack();
 		restoreLocation(JAPModel.getInstance().getConfigWindowLocation());
 		//setDockable(true);
+		this.addWindowListener(this);
+		
 		JAPModel.getInstance().addObserver(this);
 	}
+	
+	public void windowClosed(WindowEvent e)
+	{
+		
+	}
+	
+	public void windowClosing(WindowEvent e)
+	{
+		cancelPressed();
+	}
+	
+	public void windowDeactivated(WindowEvent e)
+	{
+		
+	}		
+	
+	public void windowActivated(WindowEvent e)
+	{
+		
+	}				
+	
+	public void windowDeiconified(WindowEvent e)
+	{
+		
+	}		
+	
+	public void windowIconified(WindowEvent e)
+	{
+		
+	}				
+	
+	public void windowOpened(WindowEvent e)
+	{
+		
+	}	
 
 	protected void doPack()
 	{
