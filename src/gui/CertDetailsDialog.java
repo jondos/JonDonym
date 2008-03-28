@@ -40,6 +40,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -75,7 +76,7 @@ import javax.swing.ListCellRenderer;
  * <p>Description: Displays any certificates</p>
  * @author Kuno G. Gruen
  */
-public class CertDetailsDialog extends JAPDialog
+public class CertDetailsDialog extends JAPDialog implements MouseListener
 {
 	public static final String MSG_CERTVALID = CertDetailsDialog.class.getName() + "_certValid";
 	public static final String MSG_CERTNOTVALID = CertDetailsDialog.class.getName() + "_certNotValid";
@@ -586,7 +587,7 @@ public class CertDetailsDialog extends JAPDialog
 	{
 		Insets inset = new Insets(2, 5, 2, 5);
 		TitledGridBagPanel detailsPanel = new TitledGridBagPanel(null, inset);
-
+		detailsPanel.addMouseListener(this);
 		JLabel lbl_key;
 		JLabel lbl_val;
 
@@ -1068,7 +1069,48 @@ public class CertDetailsDialog extends JAPDialog
 			}
 		}
 	}
+	
+	/**
+     * Invoked when the mouse button has been clicked (pressed
+     * and released) on a component.
+     */
+    public void mouseClicked(MouseEvent e)
+    {
+    	dispose();
+    }
 
+    /**
+     * Invoked when a mouse button has been pressed on a component.
+     */
+    public void mousePressed(MouseEvent e)
+    {
+    	
+    }
+
+    /**
+     * Invoked when a mouse button has been released on a component.
+     */
+    public void mouseReleased(MouseEvent e)
+    {
+    	
+    }
+
+    /**
+     * Invoked when the mouse enters a component.
+     */
+    public void mouseEntered(MouseEvent e)
+    {
+    	
+    }
+
+    /**
+     * Invoked when the mouse exits a component.
+     */
+    public void mouseExited(MouseEvent e)
+    {
+    	
+    }
+	
 	private final class CertPathListCellRenderer implements ListCellRenderer
 	{
 
