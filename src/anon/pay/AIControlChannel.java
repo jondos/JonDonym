@@ -71,6 +71,7 @@ public class AIControlChannel extends XmlControlChannel
 	public static final long MAX_PREPAID_INTERVAL = 3000000; // 3MB
 	public static final long MIN_PREPAID_INTERVAL = 5000; // 500 kb
 	public static final long AI_LOGIN_TIMEOUT = 120000; // 2 minutes
+	private static final long NO_CHARGED_ACCOUNT_UPDATE = 1000 * 60 * 5; // 5 minutes
 
   //codes for AI events that can be fired
   private static final int EVENT_UNREAL = 1;
@@ -93,7 +94,7 @@ public class AIControlChannel extends XmlControlChannel
   private XMLEasyCC m_initialCC;
 
   private Vector m_aiLoginSyncObject;
-  
+
   private volatile boolean m_synchronizedAILogin;
 
   public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_proxy,
@@ -121,7 +122,7 @@ public class AIControlChannel extends XmlControlChannel
    */
   public void processXmlMessage(Document docMsg)
   {
-	  Element elemRoot = docMsg.getDocumentElement(); 	 	  
+	  Element elemRoot = docMsg.getDocumentElement();
 	  String tagName = elemRoot.getTagName();
 	  try
 	  {
@@ -132,13 +133,13 @@ public class AIControlChannel extends XmlControlChannel
 		  }
 		  else if (tagName.equals(XMLAiLoginConfirmation.XML_ELEMENT_NAME))
 		  {
-			  XMLAiLoginConfirmation loginConfirm = 
+			  XMLAiLoginConfirmation loginConfirm =
 				  new XMLAiLoginConfirmation(elemRoot);
 			  /*LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
 						"Thread "+ Thread.currentThread().getName()+" getting AI Login Confirmation with code "
 						+loginConfirm.getCode()+" and message "+loginConfirm.getMessage());*/
 			  int code = loginConfirm.getCode();
-			  
+
 			  synchronized(m_aiLoginSyncObject)
 			  {
 				  if(loginConfirm.getCode()==XMLErrorMessage.ERR_OK)
@@ -150,22 +151,22 @@ public class AIControlChannel extends XmlControlChannel
 		  }
 		  else if (tagName.equals(XMLErrorMessage.XML_ELEMENT_NAME))
 		  {
-			  
+
 			  XMLErrorMessage error = new XMLErrorMessage(elemRoot);
 			  LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
 						"processing AI ErrorMessage "+error.getErrorCode()+": "+error.getMessage());
 			  if (error.getErrorCode() ==  XMLErrorMessage.ERR_ACCOUNT_EMPTY)
 			  {
 				  // find an account that is not empty - if possible...
-				  
+
 				  /*getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 				  processErrorMessage(new XMLErrorMessage(elemRoot));*/
-				  
-				  
-				 updateBalance(PayAccountsFile.getInstance().getActiveAccount()); // show that account is empty
+
+
+				  updateBalance(PayAccountsFile.getInstance().getActiveAccount(), false); // show that account is empty
 				  PayAccount currentAccount = PayAccountsFile.getInstance().getAlternativeNonEmptyAccount(
 								  m_connectedCascade.getPIID());
-				  				 				  
+
 				  if (currentAccount != null)
 				  {
 					  PayAccountsFile.getInstance().setActiveAccount(currentAccount);
@@ -175,7 +176,7 @@ public class AIControlChannel extends XmlControlChannel
 					  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 					  processErrorMessage(new XMLErrorMessage(elemRoot));
 				  }
-				
+
 			  }
 			  else
 			  {
@@ -282,30 +283,42 @@ public class AIControlChannel extends XmlControlChannel
     }
   }
 
-  private void updateBalance(final PayAccount currentAccount)
+  private void updateBalance(final PayAccount currentAccount, boolean a_bSynchronous)
   {
+	  Runnable runUpdate;
 	  if (currentAccount == null)
 	  {
 		  return;
 	  }
 
-	  LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching new Balance from BI asynchronously");
-	  Thread t = new Thread(new Runnable()
+	  runUpdate = new Runnable()
 	  {
 		  public void run()
 		  {
 			  try
 			  {
-				  currentAccount.fetchAccountInfo(m_proxys, true);
+				  currentAccount.fetchAccountInfo(m_proxys, false);
 			  }
 			  catch (Exception ex)
 			  {
 				  LogHolder.log(LogLevel.DEBUG, LogType.PAY, ex);
 			  }
 		  }
-	  });
-	  t.setDaemon(true);
-	  t.start();
+	  };
+
+	  if (a_bSynchronous)
+	  {
+		  LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching new Balance from BI.");
+		  runUpdate.run();
+	  }
+	  else
+	  {
+		  LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching new Balance from BI asynchronously.");
+		  Thread t = new Thread(runUpdate);
+		  t.setDaemon(true);
+		  t.start();
+
+	  }
   }
 
 	/**
@@ -457,6 +470,7 @@ public class AIControlChannel extends XmlControlChannel
 	  sendXmlMessage(XMLUtil.toXMLDocument(cc));
   }
 
+
   public boolean sendAccountCert()
   {
 
@@ -467,7 +481,7 @@ public class AIControlChannel extends XmlControlChannel
 	  XMLPriceCertificate priceCert;
 	  Timestamp now = new Timestamp(System.currentTimeMillis());
 	  PayAccount activeAccount = PayAccountsFile.getInstance().getActiveAccount();
-	  
+
 	  if (activeAccount == null || !activeAccount.isCharged(now) || (activeAccount.getBI() == null) ||
 		  !activeAccount.getBI().getId().equals(m_connectedCascade.getPIID()))
 	  {
@@ -502,15 +516,39 @@ public class AIControlChannel extends XmlControlChannel
 			  {
 				  PayAccountsFile.getInstance().setActiveAccount(openTransactionAccount);
 			  }
+			  // check if the account is charged; if not, try to get the latest balance from each account
+			  if (PayAccountsFile.getInstance().getActiveAccount() == null ||
+				  !PayAccountsFile.getInstance().getActiveAccount().isCharged(now) &&
+				  accounts.size() > 0)
+			  {
+				  LogHolder.log(LogLevel.WARNING, LogType.PAY,
+								"No charged account is available for connecting. Trying to update balances...");
+				  for (int i = 0; i < accounts.size(); i++)
+				  {
+					  currentAccount = (PayAccount) accounts.elementAt(i);
+					  if (currentAccount.getBalance() == null ||
+						  currentAccount.getBalance().getTimestamp().getTime() <
+						  (now.getTime() - NO_CHARGED_ACCOUNT_UPDATE))
+					  {
+						  // update the account if the timestamp is quite old
+						  updateBalance(currentAccount, true);
+						  if (currentAccount.isCharged(now))
+						  {
+							  PayAccountsFile.getInstance().setActiveAccount(currentAccount);
+							  break;
+						  }
+					  }
+				  }
+			  }
 		  }
 	  }
-	  
+
 	  if (!PayAccountsFile.getInstance().signalAccountRequest(m_connectedCascade) ||
 		  PayAccountsFile.getInstance().getActiveAccount() == null)
 	  {
 		  return false;
 	  }
-	  
+
 
 	  if (priceCerts.size() != mixIDs.size())
 	  {
@@ -542,20 +580,20 @@ public class AIControlChannel extends XmlControlChannel
 	  if (message != null)
 	  {
 		  LogHolder.log(LogLevel.ERR, LogType.PAY, message);
-		  
+
 		  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 		  PayAccountsFile.getInstance().signalAccountError(
-				  new XMLErrorMessage(XMLErrorMessage.ERR_INVALID_PRICE_CERTS, message)); 
-		  
-		  
+				  new XMLErrorMessage(XMLErrorMessage.ERR_INVALID_PRICE_CERTS, message));
+
+
 		  return false;
 	  }
 
 	  PayAccountsFile.getInstance().getActiveAccount().resetCurrentBytes();
 	  sendXmlMessage(XMLUtil.toXMLDocument(PayAccountsFile.getInstance().getActiveAccount().getAccountCertificate()));
-	  /* 
-	   * new ai login procedure: wait until all messages are 
-	   * exchanged or until login is timed out 
+	  /*
+	   * new ai login procedure: wait until all messages are
+	   * exchanged or until login is timed out
 	   */
 	  boolean aiLoginSuccess = true;
 	  synchronized(m_aiLoginSyncObject)
@@ -563,19 +601,19 @@ public class AIControlChannel extends XmlControlChannel
 		  /* Only if the new synchronized AI login procedure is suppported by the first mix
 		   * (version >= 00.07.20) we wait until the mix confirms a successful/unsuccessful login or
 		   * the connection timed out. Otherwise for backward compatibility reasons
-		   * we still perform the old asynchronous login procedure. 
+		   * we still perform the old asynchronous login procedure.
 		   */
 		  if(m_synchronizedAILogin)
 		  {
 			  LogHolder.log(LogLevel.INFO, LogType.PAY, "Performing new synchronous AI login");
 			  try {
 				m_aiLoginSyncObject.wait(AI_LOGIN_TIMEOUT);
-			  } 
+			  }
 			  catch (InterruptedException e) {
-				/* This happens when a user pushes the anonymity off button before 
-				 * the synchronous login hasn't finished. Therefore just leave. false will be returned 
+				/* This happens when a user pushes the anonymity off button before
+				 * the synchronous login hasn't finished. Therefore just leave. false will be returned
 				 * automatically.
-				 */ 
+				 */
 			  }
 			  //LogHolder.log(LogLevel.ALERT, LogType.PAY, m_aiLoginSyncObject);
 			  aiLoginSuccess = m_aiLoginSyncObject.size() != 0;
@@ -614,7 +652,7 @@ public class AIControlChannel extends XmlControlChannel
 	private synchronized void processInitialCC(XMLEasyCC a_cc) {
 		PayAccount currentAccount = PayAccountsFile.getInstance().getActiveAccount();
 		String msg = "AI has sent a INVALID last cost confirmation.";
-		
+
 		if (a_cc.verify(currentAccount.getPublicKey()))
 		{
 			try
@@ -750,8 +788,8 @@ public class AIControlChannel extends XmlControlChannel
 		PayAccountsFile.getInstance().signalAccountError(
 			new XMLErrorMessage(XMLErrorMessage.ERR_WRONG_DATA, msg));
 	}
-	
-	public void multiplexerClosed() 
+
+	public void multiplexerClosed()
 	{
 		synchronized(m_aiLoginSyncObject)
 		{
@@ -759,7 +797,7 @@ public class AIControlChannel extends XmlControlChannel
 		}
 	}
 
-	public void setSynchronizedAILogin(boolean synchronizedAILogin) 
+	public void setSynchronizedAILogin(boolean synchronizedAILogin)
 	{
 		synchronized(m_aiLoginSyncObject)
 		{

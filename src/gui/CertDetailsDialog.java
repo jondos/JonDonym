@@ -1069,14 +1069,17 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 			}
 		}
 	}
-	
+
 	/**
      * Invoked when the mouse button has been clicked (pressed
      * and released) on a component.
      */
     public void mouseClicked(MouseEvent e)
     {
-    	dispose();
+		if (e != null && e.getClickCount() >=2)
+		{
+			dispose();
+		}
     }
 
     /**
@@ -1084,7 +1087,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
      */
     public void mousePressed(MouseEvent e)
     {
-    	
+
     }
 
     /**
@@ -1092,7 +1095,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
      */
     public void mouseReleased(MouseEvent e)
     {
-    	
+
     }
 
     /**
@@ -1100,7 +1103,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
      */
     public void mouseEntered(MouseEvent e)
     {
-    	
+
     }
 
     /**
@@ -1108,9 +1111,9 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
      */
     public void mouseExited(MouseEvent e)
     {
-    	
+
     }
-	
+
 	private final class CertPathListCellRenderer implements ListCellRenderer
 	{
 
