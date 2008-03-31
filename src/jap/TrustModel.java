@@ -894,10 +894,21 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			throw (new TrustException("Payment instance for this cascade is unknown!"));
 		}
 
+		// allow to conenct to unverified cascades in user defined filter
+		synchronized(m_trustAttributes)
+		{
+			TrustAttribute attr = (TrustAttribute)m_trustAttributes.get(UserDefinedAttribute.class);
+			if (attr != null && attr.getTrustCondition() == TRUST_IF_TRUE && a_cascade.isUserDefined())
+			{
+				return;
+			}
+		}
+
 		if (!a_cascade.isUserDefined())
 		{
 			super.checkTrust(a_cascade);
 		}
+
 
 		// test if all mixes have valid certificates.
 		MixInfo info;
