@@ -172,10 +172,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			return m_conditionValue;
 		}
 
-		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
-		{
-
-		}
+		public abstract void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException;
 
 		public Element toXmlElement(Document a_doc)
 		{
