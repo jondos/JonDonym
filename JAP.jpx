@@ -167,7 +167,6 @@
 <property category="runtime.0" name="ConfigurationName" value="JAP"/>
 <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
 <property category="runtime.0" name="application.class" value="JAP"/>
-<property category="runtime.0" name="application.parameters" value="-s"/>
 <property category="runtime.0" name="custom.init_required" value="0"/>
 <property category="runtime.0" name="custom.required.1" value="http"/>
 <property category="runtime.0" name="custom.required.2" value="mac"/>
@@ -360,7 +359,7 @@
 <property category="sys" name="ExcludeClassEnabled" value="0"/>
 <property category="sys" name="IncludeTestPath" value="1"/>
 <property category="sys" name="InstanceVisibility" value="0"/>
-<property category="sys" name="JDK" value="java version 1.5.0_03-b07"/>
+<property category="sys" name="JDK" value="java version 1.6.0_04-b12"/>
 <property category="sys" name="LastTag" value="192"/>
 <property category="sys" name="Libraries" value="http;mac;Apache XML-RPC;BouncyCastleLightForJAP;JUnit;junitx;Swing;ApacheBzip2;Log4j;ApacheFTPClient;XML-1.0;AppleJavaExtensions"/>
 <property category="sys" name="MakeStable" value="0"/>

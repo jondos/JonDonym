@@ -333,44 +333,44 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		restoreLocation(JAPModel.getInstance().getConfigWindowLocation());
 		//setDockable(true);
 		this.addWindowListener(this);
-		
+
 		JAPModel.getInstance().addObserver(this);
 	}
-	
+
 	public void windowClosed(WindowEvent e)
 	{
-		
+
 	}
-	
+
 	public void windowClosing(WindowEvent e)
 	{
 		cancelPressed();
 	}
-	
+
 	public void windowDeactivated(WindowEvent e)
 	{
-		
-	}		
-	
+
+	}
+
 	public void windowActivated(WindowEvent e)
 	{
-		
-	}				
-	
+
+	}
+
 	public void windowDeiconified(WindowEvent e)
 	{
-		
-	}		
-	
+
+	}
+
 	public void windowIconified(WindowEvent e)
 	{
-		
-	}				
-	
+
+	}
+
 	public void windowOpened(WindowEvent e)
 	{
-		
-	}	
+
+	}
 
 	protected void doPack()
 	{
@@ -417,6 +417,10 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 	{
 		public abstract String getName();
 		public abstract void doChange();
+		public void doCancel()
+		{
+
+		}
 		public String getMessage()
 		{
 			return "";
@@ -742,6 +746,10 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 			}
 			else
 			{
+				for (int i = 0; i < m_vecConfigChangesNeedRestart.size(); i++)
+				{
+					((AbstractRestartNeedingConfigChange)m_vecConfigChangesNeedRestart.elementAt(i)).doCancel();
+				}
 				m_vecConfigChangesNeedRestart.removeAllElements();
 				return;
 			}
