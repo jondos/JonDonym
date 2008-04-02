@@ -3658,8 +3658,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			else if(value instanceof ServiceOperator)
 			{
 				ServiceOperator op = (ServiceOperator) value;
-				this.setForeground(Color.black);
-				setText(op.getOrganization());				
+				setForeground(Color.black);
+				
+				if(op.getCertificate() == null)
+				{
+					setForeground(Color.gray);
+				}
+				setText(op.getOrganization());
 			}
 		}
 	}
