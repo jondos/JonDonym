@@ -738,7 +738,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		p.add(m_rbViewMini, c);
 		c.gridy = 2;
 		p.add(m_rbViewSystray, c);
-		
+
 		m_cbShowSplash = new JCheckBox(JAPMessages.getString("ngViewShowSplash"));
 		m_cbShowSplash.setEnabled(!JAPModel.getInstance().getShowSplashDisabled());
 		c.gridy = 3;
@@ -759,13 +759,17 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 	protected boolean onOkPressed()
 	{
-
+		int oldFontSize = JAPModel.getInstance().getFontSize();
 		if (JAPModel.getInstance().setFontSize(m_slidFontSize.getValue()) &&
 			!JAPModel.getInstance().isConfigWindowSizeSaved())
 		{
 			beforePack();
 			JAPConf.getInstance().doPack();
 			afterPack();
+		}
+		else
+		{
+			oldFontSize = -1;
 		}
 
 		JAPModel.getInstance().setSaveMainWindowPosition(m_cbSaveWindowLocationMain.isSelected());
@@ -851,9 +855,16 @@ final class JAPConfUI extends AbstractJAPConfModule
 		{
 			newLaF = UIManager.getLookAndFeel().getClass().getName();
 		}
-		if (!UIManager.getLookAndFeel().getClass().getName().equals(newLaF))
+		if (UIManager.getLookAndFeel().getClass().getName().equals(newLaF))
+		{
+			newLaF = null;
+		}
+
+
+		if (newLaF != null || oldFontSize >= 0)
 		{
 			final String lafRestart = newLaF;
+			final int OLD_FONT_SIZE = oldFontSize;
 			JAPConf.getInstance().addNeedRestart(
 				new JAPConf.AbstractRestartNeedingConfigChange()
 			{
@@ -864,7 +875,22 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 				public void doChange()
 				{
-					JAPModel.getInstance().setLookAndFeel(lafRestart);
+					if (lafRestart != null)
+					{
+						JAPModel.getInstance().setLookAndFeel(lafRestart);
+					}
+				}
+
+				public void doCancel()
+				{
+					if (OLD_FONT_SIZE >= 0)
+					{
+						m_slidFontSize.setValue(OLD_FONT_SIZE);
+						JAPModel.getInstance().setFontSize(OLD_FONT_SIZE);
+						beforePack();
+						JAPConf.getInstance().doPack();
+						afterPack();
+					}
 				}
 			});
 		}

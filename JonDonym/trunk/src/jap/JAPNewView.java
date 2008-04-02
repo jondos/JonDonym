@@ -201,6 +201,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		JAPNewView.class.getName() + "_meter10.gif"
 	};
 
+	private final Object FONT_UPDATE = new Object();
+	private boolean m_bFontsUpdated = false;
 	private final JLabel DEFAULT_LABEL = new JLabel();
 
 	//private JLabel meterLabel;
@@ -1287,6 +1289,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		Database.getInstance(CascadeIDEntry.class).addObserver(this);
 		Database.getInstance(BlacklistedCascadeIDEntry.class).addObserver(this);
 		Database.getInstance(MessageDBEntry.class).addObserver(this);
+		TrustModel.addModelObserver(this);
 
 		JAPModel.getInstance().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().addObserver(this);
@@ -1849,23 +1852,31 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				public void run()
 				{
-					// preload meter icons
-					for (int i = 0; i < METERFNARRAY.length; i++)
+					synchronized (FONT_UPDATE)
 					{
-						GUIUtils.loadImageIcon(METERFNARRAY[i], true, true);
-					}
-					SwingUtilities.updateComponentTreeUI(view);
-					SwingUtilities.updateComponentTreeUI(DEFAULT_LABEL);
-					updateFonts();
-					onUpdateValues();
+						if (!m_bFontsUpdated)
+						{
+							m_bFontsUpdated = true;
+							// preload meter icons
+							for (int i = 0; i < METERFNARRAY.length; i++)
+							{
+								GUIUtils.loadImageIcon(METERFNARRAY[i], true, true);
+							}
+							SwingUtilities.updateComponentTreeUI(view);
+							SwingUtilities.updateComponentTreeUI(DEFAULT_LABEL);
+							updateFonts();
+							onUpdateValues();
 
-					setOptimalSize();
+							setOptimalSize();
+						}
+					}
 				}
 			};
 		}
-		else if (a_observable instanceof TrustModel)
+		else if (a_observable instanceof TrustModel.InnerObservable)
 		{
 			m_bTrustChanged = true;
+			m_comboAnonServices.updateUI(); // immediately show blocked/unblocked cascade
 			updateValues(false);
 		}
 		else if (a_message != null && (a_message.equals(JAPModel.CHANGED_INFOSERVICE_AUTO_UPDATE) ||
@@ -2559,7 +2570,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	{
 		return m_firefoxCommand;
 	}
-	
+
 	public void onUpdateValues()
 	{
 		synchronized (SYNC_ICONIFIED_VIEW)
@@ -3225,7 +3236,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_StatusPanel.removeStatusMsg(messageId.intValue());
 		}
 	}
-	
+
 	public void showChooseFirefoxPathDialog()
 	{
 		if(JAPDialog.showYesNoDialog(this, JAPMessages.getString(MSG_EXPLAIN_NO_FIREFOX_FOUND)))
@@ -3243,7 +3254,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 					m_Controller.startPortableFirefox(m_firefoxCommand);
 				}
-				
+
 			}
 		}
 	}

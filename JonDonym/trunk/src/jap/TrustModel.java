@@ -119,7 +119,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static Vector ms_trustModels = new Vector();
 	private static TrustModel ms_currentTrustModel;
 
-	private static class InnerObservable extends Observable
+	protected static class InnerObservable extends Observable
 	{
 		public void setChanged()
 		{
