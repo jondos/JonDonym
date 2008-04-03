@@ -363,8 +363,18 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 
-	  Database.getInstance(ServiceOperator.class).update(m_mixOperator);
-	  
+	  ServiceOperator currentSO =
+		  (ServiceOperator)Database.getInstance(ServiceOperator.class).getEntryById(m_mixOperator.getId());
+	  if ( (currentSO == null || currentSO.getCertificate() == null) ||
+		  (m_mixOperator.getCertificate() != null &&
+		   m_mixOperator.getCertificate().getValidity().getValidTo().after(
+			   currentSO.getCertificate().getValidity().getValidTo())))
+	  {
+		  Database.getInstance(ServiceOperator.class).update(m_mixOperator);
+	  }
+
+
+
 	  /* as default no mix is free, only if we receive a configuration request from the mix and it
 	   * it is not already assigned to a cascade, this mix will be free
 	   */

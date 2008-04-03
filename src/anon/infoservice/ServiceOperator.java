@@ -59,19 +59,19 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 * This is the EMail address of the operator.
 	 */
 	private String m_strEmail;
-	
+
 	/**
 	 * The last update time.
 	 */
 	private long m_lastUpdate;
-	
+
 	/**
 	 * The operators certificate
 	 */
 	private JAPCertificate m_certificate;
-	
+
 	/**
-	 * Creates a new ServiceOperator an operator certificate or 
+	 * Creates a new ServiceOperator an operator certificate or
 	 * from an XML description (Operator node).
 	 *
 	 * @param a_node The operator node from an XML document.
@@ -81,13 +81,13 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	public ServiceOperator(Node a_node, JAPCertificate a_certificate, long a_lastUpdate)
 	{
 		super(Long.MAX_VALUE);
-		
+
 		Node node;
 		X509DistinguishedName subject;
 
 		m_certificate = a_certificate;
 		m_lastUpdate = a_lastUpdate;
-		
+
 	    if(a_certificate != null)
 		{
 			subject = a_certificate.getSubject();
@@ -137,9 +137,9 @@ public class ServiceOperator extends AbstractDatabaseEntry
 
 	    /**
 	     * @todo remove - Backwards compatibility only
-	     * 
+	     *
 	     * older mixes seem to send no operator certificate
-	     * 
+	     *
 	     * check if the the information from the cert is valid (not null oder empty)
 		 * and take the information from the XML-Structure if not
 	     */
@@ -161,7 +161,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 			m_strUrl = XMLUtil.parseValue(node, null);
 		}
 	}
-	
+
 	/**
 	 * Returns version number which is used to determine the more recent infoservice entry, if two
 	 * entries are compared (higher version number -> more recent entry).
@@ -172,17 +172,17 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	{
 		return m_lastUpdate;
 	}
-	
+
 	/**
 	 * Returns the time in milliseconds when this db entry was created from the origin instance.
-	 * 
+	 *
 	 * @return the time in milliseconds when this db entry was created from the origin instance
 	 */
 	public long getLastUpdate()
 	{
 		return m_lastUpdate;
 	}
-	
+
 	/**
 	 * Returns a unique ID for a database entry.
 	 *
@@ -193,15 +193,15 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		if(m_certificate != null)
 		{
 			X509SubjectKeyIdentifier id = ((X509SubjectKeyIdentifier)m_certificate.getExtensions().getExtension(X509SubjectKeyIdentifier.IDENTIFIER));
-			return id != null ? id.getValue() : "";
+			return id != null ? id.getValue() : m_certificate.getId();
 		}
-		
+
 		return "";
 	}
 
 	/**
 	 * Return the EMail address of the operator.
-	 * 
+	 *
 	 * @return The EMail address of the operator.
 	 */
 	public String getEMail()
@@ -219,16 +219,16 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		return m_strOrganization;
 	}
 
-	/** 
+	/**
 	 * Returns the operator certificate.
-	 * 
+	 *
 	 * @return The operator certificate.
 	 */
 	public JAPCertificate getCertificate()
 	{
 		return m_certificate;
 	}
-	
+
 	/**
 	 * Returns the URL of the operators home page.
 	 *
@@ -242,7 +242,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	public boolean equals(Object a_obj)
 	{
 		if(a_obj == null || m_certificate == null) return false;
-		
+
 		ServiceOperator op = (ServiceOperator) a_obj;
 		return m_certificate.equals(op.m_certificate);
 	}
