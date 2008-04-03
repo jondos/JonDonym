@@ -32,6 +32,7 @@ import org.w3c.dom.Node;
 import anon.crypto.JAPCertificate;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509SubjectAlternativeName;
+import anon.crypto.X509SubjectKeyIdentifier;
 import anon.util.XMLUtil;
 import java.util.Vector;
 import anon.crypto.AbstractX509Extension;
@@ -189,7 +190,13 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 */
 	public String getId()
 	{
-		return m_certificate != null ? m_certificate.getId() : "";
+		if(m_certificate != null)
+		{
+			X509SubjectKeyIdentifier id = ((X509SubjectKeyIdentifier)m_certificate.getExtensions().getExtension(X509SubjectKeyIdentifier.IDENTIFIER));
+			return id != null ? id.getValue() : "";
+		}
+		
+		return "";
 	}
 
 	/**
