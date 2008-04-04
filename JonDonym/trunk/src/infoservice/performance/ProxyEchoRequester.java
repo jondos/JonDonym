@@ -76,7 +76,7 @@ class ProxyEchoRequester implements Runnable {
 				if(stream != null)
 					stream.close();
 			} catch (IOException e1) {
-				exception = e1;
+				// IGNORE
 			}
 		}
 	}
