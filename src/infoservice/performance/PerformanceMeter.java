@@ -31,10 +31,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Random;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 
@@ -97,7 +99,7 @@ public class PerformanceMeter implements Runnable {
 
 		        	long responseStartTime = System.currentTimeMillis();
 
-		        	int recvAmount = in.read(recvbuf, 0, recvbuf.length - 1) + 1;
+//		        	int recvAmount = in.read(recvbuf, 0, recvbuf.length - 1) + 1;
 
 		        	long responseEndTime = System.currentTimeMillis();
 
@@ -112,16 +114,14 @@ public class PerformanceMeter implements Runnable {
 		        	cascade.setThroughput(throughput);
 	        	}
 	        	catch(Exception e) {
-	        		// TODO: Log exception
-	        		e.printStackTrace();
+	        		LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
 	        	}
 	        }
 		}
 		try {
 			Thread.sleep(interval);
 		} catch (InterruptedException e) {
-			// TODO do proper logging
-			e.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.THREAD, e);
 		}
 	}
 
