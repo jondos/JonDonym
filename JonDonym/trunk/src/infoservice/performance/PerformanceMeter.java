@@ -54,8 +54,6 @@ import anon.infoservice.MixCascade;
  */
 public class PerformanceMeter implements Runnable {
 
-	public static final int BYTES_PER_CHUNK = 512;
-
 	private int interval;
 	private int requestsPerInterval;
 

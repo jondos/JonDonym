@@ -195,6 +195,15 @@ final public class Configuration
 	 *
 	 */
 	private int m_NrOfThreads;
+
+	/** Stores 3 configuration values for cascade performance monitoring.
+	 * <ul><li>The size of the random test data block in bytes;</li>
+	 * <li>The interval between measurement blocks in milliseconds;</li>
+	 * <li>The number measurements per interval.</li>
+	 */
+	private int[] m_aPerfMeterConf = new int[3];
+
+
 	public Configuration(Properties a_properties) throws Exception
 	{
 		/* for running in non-graphic environments, we need the awt headless support, it is only
@@ -822,6 +831,18 @@ final public class Configuration
 				System.err.println("Exception: " + e2.toString());
 			}
 
+			String perfconf = a_properties.getProperty("perf.randombytes","1024");
+			if(perfconf != null)
+				m_aPerfMeterConf[0] = Integer.valueOf(perfconf).intValue();
+
+			perfconf = a_properties.getProperty("perf.interval", "10000");
+			if(perfconf != null)
+				m_aPerfMeterConf[1] = Integer.valueOf(perfconf).intValue();
+
+			perfconf = a_properties.getProperty("perf.requestsperinterval", "1");
+			if(perfconf != null)
+				m_aPerfMeterConf[2] = Integer.valueOf(perfconf).intValue();
+
 		}
 		catch (Exception e)
 		{
@@ -1097,6 +1118,10 @@ final public class Configuration
 	private JAPCertificate loadX509Certificate(String a_x509FileName)
 	{
 		return JAPCertificate.getInstance(new File(a_x509FileName));
+	}
+
+	public int[] getPerformanceMeterConfig() {
+		return m_aPerfMeterConf;
 	}
 
 }
