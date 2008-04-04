@@ -1876,7 +1876,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		else if (a_observable instanceof TrustModel.InnerObservable)
 		{
 			m_bTrustChanged = true;
-			m_comboAnonServices.updateUI(); // immediately show blocked/unblocked cascade
+			//m_comboAnonServices.updateUI(); // immediately show blocked/unblocked cascade
 			updateValues(false);
 		}
 		else if (a_message != null && (a_message.equals(JAPModel.CHANGED_INFOSERVICE_AUTO_UPDATE) ||
