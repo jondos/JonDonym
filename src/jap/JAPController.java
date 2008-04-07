@@ -120,6 +120,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
+import platform.MacOS;
 import proxy.DirectProxy;
 import proxy.DirectProxy.AllowUnprotectedConnectionCallback;
 import update.JAPUpdateWizard;
@@ -2143,10 +2144,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 */
 	private void restartJAP()
 	{
-
 		// restart command
 		String strRestartCommand = "";
-
+		String JapMainClass = (AbstractOS.getInstance() instanceof MacOS) ?
+									"JAPMacintosh" : "JAP";
+		
 		//what is used: sun.java or JView?
 		String strJavaVendor = System.getProperty("java.vendor");
 		LogHolder.log(LogLevel.INFO, LogType.ALL, "Java vendor: " + strJavaVendor);
@@ -2155,7 +2157,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		String pathToJava = null;
 		if (strJavaVendor.toLowerCase().indexOf("microsoft") != -1)
 		{
-
+			System.out.println("Java vendor :"+strJavaVendor.toLowerCase());
 			pathToJava = System.getProperty("com.ms.sysdir") + File.separator;
 			javaExe = "jview /cp";
 		}
@@ -2164,20 +2166,21 @@ public final class JAPController extends Observable implements IProxyListener, O
 			pathToJava = System.getProperty("java.home") + File.separator + "bin" + File.separator;
 			javaExe = "javaw -cp"; // for windows
 		}
-		strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" JAP" +
+		strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" " + JapMainClass +
 			m_commandLineArgs;
 
 
 
 	    try
 		{
-		    Runtime.getRuntime().exec(strRestartCommand);
-			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);
+	    	Runtime.getRuntime().exec(strRestartCommand);
+			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);	
 		}
 		catch (Exception ex)
 		{
 			javaExe = "java -cp"; // Linux/UNIX
-			strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" JAP";
+			strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" "+ JapMainClass + 
+				m_commandLineArgs;
 
 			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);
 			try
@@ -2186,7 +2189,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			}
 			catch (Exception a_e)
 			{
-				LogHolder.log(LogLevel.INFO, LogType.ALL, "Error auto-restart JAP: " + ex);
+				LogHolder.log(LogLevel.EXCEPTION, LogType.ALL, "Error auto-restart JAP: " + ex);
 			}
 		}
 	}
