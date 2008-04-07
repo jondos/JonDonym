@@ -177,6 +177,8 @@ public final class JAPModel extends Observable
 	private boolean m_bShowSplashScreen = true;
 	private boolean m_bShowSplashDisabled = false;
 	
+	private boolean m_bStartPortableFirefox = true;
+	
 	private Dimension m_iconifiedSize;
 	private Dimension m_configSize;
 	private Dimension m_helpSize;
@@ -1281,6 +1283,16 @@ public final class JAPModel extends Observable
 	public boolean getShowSplashDisabled()
 	{
 		return m_bShowSplashDisabled;
+	}
+	
+	public void setStartPortableFirefox(boolean a_bStart)
+	{
+		m_bStartPortableFirefox = a_bStart;
+	}
+	
+	public boolean getStartPortableFirefox()
+	{
+		return m_bStartPortableFirefox;
 	}
 
 	public static class FontResize
