@@ -791,14 +791,14 @@ public class JAP
 			pFFExecutable = "";
 		}
 			
-		if (isArgumentSet("--portable-browserprofile"))
+		/*if (isArgumentSet("--portable-browserprofile"))
 		{
 			pFFprofile = getArgumentValue("--portable-browserprofile");
 			if(pFFprofile != null)
 			{
 				args_len += 2;
 			}
-		}
+		}*/
 		if (isArgumentSet("--portable-help-path"))
 		{
 			pFFHelpPath = getArgumentValue("--portable-help-path");
