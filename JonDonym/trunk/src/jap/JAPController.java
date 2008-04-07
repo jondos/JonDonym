@@ -4598,8 +4598,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_lastBalanceUpdateBytes = 0;
 		transferedBytes(0, IProxyListener.PROTOCOL_WWW);
 		transferedBytes(0, IProxyListener.PROTOCOL_OTHER);
-		/* perhaps we should use this solution for all OSs */
-		if(isPortableMode() && (AbstractOS.getInstance() instanceof platform.MacOS))
+		
+		if(isPortableMode() && m_Model.getStartPortableFirefox())
 		{
 			if(!m_firstPortableFFStart)
 			{
