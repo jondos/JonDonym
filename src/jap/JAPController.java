@@ -2169,29 +2169,53 @@ public final class JAPController extends Observable implements IProxyListener, O
 		strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" " + JapMainClass +
 			m_commandLineArgs;
 
-
-
-	    try
+		/** Quick and dirty hack for Mac OS X restart **/
+		/* bundle names and executables should not be hard-coded, but for a hotfix, this will do */
+		final String JAP_BUNDLE_NAME = "JAP.app";
+		final String JAP_BUNDLE_EXECUTABLE = "JavaApplicationStub";
+		final String JAP_BUNDLE_EXECUTABLE_BASE = 
+				File.separator+"Contents"+File.separator+"MacOS"+File.separator;
+		boolean osx_bundle_restart = false;
+		if(AbstractOS.getInstance() instanceof MacOS)
 		{
-	    	Runtime.getRuntime().exec(strRestartCommand);
-			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);	
-		}
-		catch (Exception ex)
-		{
-			javaExe = "java -cp"; // Linux/UNIX
-			strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" "+ JapMainClass + 
-				m_commandLineArgs;
-
-			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);
-			try
+			//try to invoke JavaStub of Mac package
+		    try
 			{
-				Runtime.getRuntime().exec(strRestartCommand);
+		    	Runtime.getRuntime().exec(System.getProperty("user.dir")+File.separator+
+		    			JAP_BUNDLE_NAME+JAP_BUNDLE_EXECUTABLE_BASE+JAP_BUNDLE_EXECUTABLE);
+		    	osx_bundle_restart = true;
 			}
-			catch (Exception a_e)
+			catch (Exception ex)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.ALL, "Error auto-restart JAP: " + ex);
-			}
+				//Better try java -cp ... JAPMacintosh
+			}	
 		}
+		if(!osx_bundle_restart)
+    	{
+		    try
+			{
+		    	Runtime.getRuntime().exec(strRestartCommand);	
+		    	LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);	
+			}
+			catch (Exception ex)
+			{
+				javaExe = "java -cp"; // Linux/UNIX
+				
+				strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" "+ JapMainClass + 
+					m_commandLineArgs;
+	
+				LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);
+				try
+				{
+					System.out.println(strRestartCommand);
+					Runtime.getRuntime().exec(strRestartCommand);
+				}
+				catch (Exception a_e)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.ALL, "Error auto-restart JAP: " + ex);
+				}
+			}
+    	}
 	}
 
 	/**

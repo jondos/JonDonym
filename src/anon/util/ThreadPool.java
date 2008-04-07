@@ -56,6 +56,12 @@ public final class ThreadPool
 			this.parent = parent;
 		}
 
+		public void shutdown()
+		{
+			shouldRun = false;
+			interrupt();
+		}
+		
 		public void run()
 		{
 			ThreadPoolRequest obj = null;
@@ -161,6 +167,14 @@ public final class ThreadPool
 		}
 	}
 
+	public void shutdown()
+	{
+		for (int i = 0; i < poolThreads.length; i++)
+		{
+			poolThreads[i].shutdown();
+		}
+	}
+	
 	private void add(Runnable target, Object lock)
 	{
 		try
