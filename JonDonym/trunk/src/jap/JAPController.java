@@ -1915,8 +1915,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 		
 		try
 		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC,
-					"Starting PFF");
 			m_portableFirefoxProcess = Runtime.getRuntime().exec(cmds);
 			return true;
 		} 
