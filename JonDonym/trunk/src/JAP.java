@@ -281,14 +281,8 @@ public class JAP
 		// Set path to Firefox for portable JAP
 		//String firepath="";
 		String profilepath = "";
-		boolean bPortable = false;
-		m_firefoxCommand = buildPortableFFCommand();
-		
-		if(m_firefoxCommand != null)
-		{
-			bPortable = true;
-			m_controller.setPortableMode(true);
-		}
+		boolean bPortable = isArgumentSet("--portable");
+		m_controller.setPortableMode(bPortable);
 		
 		String configFileName = null;
 		/* check, whether there is the -config parameter, which means the we use userdefined config
@@ -524,6 +518,42 @@ public class JAP
 			m_controller.setPortableJava(true);
 		}
 
+		/* check, whether there is the -forwarding_state parameter, which extends
+		 * the configuration dialog
+		 */
+		boolean forwardingStateVisible = false;
+		if (isArgumentSet("-forwarding_state"))
+		{
+			forwardingStateVisible = true;
+		}
+
+		JAPModel.getInstance().setForwardingStateModuleVisible(forwardingStateVisible);
+		// load settings from config file
+		splash.setText(JAPMessages.getString(MSG_LOADING_SETTINGS));
+		m_controller.loadConfigFile(configFileName, loadPay, splash);
+		// configure forwarding server
+		String forwardingServerPort;
+		if ( (forwardingServerPort = getArgumentValue("--forwarder")) == null)
+		{
+			forwardingServerPort = getArgumentValue("-f");
+		}
+		if (forwardingServerPort != null)
+		{
+			try
+			{
+				JAPModel.getInstance().getRoutingSettings().setServerPort(
+					Integer.parseInt(forwardingServerPort));
+			}
+			catch (NumberFormatException a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+			}
+		}
+		
+		if(bPortable)
+		{
+			m_firefoxCommand = buildPortableFFCommand();
+		}
 		// keep this string unchangeable from "outside"
 		final String[] firefoxCommand = m_firefoxCommand;
 		AbstractOS.getInstance().init(new AbstractOS.IURLErrorNotifier()
@@ -556,42 +586,11 @@ public class JAP
 				}
 				catch (Exception ex)
 				{
+					LogHolder.log(LogLevel.WARNING, LogType.GUI, "Error running applescript: ", ex);
 				}
 				return false;
 			}
 		});
-
-		/* check, whether there is the -forwarding_state parameter, which extends
-		 * the configuration dialog
-		 */
-		boolean forwardingStateVisible = false;
-		if (isArgumentSet("-forwarding_state"))
-		{
-			forwardingStateVisible = true;
-		}
-
-		JAPModel.getInstance().setForwardingStateModuleVisible(forwardingStateVisible);
-		// load settings from config file
-		splash.setText(JAPMessages.getString(MSG_LOADING_SETTINGS));
-		m_controller.loadConfigFile(configFileName, loadPay, splash);
-		// configure forwarding server
-		String forwardingServerPort;
-		if ( (forwardingServerPort = getArgumentValue("--forwarder")) == null)
-		{
-			forwardingServerPort = getArgumentValue("-f");
-		}
-		if (forwardingServerPort != null)
-		{
-			try
-			{
-				JAPModel.getInstance().getRoutingSettings().setServerPort(
-					Integer.parseInt(forwardingServerPort));
-			}
-			catch (NumberFormatException a_e)
-			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
-			}
-		}
 
 		splash.setText(JAPMessages.getString(MSG_INIT_DLL));
 		JAPDll.init();
@@ -815,13 +814,21 @@ public class JAP
 			pFFCommand[argC+1] = toAbsolutePath(pFFprofile);
 			argC += 2;
 		}
+		Locale loc = JAPMessages.getLocale();
 		if(pFFHelpPath != null)
 		{
 			pFFCommand[argC] = pFFHelpPath;
 		}
 		else
 		{
-			pFFCommand[argC] = "https://www.jondos.de";
+			pFFCommand[argC] = "help/en/help/index.html";
+			if(loc != null)
+			{
+				if(loc.toString().equalsIgnoreCase("de"))
+				{
+					pFFCommand[argC] = "help/de/help/index.html";
+				}
+			}
 		}
 		return pFFCommand;
 	}
