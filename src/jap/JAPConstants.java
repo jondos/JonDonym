@@ -277,6 +277,7 @@ public final class JAPConstants
 	//public final static String CONFIG_SIZE = "Size";
 	public final static String CONFIG_MOVE_TO_SYSTRAY = "MoveToSystray";
 	public final static String CONFIG_DEFAULT_VIEW = "DefaultView";
+	public final static String CONFIG_START_PORTABLE_FIREFOX = "StartPortableFirefox";
 	public final static String CONFIG_NORMAL = "Normal";
 	public final static String CONFIG_SIMPLIFIED = "Simplified";
 	public final static String CONFIG_DEBUG = "Debug";

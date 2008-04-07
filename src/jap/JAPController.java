@@ -1440,6 +1440,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 
 				  }*/
+				
+				tmp = (Element) XMLUtil.getFirstChildByName(elemMainWindow, JAPConstants.CONFIG_START_PORTABLE_FIREFOX);
+				JAPModel.getInstance().setStartPortableFirefox(XMLUtil.parseValue(tmp, true));
+				
 				tmp = (Element) XMLUtil.getFirstChildByName(elemMainWindow,
 					JAPConstants.CONFIG_DEFAULT_VIEW);
 				String strDefaultView = XMLUtil.parseValue(tmp, JAPConstants.CONFIG_NORMAL);
@@ -2502,6 +2506,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 			{
 				Element tmp = doc.createElement(JAPConstants.CONFIG_MOVE_TO_SYSTRAY);
 				XMLUtil.setValue(tmp, true);
+				elemMainWindow.appendChild(tmp);
+			}
+			if(!JAPModel.getInstance().getStartPortableFirefox())
+			{
+				Element tmp = doc.createElement(JAPConstants.CONFIG_START_PORTABLE_FIREFOX);
+				XMLUtil.setValue(tmp, false);
 				elemMainWindow.appendChild(tmp);
 			}
 			if (JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED)
