@@ -2145,8 +2145,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private void restartJAP()
 	{
 		// restart command
+		MacOS macOS = (AbstractOS.getInstance() instanceof MacOS) ?
+							(MacOS) AbstractOS.getInstance() : null;
 		String strRestartCommand = "";
-		String JapMainClass = (AbstractOS.getInstance() instanceof MacOS) ?
+		String JapMainClass = (macOS != null ) ?
 									"JAPMacintosh" : "JAP";
 		
 		//what is used: sun.java or JView?
@@ -2166,56 +2168,40 @@ public final class JAPController extends Observable implements IProxyListener, O
 			pathToJava = System.getProperty("java.home") + File.separator + "bin" + File.separator;
 			javaExe = "javaw -cp"; // for windows
 		}
-		strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" " + JapMainClass +
-			m_commandLineArgs;
-
-		/** Quick and dirty hack for Mac OS X restart **/
-		/* bundle names and executables should not be hard-coded, but for a hotfix, this will do */
-		final String JAP_BUNDLE_NAME = "JAP.app";
-		final String JAP_BUNDLE_EXECUTABLE = "JavaApplicationStub";
-		final String JAP_BUNDLE_EXECUTABLE_BASE = 
-				File.separator+"Contents"+File.separator+"MacOS"+File.separator;
-		boolean osx_bundle_restart = false;
-		if(AbstractOS.getInstance() instanceof MacOS)
+		boolean isMacOSBundle = (macOS != null) ? macOS.isBundle() : false;
+		if(isMacOSBundle)
 		{
-			//try to invoke JavaStub of Mac package
-		    try
-			{
-		    	Runtime.getRuntime().exec(System.getProperty("user.dir")+File.separator+
-		    			JAP_BUNDLE_NAME+JAP_BUNDLE_EXECUTABLE_BASE+JAP_BUNDLE_EXECUTABLE);
-		    	osx_bundle_restart = true;
-			}
-			catch (Exception ex)
-			{
-				//Better try java -cp ... JAPMacintosh
-			}	
+			strRestartCommand = macOS.getBundleExecutablePath();
 		}
-		if(!osx_bundle_restart)
-    	{
-		    try
+		else
+		{
+			strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" " 
+								+ JapMainClass + m_commandLineArgs;
+		}
+		
+	    try
+		{
+	    	Runtime.getRuntime().exec(strRestartCommand);	
+	    	LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);	
+		}
+		catch (Exception ex)
+		{
+			javaExe = "java -cp"; // Linux/UNIX
+			
+			strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" "+ JapMainClass + 
+				m_commandLineArgs;
+
+			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);
+			try
 			{
-		    	Runtime.getRuntime().exec(strRestartCommand);	
-		    	LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);	
+				Runtime.getRuntime().exec(strRestartCommand);
 			}
-			catch (Exception ex)
+			catch (Exception a_e)
 			{
-				javaExe = "java -cp"; // Linux/UNIX
-				
-				strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" "+ JapMainClass + 
-					m_commandLineArgs;
-	
-				LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);
-				try
-				{
-					System.out.println(strRestartCommand);
-					Runtime.getRuntime().exec(strRestartCommand);
-				}
-				catch (Exception a_e)
-				{
-					LogHolder.log(LogLevel.EXCEPTION, LogType.ALL, "Error auto-restart JAP: " + ex);
-				}
+				LogHolder.log(LogLevel.EXCEPTION, LogType.ALL, "Error auto-restart JAP: " + ex);
 			}
-    	}
+		}
+    	
 	}
 
 	/**
