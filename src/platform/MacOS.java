@@ -33,6 +33,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -72,7 +74,10 @@ public class MacOS extends AbstractOS
 		}
 		m_bundleProperties = new HashMap();
 		setBundlePath();
+		System.out.println(m_bundlePath);
 		loadBundleProperties();
+		System.out.println(getBundleExecutablePath());
+		
 	}
 
 	/*
@@ -162,8 +167,8 @@ public class MacOS extends AbstractOS
 		{
 			try 
 			{
-				File bundlePropertyFile = new File(m_bundlePath+File.separator+
-						BUNDLE_CONTENTS+BUNDLE_PROPERTY_FILE_NAME);
+				File bundlePropertyFile = new File(new URI("file://"+m_bundlePath+File.separator+
+						BUNDLE_CONTENTS+BUNDLE_PROPERTY_FILE_NAME));
 				
 				Document bundlePropertyDoc = XMLUtil.readXMLDocument(bundlePropertyFile);
 				if(bundlePropertyDoc != null)
@@ -209,6 +214,9 @@ public class MacOS extends AbstractOS
 			{
 				LogHolder.log(LogLevel.ERR, LogType.MISC,
 						"Cannot parse bundle property file: "+BUNDLE_PROPERTY_FILE_NAME+", cause:", xpe);
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
