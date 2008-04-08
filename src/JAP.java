@@ -808,12 +808,12 @@ public class JAP
 		pFFCommand = new String[args_len];
 		pFFCommand[argC] = pFFExecutable;
 		argC++;
-		if(pFFprofile != null)
+		/*if(pFFprofile != null)
 		{
 			pFFCommand[argC] = "-profile";
 			pFFCommand[argC+1] = toAbsolutePath(pFFprofile);
 			argC += 2;
-		}
+		}*/
 		Locale loc = JAPMessages.getLocale();
 		if(pFFHelpPath != null)
 		{
@@ -821,12 +821,12 @@ public class JAP
 		}
 		else
 		{
-			pFFCommand[argC] = "help/en/help/index.html";
+			pFFCommand[argC] = "file://"+toAbsolutePath("help/en/help/index.html");
 			if(loc != null)
 			{
 				if(loc.toString().equalsIgnoreCase("de"))
 				{
-					pFFCommand[argC] = "help/de/help/index.html";
+					pFFCommand[argC] = "file://"+toAbsolutePath("help/de/help/index.html");
 				}
 			}
 		}
