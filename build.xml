@@ -2,7 +2,7 @@
 <project name="AN.ON" default="dist" basedir=".">
   <description>Ant Build file for the various compontens of the AN.ON project</description>
   <!-- set global properties for this build -->
-  <property name="javac1.3.exe" value="/opt/java/jdk1.3/bin/javac" />
+  <property name="javac1.3.exe" value="/usr/bin/javac" />
   <property name="src" location="src"/>
   <property name="certificates" location="certificates"/>
   
@@ -83,7 +83,7 @@
       to produce byte codes which could be processed by all java 1.1 compatible implementation
       Note: Java 1.4 and 1.5 are know to prodcue "bad" bytecode even if target="1.1" is specified!
       -->
-   <property name="mycompilerversion" value="javac1.3">
+   <property name="mycompilerversion" value="modern">
    </property>
    <property name="mycompilerexecutable" value="${javac1.3.exe}">
    </property>
@@ -142,10 +142,10 @@
   </target>
   <target name="compile" depends="init" description="compile the source ">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-    destdir="${build}"  classpathref="classpath_all">
-    <include name="**/*.java"/>
-    </javac>
+  	<javac sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
+  	    destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2" fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
+  	    <include name="**/*.java"/>
+  	</javac>
 
   </target>
   <target name="dist" depends="dist-pre-compile,compile,make-only-jap-jar" description="generate the distribution">  </target>
