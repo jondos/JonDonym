@@ -254,7 +254,7 @@ public class PerformanceMeter implements Runnable
     		}
 		}
 		
-    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + cascade.getName() + " done. Avg Delay: " + cascade.getAverageDelay() + " ms - Avg Throughput: " + cascade.getAverageThroughput() + " kb/sec");
+    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + cascade.getName() + " done. Avg Delay: " + cascade.getAverageDelay() + " ms; Avg Throughput: " + cascade.getAverageThroughput() + " kb/sec");
 		
 		return true;
 	}
