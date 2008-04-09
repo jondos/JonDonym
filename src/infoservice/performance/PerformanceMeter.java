@@ -118,13 +118,17 @@ public class PerformanceMeter implements Runnable
 		catch(Exception ex) 
 		{
 			ex.printStackTrace();
-		}
-		
-
-		
-		
+		}		
 	}
 
+	/**
+	 * Performs a performance test on the given MixCascade using the parameters
+	 * of m_minorInterval and m_requestsPerInterval
+	 * 
+	 * @param cascade The MixCascade that should be tested
+	 * 
+	 * @return true if the test was successful, false otherwise
+	 */
 	private boolean performTest(MixCascade cascade) 
 	{
 		if(cascade == null)
@@ -154,7 +158,7 @@ public class PerformanceMeter implements Runnable
 			return false;
 		}
 		
-		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade" + cascade.getName() + " with " + m_requestsPerMinorInterval + " requests and " + m_minorInterval + " ms interval.");
+		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade " + cascade.getName() + " with " + m_requestsPerMinorInterval + " requests and " + m_minorInterval + " ms interval.");
 		
 		for(int i = 0; i < m_requestsPerMinorInterval; i++)
 		{
