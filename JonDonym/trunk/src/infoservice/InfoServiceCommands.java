@@ -854,7 +854,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"  <BODY BGCOLOR=\"#FFFFFF\">\n" +
 				"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n" +
 				"    <H2>InfoService Status (" + Configuration.getInstance().getID() + ")</H2>\n" +
-				"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "</P><BR>\n" +
+				"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "<BR>\n" +
+				"    Performance Monitoring Enabled: " + Configuration.getInstance().isPerfEnabled() +"</P><BR>\n" +
 				//"    <TABLE ALIGN=\"center\" BORDER=\"0\">\n" +
 				"    <TABLE BORDER=\"0\">\n" +
 				"      <COLGROUP>\n" +
