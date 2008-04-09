@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import infoservice.performance.PerformanceMeter;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
@@ -101,6 +102,14 @@ public class InfoService
 			InfoService s1 = new InfoService(fn);
 			s1.startServer();
 			System.out.println("InfoService is running!");
+			
+			// start the performance meter
+			if(Configuration.getInstance().isPerfEnabled())
+			{
+				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting Performance Meter...");
+				PerformanceMeter m = new PerformanceMeter(Configuration.getInstance().getPerformanceMeterConfig());
+				m.run();
+			}
 		}
 		catch (Exception e)
 		{
