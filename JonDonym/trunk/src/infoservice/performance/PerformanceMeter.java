@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
@@ -40,75 +41,70 @@ import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.MixCascade;
 import anon.infoservice.SimpleMixCascadeContainer;
+import anon.infoservice.Database;
 import anon.proxy.AnonProxy;
 
 /**
  * A simple performance meter for Mix cascades.<br>
+ * 
  * The meter runs as a thread inside the <code>InfoService</code> and periodically sends requests
- * to the ECHO port of each known cascade's exit point. The delay (the time between sending the first byte
- * and receiving the first byte of the response) and the throughput (the data rate of the response in bytes
+ * to the performance server of each known cascade. The transport is doing by setting up a local
+ * <code>AnonProxy</code>
+ * The delay (the time between sending the first byte and receiving the first byte of the response)
+ * and the throughput (the data rate of the response in bytes
  * per millisecond) are measured and set to the corresponding cascade.
+ *  
  * @see anon.infoservice.MixCascade#setDelay(long)
  * @see anon.infoservice.MixCascade#setThroughput(double)
  *
- * @author oliver
- *
+ * @author cbanse, oliver
  */
 public class PerformanceMeter implements Runnable 
-{
-	private int m_majorInterval;
-	private int m_minorInterval;
-	private int m_requestsPerMinorInterval;
-	
-	private int m_dataSize;
-	
-	private AnonProxy proxy;
-
-	private char[] m_recvBuff;
-	
+{	
 	private String m_proxyHost;
 	private int m_proxyPort;
-	/**
-	 * @param a_testDataSize
-	 * @param a_MinorInterval
-	 * @param a_requestsPerMinorInterval
-	 */
-	public PerformanceMeter(int a_testDataSize, int a_majorInterval, int a_minorInterval, 
-			int a_requestsPerMinorInterval, String a_proxyHost, int a_proxyPort) 
+	private int m_dataSize;
+	private int m_requestsPerMajorInterval;	
+	private int m_minorInterval;	
+	private int m_majorInterval;
+	
+	private AnonProxy proxy;
+	private char[] m_recvBuff;
+
+	public PerformanceMeter(Object[] a_config)
 	{
-		m_majorInterval = a_majorInterval;
-		m_minorInterval = a_minorInterval;
-		m_requestsPerMinorInterval = a_requestsPerMinorInterval;
-		m_dataSize = a_testDataSize;
-		
-		m_proxyHost = a_proxyHost;
-		m_proxyPort = a_proxyPort;
+		m_proxyHost = (String) a_config[0];
+		m_proxyPort = ((Integer) a_config[1]).intValue();
+		m_dataSize = ((Integer) a_config[2]).intValue();
+		m_requestsPerMajorInterval = ((Integer) a_config[3]).intValue();
+		m_minorInterval = ((Integer) a_config[4]).intValue();
+		m_majorInterval = ((Integer) a_config[5]).intValue();
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() 
-	{
+	{		
 		try
 		{
 			proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
 			
-			synchronized(proxy)
-			{
-				proxy.wait(1000);
-			}
-		
 			MixCascade cascade = new MixCascade(null, null, "yuna", 6544);
-		
+			
 			while(true)
 			{
-				performTest(cascade);
-			
+				Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
+			    
+				while(knownMixCascades.hasNext()) 
+				{
+					performTest(cascade);
+				}
+				
 	    		try 
 	    		{
 	    			Thread.sleep(m_majorInterval);
-	    		} catch (InterruptedException e) 
+	    		} catch (InterruptedException e)
 	    		{
 	    			
 	    		}
@@ -137,7 +133,6 @@ public class PerformanceMeter implements Runnable
 		}
 		
 		m_recvBuff = new char[m_dataSize];
-		
 		proxy.start(new SimpleMixCascadeContainer(cascade));
 		
 		synchronized(proxy)
@@ -158,9 +153,9 @@ public class PerformanceMeter implements Runnable
 			return false;
 		}
 		
-		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade " + cascade.getName() + " with " + m_requestsPerMinorInterval + " requests and " + m_minorInterval + " ms interval.");
+		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade " + cascade.getName() + " with " + m_requestsPerMajorInterval + " requests and " + m_minorInterval + " ms interval.");
 		
-		for(int i = 0; i < m_requestsPerMinorInterval; i++)
+		for(int i = 0; i < m_requestsPerMajorInterval; i++)
 		{
         	try 
         	{
@@ -226,8 +221,6 @@ public class PerformanceMeter implements Runnable
 		        	if(recvd == -1) break;
 		        	bytesRead += recvd;
 		        	toRead -= recvd;
-
-		        	//System.out.println(" - Recieved " + recvd + "bytes... " + bytesRead + " in total (from " + (m_dataSize) + ")");
 		        }
 		        
 		        long responseEndTime = System.currentTimeMillis();
@@ -238,19 +231,16 @@ public class PerformanceMeter implements Runnable
         			s.close();
         			continue;
         		}
-        			
+        		
         		delay = responseStartTime - transferInitiatedTime;
         		throughput = (double) m_dataSize / (responseEndTime - responseStartTime);
-        			
-        		System.out.println("delay:" + delay);
-		        System.out.println("thru:" + throughput);		        	
-
-			    cascade.setDelay(delay);
+        		
+        		cascade.setDelay(delay);
 				cascade.setThroughput(throughput);
 				
 		       	s.close();
         	}
-        	catch(Exception e) 
+        	catch(Exception e)
         	{
 	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
 	        	e.printStackTrace();
@@ -279,7 +269,7 @@ public class PerformanceMeter implements Runnable
 		do
 		{
 			line = reader.readLine();
-			if(i == 0 && !line.startsWith("HTTP")) return null;
+			if(line == null || (i == 0 && !line.startsWith("HTTP"))) return null;
 			
 			if(line.startsWith("HTTP"))
 			{
