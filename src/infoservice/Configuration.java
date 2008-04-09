@@ -195,15 +195,24 @@ final public class Configuration
 	 *
 	 */
 	private int m_NrOfThreads;
-
-	/** Stores 3 configuration values for cascade performance monitoring.
-	 * <ul><li>The size of the random test data block in bytes;</li>
-	 * <li>The interval between measurement blocks in milliseconds;</li>
-	 * <li>The number measurements per interval.</li>
+	
+	/**
+	 * Stores if the performance monitoring is enabled
 	 */
-	private int[] m_aPerfMeterConf = new int[3];
+	private boolean m_bPerfEnabled;
 
-
+	/** Stores 7 configuration values for cascade performance monitoring.
+	 * <ul>
+	 * 	<li>The local proxy hosty</li>
+	 * 	<li>The local proxy port</li>
+	 * 	<li>The size of the random test data block in bytes;</li>
+	 * 	<li>The number of measurements per major interval.</li>
+	 * 	<li>The interval between the individual measurements</li>
+	 * 	<li>The interval between measurement blocks in milliseconds</li>
+	 * </ul>
+	 */
+	private Object[] m_aPerfMeterConf = new Object[6];
+	
 	public Configuration(Properties a_properties) throws Exception
 	{
 		/* for running in non-graphic environments, we need the awt headless support, it is only
@@ -830,19 +839,35 @@ final public class Configuration
 				System.err.println("Error reading the configurastion information related to Dynamic Cascades");
 				System.err.println("Exception: " + e2.toString());
 			}
+			
+			m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "false")).booleanValue();
+			
+			if(m_bPerfEnabled)
+			{
+				String value = a_properties.getProperty("perf.proxyHost", "localhost");
+				if(value != null)
+					m_aPerfMeterConf[0] = value;
+			
+				value = a_properties.getProperty("perf.proxyPort", "4001");
+				if(value != null)
+					m_aPerfMeterConf[1] = Integer.valueOf(value);
 
-			String perfconf = a_properties.getProperty("perf.randombytes","1024");
-			if(perfconf != null)
-				m_aPerfMeterConf[0] = Integer.valueOf(perfconf).intValue();
-
-			perfconf = a_properties.getProperty("perf.interval", "10000");
-			if(perfconf != null)
-				m_aPerfMeterConf[1] = Integer.valueOf(perfconf).intValue();
-
-			perfconf = a_properties.getProperty("perf.requestsperinterval", "1");
-			if(perfconf != null)
-				m_aPerfMeterConf[2] = Integer.valueOf(perfconf).intValue();
-
+				value = a_properties.getProperty("perf.dataSize", "524288");
+				if(value != null)
+					m_aPerfMeterConf[2] = Integer.valueOf(value);
+			
+				value = a_properties.getProperty("perf.requestsPerMajorInterval", "10");
+				if(value != null)
+					m_aPerfMeterConf[3] = Integer.valueOf(value);
+			
+				value = a_properties.getProperty("perf.minorInterval", "1000");
+				if(value != null)
+					m_aPerfMeterConf[4] = Integer.valueOf(value);
+			
+				value = a_properties.getProperty("perf.majorInterval", "600000");
+				if(value != null)
+					m_aPerfMeterConf[5] = Integer.valueOf(value);
+			}
 		}
 		catch (Exception e)
 		{
@@ -1120,8 +1145,14 @@ final public class Configuration
 		return JAPCertificate.getInstance(new File(a_x509FileName));
 	}
 
-	public int[] getPerformanceMeterConfig() {
+	public Object[] getPerformanceMeterConfig() 
+	{
 		return m_aPerfMeterConf;
+	}
+	
+	public boolean isPerfEnabled()
+	{
+		return m_bPerfEnabled;
 	}
 
 }
