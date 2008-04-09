@@ -90,15 +90,13 @@ public class PerformanceMeter implements Runnable
 		{
 			proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
 			
-			MixCascade cascade = new MixCascade(null, null, "yuna", 6544);
-			
 			while(true)
 			{
 				Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
 			    
 				while(knownMixCascades.hasNext()) 
 				{
-					performTest(cascade);
+					performTest((MixCascade) knownMixCascades.next());
 				}
 				
 	    		try 
