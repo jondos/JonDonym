@@ -1255,5 +1255,13 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		m_dThroughput = (m_dThroughput + pThroughput) / m_aThroughputs.length;
 	}
 
-
+	public double getAverageThroughput()
+	{
+		return m_dThroughput;
+	}
+	
+	public long getAverageDelay()
+	{
+		return m_lDelay;
+	}
 }
