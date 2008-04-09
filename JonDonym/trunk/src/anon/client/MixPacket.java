@@ -54,6 +54,7 @@ import anon.client.crypto.SymCipher;
 public class MixPacket {
   
   private static final int PACKET_SIZE = 998;
+  private static final int NON_DATA_LENGTH = 4 + 2; // length of channel id + channel flags
   
   private static SecureRandom ms_secureRandom;
   
@@ -72,7 +73,7 @@ public class MixPacket {
   }
   
   public static int getPayloadSize() {
-    return PACKET_SIZE - 6;
+    return PACKET_SIZE - NON_DATA_LENGTH;
   }
 
   
@@ -84,7 +85,7 @@ public class MixPacket {
   
   public MixPacket(InputStream a_inputStream, SymCipher a_inputStreamCipher) throws IOException {
     m_sendCallbackHandlers = new Vector();
-    /* read the packet from the origin stream */
+    /* read the packet from the origin stream */    
     byte[] rawPacket = new byte[PACKET_SIZE];
     DataInputStream sourceStream = new DataInputStream(a_inputStream);
     try 
@@ -101,11 +102,11 @@ public class MixPacket {
       a_inputStreamCipher.encryptAES(rawPacket, 0, rawPacket, 0, 16);
     }
     /* read channel-id and channel-flags from the packet */
-    DataInputStream packetDataStream = new DataInputStream(new ByteArrayInputStream(rawPacket, 0, 6));
+    DataInputStream packetDataStream = new DataInputStream(new ByteArrayInputStream(rawPacket, 0, NON_DATA_LENGTH));
     m_channelId = packetDataStream.readInt();
     m_channelFlags = packetDataStream.readShort();
-    m_payloadData = new byte[rawPacket.length - 6];
-    System.arraycopy(rawPacket, 6, m_payloadData, 0, rawPacket.length - 6);
+    m_payloadData = new byte[rawPacket.length - NON_DATA_LENGTH];
+    System.arraycopy(rawPacket, NON_DATA_LENGTH, m_payloadData, 0, rawPacket.length - NON_DATA_LENGTH);
   }
   
 
@@ -113,7 +114,7 @@ public class MixPacket {
     m_sendCallbackHandlers = new Vector();
     m_channelId = a_channelId;
     m_channelFlags = 0;
-    m_payloadData = new byte[PACKET_SIZE - 6];
+    m_payloadData = new byte[PACKET_SIZE - NON_DATA_LENGTH];
     /* initialize payload with random bytes */
     ms_secureRandom.nextBytes(m_payloadData);
   }
