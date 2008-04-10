@@ -206,6 +206,7 @@ public class PerformanceMeter implements Runnable
 		        if(resp.m_length != m_dataSize)
 		        {
         			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
+        			System.out.println("Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
         			s.close();
         			continue;
 		        }
@@ -216,10 +217,19 @@ public class PerformanceMeter implements Runnable
 		        
 		        while(bytesRead < m_dataSize) 
 		        {
-		        	recvd = reader.read(m_recvBuff, bytesRead, toRead);
+		        	try
+		        	{
+		        		recvd = reader.read(m_recvBuff, bytesRead, toRead);
+		        	}
+		        	catch(Exception ex)
+		        	{
+		        		System.out.println("Caught exception: " + ex.getMessage() + "exiting recv loop.");
+		        		break;
+		        	}
 		        	if(recvd == -1) break;
 		        	bytesRead += recvd;
 		        	toRead -= recvd;
+		        	System.out.println("Received " + recvd + ". Total: " + bytesRead + " from  " + m_dataSize);
 		        }
 		        
 		        long responseEndTime = System.currentTimeMillis();
@@ -227,6 +237,7 @@ public class PerformanceMeter implements Runnable
         		if(bytesRead != m_dataSize)
         		{
         			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Performance Meter could not verify incoming package. Recieved " + bytesRead + " of " + m_dataSize + " bytes.");
+        			System.out.println("Performance Meter could not verify incoming package. Recieved " + bytesRead + " of " + m_dataSize + " bytes.");
         			s.close();
         			continue;
         		}
