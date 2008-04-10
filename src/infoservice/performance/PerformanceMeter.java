@@ -166,15 +166,15 @@ public class PerformanceMeter implements Runnable
 		       	s.setSoTimeout(5000);
 		       	OutputStream stream = s.getOutputStream();
 		       	stream.write("CONNECT 127.0.0.1:7777 HTTP/1.0\r\n\r\n".getBytes());
-		       	BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+		       	InputStreamReader in = new InputStreamReader(s.getInputStream());
 		       	HTTPResponse resp;     	
 		        	
 		       	// read HTTP header from Anon Proxy
-		       	if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
+		       	if(((resp = parseHTTPHeader(in)) == null) || resp.m_statusCode != 200)
 		       	{
 		       		LogHolder.log(LogLevel.INFO, LogType.NET, "Connection to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
 		       		s.close();
-		       
+		       		
 		       		// TODO: try it twice?
 		        	break;
 		        }
@@ -188,15 +188,15 @@ public class PerformanceMeter implements Runnable
 				// read first byte for delay
 		        long transferInitiatedTime = System.currentTimeMillis();
 		        	
-		        reader.mark(2);
-		        reader.read();
+		        /*reader.mark(2);
+		        reader.read();*/
 		        	
 		        long responseStartTime = System.currentTimeMillis();
 		        	
-		        reader.reset();
+		        //reader.reset();
 		        	
 		        // read HTTP header from PerformanceServer
-		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
+		        if(((resp = parseHTTPHeader(in)) == null) || resp.m_statusCode != 200)
 		        {
 		        	LogHolder.log(LogLevel.INFO, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
 		        	s.close();
@@ -211,7 +211,7 @@ public class PerformanceMeter implements Runnable
         			s.close();
         			continue;
 		        }
-		        	
+		        
 		        int bytesRead = 0;
 		        int recvd = 0;
 		        int toRead = resp.m_length;
@@ -220,7 +220,7 @@ public class PerformanceMeter implements Runnable
 		        {
 		        	try
 		        	{
-		        		recvd = reader.read(m_recvBuff, bytesRead, toRead);
+		        		recvd = in.read(m_recvBuff, bytesRead, toRead);
 		        	}
 		        	catch(Exception ex)
 		        	{
@@ -271,7 +271,7 @@ public class PerformanceMeter implements Runnable
 		return true;
 	}
 		
-	public HTTPResponse parseHTTPHeader(BufferedReader reader) throws IOException, NumberFormatException
+	public HTTPResponse parseHTTPHeader(InputStreamReader in) throws IOException, NumberFormatException
 	{	
 		String line;
 		HTTPResponse r = new HTTPResponse();
@@ -279,7 +279,9 @@ public class PerformanceMeter implements Runnable
 		
 		do
 		{
-			line = reader.readLine();
+			//line = reader.readLine();
+			line = readLine(in);
+			System.out.println(line);
 			if(line == null || (i == 0 && !line.startsWith("HTTP"))) return null;
 			
 			if(line.startsWith("HTTP"))
@@ -298,6 +300,38 @@ public class PerformanceMeter implements Runnable
 		} while(line.length() > 0);
 		
 		return r;
+	}
+	
+	public String readLine(InputStreamReader in)
+	{
+		char b = 0;
+		String s = "";
+		
+		do
+		{
+			try
+			{
+				b = (char) in.read();
+			}
+			catch(IOException ex)
+			{
+				System.out.println("IO exception" + ex.getMessage());
+				return s;
+			}
+			
+			if(b == '\r' || b == '\n')
+			{
+				//s += bline[i++] = 0;
+				continue;
+			}
+			else
+			{
+				s += String.valueOf(b);
+			}
+		}
+		while(b != '\n');
+		
+		return s;
 	}
 	
 	private class HTTPResponse
