@@ -245,7 +245,7 @@ public class PerformanceMeter implements Runnable
         		
         		delay = responseStartTime - transferInitiatedTime;
         		throughput = (double) m_dataSize / (responseEndTime - responseStartTime);
-        		
+        		System.out.println("Packet verified.\n");
         		cascade.setDelay(delay);
 				cascade.setThroughput(throughput);
 				
