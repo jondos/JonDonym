@@ -253,7 +253,7 @@ public class PerformanceMeter implements Runnable
         	catch(Exception e)
         	{
 	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
-	        	e.printStackTrace();
+	        	//e.printStackTrace();
 	        }
         	
     		try 
