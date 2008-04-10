@@ -2171,7 +2171,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 		boolean isMacOSBundle = (macOS != null) ? macOS.isBundle() : false;
 		if(isMacOSBundle)
 		{
-			strRestartCommand = macOS.getBundleExecutablePath();
+			//strRestartCommand = macOS.getBundleExecutablePath();
+			strRestartCommand = "open -n "+macOS.getBundlePath();
 		}
 		else
 		{
