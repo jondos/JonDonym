@@ -92,12 +92,13 @@ public class PerformanceMeter implements Runnable
 			
 			while(true)
 			{
-				Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
+				/*Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
 			    
 				while(knownMixCascades.hasNext()) 
 				{
 					performTest((MixCascade) knownMixCascades.next());
-				}
+				}*/
+				performTest(new MixCascade("yuna", 6544));
 				
 	    		try 
 	    		{
@@ -205,7 +206,7 @@ public class PerformanceMeter implements Runnable
 		        	
 		        if(resp.m_length != m_dataSize)
 		        {
-        			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
+        			LogHolder.log(LogLevel.INFO, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
         			System.out.println("Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
         			s.close();
         			continue;
@@ -236,7 +237,7 @@ public class PerformanceMeter implements Runnable
 		        	
         		if(bytesRead != m_dataSize)
         		{
-        			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Performance Meter could not verify incoming package. Recieved " + bytesRead + " of " + m_dataSize + " bytes.");
+        			LogHolder.log(LogLevel.INFO, LogType.NET, "Performance Meter could not verify incoming package. Recieved " + bytesRead + " of " + m_dataSize + " bytes.");
         			System.out.println("Performance Meter could not verify incoming package. Recieved " + bytesRead + " of " + m_dataSize + " bytes.");
         			s.close();
         			continue;
