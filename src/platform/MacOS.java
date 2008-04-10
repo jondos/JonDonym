@@ -74,9 +74,8 @@ public class MacOS extends AbstractOS
 		}
 		m_bundleProperties = new HashMap();
 		setBundlePath();
-		System.out.println(m_bundlePath);
-		loadBundleProperties();
-		System.out.println(getBundleExecutablePath());
+		//loadBundleProperties();
+		
 		
 	}
 
