@@ -27,23 +27,8 @@
  */
 package platform;
 
-import jap.JAPController;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.HashMap;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import anon.util.XMLParseException;
-import anon.util.XMLUtil;
+import anon.util.ClassUtil;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -63,7 +48,6 @@ public class MacOS extends AbstractOS
 	final static String BUNDLE_EXECUTABLE_PROPERTY_KEY = "CFBundleExecutable";
 	
 	//private HashMap m_bundleProperties = null;
-	private boolean m_bundle = false;
 	private String m_bundlePath = null;
 	
 	public MacOS() throws Exception
@@ -121,11 +105,10 @@ public class MacOS extends AbstractOS
 	 */
 	public void setBundlePath()
 	{
-		URL url = MacOS.class.getResource(this.getClass().getSimpleName()+".class");
-		
-		if(url != null)
+		File classParentFile = ClassUtil.getClassDirectory(this.getClass());
+		if(classParentFile != null)
 		{
-			String path = url.getPath();
+			String path = classParentFile.getPath();
 			if(path != null)
 			{
 				// remove file: prefix
@@ -134,14 +117,10 @@ public class MacOS extends AbstractOS
 					int s_index = path.indexOf("/");
 					path = (s_index != -1) ? path.substring(s_index) : path;
 				}
-						
-				LogHolder.log(LogLevel.ERR, LogType.MISC,
-						  "plg: "+path+" in MacOS default program.");
 				int index_path = path.indexOf(BUNDLE_CONTENTS);
 				if(index_path != -1)
 				{
 					/* JAP is started as an  application bundle */
-					m_bundle = true;
 					m_bundlePath = path.substring(0, index_path-1);
 					return;
 				}
