@@ -201,17 +201,15 @@ final public class Configuration
 	 */
 	private boolean m_bPerfEnabled;
 
-	/** Stores 7 configuration values for cascade performance monitoring.
+	/** Stores 4 configuration values for cascade performance monitoring.
 	 * <ul>
 	 * 	<li>The local proxy hosty</li>
 	 * 	<li>The local proxy port</li>
 	 * 	<li>The size of the random test data block in bytes;</li>
-	 * 	<li>The number of measurements per major interval.</li>
-	 * 	<li>The interval between the individual measurements</li>
 	 * 	<li>The interval between measurement blocks in milliseconds</li>
 	 * </ul>
 	 */
-	private Object[] m_aPerfMeterConf = new Object[6];
+	private Object[] m_aPerfMeterConf = new Object[4];
 	
 	public Configuration(Properties a_properties) throws Exception
 	{

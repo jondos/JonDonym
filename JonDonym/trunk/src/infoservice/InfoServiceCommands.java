@@ -887,7 +887,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			{
 				info = (StatusInfo) (enumer.nextElement());
 				/* get the HTML table line */
-				htmlData = htmlData + "      " + (info).getHtmlTableLine() +
+				htmlData = htmlData + "      " + (info).getHtmlTableLine(Configuration.getInstance().getID()) +
 					"\n";
 			}
 			htmlData = htmlData + "    </TABLE><BR><BR><BR><BR>\n";

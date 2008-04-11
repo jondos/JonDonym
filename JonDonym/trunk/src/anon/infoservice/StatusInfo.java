@@ -487,13 +487,15 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 *
 	 * @return A HTML table line with the data of this status entry.
 	 */
-	public String getHtmlTableLine()
+	public String getHtmlTableLine(String a_strInfoServiceId)
 	{
 		String htmlTableLine = "<TR><TD CLASS=\"name\">";
 		MixCascade ownMixCascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(getId());
+		PerformanceEntry perfEntry = null;
 		if (ownMixCascade != null)
 		{
 			htmlTableLine = htmlTableLine + ownMixCascade.getName();
+			perfEntry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(getId() + "." + a_strInfoServiceId);
 		}
 		/* generate a String, which describes the traffic situation */
 		String trafficString = " (n/a)";
@@ -515,8 +517,8 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			"</TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
 			trafficString +
 
-			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (ownMixCascade != null ? String.valueOf(ownMixCascade.getAverageDelay()) : "?") + " ms" +
-			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (ownMixCascade != null ? String.valueOf(ownMixCascade.getAverageThroughput()) : "?") + " kb/sec" +
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (perfEntry != null ? String.valueOf(perfEntry.getAverageDelay()) : "?") + " ms" +
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (perfEntry != null ? String.valueOf(perfEntry.getAverageThroughput()) : "?") + " kb/sec" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + new Date(getLastUpdate()) +
