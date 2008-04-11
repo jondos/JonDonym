@@ -62,7 +62,7 @@ public class MacOS extends AbstractOS
 	final static String BUNDLE_PROPERTY_FILE_NAME = "Info.plist";
 	final static String BUNDLE_EXECUTABLE_PROPERTY_KEY = "CFBundleExecutable";
 	
-	private HashMap m_bundleProperties = null;
+	//private HashMap m_bundleProperties = null;
 	private boolean m_bundle = false;
 	private String m_bundlePath = null;
 	
@@ -72,7 +72,7 @@ public class MacOS extends AbstractOS
 		{
 			throw new Exception("Operating system is not "+ OS_NAME);
 		}
-		m_bundleProperties = new HashMap();
+		//m_bundleProperties = new HashMap();
 		setBundlePath();
 		//loadBundleProperties();
 		
@@ -160,7 +160,7 @@ public class MacOS extends AbstractOS
 	}
 	
 	/* load the bundle properties specified in the Info.plist property file */
-	protected void loadBundleProperties()
+	/*protected void loadBundleProperties()
 	{
 		if(isBundle())
 		{
@@ -218,7 +218,7 @@ public class MacOS extends AbstractOS
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 	
 	/* returns absolute path to application bundle executable
 	 * which is the stub to execute the jar file
@@ -226,7 +226,7 @@ public class MacOS extends AbstractOS
 	 */
 	public String getBundleExecutablePath()
 	{
-		if(!isBundle())
+		/*if(!isBundle())
 		{
 			return null;
 		}
@@ -236,7 +236,8 @@ public class MacOS extends AbstractOS
 		{
 			return null;
 		}
-		return getBundlePath()+File.separator+BUNDLE_MAC_OS_EXECUTABLES+bundleExecutable;
+		return getBundlePath()+File.separator+BUNDLE_MAC_OS_EXECUTABLES+bundleExecutable;*/
+		return null;
 	}
 	
 	
