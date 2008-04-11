@@ -854,19 +854,15 @@ final public class Configuration
 
 				value = a_properties.getProperty("perf.dataSize", "524288");
 				if(value != null)
-					m_aPerfMeterConf[2] = Integer.valueOf(value);
-			
-				value = a_properties.getProperty("perf.requestsPerMajorInterval", "10");
+				{
+					m_aPerfMeterConf[2] = new Integer(Math.min(524288, Integer.parseInt(value)));
+				}
+				
+				value = a_properties.getProperty("perf.majorInterval", "300000");
 				if(value != null)
-					m_aPerfMeterConf[3] = Integer.valueOf(value);
-			
-				value = a_properties.getProperty("perf.minorInterval", "1000");
-				if(value != null)
-					m_aPerfMeterConf[4] = Integer.valueOf(value);
-			
-				value = a_properties.getProperty("perf.majorInterval", "600000");
-				if(value != null)
-					m_aPerfMeterConf[5] = Integer.valueOf(value);
+				{
+					m_aPerfMeterConf[3] = new Integer(Math.max(300000, Integer.parseInt(value)));
+				}
 			}
 		}
 		catch (Exception e)

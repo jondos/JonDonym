@@ -66,23 +66,21 @@ public class PerformanceMeter implements Runnable
 	private String m_proxyHost;
 	private int m_proxyPort;
 	private int m_dataSize;
-	private int m_requestsPerMajorInterval;	
-	private int m_minorInterval;	
 	private int m_majorInterval;
 	
 	private AnonProxy proxy;
 	private char[] m_recvBuff;
 	
 	public static final int PERFORMANCE_SERVER_TIMEOUT = 5000;
-
+	public static final int REQUESTS_PER_INTERVAL = 2;
+	public static final int MINOR_INTERVAL = 1000;
+	
 	public PerformanceMeter(Object[] a_config)
 	{
 		m_proxyHost = (String) a_config[0];
 		m_proxyPort = ((Integer) a_config[1]).intValue();
 		m_dataSize = ((Integer) a_config[2]).intValue();
-		m_requestsPerMajorInterval = ((Integer) a_config[3]).intValue();
-		m_minorInterval = ((Integer) a_config[4]).intValue();
-		m_majorInterval = ((Integer) a_config[5]).intValue();
+		m_majorInterval = ((Integer) a_config[3]).intValue();
 	}
 	
 	/* (non-Javadoc)
@@ -160,9 +158,9 @@ public class PerformanceMeter implements Runnable
 			}
 		}
 		
-		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade " + cascade.getName() + " with " + m_requestsPerMajorInterval + " requests and " + m_minorInterval + " ms interval.");
+		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade " + cascade.getName() + " with " + REQUESTS_PER_INTERVAL + " requests and " + MINOR_INTERVAL + " ms interval.");
 		
-		for(int i = 0; i < m_requestsPerMajorInterval; i++)
+		for(int i = 0; i < REQUESTS_PER_INTERVAL; i++)
 		{
         	try 
         	{
@@ -270,7 +268,7 @@ public class PerformanceMeter implements Runnable
         	
     		try 
     		{
-    			Thread.sleep(m_minorInterval);
+    			Thread.sleep(MINOR_INTERVAL);
     		} 
     		catch (InterruptedException e) 
     		{
