@@ -142,16 +142,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	private boolean m_bPerformanceServer;
 	
-	/**
-	 * The host of the performance server.
-	 */
-	private String m_strPerformanceServerHost;
-	
-	/**
-	 * The port of the performance server.
-	 */
-	private int m_iPerformanceServerPort;
-
 	private long m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
 
 	private String m_mixProtocolVersion;
@@ -369,7 +359,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		m_isPayment = XMLUtil.parseAttribute(payNode, "required", false);
 		m_paymentProtocolVersion = XMLUtil.parseAttribute(payNode, XML_ATTR_VERSION,
 			SUPPORTED_PAYMENT_PROTOCOL_VERSION);
-
+		
 		m_prepaidInterval = XMLUtil.parseAttribute(payNode, "prepaidInterval", AIControlChannel.MAX_PREPAID_INTERVAL + 1);
 		m_piid = XMLUtil.parseAttribute(payNode, "piid", "");
 
@@ -460,6 +450,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			}
 		}
 
+		Node perfNode = XMLUtil.getFirstChildByName(a_mixCascadeNode, "PerformanceServer");
+		m_bPerformanceServer = perfNode == null ? false : XMLUtil.parseValue(perfNode, false);
+		
 		if (m_mixCascadeId == null)
 		{
 			m_mixCascadeId = (String)m_mixIds.elementAt(0);
@@ -1283,15 +1276,5 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	public boolean hasPerformanceServer()
 	{
 		return m_bPerformanceServer;
-	}
-	
-	public String getPerformanceServerHost()
-	{
-		return m_strPerformanceServerHost;
-	}
-	
-	public int getPerformanceServerPort()
-	{
-		return m_iPerformanceServerPort;
 	}
 }
