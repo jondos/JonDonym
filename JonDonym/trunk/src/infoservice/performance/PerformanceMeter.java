@@ -186,6 +186,8 @@ public class PerformanceMeter implements Runnable
 		       	
 		       	MixInfo lastMix = cascade.getMixInfo(cascade.getNumberOfMixes() - 1);
 		       	
+		       	LogHolder.log(LogLevel.DEBUG, LogType.NET, "Connecting to Performance Server at " + lastMix.getPerformanceServerHost() + ":" + lastMix.getPerformanceServerPort() + " through the mixcascade.");
+		       	
 		       	stream.write(("CONNECT " + lastMix.getPerformanceServerHost()  + ":" + lastMix.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
 		       	
 		       	// read HTTP header from Anon Proxy
