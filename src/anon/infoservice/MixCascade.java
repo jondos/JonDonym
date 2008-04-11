@@ -136,6 +136,21 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 * True, if this MixCascade is a payment cascade.
 	 */
 	private boolean m_isPayment;
+	
+	/**
+	 * True, if this MixCascade has a performance server. 
+	 */
+	private boolean m_bPerformanceServer;
+	
+	/**
+	 * The host of the performance server.
+	 */
+	private String m_strPerformanceServerHost;
+	
+	/**
+	 * The port of the performance server.
+	 */
+	private int m_iPerformanceServerPort;
 
 	private long m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
 
@@ -147,7 +162,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private Vector m_priceCertificates = new Vector();
 
 	/**
-	 * If this MixCascade has been recevied directly from a cascade connection.
+	 * If this MixCascade has been received directly from a cascade connection.
 	 */
 	private boolean m_bFromCascade;
 
@@ -1263,5 +1278,20 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	public long getAverageDelay()
 	{
 		return m_lDelay;
+	}
+	
+	public boolean hasPerformanceServer()
+	{
+		return m_bPerformanceServer;
+	}
+	
+	public String getPerformanceServerHost()
+	{
+		return m_strPerformanceServerHost;
+	}
+	
+	public int getPerformanceServerPort()
+	{
+		return m_iPerformanceServerPort;
 	}
 }
