@@ -105,12 +105,11 @@ public class PerformanceMeter implements Runnable
 						performTest(cascade);
 					}
 				}
-				
+			
 	    		try 
 	    		{
 	    			LogHolder.log(LogLevel.INFO, LogType.NET, "Sleeping for " + m_majorInterval);
-	    			//Thread.sleep(m_majorInterval);
-	    			Thread.sleep(1000);
+	    			Thread.sleep(m_majorInterval);
 	    		} catch (InterruptedException e)
 	    		{
 	    			
