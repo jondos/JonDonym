@@ -864,7 +864,9 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <COL WIDTH=\"10%\">\n" +
 				"        <COL WIDTH=\"7%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				"        <COL WIDTH=\"13%\">\n" +
+				"        <COL WIDTH=\"5%\">\n" +				
+				"        <COL WIDTH=\"5%\">\n" +
+				"        <COL WIDTH=\"3%\">\n" +				
 				"        <COL WIDTH=\"25%\">\n" +
 				"      </COLGROUP>\n" +
 				"      <TR>\n" +
@@ -873,10 +875,12 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <TH>Active Users</TH>\n" +
 				"        <TH>Current Risk</TH>\n" +
 				"        <TH>Traffic Situation</TH>\n" +
+				"        <TH>Avg Delay</TH>\n" +
+				"        <TH>Avg Speed</TH>\n" +
 				"        <TH>Mixed Packets</TH>\n" +
 				"        <TH>Last Notification</TH>\n" +
 				"      </TR>\n";
-			/* get all status entrys from database */
+			/* get all status entries from database */
 			Enumeration enumer = Database.getInstance(StatusInfo.class).getEntrySnapshotAsEnumeration();
 			StatusInfo info;
 			while (enumer.hasMoreElements())

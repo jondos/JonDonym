@@ -514,6 +514,9 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + Integer.toString(getCurrentRisk()) +
 			"</TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
 			trafficString +
+			// TODO: THIS IS A HACK AND SHOULD BE REWRITTEN INTO THE STATUSINFO OBJECT!!!
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + ((MixCascade) Database.getInstance(MixCascade.class).getEntryById(getId())).getAverageDelay() +
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + ((MixCascade) Database.getInstance(MixCascade.class).getEntryById(getId())).getAverageThroughput() +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + new Date(getLastUpdate()) +
