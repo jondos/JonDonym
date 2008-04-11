@@ -854,10 +854,18 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"  <BODY BGCOLOR=\"#FFFFFF\">\n" +
 				"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n" +
 				"    <H2>InfoService Status (" + Configuration.getInstance().getID() + ")</H2>\n" +
-				"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "<BR>\n" +
-				"    Performance Monitoring Enabled: " + Configuration.getInstance().isPerfEnabled() +"</P><BR>\n" +
+				"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "<BR></P>\n";
+
+				if(Configuration.getInstance().isPerfEnabled())
+				{
+					htmlData += "    <P>Performance Monitoring Enabled<BR>\n" + 
+					"   - Proxy Host: " + Configuration.getInstance().getPerformanceMeterConfig()[0] + "<BR>" +
+					"   - Proxy Port: " + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<BR>" +
+					"   - Datasize: " + Configuration.getInstance().getPerformanceMeterConfig()[2] + "<BR>" +
+					"   - Major Interval: " + Configuration.getInstance().getPerformanceMeterConfig()[3] + "<BR></p>";
+				}				
 				//"    <TABLE ALIGN=\"center\" BORDER=\"0\">\n" +
-				"    <TABLE BORDER=\"0\">\n" +
+				htmlData +="    <TABLE BORDER=\"0\">\n" +
 				"      <COLGROUP>\n" +
 				"        <COL WIDTH=\"20%\">\n" +
 				"        <COL WIDTH=\"15%\">\n" +
