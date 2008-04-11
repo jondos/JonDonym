@@ -40,6 +40,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixInfo;
 import anon.infoservice.SimpleMixCascadeContainer;
 import anon.infoservice.Database;
 import anon.proxy.AnonProxy;
@@ -176,7 +177,9 @@ public class PerformanceMeter implements Runnable
 		       	BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		       	HTTPResponse resp;
 		       	
-		       	stream.write(("CONNECT " + cascade.getPerformanceServerHost()  + ":" + cascade.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
+		       	MixInfo lastMix = cascade.getMixInfo(cascade.getNumberOfMixes() - 1);
+		       	
+		       	stream.write(("CONNECT " + lastMix.getPerformanceServerHost()  + ":" + lastMix.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
 		       	
 		       	// read HTTP header from Anon Proxy
 		       	if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
