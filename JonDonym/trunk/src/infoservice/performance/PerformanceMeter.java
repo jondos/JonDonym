@@ -43,6 +43,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.SimpleMixCascadeContainer;
 import anon.infoservice.Database;
 import anon.proxy.AnonProxy;
+import infoservice.Configuration;
 
 /**
  * A simple performance meter for Mix cascades.<br>
@@ -70,6 +71,8 @@ public class PerformanceMeter implements Runnable
 	
 	private AnonProxy proxy;
 	private char[] m_recvBuff;
+	
+	public static final int PERFORMANCE_SERVER_TIMEOUT = 5000;
 
 	public PerformanceMeter(Object[] a_config)
 	{
@@ -80,25 +83,29 @@ public class PerformanceMeter implements Runnable
 		m_minorInterval = ((Integer) a_config[4]).intValue();
 		m_majorInterval = ((Integer) a_config[5]).intValue();
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() 
-	{		
+	{
+	
 		try
 		{
 			proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
 			
 			while(true)
 			{
-				/*Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
+				Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
 			    
 				while(knownMixCascades.hasNext()) 
 				{
-					performTest((MixCascade) knownMixCascades.next());
-				}*/
-				performTest(new MixCascade("yuna", 6544));
+					MixCascade cascade = (MixCascade) knownMixCascades.next();
+					if(cascade.hasPerformanceServer())
+					{
+						performTest(cascade);
+					}
+				}
 				
 	    		try 
 	    		{
@@ -133,24 +140,23 @@ public class PerformanceMeter implements Runnable
 		}
 		
 		m_recvBuff = new char[m_dataSize];
-		proxy.start(new SimpleMixCascadeContainer(cascade));
 		
-		synchronized(proxy)
+		if((proxy.getMixCascade() != cascade) && !proxy.isConnected())
 		{
-			try
+			proxy.start(new SimpleMixCascadeContainer(cascade));
+		
+			synchronized(proxy)
 			{
-				// TODO: doesn't work
-				proxy.wait(1000);
-			}
-			catch(InterruptedException ex)
-			{
+				try
+				{
+					// TODO: doesn't work
+					proxy.wait(1000);
+				}
+				catch(InterruptedException ex)
+				{
 				
+				}
 			}
-		}
-		
-		if(!proxy.isConnected())
-		{
-			return false;
 		}
 		
 		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade " + cascade.getName() + " with " + m_requestsPerMajorInterval + " requests and " + m_minorInterval + " ms interval.");
@@ -163,14 +169,17 @@ public class PerformanceMeter implements Runnable
 		        double throughput;
 					
 		       	Socket s = new Socket(m_proxyHost, m_proxyPort);
-		       	s.setSoTimeout(5000);
+		       	s.setSoTimeout(PERFORMANCE_SERVER_TIMEOUT);
+		       	
 		       	OutputStream stream = s.getOutputStream();
-		       	stream.write("CONNECT 127.0.0.1:7777 HTTP/1.0\r\n\r\n".getBytes());
-		       	InputStreamReader in = new InputStreamReader(s.getInputStream());
-		       	HTTPResponse resp;     	
-		        	
+
+		       	BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+		       	HTTPResponse resp;
+		       	
+		       	stream.write(("CONNECT " + cascade.getPerformanceServerHost()  + ":" + cascade.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
+		       	
 		       	// read HTTP header from Anon Proxy
-		       	if(((resp = parseHTTPHeader(in)) == null) || resp.m_statusCode != 200)
+		       	if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
 		       	{
 		       		LogHolder.log(LogLevel.INFO, LogType.NET, "Connection to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
 		       		s.close();
@@ -178,25 +187,29 @@ public class PerformanceMeter implements Runnable
 		       		// TODO: try it twice?
 		        	break;
 		        }
-		        	
-		        String data = "<GenerateDummyDataRequest dataLength=\"" + m_dataSize +"\"></GenerateDummyDataRequest>\r\n";
-		        	
-				stream.write("POST /generatedummydata\r\n".getBytes());
+		        
+		        String data = 
+		        	"<SendDummyDataRequest dataLength=\"" + m_dataSize +"\">" +
+		        	"	<InfoService id=\"" + Configuration.getInstance().getID() + "\">" +
+		        	"	</InfoService>" +
+		        	"</SendDummyDataRequest>";
+		        
+				stream.write("POST /senddummydata\r\n".getBytes());
 				stream.write(("Content-Length: " + data.getBytes().length +"\r\n\r\n").getBytes());
 				stream.write(data.getBytes());
 					
 				// read first byte for delay
 		        long transferInitiatedTime = System.currentTimeMillis();
 		        	
-		        /*reader.mark(2);
-		        reader.read();*/
+		        reader.mark(2);
+		        reader.read();
 		        	
 		        long responseStartTime = System.currentTimeMillis();
 		        	
-		        //reader.reset();
+		        reader.reset();
 		        	
 		        // read HTTP header from PerformanceServer
-		        if(((resp = parseHTTPHeader(in)) == null) || resp.m_statusCode != 200)
+		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
 		        {
 		        	LogHolder.log(LogLevel.INFO, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
 		        	s.close();
@@ -207,7 +220,6 @@ public class PerformanceMeter implements Runnable
 		        if(resp.m_length != m_dataSize)
 		        {
         			LogHolder.log(LogLevel.INFO, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
-        			System.out.println("Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
         			s.close();
         			continue;
 		        }
@@ -220,17 +232,15 @@ public class PerformanceMeter implements Runnable
 		        {
 		        	try
 		        	{
-		        		recvd = in.read(m_recvBuff, bytesRead, toRead);
+		        		recvd = reader.read(m_recvBuff, bytesRead, toRead);
 		        	}
 		        	catch(Exception ex)
 		        	{
-		        		System.out.println("Caught exception: " + ex.getMessage() + "exiting recv loop.");
-		        		break;
+		        		continue;
 		        	}
 		        	if(recvd == -1) break;
 		        	bytesRead += recvd;
 		        	toRead -= recvd;
-		        	System.out.println("Received " + recvd + ". Total: " + bytesRead + " from  " + m_dataSize);
 		        }
 		        
 		        long responseEndTime = System.currentTimeMillis();
@@ -238,14 +248,12 @@ public class PerformanceMeter implements Runnable
         		if(bytesRead != m_dataSize)
         		{
         			LogHolder.log(LogLevel.INFO, LogType.NET, "Performance Meter could not verify incoming package. Recieved " + bytesRead + " of " + m_dataSize + " bytes.");
-        			System.out.println("Performance Meter could not verify incoming package. Recieved " + bytesRead + " of " + m_dataSize + " bytes.");
         			s.close();
         			continue;
         		}
         		
         		delay = responseStartTime - transferInitiatedTime;
         		throughput = (double) m_dataSize / (responseEndTime - responseStartTime);
-        		System.out.println("Packet verified.\n");
         		cascade.setDelay(delay);
 				cascade.setThroughput(throughput);
 				
@@ -260,7 +268,8 @@ public class PerformanceMeter implements Runnable
     		try 
     		{
     			Thread.sleep(m_minorInterval);
-    		} catch (InterruptedException e) 
+    		} 
+    		catch (InterruptedException e) 
     		{
     			
     		}
@@ -271,7 +280,7 @@ public class PerformanceMeter implements Runnable
 		return true;
 	}
 		
-	public HTTPResponse parseHTTPHeader(InputStreamReader in) throws IOException, NumberFormatException
+	public HTTPResponse parseHTTPHeader(BufferedReader reader) throws IOException, NumberFormatException
 	{	
 		String line;
 		HTTPResponse r = new HTTPResponse();
@@ -279,9 +288,7 @@ public class PerformanceMeter implements Runnable
 		
 		do
 		{
-			//line = reader.readLine();
-			line = readLine(in);
-			System.out.println(line);
+			line = reader.readLine();
 			if(line == null || (i == 0 && !line.startsWith("HTTP"))) return null;
 			
 			if(line.startsWith("HTTP"))
@@ -300,38 +307,6 @@ public class PerformanceMeter implements Runnable
 		} while(line.length() > 0);
 		
 		return r;
-	}
-	
-	public String readLine(InputStreamReader in)
-	{
-		char b = 0;
-		String s = "";
-		
-		do
-		{
-			try
-			{
-				b = (char) in.read();
-			}
-			catch(IOException ex)
-			{
-				System.out.println("IO exception" + ex.getMessage());
-				return s;
-			}
-			
-			if(b == '\r' || b == '\n')
-			{
-				//s += bline[i++] = 0;
-				continue;
-			}
-			else
-			{
-				s += String.valueOf(b);
-			}
-		}
-		while(b != '\n');
-		
-		return s;
 	}
 	
 	private class HTTPResponse
