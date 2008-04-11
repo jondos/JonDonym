@@ -156,16 +156,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	private boolean m_bFromCascade;
 
-	/** The average response time on this cascade. */
-	private long m_lDelay;
-	/** The average data throughput on this cascade. */
-	private double m_dThroughput;
-
-	/** An array that holds the past few measured delay times to calculate the average delay. */
-	private long[] m_aDelays;
-	/** An array that holds the past few measured throughputs to calculate the average throughput. */
-	private double[] m_aThroughputs;
-
 	/**
 	 * Maps the position of a Mix in a cascade to a concrete Mix ID.
 	 */
@@ -1243,35 +1233,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		}
 	}
 
-	public void setDelay(long pDelay) {
-		if(m_aDelays == null)
-			m_aDelays = new long[3]; // TODO: Make number of fixings configurable
-		m_lDelay = 0;
-		for(int i=1;i < m_aDelays.length;i++)
-			m_lDelay += (m_aDelays[i-1] = m_aDelays[i]);
-		m_aDelays[m_aDelays.length-1] = pDelay;
-		m_lDelay = (m_lDelay + pDelay) / m_aDelays.length;
-	}
 
-	public void setThroughput(double pThroughput) {
-		if(m_aThroughputs == null)
-			m_aThroughputs = new double[3]; // TODO: Make number of fixings configurable
-		m_dThroughput = 0.0;
-		for(int i=1; i < m_aThroughputs.length; i++)
-			m_dThroughput += (m_aThroughputs[i-1] = m_aThroughputs[i]);
-		m_aThroughputs[m_aThroughputs.length-1] = pThroughput;
-		m_dThroughput = (m_dThroughput + pThroughput) / m_aThroughputs.length;
-	}
-
-	public double getAverageThroughput()
-	{
-		return m_dThroughput;
-	}
-	
-	public long getAverageDelay()
-	{
-		return m_lDelay;
-	}
 	
 	public boolean hasPerformanceServer()
 	{
