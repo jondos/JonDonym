@@ -1,6 +1,13 @@
 package anon.infoservice;
 
-public class PerformanceEntry extends AbstractDatabaseEntry 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Document;
+
+import anon.util.XMLUtil;
+import anon.util.IXMLEncodable;
+
+public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
 	private String m_strCascadeId;
 	private String m_strInfoServiceId;
@@ -8,17 +15,24 @@ public class PerformanceEntry extends AbstractDatabaseEntry
 	private long m_lastUpdate;
 	private long m_serial;
 	
-	private static final int ENTRY_TIMEOUT = 1000*60*5;
-	
 	private long m_lDelay;
 	private double m_dSpeed;
 	
 	private long[] m_aDelays = new long[3];
 	private double[] m_aSpeeds = new double[3];
 	
-	public PerformanceEntry(String a_strCascadeId, String a_strInfoServiceId)
+	public static final String XML_ELEMENT_NAME = "PerformanceEntry";
+	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceEntries";
+	
+	public static final String XML_ATTR_ID = "Id";
+	public static final String XML_ATTR_AVG_DELAY = "AvgDelay";
+	public static final String XML_ATTR_AVG_SPEED = "AvgSpeed";
+	public static final String XML_ATTR_EXPIRE_TIME = "ExpireTime";
+	
+	public PerformanceEntry(String a_strCascadeId, String a_strInfoServiceId, long a_lExpireTime)
 	{
-		super(System.currentTimeMillis() + ENTRY_TIMEOUT);
+		// expire time + 5 minutes to be safe
+		super(a_lExpireTime);
 		
 		m_strCascadeId = a_strCascadeId;
 		m_strInfoServiceId = a_strInfoServiceId;
@@ -28,6 +42,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry
 		m_lDelay = -1;
 		m_dSpeed = -1;
 	}
+	
+	/*public PerformanceEntry(PerformanceEntry a_entry, long a_lExpireTime)
+	{
+		super(a_lExpireTime);
+		
+		m_strCascadeId = a_entry.m_strCascadeId;
+		m_strInfoServiceId = a_entry.m_strInfoServiceId;
+		
+		m_lastUpdate = System.currentTimeMillis();
+		m_serial = System.currentTimeMillis();
+	}*/
 	
 	/**
 	 * Use IS and cascade IDs since this entry depends on a specific
@@ -57,8 +82,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry
 			m_lDelay += (m_aDelays[i-1] = m_aDelays[i]);
 		m_aDelays[m_aDelays.length-1] = a_lDelay;
 		m_lDelay = (m_lDelay + a_lDelay) / m_aDelays.length;
+		
+		m_lastUpdate = System.currentTimeMillis();
 	}
-
+	
 	public void updateSpeed(double a_dSpeed) 
 	{
 		if(m_aSpeeds == null)
@@ -68,9 +95,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry
 			m_dSpeed += (m_aSpeeds[i-1] = m_aSpeeds[i]);
 		m_aSpeeds[m_aSpeeds.length-1] = a_dSpeed;
 		m_dSpeed = (m_dSpeed + a_dSpeed) / m_aSpeeds.length;
+		
+		m_lastUpdate = System.currentTimeMillis();
 	}
 
-	public double getAverageThroughput()
+	public double getAverageSpeed()
 	{
 		return m_dSpeed;
 	}
@@ -78,5 +107,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry
 	public long getAverageDelay()
 	{
 		return m_lDelay;
+	}
+	
+	public Element toXmlElement(Document a_doc)
+	{
+		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
+		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
+		XMLUtil.setAttribute(elem, XML_ATTR_AVG_DELAY, m_lDelay);
+		XMLUtil.setAttribute(elem, XML_ATTR_AVG_SPEED, m_dSpeed);
+		XMLUtil.setAttribute(elem, XML_ATTR_EXPIRE_TIME, getExpireTime());
+		
+		return elem;
 	}
 }
