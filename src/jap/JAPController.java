@@ -2168,21 +2168,22 @@ public final class JAPController extends Observable implements IProxyListener, O
 			pathToJava = System.getProperty("java.home") + File.separator + "bin" + File.separator;
 			javaExe = "javaw -cp"; // for windows
 		}
+		strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" " 
+		+ JapMainClass + m_commandLineArgs;
+		
 		boolean isMacOSBundle = (macOS != null) ? macOS.isBundle() : false;
-		if(isMacOSBundle)
-		{
-			//strRestartCommand = macOS.getBundleExecutablePath();
-			strRestartCommand = "open -n "+macOS.getBundlePath();
-		}
-		else
-		{
-			strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" " 
-								+ JapMainClass + m_commandLineArgs;
-		}
 		
 	    try
 		{
-	    	Runtime.getRuntime().exec(strRestartCommand);	
+	    	if(!isMacOSBundle)
+	    	{
+	    		Runtime.getRuntime().exec(strRestartCommand);	
+	    	}
+	    	else
+	    	{
+	    		String[] cmdArray = {"open", "-n", macOS.getBundlePath()};
+	    		Runtime.getRuntime().exec(cmdArray);
+	    	}
 	    	LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);	
 		}
 		catch (Exception ex)
