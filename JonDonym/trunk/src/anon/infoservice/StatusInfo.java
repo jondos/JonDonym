@@ -518,7 +518,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			trafficString +
 
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (perfEntry != null ? String.valueOf(perfEntry.getAverageDelay()) : "?") + " ms" +
-			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (perfEntry != null ? String.valueOf(perfEntry.getAverageThroughput()) : "?") + " kb/sec" +
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (perfEntry != null ? String.valueOf(perfEntry.getAverageSpeed()) : "?") + " kb/sec" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + new Date(getLastUpdate()) +
