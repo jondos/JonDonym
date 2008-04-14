@@ -100,13 +100,6 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			return JavaVersionDBEntry.class;
 		}
 	};
-	private final HTTPResponseGetter m_performanceResponseGetter = new HTTPResponseGetter()
-	{
-		public Class getDatabaseClass()
-		{
-			return PerformanceEntry.class;
-		}
-	};
 
 	private IInfoServiceAgreementAdapter m_agreementAdapter = DynamicConfiguration.getInstance().
 		getAgreementHandler();
@@ -1004,12 +997,47 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		return httpResponse;
 	}
-
+	
 	/**
-	 * Sends the XML encoded mixcascade entry the ID given by cascadeId to the client.
+	 * Sends the XML encoded performance entry of the give id to the client.
+	 * 
+	 * @param a_cascadeId The ID of the requested mix cascade.
+	 * 
+	 * @return The HTTP response for the client.
+	 */
+	private HttpResponseStructure getPerformanceEntry(String a_cascadeId)
+	{
+		HttpResponseStructure httpResponse;
+		try
+		{
+			PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(Configuration.getInstance().getID() + "." + a_cascadeId);
+			if(entry == null)
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_NOT_FOUND);
+			}
+			else
+			{
+				/* send XML-Document */
+				httpResponse = new HttpResponseStructure(
+						HttpResponseStructure.HTTP_TYPE_TEXT_XML, HttpResponseStructure.HTTP_ENCODING_PLAIN,
+						XMLUtil.toString(entry.toXmlElement(XMLUtil.createDocument())));
+			}
+		}
+		catch (Exception e)
+		{
+			httpResponse =
+				new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR);
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
+		}
+		return httpResponse;		
+	}
+	
+	/**
+	 * Sends the XML encoded mix cascade entry the ID given by cascadeId to the client.
 	 *
-	 * @param a_cascadeId The ID of the requested mixcascade.
 	 * @param a_supportedEncodings defines the encoding supported by the client (deflate, gzip,...)
+	 * @param a_cascadeId The ID of the requested mix cascade.
+	 * 
 	 * @return The HTTP response for the client.
 	 */
 	private HttpResponseStructure getCascadeInfo(int a_supportedEncodings, String a_cascadeId)
@@ -1555,10 +1583,11 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			/* JAP or someone else wants to get information about all cascades we know */
 			httpResponse = m_cascadeResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
-		else if( (command.equals("/performanceentries") && (method == Constants.REQUEST_METHOD_GET)))
+		else if( (command.startsWith("/performanceentry") && (method == Constants.REQUEST_METHOD_GET)))
 		{
-			ISRuntimeStatistics.ms_lNrOfPerformanceEntriesRequests++;
-			httpResponse = m_performanceResponseGetter.fetchResponse(a_supportedEncodings, false);
+			ISRuntimeStatistics.ms_lNrOfPerformanceEntryRequests++;
+			String cascadeId = command.substring(18);
+			httpResponse = getPerformanceEntry(cascadeId);
 		}
 		else if ( (command.equals("/helo")) && (method == Constants.REQUEST_METHOD_POST))
 		{

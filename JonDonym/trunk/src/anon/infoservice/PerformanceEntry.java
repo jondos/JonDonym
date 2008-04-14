@@ -1,10 +1,10 @@
 package anon.infoservice;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
 import anon.util.XMLUtil;
+import anon.util.XMLParseException;
 import anon.util.IXMLEncodable;
 
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
@@ -24,14 +24,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public static final String XML_ELEMENT_NAME = "PerformanceEntry";
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceEntries";
 	
-	public static final String XML_ATTR_ID = "Id";
-	public static final String XML_ATTR_AVG_DELAY = "AvgDelay";
-	public static final String XML_ATTR_AVG_SPEED = "AvgSpeed";
-	public static final String XML_ATTR_EXPIRE_TIME = "ExpireTime";
+	public static final String XML_ATTR_ID = "id";
+	public static final String XML_ATTR_AVG_DELAY = "avgDelay";
+	public static final String XML_ATTR_AVG_SPEED = "avgSpeed";
+	public static final String XML_ATTR_EXPIRE_TIME = "expireTime";
 	
 	public PerformanceEntry(String a_strCascadeId, String a_strInfoServiceId, long a_lExpireTime)
 	{
-		// expire time + 5 minutes to be safe
 		super(a_lExpireTime);
 		
 		m_strCascadeId = a_strCascadeId;
@@ -43,16 +42,29 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_dSpeed = -1;
 	}
 	
-	/*public PerformanceEntry(PerformanceEntry a_entry, long a_lExpireTime)
+	public PerformanceEntry(Element a_entry) throws XMLParseException
 	{
-		super(a_lExpireTime);
+		// TODO: client expire time
+		super(System.currentTimeMillis() + 1000*60*24);
 		
-		m_strCascadeId = a_entry.m_strCascadeId;
-		m_strInfoServiceId = a_entry.m_strInfoServiceId;
+		XMLUtil.assertNodeName(a_entry, XML_ELEMENT_NAME);
+		
+		String id = XMLUtil.parseAttribute(a_entry, XML_ATTR_ID, ".");
+		int i = id.indexOf(".");
+		
+		if(i < 0)
+		{
+			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not parse id");
+		}
+		
+		m_strCascadeId = id.substring(0, i);
+		m_strInfoServiceId = id.substring(i);
+		m_lDelay = XMLUtil.parseAttribute(a_entry, XML_ATTR_AVG_DELAY, -1);
+		m_dSpeed = XMLUtil.parseAttribute(a_entry, XML_ATTR_AVG_SPEED, -1);
 		
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
-	}*/
+	}
 	
 	/**
 	 * Use IS and cascade IDs since this entry depends on a specific
