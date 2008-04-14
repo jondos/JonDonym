@@ -53,6 +53,9 @@ final class ISRuntimeStatistics
 
 	///How many get /paymentinstances or /paymentinstance commands did we process?
 	static volatile long ms_lNrOfGetPaymentRequests=0;
+	
+	///How many get /performanceentries commands did we process?
+	static volatile long ms_lNrOfPerformanceEntriesRequests=0;
 
 	///How many get /tornodes command did we process?
 	static volatile long ms_lNrOfGetTorNodesRequests=0;
@@ -97,6 +100,8 @@ final class ISRuntimeStatistics
 		sb.append(ms_NumberFormat.format(ms_lNrOfGetMinJapVersion));
 		sb.append("</td></tr><tr><td>GET Requests for /status: </td><td>");
 		sb.append(ms_NumberFormat.format(ms_lNrOfGetStatus));
+		sb.append("</td></tr><tr><td>GET Requests for /performanceentries: </td><td>");		
+		sb.append(ms_NumberFormat.format(ms_lNrOfPerformanceEntriesRequests));
 		sb.append("</td></tr><tr><td>GET Requests for Payment: </td><td>");
 		sb.append(ms_NumberFormat.format(ms_lNrOfGetPaymentRequests));
 		sb.append("</td></tr><tr><td>Unknown Requests: </td><td>");
