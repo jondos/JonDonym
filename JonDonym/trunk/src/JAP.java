@@ -89,6 +89,7 @@ public class JAP
 	private static final String MSG_INIT_RANDOM = JAP.class.getName() + "_initRandom";
 	private static final String MSG_FINISH_RANDOM = JAP.class.getName() + "_finishRandom";
 	private static final String MSG_START_LISTENER = JAP.class.getName() + "_startListener";
+	private final static String WHITESPACE_ENCODED = "%20";
 	
 	private JAPController m_controller;
 	
@@ -122,6 +123,7 @@ public class JAP
 				{
 					// this option has an argument
 					m_arstrCmdnLnArgs.put(argv[i], argv[i + 1]);
+					System.out.println(argv[i]+": "+argv[i + 1]);
 				}
 				else
 				{
@@ -783,8 +785,19 @@ public class JAP
 		args_len++;
 		if (pFFExecutable != null)
 		{
-			// portable configuration seems to be complete
-			pFFExecutable = toAbsolutePath(pFFExecutable);
+			/*replace any white space encodings with white spaces */
+			StringBuffer pFFExecutableBuf = new StringBuffer("");
+			int whiteSpEnc = pFFExecutable.indexOf(WHITESPACE_ENCODED, 0);
+			int lastIx = 0;
+			while(whiteSpEnc != -1)
+			{
+				pFFExecutableBuf.append(pFFExecutable.substring(lastIx, whiteSpEnc));				
+				pFFExecutableBuf.append(" ");
+				lastIx = whiteSpEnc+WHITESPACE_ENCODED.length();
+				whiteSpEnc = pFFExecutable.indexOf(WHITESPACE_ENCODED, (whiteSpEnc+1));
+			}
+			pFFExecutableBuf.append(pFFExecutable.substring(lastIx));
+			pFFExecutable = toAbsolutePath(pFFExecutableBuf.toString());
 		}
 		else
 		{
