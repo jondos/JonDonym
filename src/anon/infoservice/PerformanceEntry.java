@@ -70,7 +70,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	 * Use IS and cascade IDs since this entry depends on a specific
 	 * cascade and the info service we're retrieving it from.
 	 */
-	public String getId() 
+	public String getId()
 	{
 		return m_strCascadeId + "." + m_strInfoServiceId;
 	}
