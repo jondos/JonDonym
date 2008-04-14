@@ -73,7 +73,7 @@ public class PerformanceMeter implements Runnable
 	private char[] m_recvBuff;
 	
 	public static final int PERFORMANCE_SERVER_TIMEOUT = 5000;
-	public static final int REQUESTS_PER_INTERVAL = 2;
+	public static final int REQUESTS_PER_INTERVAL = 3;
 	public static final int MINOR_INTERVAL = 1000;
 	
 	public PerformanceMeter(Object[] a_config)
@@ -143,8 +143,7 @@ public class PerformanceMeter implements Runnable
 		// no entry for this mix cascade yet -> create one
 		if(entry == null)
 		{
-	
-			entry = new PerformanceEntry(cascade.getId(), Configuration.getInstance().getID());
+			entry = new PerformanceEntry(cascade.getId(), Configuration.getInstance().getID(), System.currentTimeMillis() + m_majorInterval + 1000*60*5);
 		}
 		
 		m_recvBuff = new char[m_dataSize];
@@ -152,7 +151,7 @@ public class PerformanceMeter implements Runnable
 		if((proxy.getMixCascade() != cascade) && !proxy.isConnected())
 		{
 			proxy.start(new SimpleMixCascadeContainer(cascade));
-		
+			
 			synchronized(proxy)
 			{
 				try
@@ -186,7 +185,7 @@ public class PerformanceMeter implements Runnable
 		       	
 		       	MixInfo lastMix = cascade.getMixInfo(cascade.getNumberOfMixes() - 1);
 		       	
-		       	LogHolder.log(LogLevel.DEBUG, LogType.NET, "Connecting to Performance Server at " + lastMix.getPerformanceServerHost() + ":" + lastMix.getPerformanceServerPort() + " through the mixcascade.");
+		       	LogHolder.log(LogLevel.INFO, LogType.NET, "Connecting to Performance Server at " + lastMix.getPerformanceServerHost() + ":" + lastMix.getPerformanceServerPort() + " through the mixcascade.");
 		       	
 		       	stream.write(("CONNECT " + lastMix.getPerformanceServerHost()  + ":" + lastMix.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
 		       	
@@ -267,6 +266,8 @@ public class PerformanceMeter implements Runnable
         		delay = responseStartTime - transferInitiatedTime;
         		throughput = (double) m_dataSize / (responseEndTime - responseStartTime);
         		
+        		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + throughput + " kb/sec.");
+        		
         		entry.updateDelay(delay);
         		entry.updateSpeed(throughput);
 		       	s.close();
@@ -287,8 +288,9 @@ public class PerformanceMeter implements Runnable
     		}
 		}
 		
-    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + cascade.getName() + " done. Avg Delay: " + entry.getAverageDelay() + " ms; Avg Throughput: " + entry.getAverageThroughput() + " kb/sec");
-		Database.getInstance(PerformanceEntry.class).update(entry);
+    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + cascade.getName() + " done. Avg Delay: " + entry.getAverageDelay() + " ms; Avg Throughput: " + entry.getAverageSpeed() + " kb/sec");
+		
+    	Database.getInstance(PerformanceEntry.class).update(entry);
 		
 		return true;
 	}
