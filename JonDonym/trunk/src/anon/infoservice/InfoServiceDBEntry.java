@@ -1480,6 +1480,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	{
 		return getUpdateEntries(MessageDBEntry.class, true);
 	}
+	
+	public Hashtable getPerformanceEntries() throws Exception
+	{
+		return getUpdateEntries(PerformanceEntry.class, false);
+	}
 
 	/**
 	 * Get the latest java versions the infoservice knows ordered by vendors.
