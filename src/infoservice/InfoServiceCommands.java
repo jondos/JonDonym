@@ -50,6 +50,7 @@ import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
+import anon.infoservice.PerformanceEntry;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
@@ -97,6 +98,13 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		public Class getDatabaseClass()
 		{
 			return JavaVersionDBEntry.class;
+		}
+	};
+	private final HTTPResponseGetter m_performanceResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return PerformanceEntry.class;
 		}
 	};
 
@@ -1546,6 +1554,11 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			ISRuntimeStatistics.ms_lNrOfGetCascadesRequests++;
 			/* JAP or someone else wants to get information about all cascades we know */
 			httpResponse = m_cascadeResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if( (command.equals("/performanceentries") && (method == Constants.REQUEST_METHOD_GET)))
+		{
+			ISRuntimeStatistics.ms_lNrOfPerformanceEntriesRequests++;
+			httpResponse = m_performanceResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals("/helo")) && (method == Constants.REQUEST_METHOD_POST))
 		{
