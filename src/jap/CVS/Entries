@@ -1,8 +1,4 @@
-D/forward////
-D/pay////
 /.cvsignore/1.1/Fri Jan 25 16:56:50 2008//
-/JAPController.java/1.412/Fri Jan 25 12:17:02 2008//
-/JAPNewView.java/1.233/Fri Jan 25 15:49:00 2008//
 /AbstractDatabaseUpdater.java/1.34/Tue Jan 15 15:40:42 2008//
 /AbstractJAPConfModule.java/1.17/Tue Jan 15 15:40:43 2008//
 /AbstractJAPMainView.java/1.26/Tue Jan 15 15:40:43 2008//
@@ -17,6 +13,7 @@ D/pay////
 /JAPAbout.java/1.18/Tue Jan 15 15:40:42 2008//
 /JAPAboutNew.java/1.4/Tue Jan 15 15:40:42 2008//
 /JAPConf.java/1.131/Tue Jan 15 15:40:42 2008//
+/JAPConfAnon.java/1.173/Fri Mar  7 13:03:53 2008//
 /JAPConfAnonGeneral.java/1.53/Tue Jan 15 15:40:42 2008//
 /JAPConfCert.java/1.49/Tue Jan 15 15:40:43 2008//
 /JAPConfCertSavePoint.java/1.2/Tue Jan 15 15:40:43 2008//
@@ -28,9 +25,11 @@ D/pay////
 /JAPConfNetworkSavePoint.java/1.1/Tue Jan 15 15:40:42 2008//
 /JAPConfServices.java/1.11/Tue Jan 15 15:40:43 2008//
 /JAPConfTor.java/1.34/Tue Jan 15 15:40:43 2008//
-/JAPConfTrust.java/1.4/Tue Jan 15 15:40:43 2008//
+/JAPConfTrust.java/-1.4/Mon Apr  7 20:22:04 2008//
 /JAPConfUI.java/1.51/Tue Jan 15 15:40:42 2008//
 /JAPConfUpdate.java/1.32/Tue Jan 15 15:40:43 2008//
+/JAPConstants.java/1.941/Sat Mar  8 12:49:56 2008//
+/JAPController.java/1.412/Fri Jan 25 12:17:02 2008//
 /JAPControllerMessage.java/1.3/Tue Jan 15 15:40:43 2008//
 /JAPDebug.java/1.23/Tue Jan 15 15:40:42 2008//
 /JAPFeedback.java/1.24/Tue Jan 15 15:40:42 2008//
@@ -38,6 +37,7 @@ D/pay////
 /JAPInfoServiceListModel.java/1.2/Tue Jan 15 15:40:43 2008//
 /JAPMixCascadeComboBox.java/1.15/Tue Jan 15 15:40:42 2008//
 /JAPModel.java/1.110/Tue Jan 15 15:40:43 2008//
+/JAPNewView.java/1.233/Fri Jan 25 15:49:00 2008//
 /JAPObserver.java/1.6/Tue Jan 15 15:40:42 2008//
 /JAPSplash.java/1.19/Tue Jan 15 15:40:43 2008//
 /JAPUtil.java/1.43/Tue Jan 15 15:40:42 2008//
@@ -53,5 +53,6 @@ D/pay////
 /StatusPanel.java/1.9/Tue Jan 15 15:40:43 2008//
 /SystrayPopupMenu.java/1.12/Tue Jan 15 15:40:43 2008//
 /TrustModel.java/1.20/Tue Jan 15 15:40:43 2008//
-/JAPConfAnon.java/1.173/Fri Mar  7 13:03:53 2008//
-/JAPConstants.java/1.941/Sat Mar  8 12:49:56 2008//
+D/forward////
+D/pay////
+D/platform////

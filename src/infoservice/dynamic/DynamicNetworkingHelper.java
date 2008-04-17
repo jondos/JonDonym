@@ -68,7 +68,7 @@ public class DynamicNetworkingHelper
                 HttpResponseStructure.HTTP_RETURN_OK);
         try
         {
-            LogHolder.log(LogLevel.DEBUG, LogType.NET, "MixCascade HELO received: XML: "
+            LogHolder.log(LogLevel.DEBUG, LogType.NET, "LastMixPostDynaCascade: MixCascade HELO received: XML: "
                     + (new String(a_postData)));
             Element mixCascadeNode = (Element) (XMLUtil.getFirstChildByName(XMLUtil
                     .toXMLDocument(a_postData), MixCascade.XML_ELEMENT_NAME));

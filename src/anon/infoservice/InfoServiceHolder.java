@@ -187,6 +187,12 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 		return ms_infoServiceHolderInstance;
 	}
 
+	public void shutdown()
+	{
+		m_poolFetchInformation.shutdown();
+
+	}
+
 	/**
 	 * Returns the name of the XML node used to store all settings of the InfoServiceHolder
 	 * instance. This name can be used to find the XML node within a document when the settings

@@ -36,10 +36,10 @@ import anon.mixminion.Mixminion;
 public final class JAPConstants
 {
 	public static final String aktVersion = "00.09.023"; //Never change the layout of this line!
-	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-03-08 12:49:56 $";
+	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-04-11 13:04:12 $";
 
 	//Warning: This is a little bit tricky,
-	//because CVS will expand the $Date: 2008-03-08 12:49:56 $
+	//because CVS will expand the $Date: 2008-04-11 13:04:12 $
 	//to the date of the last commmit of this file
 
 	//Never change the layout of the next two lines as serveal automated tools use these lines to do fancy things...
