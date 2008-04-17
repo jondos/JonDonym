@@ -59,9 +59,13 @@ public final class ThreadPool
 		public void shutdown()
 		{
 			shouldRun = false;
-			interrupt();
+			while (isAlive())
+			{
+				interrupt();
+				Thread.yield();
+			}
 		}
-		
+
 		public void run()
 		{
 			ThreadPoolRequest obj = null;
@@ -174,7 +178,7 @@ public final class ThreadPool
 			poolThreads[i].shutdown();
 		}
 	}
-	
+
 	private void add(Runnable target, Object lock)
 	{
 		try

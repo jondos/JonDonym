@@ -4,14 +4,14 @@
  Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
 
-  - Redistributions of source code must retain the above copyright notice,
+ - Redistributions of source code must retain the above copyright notice,
  this list of conditions and the following disclaimer.
 
-  - Redistributions in binary form must reproduce the above copyright notice,
+ - Redistributions in binary form must reproduce the above copyright notice,
  this list of conditions and the following disclaimer in the documentation and/or
  other materials provided with the distribution.
 
-  - Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+ - Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
  may be used to endorse or promote products derived from this software without specific
  prior written permission.
 
@@ -81,9 +81,8 @@ public class HTTPConnectionFactory
 	 */
 	private boolean m_bUseAuth = false;
 
-	private Class m_classHTTPCLient_ContentEncodingeModule; //cache the class of the
-	//HTTPClient.ContentEncodingModule for performance reasons
-
+	private Class m_classHTTPCLient_ContentEncodingeModule; // cache the class of the
+	// HTTPClient.ContentEncodingModule for performance reasons
 
 	/**
 	 * This creates a new instance of HTTPConnectionFactory. This is only used for setting some
@@ -96,7 +95,8 @@ public class HTTPConnectionFactory
 		m_timeout = 10;
 		try
 		{
-			m_classHTTPCLient_ContentEncodingeModule = Class.forName("HTTPClient.ContentEncodingModule");
+			m_classHTTPCLient_ContentEncodingeModule = Class
+			.forName("HTTPClient.ContentEncodingModule");
 		}
 		catch (ClassNotFoundException ex)
 		{
@@ -104,9 +104,9 @@ public class HTTPConnectionFactory
 	}
 
 	/**
-	 * Returns the instance of HTTPConnectionFactory (Singleton). If there is no instance,
-	 * there is a new one created.
-	 *
+	 * Returns the instance of HTTPConnectionFactory (Singleton). If there is no instance, there is
+	 * a new one created.
+	 * 
 	 * @return The HTTPConnectionFactory instance.
 	 */
 	public static HTTPConnectionFactory getInstance()
@@ -117,8 +117,9 @@ public class HTTPConnectionFactory
 
 			try
 			{
-				// remove this module as it doesn`t work and as it interferes with our own implementation
-				//HTTPConnection.removeDefaultModule(Class.forName("HTTPClient.AuthorizationModule"));
+				// remove this module as it doesn`t work and as it interferes with our own
+				// implementation
+				// HTTPConnection.removeDefaultModule(Class.forName("HTTPClient.AuthorizationModule"));
 			}
 			catch (Exception e)
 			{
@@ -132,12 +133,14 @@ public class HTTPConnectionFactory
 	 * after the call of this method will use them. Instances of HTTPConnection which already exist
 	 * are not influenced by that call. The default after creating the instance of
 	 * HTTPConnectionFactory is to use no proxy for all new instances of HTTPConnection.
-	 *
-	 * @param a_proxyInterface the listener interface of the proxy server; if it is set to null, no
-	 *                        proxy is used
-	 * @param a_bUseAuth indicates whether proxy authentication should be used
+	 * 
+	 * @param a_proxyInterface
+	 *            the listener interface of the proxy server; if it is set to null, no proxy is used
+	 * @param a_bUseAuth
+	 *            indicates whether proxy authentication should be used
 	 */
-	public synchronized void setNewProxySettings(ImmutableProxyInterface a_proxyInterface, boolean a_bUseAuth)
+	public synchronized void setNewProxySettings(ImmutableProxyInterface a_proxyInterface,
+			boolean a_bUseAuth)
 	{
 		m_proxyInterface = a_proxyInterface;
 		m_bUseAuth = a_bUseAuth;
@@ -150,7 +153,10 @@ public class HTTPConnectionFactory
 			return;
 		}
 
-		/* don't allow to create new connections until we have changed all proxy attributes */
+		/*
+		 * don't allow to create new connections until we have changed all proxy
+		 * attributes
+		 */
 		if (a_proxyInterface.getProtocol() == ImmutableListenerInterface.PROTOCOL_TYPE_HTTP)
 		{
 			/* set the new values for the proxy */
@@ -164,23 +170,24 @@ public class HTTPConnectionFactory
 			HTTPConnection.setSocksServer(a_proxyInterface.getHost(), a_proxyInterface.getPort());
 			if (m_bUseAuth)
 			{
-			NVPair[] up = new NVPair[1];
-			up[0] = new NVPair(a_proxyInterface.getAuthenticationUserID(),
-							   a_proxyInterface.getAuthenticationPassword());
-			AuthorizationInfo.addAuthorization(new AuthorizationInfo(a_proxyInterface.getHost(),
-				a_proxyInterface.getPort(),
-				"SOCKS5", "USER/PASS", up, null));
-		}
+				NVPair[] up = new NVPair[1];
+				up[0] = new NVPair(a_proxyInterface.getAuthenticationUserID(), a_proxyInterface
+						.getAuthenticationPassword());
+				AuthorizationInfo.addAuthorization(new AuthorizationInfo(
+						a_proxyInterface.getHost(), a_proxyInterface.getPort(), "SOCKS5",
+						"USER/PASS", up, null));
+			}
 		}
 
 	}
 
 	/**
-	 * Sets the communication timeout (sec) for new HTTP connections. If this value is zero
-	 * or lower, a connection never times out. Instances of HTTPConnection which already exist,
-	 * are not influenced by this method.
-	 *
-	 * @param a_timeout The new communication timeout.
+	 * Sets the communication timeout (sec) for new HTTP connections. If this value is zero or
+	 * lower, a connection never times out. Instances of HTTPConnection which already exist, are not
+	 * influenced by this method.
+	 * 
+	 * @param a_timeout
+	 *            The new communication timeout.
 	 */
 	public synchronized void setTimeout(int a_timeout)
 	{
@@ -192,9 +199,9 @@ public class HTTPConnectionFactory
 	}
 
 	/**
-	 * Returns the communication timeout (sec) for new HTTP connections. If this value is zero, a
-	 * connection never times out.
-	 *
+	 * Returns the communication timeout (sec) for new HTTP connections. If this
+	 * value is zero, a connection never times out.
+	 * 
 	 * @return The communication timeout for new connections.
 	 */
 	public synchronized int getTimeout()
@@ -204,8 +211,9 @@ public class HTTPConnectionFactory
 
 	/**
 	 * This method creates a new instance of HTTPConnection. The current proxy settings are used.
-	 *
-	 * @param target The ListenerInterface of the connection target.
+	 * 
+	 * @param target
+	 *            The ListenerInterface of the connection target.
 	 * @return A new instance of HTTPConnection with a connection to the specified target and the
 	 *         current proxy settings.
 	 */
@@ -214,19 +222,21 @@ public class HTTPConnectionFactory
 		return createHTTPConnection(target, HTTP_ENCODING_PLAIN, true);
 	}
 
-
 	/**
 	 * This method creates a new instance of HTTPConnection. The current proxy settings are used.
-	 *
-	 * @param target The ListenerInterface of the connection target.
-	 * @param a_encoding http encoding used to send the data (e.g. HTTP_ENCODING_ZLIB)
-	 *  @param a_bGet if encoding is set to another value than HTTP_ENCODING_PLAIN, it must be specified if
-	 *  this is a get or a post statement
+	 * 
+	 * @param target
+	 *            The ListenerInterface of the connection target.
+	 * @param a_encoding
+	 *            http encoding used to send the data (e.g. HTTP_ENCODING_ZLIB)
+	 * @param a_bGet
+	 *            if encoding is set to another value than HTTP_ENCODING_PLAIN, it must be specified
+	 *            if this is a get or a post statement
 	 * @return A new instance of HTTPConnection with a connection to the specified target and the
 	 *         current proxy settings.
 	 */
 	public synchronized HTTPConnection createHTTPConnection(ListenerInterface target,
-		int a_encoding, boolean a_bGet)
+			int a_encoding, boolean a_bGet)
 	{
 		HTTPConnection newConnection = null;
 		synchronized (this)
@@ -238,6 +248,7 @@ public class HTTPConnectionFactory
 				{
 					boolean bAlreadyTried = false;
 					String password;
+
 					public synchronized NVPair getUsernamePassword(AuthorizationInfo challenge)
 					{
 						try
@@ -248,9 +259,9 @@ public class HTTPConnectionFactory
 								return null;
 							}
 							/*
-							System.out.println("Challenge:" +
-											   challenge.getHost() + ":" + challenge.getPort() + ":" + challenge.toString());
-*/
+							 * System.out.println("Challenge:" + challenge.getHost() + ":" +
+							 * challenge.getPort() + ":" + challenge.toString());
+							 */
 							if (bAlreadyTried)
 							{
 
@@ -258,9 +269,11 @@ public class HTTPConnectionFactory
 								if (m_proxyInterface instanceof ProxyInterface)
 								{
 									/*
-									System.out.println("Challenge bad:" +
-										challenge.getHost() + ":" + challenge.getPort() + ":" + challenge.toString());*/
-									( (ProxyInterface) m_proxyInterface).clearAuthenticationPassword();
+									 * System.out.println("Challenge bad:" + challenge.getHost() +
+									 * ":" + challenge.getPort() + ":" + challenge.toString());
+									 */
+									((ProxyInterface) m_proxyInterface)
+									.clearAuthenticationPassword();
 								}
 								else
 								{
@@ -289,18 +302,21 @@ public class HTTPConnectionFactory
 			{
 				if (a_bGet)
 				{
-					//replaceHeader(newConnection, new NVPair("Accept-Encoding", HTTP_ENCODING_ZLIB_STRING));
-					newConnection.addModule(m_classHTTPCLient_ContentEncodingeModule,-1);
-				}				}
+					// replaceHeader(newConnection, new NVPair("Accept-Encoding",
+					// HTTP_ENCODING_ZLIB_STRING));
+					newConnection.addModule(m_classHTTPCLient_ContentEncodingeModule, -1);
+				}
 				else
 				{
-					replaceHeader(newConnection, new NVPair("Content-Encoding", HTTP_ENCODING_ZLIB_STRING));
+					newConnection.removeModule(m_classHTTPCLient_ContentEncodingeModule);
+					replaceHeader(newConnection, new NVPair("Content-Encoding",
+							HTTP_ENCODING_ZLIB_STRING));
 				}
-
+			}
 		}
 		else
 		{
-			newConnection.removeModule( m_classHTTPCLient_ContentEncodingeModule);
+			newConnection.removeModule(m_classHTTPCLient_ContentEncodingeModule);
 		}
 		newConnection.setAllowUserInteraction(false);
 		/* set the timeout for all network operations */
@@ -311,16 +327,18 @@ public class HTTPConnectionFactory
 	/**
 	 * This method creates a new instance of HTTPConnection using the specified proxy settings
 	 * (ignoring the default settings).
-	 *
-	 * @param target The ListenerInterface of the connection target.
-	 * @param a_proxySettings The proxy settings to use for this single connection. If the proxy
-	 *                        settings are null, no proxy is used.
-	 *
+	 * 
+	 * @param target
+	 *            The ListenerInterface of the connection target.
+	 * @param a_proxySettings
+	 *            The proxy settings to use for this single connection. If the proxy settings are
+	 *            null, no proxy is used.
+	 * 
 	 * @return A new instance of HTTPConnection with a connection to the specified target and the
 	 *         current proxy settings.
 	 */
 	public synchronized HTTPConnection createHTTPConnection(ListenerInterface target,
-		ImmutableProxyInterface a_proxySettings)
+			ImmutableProxyInterface a_proxySettings)
 	{
 		return createHTTPConnection(target, a_proxySettings, HTTP_ENCODING_PLAIN, true);
 	}
@@ -328,21 +346,27 @@ public class HTTPConnectionFactory
 	/**
 	 * This method creates a new instance of HTTPConnection using the specified proxy settings
 	 * (ignoring the default settings).
-	 *
-	 * @param target The ListenerInterface of the connection target.
-	 * @param a_proxySettings The proxy settings to use for this single connection. If the proxy
-	 *                        settings are null, no proxy is used.
-	 * @param a_bGet if encoding is set to another value than HTTP_ENCODING_PLAIN, it must be specified if
-	 * this is a get or a post statement
-	 * @param a_encoding http encoding used to send the data (e.g. HTTP_ENCODING_ZLIB)
+	 * 
+	 * @param target
+	 *            The ListenerInterface of the connection target.
+	 * @param a_proxySettings
+	 *            The proxy settings to use for this single connection. If the proxy settings are
+	 *            null, no proxy is used.
+	 * @param a_bGet
+	 *            if encoding is set to another value than HTTP_ENCODING_PLAIN, it must be specified
+	 *            if this is a get or a post statement
+	 * @param a_encoding
+	 *            http encoding used to send the data (e.g. HTTP_ENCODING_ZLIB)
 	 * @return A new instance of HTTPConnection with a connection to the specified target and the
 	 *         current proxy settings.
 	 */
 	public synchronized HTTPConnection createHTTPConnection(ListenerInterface target,
-		ImmutableProxyInterface a_proxySettings, int a_encoding, boolean a_bGet)
+			ImmutableProxyInterface a_proxySettings, int a_encoding, boolean a_bGet)
 	{
-		/* tricky: change the global proxy settings, create the connection and restore the original
-		 * proxy settings -> no problem because all methods are synchronized
+		/*
+		 * tricky: change the global proxy settings, create the connection and
+		 * restore the original proxy settings -> no problem because all methods
+		 * are synchronized
 		 */
 		ImmutableProxyInterface oldProxySettings = m_proxyInterface;
 		setNewProxySettings(a_proxySettings, m_bUseAuth);
@@ -352,15 +376,18 @@ public class HTTPConnectionFactory
 	}
 
 	/**
-	 * An internal helper function to set the header information for the HTTP connection.
-	 *
-	 * @param connection The connection where the new headers are set.
-	 * @param header The header information to set.
+	 * An internal helper function to set the header information for the HTTP
+	 * connection.
+	 * 
+	 * @param connection
+	 *          The connection where the new headers are set.
+	 * @param header
+	 *          The header information to set.
 	 */
 	private static void replaceHeader(HTTPConnection connection, NVPair header)
 	{
 		NVPair headers[] = connection.getDefaultHeaders();
-		if ( (headers == null) || (headers.length == 0))
+		if ((headers == null) || (headers.length == 0))
 		{
 			/* create new header with one field and set it */
 			headers = new NVPair[1];
@@ -388,11 +415,13 @@ public class HTTPConnectionFactory
 	}
 
 	/**
-	 * This method is used to change the type of the created HTTPConnections.
-	 * A call of this method deletes the current factory instance and can be used
-	 * as a reset operation, too.
-	 * This method is used for testing purposes. PLEASE DO NOT REMOVE IT!
-	 * @param a_HTTPConnectionClass the class of generated HTTPConnections
+	 * This method is used to change the type of the created HTTPConnections. A
+	 * call of this method deletes the current factory instance and can be used
+	 * as a reset operation, too. This method is used for testing purposes.
+	 * PLEASE DO NOT REMOVE IT!
+	 * 
+	 * @param a_HTTPConnectionClass
+	 *            the class of generated HTTPConnections
 	 */
 	private static void setHTTPConnectionClass(Class a_HTTPConnectionClass)
 	{
@@ -404,13 +433,14 @@ public class HTTPConnectionFactory
 		else
 		{
 			throw new IllegalArgumentException("This is not a valid HTTPConnection class: "
-											   + a_HTTPConnectionClass);
+					+ a_HTTPConnectionClass);
 		}
 	}
 
 	/**
-	 * Returns the recently created HTTPConnections.
-	 * This method is used for testing purposes. PLEASE DO NOT REMOVE IT!
+	 * Returns the recently created HTTPConnections. This method is used for testing purposes.
+	 * PLEASE DO NOT REMOVE IT!
+	 * 
 	 * @return Vector
 	 */
 	private Vector getCreatedHTTPConnections()
@@ -420,7 +450,9 @@ public class HTTPConnectionFactory
 
 	/**
 	 * Creates an HTTPConnection with the listener settings.
-	 * @param target the basic listener settings for this connection
+	 * 
+	 * @param target
+	 *          the basic listener settings for this connection
 	 * @return an HTTPConnection with the listener settings
 	 */
 	private HTTPConnection createHTTPConnectionInternal(ListenerInterface target)
@@ -429,7 +461,8 @@ public class HTTPConnectionFactory
 
 		if (ms_HTTPConnectionClass == HTTPConnection.class)
 		{
-			// create standard HTTPConnections the easy way for performance reasons
+			// create standard HTTPConnections the easy way for performance
+			// reasons
 			connection = new HTTPConnection(target.getHost(), target.getPort());
 		}
 		else
@@ -443,8 +476,8 @@ public class HTTPConnectionFactory
 			params[1] = new Integer(target.getPort());
 			try
 			{
-				connection = (HTTPConnection) ms_HTTPConnectionClass.getConstructor(
-					paramTypes).newInstance(params);
+				connection = (HTTPConnection) ms_HTTPConnectionClass.getConstructor(paramTypes)
+				.newInstance(params);
 			}
 			catch (Exception a_e)
 			{

@@ -319,7 +319,7 @@ public final class LogHolder
 		return ms_logInstance;
 	}
 
-	private static boolean isLogged(int a_logLevel, int a_logType)
+	public static boolean isLogged(int a_logLevel, int a_logType)
 	{
 		return (a_logLevel <= ms_logInstance.getLogLevel()) &&
 			( (a_logType & ms_logInstance.getLogType()) == a_logType);

@@ -5780,6 +5780,7 @@
 <file path="src/JAPMessages_fr.properties"/>
 <file path="src/JAPMessages_nl.properties"/>
 <file path="src/JAPMessages_pt.properties"/>
+<file path="src/JAPMessages_ru.properties"/>
 <file path="magicdraw.magicdraw"/>
 <file path="MANIFEST.MF"/>
 </project>

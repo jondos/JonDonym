@@ -62,6 +62,7 @@ import java.awt.event.WindowListener;
 import java.awt.image.ImageObserver;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
@@ -701,6 +702,20 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			return m_optionType;
 		}
 
+		public int getDefaultButton()
+			{
+				if (m_optionType == OPTION_TYPE_CANCEL ||
+						m_optionType == OPTION_TYPE_OK_CANCEL ||
+						m_optionType == OPTION_TYPE_YES_NO_CANCEL)
+					{
+						return DialogContentPane.DEFAULT_BUTTON_CANCEL;
+					}
+					else if (m_optionType == OPTION_TYPE_YES_NO)
+					{
+						return DialogContentPane.DEFAULT_BUTTON_NO;
+					}
+				return -1;
+		}
 		public String getYesOKText()
 		{
 			return null;
@@ -1728,16 +1743,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 
 		dialogContentPane.setContentPane(dummyBox);
-		if (a_options.getOptionType() == OPTION_TYPE_CANCEL ||
-			a_options.getOptionType() == OPTION_TYPE_OK_CANCEL ||
-			a_options.getOptionType() == OPTION_TYPE_YES_NO_CANCEL)
-		{
-			dialogContentPane.setDefaultButton(DialogContentPane.DEFAULT_BUTTON_CANCEL);
-		}
-		else if (a_options.getOptionType() == OPTION_TYPE_YES_NO)
-		{
-			dialogContentPane.setDefaultButton(DialogContentPane.DEFAULT_BUTTON_NO);
-		}
+		dialogContentPane.setDefaultButton(a_options.getDefaultButton());
 
 		dialogContentPane.updateDialog();
 		( (JComponent) dialog.getContentPane()).setPreferredSize(bestDimension);
@@ -3562,6 +3568,10 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		{
 			// fix for old JDKs, e.g. 1.1.8, that do not auto-focus the first focusable component
 			requestFocusForFirstFocusableComponent(m_internalDialog.getContentPane()); // no TreeLock!
+			//if the dialog has a default button it should get the focus
+			JButton bttnDefault=m_internalDialog.getRootPane().getDefaultButton();
+			if(bttnDefault!=null)
+				bttnDefault.requestFocus();
 		}
 
 		if (m_bBlockParentWindow)
