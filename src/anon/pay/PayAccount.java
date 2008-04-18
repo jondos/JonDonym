@@ -207,12 +207,12 @@ public class PayAccount implements IXMLEncodable
 
 		// fill vector with transfer certificates
 		m_transCerts = new Vector();
-		Element elemTrs = (Element) XMLUtil.getFirstChildByName(elemRoot, "TransferCertificates");
-		Element elemTr = (Element) elemTrs.getFirstChild();
+		Element elemTrs = (Element) XMLUtil.getFirstChildByName(elemRoot, XMLTransCert.XML_ELEMENT_NAME_TRANSFER_CERTIFICATES);
+		Element elemTr = (Element) XMLUtil.getFirstChildByName(elemTrs, XMLTransCert.XML_ELEMENT_NAME_TRANSFER_CERTIFICATE);
 		while (elemTr != null)
 		{
 			m_transCerts.addElement(new XMLTransCert(elemTr));
-			elemTr = (Element) elemTr.getNextSibling();
+			elemTr = (Element) XMLUtil.getNextSiblingByName(elemTr,XMLTransCert.XML_ELEMENT_NAME_TRANSFER_CERTIFICATE);
 		}
 
 		// set account certificate
