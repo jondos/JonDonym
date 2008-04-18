@@ -27,6 +27,7 @@
  */
 package infoservice.performance;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedReader;
@@ -36,6 +37,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -44,7 +49,11 @@ import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.SimpleMixCascadeContainer;
 import anon.infoservice.Database;
+import anon.pay.PayAccount;
+import anon.pay.PayAccountsFile;
 import anon.proxy.AnonProxy;
+import anon.util.IMiscPasswordReader;
+import anon.util.XMLUtil;
 import infoservice.Configuration;
 
 /**
@@ -92,6 +101,16 @@ public class PerformanceMeter implements Runnable
 		try
 		{
 			proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
+			
+			/* @todo: first effort to get infoservice connected with PayCascades */
+			/* read in an account file, as it is exported and password protected by JAP */
+			Document payAccountXMLFile = XMLUtil.readXMLDocument(new File("infoservice_test.acc"));
+			Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
+			
+			PayAccount payAccount = new PayAccount(payAccountElem,new FixedPasswordReader()); 
+			PayAccountsFile payAccountsFile = PayAccountsFile.getInstance();
+			payAccountsFile.addAccount(payAccount);
+			payAccountsFile.setActiveAccount(payAccount.getAccountNumber());
 			
 			while(true)
 			{
@@ -328,6 +347,17 @@ public class PerformanceMeter implements Runnable
 	{
 		int m_statusCode = -1;
 		int m_length = 0;
+	}
+	
+	/* @todo: only a dummy password reader: customize to read 
+	 * the password via InfoserviceProperties
+	 */
+	private final class FixedPasswordReader implements IMiscPasswordReader
+	{
+		public String readPassword(Object message)
+		{
+			return "passw";
+		}
 	}
 }
 
