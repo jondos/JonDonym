@@ -82,7 +82,8 @@ public class XMLTransactionOverview implements IXMLEncodable
 	
 	public XMLTransactionOverview(char[] xml) throws Exception
 	{
-		this(new String(xml));
+		Document doc = XMLUtil.toXMLDocument(xml);
+		setValues(doc.getDocumentElement());
 	}
 	
 	public XMLTransactionOverview(byte[] xml) throws Exception
