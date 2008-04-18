@@ -53,6 +53,8 @@ public class XMLTransCert implements IXMLEncodable
 	//example: paysafecard disposition (paymentMethodValidTime) is invalid after 1 hour, but the user could still send cash until 30 days later (validTime)
 	private Document m_docTheTransCert;
 
+	public final static String XML_ELEMENT_NAME_TRANSFER_CERTIFICATES = "TransferCertificates";
+	public final static String XML_ELEMENT_NAME_TRANSFER_CERTIFICATE = "TransferCertificate";
 	//~ Constructors ***********************************************************
 
 	public XMLTransCert(long accountNumber, long transferNumber,

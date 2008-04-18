@@ -534,7 +534,37 @@ public class XMLUtil
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Returns the child node of the given node with the given name.
+	 * @param a_node the node from that the search starts
+	 * @param a_childname the childnode we are looking for
+	 * @return the child node of the given node with the given name or null if it was not found
+	 */
+	public static Node getNextSiblingByName(Node a_node, String a_siblingName)
+	{
+		try
+		{
+			if(a_node == null)
+			{
+				return null;
+			}
+			Node iterator = a_node.getNextSibling();
+			while (iterator != null)
+			{
+				if (iterator.getNodeName().equals(a_siblingName))
+				{
+					return iterator;
+				}
+				iterator = iterator.getNextSibling();
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		return null;
+	}
+	
 	/**
 	 * Returns the child node of the given node with the given name. If the node is not found
 	 * in the direct children of the parent node, then all child nodes will be searched and then
