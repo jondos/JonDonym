@@ -28,6 +28,7 @@
 package infoservice;
 
 import java.net.InetAddress;
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.Enumeration;
 
@@ -865,13 +866,17 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"    <H2>InfoService Status (" + Configuration.getInstance().getID() + ")</H2>\n" +
 				"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "<BR></P>\n";
 
-				if(Configuration.getInstance().isPerfEnabled())
+				if(Configuration.getInstance().isPerfEnabled() && InfoService.getPerfMeter() != null)
 				{
-					htmlData += "    <P>Performance Monitoring Enabled<BR>\n" + 
-					"   - Proxy Host: " + Configuration.getInstance().getPerformanceMeterConfig()[0] + "<BR>" +
-					"   - Proxy Port: " + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<BR>" +
-					"   - Datasize: " + Configuration.getInstance().getPerformanceMeterConfig()[2] + "<BR>" +
-					"   - Major Interval: " + Configuration.getInstance().getPerformanceMeterConfig()[3] + "<BR></p>";
+					htmlData += "    <table border=\"0\" width=\"30%\"><tr><th colspan=\"2\">Performance Monitoring Enabled</th></tr>\n" + 
+					"<tr><td class=\"name\">Proxy Host</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[0] + "</td></tr>" +
+					"<tr><td class=\"name\">Proxy Port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
+					"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[2] + "<td></tr>" +
+					"<tr><td class=\"name\">Major Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + "<td></tr>" +
+					"<tr><td class=\"name\">Last Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastUpdate()).toString()) + "</td></tr>" + 
+					"<tr><td class=\"name\">Last Cascade Updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
+					"<tr><td class=\"name\">Recieved (Estimated)</td><td class=\"status\">" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(InfoService.getPerfMeter().getKiloBytesRecvd()) + " kb</td></tr>" +
+					"</table><br />";
 				}				
 				//"    <TABLE ALIGN=\"center\" BORDER=\"0\">\n" +
 				htmlData +="    <TABLE BORDER=\"0\">\n" +
@@ -879,12 +884,12 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <COL WIDTH=\"20%\">\n" +
 				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				"        <COL WIDTH=\"7%\">\n" +
+				"        <COL WIDTH=\"2%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
 				"        <COL WIDTH=\"5%\">\n" +				
-				"        <COL WIDTH=\"5%\">\n" +
+				"        <COL WIDTH=\"17%\">\n" +
 				"        <COL WIDTH=\"3%\">\n" +				
-				"        <COL WIDTH=\"25%\">\n" +
+				"        <COL WIDTH=\"20%\">\n" +
 				"      </COLGROUP>\n" +
 				"      <TR>\n" +
 				"        <TH>Cascade Name</TH>\n" +
