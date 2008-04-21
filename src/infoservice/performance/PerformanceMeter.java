@@ -317,7 +317,7 @@ public class PerformanceMeter implements Runnable
 		        	// TODO: try it twice?
 		        	break;
 		        }
-		        	
+		        
 		        if(resp.m_length != m_dataSize)
 		        {
         			LogHolder.log(LogLevel.INFO, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
