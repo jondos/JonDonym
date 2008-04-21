@@ -853,13 +853,13 @@ final public class Configuration
 				value = a_properties.getProperty("perf.dataSize", "524288");
 				if(value != null)
 				{
-					m_aPerfMeterConf[2] = new Integer(Math.min(524288, Integer.parseInt(value)));
+					m_aPerfMeterConf[2] = new Integer(Math.min(512*1024*2, Integer.parseInt(value)));
 				}
 				
 				value = a_properties.getProperty("perf.majorInterval", "300000");
 				if(value != null)
 				{
-					m_aPerfMeterConf[3] = new Integer(Math.max(300000, Integer.parseInt(value)));
+					m_aPerfMeterConf[3] = new Integer(Math.max(60*1000, Integer.parseInt(value)));
 				}
 			}
 		}
