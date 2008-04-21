@@ -245,6 +245,10 @@ public class XMLPriceCertificate implements IXMLEncodable
 
 	public boolean verify(PaymentInstanceDBEntry a_bi)
 	{
+		if(a_bi==null)
+		{
+			return false;
+		}
 		try
 		{
 			return XMLSignature.verify(m_docThePriceCert, a_bi.getCertificate()) != null;
