@@ -48,7 +48,8 @@ public class InfoService
 	protected JWSInternalCommands oicHandler;
 
 	private static int m_connectionCounter;
-
+	private static PerformanceMeter m_perfMeter;
+	
 	protected ThreadPool m_ThreadPool;
 
 	public static void main(String[] argv)
@@ -107,8 +108,12 @@ public class InfoService
 			if(Configuration.getInstance().isPerfEnabled())
 			{
 				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting Performance Meter...");
-				PerformanceMeter m = new PerformanceMeter(Configuration.getInstance().getPerformanceMeterConfig());
-				m.run();
+				s1.m_perfMeter = new PerformanceMeter(Configuration.getInstance().getPerformanceMeterConfig());
+				s1.m_perfMeter.run();
+			}
+			else
+			{
+				s1.m_perfMeter = null;
 			}
 		}
 		catch (Exception e)
@@ -195,4 +200,8 @@ public class InfoService
 		return m_connectionCounter++;
 	}
 
+	protected static PerformanceMeter getPerfMeter()
+	{
+		return m_perfMeter;
+	}
 }
