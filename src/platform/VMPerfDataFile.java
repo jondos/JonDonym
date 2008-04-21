@@ -162,7 +162,7 @@ public final class VMPerfDataFile
 			m_byteBufferPositionMethod = m_javaNioByteBufferClass.getMethod("position", new Class[] { int.class });
 			m_byteBufferGetMethod = m_javaNioByteBufferClass.getMethod("get", (Class[]) null);
 			m_byteBufferGetIntMethod = m_javaNioByteBufferClass.getMethod("getInt", (Class[]) null);
-							
+			
 			/*
 			 * m_perf = (sun.misc.Perf) java.security.AccessController.doPrivileged(new sun.misc.Perf.GetPerfAction());
 			 * m_buff = m_perf.attach(a_vmId, "r");
@@ -180,7 +180,7 @@ public final class VMPerfDataFile
 			 * m_buff.order(getByteOrder());
 			 */
 			m_javaNioByteBufferClass.getMethod("order", new Class[] { m_javaNioByteOrderClass }).invoke(m_buff, new Object[] { getByteOrder() });
-	
+			
 			m_bUsable = buildEntries();
 		}
 		catch(Exception ex) { LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Java VM < 1.4 found, can't use multiple-instances feature."); }	
