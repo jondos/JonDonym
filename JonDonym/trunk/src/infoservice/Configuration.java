@@ -211,6 +211,23 @@ final public class Configuration
 	 */
 	private Object[] m_aPerfMeterConf = new Object[4];
 	
+	private String m_strPerfAccountFile = null;
+	
+	private String m_strPerfAccountPassword = null;
+	
+	public final static String IS_PROP_NAME_PERFORMANCE_MONITORING = "perf";
+	public final static String IS_PROP_NAME_PERFACCOUNT = 
+		IS_PROP_NAME_PERFORMANCE_MONITORING +".account";
+	
+	public final static String IS_PROP_NAME_PERFACCOUNT_FILE =
+		IS_PROP_NAME_PERFACCOUNT+".file";
+	public final static String IS_PROP_VALUE_PERFACCOUNT_FILE = null;
+	
+	public final static String IS_PROP_NAME_PERFACCOUNT_PASSWORD = 
+		IS_PROP_NAME_PERFACCOUNT+".passw";
+	public final static String IS_PROP_VALUE_PERFACCOUNT_PASSWORD = null;
+	
+
 	public Configuration(Properties a_properties) throws Exception
 	{
 		/* for running in non-graphic environments, we need the awt headless support, it is only
@@ -861,6 +878,14 @@ final public class Configuration
 				{
 					m_aPerfMeterConf[3] = new Integer(Math.max(60*1000, Integer.parseInt(value)));
 				}
+				
+				m_strPerfAccountFile = 
+					a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_FILE, 
+							 				 IS_PROP_VALUE_PERFACCOUNT_FILE);
+				m_strPerfAccountPassword = 
+					a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_PASSWORD, 
+		 				 					 IS_PROP_VALUE_PERFACCOUNT_PASSWORD);
+				
 			}
 		}
 		catch (Exception e)
@@ -1147,6 +1172,16 @@ final public class Configuration
 	public boolean isPerfEnabled()
 	{
 		return m_bPerfEnabled;
+	}
+	
+	public String getPerfAccountFile()
+	{
+		return m_strPerfAccountFile;
+	}
+	
+	public String getPerfAccountPassword()
+	{
+		return m_strPerfAccountPassword;
 	}
 
 }
