@@ -873,7 +873,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 					"<tr><td class=\"name\">Proxy Port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
 					"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[2] + "<td></tr>" +
 					"<tr><td class=\"name\">Major Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + "<td></tr>" +
-					"<tr><td class=\"name\">Last Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastUpdate()).toString()) + "</td></tr>" + 
+					"<tr><td class=\"name\">Last Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastUpdate()).toString()) + "</td></tr>" +
+					"<tr><td class=\"name\">Next Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getLastUpdate() + ((Integer)Configuration.getInstance().getPerformanceMeterConfig()[3]).intValue()).toString()) + "</td></tr>" +
 					"<tr><td class=\"name\">Last Cascade Updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
 					"<tr><td class=\"name\">Estimated Traffic</td><td class=\"status\">" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(InfoService.getPerfMeter().getKiloBytesRecvd()) + " kb</td></tr>" +
 					"</table><br />";
