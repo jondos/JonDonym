@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -53,6 +54,7 @@ import anon.pay.PayAccount;
 import anon.pay.PayAccountsFile;
 import anon.proxy.AnonProxy;
 import anon.util.IMiscPasswordReader;
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import infoservice.Configuration;
 
@@ -81,6 +83,8 @@ public class PerformanceMeter implements Runnable
 	private AnonProxy proxy;
 	private char[] m_recvBuff;
 	
+	private Configuration m_infoServiceConfig = null;
+	
 	public static final int PERFORMANCE_SERVER_TIMEOUT = 5000;
 	public static final int REQUESTS_PER_INTERVAL = 3;
 	public static final int MINOR_INTERVAL = 1000;
@@ -91,55 +95,106 @@ public class PerformanceMeter implements Runnable
 		m_proxyPort = ((Integer) a_config[1]).intValue();
 		m_dataSize = ((Integer) a_config[2]).intValue();
 		m_majorInterval = ((Integer) a_config[3]).intValue();
+		m_infoServiceConfig = Configuration.getInstance(); 
+		if(m_infoServiceConfig == null)
+		{
+			//@todo: throw something. Assert InfoServiceConfig is not null
+		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 */
 	public void run() 
 	{
-		try
+		try 
 		{
 			proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
-			
-			/* @todo: first effort to get infoservice connected with PayCascades */
-			/* read in an account file, as it is exported and password protected by JAP */
-			Document payAccountXMLFile = XMLUtil.readXMLDocument(new File("infoservice_test.acc"));
-			Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
-			
-			PayAccount payAccount = new PayAccount(payAccountElem,new FixedPasswordReader()); 
-			PayAccountsFile payAccountsFile = PayAccountsFile.getInstance();
-			payAccountsFile.addAccount(payAccount);
-			payAccountsFile.setActiveAccount(payAccount.getAccountNumber());
-			
-			while(true)
+		} 
+		catch (UnknownHostException e1) 
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, 
+					"An error occured while setting up performance monitoring, cause: ", e1);
+			return;
+		} 
+		catch (IOException e1) 
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, 
+					"An I/O error occured while setting up performance monitoring, cause: ", e1);
+			return;
+		}
+		
+		/* @todo: first effort to get infoservice connected with PayCascades */
+		/* read in an account file, as it is exported and password protected by JAP */
+		Document payAccountXMLFile = null;
+		boolean accountLoaded = false;
+		String payAccountFileName = 
+			m_infoServiceConfig.getPerfAccountFile();
+		if(payAccountFileName != null)
+		{
+			try 
 			{
-				Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
-			    
-				while(knownMixCascades.hasNext()) 
+				payAccountXMLFile = XMLUtil.readXMLDocument(new File(payAccountFileName));
+				Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
+				if(payAccountElem != null)
 				{
-					MixCascade cascade = (MixCascade) knownMixCascades.next();
-					if(cascade.hasPerformanceServer())
+					PayAccount payAccount = null;
+					payAccount = new PayAccount(payAccountElem,new PerformanceAccountPasswordReader());
+					PayAccountsFile payAccountsFile = PayAccountsFile.getInstance();
+					if(payAccountsFile != null)
 					{
-						performTest(cascade);
+						payAccountsFile.addAccount(payAccount);
+						payAccountsFile.setActiveAccount(payAccount.getAccountNumber());
+						accountLoaded = true;
 					}
 				}
-			
-	    		try 
-	    		{
-	    			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sleeping for " + m_majorInterval);
-	    			Thread.sleep(m_majorInterval);
-	    		} catch (InterruptedException e)
-	    		{
-	    			
-	    		}
+			}
+			catch (IOException e) 
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.PAY, 
+					"Cannot read account file "+payAccountFileName+" for performance monitoring.");
+			} 
+			catch (XMLParseException e) 
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.PAY, 
+					"Cannot parse account file "+payAccountFileName+" for performance monitoring.");
+			}
+			catch (Exception e) 
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.PAY, 
+						"An error occured while accessing the accountfile: "+payAccountFileName+
+						", cause: ",e);
 			}
 		}
 		
-		catch(Exception ex) 
+		if(!accountLoaded)
 		{
-			ex.printStackTrace();
-		}		
+			System.out.println("Error loading account file");
+			LogHolder.log(LogLevel.WARNING, LogType.PAY, 
+					"Loading of accountfile: "+payAccountFileName+
+					" failed. Infoservice cannot perform performance check for pay cascades.");
+		}
+		
+		while(true)
+		{
+			Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
+		    
+			while(knownMixCascades.hasNext()) 
+			{
+				MixCascade cascade = (MixCascade) knownMixCascades.next();
+				if(cascade.hasPerformanceServer())
+				{
+					performTest(cascade);
+				}
+			}
+		
+    		try 
+    		{
+    			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sleeping for " + m_majorInterval);
+    			Thread.sleep(m_majorInterval);
+    		} 
+    		catch (InterruptedException e)
+    		{
+    			//@todo: ignore or terminate ?
+    		}
+		}
 	}
 
 	/**
@@ -157,12 +212,14 @@ public class PerformanceMeter implements Runnable
 			return false;
 		}
 	
-		PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(cascade.getId() + "." + Configuration.getInstance().getID());
+		PerformanceEntry entry = 
+			(PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(cascade.getId() 
+					+ "." + m_infoServiceConfig.getID());
 		
 		// no entry for this mix cascade yet -> create one
 		if(entry == null)
 		{
-			entry = new PerformanceEntry(cascade.getId(), Configuration.getInstance().getID(), System.currentTimeMillis() + m_majorInterval + 1000*60*5);
+			entry = new PerformanceEntry(cascade.getId(), m_infoServiceConfig.getID(), System.currentTimeMillis() + m_majorInterval + 1000*60*5);
 		}
 		
 		m_recvBuff = new char[m_dataSize];
@@ -220,7 +277,7 @@ public class PerformanceMeter implements Runnable
 		        
 		        String data = 
 		        	"<SendDummyDataRequest dataLength=\"" + m_dataSize +"\">" +
-		        	"	<InfoService id=\"" + Configuration.getInstance().getID() + "\">" +
+		        	"	<InfoService id=\"" + m_infoServiceConfig.getID() + "\">" +
 		        	"	</InfoService>" +
 		        	"</SendDummyDataRequest>";
 		        
@@ -352,11 +409,11 @@ public class PerformanceMeter implements Runnable
 	/* @todo: only a dummy password reader: customize to read 
 	 * the password via InfoserviceProperties
 	 */
-	private final class FixedPasswordReader implements IMiscPasswordReader
+	private final class PerformanceAccountPasswordReader implements IMiscPasswordReader
 	{
 		public String readPassword(Object message)
 		{
-			return "passw";
+			return m_infoServiceConfig.getPerfAccountPassword();
 		}
 	}
 }
