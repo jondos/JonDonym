@@ -222,13 +222,12 @@ public class PerformanceMeter implements Runnable
 		}
 	
 		PerformanceEntry entry = 
-			(PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascade.getId() 
-					+ "." + m_infoServiceConfig.getID());
+			(PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascade.getId());
 		
 		// no entry for this mix cascade yet -> create one
 		if(entry == null)
 		{
-			entry = new PerformanceEntry(a_cascade.getId(), m_infoServiceConfig.getID(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
+			entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
 		}
 		
 		m_recvBuff = new char[m_dataSize];
@@ -264,7 +263,7 @@ public class PerformanceMeter implements Runnable
         	try 
         	{
         		long delay;
-		        double throughput;
+        		long speed;
 					
 		       	Socket s = new Socket(m_proxyHost, m_proxyPort);
 		       	s.setSoTimeout(PERFORMANCE_SERVER_TIMEOUT);
@@ -355,12 +354,12 @@ public class PerformanceMeter implements Runnable
         		}
         		
         		delay = responseStartTime - transferInitiatedTime;
-        		throughput = (double) m_dataSize / (responseEndTime - responseStartTime);
+        		speed = (long) (m_dataSize / (responseEndTime - responseStartTime));
         		
-        		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + throughput + " kb/sec.");
+        		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kb/sec.");
         		
         		entry.updateDelay(delay);
-        		entry.updateSpeed(throughput);
+        		entry.updateSpeed(speed);
         		
         		m_lastUpdate = System.currentTimeMillis();
         		m_lastCascadeUpdated = a_cascade.getName();

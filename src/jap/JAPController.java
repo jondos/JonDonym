@@ -247,6 +247,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private MinVersionUpdater m_minVersionUpdater;
 	private JavaVersionUpdater m_javaVersionUpdater;
 	private MessageUpdater m_messageUpdater;
+	private PerformanceInfoUpdater m_perfInfoUpdater;
+	
 	private Object LOCK_VERSION_UPDATE = new Object();
 	private boolean m_bShowingVersionUpdate = false;
 
@@ -318,6 +320,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_minVersionUpdater = new MinVersionUpdater();
 		m_javaVersionUpdater = new JavaVersionUpdater();
 		m_messageUpdater = new MessageUpdater();
+		m_perfInfoUpdater = new PerformanceInfoUpdater();
 
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
@@ -536,6 +539,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					m_minVersionUpdater.start(false);
 					m_javaVersionUpdater.start(false);
 					m_messageUpdater.start(false);
+					m_perfInfoUpdater.start(false);
 				}
 				else
 				{
@@ -562,6 +566,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (!m_messageUpdater.isFirstUpdateDone())
 					{
 						m_messageUpdater.update();
+					}
+					if (!m_perfInfoUpdater.isFirstUpdateDone())
+					{
+						m_perfInfoUpdater.update();
 					}
 				}
 
@@ -3678,6 +3686,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							m_Controller.m_minVersionUpdater.stop();
 							m_Controller.m_javaVersionUpdater.stop();
 							m_Controller.m_messageUpdater.stop();
+							m_Controller.m_perfInfoUpdater.stop();
 						}
 					}, "Finish IS threads");
 					finishIS.start();
