@@ -146,6 +146,7 @@ public class PerformanceMeter implements Runnable
 					PayAccount payAccount = null;
 					payAccount = new PayAccount(payAccountElem,new PerformanceAccountPasswordReader());
 					PayAccountsFile payAccountsFile = PayAccountsFile.getInstance();
+					
 					if(payAccountsFile != null)
 					{
 						payAccountsFile.addAccount(payAccount);
@@ -179,11 +180,11 @@ public class PerformanceMeter implements Runnable
 					"Loading of accountfile: "+payAccountFileName+
 					" failed. Infoservice cannot perform performance check for pay cascades.");
 		}
-		
+
 		while(true)
 		{
 			Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
-		    
+
 			while(knownMixCascades.hasNext()) 
 			{
 				MixCascade cascade = (MixCascade) knownMixCascades.next();
@@ -232,8 +233,8 @@ public class PerformanceMeter implements Runnable
 		
 		m_recvBuff = new char[m_dataSize];
 		
-		if((proxy.getMixCascade() != a_cascade) && !proxy.isConnected())
-		{
+		/*if((proxy.getMixCascade() != a_cascade))
+		{*/
 			proxy.start(new SimpleMixCascadeContainer(a_cascade));
 			
 			synchronized(proxy)
@@ -248,7 +249,7 @@ public class PerformanceMeter implements Runnable
 				
 				}
 			}
-		}
+		//}
 		
 		if(!proxy.isConnected())
 		{
@@ -275,7 +276,7 @@ public class PerformanceMeter implements Runnable
 		       	
 		       	MixInfo lastMix = a_cascade.getMixInfo(a_cascade.getNumberOfMixes() - 1);
 		       	
-		       	LogHolder.log(LogLevel.INFO, LogType.NET, "Connecting to Performance Server at " + lastMix.getPerformanceServerHost() + ":" + lastMix.getPerformanceServerPort() + " through the mixcascade.");
+		       	LogHolder.log(LogLevel.INFO, LogType.NET, "Connecting to Performance Server at " + lastMix.getPerformanceServerHost() + ":" + lastMix.getPerformanceServerPort() + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
 		       	
 		       	stream.write(("CONNECT " + lastMix.getPerformanceServerHost()  + ":" + lastMix.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
 		       	
@@ -389,7 +390,8 @@ public class PerformanceMeter implements Runnable
     	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Avg Delay: " + entry.getAverageDelay() + " ms; Avg Throughput: " + entry.getAverageSpeed() + " kb/sec");
 		
     	Database.getInstance(PerformanceEntry.class).update(entry);
-		
+		proxy.stop();
+    	
 		return true;
 	}
 		
