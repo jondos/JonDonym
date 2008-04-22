@@ -179,9 +179,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final int FILTER_SPEED_MINOR_TICK = 32;
 	private static final int FILTER_SPEED_MAX = 128;
 	
-	private static final int FILTER_LATENCY_MAJOR_TICK = 2;
-	private static final int FILTER_LATENCY_MAX = 6;
-	private static final int FILTER_LATENCY_MIN = 0;
+	private static final int FILTER_LATENCY_MAJOR_TICK = 200;
+	private static final int FILTER_LATENCY_MAX = 800;
+	private static final int FILTER_LATENCY_MIN = 200;
 	
 	private static final String DEFAULT_MIX_NAME = "AN.ON Mix";
 
@@ -464,6 +464,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					m_filterInternationalGroup.setSelected(m_filterAtLeast3Countries.getModel(), true);
 				}
 			}
+			
+			m_filterSpeedSlider.setValue(((Integer)m_trustModelCopy.getAttribute(TrustModel.SpeedAttribute.class).getConditionValue()).intValue());
+			
+			int delay = ((Integer)m_trustModelCopy.getAttribute(TrustModel.DelayAttribute.class).getConditionValue()).intValue();
+			
+			if(delay == 0) delay = 200;
+			else
+				delay =  (m_filterLatencySlider.getMaximum() + m_filterLatencySlider.getMinimum()) - delay;
+			
+			m_filterLatencySlider.setValue(delay);
 			
 			((OperatorsTableModel)m_listOperators.getModel()).update();
 		
@@ -1430,6 +1440,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			else if(m_filterAtLeast3Countries.isSelected()) value = 3;
 			m_trustModelCopy.setAttribute(TrustModel.InternationalAttribute.class, Integer.parseInt(cmd), value);
 			m_trustModelCopy.setAttribute(TrustModel.OperatorBlacklistAttribute.class, TrustModel.TRUST_IF_NOT_IN_LIST, ((OperatorsTableModel) m_listOperators.getModel()).getBlacklist());
+			
+			m_trustModelCopy.setAttribute(TrustModel.SpeedAttribute.class, TrustModel.TRUST_IF_AT_LEAST, m_filterSpeedSlider.getValue());
+						
+			int delay = (m_filterLatencySlider.getMaximum() + m_filterLatencySlider.getMinimum()) - m_filterLatencySlider.getValue();
+			if(delay == 800) delay = 0;
+			
+			m_trustModelCopy.setAttribute(TrustModel.DelayAttribute.class, TrustModel.TRUST_IF_AT_MOST, delay);
 			
 			if(m_filterNameField.getText().length() > 0)
 				m_trustModelCopy.setName(m_filterNameField.getText());
@@ -3128,7 +3145,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			p.add(new JLabel(JAPMessages.getString(MSG_FILTER_AT_LEAST)), c1);
 			
 			m_filterSpeedSlider = new JSlider(SwingConstants.VERTICAL);
-			m_filterSpeedSlider.setEnabled(false);
 			m_filterSpeedSlider.setMinimum(0);
 			m_filterSpeedSlider.setMaximum(FILTER_SPEED_MAX);
 			m_filterSpeedSlider.setValue(0);
@@ -3166,13 +3182,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			p.add(new JLabel(JAPMessages.getString(MSG_FILTER_AT_MOST)), c1);
 			
 			/* 
-			 * IMPORTANT: to get the correct value of this slider use 8 - getValue(),
-			 * if you get an 8 -> unlimited response time. This is a little trick to 
+			 * IMPORTANT: to get the correct value of this slider use (MINVALUE+MAXVALUE) - getValue(),
+			 * if you get an MAXVALUE -> unlimited response time. This is a little trick to 
 			 * display the slider in the same direction as the speed slider even though
 			 * the original direction would be the other way around.
 			 */
 			m_filterLatencySlider = new JSlider(SwingConstants.VERTICAL);
-			m_filterLatencySlider.setEnabled(false);
 			m_filterLatencySlider.setMinimum(FILTER_LATENCY_MIN);
 			m_filterLatencySlider.setMaximum(FILTER_LATENCY_MAX);
 			m_filterLatencySlider.setValue(0);
@@ -3182,10 +3197,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterLatencySlider.setInverted(true);
 			m_filterLatencySlider.setSnapToTicks(true);
 			ht = new Hashtable(4);
-			ht.put(new Integer(0), new JLabel("\u221E"));
-			ht.put(new Integer(2), new JLabel(6 + " s"));
-			ht.put(new Integer(4), new JLabel(4 + " s"));
-			ht.put(new Integer(6), new JLabel(2 + " s"));
+			ht.put(new Integer(200), new JLabel("\u221E"));
+			ht.put(new Integer(400), new JLabel(600 + " s"));
+			ht.put(new Integer(600), new JLabel(400 + " s"));
+			ht.put(new Integer(800), new JLabel(200 + " s"));
 			m_filterLatencySlider.setLabelTable(ht);
 			
 			c1.gridy++;

@@ -46,6 +46,8 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
+import anon.infoservice.PerformanceEntry;
+import anon.infoservice.PerformanceInfo;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
@@ -441,6 +443,56 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 	}
 
+	public static class SpeedAttribute extends TrustAttribute
+	{
+		public SpeedAttribute(int a_trustCondition, Object a_conditionValue)
+		{
+			// MUST always be TRUST_IF_AT_LEAST
+			super(TRUST_IF_AT_LEAST, a_conditionValue);
+		}
+
+		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
+		{
+			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
+			int minSpeed = ((Integer) m_conditionValue).intValue();
+			
+			if(minSpeed == 0) return;
+			
+			///////// DEBUG //////////
+			//if(entry == null || entry.isInvalid()) return;
+			
+			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || entry.isInvalid() || entry.getAverageSpeed() < minSpeed))
+			{
+				throw (new TrustException("This cascade does not have enough speed!"));
+			}
+		}
+	}
+	
+	public static class DelayAttribute extends TrustAttribute
+	{
+		public DelayAttribute(int a_trustCondition, Object a_conditionValue)
+		{
+			// MUST always be TRUST_IF_AT_MOST
+			super(TRUST_IF_AT_MOST, a_conditionValue);
+		}
+
+		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
+		{
+			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
+			int maxDelay = ((Integer) m_conditionValue).intValue();
+			
+			if(maxDelay == 0) return;
+			
+			///////// DEBUG //////////
+			//if(entry == null || entry.isInvalid()) return;
+			
+			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || entry.isInvalid() || entry.getAverageDelay() > maxDelay))
+			{
+				throw (new TrustException("This cascade does not have enough speed!"));
+			}
+		}
+	}	
+	
 	static
 	{
 		// Initialize basic trust models
