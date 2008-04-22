@@ -1743,14 +1743,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
 					if(entry != null)
 					{
-						m_lblSpeed.setText(entry.getAverageSpeed() + " kb/sec");
-						m_lblDelay.setText(entry.getAverageDelay() + " ms");
+						if(entry.isInvalid())
+						{
+							m_lblSpeed.setText("Unbekannt");
+							m_lblDelay.setText("Unbekannt");
+						}
+						else
+						{
+							m_lblSpeed.setText(entry.getAverageSpeed() + " kbit/sec");
+							m_lblDelay.setText(entry.getAverageDelay() + " ms");
+						}
 					}
-					else if(entry.isInvalid())
-					{
-						m_lblSpeed.setText("Unbekannt");
-						m_lblDelay.setText("Unbekannt");
-					}
+					
 					
 					m_numOfUsersLabel.setText(m_infoService.getAnonLevel(cascadeId));
 					//System.out.println(m_numOfUsersLabel.getText());
