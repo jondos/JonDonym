@@ -353,10 +353,13 @@ public class PerformanceMeter implements Runnable
         			continue;
         		}
         		
+        		// delay in ms
         		delay = responseStartTime - transferInitiatedTime;
-        		speed = (long) (m_dataSize / (responseEndTime - responseStartTime));
         		
-        		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kb/sec.");
+        		// speed in kbit/sec
+        		speed = (long) (m_dataSize / (responseEndTime - responseStartTime)) * 8;
+        		
+        		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
         		
         		entry.updateDelay(delay);
         		entry.updateSpeed(speed);
@@ -373,7 +376,6 @@ public class PerformanceMeter implements Runnable
         	catch(Exception e)
         	{
 	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
-	        	//e.printStackTrace();
 	        }
         	
     		try 

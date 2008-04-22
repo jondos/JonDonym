@@ -79,7 +79,6 @@ public class PerformanceInfo extends AbstractDatabaseEntry
 		
 		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
 		PerformanceEntry avgEntry = new PerformanceEntry(a_cascadeId, -1);
-		System.out.println(vec.size() + " perf infos found");
 		
 		for(int i = 0; i < vec.size(); i++)
 		{
