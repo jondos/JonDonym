@@ -21,14 +21,12 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS_SHORT));
 	}
 	
-	@Override
 	protected Hashtable getEntrySerials() 
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	protected Hashtable getUpdatedEntries(Hashtable toUpdate) 
 	{
 		Hashtable hashtable = InfoServiceHolder.getInstance().getPerformanceInfos();
@@ -91,7 +89,6 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 		}
 	}
 
-	@Override
 	public Class getUpdatedClass() {
 		// TODO Auto-generated method stub
 		return PerformanceInfo.class;
