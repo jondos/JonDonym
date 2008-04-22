@@ -27,7 +27,6 @@
  */
 package anon.infoservice;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InterruptedIOException;
@@ -54,7 +53,6 @@ import anon.crypto.XMLSignature;
 import anon.util.ClassUtil;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import anon.util.ZLibTools;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -1481,9 +1479,21 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return getUpdateEntries(MessageDBEntry.class, true);
 	}
 	
-	public Hashtable getPerformanceEntries() throws Exception
+	public PerformanceInfo getPerformanceInfo() throws Exception
 	{
-		return getUpdateEntries(PerformanceEntry.class, false);
+		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest("/performanceinfo"),
+				  HTTPConnectionFactory.HTTP_ENCODING_PLAIN);
+		
+		if (!SignatureVerifier.getInstance().verifyXml(doc, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+		{
+			// signature could not be verified
+			throw new SignatureException("Document could not be verified!");
+		}
+		
+		Element nodePerf = (Element) XMLUtil.getFirstChildByName(doc, "PerformanceInfo");
+		PerformanceInfo info = new PerformanceInfo(nodePerf);
+		
+		return info;
 	}
 
 	/**

@@ -94,10 +94,12 @@ import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
+import anon.infoservice.PerformanceEntry;
 import anon.infoservice.ServiceLocation;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.ServiceSoftware;
 import anon.infoservice.StatusInfo;
+import anon.infoservice.PerformanceInfo;
 import anon.util.Util;
 import anon.util.Util.Comparable;
 import gui.JAPHelp;
@@ -209,12 +211,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private ManualPanel m_manualPanel;
 	private FilterPanel m_filterPanel;
 
+	private JLabel m_lblSpeed;
+	private JLabel m_lblDelay;
+	
 	private JLabel m_numOfUsersLabel;
 	private GridBagConstraints m_constrHosts, m_constrPorts;
-	private JLabel m_lblHosts;
+	/*private JLabel m_lblHosts;
 	private JLabel m_lblPorts;
 	private JAPMultilineLabel m_reachableLabel;
-	private JLabel m_portsLabel;
+	private JLabel m_portsLabel;*/
 	private JLabel m_lblSocks;
 
 	private GridBagLayout m_rootPanelLayout;
@@ -669,7 +674,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_cascadesPanel.add(panelBttns, c);
 
 		c.insets = new Insets(5, 20, 0, 5);
-
+		
 		//l = new JLabel(JAPMessages.getString("numOfUsersOnCascade") + ":");
 		l = new JLabel(JAPMessages.getString(MSG_ANON_LEVEL) + ":");
 		c.gridx = 2;
@@ -688,38 +693,38 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_cascadesPanel.add(m_numOfUsersLabel, c);
 
 		c.insets = new Insets(5, 20, 0, 5);
-		m_lblHosts = new JLabel(JAPMessages.getString("cascadeReachableBy") + ":");
+		l = new JLabel(JAPMessages.getString(MSG_FILTER_SPEED) + ":");
 		c.gridx = 2;
 		c.gridy = 2;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_constrHosts = (GridBagConstraints)c.clone();
-		m_cascadesPanel.add(m_lblHosts, c);
+		m_cascadesPanel.add(l, c);
 
 		c.insets = new Insets(5, 5, 0, 5);
-		m_reachableLabel = new JAPMultilineLabel("", null, null);
+		m_lblSpeed = new JLabel("");
 		c.gridx = 3;
 		c.gridy = 2;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		m_cascadesPanel.add(m_reachableLabel, c);
+		m_cascadesPanel.add(m_lblSpeed, c);
 
 		c.insets = new Insets(5, 20, 0, 5);
-		m_lblPorts = new JLabel(JAPMessages.getString("cascadePorts") + ":");
+		l = new JLabel(JAPMessages.getString(MSG_FILTER_LATENCY) + ":");
 		c.gridx = 2;
 		c.gridy = 3;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_constrPorts = (GridBagConstraints)c.clone();
-		m_cascadesPanel.add(m_lblPorts, c);
+		m_cascadesPanel.add(l, c);
 
 		c.insets = new Insets(5, 5, 0, 5);
-		m_portsLabel = new JLabel("");
+		m_lblDelay = new JLabel("");
 		c.gridx = 3;
 		c.gridy = 3;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		m_cascadesPanel.add(m_portsLabel, c);
+		m_cascadesPanel.add(m_lblDelay, c);
 
 		c.insets = new Insets(5, 20, 0, 5);
 		c.gridy = 4;
@@ -1735,18 +1740,30 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 					}
 
+					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
+					if(entry != null)
+					{
+						m_lblSpeed.setText(entry.getAverageSpeed() + " kb/sec");
+						m_lblDelay.setText(entry.getAverageDelay() + " ms");
+					}
+					else if(entry.isInvalid())
+					{
+						m_lblSpeed.setText("Unbekannt");
+						m_lblDelay.setText("Unbekannt");
+					}
+					
 					m_numOfUsersLabel.setText(m_infoService.getAnonLevel(cascadeId));
 					//System.out.println(m_numOfUsersLabel.getText());
 					//m_reachableLabel.setFont(m_numOfUsersLabel.getFont());
 					//m_lblHosts.setFont(m_numOfUsersLabel.getFont());
-					m_reachableLabel.setText(m_infoService.getHosts(cascadeId));
-					m_cascadesPanel.remove(m_lblHosts);
-					m_cascadesPanel.add(m_lblHosts, m_constrHosts);
+					//m_reachableLabel.setText(m_infoService.getHosts(cascadeId));
+					/*m_cascadesPanel.remove(m_lblHosts);
+					m_cascadesPanel.add(m_lblHosts, m_constrHosts);*/
 					//m_portsLabel.setFont(m_numOfUsersLabel.getFont());
 					//m_lblPorts.setFont(m_numOfUsersLabel.getFont());
-					m_portsLabel.setText(m_infoService.getPorts(cascadeId));
-					m_cascadesPanel.remove(m_lblPorts);
-					m_cascadesPanel.add(m_lblPorts, m_constrPorts);
+					//m_portsLabel.setText(m_infoService.getPorts(cascadeId));
+					/*m_cascadesPanel.remove(m_lblPorts);
+					m_cascadesPanel.add(m_lblPorts, m_constrPorts);*/
 					setPayLabel(cascade);
 					m_lblSocks.setVisible(cascade.isSocks5Supported());
 				}
@@ -2600,6 +2617,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 
 			return info;
+		}
+		
+		private PerformanceEntry getPerformanceEntry(String a_cascadeId)
+		{
+			return PerformanceInfo.getAverageEntry(a_cascadeId);
 		}
 	}
 

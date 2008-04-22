@@ -487,7 +487,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 *
 	 * @return A HTML table line with the data of this status entry.
 	 */
-	public String getHtmlTableLine(String a_strInfoServiceId)
+	public String getHtmlTableLine()
 	{
 		String htmlTableLine = "<TR><TD CLASS=\"name\">";
 		MixCascade ownMixCascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(getId());
@@ -495,7 +495,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		if (ownMixCascade != null)
 		{
 			htmlTableLine = htmlTableLine + ownMixCascade.getName();
-			perfEntry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(getId() + "." + a_strInfoServiceId);
+			perfEntry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(getId());
 		}
 		/* generate a String, which describes the traffic situation */
 		String trafficString = " (n/a)";

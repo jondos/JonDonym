@@ -127,7 +127,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	private static final int GET_MESSAGE_SERIALS = 18;
 
 	private static final int GET_STATUSINFO_TIMEOUT = 19;
-	private static final int GET_PERFORMANCE_ENTRIES = 20;
+	private static final int GET_PERFORMANCE_INFO = 20;
 
 	/**
 	 * This defines, whether there is an automatic change of infoservice after failure as default.
@@ -381,7 +381,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				|| functionNumber == GET_INFOSERVICE_SERIALS || functionNumber == GET_MIXCASCADE_SERIALS ||
 				functionNumber == GET_CASCADEINFO || functionNumber == GET_LATEST_JAVA_SERIALS ||
 				functionNumber == GET_LATEST_JAVA || functionNumber == GET_MESSAGES ||
-				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES || functionNumber == GET_PERFORMANCE_ENTRIES)
+				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES || functionNumber == GET_PERFORMANCE_INFO)
 			{
 				result = new Hashtable();
 				//if (functionNumber == GET_CASCADEINFO)
@@ -459,6 +459,15 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_LATEST_JAVA_SERIALS)
 					{
 						tempHashtable = currentInfoService.getLatestJavaSerials();
+					}
+					else if (functionNumber == GET_PERFORMANCE_INFO)
+					{
+						AbstractDatabaseEntry dbEntry = currentInfoService.getPerformanceInfo();
+						tempHashtable = new Hashtable();
+						if (dbEntry != null)
+						{
+							tempHashtable.put(dbEntry.getId(), dbEntry);
+						}
 					}
 					else if (functionNumber == GET_MESSAGES)
 					{
@@ -621,7 +630,6 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 						currentInfoService = null;
 						continue;
 					}
-
 					break;
 				}
 				catch (Exception e)
@@ -699,9 +707,12 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 		return (Hashtable) (fetchInformation(GET_MIXCASCADE_SERIALS, null));
 	}
 
-	public Hashtable getPerformanceEntries()
+	/*
+	 * Retrieves the PerformanceInfo object of ALL inforservices!
+	 */
+	public Hashtable getPerformanceInfos()
 	{
-		return (Hashtable) (fetchInformation(GET_PERFORMANCE_ENTRIES, null));
+		return (Hashtable) (fetchInformation(GET_PERFORMANCE_INFO, null));
 	}
 
 	/**
