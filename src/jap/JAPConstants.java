@@ -43,7 +43,7 @@ public final class JAPConstants
 	//to the date of the last commmit of this file
 
 	//Never change the layout of the next two lines as serveal automated tools use these lines to do fancy things...
-	public final static boolean m_bReleasedVersion = false; //Set to true if this is a stable (release) Version
+	public final static boolean m_bReleasedVersion = true; //Set to true if this is a stable (release) Version
 	private static final String RELEASE_DATE = "2007/11/08 20:01:48"; // Set only to a Value, if m_bReleaseVersion=true
 
 	public static final String CURRENT_CONFIG_VERSION = aktVersion;

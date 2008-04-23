@@ -75,6 +75,10 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String XML_ATTR_CURRENT_TRUST_MODEL = "currentTrustModel";
 	private static final String XML_ATTR_NAME = "name";
 
+	public static final TrustModel TRUST_MODEL_USER_DEFINED;
+	public static final TrustModel TRUST_MODEL_DEFAULT;
+	
+	
 	/**
 	 * Always trust the cascade, regardless of the attribute
 	 */
@@ -161,7 +165,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		public static final String XML_ATTR_NAME = "name";
 		public static final String XML_ATTR_TRUST_CONDITION = "trustCondition";
 		public static final String XML_ATTR_CONDITION_VALUE = "conditonValue";
-
+		
 		private int m_category;
 		protected int m_trustCondition;
 		protected Object m_conditionValue;
@@ -514,6 +518,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		model = new TrustModel(MSG_ALL_SERVICES, 0);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
+		TRUST_MODEL_DEFAULT = model;
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2);
@@ -542,6 +547,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 		};
 		model.setAttribute(UserDefinedAttribute.class, TRUST_IF_TRUE);
+		TRUST_MODEL_USER_DEFINED = model;
 		ms_trustModels.addElement(model);
 
 		setCurrentTrustModel((TrustModel)ms_trustModels.elementAt(0));
@@ -791,6 +797,16 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 	}
 
+	public static TrustModel getTrustModelUserDefined()
+	{
+		return TRUST_MODEL_USER_DEFINED;
+	}
+	
+	public static TrustModel getTrustModelDefault()
+	{
+		return TRUST_MODEL_DEFAULT;
+	}
+	
 	public static TrustModel getCurrentTrustModel()
 	{
 		return ms_currentTrustModel;

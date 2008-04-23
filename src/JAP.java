@@ -190,8 +190,6 @@ public class JAP
 			System.out.println("--listen, -l {[host][:port]} Listen on the specified interface.");
 			System.out.println("--cascade {[host][:port]}    Connects to the specified Mix-Cascade.");
 			System.out.println("--portable [path_to_browser] Tell JonDo that it runs in a portable environment.");
-			System.out.println("--portable-browserprofile [profile] Path to the portable browser profile,");
-			System.out.println("                             if not detected automatically.");
 			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
 			System.out.println("--portable-help-path         Path of external html help files for portable use.");
 			System.out.println("--config, -c {Filename}:     Force JonDo to use a specific configuration file.");
@@ -804,14 +802,6 @@ public class JAP
 			pFFExecutable = "";
 		}
 			
-		/*if (isArgumentSet("--portable-browserprofile"))
-		{
-			pFFprofile = getArgumentValue("--portable-browserprofile");
-			if(pFFprofile != null)
-			{
-				args_len += 2;
-			}
-		}*/
 		if (isArgumentSet("--portable-help-path"))
 		{
 			pFFHelpPath = getArgumentValue("--portable-help-path");
