@@ -81,9 +81,12 @@ public final class JAPUtil
 	public static final int MAX_FORMAT_KBYTES = 1;
 	public static final int MAX_FORMAT_MBYTES = 2;
 	public static final int MAX_FORMAT_GBYTES = 3;
+	
+	public static final int MAX_FORMAT_KBIT_PER_SEC = 0;
+	public static final int MAX_FORMAT_MBIT_PER_SEC = 1;
+	public static final int MAX_FORMAT_GBIT_PER_SEC = 2;
+	
 	public static final int MAX_FORMAT_ALL = 4;
-
-
 
 	public static JAPDialog.ILinkedInformation createDialogBrowserLink(String a_strUrl)
 	{
@@ -115,6 +118,60 @@ public final class JAPUtil
 				AbstractOS.getInstance().openURL(myUrl);
 			}
 		};
+	}
+	
+	public static String formatKbitPerSecValueWithUnit(long c)
+	{
+		return formatKbitPerSecValueWithUnit(c, MAX_FORMAT_ALL);
+	}
+
+	public static String formatKbitPerSecValueWithUnit(long c, int a_maxFormat)
+	{
+		return formatKbitPerSecValueWithoutUnit(c, a_maxFormat) + " " + formatKbitPerSecValueOnlyUnit(c, a_maxFormat);
+	}
+	
+	public static String formatKbitPerSecValueOnlyUnit(long c)
+	{
+		return formatKbitPerSecValueOnlyUnit(MAX_FORMAT_ALL);
+	}
+	
+	public static String formatKbitPerSecValueOnlyUnit(long c, int a_maxFormat)
+	{
+		if (c < 1000 || a_maxFormat < MAX_FORMAT_MBIT_PER_SEC)
+		{
+			return JAPMessages.getString("kbit/sec");
+		}
+		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_GBIT_PER_SEC)
+		{
+			return JAPMessages.getString("mbit/sec");
+		}
+		return JAPMessages.getString("gbit/sec");		
+	}
+	
+	public static String formatKbitPerSecValueWithoutUnit(long c)
+	{
+		return formatKbitPerSecValueWithoutUnit(c, MAX_FORMAT_ALL);
+	}
+	
+	public static String formatKbitPerSecValueWithoutUnit(long c, int a_maxFormat)
+	{
+		DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
+		double d = c;
+		if (c < 1000 || a_maxFormat < MAX_FORMAT_MBIT_PER_SEC)
+		{
+			df.applyPattern("#,####");
+		}
+		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_GBIT_PER_SEC)
+		{
+			d /= 1000.0;
+			df.applyPattern("#,##0.0");
+		}
+		else
+		{
+			d /= 1000000.0;
+			df.applyPattern("#,##0.0");
+		}
+		return df.format(d);
 	}
 
 	/** Returns the desired unit for this amount of Bytes (Bytes, kBytes, MBytes,GBytes)*/

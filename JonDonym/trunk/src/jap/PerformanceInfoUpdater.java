@@ -81,7 +81,7 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 			}
 			
 			updated = doCleanup(newEntries) || updated;
-
+			
 			if ((getUpdatedClass() == MixCascade.class) && updated)
 			{
 				JAPController.getInstance().notifyJAPObservers();
