@@ -1479,6 +1479,15 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return getUpdateEntries(MessageDBEntry.class, true);
 	}
 	
+	/**
+	 * Sends a /performanceinfo request to the Info Service, retrieves the data
+	 * and creates a new PerformanceInfo object.
+	 * 
+	 * @return a PerformanceInfo object
+	 * 
+	 * @throws Exception if the Signature can't be verified, the Info Service doesn't have
+	 * the information available or can't be reached.
+	 */
 	public PerformanceInfo getPerformanceInfo() throws Exception
 	{
 		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest("/performanceinfo"),
@@ -1490,7 +1499,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			throw new SignatureException("Document could not be verified!");
 		}
 		
-		Element nodePerf = (Element) XMLUtil.getFirstChildByName(doc, "PerformanceInfo");
+		Element nodePerf = (Element) XMLUtil.getFirstChildByName(doc, PerformanceInfo.XML_ELEMENT_NAME);
 		PerformanceInfo info = new PerformanceInfo(nodePerf);
 		
 		return info;
