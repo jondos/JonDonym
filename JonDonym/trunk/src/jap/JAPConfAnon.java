@@ -3306,6 +3306,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				MixCascade cascade = (MixCascade)value;
 				ImageIcon icon;
 
+				this.setToolTipText(
+						JAPMessages.getString("cascadeReachableBy") + ": " + 
+						m_infoService.getHosts(cascade.getId()) + " - " +
+						JAPMessages.getString("cascadePorts") + ": " +
+						m_infoService.getPorts(cascade.getId()));
+				
 				if (cascade.isUserDefined())
 				{
 					if (TrustModel.getCurrentTrustModel().isTrusted(cascade))
