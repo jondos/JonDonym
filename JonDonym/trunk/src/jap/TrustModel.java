@@ -117,7 +117,21 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String MSG_SERVICES_USER_DEFINED = TrustModel.class.getName() + "_servicesUserDefined";
 	private static final String MSG_CASCADES_FILTER = TrustModel.class.getName() + "_servicesFilter";
 	private static final String MSG_ALL_SERVICES = TrustModel.class.getName() + "_allServices";
-
+	
+	private static final String MSG_EXCEPTION_PAY_CASCADE = TrustModel.class.getName() + "_exceptionPayCascade";
+	private static final String MSG_EXCEPTION_FREE_CASCADE = TrustModel.class.getName() + "_exceptionFreeCascade";
+	private static final String MSG_EXCEPTION_MORE_THAN_1_OPERATOR = TrustModel.class.getName() + "_exceptionMoreThan1Op";
+	private static final String MSG_EXCEPTION_SINGLE_MIX = TrustModel.class.getName() + "_exceptionSingleMix";
+	private static final String MSG_EXCEPTION_EXPIRED_CERT = TrustModel.class.getName() + "_exceptionExpiredCert";
+	private static final String MSG_EXCEPTION_NOT_USER_DEFINED = TrustModel.class.getName() + "_exceptionNotUserDefined";
+	private static final String MSG_EXCEPTION_TOO_FEW_COUNTRIES = TrustModel.class.getName() + "_exceptionTooFewCountries";
+	private static final String MSG_EXCEPTION_NOT_INTERNATIONAL = TrustModel.class.getName() + "_exceptionNotInternational";
+	private static final String MSG_EXCEPTION_INTERNATIONAL = TrustModel.class.getName() + "_exceptionInternational";
+	private static final String MSG_EXCEPTION_NOT_ENOUGH_ANON = TrustModel.class.getName() + "_exceptionNotEnoughAnon";
+	private static final String MSG_EXCEPTION_BLACKLISTED = TrustModel.class.getName() + "_exceptionBlacklisted";
+	private static final String MSG_EXCEPTION_NOT_ENOUGH_SPEED = TrustModel.class.getName() + "_exceptionNotEnoughSpeed";
+	private static final String MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH = TrustModel.class.getName() + "_exceptionResponseTimeTooHigh";
+	
 	private static Vector ms_trustModels = new Vector();
 	private static TrustModel ms_currentTrustModel;
 
@@ -264,12 +278,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			{
 				if (m_trustCondition == TRUST_IF_NOT_TRUE)
 				{
-					throw new TrustException("Payment is not allowed!");
+					throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_PAY_CASCADE));
 				}
 			}
 			else if (m_trustCondition == TRUST_IF_TRUE)
 			{
-				throw new TrustException("Only payment services allowed!");
+				throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_FREE_CASCADE));
 			}
 		}
 	};
@@ -285,11 +299,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			if (m_trustCondition == TRUST_IF_TRUE && a_cascade.getNumberOfOperators() > 1)
 			{
-				throw (new TrustException("This cascade has more than one operator!"));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_MORE_THAN_1_OPERATOR)));
 			}
 			else if (m_trustCondition == TRUST_IF_NOT_TRUE && a_cascade.getNumberOfOperators() <= 1)
 			{
-				throw (new TrustException("This is a single-Mix cascade!"));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_SINGLE_MIX)));
 			}
 		}
 	};
@@ -307,7 +321,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			{
 				if (m_trustCondition == TRUST_IF_NOT_TRUE)
 				{
-					throw new TrustException("Expired certificates are not trusted!");
+					throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_EXPIRED_CERT));
 				}
 			}
 		}
@@ -336,7 +350,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				}
 				else
 				{
-					throw new TrustException("Only user-defined services allowed!");
+					throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_USER_DEFINED));
 				}
 			}
 		}
@@ -353,20 +367,20 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			if(m_trustCondition == TRUST_IF_AT_LEAST && a_cascade.getNumberOfCountries() < ((Integer) m_conditionValue).intValue())
 			{
-				throw (new TrustException("This cascade does have too few different coutries!"));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_TOO_FEW_COUNTRIES)));
 			}
 			else if (m_trustCondition == TRUST_IF_TRUE && a_cascade.getNumberOfCountries() <= 1)
 			{
-				throw (new TrustException("This cascade does not count as international!"));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_INTERNATIONAL)));
 			}
 			else if (m_trustCondition == TRUST_IF_NOT_TRUE && a_cascade.getNumberOfCountries() > 1)
 			{
-				throw (new TrustException("This cascade does count as international!"));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_INTERNATIONAL)));
 			}
 		}
 	};
 
-	public static class NewAttribute extends TrustAttribute
+	/*public static class NewAttribute extends TrustAttribute
 	{
 		public NewAttribute(int a_trustCondition, Object a_conditionValue)
 		{
@@ -380,7 +394,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				if (Database.getInstance(NewCascadeIDEntry.class).getEntryById(
 					 a_cascade.getMixIDsAsString()) == null)
 				{
-					throw (new TrustException("Only new cascades are accepted!"));
+					throw (new TrustException("only new cascades are accepted!"));
 				}
 			}
 			else if(m_trustCondition == TRUST_IF_NOT_TRUE)
@@ -391,7 +405,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				}
 			}
 		}
-	};
+	};*/
 
 	public static class AnonLevelAttribute extends TrustAttribute
 	{
@@ -406,7 +420,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			StatusInfo info = (StatusInfo) Database.getInstance(StatusInfo.class).getEntryById(a_cascade.getId());
 			if(m_trustCondition == TRUST_IF_AT_LEAST && (info == null || info.getAnonLevel() < ((Integer) m_conditionValue).intValue()))
 			{
-				throw (new TrustException("This cascade does not have enough anonymity!"));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_ANON)));
 			}
 		}
 	}
@@ -429,7 +443,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 					if(list.contains(a_cascade.getMixInfo(i).getServiceOperator()))
 					{
-						throw new TrustException("This cascade has a blacklisted mix!");
+						throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_BLACKLISTED));
 					}
 					/*for(int j = 0; j < ((Vector)m_conditionValue).size(); j++)
 					{
@@ -458,12 +472,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			
 			if(minSpeed == 0) return;
 			
-			///////// DEBUG //////////
-			//if(entry == null || entry.isInvalid()) return;
+			// TODO: make it configurable
+			if(entry == null || entry.isInvalid()) return;
 			
 			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || entry.isInvalid() || entry.getAverageSpeed() < minSpeed))
 			{
-				throw (new TrustException("This cascade does not have enough speed!"));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_SPEED)));
 			}
 		}
 	}
@@ -483,12 +497,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			
 			if(maxDelay == 0) return;
 			
-			///////// DEBUG //////////
-			//if(entry == null || entry.isInvalid()) return;
+			// TODO: make it configurable
+			if(entry == null || entry.isInvalid()) return;
 			
 			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || entry.isInvalid() || entry.getAverageDelay() > maxDelay))
 			{
-				throw (new TrustException("This cascade does not have enough speed!"));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH)));
 			}
 		}
 	}	

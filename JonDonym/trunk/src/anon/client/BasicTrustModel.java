@@ -82,4 +82,27 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		}
 	}
 
+	public final boolean isTrusted(MixCascade a_cascade, StringBuffer buff)
+	{
+		if (a_cascade != null && a_cascade.isShownAsTrusted())
+		{
+			return true;
+		}
+		try
+		{
+			checkTrust(a_cascade);
+			return true;
+		}
+		catch (TrustException a_e)
+		{
+			buff.append(a_e.getMessage());
+			return false;
+		}
+		catch (SignatureException a_e)
+		{
+			// TODO: localize signature exceptions!
+			buff.append(a_e.getMessage());
+			return false;
+		}
+	}
 }

@@ -139,13 +139,13 @@ public final class JAPUtil
 	{
 		if (c < 1000 || a_maxFormat < MAX_FORMAT_MBIT_PER_SEC)
 		{
-			return JAPMessages.getString("kbit/sec");
+			return JAPMessages.getString("kbit/s");
 		}
 		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_GBIT_PER_SEC)
 		{
-			return JAPMessages.getString("mbit/sec");
+			return JAPMessages.getString("Mbit/s");
 		}
-		return JAPMessages.getString("gbit/sec");		
+		return JAPMessages.getString("Gbit/s");		
 	}
 	
 	public static String formatKbitPerSecValueWithoutUnit(long c)
