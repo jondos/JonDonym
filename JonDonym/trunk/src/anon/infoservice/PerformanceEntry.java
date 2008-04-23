@@ -43,7 +43,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public PerformanceEntry(Element a_entry) throws XMLParseException
 	{
-		// TODO: client expire time
+		// TODO: expire time
 		super(System.currentTimeMillis() + 1000*60*24);
 		
 		XMLUtil.assertNodeName(a_entry, XML_ELEMENT_NAME);
@@ -73,10 +73,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_serial = System.currentTimeMillis();
 	}
 	
-	/**
-	 * Use IS and cascade IDs since this entry depends on a specific
-	 * cascade and the info service we're retrieving it from.
-	 */
 	public String getId()
 	{
 		return m_strCascadeId;
