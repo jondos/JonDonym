@@ -74,6 +74,7 @@ import anon.infoservice.AbstractMixCascadeContainer;
 import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.CascadeIDEntry;
 import anon.infoservice.Database;
+import anon.infoservice.PerformanceInfo;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
 import anon.infoservice.HTTPConnectionFactory;
@@ -1239,7 +1240,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 				// load the stored statusinfos
 				Database.getInstance(StatusInfo.class).loadFromXml(
 						(Element) XMLUtil.getFirstChildByName(root, StatusInfo.XML_ELEMENT_CONTAINER_NAME));
-
+				
+				// load stored performanceinfo
+				Database.getInstance(PerformanceInfo.class).loadFromXml(
+						(Element) XMLUtil.getFirstChildByName(root, PerformanceInfo.XML_ELEMENT_CONTAINER_NAME));
+				
 				// load deleted messages
 				Database.getInstance(DeletedMessageIDDBEntry.class).loadFromXml(
 								(Element) XMLUtil.getFirstChildByName(root,
@@ -2469,6 +2474,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 				e.appendChild(elem);
 			}
 
+			// TODO: Is this really the best way?
+			// store performanceinfo objects
+			e.appendChild(Database.getInstance(PerformanceInfo.class).toXmlElement(doc));
+			
 			// store deleted messages
 			e.appendChild(Database.getInstance(DeletedMessageIDDBEntry.class).toXmlElement(doc));
 
