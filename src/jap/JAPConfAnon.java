@@ -837,7 +837,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	private void setPayLabel(MixCascade cascade)
 	{
-		if (!TrustModel.getCurrentTrustModel().isTrusted(cascade))
+		StringBuffer buff = new StringBuffer();
+		
+		if (!TrustModel.getCurrentTrustModel().isTrusted(cascade, buff))
 		{
 			m_payLabel.setForeground(Color.red);
 			m_payLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -860,7 +862,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 			else
 			{
-				m_payLabel.setText(JAPMessages.getString(MSG_NOT_TRUSTWORTHY));
+				m_payLabel.setText(JAPMessages.getString(MSG_NOT_TRUSTWORTHY) + " (" + buff.toString() + ")");
 				m_payLabel.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 					TrustModel.getCurrentTrustModel().getName()));
 				m_blacklist = false;
@@ -1762,8 +1764,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					{
 						if(entry.isInvalid())
 						{
-							m_lblSpeed.setText("Unbekannt");
-							m_lblDelay.setText("Unbekannt");
+							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
+							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
 						}
 						else
 						{
