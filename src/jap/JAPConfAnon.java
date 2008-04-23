@@ -1767,7 +1767,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else
 						{
-							m_lblSpeed.setText(entry.getAverageSpeed() + " kbit/sec");
+							m_lblSpeed.setText(/*entry.getAverageSpeed() + " kbit/sec"*/JAPUtil.formatKbitPerSecValueWithUnit(entry.getAverageSpeed()));
 							m_lblDelay.setText(entry.getAverageDelay() + " ms");
 						}
 					}
@@ -3198,9 +3198,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterLatencySlider.setSnapToTicks(true);
 			ht = new Hashtable(4);
 			ht.put(new Integer(200), new JLabel("\u221E"));
-			ht.put(new Integer(400), new JLabel(600 + " s"));
-			ht.put(new Integer(600), new JLabel(400 + " s"));
-			ht.put(new Integer(800), new JLabel(200 + " s"));
+			ht.put(new Integer(400), new JLabel(600 + " ms"));
+			ht.put(new Integer(600), new JLabel(400 + " ms"));
+			ht.put(new Integer(800), new JLabel(200 + " ms"));
 			m_filterLatencySlider.setLabelTable(ht);
 			
 			c1.gridy++;
