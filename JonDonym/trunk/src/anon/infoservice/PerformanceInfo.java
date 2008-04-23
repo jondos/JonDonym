@@ -60,6 +60,8 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	public static final String XML_ELEMENT_NAME = "PerformanceInfo";
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfoList";
 	
+	public static final int PERFORMANCE_INFO_TTL = 1000*60*6; // 6 minutes
+	
 	/**
 	 * Creates a new PerformanceInfo object from an XML element which is usually
 	 * either retrieved from the Info Service or stored in the configuration file 
@@ -71,7 +73,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	 */
 	public PerformanceInfo(Element a_info) throws XMLParseException
 	{
-		super(System.currentTimeMillis() + 1000*60*60);
+		super(System.currentTimeMillis() + PERFORMANCE_INFO_TTL);
 
 		if(a_info == null)
 		{

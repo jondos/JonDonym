@@ -14,7 +14,7 @@ import anon.infoservice.MixCascade;
 
 public class PerformanceInfoUpdater extends AbstractDatabaseUpdater 
 {
-	private static final long UPDATE_INTERVAL_MS_SHORT = 1000 * 60; // 1 minute
+	private static final long UPDATE_INTERVAL_MS_SHORT = 1000 * 60 * 5; // 5 minutes
 	
 	public PerformanceInfoUpdater()
 	{
