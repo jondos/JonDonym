@@ -52,7 +52,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	private Element m_xmlData;
 	
 	/**
-	 * All PerformanceEntry objects measured by the infoservice
+	 * All PerformanceEntry objects measured by the info service
 	 */
 	private Hashtable m_entries = new Hashtable();
 	
