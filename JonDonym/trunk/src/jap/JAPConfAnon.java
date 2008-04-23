@@ -135,10 +135,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_MIX_X_OF_Y = JAPConfAnon.class.getName() + "_mixXOfY";
 	private static final String MSG_MIX_POSITION = JAPConfAnon.class.getName() + "_mixPosition";
 	private static final String MSG_MIX_FIRST = JAPConfAnon.class.getName() + "_mixFirst";
+	private static final String MSG_MIX_SINGLE = JAPConfAnon.class.getName() + "_singleMix";
 	private static final String MSG_MIX_MIDDLE = JAPConfAnon.class.getName() + "_mixMiddle";
 	private static final String MSG_MIX_LAST = JAPConfAnon.class.getName() + "_mixLast";
 	private static final String MSG_EXPLAIN_MIX_TT = JAPConfAnon.class.getName() + "_explainMixTT";
 	private static final String MSG_FIRST_MIX_TEXT = JAPConfAnon.class.getName() + "_firstMixText";
+	private static final String MSG_SINGLE_MIX_TEXT = JAPConfAnon.class.getName() + "_singleMixText";
 	private static final String MSG_MIDDLE_MIX_TEXT = JAPConfAnon.class.getName() + "_middleMixText";
 	private static final String MSG_LAST_MIX_TEXT = JAPConfAnon.class.getName() + "_lastMixText";
 	private static final String MSG_NOT_TRUSTWORTHY = JAPConfAnon.class.getName() + "_notTrustworthy";
@@ -928,21 +930,32 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_lblMix.setToolTipText("");
 		}
+		
+		//m_nrLblExplain.setForeground(Color.black);
 		if (m_serverList.areMixButtonsEnabled())
 		{
 			String mixType;
 			if (server == 0)
 			{
-				mixType = JAPMessages.getString(MSG_MIX_FIRST);
+				if (m_serverList.getNumberOfMixes() <= 1)
+				{
+					mixType = MSG_MIX_SINGLE;
+					//m_nrLblExplain.setForeground(Color.red);
+				}
+				else
+				{
+					mixType = MSG_MIX_FIRST;
+				}
 			}
 			else if ((server + 1) == m_serverList.getNumberOfMixes())
 			{
-				mixType = JAPMessages.getString(MSG_MIX_LAST);
+				mixType = MSG_MIX_LAST;
 			}
 			else
 			{
-				mixType = JAPMessages.getString(MSG_MIX_MIDDLE);
+				mixType = MSG_MIX_MIDDLE;
 			}
+			mixType = JAPMessages.getString(mixType);
 
 			m_nrLabel.setText(JAPMessages.getString(MSG_MIX_X_OF_Y, new Object[]{new Integer(server + 1),
 													new Integer(m_serverList.getNumberOfMixes())}));
@@ -1331,6 +1344,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						   JAPMessages.getString("activeCascadeEdited"));
 						 }**/
 				}
+
 				new Thread(new Runnable()
 				{
 					// get out of event thread
@@ -1342,7 +1356,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						{
 							public void run()
 							{
-								setSelectedCascade(c);
+								setSelectedCascade(c); // scroll window to cascade
 							}
 						});
 					}
@@ -1373,6 +1387,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			MixCascade cascade =
 				(MixCascade) m_tableMixCascade.getValueAt(m_tableMixCascade.getSelectedRow(), 1);
+			Enumeration enumCascades;
 			if (JAPController.getInstance().getCurrentMixCascade().equals(cascade))
 			{
 				JAPDialog.showErrorDialog(this.getRootPanel(),
@@ -1384,6 +1399,26 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				if (JAPDialog.showYesNoDialog(getRootPanel(), JAPMessages.getString(MSG_REALLY_DELETE)))
 				{
 					Database.getInstance(MixCascade.class).remove(cascade);
+					
+					if (TrustModel.getCurrentTrustModel() == TrustModel.getTrustModelUserDefined())
+					{
+						// we have the user defined trust model; look whether there are any user defined cascades left
+						enumCascades = Database.getInstance(MixCascade.class).getEntrySnapshotAsEnumeration();
+						while (enumCascades.hasMoreElements())
+						{
+							cascade = (MixCascade)enumCascades.nextElement();
+							if (cascade.isUserDefined())
+							{
+								enumCascades = null;
+								break;
+							}
+						}
+						if (enumCascades != null)
+						{							
+							// there are no more user defined cascades; set the default trust model 
+							TrustModel.setCurrentTrustModel(TrustModel.getTrustModelDefault());
+						}
+					}
 
 					if (m_tableMixCascade.getRowCount() >= 0)
 					{
@@ -1410,10 +1445,27 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 												Integer.parseInt(m_manPortField.getText()));
 			Database.getInstance(PreviouslyKnownCascadeIDEntry.class).update(
 						 new PreviouslyKnownCascadeIDEntry(c));
-			Database.getInstance(MixCascade.class).update(c);
-			((MixCascadeTableModel)m_tableMixCascade.getModel()).addElement(c);
-			setSelectedCascade(c);
-			updateValues(false);
+			Database.getInstance(MixCascade.class).update(c);			
+			((MixCascadeTableModel)m_tableMixCascade.getModel()).addElement(c);		
+			TrustModel.setCurrentTrustModel(TrustModel.getTrustModelUserDefined());
+			setSelectedCascade(c); // update the cascade information
+			new Thread(new Runnable()
+			{
+				// get out of event thread
+				public void run()
+				{
+					updateValues(true);
+					SwingUtilities.invokeLater(
+					new Runnable()
+					{
+						public void run()
+						{
+							// scroll the window to this cascade
+							setSelectedCascade(c);
+						}
+					});
+				}
+			}).start();
 		}
 		catch (Exception a_e)
 		{
@@ -2877,6 +2929,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					{
 						JAPDialog.showMessageDialog(
 											  getRootPanel(), JAPMessages.getString(MSG_FIRST_MIX_TEXT),
+											  mixType);
+					}
+					else if (m_nrLblExplain.getText().equals(mixType = JAPMessages.getString(MSG_MIX_SINGLE)))
+					{
+						JAPDialog.showMessageDialog(
+											  getRootPanel(), JAPMessages.getString(MSG_SINGLE_MIX_TEXT),
 											  mixType);
 					}
 					else if (m_nrLblExplain.getText().equals(mixType = JAPMessages.getString(MSG_MIX_MIDDLE)))

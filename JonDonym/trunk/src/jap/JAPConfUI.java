@@ -692,7 +692,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		TitledGridBagPanel panel = new TitledGridBagPanel(JAPMessages.getString(MSG_ON_CLOSING_JAP),
 			new Insets(0, 10, 0, 10));
 		m_cbWarnOnClose = new JCheckBox(JAPMessages.getString(MSG_WARNING_ON_CLOSING_JAP));
-
+		m_cbWarnOnClose.setEnabled(!JAPController.getInstance().isPortableMode());
 		panel.addRow(m_cbWarnOnClose, null);
 		return panel;
 	}
