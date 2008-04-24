@@ -337,7 +337,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			super(a_trustCondition, a_conditionValue);
 		}
-
+		
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			if (m_trustCondition == TRUST_IF_TRUE)
@@ -743,7 +743,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			TrustAttribute attr = (TrustAttribute) m_trustAttributes.get(a_attr);
 			if(attr == null)
-				return setAttribute(a_attr, TRUST_ALWAYS, null);
+				return setAttribute(a_attr, TRUST_ALWAYS, new Integer(0));
 
 			return attr;
 		}
@@ -814,35 +814,34 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	public static void fromXmlElement(Element a_container)
 	{
-		if (a_container == null || !a_container.getNodeName().equals(XML_ELEMENT_CONTAINER_NAME))
-		{
-			return;
-		}
-
 		int trustModelsAdded = 0;
 
-		NodeList elements = a_container.getElementsByTagName(XML_ELEMENT_NAME);
-		for (int i = 0; i < elements.getLength(); i++)
+		if (a_container != null && a_container.getNodeName().equals(XML_ELEMENT_CONTAINER_NAME))
 		{
-			try
-			{
-				addTrustModel(new TrustModel( (Element) elements.item(i)));
-				trustModelsAdded++;
-			}
-			catch (Exception a_e)
-			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Could not load trust model from XML!", a_e);
-			}
-		}
 
+			NodeList elements = a_container.getElementsByTagName(XML_ELEMENT_NAME);
+			for (int i = 0; i < elements.getLength(); i++)
+			{
+				try
+				{
+					addTrustModel(new TrustModel( (Element) elements.item(i)));
+					trustModelsAdded++;
+				}
+				catch (Exception a_e)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Could not load trust model from XML!", a_e);
+				}
+			}
+			
+			setCurrentTrustModel(XMLUtil.parseAttribute(a_container, XML_ATTR_CURRENT_TRUST_MODEL, 0l));
+		}
+		
 		if(trustModelsAdded == 0)
 		{
 			TrustModel model = new TrustModel(MSG_CASCADES_FILTER, 5);
 			model.setEditable(true);
 			addTrustModel(model);
 		}
-
-		setCurrentTrustModel(XMLUtil.parseAttribute(a_container, XML_ATTR_CURRENT_TRUST_MODEL, 0l));
 	}
 
 	public static Element toXmlElement(Document a_doc, String a_xmlContainerName)

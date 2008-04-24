@@ -91,7 +91,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public void updateDelay(long a_lDelay) 
 	{
 		if(m_aDelays == null)
+		{
 			m_aDelays = new long[3]; // TODO: Make number of fixings configurable
+		}
 		m_lDelay = 0;
 		int numEntries = 1;
 		for(int i=1;i < m_aDelays.length;i++)
@@ -108,7 +110,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public void updateSpeed(long a_iSpeed) 
 	{
 		if(m_aSpeeds == null)
+		{
 			m_aSpeeds = new long[3]; // TODO: Make number of fixings configurable
+		}
 		m_lSpeed = 0;
 		int numEntries = 1;
 		for(int i=1; i < m_aSpeeds.length; i++)
@@ -120,6 +124,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_lSpeed = (m_lSpeed + a_iSpeed) / numEntries;
 		
 		m_lastUpdate = System.currentTimeMillis();
+	}
+	
+	public void setAverageSpeed(long a_lSpeed)
+	{
+		m_lSpeed = a_lSpeed;
+	}
+	
+	public void setAverageDelay(long a_lDelay)
+	{
+		m_lDelay = a_lDelay;
 	}
 	
 	public long getAverageSpeed()

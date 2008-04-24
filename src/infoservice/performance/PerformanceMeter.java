@@ -221,14 +221,8 @@ public class PerformanceMeter implements Runnable
 			return false;
 		}
 	
-		PerformanceEntry entry = 
-			(PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascade.getId());
-		
-		// no entry for this mix cascade yet -> create one
-		if(entry == null)
-		{
-			entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
-		}
+
+		PerformanceEntry entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
 		
 		m_recvBuff = new char[m_dataSize];
 		
@@ -306,9 +300,9 @@ public class PerformanceMeter implements Runnable
 		        reader.read();
 		        	
 		        long responseStartTime = System.currentTimeMillis();
-		        	
+		        
 		        reader.reset();
-		        	
+		        
 		        // read HTTP header from PerformanceServer
 		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
 		        {
