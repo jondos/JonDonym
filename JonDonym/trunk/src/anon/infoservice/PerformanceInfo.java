@@ -149,10 +149,10 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
 		PerformanceEntry avgEntry = new PerformanceEntry(a_cascadeId, -1);
 		
-		for(int i = 0; i < vec.size(); i++)
+		for (int i = 0; i < vec.size(); i++)
 		{
 			PerformanceEntry entry = ((PerformanceInfo) vec.elementAt(i)).getEntry(a_cascadeId);
-			if(entry != null)
+			if (entry != null)
 			{
 				avgEntry.updateSpeed(entry.getAverageSpeed());
 				avgEntry.updateDelay(entry.getAverageDelay());

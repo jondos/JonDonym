@@ -401,12 +401,19 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  }
 	  }
 
+	  /*
+	   * Store the Service Operator if
+	   * - it doesn't exist yet or
+	   * - the old certificate is null or
+	   * - the certificate is newer than the old entry
+	   * but only if the organization name is != null
+	   */
 	  ServiceOperator currentSO =
 		  (ServiceOperator)Database.getInstance(ServiceOperator.class).getEntryById(m_mixOperator.getId());
-	  if ( (currentSO == null || currentSO.getCertificate() == null) ||
+	  if ( m_mixOperator.getOrganization() != null && ((currentSO == null || currentSO.getCertificate() == null) ||
 		  (m_mixOperator.getCertificate() != null &&
 		   m_mixOperator.getCertificate().getValidity().getValidTo().after(
-			   currentSO.getCertificate().getValidity().getValidTo())))
+			   currentSO.getCertificate().getValidity().getValidTo()))))
 	  {
 		  Database.getInstance(ServiceOperator.class).update(m_mixOperator);
 	  }

@@ -3675,7 +3675,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				public int compare(Object a_obj1, Object a_obj2)
 				{
-					if(a_obj1 == null || a_obj2 == null ) return 0;
+					if(a_obj1 == null || a_obj2 == null || ((ServiceOperator) a_obj1).getOrganization() == null || ((ServiceOperator) a_obj2).getOrganization() == null) return 0;
 					boolean b1 = m_vecBlacklist.contains(a_obj1);
 					boolean b2 = m_vecBlacklist.contains(a_obj2);
 					
