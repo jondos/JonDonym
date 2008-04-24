@@ -508,6 +508,10 @@ public class JAP
 			{
 				cmdArgs += " " + m_temp[i];
 			}
+			if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
+			{
+				cmdArgs += " -a"; // important for automatic restart
+			}
 			m_controller.setCommandLineArgs(cmdArgs);
 		}
 
