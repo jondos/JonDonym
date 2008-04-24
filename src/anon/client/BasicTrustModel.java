@@ -30,10 +30,8 @@ package anon.client;
 import java.security.SignatureException;
 import java.util.Observable;
 
-import anon.infoservice.Database;
-import anon.client.ITrustModel.TrustException;
+import gui.JAPMessages;
 import anon.infoservice.MixCascade;
-import anon.infoservice.BlacklistedCascadeIDEntry;
 
 
 /**
@@ -51,7 +49,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 	{
 		if (a_cascade == null || !a_cascade.isVerified())
 		{
-			throw (new SignatureException("Received structure has an invalid signature."));
+			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
 		}
 	}
 
@@ -100,7 +98,6 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		}
 		catch (SignatureException a_e)
 		{
-			// TODO: localize signature exceptions!
 			buff.append(a_e.getMessage());
 			return false;
 		}
