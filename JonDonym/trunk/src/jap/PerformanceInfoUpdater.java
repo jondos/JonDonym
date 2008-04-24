@@ -14,19 +14,18 @@ import anon.infoservice.MixCascade;
 
 public class PerformanceInfoUpdater extends AbstractDatabaseUpdater 
 {
-	private static final long UPDATE_INTERVAL_MS_SHORT = 1000 * 60 * 5; // 5 minutes
+	private static final long UPDATE_INTERVAL = 1000 * 60 * 5; // 5 minutes
 	
 	public PerformanceInfoUpdater()
 	{
-		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS_SHORT));
+		super(new DynamicUpdateInterval(UPDATE_INTERVAL));
 	}
 	
 	protected Hashtable getEntrySerials() 
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	protected Hashtable getUpdatedEntries(Hashtable toUpdate) 
 	{
 		Hashtable hashtable = InfoServiceHolder.getInstance().getPerformanceInfos();
@@ -40,6 +39,8 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 	
 	protected void updateInternal()
 	{
+		// this code is pretty much taken from AbstractDatabaseUpdate
+		
 		if (Thread.currentThread().isInterrupted())
 		{
 			// this thread is being stopped; ignore this error
@@ -89,9 +90,8 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 		}
 	}
 
-	public Class getUpdatedClass() {
-		// TODO Auto-generated method stub
+	public Class getUpdatedClass() 
+	{
 		return PerformanceInfo.class;
 	}
-
 }

@@ -60,7 +60,11 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	public static final String XML_ELEMENT_NAME = "PerformanceInfo";
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfoList";
 	
-	public static final int PERFORMANCE_INFO_TTL = 1000*60*6; // 6 minutes
+	/*
+	 * Timeout set to 6 hours because it's better to have out-dated 
+	 * performance information than no performance information at all ;-)
+	 */
+	public static final int PERFORMANCE_INFO_TTL = 1000*60*60*6;
 	
 	/**
 	 * Creates a new PerformanceInfo object from an XML element which is usually
@@ -135,8 +139,6 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	 * Info Services and returns a new average PerformanceEntry for the
 	 * given cascade.
 	 * 
-	 * @todo cache the values?
-	 * 
 	 * @param a_cascadeId Id of the cascade
 	 * 
 	 * @return PerformanceEntry with average values for the given cascade
@@ -149,15 +151,76 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
 		PerformanceEntry avgEntry = new PerformanceEntry(a_cascadeId, -1);
 		
+		Vector v = new Vector();
+		
 		for (int i = 0; i < vec.size(); i++)
 		{
 			PerformanceEntry entry = ((PerformanceInfo) vec.elementAt(i)).getEntry(a_cascadeId);
 			if (entry != null)
 			{
-				avgEntry.updateSpeed(entry.getAverageSpeed());
-				avgEntry.updateDelay(entry.getAverageDelay());
+				v.addElement(entry);
 			}
 		}
+		
+		if(v.size() == 0)
+		{
+			return avgEntry;
+		}
+		
+		/*
+		 * TODO: this obviously needs some improvement, this is just a first draft
+		 */
+		long speed = 0;
+		long delay = 0;
+		for(int j = 0; j < v.size(); j++)
+		{
+			speed += ((PerformanceEntry) v.get(j)).getAverageSpeed();
+			delay += ((PerformanceEntry) v.get(j)).getAverageDelay();
+		}
+		speed /= v.size();
+		delay /= v.size();
+		
+		for(int k = 0; k < v.size(); k++)
+		{
+			double straySpeed = Math.abs(speed - ((PerformanceEntry) v.get(k)).getAverageSpeed()) / speed;
+			double strayDelay = Math.abs(delay - ((PerformanceEntry) v.get(k)).getAverageDelay()) / delay;
+			if(straySpeed > 0.6)
+			{
+				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with speed " + ((PerformanceEntry) v.get(k)).getAverageSpeed());
+				((PerformanceEntry) v.get(k)).setAverageSpeed(0);
+			}
+			
+			if(strayDelay > 0.6)
+			{
+				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with delay " + ((PerformanceEntry) v.get(k)).getAverageDelay());
+				((PerformanceEntry) v.get(k)).setAverageDelay(0);
+			}
+		}
+		
+		if(v.size() == 0)
+		{
+			return avgEntry;
+		}
+		
+		speed = 0;
+		delay = 0;
+		for(int j = 0; j < v.size(); j++)
+		{
+			if(((PerformanceEntry) v.get(j)).getAverageSpeed() != 0)
+			{
+				speed += ((PerformanceEntry) v.get(j)).getAverageSpeed();
+			}
+			
+			if(((PerformanceEntry) v.get(j)).getAverageSpeed() != 0)
+			{
+				delay += ((PerformanceEntry) v.get(j)).getAverageDelay();
+			}
+		}
+		speed /= v.size();
+		delay /= v.size();
+		
+		avgEntry.setAverageSpeed(speed);
+		avgEntry.setAverageDelay(delay);
 		
 		return avgEntry;
 	}
