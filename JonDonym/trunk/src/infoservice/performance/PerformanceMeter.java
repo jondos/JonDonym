@@ -80,6 +80,7 @@ public class PerformanceMeter implements Runnable
 	private int m_proxyPort;
 	private int m_dataSize;
 	private int m_majorInterval;
+	private int m_requestsPerInterval;
 	
 	private AnonProxy proxy;
 	private char[] m_recvBuff;
@@ -92,7 +93,6 @@ public class PerformanceMeter implements Runnable
 	
 	public static final int PERFORMANCE_SERVER_TIMEOUT = 5000;
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60;
-	public static final int REQUESTS_PER_INTERVAL = 3;
 	public static final int MINOR_INTERVAL = 1000;
 	
 	public PerformanceMeter(Object[] a_config)
@@ -101,6 +101,7 @@ public class PerformanceMeter implements Runnable
 		m_proxyPort = ((Integer) a_config[1]).intValue();
 		m_dataSize = ((Integer) a_config[2]).intValue();
 		m_majorInterval = ((Integer) a_config[3]).intValue();
+		m_requestsPerInterval = ((Integer) a_config[4]).intValue();
 		m_infoServiceConfig = Configuration.getInstance(); 
 		if(m_infoServiceConfig == null)
 		{
@@ -250,9 +251,9 @@ public class PerformanceMeter implements Runnable
 			return false;
 		}
 		
-		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + REQUESTS_PER_INTERVAL + " requests and " + MINOR_INTERVAL + " ms interval.");
+		LogHolder.log(LogLevel.INFO, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + MINOR_INTERVAL + " ms interval.");
 		
-		for(int i = 0; i < REQUESTS_PER_INTERVAL; i++)
+		for(int i = 0; i < m_requestsPerInterval; i++)
 		{
         	try 
         	{
@@ -355,11 +356,9 @@ public class PerformanceMeter implements Runnable
         		
         		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
         		
-        		entry.updateDelay(delay);
-        		entry.updateSpeed(speed);
-        		
-        		m_lastUpdate = System.currentTimeMillis();
-        		m_lastCascadeUpdated = a_cascade.getName();
+        		entry.updateDelay(delay, m_requestsPerInterval);
+        		entry.updateSpeed(speed, m_requestsPerInterval);
+
         		m_lKiloBytesRecvd += bytesRead / 1024;
         		
         		if(m_lKiloBytesRecvd < 0) 
@@ -386,6 +385,9 @@ public class PerformanceMeter implements Runnable
 		
     	Database.getInstance(PerformanceEntry.class).update(entry);
 		proxy.stop();
+		
+		m_lastUpdate = System.currentTimeMillis();
+		m_lastCascadeUpdated = a_cascade.getName();
     	
 		return true;
 	}
