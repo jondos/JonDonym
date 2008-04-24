@@ -77,7 +77,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	public static final TrustModel TRUST_MODEL_USER_DEFINED;
 	public static final TrustModel TRUST_MODEL_DEFAULT;
-	
+
+	public static TrustModel TRUST_MODEL_CUSTOM_FILTER;
 	
 	/**
 	 * Always trust the cascade, regardless of the attribute
@@ -135,6 +136,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String MSG_EXCEPTION_BLACKLISTED = TrustModel.class.getName() + "_exceptionBlacklisted";
 	private static final String MSG_EXCEPTION_NOT_ENOUGH_SPEED = TrustModel.class.getName() + "_exceptionNotEnoughSpeed";
 	private static final String MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH = TrustModel.class.getName() + "_exceptionResponseTimeTooHigh";
+	private static final String MSG_EXCEPTION_NO_VALID_SIGNATURE = TrustModel.class.getName() + "_exceptionNoValidSignature";
 	
 	private static Vector ms_trustModels = new Vector();
 	private static TrustModel ms_currentTrustModel;
@@ -824,7 +826,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			{
 				try
 				{
-					addTrustModel(new TrustModel( (Element) elements.item(i)));
+					TrustModel model = new TrustModel( (Element) elements.item(i));
+					TRUST_MODEL_CUSTOM_FILTER = model;
+					addTrustModel(model);					
 					trustModelsAdded++;
 				}
 				catch (Exception a_e)
@@ -840,8 +844,21 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			TrustModel model = new TrustModel(MSG_CASCADES_FILTER, 5);
 			model.setEditable(true);
+			TRUST_MODEL_CUSTOM_FILTER = model;
 			addTrustModel(model);
 		}
+	}
+	
+	public static void restoreDefault()
+	{
+		removeTrustModel(TRUST_MODEL_CUSTOM_FILTER);
+	
+		TrustModel model = new TrustModel(MSG_CASCADES_FILTER, 5);
+		model.setEditable(true);
+		TRUST_MODEL_CUSTOM_FILTER = model;
+		addTrustModel(model);
+		
+		setCurrentTrustModel(TRUST_MODEL_DEFAULT);
 	}
 
 	public static Element toXmlElement(Document a_doc, String a_xmlContainerName)
@@ -995,7 +1012,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			info = a_cascade.getMixInfo(i);
 			if (info == null || !info.isVerified())
 			{
-				throw new SignatureException("Mix " + (i + 1) + " has no valid signature!");
+				throw new SignatureException(JAPMessages.getString(MSG_EXCEPTION_NO_VALID_SIGNATURE, new Integer(i+1)));
 			}
 		}
 

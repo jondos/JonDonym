@@ -1065,6 +1065,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			hideEditFilter();
 		}
+		
+		TrustModel.restoreDefault();
 	}
 	
 	protected void onCancelPressed()
