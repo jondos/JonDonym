@@ -18,10 +18,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private long m_lDelay;
 	private long m_lSpeed;
 	
-	private long[] m_aDelays = new long[3];
-	private long[] m_aSpeeds = new long[3];
+	private long[] m_aDelays;
+	private long[] m_aSpeeds;
 	
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
+	
+	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
 	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
 	public static final String XML_ELEMENT_AVG_DELAY = "avgDelay";
@@ -43,8 +45,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public PerformanceEntry(Element a_entry) throws XMLParseException
 	{
-		// TODO: expire time
-		super(System.currentTimeMillis() + 1000*60*24);
+		super(System.currentTimeMillis() + PERFORMANCE_ENTRY_TTL);
 		
 		XMLUtil.assertNodeName(a_entry, XML_ELEMENT_NAME);
 		
@@ -88,15 +89,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_serial;
 	}
 	
-	public void updateDelay(long a_lDelay) 
+	public void updateDelay(long a_lDelay, int maxEntries) 
 	{
 		if(m_aDelays == null)
 		{
-			m_aDelays = new long[3]; // TODO: Make number of fixings configurable
+			m_aDelays = new long[maxEntries];
 		}
 		m_lDelay = 0;
 		int numEntries = 1;
-		for(int i=1;i < m_aDelays.length;i++)
+		for(int i = 1; i < m_aDelays.length; i++)
 		{
 			if(m_aDelays[i] != 0) numEntries++;
 			m_lDelay += (m_aDelays[i-1] = m_aDelays[i]);
@@ -107,11 +108,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_lastUpdate = System.currentTimeMillis();
 	}
 	
-	public void updateSpeed(long a_iSpeed) 
+	public void updateSpeed(long a_iSpeed, int maxEntries) 
 	{
 		if(m_aSpeeds == null)
 		{
-			m_aSpeeds = new long[3]; // TODO: Make number of fixings configurable
+			m_aSpeeds = new long[maxEntries];
 		}
 		m_lSpeed = 0;
 		int numEntries = 1;
