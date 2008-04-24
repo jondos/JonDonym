@@ -201,12 +201,13 @@ final public class Configuration
 	 */
 	private boolean m_bPerfEnabled;
 
-	/** Stores 4 configuration values for cascade performance monitoring.
+	/** Stores 5 configuration values for cascade performance monitoring.
 	 * <ul>
 	 * 	<li>The local proxy hosty</li>
 	 * 	<li>The local proxy port</li>
 	 * 	<li>The size of the random test data block in bytes;</li>
 	 * 	<li>The interval between measurement blocks in milliseconds</li>
+	 *  <li>Requests per interval</li>
 	 * </ul>
 	 */
 	private Object[] m_aPerfMeterConf = new Object[4];
@@ -878,6 +879,12 @@ final public class Configuration
 				{
 					m_aPerfMeterConf[3] = new Integer(Math.max(60*1000, Integer.parseInt(value)));
 				}
+				
+				value = a_properties.getProperty("perf.requestsPerInterval", "3");
+				if(value != null)
+				{
+					m_aPerfMeterConf[4] = Integer.valueOf(value);
+				}				
 				
 				m_strPerfAccountFile = 
 					a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_FILE, 
