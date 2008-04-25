@@ -182,16 +182,17 @@ public class ActivePaymentDetails extends JAPDialog implements ActionListener
 					{
 						extraInfoString = PaymentInfoPane.createEgoldLink(extraInfoString,amount,planName, transferNumber);
 					}
-					/*
+					
 					else if (extraInfoString.toUpperCase().indexOf("PAYSAFECARD") != -1 )
 					{
 						extraInfoString = PaymentInfoPane.createPaysafecardLink(extraInfoString,amount, transferNumber);
-					}*/
+					}
 					else
 					{
-						extraInfoString = Util.replaceAll(extraInfoString,"%t", transferNumber);
-						extraInfoString = Util.replaceAll(extraInfoString,"%a",(new Long(amount)).toString());
-						extraInfoString = Util.replaceAll(extraInfoString,"%c",""); //currency is not used, so get rid of the placeholder
+						extraInfoString = PaymentInfoPane.createPaysafecardLink(extraInfoString,amount, transferNumber);
+						//extraInfoString = Util.replaceAll(extraInfoString,"%t", transferNumber);
+						//extraInfoString = Util.replaceAll(extraInfoString,"%a",(new Long(amount)).toString());
+						//extraInfoString = Util.replaceAll(extraInfoString,"%c",""); //currency is not used, so get rid of the placeholder
 					}
 					//if a link, store it in final variable (for anonymous inner class ActionListeners), but don't show it
 					final String linkToUse = extraInfoString;
@@ -246,11 +247,19 @@ public class ActivePaymentDetails extends JAPDialog implements ActionListener
 				}
 				else //regular text
 				{
-					//test could contain e.g. wiring instructions, so need to replace placeholders, too
-					extraInfoString = Util.replaceAll(extraInfoString,"%t", transferNumber);
-					extraInfoString = Util.replaceAll(extraInfoString,"%a",JAPUtil.formatEuroCentValue(amount));
-					extraInfoString = Util.replaceAll(extraInfoString,"%c",""); //currency is not used, so get rid of the placeholder
-
+					if (extraInfoString.toUpperCase().indexOf("PAYSAFECARD") != -1 )
+					{
+						extraInfoString = PaymentInfoPane.createPaysafecardLink(extraInfoString,amount, transferNumber);
+					}
+					else
+					{
+						extraInfoString = PaymentInfoPane.createPaysafecardLink(extraInfoString,amount, transferNumber);
+						//test could contain e.g. wiring instructions, so need to replace placeholders, too
+						//extraInfoString = Util.replaceAll(extraInfoString,"%t", transferNumber);
+						//extraInfoString = Util.replaceAll(extraInfoString,"%a",JAPUtil.formatEuroCentValue(amount));
+						//extraInfoString = Util.replaceAll(extraInfoString,"%c",""); //currency is not used, so get rid of the placeholder
+					}
+					
 					//add text
 					JAPHtmlMultiLineLabel extraInfoLabel = new JAPHtmlMultiLineLabel(extraInfoString);
 					extraInfoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);

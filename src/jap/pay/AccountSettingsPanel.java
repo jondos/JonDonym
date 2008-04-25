@@ -333,7 +333,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 	private static final String MSG_BACKUP_WARNING = AccountSettingsPanel.class.getName() + "_backupwarning";
 	private static final String MSG_ACTIVE_COMPLETE = AccountSettingsPanel.class.getName() + "_activecomplete";
-	private static final String MSG_MIXED_COMPLETE = AccountSettingsPanel.class.getName() + "_mixedcomplete";
+	//private static final String MSG_MIXED_COMPLETE = AccountSettingsPanel.class.getName() + "_mixedcomplete";
 	private static final String MSG_COUPON_SENT = AccountSettingsPanel.class.getName() + "_couponsent";
 	private static final String MSG_COUPON_FAILED = AccountSettingsPanel.class.getName() + "_couponfailed";
     private static final String MSG_COUPON = AccountSettingsPanel.class.getName() + "_coupon";
@@ -1720,11 +1720,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				 {
 					 return false;
 				 }
-				 else if (methodSelectionPane.getSelectedPaymentOption().getType().equalsIgnoreCase(
-					 XMLPaymentOption.OPTION_MIXED))
-				 {
-					 return false;
-				 }
 				 else
 				 {
 					 return true;
@@ -1750,11 +1745,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				}
 				if (methodSelectionPane.getSelectedPaymentOption().getType().equalsIgnoreCase(
 					XMLPaymentOption.OPTION_ACTIVE))
-				{
-					return true;
-				}
-				else if (methodSelectionPane.getSelectedPaymentOption().getType().equalsIgnoreCase(
-					XMLPaymentOption.OPTION_MIXED))
 				{
 					return true;
 				}
@@ -1800,18 +1790,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					 long accNum = a_accountCreationThread.getAccount().getAccountNumber();
 					 paymentToSend.addData(XMLPassivePayment.KEY_ACCOUNTNUMBER, new Long(accNum).toString());
 
-				 }
-				 else if (methodSelectionPane.getSelectedPaymentOption().getType().equalsIgnoreCase(
-					 XMLPaymentOption.OPTION_MIXED))
-				 {
-					 XMLVolumePlan selectedPlan = planSelectionPane.getSelectedVolumePlan();
-					 int planPrice = selectedPlan.getPrice();
-					 paymentToSend.setAmount(planPrice);
-					 paymentToSend.setCurrency("EUR");
-					 String paymentName = methodSelectionPane.getSelectedPaymentOption().getName();
-					 paymentToSend.setPaymentName(paymentName);
-					 XMLTransCert newTan = paymentInfoPane.getTransCert();
-					 paymentToSend.setTransferNumber(newTan.getTransferNumber());
 				 }
 				 try
 				 {
@@ -1868,13 +1846,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				{
 					return true;
 				}
-				else if (methodSelectionPane.getSelectedPaymentOption().getType().equalsIgnoreCase(
-					XMLPaymentOption.OPTION_MIXED))
-			    {
-					return false;
-					//we do NOT send the paysafecardpayment here any more, we do it already when getting the tan (to avoid the user accidently closing the wizard after confirming the payment but before the payment ist stored)
-					//BUT we send the passivepayment to immediately trigger polling the disposition state/crediting the user account
-				}
 				else //passive
 				{
 					return false;
@@ -1907,7 +1878,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				String couponFailed = highlightMarkupStart + JAPMessages.getString(MSG_COUPON_FAILED) +
 					highlightMarkupEnd; //shold not happne, since we check validity upon entering the coupon
 				String activeComplete = JAPMessages.getString(MSG_ACTIVE_COMPLETE);
-				String mixedComplete = JAPMessages.getString(MSG_MIXED_COMPLETE);
+				//String mixedComplete = JAPMessages.getString(MSG_MIXED_COMPLETE);
 
 				String paymentType;
 				//get info about the delay until paymen is credited
@@ -1932,12 +1903,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					messagesToShow.addElement(paymentDelay);
 					messagesToShow.addElement(backupWarning);
 				}
-				else if (paymentType.equalsIgnoreCase(XMLPaymentOption.OPTION_MIXED))
-				{
-                   messagesToShow.addElement(mixedComplete);
-				   messagesToShow.addElement(paymentDelay);
-				   messagesToShow.addElement(backupWarning);
-			    }
 				else if (paymentType.equals("coupon") )
 				{
 					boolean passivePaymentSucceeded = ((Boolean) sendPassivePane.getValue()).booleanValue();
@@ -2855,6 +2820,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		{
 			public boolean isSkippedAsNextContentPane()
 			{
+				return false;
+				/*
 				if (a_methodSelectionPane == null ||
 					a_methodSelectionPane.getSelectedPaymentOption() == null ||
 					a_methodSelectionPane.getSelectedPaymentOption().getType().equalsIgnoreCase(
@@ -2867,7 +2834,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				else
 				{
 					return true;
-				}
+				}*/
 			}
 
 			public boolean isSkippedAsPreviousContentPane()
