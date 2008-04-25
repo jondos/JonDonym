@@ -75,7 +75,7 @@ public class BISelectionDialog extends JAPDialog implements ActionListener, List
 		super(a_owner, JAPMessages.getString("biSelectionDialog"), true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		jbInit();
-		setSize(400, 300);
+		setSize(500, 400);
 		setVisible(true);
 	}
 

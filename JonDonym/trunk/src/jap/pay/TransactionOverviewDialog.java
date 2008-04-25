@@ -467,17 +467,6 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 				{
 					continue; //we only need data for active and mixed payment options
 				}
-				//skip paysafecard unless it was chosen for this transfer (cause if not, no psc disposition was created in the wizard, so completing the payment via psc would not work)
-				if (curOption.getName().toUpperCase().indexOf("PAYSAFE") != -1 )
-				{
-					/** @todo do not show paysafecard here, as the user might have canceled the transaction
-					if (a_paymentMethod.toUpperCase().indexOf("PAYSAFE") == -1 )
-					 */
-					{
-						continue;
-					}
-				}
-
 
 				Hashtable curOptionData = new Hashtable();
 				curOptionData.put("name",curOption.getName());
@@ -636,18 +625,6 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 			}
 			else
 			{
-				//do not show exired paysafecard payments as open
-				String paymentMethod = (String) a_transactionData.get(XMLTransactionOverview.KEY_PAYMENTMETHOD);
-				if (paymentMethod.toUpperCase().indexOf("PAYSAFECARD") != -1)
-				{
-					String creationDateAsString = (String) a_transactionData.get(XMLTransactionOverview.KEY_CREATIONDATE);
-					long dateAsMillis = Long.parseLong(creationDateAsString);
-					int timeoutInMinutes = JAPConstants.PAYSAFECARD_TIMEOUT;
-					if (dateAsMillis + (timeoutInMinutes * 60 * 1000)  < System.currentTimeMillis() )
-					{
-						return JAPMessages.getString(MSG_EXPIREDSTATUS);
-					}
-				}
 				return JAPMessages.getString(MSG_OPENSTATUS);
 			}
 		}

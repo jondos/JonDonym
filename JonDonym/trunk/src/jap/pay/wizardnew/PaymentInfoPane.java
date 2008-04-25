@@ -145,23 +145,12 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
      * takes the extrainfo as contained in the database's paymentoption configuration, and replaces the placeholders etc
 	 * in a way suitable for the paysafecard syntax
 	 */
-	public static String createPaysafecardLink(String baseLink, long intAmount, String transferNumber,
-											   XMLTransCert a_transCert,
-											   XMLPaymentOption a_option)
+	public static String createPaysafecardLink(String baseLink, long intAmount, String transferNumber)
 	{
-		long creationTime =
-			PayAccountsFile.getInstance().getAccount(a_transCert.getAccountNumber()).getCreationTime().getTime();
-		transferNumber += "d" + creationTime;
-
-		if (a_option.isMaxClicksRestricted() && a_option.getMaxClicks() > 0)
-		{
-			// add the counter mark to the tan
-			transferNumber += "c" + a_option.getMaxClicks();
-		}
-
 		baseLink = Util.replaceAll(baseLink, "%t", transferNumber);
 		String pscAmount = amountAsString(intAmount);
 		baseLink = Util.replaceAll(baseLink, "%a", pscAmount);
+		baseLink = Util.replaceAll(baseLink, "%l", JAPMessages.getLocale().getLanguage());
 		return baseLink;
 	}
 
@@ -295,8 +284,7 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 					}
 					else if (strOptionName.toLowerCase().indexOf("paysafecard") != -1)
 					{
-						link = createPaysafecardLink(strExtraInfo, intAmount, tan, m_transCert,
-							m_selectedOption);
+						link = createPaysafecardLink(strExtraInfo, intAmount, tan);
 					}
 					else
 					{
@@ -304,9 +292,7 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 						link = Util.replaceAll(strExtraInfo, "%t", tan);
 						String amount = JAPUtil.formatEuroCentValue(intAmount);
 						link = Util.replaceAll(link, "%a", amount);
-						link = Util.replaceAll(link, "%c", "");
 					}
-					m_selectedOption.decrementMaxClicks();
 					return link;
 				}
 			};
@@ -332,10 +318,7 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 					{
 						public void mouseClicked(MouseEvent a_event)
 						{
-							if (m_selectedOption.getMaxClicks() > 0)
-							{
-								super.mouseClicked(a_event);
-							}
+							super.mouseClicked(a_event);							
 							actionPerformed(null); // hide buttons if no more clicks are allowed
 						}
 					});
@@ -365,24 +348,10 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 			if (m_bURL)
 			{
 				m_bttnOpen.setVisible(true);
-				if (m_selectedOption.getMaxClicks() > 0)
-				{
-					m_bttnOpen.setEnabled(true);
-					//links should never be shown, only confuse the user
-					htmlExtraInfo = selectedOption.getDetailedInfo(m_language);
-					//htmlExtraInfo = "<br><p> <font color=blue><u><b>" + m_strExtraInfo + "</b></u></font></p>";
-				}
-				else
-				{
-					m_bttnOpen.setEnabled(false);
-					htmlExtraInfo = "<b>" + JAPMessages.getString(MSG_NO_FURTHER_PAYMENT, m_selectedOption.getHeading(m_language)) + " " +
-						JAPMessages.getString(MSG_USE_OTHER_METHOD) + "</b>";
-					if (m_imageLabel != null)
-					{
-						m_imageLabel.setToolTipText(JAPMessages.getString(MSG_NO_FURTHER_PAYMENT, m_selectedOption.getHeading(m_language)));
-						m_imageLabel = null;
-					}
-				}
+				m_bttnOpen.setEnabled(true);
+				//links should never be shown, only confuse the user
+				htmlExtraInfo = selectedOption.getDetailedInfo(m_language);
+				//htmlExtraInfo = "<br><p> <font color=blue><u><b>" + m_strExtraInfo + "</b></u></font></p>";
 			}
 			else
 			{
@@ -546,39 +515,21 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 
 	public void actionPerformed(ActionEvent e)
 	{
-		if (m_selectedOption.getMaxClicks() > 0)
+		if (e != null)
 		{
-			if (e != null)
+			if (e.getSource() == m_bttnCopy)
 			{
-				if (e.getSource() == m_bttnCopy)
-				{
-					copyExtraInfoToClipboard();
-				}
-				else if (e.getSource() == m_bttnOpen)
-				{
-					openURL();
-				}
+				copyExtraInfoToClipboard();
+			}
+			else if (e.getSource() == m_bttnOpen)
+			{
+				openURL();
 			}
 		}
-
-		if (m_selectedOption.getMaxClicks() <= 0)
-		{
-			m_bttnCopy.setEnabled(false);
-			m_bttnOpen.setEnabled(false);
-			m_bttnCopy.setToolTipText(JAPMessages.getString(MSG_NO_FURTHER_PAYMENT, m_selectedOption.getHeading(m_language)));
-			m_bttnOpen.setToolTipText(JAPMessages.getString(MSG_NO_FURTHER_PAYMENT, m_selectedOption.getHeading(m_language)));
-
-			if (m_imageLabel != null)
-			{
-				m_imageLabel.setToolTipText(JAPMessages.getString(MSG_NO_FURTHER_PAYMENT, m_selectedOption.getHeading(m_language)));
-				m_imageLabel = null;
-			}
-		}
-		else
-		{
-			m_bttnCopy.setEnabled(true);
-		}
+		
+		m_bttnCopy.setEnabled(true);
 	}
+	
 	public CheckError[] checkUpdate()
 	{
 		m_linkOpenedInBrowser.setSelected(false);
