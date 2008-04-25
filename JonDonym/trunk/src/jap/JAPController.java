@@ -3116,7 +3116,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							adapter.connectionEstablished(proxyAnon.getMixCascade());
 
 							if (!mbActCntMessageNotRemind && !JAPModel.isSmallDisplay() &&
-								!m_bShowConfigAssistant)
+								!m_bShowConfigAssistant && !getInstance().isPortableMode())
 							{
 								SwingUtilities.invokeLater(new Runnable()
 								{
