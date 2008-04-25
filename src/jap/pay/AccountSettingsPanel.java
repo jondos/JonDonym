@@ -1900,7 +1900,18 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				if (paymentType.equalsIgnoreCase(XMLPaymentOption.OPTION_ACTIVE))
 				{
                     messagesToShow.addElement(activeComplete);
-					messagesToShow.addElement(paymentDelay);
+                    
+                    Timestamp ts = new Timestamp(new java.util.Date().getTime());
+                    
+                    if (!a_accountCreationThread.getAccount().isCharged(ts))
+                    {
+                    	messagesToShow.addElement(paymentDelay);
+                    }
+                    else
+                    {
+                    	messagesToShow.addElement("Vorsicht geladen!");
+                    }
+                    
 					messagesToShow.addElement(backupWarning);
 				}
 				else if (paymentType.equals("coupon") )

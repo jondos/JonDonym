@@ -47,7 +47,6 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -69,7 +68,6 @@ import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
 import java.awt.event.MouseEvent;
-import anon.pay.PayAccountsFile;
 
 
 public class PaymentInfoPane extends DialogContentPane implements IWizardSuitable,
