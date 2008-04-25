@@ -327,6 +327,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		AccountSettingsPanel.class.getName() + "_termsAndConditions";
 	private static final String MSG_TERMS_AND_COND_HINT =
 		AccountSettingsPanel.class.getName() + "_termsAndConditionsHint";
+	
+	private static final String MSG_CHARGING_SUCCESSFUL = AccountSettingsPanel.class.getName() + "_chargingSuccessful";
 
 
 
@@ -1898,18 +1900,17 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 			    //set strings to show according to payment type and success/failure
 				if (paymentType.equalsIgnoreCase(XMLPaymentOption.OPTION_ACTIVE))
-				{
-                    messagesToShow.addElement(activeComplete);
-                    
+				{                                        
                     Timestamp ts = new Timestamp(new java.util.Date().getTime());
                     
                     if (!a_accountCreationThread.getAccount().isCharged(ts))
                     {
+                    	messagesToShow.addElement(activeComplete);
                     	messagesToShow.addElement(paymentDelay);
                     }
                     else
                     {
-                    	messagesToShow.addElement("Vorsicht geladen!");
+                    	messagesToShow.addElement(JAPMessages.getString(MSG_CHARGING_SUCCESSFUL));
                     }
                     
 					messagesToShow.addElement(backupWarning);
