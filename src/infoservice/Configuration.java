@@ -201,9 +201,8 @@ final public class Configuration
 	 */
 	private boolean m_bPerfEnabled;
 
-	/** Stores 5 configuration values for cascade performance monitoring.
+	/** Stores 4 configuration values for cascade performance monitoring.
 	 * <ul>
-	 * 	<li>The local proxy hosty</li>
 	 * 	<li>The local proxy port</li>
 	 * 	<li>The size of the random test data block in bytes;</li>
 	 * 	<li>The interval between measurement blocks in milliseconds</li>

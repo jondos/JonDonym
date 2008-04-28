@@ -926,7 +926,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				Configuration.getInstance().getStartupTime() +
 				"</P>\n" +
 				"    <HR noShade SIZE=\"1\">\n" +
-				"    <ADDRESS>&copy; 2000 - 2008 The JAP Team</ADDRESS>\n" +
+				"    <ADDRESS>&copy; 2000 - 2008 The JAP Team - JonDos GmbH</ADDRESS>\n" +
 				"  </BODY>\n" +
 				"</HTML>\n";
 			/* send content */

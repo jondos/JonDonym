@@ -54,8 +54,8 @@ public abstract class AbstractDatabaseUpdater extends Updater
 	 */
 	public static final long KEEP_ENTRY_FACTOR = 3l;
 
-	protected boolean m_successfulUpdate = false;
-	protected boolean m_bFirstUpdateDone = false;
+	private boolean m_successfulUpdate = false;
+	private boolean m_bFirstUpdateDone = false;
 
 
 	/**
