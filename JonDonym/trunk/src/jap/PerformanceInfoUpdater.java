@@ -23,7 +23,7 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 	
 	protected Hashtable getEntrySerials() 
 	{
-		return null;
+		return new Hashtable();
 	}
 	
 	protected Hashtable getUpdatedEntries(Hashtable toUpdate) 
@@ -35,59 +35,6 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 		}
 
 		return hashtable;
-	}
-	
-	protected void updateInternal()
-	{
-		// this code is pretty much taken from AbstractDatabaseUpdate
-		
-		if (Thread.currentThread().isInterrupted())
-		{
-			// this thread is being stopped; ignore this error
-			m_successfulUpdate = true;
-			return;
-		}
-		
-		Hashtable newEntries = getUpdatedEntries(null);
-		if (Thread.currentThread().isInterrupted())
-		{
-			// this thread is being stopped; ignore this error
-			m_successfulUpdate = true;
-		}
-		else if (newEntries == null)
-		{
-			LogHolder.log(LogLevel.ERR, LogType.THREAD, getUpdatedClassName() + "update failed!");
-			m_successfulUpdate = false;
-
-		}
-		else
-		{
-			LogHolder.log(LogLevel.DEBUG, LogType.THREAD,
-						  getUpdatedClassName() + "update was successful.");
-			boolean updated = false;
-			m_bFirstUpdateDone = true; // indicate that at least one update was successful
-			m_successfulUpdate = true;
-			/* we have successfully downloaded the requested database entries
-			 * -> update the internal database
-			 */
-			Enumeration entries = newEntries.elements();
-			while (entries.hasMoreElements())
-			{
-
-				AbstractDatabaseEntry currentEntry = (AbstractDatabaseEntry) (entries.nextElement());
-				if (Database.getInstance(getUpdatedClass()).update(currentEntry))
-				{
-					updated = true;
-				}
-			}
-			
-			updated = doCleanup(newEntries) || updated;
-			
-			if ((getUpdatedClass() == MixCascade.class) && updated)
-			{
-				JAPController.getInstance().notifyJAPObservers();
-			}
-		}
 	}
 
 	public Class getUpdatedClass() 
