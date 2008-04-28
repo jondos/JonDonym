@@ -68,8 +68,6 @@ public class XMLPaymentOption implements IXMLEncodable
 	/** Option type (active|passive)*/
 	private String m_type;
 
-	private int m_maxClicks = MAX_CLICKS_UNLIMITED;
-
     /** percentage of a user's payment that we have to pay to the payment option's provider*/
 	private int m_markup;
 
@@ -134,18 +132,13 @@ public class XMLPaymentOption implements IXMLEncodable
 		m_minJapVersion = a_japVersion;
 	}
 
-	public XMLPaymentOption(String a_name, String a_type, boolean a_generic, String a_japVersion, int a_markup, int a_maxClicks)
+	public XMLPaymentOption(String a_name, String a_type, boolean a_generic, String a_japVersion, int a_markup)
 	{
 		m_name = a_name;
 		m_type = a_type;
 		m_generic = a_generic;
 		m_minJapVersion = a_japVersion;
 		m_markup = a_markup;
-		if (a_maxClicks <= 0)
-		{
-			a_maxClicks = MAX_CLICKS_UNLIMITED;
-		}
-		m_maxClicks = a_maxClicks;
 	}
 
 
@@ -219,7 +212,6 @@ public class XMLPaymentOption implements IXMLEncodable
 		elemRoot.setAttribute("type", m_type);
 		elemRoot.setAttribute("generic", String.valueOf(m_generic));
 		elemRoot.setAttribute("japversion", m_minJapVersion);
-		XMLUtil.setAttribute(elemRoot, XML_ATTR_MAXCLICKS, m_maxClicks);
 
 		elem = a_doc.createElement("Markup");
 		XMLUtil.setValue(elem,m_markup);
@@ -319,7 +311,6 @@ public class XMLPaymentOption implements IXMLEncodable
 		m_name = elemRoot.getAttribute("name");
 		m_generic = XMLUtil.parseAttribute(elemRoot, "generic", true);
 		m_minJapVersion = XMLUtil.parseAttribute(elemRoot, "japversion", Util.VERSION_FORMAT);
-		m_maxClicks = XMLUtil.parseAttribute(elemRoot, XML_ATTR_MAXCLICKS, MAX_CLICKS_UNLIMITED);
 
 		Node markupElem = XMLUtil.getFirstChildByName(elemRoot,"Markup");
 		m_markup = XMLUtil.parseValue(markupElem,0);
@@ -612,35 +603,6 @@ public class XMLPaymentOption implements IXMLEncodable
 	public boolean isGeneric()
 	{
 		return m_generic;
-	}
-
-	/**
-	 * Decrements the max clicks counter and returns if clicks for this payments option are
-	 * still allowed (only applicable on payment options with web link).
-	 * @return boolean
-	 */
-	public boolean decrementMaxClicks()
-	{
-		if (m_maxClicks == MAX_CLICKS_UNLIMITED)
-		{
-			return true;
-		}
-		if (m_maxClicks > 0)
-		{
-			m_maxClicks--;
-			return true;
-		}
-		return false;
-	}
-
-	public boolean isMaxClicksRestricted()
-	{
-		return m_maxClicks != MAX_CLICKS_UNLIMITED;
-	}
-
-	public int getMaxClicks()
-	{
-		return m_maxClicks;
 	}
 
 	public int getMarkup()
