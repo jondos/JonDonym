@@ -115,6 +115,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public static final int TRUST_RESERVED = 7;
 
+	public static final int TRUST_VALUE_INFINITE = -1;
+	
 	public static final long TRUST_MODEL_ALL = 0;
 
 	private static final String MSG_SERVICES_WITH_COSTS = TrustModel.class.getName() + "_servicesWithCosts";
@@ -476,10 +478,16 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
 			
-			if(minSpeed == 0) return;
+			if(minSpeed == 0)
+			{
+				return;
+			}
 			
 			// TODO: make it configurable
-			if(entry == null || entry.isInvalid()) return;
+			if(entry == null || entry.isInvalid()) 
+			{
+				return;
+			}
 			
 			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || entry.isInvalid() || entry.getAverageSpeed() < minSpeed))
 			{
@@ -501,10 +509,16 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
 			int maxDelay = ((Integer) m_conditionValue).intValue();
 			
-			if(maxDelay == 0) return;
+			if(maxDelay == TRUST_VALUE_INFINITE)
+			{
+				return;
+			}
 			
 			// TODO: make it configurable
-			if(entry == null || entry.isInvalid()) return;
+			if(entry == null || entry.isInvalid())
+			{
+				return;
+			}
 			
 			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || entry.isInvalid() || entry.getAverageDelay() > maxDelay))
 			{
