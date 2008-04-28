@@ -178,7 +178,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	
 	private static final int FILTER_SPEED_MAJOR_TICK = 32;
-	private static final int FILTER_SPEED_MINOR_TICK = 32;
 	private static final int FILTER_SPEED_MAX = 128;
 	
 	private static final int FILTER_LATENCY_MIN = 200;
@@ -217,8 +216,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JLabel m_lblDelay;
 	
 	private JLabel m_numOfUsersLabel;
-	private GridBagConstraints m_constrHosts, m_constrPorts;
-	/*private JLabel m_lblHosts;
+	
+	/*private GridBagConstraints m_constrHosts, m_constrPorts;
+	private JLabel m_lblHosts;
 	private JLabel m_lblPorts;
 	private JAPMultilineLabel m_reachableLabel;
 	private JLabel m_portsLabel;*/
@@ -705,7 +705,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridy = 2;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		m_constrHosts = (GridBagConstraints)c.clone();
 		m_cascadesPanel.add(l, c);
 
 		c.insets = new Insets(5, 5, 0, 5);
@@ -722,7 +721,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridy = 3;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		m_constrPorts = (GridBagConstraints)c.clone();
 		m_cascadesPanel.add(l, c);
 
 		c.insets = new Insets(5, 5, 0, 5);
@@ -3229,15 +3227,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterSpeedSlider.setMaximum(FILTER_SPEED_MAX);
 			m_filterSpeedSlider.setValue(0);
 			m_filterSpeedSlider.setMajorTickSpacing(FILTER_SPEED_MAJOR_TICK);
-			m_filterSpeedSlider.setMinorTickSpacing(FILTER_SPEED_MINOR_TICK);
 			m_filterSpeedSlider.setPaintLabels(true);
 			m_filterSpeedSlider.setPaintTicks(true);
 			m_filterSpeedSlider.setInverted(true);
 			m_filterSpeedSlider.setSnapToTicks(true);
-			Hashtable ht = new Hashtable(5);
-			for (int i = 0; i < 5; i++)
+			int steps = (FILTER_SPEED_MAX / FILTER_SPEED_MAJOR_TICK) + 1;
+			Hashtable ht = new Hashtable(steps);
+			for (int i = 0; i < steps; i++)
 			{
-				ht.put(new Integer(i * 32), new JLabel(String.valueOf(i * 32) + " kbit/s"));
+				ht.put(new Integer(i * FILTER_SPEED_MAJOR_TICK), new JLabel(String.valueOf(i * 32) + " kbit/s"));
 			}
 			m_filterSpeedSlider.setLabelTable(ht);
 			c1.gridy++;
@@ -3272,7 +3270,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterLatencySlider.setMaximum(FILTER_LATENCY_MAX);
 			m_filterLatencySlider.setMajorTickSpacing(FILTER_LATENCY_MAJOR_TICK);
 			
-			int steps = ((FILTER_LATENCY_MAX - FILTER_LATENCY_MIN) / FILTER_LATENCY_MAJOR_TICK) + 1;
+			steps = ((FILTER_LATENCY_MAX - FILTER_LATENCY_MIN) / FILTER_LATENCY_MAJOR_TICK) + 1;
 			int value = 0;
 			
 			ht = new Hashtable(steps);
