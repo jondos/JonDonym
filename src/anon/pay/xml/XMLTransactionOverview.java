@@ -72,8 +72,7 @@ public class XMLTransactionOverview implements IXMLEncodable
 	public static final String KEY_AMOUNT = "amount";
 	public static final String KEY_VOLUMEPLAN = "volumeplan";
 	public static final String KEY_PAYMENTMETHOD = "paymentmethod";
-	public static final String KEY_USED = "used";
-	public static final String KEY_METHOD_TIMEOUT = "payment_method_timeout"; // cf. XMLTransCert m_paymentMethodValidTime
+	public static final String KEY_USED = "used";	
 
 	public XMLTransactionOverview(String a_language)
 	{
@@ -163,17 +162,6 @@ public class XMLTransactionOverview implements IXMLEncodable
 			}
 			transactionData.put(KEY_DATE, date);
 
-	        String paymentExpiry;
-			if (curTanElem.getAttribute(KEY_METHOD_TIMEOUT) != null)
-			{
-				paymentExpiry = curTanElem.getAttribute(KEY_METHOD_TIMEOUT);
-				transactionData.put(KEY_METHOD_TIMEOUT,paymentExpiry);
-			}
-			else
-			{
-				; //do NOT set a value for this key if none exists (the normal case)
-			}
-
 
 			String amount;
 			if ( curTanElem.getAttribute("amount") != null)
@@ -248,12 +236,6 @@ public class XMLTransactionOverview implements IXMLEncodable
 			String date = (String) curTransaction.get(KEY_DATE);
 			date = (date == null)?"":date;
 			elem.setAttribute("date", date);
-
-			String methodTimeout = (String) curTransaction.get(KEY_METHOD_TIMEOUT);
-			if (methodTimeout != null)
-			{
-				elem.setAttribute(KEY_METHOD_TIMEOUT,methodTimeout);
-			}
 
 			String amount = (String) curTransaction.get(KEY_AMOUNT);
 			amount = (amount == null)?"": amount;
