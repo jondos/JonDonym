@@ -201,17 +201,18 @@ final public class Configuration
 	 */
 	private boolean m_bPerfEnabled;
 
-	/** Stores 4 configuration values for cascade performance monitoring.
+	/** Stores 5 configuration values for cascade performance monitoring.
 	 * <ul>
+	 *  <li>The local proxy host</li>
 	 * 	<li>The local proxy port</li>
 	 * 	<li>The size of the random test data block in bytes;</li>
 	 * 	<li>The interval between measurement blocks in milliseconds</li>
 	 *  <li>Requests per interval</li>
 	 * </ul>
 	 */
-	private Object[] m_aPerfMeterConf = new Object[4];
+	private Object[] m_aPerfMeterConf = new Object[5];
 	
-	private String m_strPerfAccountFile = null;
+	private File m_strPerfAccountDirectory = null;
 	
 	private String m_strPerfAccountPassword = null;
 	
@@ -219,15 +220,14 @@ final public class Configuration
 	public final static String IS_PROP_NAME_PERFACCOUNT = 
 		IS_PROP_NAME_PERFORMANCE_MONITORING +".account";
 	
-	public final static String IS_PROP_NAME_PERFACCOUNT_FILE =
-		IS_PROP_NAME_PERFACCOUNT+".file";
-	public final static String IS_PROP_VALUE_PERFACCOUNT_FILE = null;
+	public final static String IS_PROP_NAME_PERFACCOUNT_DIRECTORY =
+		IS_PROP_NAME_PERFACCOUNT+".directory";
+	public final static String IS_PROP_VALUE_PERFACCOUNT_DIRECTORY = "accounts";
 	
 	public final static String IS_PROP_NAME_PERFACCOUNT_PASSWORD = 
 		IS_PROP_NAME_PERFACCOUNT+".passw";
 	public final static String IS_PROP_VALUE_PERFACCOUNT_PASSWORD = null;
 	
-
 	public Configuration(Properties a_properties) throws Exception
 	{
 		/* for running in non-graphic environments, we need the awt headless support, it is only
@@ -885,9 +885,9 @@ final public class Configuration
 					m_aPerfMeterConf[4] = Integer.valueOf(value);
 				}				
 				
-				m_strPerfAccountFile = 
-					a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_FILE, 
-							 				 IS_PROP_VALUE_PERFACCOUNT_FILE);
+				m_strPerfAccountDirectory = 
+					new File(a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_DIRECTORY, 
+							 				 IS_PROP_VALUE_PERFACCOUNT_DIRECTORY));
 				m_strPerfAccountPassword = 
 					a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_PASSWORD, 
 		 				 					 IS_PROP_VALUE_PERFACCOUNT_PASSWORD);
@@ -1180,9 +1180,9 @@ final public class Configuration
 		return m_bPerfEnabled;
 	}
 	
-	public String getPerfAccountFile()
+	public File getPerfAccountDirectory()
 	{
-		return m_strPerfAccountFile;
+		return m_strPerfAccountDirectory;
 	}
 	
 	public String getPerfAccountPassword()
