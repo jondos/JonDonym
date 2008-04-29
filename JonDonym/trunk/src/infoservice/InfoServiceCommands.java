@@ -901,6 +901,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"<table style=\"align: left\" border=\"0\" width=\"30%\">" +
 				"<tr><td class=\"name\">Accumulated Total Traffic</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getKiloBytesRecvd() * 1000) + "</td></tr>" +
 				"<tr><td class=\"name\">Estimated PayTraffic per Day</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().calculatePayTrafficPerDay()) + "</td></tr>" +
+				"<tr><td class=\"name\">Remaining PayCredit</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getRemainingCredit()) + "</td></tr>" +				
 				"<tr><td class=\"name\">Estimated Pay End Time</td><td class=\"status\">" + (InfoService.getPerfMeter().calculateRemainingPayTime() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().calculateRemainingPayTime()).toString()) + "</td></tr>" +
 				"</table><br />";
 				

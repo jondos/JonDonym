@@ -489,10 +489,9 @@ public class PerformanceMeter implements Runnable
 	{
 		int payCascades = 0;
 		long trafficPerTest = 0;
-		long remainingTests = 0;
 		
 		Iterator cascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
-
+		
 		while(cascades.hasNext()) 
 		{
 			MixCascade cascade = (MixCascade) cascades.next();
@@ -521,6 +520,7 @@ public class PerformanceMeter implements Runnable
 		while(accounts.hasMoreElements())
 		{
 			PayAccount account = (PayAccount) accounts.nextElement();
+			// balance credit is kb
 			credit += account.getBalance().getCredit() * 1000;
 		}
 		
