@@ -478,7 +478,7 @@ public class PerformanceMeter implements Runnable
 		long trafficPerTest = calculatePayTrafficPerTest();
 		if(trafficPerTest == 0)
 		{
-			return -1;
+			return 0;
 		}
 		
 		remainingTests = getRemainingCredit() / trafficPerTest;
@@ -496,7 +496,7 @@ public class PerformanceMeter implements Runnable
 		while(cascades.hasNext()) 
 		{
 			MixCascade cascade = (MixCascade) cascades.next();
-			if(cascade.hasPerformanceServer() /*&& cascade.isPayment()*/)
+			if(cascade.hasPerformanceServer() && cascade.isPayment())
 			{
 				payCascades++;
 			}
