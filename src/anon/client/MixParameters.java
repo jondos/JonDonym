@@ -46,7 +46,11 @@ public class MixParameters {
 
   private ReplayTimestamp m_replayTimestamp;
   
+  private int m_replayOffset;
+  
   private Object m_internalSynchronization;
+  
+  public static long m_referenceTime;
   
   
   public MixParameters(String a_mixId, ASymCipher a_mixCipher) {
@@ -54,6 +58,7 @@ public class MixParameters {
     m_mixCipher = a_mixCipher;
     m_replayTimestamp = null;
     m_internalSynchronization = new Object();
+    m_replayOffset = 0;
   }
  
   
@@ -71,10 +76,36 @@ public class MixParameters {
     }
   }
   
+  public byte[] getReplayOffset() 
+  {
+      byte[] r_replayOffset = new byte[3];
+      m_replayOffset=m_replayOffset&0xffffff;
+      r_replayOffset[0] = (byte)(m_replayOffset >> 16);
+      r_replayOffset[1] = (byte)((m_replayOffset >> 8)&0xff);
+      r_replayOffset[2] = (byte)(m_replayOffset&0xff);
+      return r_replayOffset;
+  }
+
+  public byte[] getCurrentReplayOffset(int diff) 
+  {
+	  if (m_replayOffset==0) return null;
+	  byte[] r_replayOffset = new byte[3];
+      int tmp_replayOffset=(m_replayOffset+diff)&0xffffff;
+      r_replayOffset[0] = (byte)(tmp_replayOffset >> 16);
+      r_replayOffset[1] = (byte)((tmp_replayOffset >> 8)&0xff);
+      r_replayOffset[2] = (byte)(tmp_replayOffset&0xff);
+      return r_replayOffset;
+  }
+
   public void setReplayTimestamp(ReplayTimestamp a_replayTimestamp) {
     synchronized (m_internalSynchronization) {
       m_replayTimestamp = a_replayTimestamp;
     }
   }
-  
+
+  public void setReplayOffset(int a_replayTimestamp) 
+  {
+	  m_replayOffset=a_replayTimestamp&0xffffff;
+  }
+
 }

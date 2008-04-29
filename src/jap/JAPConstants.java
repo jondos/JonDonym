@@ -35,7 +35,7 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.09.024"; //Never change the layout of this line!
+	public static final String aktVersion = "00.09.025"; //Never change the layout of this line!
 	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-04-11 13:04:12 $";
 
 	//Warning: This is a little bit tricky,

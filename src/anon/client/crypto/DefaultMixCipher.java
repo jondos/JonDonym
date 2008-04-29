@@ -77,6 +77,21 @@ public class DefaultMixCipher implements IMixCipher {
        */
       symmetricKey[0] = (byte)(symmetricKey[0] & 0x7f);
       /* now check for replay-detection */
+      int diff=(int)((System.currentTimeMillis()/1000)-MixParameters.m_referenceTime);
+
+      byte[] ReplayOffset = m_mixParameters.getCurrentReplayOffset(diff);
+      if (ReplayOffset != null) 
+      {
+        /* mix supports replay-detection -> modify the key of the symmetric
+         * cipher with the current timestamp (we assume that the packet is
+         * sent immediately after encryption)
+         */
+    	  for(int i=0;i<ReplayOffset.length;i++)
+		  {
+    	  	symmetricKey[symmetricKey.length-ReplayOffset.length+i]=ReplayOffset[i];
+    	  }
+      }
+
       ReplayTimestamp timestampStructure = m_mixParameters.getReplayTimestamp();
       if (timestampStructure != null) {
         /* mix supports replay-detection -> modify the key of the symmetric
