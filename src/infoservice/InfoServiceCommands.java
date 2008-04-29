@@ -29,8 +29,10 @@ package infoservice;
 
 import java.net.InetAddress;
 import java.text.NumberFormat;
+import java.io.File;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -822,6 +824,113 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		return httpResponse;
 	}
 
+	private String getHumanStatusHeader()
+	{
+		return "<HTML>\n" +
+		"  <HEAD>\n" +
+		"    <TITLE>JAP - InfoService - Cascade Status</TITLE>\n" +
+		"    <STYLE TYPE=\"text/css\">\n" +
+		"      <!--\n" +
+		"        h1 {color:blue; text-align:center;}\n" +
+		"        b,h3,h4,h5 {font-weight:bold; color:maroon;}\n" +
+		"        body {margin-top:0px; margin-left:5px; margin-width:0px; margin-height:0px; background-color:white; color:black;}\n" +
+		"        h1,h2,h3,h4,h5,p,address,ol,ul,tr,td,th,blockquote,body,.smalltext,.leftcol {font-family:geneva,arial,helvetica,sans-serif;}\n" +
+		"        p,address,ol,ul,tr,td,th,blockquote {font-size:11pt;}\n" +
+		"        .leftcol,.smalltext {font-size: 10px;}\n" +
+		"        h1 {font-size:17px;}\n" +
+		"        h2 {font-size:16px;}\n" +
+		"        h3 {font-size:15px;}\n" +
+		"        h4 {font-size:14px;}\n" +
+		"        h5 {font-size:13px;}\n" +
+		"        address {font-style:normal;}\n" +
+		"        hr {color:#cccccc;}\n" +
+		"        h2,.leftcol {font-weight:bold; color:#006699;}\n" +
+		"        a:link {color:#006699; font-weight:bold; text-decoration:none;}\n" +
+		"        a:visited {color:#666666; font-weight:bold; text-decoration:none;}\n" +
+		"        a:active {color:#006699; font-weight:bold; text-decoration:none;}\n" +
+		"        a:hover {color:#006699; font-weight:bold; text-decoration:underline;}\n" +
+		"        th {color:white; background:#006699; font-weight:bold; text-align:left;}\n" +
+		"        td.name {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699; background:#eeeeff;}\n" +
+		"        td.status {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699;}\n" +
+		"      -->\n" +
+		"    </STYLE>\n" +
+		"    <META HTTP-EQUIV=\"refresh\" CONTENT=\"25\">\n" +
+		"  </HEAD>\n" +
+		"  <BODY BGCOLOR=\"#FFFFFF\">\n" +
+		"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n" +
+		"    <H2>InfoService Status (" + Configuration.getInstance().getID() + ")</H2>\n" +
+		"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "<BR></P>\n";
+	}
+	
+	private String getHumanStatusFooter()
+	{
+		return 
+		"    <P>Infoservice [" + Constants.INFOSERVICE_VERSION + "] Startup Time: " +
+			Configuration.getInstance().getStartupTime() +
+			"</P>\n" +
+			"    <HR noShade SIZE=\"1\">\n" +
+			"    <ADDRESS>&copy; 2000 - 2008 The JAP Team - JonDos GmbH</ADDRESS>\n" +
+			"  </BODY>\n" +
+			"</HTML>\n";
+	}
+	
+	private HttpResponseStructure humanGetPerfStatus()
+	{
+		HttpResponseStructure httpResponse;
+		try
+		{
+			String htmlData = getHumanStatusHeader();
+			
+			htmlData += "<a href=\"/status\">Go to Server Status</a><br /><br />";
+			
+			if(Configuration.getInstance().isPerfEnabled() && InfoService.getPerfMeter() != null)
+			{
+				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\"><tr><th colspan=\"2\">Performance Monitoring Enabled</th></tr>\n" + 
+				"<tr><td class=\"name\">Proxy Host</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[0] + "</td></tr>" +
+				"<tr><td class=\"name\">Proxy Port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
+				"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[2] + "<td></tr>" +
+				"<tr><td class=\"name\">Major Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + "<td></tr>" +
+				"<tr><td class=\"name\">Requests per Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[4] + "<td></tr>" +
+				"<tr><td class=\"name\">Account directory</td><td class=\"status\">" + Configuration.getInstance().getPerfAccountDirectory() + "<td></tr>" +
+				"<tr><td class=\"name\">Last Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastUpdate()).toString()) + "</td></tr>" +
+				"<tr><td class=\"name\">Next Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getLastUpdate() + ((Integer)Configuration.getInstance().getPerformanceMeterConfig()[3]).intValue()).toString()) + "</td></tr>" +
+				"<tr><td class=\"name\">Last Cascade Updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
+				"<tr><td class=\"name\">Accumulated Traffic</td><td class=\"status\">" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(InfoService.getPerfMeter().getKiloBytesRecvd()) + " kb</td></tr>" +
+				"</table><br />";
+				
+				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\">" +
+				"<tr><th>Account File</th><th>Last Modified</th></tr>\n";
+								
+				Hashtable usedFiles = InfoService.getPerfMeter().getUsedAccountFiles();
+				
+				Enumeration keys = usedFiles.keys();
+				while (keys.hasMoreElements())
+				{
+					File file = (File) keys.nextElement();
+					htmlData += "<tr><td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(file.lastModified()) + "</td></tr>";
+				}
+				
+				htmlData += "</table><br />";
+			}
+			else
+			{
+				htmlData += "Performance Monitoring disabled.";
+			}
+			
+			htmlData += getHumanStatusFooter();
+			
+			/* send content */
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_HTML,
+				HttpResponseStructure.HTTP_ENCODING_PLAIN, htmlData);
+		}
+		catch (Exception e)
+		{
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR);
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
+		}
+		return httpResponse;
+	}
+	
 	/**
 	 * Sends a generated HTML file with all status entrys to the client. This function is not used
 	 * by the JAP client. It's intended to use with a webbrowser to see the status of all cascades.
@@ -834,43 +943,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		HttpResponseStructure httpResponse;
 		try
 		{
-			String htmlData = "<HTML>\n" +
-				"  <HEAD>\n" +
-				"    <TITLE>JAP - InfoService - Cascade Status</TITLE>\n" +
-				"    <STYLE TYPE=\"text/css\">\n" +
-				"      <!--\n" +
-				"        h1 {color:blue; text-align:center;}\n" +
-				"        b,h3,h4,h5 {font-weight:bold; color:maroon;}\n" +
-				"        body {margin-top:0px; margin-left:5px; margin-width:0px; margin-height:0px; background-color:white; color:black;}\n" +
-				"        h1,h2,h3,h4,h5,p,address,ol,ul,tr,td,th,blockquote,body,.smalltext,.leftcol {font-family:geneva,arial,helvetica,sans-serif;}\n" +
-				"        p,address,ol,ul,tr,td,th,blockquote {font-size:11pt;}\n" +
-				"        .leftcol,.smalltext {font-size: 10px;}\n" +
-				"        h1 {font-size:17px;}\n" +
-				"        h2 {font-size:16px;}\n" +
-				"        h3 {font-size:15px;}\n" +
-				"        h4 {font-size:14px;}\n" +
-				"        h5 {font-size:13px;}\n" +
-				"        address {font-style:normal;}\n" +
-				"        hr {color:#cccccc;}\n" +
-				"        h2,.leftcol {font-weight:bold; color:#006699;}\n" +
-				"        a:link {color:#006699; font-weight:bold; text-decoration:none;}\n" +
-				"        a:visited {color:#666666; font-weight:bold; text-decoration:none;}\n" +
-				"        a:active {color:#006699; font-weight:bold; text-decoration:none;}\n" +
-				"        a:hover {color:#006699; font-weight:bold; text-decoration:underline;}\n" +
-				"        th {color:white; background:#006699; font-weight:bold; text-align:left;}\n" +
-				"        td.name {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699; background:#eeeeff;}\n" +
-				"        td.status {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699;}\n" +
-				"      -->\n" +
-				"    </STYLE>\n" +
-				"    <META HTTP-EQUIV=\"refresh\" CONTENT=\"25\">\n" +
-				"  </HEAD>\n" +
-				"  <BODY BGCOLOR=\"#FFFFFF\">\n" +
-				"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n" +
-				"    <H2>InfoService Status (" + Configuration.getInstance().getID() + ")</H2>\n" +
-				"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "<BR></P>\n";
-
-			
-				//"    <TABLE ALIGN=\"center\" BORDER=\"0\">\n" +
+				String htmlData = getHumanStatusHeader();
+				
 				htmlData +="    <TABLE BORDER=\"0\">\n" +
 				"      <COLGROUP>\n" +
 				"        <COL WIDTH=\"20%\">\n" +
@@ -908,27 +982,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			
 			if(Configuration.getInstance().isPerfEnabled() && InfoService.getPerfMeter() != null)
 			{
-				htmlData += "    <table border=\"0\" width=\"30%\"><tr><th colspan=\"2\">Performance Monitoring Enabled</th></tr>\n" + 
-				"<tr><td class=\"name\">Proxy Host</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[0] + "</td></tr>" +
-				"<tr><td class=\"name\">Proxy Port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
-				"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[2] + "<td></tr>" +
-				"<tr><td class=\"name\">Major Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + "<td></tr>" +
-				"<tr><td class=\"name\">Last Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastUpdate()).toString()) + "</td></tr>" +
-				"<tr><td class=\"name\">Next Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getLastUpdate() + ((Integer)Configuration.getInstance().getPerformanceMeterConfig()[3]).intValue()).toString()) + "</td></tr>" +
-				"<tr><td class=\"name\">Last Cascade Updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
-				"<tr><td class=\"name\">Estimated Traffic</td><td class=\"status\">" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(InfoService.getPerfMeter().getKiloBytesRecvd()) + " kb</td></tr>" +
-				"</table><br />";
-			}	
+				htmlData += "<a href=\"/perfstatus\">Performance Monitoring enabled</a>";				
+			}
 			
-			htmlData = htmlData + "<BR><BR><BR>\n";
-			htmlData = htmlData + ISRuntimeStatistics.getAsHTML();
-			htmlData = htmlData + "    <P>Infoservice [" + Constants.INFOSERVICE_VERSION + "] Startup Time: " +
-				Configuration.getInstance().getStartupTime() +
-				"</P>\n" +
-				"    <HR noShade SIZE=\"1\">\n" +
-				"    <ADDRESS>&copy; 2000 - 2008 The JAP Team - JonDos GmbH</ADDRESS>\n" +
-				"  </BODY>\n" +
-				"</HTML>\n";
+			htmlData += "<BR><BR><BR>\n" +
+			ISRuntimeStatistics.getAsHTML();
+			
+			htmlData += getHumanStatusFooter();
+			
 			/* send content */
 			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_HTML,
 				HttpResponseStructure.HTTP_ENCODING_PLAIN, htmlData);
@@ -1609,6 +1670,11 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			ISRuntimeStatistics.ms_lNrOfGetStatus++;
 			httpResponse = humanGetStatus();
 		}
+		else if ( (command.equals("/perfstatus")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			/* get the status information about the performance monitoring for human view as html file */
+			httpResponse = humanGetPerfStatus();
+		}		
 		else if ( (command.equals("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/* get information about all mixes (mixes of all cascades) */
