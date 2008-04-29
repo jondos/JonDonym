@@ -174,26 +174,26 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		long delay = 0;
 		for(int j = 0; j < v.size(); j++)
 		{
-			speed += ((PerformanceEntry) v.get(j)).getAverageSpeed();
-			delay += ((PerformanceEntry) v.get(j)).getAverageDelay();
+			speed += ((PerformanceEntry) v.elementAt(j)).getAverageSpeed();
+			delay += ((PerformanceEntry) v.elementAt(j)).getAverageDelay();
 		}
 		speed /= v.size();
 		delay /= v.size();
 		
 		for(int k = 0; k < v.size(); k++)
 		{
-			double straySpeed = Math.abs(speed - ((PerformanceEntry) v.get(k)).getAverageSpeed()) / speed;
-			double strayDelay = Math.abs(delay - ((PerformanceEntry) v.get(k)).getAverageDelay()) / delay;
+			double straySpeed = Math.abs(speed - ((PerformanceEntry) v.elementAt(k)).getAverageSpeed()) / speed;
+			double strayDelay = Math.abs(delay - ((PerformanceEntry) v.elementAt(k)).getAverageDelay()) / delay;
 			if(straySpeed > 0.6)
 			{
-				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with speed " + ((PerformanceEntry) v.get(k)).getAverageSpeed());
-				((PerformanceEntry) v.get(k)).setAverageSpeed(0);
+				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with speed " + ((PerformanceEntry) v.elementAt(k)).getAverageSpeed());
+				((PerformanceEntry) v.elementAt(k)).setAverageSpeed(0);
 			}
 			
 			if(strayDelay > 0.6)
 			{
-				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with delay " + ((PerformanceEntry) v.get(k)).getAverageDelay());
-				((PerformanceEntry) v.get(k)).setAverageDelay(0);
+				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with delay " + ((PerformanceEntry) v.elementAt(k)).getAverageDelay());
+				((PerformanceEntry) v.elementAt(k)).setAverageDelay(0);
 			}
 		}
 		
@@ -206,14 +206,14 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		delay = 0;
 		for(int j = 0; j < v.size(); j++)
 		{
-			if(((PerformanceEntry) v.get(j)).getAverageSpeed() != 0)
+			if(((PerformanceEntry) v.elementAt(j)).getAverageSpeed() != 0)
 			{
-				speed += ((PerformanceEntry) v.get(j)).getAverageSpeed();
+				speed += ((PerformanceEntry) v.elementAt(j)).getAverageSpeed();
 			}
 			
-			if(((PerformanceEntry) v.get(j)).getAverageSpeed() != 0)
+			if(((PerformanceEntry) v.elementAt(j)).getAverageSpeed() != 0)
 			{
-				delay += ((PerformanceEntry) v.get(j)).getAverageDelay();
+				delay += ((PerformanceEntry) v.elementAt(j)).getAverageDelay();
 			}
 		}
 		speed /= v.size();
