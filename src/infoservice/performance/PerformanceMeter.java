@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -191,13 +192,13 @@ public class PerformanceMeter implements Runnable
 				{
 					file = new File(accountDir.getAbsolutePath() + File.separator + files[i]);
 					oldModifyDate = (Long) m_usedAccountFiles.get(file);
-				
+					
 					/* skip files that already used and have the same modify date */
 					if(oldModifyDate != null && oldModifyDate.longValue() == file.lastModified())
 					{
 						continue;
 					}
-				
+					
 					payAccountXMLFile = XMLUtil.readXMLDocument(file);
 					Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
 					if(payAccountElem != null)
@@ -212,10 +213,10 @@ public class PerformanceMeter implements Runnable
 							m_payAccountsFile.setActiveAccount(payAccount.getAccountNumber());
 						}
 					}
-				
+					
 					m_usedAccountFiles.put(file, new Long(file.lastModified()));
 				}
-				catch (IOException e) 
+				catch (IOException e)
 				{
 					LogHolder.log(LogLevel.WARNING, LogType.PAY, 
 						"Cannot read account file " + files[i] +" for performance monitoring.", e);
@@ -252,8 +253,7 @@ public class PerformanceMeter implements Runnable
 		{
 			return false;
 		}
-	
-
+		
 		PerformanceEntry entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
 		
 		m_recvBuff = new char[m_dataSize];
@@ -470,6 +470,61 @@ public class PerformanceMeter implements Runnable
 	public Hashtable getUsedAccountFiles()
 	{
 		return m_usedAccountFiles;
+	}
+	
+	public long calculateRemainingPayTime()
+	{
+		long remainingTests;
+		long trafficPerTest = calculatePayTrafficPerTest();
+		if(trafficPerTest == 0)
+		{
+			return -1;
+		}
+		
+		remainingTests = getRemainingCredit() / trafficPerTest;
+		return System.currentTimeMillis() + (remainingTests * m_majorInterval);
+	}
+
+	private long calculatePayTrafficPerTest() 
+	{
+		int payCascades = 0;
+		long trafficPerTest = 0;
+		long remainingTests = 0;
+		
+		Iterator cascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
+
+		while(cascades.hasNext()) 
+		{
+			MixCascade cascade = (MixCascade) cascades.next();
+			if(cascade.hasPerformanceServer() /*&& cascade.isPayment()*/)
+			{
+				payCascades++;
+			}
+		}
+		
+		trafficPerTest = payCascades * m_requestsPerInterval * m_dataSize;
+		return trafficPerTest;
+	}
+	
+	public long calculatePayTrafficPerDay()
+	{
+		int testsPerDay = (3600 * 24 * 1000) / (m_majorInterval);
+		
+		return calculatePayTrafficPerTest() * testsPerDay;
+	}
+	
+	public long getRemainingCredit()
+	{
+		Enumeration accounts = m_payAccountsFile.getAccounts();
+		long credit = 0;
+		
+		while(accounts.hasMoreElements())
+		{
+			PayAccount account = (PayAccount) accounts.nextElement();
+			credit += account.getBalance().getCredit() * 1000;
+		}
+		
+		return credit;
 	}
 	
 	private class HTTPResponse

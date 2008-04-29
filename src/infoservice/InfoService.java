@@ -30,8 +30,10 @@ package infoservice;
 import java.io.FileInputStream;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Locale;
 
 import infoservice.performance.PerformanceMeter;
+import gui.JAPMessages;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
@@ -101,6 +103,8 @@ public class InfoService
 		try
 		{
 			InfoService s1 = new InfoService(fn);
+			JAPMessages.setLocale(Locale.ENGLISH);
+			
 			s1.startServer();
 			System.out.println("InfoService is running!");
 			

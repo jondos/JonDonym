@@ -27,6 +27,8 @@
  */
 package infoservice;
 
+import jap.JAPUtil;
+
 import java.net.InetAddress;
 import java.text.NumberFormat;
 import java.io.File;
@@ -888,14 +890,18 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\"><tr><th colspan=\"2\">Performance Monitoring Enabled</th></tr>\n" + 
 				"<tr><td class=\"name\">Proxy Host</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[0] + "</td></tr>" +
 				"<tr><td class=\"name\">Proxy Port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
-				"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[2] + "<td></tr>" +
-				"<tr><td class=\"name\">Major Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + "<td></tr>" +
+				"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(((Integer)Configuration.getInstance().getPerformanceMeterConfig()[2]).intValue()) + "<td></tr>" +
+				"<tr><td class=\"name\">Major Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + " ms<td></tr>" +
 				"<tr><td class=\"name\">Requests per Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[4] + "<td></tr>" +
 				"<tr><td class=\"name\">Account directory</td><td class=\"status\">" + Configuration.getInstance().getPerfAccountDirectory() + "<td></tr>" +
 				"<tr><td class=\"name\">Last Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastUpdate()).toString()) + "</td></tr>" +
 				"<tr><td class=\"name\">Next Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getLastUpdate() + ((Integer)Configuration.getInstance().getPerformanceMeterConfig()[3]).intValue()).toString()) + "</td></tr>" +
 				"<tr><td class=\"name\">Last Cascade Updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
-				"<tr><td class=\"name\">Accumulated Traffic</td><td class=\"status\">" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(InfoService.getPerfMeter().getKiloBytesRecvd()) + " kb</td></tr>" +
+				"</table><br />" +
+				"<table style=\"align: left\" border=\"0\" width=\"30%\">" +
+				"<tr><td class=\"name\">Accumulated Total Traffic</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getKiloBytesRecvd() * 1000) + "</td></tr>" +
+				"<tr><td class=\"name\">Estimated PayTraffic per Day</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().calculatePayTrafficPerDay()) + "</td></tr>" +
+				"<tr><td class=\"name\">Estimated Pay End Time</td><td class=\"status\">" + (InfoService.getPerfMeter().calculateRemainingPayTime() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().calculateRemainingPayTime()).toString()) + "</td></tr>" +
 				"</table><br />";
 				
 				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\">" +
