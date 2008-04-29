@@ -201,6 +201,11 @@ public final class JAPMessages
 	 */
 	public static String getString(String a_key)
 	{
+		if(ms_cachedMessages == null)
+		{
+			return a_key;
+		}
+		
 		String string = (String)ms_cachedMessages.get(a_key);
 
 		if (string != null)
