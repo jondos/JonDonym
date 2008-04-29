@@ -81,6 +81,8 @@ public class KeyExchangeManager {
 
   private boolean m_protocolWithTimestamp;
 
+  private boolean m_protocolWithReplay;
+
   private boolean m_paymentRequired;
 
   private SymCipher m_firstMixSymmetricCipher;
@@ -239,6 +241,7 @@ public class KeyExchangeManager {
 		  }
 
 		  m_protocolWithTimestamp = false;
+		  m_protocolWithReplay = false;
 		  m_paymentRequired = m_cascade.isPayment();
 		  if (!m_cascade.isPaymentProtocolSupported())
 		  {
@@ -261,9 +264,10 @@ public class KeyExchangeManager {
 		  {
 			  m_firstMixSymmetricCipher = new SymCipher();
 		  }
-		  else if (m_cascade.getMixProtocolVersion().equals("0.8"))
+		  else if (m_cascade.getMixProtocolVersion().equals("0.81"))
 		  {
-			  m_protocolWithTimestamp = true;
+			  m_protocolWithTimestamp = false;
+			  m_protocolWithReplay = true;
 			  m_firstMixSymmetricCipher = new SymCipher();
 		  }
 		  else if (m_cascade.getMixProtocolVersion().equalsIgnoreCase("0.9"))
@@ -462,6 +466,16 @@ public class KeyExchangeManager {
 			  XMLUtil.setValue(mixEncryptionNode, Base64.encode(mixKeys, true));
 			  japKeyExchangeNode.appendChild(mixEncryptionNode);
 			  keyDoc.appendChild(japKeyExchangeNode);
+			  Element mixReplayNode = keyDoc.createElement("ReplayDetection");
+			  if (m_protocolWithReplay)
+			  {
+			  	XMLUtil.setValue(mixReplayNode, "true");
+			  } 
+			  else 
+			  {
+				XMLUtil.setValue(mixReplayNode, "false");
+			  }
+			  japKeyExchangeNode.appendChild(mixReplayNode);
 			  XMLEncryption.encryptElement(japKeyExchangeNode,
 										   m_mixParameters[0].getMixCipher().getPublicKey());
 			  ByteArrayOutputStream keyExchangeBuffer = new ByteArrayOutputStream();
@@ -506,13 +520,38 @@ public class KeyExchangeManager {
 					  keySignatureXmlDataLength = keySignatureXmlDataLength - bytesRead;
 				  }
 			  }
+
 			  Document keySignatureDoc = XMLUtil.toXMLDocument(keySignatureXmlData);
-			  Element keySignatureNode = keySignatureDoc.getDocumentElement();
+			  Element keySignatureNode=null;
+// if version=0.81
+			  if (m_protocolWithReplay)
+			  {
+				  Element mixExchange = keySignatureDoc.getDocumentElement();
+				  Element mixReplay = (Element)mixExchange.getFirstChild();
+				  Element mixe = (Element)mixReplay.getFirstChild();
+				  for (int i = 0; i < m_cascade.getNumberOfMixes(); i++)
+				  {
+					  for (int foo = 0; foo < m_cascade.getNumberOfMixes(); foo++)
+					  {
+						if ((mixe.getAttribute("id")).equals(m_mixParameters[foo].getMixId()))
+						{
+							m_mixParameters[foo].setReplayOffset(Integer.parseInt(mixe.getFirstChild().getFirstChild().getNodeValue()));
+						}					
+					  }
+					  mixe=(Element)mixe.getNextSibling();
+				  }
+				  MixParameters.m_referenceTime=System.currentTimeMillis()/1000;
+				  keySignatureNode = (Element)mixExchange.getLastChild();
+			  }
+			  else
+			  {
+				  keySignatureNode = keySignatureDoc.getDocumentElement();
+			  }
 			  if (keySignatureNode == null)
-			 {
+			  {
 				 throw (new XMLParseException(XMLParseException.ROOT_TAG,
 					 "No document element in received symmetric key signature XML structure."));
-			 }
+			  }
 
 			  keyDoc.getDocumentElement().appendChild(XMLUtil.importNode(keyDoc, keySignatureNode, true));
 
