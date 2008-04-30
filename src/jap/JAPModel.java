@@ -31,6 +31,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Vector;
 import java.io.File;
+import java.math.BigInteger;
 
 import anon.crypto.JAPCertificate;
 import anon.infoservice.ProxyInterface;
@@ -208,6 +209,8 @@ public final class JAPModel extends Observable
 
 	/** Boolen value which describes if a dll update is necessary */
 	private boolean m_bUpdateDll = false;
+
+	private BigInteger m_iDialogVersion=new BigInteger("-1");
 
 	private JAPModel()
 	{
@@ -1390,4 +1393,15 @@ public final class JAPModel extends Observable
 		}
 		return proxyDirect;
 	}
+
+	public BigInteger getDialogVersion()
+		{
+			return m_iDialogVersion;
+		}
+
+		public void setDialogVersion(BigInteger dialogVersion)
+		{
+			m_iDialogVersion = dialogVersion;
+		}
+
 }

@@ -114,8 +114,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 * Reserved for future use
 	 */
 	public static final int TRUST_RESERVED = 7;
-
-	public static final int TRUST_VALUE_INFINITE = -1;
 	
 	public static final long TRUST_MODEL_ALL = 0;
 
@@ -509,7 +507,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
 			int maxDelay = ((Integer) m_conditionValue).intValue();
 			
-			if(maxDelay == TRUST_VALUE_INFINITE)
+			if(maxDelay == TRUST_ALWAYS)
 			{
 				return;
 			}
@@ -759,7 +757,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			TrustAttribute attr = (TrustAttribute) m_trustAttributes.get(a_attr);
 			if(attr == null)
+			{
 				return setAttribute(a_attr, TRUST_ALWAYS, new Integer(0));
+			}
 
 			return attr;
 		}

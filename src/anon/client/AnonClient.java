@@ -126,11 +126,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 	private boolean m_connected;
 
-	// counts the times a connection error has been signaled
-	private int m_connectionErrorCount;
-	private long m_connectionErrorTime;
-	private final Object CONN_ERR_SYNC = new Object();
-
 	public AnonClient()
 	{
 		m_socketHandler = null;
@@ -200,11 +195,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 							}
 							return;
 						//}
-					}
-					synchronized (CONN_ERR_SYNC)
-					{
-						m_connectionErrorCount = 0;
-						m_connectionErrorTime = 0;
 					}
 
 					Socket socketToMixCascade = null;
@@ -509,28 +499,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	{
 		synchronized (m_eventListeners)
 		{
-			synchronized (CONN_ERR_SYNC)
-			{
-				if (1 == 1)
-				{
-					/** @todo This method does not work properly!! Errors happen with fast downloads + browsing */
-					return;
-				}
-
-				if (m_connectionErrorTime <= (System.currentTimeMillis() - CONNECTION_ERROR_WAIT_TIME))
-				{
-					// error signal of last period is too old; remove the whole error history
-					m_connectionErrorTime = System.currentTimeMillis();
-					m_connectionErrorCount = 0;
-				}
-				m_connectionErrorCount++;
-				if (m_connectionErrorCount < CONNECTION_ERROR_WAIT_COUNT)
-				{
-					// may be an error, but is not yet reported
-					return;
-				}
-			}
-
 			final Enumeration eventListenersList = m_eventListeners.elements();
 			Thread notificationThread = new Thread(new Runnable()
 			{
