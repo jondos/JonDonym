@@ -179,12 +179,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	private static final int FILTER_SPEED_MAJOR_TICK = 32;
 	private static final int FILTER_SPEED_MAX = 128;
+	private static final int FILTER_SPEED_STEPS = (FILTER_SPEED_MAX / FILTER_SPEED_MAJOR_TICK) + 1;
 	
-	private static final int FILTER_LATENCY_MIN = 200;
-	private static final int FILTER_LATENCY_MAX = 1000;
-	private static final int FILTER_LATENCY_MAJOR_TICK = 200;
+	private static final int FILTER_LATENCY_STEPS = 5;
+	private static final int FILTER_LATENCY_MAJOR_TICK = 500;
+	private static final int FILTER_LATENCY_MAX = FILTER_LATENCY_STEPS * FILTER_LATENCY_MAJOR_TICK;
 	
-	private static final String DEFAULT_MIX_NAME = "AN.ON Mix";
+	private static final String DEFAULT_MIX_NAME = "Mix";
 
 	private static final int MAX_HOST_LENGTH = 30;
 
@@ -467,7 +468,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 			}
 			
-			m_filterSpeedSlider.setValue(((Integer)m_trustModelCopy.getAttribute(TrustModel.SpeedAttribute.class).getConditionValue()).intValue());
+			m_filterSpeedSlider.setValue(((Integer)m_trustModelCopy.getAttribute(TrustModel.SpeedAttribute.class).getConditionValue()).intValue() / FILTER_SPEED_MAJOR_TICK);
 			
 			int delay = ((Integer)m_trustModelCopy.getAttribute(TrustModel.DelayAttribute.class).getConditionValue()).intValue();
 			m_filterLatencySlider.setValue(convertDelayValue(delay, false));
@@ -504,7 +505,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 		JLabel l;
 		
-		l = new JLabel(JAPMessages.getString(MSG_FILTER));
+		l = new JLabel(JAPMessages.getString(MSG_FILTER) + ":");
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 1;
@@ -1490,7 +1491,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_trustModelCopy.setAttribute(TrustModel.InternationalAttribute.class, Integer.parseInt(cmd), value);
 			m_trustModelCopy.setAttribute(TrustModel.OperatorBlacklistAttribute.class, TrustModel.TRUST_IF_NOT_IN_LIST, ((OperatorsTableModel) m_listOperators.getModel()).getBlacklist());
 			
-			m_trustModelCopy.setAttribute(TrustModel.SpeedAttribute.class, TrustModel.TRUST_IF_AT_LEAST, m_filterSpeedSlider.getValue());
+			m_trustModelCopy.setAttribute(TrustModel.SpeedAttribute.class, TrustModel.TRUST_IF_AT_LEAST, m_filterSpeedSlider.getValue() * FILTER_SPEED_MAJOR_TICK);
 			m_trustModelCopy.setAttribute(TrustModel.DelayAttribute.class, TrustModel.TRUST_IF_AT_MOST, convertDelayValue(m_filterLatencySlider.getValue(), true));
 			
 			if(m_filterNameField.getText().length() > 0)
@@ -1629,26 +1630,34 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if(bFromUtilToReal && a_delay == m_filterLatencySlider.getMinimum())
 		{
-			return TrustModel.TRUST_VALUE_INFINITE;
+			return TrustModel.TRUST_ALWAYS;
 		}
 		
-		if(!bFromUtilToReal && a_delay == TrustModel.TRUST_VALUE_INFINITE)
+		if(!bFromUtilToReal && a_delay == TrustModel.TRUST_ALWAYS)
 		{
 			return m_filterLatencySlider.getMinimum();
 		}
 		
-		a_delay = (m_filterLatencySlider.getMaximum() + m_filterLatencySlider.getMinimum()) - a_delay;
-		
-		if(a_delay > m_filterLatencySlider.getMaximum())
+		if (bFromUtilToReal)
 		{
-			a_delay = m_filterLatencySlider.getMaximum();
+			a_delay = (FILTER_LATENCY_STEPS - a_delay) * FILTER_LATENCY_MAJOR_TICK;
 		}
-		
-		if(a_delay < m_filterLatencySlider.getMinimum())
-		{
-			a_delay = m_filterLatencySlider.getMinimum();
+		else
+		{			
+			if (a_delay < FILTER_LATENCY_MAJOR_TICK)
+			{
+				a_delay = FILTER_LATENCY_MAJOR_TICK;
+			}
+			else if (a_delay > FILTER_LATENCY_MAX)
+			{
+				a_delay = FILTER_LATENCY_MAX;
+			}
+			else
+			{
+				a_delay = FILTER_LATENCY_STEPS - (a_delay / FILTER_LATENCY_MAJOR_TICK);
+			}
 		}
-		
+				
 		return a_delay;
 	}
 	
@@ -3131,6 +3140,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			JPanel p;
 			JMenuItem item;
 			JRadioButton r, s, t;
+			JLabel lbtTable;	
 			
 			m_opPopupMenu = new JPopupMenu();
 			item = new JMenuItem(JAPMessages.getString(MSG_FILTER_SELECT_ALL_OPERATORS));
@@ -3138,7 +3148,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			item.setActionCommand(MSG_FILTER_SELECT_ALL_OPERATORS);
 			m_opPopupMenu.add(item);
 			
-			l = new JLabel("Name:");
+			l = new JLabel(JAPMessages.getString(MSG_FILTER) + ":");
 			c.gridx = 0;
 			c.gridy = 0;
 			c.insets = new Insets(0, 0, 5, 5);
@@ -3149,7 +3159,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridx++;
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.insets = new Insets(0, 0, 5, 0);
-			c.gridwidth = 3;
+			c.gridwidth = 2;
 			add(m_filterNameField, c);
 			
 			c.weightx = 0;
@@ -3224,18 +3234,29 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			m_filterSpeedSlider = new JSlider(SwingConstants.VERTICAL);
 			m_filterSpeedSlider.setMinimum(0);
-			m_filterSpeedSlider.setMaximum(FILTER_SPEED_MAX);
+			m_filterSpeedSlider.setMaximum(FILTER_SPEED_MAX / FILTER_SPEED_MAJOR_TICK);
 			m_filterSpeedSlider.setValue(0);
-			m_filterSpeedSlider.setMajorTickSpacing(FILTER_SPEED_MAJOR_TICK);
+			m_filterSpeedSlider.setMajorTickSpacing(1);
 			m_filterSpeedSlider.setPaintLabels(true);
 			m_filterSpeedSlider.setPaintTicks(true);
 			m_filterSpeedSlider.setInverted(true);
 			m_filterSpeedSlider.setSnapToTicks(true);
-			int steps = (FILTER_SPEED_MAX / FILTER_SPEED_MAJOR_TICK) + 1;
-			Hashtable ht = new Hashtable(steps);
-			for (int i = 0; i < steps; i++)
+				
+			Hashtable ht = new Hashtable(FILTER_SPEED_STEPS);
+			lbtTable = null;
+			for (int i = 0; i < FILTER_SPEED_STEPS; i++)
 			{
-				ht.put(new Integer(i * FILTER_SPEED_MAJOR_TICK), new JLabel(String.valueOf(i * 32) + " kbit/s"));
+				if(i == 0)
+				{
+					//lbtTable = new JLabel("\u221E");
+					lbtTable = new JLabel(JAPMessages.getString(MSG_FILTER_ALL));
+				}
+				else
+				{
+					lbtTable = new JLabel((i * FILTER_SPEED_MAJOR_TICK) + " kbit/s");
+				}
+				ht.put(new Integer(i), lbtTable);				
+				
 			}
 			m_filterSpeedSlider.setLabelTable(ht);
 			c1.gridy++;
@@ -3266,29 +3287,29 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			 * the original direction would be the other way around.
 			 */
 			m_filterLatencySlider = new JSlider(SwingConstants.VERTICAL);
-			m_filterLatencySlider.setMinimum(FILTER_LATENCY_MIN);
-			m_filterLatencySlider.setMaximum(FILTER_LATENCY_MAX);
-			m_filterLatencySlider.setMajorTickSpacing(FILTER_LATENCY_MAJOR_TICK);
+			m_filterLatencySlider.setMinimum(0);
+			m_filterLatencySlider.setMaximum(FILTER_LATENCY_STEPS - 1);			
 			
-			steps = ((FILTER_LATENCY_MAX - FILTER_LATENCY_MIN) / FILTER_LATENCY_MAJOR_TICK) + 1;
-			int value = 0;
 			
-			ht = new Hashtable(steps);
-			for(int i = 0; i < steps; i++)
+			lbtTable = null;			
+			ht = new Hashtable(FILTER_LATENCY_STEPS);
+			for(int i = 0; i < FILTER_LATENCY_STEPS; i++)
 			{
-				value = FILTER_LATENCY_MIN + (i * FILTER_LATENCY_MAJOR_TICK);
-				
-				if(value == FILTER_LATENCY_MIN)
+				if(i == 0)
 				{
-					ht.put(new Integer(value), new JLabel("\u221E"));
+					//lbtTable = new JLabel("\u221E");
+					lbtTable = new JLabel(JAPMessages.getString(MSG_FILTER_ALL));
 				}
 				else
 				{
-					ht.put(new Integer(value), new JLabel(convertDelayValue(value, false) + " ms"));
+					lbtTable = new JLabel((FILTER_LATENCY_MAX  - (i * FILTER_LATENCY_MAJOR_TICK)) + " ms");
 				}
+				ht.put(new Integer(i), lbtTable);
 			}
 
 			m_filterLatencySlider.setLabelTable(ht);
+			m_filterLatencySlider.setMajorTickSpacing(1);
+			m_filterLatencySlider.setMinorTickSpacing(1);
 			m_filterLatencySlider.setValue(0);
 			m_filterLatencySlider.setPaintLabels(true);
 			m_filterLatencySlider.setPaintTicks(true);

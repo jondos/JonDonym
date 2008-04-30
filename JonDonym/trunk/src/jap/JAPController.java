@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.URL;
@@ -848,6 +849,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 *     <ForwardInfoService>false</ForwardInfoService>        // whether an InfoService can be reached or also the InfoService needs forwarding
 	 *   </ForwardingClient>
 	 * </JapForwardingSettings>
+	 * <Dialog>version</Dialog>                                 // Dialog version shown
 	 *  </JAP>
 	 *  @param a_strJapConfFile - file containing the Configuration. If null $(user.home)/jap.conf or ./jap.conf is used.
 	 *  @param loadPay does this JAP support Payment ?
@@ -1800,6 +1802,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 								  "Error loading Mixminion configuration.", ex);
 				}
 
+				try{
+					Element elemDialog = (Element) XMLUtil.getFirstChildByName(root,"Dialog");
+					BigInteger d=XMLUtil.parseValue(elemDialog, JAPModel.getInstance().getDialogVersion(),1);
+					JAPModel.getInstance().setDialogVersion(d);
+				}
+				catch(Exception e)
+					{
+					
+					}
+				
 				/* read the settings of the JAP forwarding system */
 				Element japForwardingSettingsNode = (Element) (XMLUtil.getFirstChildByName(root,
 					JAPConstants.CONFIG_JAP_FORWARDING_SETTINGS));
@@ -2644,7 +2656,20 @@ public final class JAPController extends Observable implements IProxyListener, O
 				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC,
 							  "Error in savin Mixminion settings -- ignoring...", em);
 			}
+			
+			try{
+				Element elemDialog=doc.createElement("Dialog");
+				XMLUtil.setValue(elemDialog, JAPModel.getInstance().getDialogVersion());
+				e.appendChild(elemDialog);
+			}
+			catch(Exception el)
+				{
+					
+				}
+			
 			e.appendChild(JAPModel.getInstance().getRoutingSettings().toXmlElement(doc));
+			
+			
 
 			return doc;
 		}
@@ -2996,6 +3021,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to start AN.ON service...");
 					}
+					//JAPExtension.doIt();
 					ret = m_proxyAnon.start(cascadeContainer);
 
 

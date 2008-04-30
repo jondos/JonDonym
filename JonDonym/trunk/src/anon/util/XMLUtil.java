@@ -45,6 +45,7 @@ import java.io.Writer;
 import java.util.StringTokenizer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -466,7 +467,7 @@ public class XMLUtil
 	/**
 	 * Loads all elements under the root elements that have the specified tag name.
 	 * @param a_file a file to load the elements from
-	 * @param a_tagName the tag that specifies the elemetns to load
+	 * @param a_tagName the tag that specifies the elements to load
 	 * @return the elements read from the given file or an empty array if no elements were read
 	 */
 	public static Element[] readElementsByTagName(File a_file, String a_tagName)
@@ -1657,4 +1658,29 @@ public class XMLUtil
 	{
 		System.out.println(XMLUtil.toString(XMLUtil.toXMLElement(xmlobject)));
 	}
-}
+
+	public static BigInteger parseValue(Element elem,	BigInteger defValue,int l)
+		{
+			try{
+			String s=XMLUtil.parseValue(elem,null);
+			if(s==null)
+				return defValue;
+			return new BigInteger(s.trim());
+			}
+			catch(Exception e)
+				{
+				}
+			return defValue;
+		}
+
+	public static void setValue(Element elem,BigInteger i)
+		{
+		try{
+			setValue(elem,i.toString());
+		}
+		catch(Exception e)
+			{
+				
+			}
+		}
+	}

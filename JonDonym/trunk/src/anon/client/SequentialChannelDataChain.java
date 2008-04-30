@@ -333,11 +333,6 @@ public class SequentialChannelDataChain extends AbstractDataChain {
                 LogHolder.log(LogLevel.DEBUG, LogType.NET, "SequentialChannelDataChain: run(): Data received.");
                 addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(DataChainInputStreamQueueEntry.TYPE_DATA_AVAILABLE, dataCell.getPayloadData()));
               }
-              if (dataCell.isConnectionErrorFlagSet()) {
-                LogHolder.log(LogLevel.ERR, LogType.NET, "SequentialChannelDataChain: run(): Last mix signaled a connection-error.");
-                addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(new IOException("SequentialChannelDataChain: run(): Last mix signaled a connection-error.")));
-                propagateConnectionError();
-              }
               if (dataCell.isUnknownChainIdFlagSet()) {
                 LogHolder.log(LogLevel.ERR, LogType.NET, "SequentialChannelDataChain: run(): Last mix signaled unknown chain ID.");
                 addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(new IOException("SequentialChannelDataChain: run(): Last mix signaled unknown chain ID.")));                
@@ -357,6 +352,23 @@ public class SequentialChannelDataChain extends AbstractDataChain {
             break;
           }
           case InternalChannelMessage.CODE_CHANNEL_CLOSED: {
+	    	  ChainCell dataCell = null;
+	          try {
+        	  if (currentMessage.getMessageData() != null)
+				{
+		            dataCell = new ChainCell(currentMessage.getMessageData());
+		            if (dataCell.isConnectionErrorFlagSet()) 
+		            {
+		              LogHolder.log(LogLevel.ERR, LogType.NET, "SequentialChannelDataChain: run(): Last mix signaled a connection-error.");
+		              addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(new IOException("SequentialChannelDataChain: run(): Last mix signaled a connection-error.")));
+		              propagateConnectionError();
+		            }
+				}
+	          }
+	          catch (InvalidChainCellException e) {
+	            addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(new IOException(e.toString())));	           
+	          }
+            
             if (currentChannel.getProcessedDownstreamPackets() == 0) {
               LogHolder.log(LogLevel.ERR, LogType.NET, "SequentialChannelDataChain: run(): Last mix sent CHANNEL_CLOSE immediately without data-packets.");
               /* should never occur that no packets and also no exception is received */

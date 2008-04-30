@@ -59,5 +59,9 @@ public final class MyRandom
 			}
 		}
 	}
-
+	
+	public Random getRandSource()
+		{
+			return m_TheRandom;
+		}
 }
