@@ -495,6 +495,9 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		}
 	}
 
+	/**
+	 * @todo signals proxy connection error without recovery
+	 */
 	public void dataChainErrorSignaled()
 	{
 		synchronized (m_eventListeners)

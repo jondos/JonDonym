@@ -63,7 +63,7 @@ import gui.dialog.JAPDialog;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-import java.io.File;
+import platform.AbstractOS;
 
 /**
  * Help window for the JAP. This is a singleton meaning that there exists only one help window all the time.
@@ -278,17 +278,38 @@ public final class JAPHelp extends JAPDialog
 
 	public void setVisible(boolean a_bVisible)
 	{
+		boolean bURL = false;
 		if (a_bVisible)
 		{
+			String strContext = m_helpContext.getContext();		
 			try
 			{
-				m_htmlpaneTheHelpPane.loadContext(m_helpPath, m_helpContext.getContext(), m_language);
+				URL url = new URL(strContext);
+				if (AbstractOS.getInstance().openURL(url))
+				{
+					bURL = true; //this is a URL that was opened in the web browser
+				}
 			}
-			catch (Exception e)
+			catch (Exception a_e)
 			{
+				// ignore and try to load the normal help context
+			}
+			if (!bURL)
+			{
+				// this is no URL
+				try
+				{
+					m_htmlpaneTheHelpPane.loadContext(m_helpPath, m_helpContext.getContext(), m_language);
+				}
+				catch (Exception e)
+				{
+				}
 			}
 		}
-		super.setVisible(a_bVisible);
+		if (!bURL || a_bVisible == false)
+		{
+			super.setVisible(a_bVisible);
+		}
 
 	}
 

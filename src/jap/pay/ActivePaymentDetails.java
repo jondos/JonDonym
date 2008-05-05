@@ -246,19 +246,12 @@ public class ActivePaymentDetails extends JAPDialog implements ActionListener
 					optionPanel.add(linkButtonsPanel);
 				}
 				else //regular text
-				{
-					if (extraInfoString.toUpperCase().indexOf("PAYSAFECARD") != -1 )
-					{
-						extraInfoString = PaymentInfoPane.createPaysafecardLink(extraInfoString,amount, transferNumber);
-					}
-					else
-					{
-						extraInfoString = PaymentInfoPane.createPaysafecardLink(extraInfoString,amount, transferNumber);
-						//test could contain e.g. wiring instructions, so need to replace placeholders, too
-						//extraInfoString = Util.replaceAll(extraInfoString,"%t", transferNumber);
-						//extraInfoString = Util.replaceAll(extraInfoString,"%a",JAPUtil.formatEuroCentValue(amount));
-						//extraInfoString = Util.replaceAll(extraInfoString,"%c",""); //currency is not used, so get rid of the placeholder
-					}
+				{					
+					//test could contain e.g. wiring instructions, so need to replace placeholders, too
+					extraInfoString = Util.replaceAll(extraInfoString,"%t", transferNumber);
+					extraInfoString = Util.replaceAll(extraInfoString,"%a",JAPUtil.formatEuroCentValue(amount));
+					extraInfoString = Util.replaceAll(extraInfoString,"%c",""); //currency is not used, so get rid of the placeholder
+					
 					
 					//add text
 					JAPHtmlMultiLineLabel extraInfoLabel = new JAPHtmlMultiLineLabel(extraInfoString);

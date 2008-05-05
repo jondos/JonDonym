@@ -958,7 +958,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	public boolean isPaymentForced()
 	{
-		// TODO: NULL check
 		TrustAttribute attr = getAttribute(PaymentAttribute.class);
 
 		return (attr == null) ? false : (attr.getTrustCondition() == TRUST_IF_TRUE);

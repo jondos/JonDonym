@@ -1886,7 +1886,9 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				//get info about the delay until paymen is credited
 				String language = JAPMessages.getLocale().getLanguage();
 				String paymentDelay = null;
-
+				Timestamp ts = new Timestamp(new java.util.Date().getTime());
+				boolean bTransactionComplete = a_accountCreationThread.getAccount().isCharged(ts);
+					
 				//determine type of payment option used, so we can later show apropriate info
 				if (planSelectionPane.isCouponUsed() )
 				{
@@ -1900,17 +1902,15 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 			    //set strings to show according to payment type and success/failure
 				if (paymentType.equalsIgnoreCase(XMLPaymentOption.OPTION_ACTIVE))
-				{                                        
-                    Timestamp ts = new Timestamp(new java.util.Date().getTime());
-                    
-                    if (!a_accountCreationThread.getAccount().isCharged(ts))
+				{                                                                                
+                    if (bTransactionComplete)
                     {
-                    	messagesToShow.addElement(activeComplete);
-                    	messagesToShow.addElement(paymentDelay);
+                    	messagesToShow.addElement(JAPMessages.getString(MSG_CHARGING_SUCCESSFUL));                    	
                     }
                     else
                     {
-                    	messagesToShow.addElement(JAPMessages.getString(MSG_CHARGING_SUCCESSFUL));
+                    	messagesToShow.addElement(activeComplete);
+                    	messagesToShow.addElement(paymentDelay);                    	
                     }
                     
 					messagesToShow.addElement(backupWarning);
@@ -1935,8 +1935,15 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					boolean passivePaymentSucceeded = ( (Boolean) sendPassivePane.getValue()).booleanValue();
 					if (passivePaymentSucceeded)
 					{
-						messagesToShow.addElement(passiveOK);
-						messagesToShow.addElement(paymentDelay);
+						if (bTransactionComplete)
+						{
+							messagesToShow.addElement(JAPMessages.getString(MSG_CHARGING_SUCCESSFUL));
+						}
+						else
+						{
+							messagesToShow.addElement(passiveOK);
+							messagesToShow.addElement(paymentDelay);
+						}
 						messagesToShow.addElement(backupWarning);
 					}
 					else
@@ -1959,8 +1966,17 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					}
 				}
 				setText(combinedString);
-				return null;
+				MixCascade currentCascade = JAPController.getInstance().getCurrentMixCascade();
+				if (bTransactionComplete && currentCascade.isPayment() &&
+					currentCascade.getPIID().equals(a_accountCreationThread.getAccount().getBI().getId()) &&
+					JAPModel.isAutomaticallyReconnected())
+				{
+					// try to connect to the current Cascade if not yet connected
+					JAPController.getInstance().setAnonMode(true);
 				}
+				
+				return null;
+			}
 		};
 
 		sentPane.getButtonCancel().setVisible(false);
