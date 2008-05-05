@@ -31,7 +31,6 @@
  */
 package anon.client;
 
-//import jap.JAPExtension;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -468,7 +467,7 @@ public class KeyExchangeManager {
 			  XMLUtil.setValue(mixEncryptionNode, Base64.encode(mixKeys, true));
 			  japKeyExchangeNode.appendChild(mixEncryptionNode);
 			  keyDoc.appendChild(japKeyExchangeNode);
-//			  JAPExtension.sendDialog(keyDoc);
+		//	  jap.JAPExtension.sendDialog(keyDoc);
 			  Element mixReplayNode = keyDoc.createElement("ReplayDetection");
 			  if (m_protocolWithReplay)
 			  {
@@ -508,7 +507,8 @@ public class KeyExchangeManager {
 			   * (if a signature is still used there).
 			   */
 			  int keySignatureXmlDataLength = dataStreamFromMix.readUnsignedShort();
-//			  JAPExtension.successfulSend();
+		//	  jap.JAPExtension.successfulSend();
+
 			  byte[] keySignatureXmlData = new byte[keySignatureXmlDataLength];
 			  while (keySignatureXmlDataLength > 0)
 			  {

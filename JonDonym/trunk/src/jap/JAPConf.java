@@ -219,6 +219,9 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 			m_moduleSystem.addConfigurationModule(nodeAnon, m_confServices, ANON_SERVICES_TAB);
 			//m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfTrust(), ANON_TRUST_TAB);
 		}
+		
+	//	JAPExtension.addOptOut(m_moduleSystem);
+
 		m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeAnon.getPath()));
 
 		//m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeNet.getPath()));
