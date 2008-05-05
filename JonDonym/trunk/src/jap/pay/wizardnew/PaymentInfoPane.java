@@ -290,6 +290,7 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 						link = Util.replaceAll(strExtraInfo, "%t", tan);
 						String amount = JAPUtil.formatEuroCentValue(intAmount);
 						link = Util.replaceAll(link, "%a", amount);
+						link = Util.replaceAll(link, "%c", "");
 					}
 					return link;
 				}

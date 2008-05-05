@@ -72,6 +72,7 @@ import jap.JAPController;
 import jap.JAPModel;
 import jap.JAPNewView;
 import jap.JAPUtil;
+import jap.TrustModel;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -114,6 +115,7 @@ public class PaymentMainPanel extends FlippingPanel
 	private static final String MSG_TT_CREATE_ACCOUNT = PaymentMainPanel.class.getName() + "_ttCreateAccount";
 	private static final String MSG_FREE_OF_CHARGE = PaymentMainPanel.class.getName() + "_freeOfCharge";
 	private static final String MSG_OPEN_TRANSACTION = PaymentMainPanel.class.getName() + "_openTransaction";
+	private static final String MSG_CREATE_ACCOUNT_QUESTION = PaymentMainPanel.class.getName() + "_createAccountQuestion";
 
 
 
@@ -704,8 +706,8 @@ public class PaymentMainPanel extends FlippingPanel
 		{
 			final PayAccountsFile accounts = PayAccountsFile.getInstance();
 			boolean bSuccess = true;
-
-			final JAPDialog.LinkedInformationAdapter adapter =
+			
+			final JAPDialog.LinkedInformationAdapter adapter =			
 				new JAPDialog.AbstractLinkedURLAdapter()
 			{
 				public boolean isOnTop()
@@ -730,7 +732,7 @@ public class PaymentMainPanel extends FlippingPanel
 						// ignore, should not happen
 						return null;
 					}
-				}
+				}			
 			};
 			Runnable run = null;
 			final String strMessage = ""; //JAPMessages.getString(MSG_FREE_OF_CHARGE) + "<br><br>";
@@ -746,12 +748,31 @@ public class PaymentMainPanel extends FlippingPanel
 				{
 					public void run()
 					{
-						boolean answer = JAPDialog.showYesNoDialog(
-											  JAPController.getInstance().getViewWindow(),
-							strMessage + JAPMessages.getString("payCreateAccountQuestion"), adapter);
-						if (answer)
+						int optionType;
+						if (JAPModel.getInstance().isCascadeAutoSwitched() &&
+							!TrustModel.getCurrentTrustModel().isPaymentForced())
 						{
+							optionType = JAPDialog.OPTION_TYPE_YES_NO_CANCEL;
+						}
+						else
+						{
+							optionType = JAPDialog.OPTION_TYPE_OK_CANCEL;
+						}
+						int answer = JAPDialog.showConfirmDialog(
+							JAPController.getInstance().getViewWindow(),
+							strMessage + JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION),
+							optionType, JAPDialog.MESSAGE_TYPE_QUESTION, adapter);
+						
+						if (answer == JAPDialog.RETURN_VALUE_YES)
+						{
+							JAPController.getInstance().setAllowPaidServices(true);
 							m_view.showConfigDialog(JAPConf.PAYMENT_TAB, a_connectedCascade.getPIID());
+						}
+						else if (answer == JAPDialog.RETURN_VALUE_NO)
+						{
+							JAPController.getInstance().setAllowPaidServices(false);
+							JAPController.getInstance().switchToNextMixCascade();
+							JAPController.getInstance().setAnonMode(true);
 						}
 					}
 				};
@@ -793,15 +814,33 @@ public class PaymentMainPanel extends FlippingPanel
 							else
 							{
 								message += //JAPMessages.getString(MSG_WANNA_CHARGE);
-									JAPMessages.getString("payCreateAccountQuestion");
+									JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION);
 							}
 							JAPController.getInstance().setAnonMode(false);
-							if (JAPDialog.showYesNoDialog(JAPController.getInstance().getViewWindow(),
-								message, adapter))
+							int optionType;
+							if (JAPModel.getInstance().isCascadeAutoSwitched() &&
+								!TrustModel.getCurrentTrustModel().isPaymentForced())
 							{
-								m_view.showConfigDialog(JAPConf.PAYMENT_TAB,
-									//PayAccountsFile.getInstance().getActiveAccount());
-									new Boolean(true));
+								optionType = JAPDialog.OPTION_TYPE_YES_NO_CANCEL;
+							}
+							else
+							{
+								optionType = JAPDialog.OPTION_TYPE_OK_CANCEL;
+							}
+							int answer = JAPDialog.showConfirmDialog(
+									JAPController.getInstance().getViewWindow(), message,
+									optionType, JAPDialog.MESSAGE_TYPE_QUESTION, adapter);
+							if (answer == JAPDialog.RETURN_VALUE_YES)
+							{
+								JAPController.getInstance().setAllowPaidServices(true);
+								m_view.showConfigDialog(JAPConf.PAYMENT_TAB, a_connectedCascade.getPIID());
+								//m_view.showConfigDialog(JAPConf.PAYMENT_TAB, new Boolean(true));
+							}
+							else if (answer == JAPDialog.RETURN_VALUE_NO)
+							{
+								JAPController.getInstance().setAllowPaidServices(false);
+								JAPController.getInstance().switchToNextMixCascade();
+								JAPController.getInstance().setAnonMode(true);
 							}
 						}
 					};
@@ -857,7 +896,7 @@ public class PaymentMainPanel extends FlippingPanel
 				return;
 			}
 
-			MixCascade cascade = JAPController.getInstance().getCurrentMixCascade();
+			final MixCascade cascade = JAPController.getInstance().getCurrentMixCascade();
 			if (cascade.equals(JAPController.getInstance().switchToNextMixCascade()))
 			{
 				// there are no other cascades to switch to
@@ -907,19 +946,45 @@ public class PaymentMainPanel extends FlippingPanel
 						{
 							message += "<br><br>" +
 								//JAPMessages.getString(MSG_WANNA_CHARGE);
-								JAPMessages.getString("payCreateAccountQuestion");
-
-							if (JAPDialog.showYesNoDialog(parent, message, adapter))
+								JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION);
+							int optionType;
+							if (JAPModel.getInstance().isCascadeAutoSwitched() &&
+								!TrustModel.getCurrentTrustModel().isPaymentForced())
 							{
+								
+								optionType = JAPDialog.OPTION_TYPE_YES_NO_CANCEL;
+							}
+							else
+							{
+								optionType = JAPDialog.OPTION_TYPE_OK_CANCEL;
+							}
+							int answer = JAPDialog.showConfirmDialog(parent, message,
+								optionType, JAPDialog.MESSAGE_TYPE_QUESTION, adapter);							
+							
+							if (answer == JAPDialog.RETURN_VALUE_YES)
+							{
+								JAPController.getInstance().setAllowPaidServices(true);
 								new Thread(new Runnable()
 								{
 									public void run()
 									{
-										m_view.showConfigDialog(JAPConf.PAYMENT_TAB,
-											//PayAccountsFile.getInstance().getActiveAccount());
-											new Boolean(true));
+										if (cascade.isPayment())
+										{
+											m_view.showConfigDialog(JAPConf.PAYMENT_TAB, cascade.getPIID());
+										}
+										else
+										{
+											// huh, this should not happen...
+											m_view.showConfigDialog(JAPConf.PAYMENT_TAB, new Boolean(true));
+										}
 									}
-								}).start();
+								}).start();																								
+							}
+							else if (answer == JAPDialog.RETURN_VALUE_NO)
+							{
+								JAPController.getInstance().setAllowPaidServices(false);
+								JAPController.getInstance().switchToNextMixCascade();
+								JAPController.getInstance().setAnonMode(true);
 							}
 						}
 						else if (!JAPModel.getInstance().isCascadeAutoSwitched())

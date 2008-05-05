@@ -242,8 +242,8 @@ public final class JAPUtil
 
 
 	/**
-	 * deprecated, since balances are not stored as
-	 * @param centvalue long
+	 * deprecated, since balances are not stored as centvalue
+	 * @param long
 	 * @return String
 	 */
 	public static String formatEuroCentValue(long centvalue)

@@ -46,6 +46,8 @@ public class SingleChannelDataChain extends AbstractDataChain
 
 	private static final short FLAG_FLOW_CONTROL = (short) 0x8000;
 
+	private static final int CLOSE_CELL_CONNECTION_ERROR=1;
+
 	private int m_chainType;
 
 	private boolean m_supportFlowControl;
@@ -69,13 +71,16 @@ public class SingleChannelDataChain extends AbstractDataChain
 
 		private static final short DATALENGTH_MASK = 0x03FF;
 
-		private static final short FLAG_CONNECTION_ERROR = (short) 0x4000;
+//		private static final short FLAG_CONNECTION_ERROR = (short) 0x4000;
 
 		private byte[] m_payloadData;
 
+		private int m_payloadLen;
+		private int m_payloadType;
+		
 		private boolean m_flowControlFlagSet;
 
-		private boolean m_connectionErrorFlagSet;
+	//	private boolean m_connectionErrorFlagSet;
 
 		public ChainCell(byte[] a_rawData) throws InvalidChainCellException
 		{
@@ -87,15 +92,16 @@ public class SingleChannelDataChain extends AbstractDataChain
 			short lengthAndFlagsField = 0;
 			try
 			{
-				DataInputStream rawDataStream = new DataInputStream(new ByteArrayInputStream(a_rawData, 0, 2));
+				DataInputStream rawDataStream = new DataInputStream(new ByteArrayInputStream(a_rawData, 0, 3));
 				lengthAndFlagsField = rawDataStream.readShort();
+				m_payloadType=rawDataStream.readByte();
 			}
 			catch (IOException e)
 			{
 				/* should never occur */
 			}
 			m_flowControlFlagSet = false;
-			m_connectionErrorFlagSet = false;
+	//		m_connectionErrorFlagSet = false;
 			short flags = (short) (lengthAndFlagsField & (~DATALENGTH_MASK));
 			if (m_supportFlowControl)
 			{
@@ -104,22 +110,22 @@ public class SingleChannelDataChain extends AbstractDataChain
 					m_flowControlFlagSet = true;
 				}
 			}
-			if ( (flags & FLAG_CONNECTION_ERROR) == FLAG_CONNECTION_ERROR)
-			{
-				m_connectionErrorFlagSet = true;
-			}
-			int dataLength = lengthAndFlagsField & DATALENGTH_MASK;
+	//		if ( (flags & FLAG_CONNECTION_ERROR) == FLAG_CONNECTION_ERROR)
+	//		{
+	//			m_connectionErrorFlagSet = true;
+	//		}
+			m_payloadLen = lengthAndFlagsField & DATALENGTH_MASK;
 			/* data is starting at byte 3 (0 and 1 are length and flags, 2 is the type and can
 			 * be ignored)
 			 */
 			int dataOffset = 3;
-			if (dataOffset + dataLength > a_rawData.length)
+			if (dataOffset + m_payloadLen > a_rawData.length)
 			{
 				throw (new InvalidChainCellException(
 					"SingleChannelDataChain: ChainCell: Constructor: ChainCell has invalid length-field."));
 			}
-			m_payloadData = new byte[dataLength];
-			System.arraycopy(a_rawData, dataOffset, m_payloadData, 0, dataLength);
+			m_payloadData = new byte[m_payloadLen];
+			System.arraycopy(a_rawData, dataOffset, m_payloadData, 0, m_payloadLen);
 		}
 
 		public byte[] getPayloadData()
@@ -127,15 +133,25 @@ public class SingleChannelDataChain extends AbstractDataChain
 			return m_payloadData;
 		}
 
+		public int getPayloadType()
+			{
+				return m_payloadType;
+			}
+		
+		public int getPayloadLength()
+			{
+				return m_payloadLen;
+			}
+
 		public boolean isFlowControlFlagSet()
 		{
 			return m_flowControlFlagSet;
 		}
 
-		public boolean isConnectionErrorFlagSet()
-		{
-			return m_connectionErrorFlagSet;
-		}
+//		public boolean isConnectionErrorFlagSet()
+//		{
+//			return m_connectionErrorFlagSet;
+//		}
 	}
 
 	public SingleChannelDataChain(IDataChannelCreator a_channelCreator,
@@ -247,12 +263,6 @@ public class SingleChannelDataChain extends AbstractDataChain
 							/* add data to the datastream */
 							addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(
 								DataChainInputStreamQueueEntry.TYPE_DATA_AVAILABLE, dataCell.getPayloadData()));
-							if (dataCell.isConnectionErrorFlagSet())
-							{
-								addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(new IOException(
-									"SingleChannelDataChain: run(): Last mix signaled connection error.")));
-								propagateConnectionError();
-							}
 						}
 						catch (InvalidChainCellException e)
 						{
@@ -265,12 +275,14 @@ public class SingleChannelDataChain extends AbstractDataChain
 					{
 						addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(
 							DataChainInputStreamQueueEntry.TYPE_STREAM_END, null));
+						
 						try
 						{
 							if (currentMessage.getMessageData() != null)
 							{
 								ChainCell dataCell = new ChainCell(currentMessage.getMessageData());
-								if (dataCell.isConnectionErrorFlagSet())
+								if (dataCell.getPayloadLength() == 0 && 
+									dataCell.getPayloadType()==CLOSE_CELL_CONNECTION_ERROR)
 								{
 									addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(new IOException(
 										"SingleChannelDataChain: run(): Last mix signaled connection error.")));

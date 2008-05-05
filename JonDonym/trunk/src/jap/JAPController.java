@@ -221,6 +221,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	private boolean m_bShowConfigAssistant = false;
 	private boolean m_bAssistantClicked = false;
+	private boolean m_bAllowPaidServices = true; 
 
 	private JobQueue m_anonJobQueue;
 
@@ -511,6 +512,17 @@ public final class JAPController extends Observable implements IProxyListener, O
 			m_commandLineArgs = a_cmdArgs;
 		}
 	}
+	/**
+	public void simuateProxyError()
+	{
+		new Thread(new Runnable()
+		{
+			public void run()
+			{
+				m_proxyAnon.dataChainErrorSignaled();
+			}
+		}).start();	
+	}*/
 
 	/**
 	 * Returns the password reader.
@@ -1916,8 +1928,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 			m_Model.setConfigFile(AbstractOS.getInstance().getConfigPath() +
 												 JAPConstants.XMLCONFFN);
 
-			/* As this is the first JAp start, show the config assistant */
-			m_bShowConfigAssistant = true;
+			/* As this is the first JAP start, show the config assistant */
+			m_bShowConfigAssistant = true;	
+			m_bAllowPaidServices = false; // forbid automatic connection to paid services
 		}
 		return success;
 	}
@@ -3310,6 +3323,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 		return m_bShowConfigAssistant;
 	}
 
+	public void setAllowPaidServices(boolean a_bAllow)
+	{
+		m_bAllowPaidServices = a_bAllow;
+	}
+	
 	public void setConfigAssistantShown()
 	{
 		m_bShowConfigAssistant = false;
@@ -4993,7 +5011,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 		public boolean isReconnectedAutomatically()
 		{
-			return JAPModel.getInstance().isAutomaticallyReconnected();
+			return JAPModel.isAutomaticallyReconnected();
 		}
 
 		private boolean isSuitableCascade(MixCascade a_cascade)
@@ -5003,8 +5021,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				return false;
 			}
 
-			if (a_cascade.isPayment() && isConfigAssistantShown() && !isPortableMode() &&
-				!TrustModel.getCurrentTrustModel().isPaymentForced())
+			if (a_cascade.isPayment() && !TrustModel.getCurrentTrustModel().isPaymentForced() &&
+				((isConfigAssistantShown() && !isPortableMode()) || !m_bAllowPaidServices))
 			{
 				// do not connect to payment for new users
 				return false;

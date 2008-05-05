@@ -2325,6 +2325,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				else if (source == m_btnAbout)
 				{
+					//JAPController.getInstance().simuateProxyError();
 					JAPController.aboutJAP();
 				}
 				else if (source == m_btnAssistant)
