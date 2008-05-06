@@ -111,7 +111,7 @@ public class InfoService
 			System.out.println("InfoService is running!");
 			
 			InfoService.ms_accountUpdater = new AccountUpdater();
-			InfoService.ms_accountUpdater.stop();
+			InfoService.ms_accountUpdater.start(false);
 			
 			// start the performance meter
 			if(Configuration.getInstance().isPerfEnabled())
