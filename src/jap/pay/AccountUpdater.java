@@ -110,7 +110,7 @@ public class AccountUpdater extends Updater
 			catch (Exception e)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.PAY,
-							  "Could not fetch statement for account: " + account.getAccountNumber());
+							  "Could not fetch statement for account: " + account.getAccountNumber(), e);
 			}
 		}
 

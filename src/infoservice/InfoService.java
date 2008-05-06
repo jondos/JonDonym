@@ -110,6 +110,10 @@ public class InfoService
 			s1.startServer();
 			System.out.println("InfoService is running!");
 			
+			jap.JAPModel model = jap.JAPModel.getInstance();
+			model.allowPaymentViaDirectConnection(true);
+			model.allowUpdateViaDirectConnection(true);
+			
 			InfoService.ms_accountUpdater = new AccountUpdater();
 			InfoService.ms_accountUpdater.start(false);
 			
