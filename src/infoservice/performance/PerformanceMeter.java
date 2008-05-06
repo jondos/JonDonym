@@ -537,5 +537,6 @@ public class PerformanceMeter implements Runnable
 			return m_infoServiceConfig.getPerfAccountPassword();
 		}
 	}
+
 }
 
