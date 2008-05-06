@@ -35,6 +35,8 @@ import java.util.Locale;
 import infoservice.performance.PerformanceMeter;
 import gui.JAPMessages;
 import jap.pay.AccountUpdater;
+import jap.JAPModel;
+import jap.JAPController;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
@@ -110,9 +112,10 @@ public class InfoService
 			s1.startServer();
 			System.out.println("InfoService is running!");
 			
-			jap.JAPModel model = jap.JAPModel.getInstance();
+			JAPModel model = JAPModel.getInstance();
 			model.allowPaymentViaDirectConnection(true);
 			model.allowUpdateViaDirectConnection(true);
+			model.setAnonConnectionChecker(JAPController.getInstance().new AnonConnectionChecker());
 			
 			InfoService.ms_accountUpdater = new AccountUpdater();
 			InfoService.ms_accountUpdater.start(false);
