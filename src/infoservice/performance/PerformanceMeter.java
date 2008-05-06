@@ -258,23 +258,20 @@ public class PerformanceMeter implements Runnable
 		
 		m_recvBuff = new char[m_dataSize];
 		
-		/*if((proxy.getMixCascade() != a_cascade))
-		{*/
-			proxy.start(new SimpleMixCascadeContainer(a_cascade));
+		proxy.start(new SimpleMixCascadeContainer(a_cascade));
 			
-			synchronized(proxy)
+		synchronized(proxy)
+		{
+			try
 			{
-				try
-				{
-					// @todo: doesn't work
-					proxy.wait(1000);
-				}
-				catch(InterruptedException ex)
-				{
-				
-				}
+				// @todo: doesn't work
+				proxy.wait(1000);
 			}
-		//}
+			catch(InterruptedException ex)
+			{
+				
+			}
+		}
 		
 		if(!proxy.isConnected())
 		{
