@@ -348,7 +348,10 @@ final public class InfoServiceConnection implements Runnable
 
 		try
 		{
-			m_socket.getOutputStream().close();
+			if(!m_socket.isClosed())
+			{
+				m_socket.getOutputStream().close();
+			}
 		}
 		catch (IOException a_e)
 		{
