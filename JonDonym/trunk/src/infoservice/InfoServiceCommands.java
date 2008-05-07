@@ -894,8 +894,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"<tr><td class=\"name\">Major Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + " ms<td></tr>" +
 				"<tr><td class=\"name\">Requests per Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[4] + "<td></tr>" +
 				"<tr><td class=\"name\">Account directory</td><td class=\"status\">" + Configuration.getInstance().getPerfAccountDirectory() + "<td></tr>" +
-				"<tr><td class=\"name\">Last Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastSuccessfulUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastSuccessfulUpdate()).toString()) + "</td></tr>" +
-				"<tr><td class=\"name\">Next Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getNextUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getNextUpdate()).toString()) + "</td></tr>" +
+				"<tr><td class=\"name\">Last Successful Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastSuccessfulUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastSuccessfulUpdate()).toString()) + "</td></tr>" +
+				"<tr><td class=\"name\">Next Update Attempt</td><td class=\"status\">" + (InfoService.getPerfMeter().getNextUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getNextUpdate()).toString()) + "</td></tr>" +
 				"<tr><td class=\"name\">Last Cascade Updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
 				"</table><br />" +
 				"<table style=\"align: left\" border=\"0\" width=\"30%\">" +
