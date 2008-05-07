@@ -1640,7 +1640,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		else if( (command.startsWith("/performanceinfo") && (method == Constants.REQUEST_METHOD_GET)))
 		{
-			ISRuntimeStatistics.ms_lNrOfPerformanceEntriesRequests++;
+			ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
 			httpResponse = m_performanceResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals("/helo")) && (method == Constants.REQUEST_METHOD_POST))
