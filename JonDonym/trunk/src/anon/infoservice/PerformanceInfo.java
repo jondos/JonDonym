@@ -31,6 +31,9 @@ import logging.LogType;
  */
 public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncodable
 {
+	private static final double PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES = 0.6666666666;
+	private static final double PERFORMANCE_INFO_MAX_STRAY = 0.7;
+
 	/**
 	 * Last Update time of the database entry
 	 */
@@ -167,60 +170,69 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 			return avgEntry;
 		}
 		
-		/*
-		 * TODO: this obviously needs some improvement, this is just a first draft
-		 */
-		long speed = 0;
-		long delay = 0;
+		//////// DEBUG ///////
+		v = new Vector();
+		v.addElement(new PerformanceEntry(300, 1));
+		v.addElement(new PerformanceEntry(300, 60000));
+		//v.addElement(new PerformanceEntry(300, 60500));
+		//v.addElement(new PerformanceEntry(300, 60200));
+		//v.addElement(new PerformanceEntry(300, 60200));
+		v.addElement(new PerformanceEntry(300, 60700));
+		v.addElement(new PerformanceEntry(300, 900000));
+		
+		long avgSpeed = 0;
+		long avgDelay = 0;
 		for(int j = 0; j < v.size(); j++)
 		{
-			speed += ((PerformanceEntry) v.elementAt(j)).getAverageSpeed();
-			delay += ((PerformanceEntry) v.elementAt(j)).getAverageDelay();
+			avgSpeed += ((PerformanceEntry) v.elementAt(j)).getAverageSpeed();
+			avgDelay += ((PerformanceEntry) v.elementAt(j)).getAverageDelay();
 		}
-		speed /= v.size();
-		delay /= v.size();
+		avgSpeed /= v.size();
+		avgDelay /= v.size();
 		
-		for(int k = 0; k < v.size(); k++)
+		Vector vToCheck = (Vector) v.clone();
+		Vector vResult = new Vector();
+		Vector vDeleted = new Vector();
+		double stray = PERFORMANCE_INFO_MAX_STRAY;
+		
+		// loop through all entries to eliminate stray entries
+		// if we deleted too many entries, re-add deleted entries
+		do
 		{
-			double straySpeed = Math.abs(speed - ((PerformanceEntry) v.elementAt(k)).getAverageSpeed()) / speed;
-			double strayDelay = Math.abs(delay - ((PerformanceEntry) v.elementAt(k)).getAverageDelay()) / delay;
-			if(straySpeed > 0.6)
-			{
-				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with speed " + ((PerformanceEntry) v.elementAt(k)).getAverageSpeed());
-				((PerformanceEntry) v.elementAt(k)).setAverageSpeed(0);
-			}
-			
-			if(strayDelay > 0.6)
-			{
-				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with delay " + ((PerformanceEntry) v.elementAt(k)).getAverageDelay());
-				((PerformanceEntry) v.elementAt(k)).setAverageDelay(0);
-			}
+			stray = eliminateStrayEntries(vToCheck, vDeleted, avgSpeed, avgDelay, stray);
+			// add the entries that passed the test to the result vector
+			vResult.addAll(vToCheck);
+			// only check the deleted entries next round
+			vToCheck = vDeleted;
+			// reset the deleted entries vector
+			vDeleted = new Vector();
 		}
+		while((double)vResult.size() / v.size() < PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES);
 		
-		if(v.size() == 0)
+		if(vResult.size() == 0)
 		{
 			return avgEntry;
 		}
 		
-		speed = 0;
-		delay = 0;
-		for(int j = 0; j < v.size(); j++)
+		avgSpeed = 0;
+		avgDelay = 0;
+		for(int j = 0; j < vResult.size(); j++)
 		{
-			if(((PerformanceEntry) v.elementAt(j)).getAverageSpeed() != 0)
+			if(((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed() != 0)
 			{
-				speed += ((PerformanceEntry) v.elementAt(j)).getAverageSpeed();
+				avgSpeed += ((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed();
 			}
 			
-			if(((PerformanceEntry) v.elementAt(j)).getAverageSpeed() != 0)
+			if(((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed() != 0)
 			{
-				delay += ((PerformanceEntry) v.elementAt(j)).getAverageDelay();
+				avgDelay += ((PerformanceEntry) vResult.elementAt(j)).getAverageDelay();
 			}
 		}
-		speed /= v.size();
-		delay /= v.size();
+		avgSpeed /= vResult.size();
+		avgDelay /= vResult.size();
 		
-		avgEntry.setAverageSpeed(speed);
-		avgEntry.setAverageDelay(delay);
+		avgEntry.setAverageSpeed(avgSpeed);
+		avgEntry.setAverageDelay(avgDelay);
 		
 		return avgEntry;
 	}
@@ -243,5 +255,53 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 			
 			return null;
 		}
+	}
+	
+	/**
+	 * Eliminates all stray entries from the vector.
+	 * 
+	 * @param a_vec			The entries to check
+	 * @param r_vecDeleted	A vector that will hold the deleted entries
+	 * @param a_avgSpeed	The average speed of the vector
+	 * @param a_avgDelay	The average delay of the vector
+	 * @param a_maxStray	The maximum stray an entry is allowed to have
+	 * 
+	 * @return The minimum stray of the deleted entries
+	 */
+	public static double eliminateStrayEntries(Vector a_vec, Vector r_vecDeleted, long a_avgSpeed, long a_avgDelay, double a_maxStray)
+	{
+		LogHolder.log(LogLevel.INFO, LogType.MISC, "Looking for entries with stray >" + a_maxStray);
+		double nextStray = Double.MAX_VALUE;
+		
+		for(int k = 0; k < a_vec.size(); k++)
+		{
+			PerformanceEntry entry = ((PerformanceEntry) a_vec.elementAt(k));
+			
+			double straySpeed = (double) Math.abs(a_avgSpeed - entry.getAverageSpeed()) / (double) a_avgSpeed;
+			double strayDelay = (double) Math.abs(a_avgDelay - entry.getAverageDelay()) / (double) a_avgDelay;
+			if(straySpeed > a_maxStray || strayDelay > a_maxStray)
+			{
+				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with speed " + ((PerformanceEntry) a_vec.elementAt(k)).getAverageSpeed());
+				
+				r_vecDeleted.addElement(entry);
+				
+				a_vec.remove(k);
+				
+				if(straySpeed < nextStray)
+				{
+					nextStray = straySpeed;
+				}
+				
+				if(strayDelay < nextStray)
+				{
+					nextStray = strayDelay;
+				}
+				
+				k--;
+				
+			}
+		}
+		
+		return nextStray;
 	}
 }
