@@ -90,6 +90,8 @@ public class PerformanceMeter implements Runnable
 	private Configuration m_infoServiceConfig = null;
 	
 	private long m_lastUpdate;
+	private long m_nextUpdate;
+	
 	private String m_lastCascadeUpdated = "(none)";
 	private long m_lKiloBytesRecvd;
 	
@@ -139,6 +141,8 @@ public class PerformanceMeter implements Runnable
 		
 		while(true)
 		{
+			m_nextUpdate = System.currentTimeMillis() + m_majorInterval;
+			
 			Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
 
 			while(knownMixCascades.hasNext()) 
@@ -399,6 +403,8 @@ public class PerformanceMeter implements Runnable
 	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
 	        }
         	
+        	
+        	
     		try 
     		{
     			Thread.sleep(MINOR_INTERVAL);
@@ -449,9 +455,14 @@ public class PerformanceMeter implements Runnable
 		return r;
 	}
 	
-	public long getLastUpdate()
+	public long getLastSuccessfulUpdate()
 	{
 		return m_lastUpdate;
+	}
+	
+	public long getNextUpdate()
+	{
+		return m_nextUpdate;
 	}
 	
 	public String getLastCascadeUpdated()
