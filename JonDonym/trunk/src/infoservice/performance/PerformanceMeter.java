@@ -169,6 +169,7 @@ public class PerformanceMeter implements Runnable
 
 	private boolean loadAccountFiles() 
 	{
+		LogHolder.log(LogLevel.INFO, LogType.PAY, "Looking for new account files");
 		Document payAccountXMLFile = null;
 		Long oldModifyDate;
 		File file;
@@ -203,11 +204,13 @@ public class PerformanceMeter implements Runnable
 						continue;
 					}
 					
+					LogHolder.log(LogLevel.INFO, LogType.PAY, "Trying to add" + file.getName());
 					payAccountXMLFile = XMLUtil.readXMLDocument(file);
 					Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
 					if(payAccountElem != null)
 					{
 						PayAccount payAccount = null;
+						LogHolder.log(LogLevel.INFO, LogType.PAY, "Trying to decode password encrypted file");
 						payAccount = new PayAccount(payAccountElem,new PerformanceAccountPasswordReader());
 						m_payAccountsFile = PayAccountsFile.getInstance();
 						if(m_payAccountsFile != null)
