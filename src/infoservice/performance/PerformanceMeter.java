@@ -210,7 +210,7 @@ public class PerformanceMeter implements Runnable
 					if(payAccountElem != null)
 					{
 						PayAccount payAccount = null;
-						LogHolder.log(LogLevel.INFO, LogType.PAY, "Trying to decode password encrypted file");
+						//LogHolder.log(LogLevel.INFO, LogType.PAY, "Trying to decode password encrypted file");
 						payAccount = new PayAccount(payAccountElem,new PerformanceAccountPasswordReader());
 						m_payAccountsFile = PayAccountsFile.getInstance();
 						if(m_payAccountsFile != null)
