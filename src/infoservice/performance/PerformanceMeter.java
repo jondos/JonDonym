@@ -267,19 +267,6 @@ public class PerformanceMeter implements Runnable
 		
 		proxy.start(new SimpleMixCascadeContainer(a_cascade));
 			
-		synchronized(proxy)
-		{
-			try
-			{
-				// @todo: doesn't work
-				proxy.wait(1000);
-			}
-			catch(InterruptedException ex)
-			{
-				
-			}
-		}
-		
 		if(!proxy.isConnected())
 		{
 			LogHolder.log(LogLevel.INFO, LogType.NET, "Could not start performance test. Connection to cascade " + a_cascade.getName() + " failed.");
