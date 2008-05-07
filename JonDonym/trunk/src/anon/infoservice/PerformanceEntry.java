@@ -43,15 +43,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_lSpeed = -1;
 	}
 	
-	//// DEBUG ////
-	public PerformanceEntry(long delay, long speed)
-	{
-		super(0);
-		
-		m_lDelay = delay;
-		m_lSpeed = speed;
-	}
-	
 	public PerformanceEntry(Element a_entry) throws XMLParseException
 	{
 		super(System.currentTimeMillis() + PERFORMANCE_ENTRY_TTL);

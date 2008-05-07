@@ -170,16 +170,6 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 			return avgEntry;
 		}
 		
-		//////// DEBUG ///////
-		v = new Vector();
-		v.addElement(new PerformanceEntry(300, 1));
-		v.addElement(new PerformanceEntry(300, 60000));
-		//v.addElement(new PerformanceEntry(300, 60500));
-		//v.addElement(new PerformanceEntry(300, 60200));
-		//v.addElement(new PerformanceEntry(300, 60200));
-		v.addElement(new PerformanceEntry(300, 60700));
-		v.addElement(new PerformanceEntry(300, 900000));
-		
 		long avgSpeed = 0;
 		long avgDelay = 0;
 		for(int j = 0; j < v.size(); j++)
@@ -270,7 +260,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	 */
 	public static double eliminateStrayEntries(Vector a_vec, Vector r_vecDeleted, long a_avgSpeed, long a_avgDelay, double a_maxStray)
 	{
-		LogHolder.log(LogLevel.INFO, LogType.MISC, "Looking for entries with stray >" + a_maxStray);
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Looking for entries with stray >" + a_maxStray);
 		double nextStray = Double.MAX_VALUE;
 		
 		for(int k = 0; k < a_vec.size(); k++)
@@ -279,26 +269,38 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 			
 			double straySpeed = (double) Math.abs(a_avgSpeed - entry.getAverageSpeed()) / (double) a_avgSpeed;
 			double strayDelay = (double) Math.abs(a_avgDelay - entry.getAverageDelay()) / (double) a_avgDelay;
-			if(straySpeed > a_maxStray || strayDelay > a_maxStray)
+			if(straySpeed > a_maxStray)
 			{
-				LogHolder.log(LogLevel.INFO, LogType.MISC, "Ignoring performance entry with speed " + ((PerformanceEntry) a_vec.elementAt(k)).getAverageSpeed());
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with speed " + entry.getAverageSpeed());
 				
 				r_vecDeleted.addElement(entry);
 				
 				a_vec.remove(k);
+				k--;
 				
 				if(straySpeed < nextStray)
 				{
 					nextStray = straySpeed;
 				}
 				
+				continue;
+			}
+			
+			if(strayDelay > a_maxStray)
+			{
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with delay " + entry.getAverageDelay());
+				
+				r_vecDeleted.addElement(entry);
+				
+				a_vec.remove(k);
+				k--;
+				
 				if(strayDelay < nextStray)
 				{
 					nextStray = strayDelay;
 				}
 				
-				k--;
-				
+				continue;				
 			}
 		}
 		
