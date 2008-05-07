@@ -384,13 +384,13 @@ public class PerformanceMeter implements Runnable
         		delay = responseStartTime - transferInitiatedTime;
         		
         		// speed in kbit/sec
-        		speed = (long) (m_dataSize * 8 / (responseEndTime - responseStartTime));
+        		speed = (m_dataSize * 8) / (responseEndTime - responseStartTime);
         		
         		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
         		
         		entry.updateDelay(delay, m_requestsPerInterval);
         		entry.updateSpeed(speed, m_requestsPerInterval);
-
+        		
         		m_lKiloBytesRecvd += bytesRead / 1024;
         		
         		if(m_lKiloBytesRecvd < 0) 
