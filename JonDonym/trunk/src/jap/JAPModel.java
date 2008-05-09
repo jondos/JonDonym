@@ -294,7 +294,7 @@ public final class JAPModel extends Observable
 		return ms_TheModel.m_bAutoConnect;
 	}
 
-	void setAutoReConnect(boolean b)
+	public void setAutoReConnect(boolean b)
 	{
 		synchronized (this)
 		{

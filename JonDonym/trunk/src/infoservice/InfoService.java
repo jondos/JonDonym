@@ -116,6 +116,8 @@ public class InfoService
 			model.allowPaymentViaDirectConnection(true);
 			model.allowUpdateViaDirectConnection(true);
 			model.setAnonConnectionChecker(JAPController.getInstance().new AnonConnectionChecker());
+			model.setAutoReConnect(false);
+			model.setCascadeAutoSwitch(false);
 			
 			InfoService.ms_accountUpdater = new AccountUpdater();
 			InfoService.ms_accountUpdater.start(false);

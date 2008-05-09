@@ -6,6 +6,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.Enumeration;
 
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
@@ -31,7 +32,7 @@ import logging.LogType;
  */
 public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncodable
 {
-	private static final double PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES = 0.6666666666;
+	private static final double PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES = 2.0/3.0;
 	private static final double PERFORMANCE_INFO_MAX_STRAY = 0.7;
 
 	/**
@@ -191,15 +192,19 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		{
 			stray = eliminateStrayEntries(vToCheck, vDeleted, avgSpeed, avgDelay, stray);
 			// add the entries that passed the test to the result vector
-			vResult.addAll(vToCheck);
+			for (Enumeration e = vToCheck.elements(); e.hasMoreElements(); )
+			{
+				vResult.addElement(e.nextElement() ); //.addAll would be faster, but is post-JDK 1.1.8
+			}
+			//vResult.addAll(vToCheck);
 			// only check the deleted entries next round
 			vToCheck = vDeleted;
 			// reset the deleted entries vector
 			vDeleted = new Vector();
 		}
-		while((double)vResult.size() / v.size() < PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES);
+		while ((double)vResult.size() / v.size() < PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES);
 		
-		if(vResult.size() == 0)
+		if (vResult.size() == 0)
 		{
 			return avgEntry;
 		}
@@ -275,7 +280,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 				
 				r_vecDeleted.addElement(entry);
 				
-				a_vec.remove(k);
+				a_vec.removeElement(k);
 				k--;
 				
 				if(straySpeed < nextStray)
@@ -292,7 +297,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 				
 				r_vecDeleted.addElement(entry);
 				
-				a_vec.remove(k);
+				a_vec.removeElement(k);
 				k--;
 				
 				if(strayDelay < nextStray)
