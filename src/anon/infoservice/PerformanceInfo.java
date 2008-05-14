@@ -280,7 +280,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 				
 				r_vecDeleted.addElement(entry);
 				
-				a_vec.removeElement(k);
+				a_vec.removeElementAt(k);
 				k--;
 				
 				if(straySpeed < nextStray)
@@ -297,7 +297,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 				
 				r_vecDeleted.addElement(entry);
 				
-				a_vec.removeElement(k);
+				a_vec.removeElementAt(k);
 				k--;
 				
 				if(strayDelay < nextStray)
