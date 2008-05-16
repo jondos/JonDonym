@@ -35,7 +35,8 @@ import java.util.Vector;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -49,9 +50,13 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 
+
 import gui.GUIUtils;
 import gui.JAPMessages;
 import gui.JAPMultilineLabel;
+
+import anon.infoservice.ServiceLocation;
+import anon.infoservice.ServiceOperator;
 
 /**
  * Class for painting a mix cascade in the configuration dialog
@@ -65,6 +70,8 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	private int m_selectedIndex;
 	private Vector m_itemListeners;
 	private JRadioButton[] m_mixButtons;
+	private JLabel[] m_mixFlags;
+	private JLabel[] m_operatorFlags;
 
 	/**
 	 * Creates a panel with numberOfMixes Mix-icons
@@ -82,6 +89,8 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			selectedIndex = a_selectedIndex;
 		}
 		m_mixButtons = new JRadioButton[a_numberOfMixes];
+		m_mixFlags = new JLabel[a_numberOfMixes];
+		m_operatorFlags = new JLabel[a_numberOfMixes];
 		m_itemListeners = new Vector();
 		GridBagLayout la = new GridBagLayout();
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -89,24 +98,100 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		m_selectedIndex = 0;
 
 		setLayout(la);
+		constraints.gridy = 0;
+		constraints.gridx = 0;
 		constraints.anchor = GridBagConstraints.WEST;
 		constraints.weightx = 0;
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 
-		for (int i = 0; i < a_numberOfMixes; i++)
+		for(int i = 0; i < a_numberOfMixes; i++)
+		{
+			constraints.gridy = 0;
+			constraints.gridx = i * 2;
+			constraints.gridheight = 3;
+			constraints.insets = new Insets(0, 0, 0, 0);
+			
+			m_mixButtons[i] = new JRadioButton();
+			if (a_enabled)
+			{
+				m_mixButtons[i].setToolTipText(JAPMessages.getString("serverPanelAdditional"));
+			}
+			
+			m_mixButtons[i].addActionListener(this);
+			m_mixButtons[i].setBorder(null);
+			m_mixButtons[i].setFocusPainted(false);
+			m_mixButtons[i].setRolloverEnabled(true);
+			m_mixButtons[i].setIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_SERVER, true));
+			m_mixButtons[i].setRolloverIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_SERVER_BLAU, true));
+			m_mixButtons[i].setSelectedIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_SERVER_ROT, true));
+			m_mixButtons[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			if (i == selectedIndex)
+			{
+				m_selectedIndex = i;
+				m_mixButtons[i].setSelected(true);
+			}
+
+			add(m_mixButtons[i], constraints);
+			m_bgMixe.add(m_mixButtons[i]);
+			m_bEnabled = a_enabled;
+			m_mixButtons[i].setEnabled(m_bEnabled);
+			
+			constraints.gridy = 0;
+			constraints.gridheight = 1;
+			constraints.gridx = (i * 2) + 1;
+			constraints.weightx = 0;
+			m_operatorFlags[i] = new JLabel(" ");
+			m_operatorFlags[i].setFont(new Font("", Font.PLAIN, 10));
+			add(m_operatorFlags[i], constraints);
+			
+
+			
+			if(i != a_numberOfMixes - 1)
+			{
+				constraints.gridx = (i * 2) + 1;
+				constraints.gridheight = 1;
+				constraints.gridy = 1;
+				constraints.weightx = 0.5 / (a_numberOfMixes - 1);
+				JSeparator sep = new JSeparator();
+				add(sep, constraints);
+			}
+			
+				constraints.gridy = 2;
+				constraints.gridheight = 1;
+				constraints.gridx = (i * 2) +1;
+				constraints.weightx = 0;
+				m_mixFlags[i] = new JLabel("");
+				m_mixFlags[i].setFont(new Font("", Font.PLAIN, 10));
+				add(m_mixFlags[i], constraints);
+		}
+		
+		constraints.gridx = (a_numberOfMixes * 2);
+		constraints.gridy = 0;
+		constraints.weightx = 0.5;
+		constraints.gridheight = 3;
+		constraints.insets = new Insets(0, 10, 0, 0);
+		Color color = null;
+		if (!a_enabled)
+		{
+			color = getBackground();
+		}
+
+		JAPMultilineLabel explain = new JAPMultilineLabel(JAPMessages.getString(MSG_MIX_CLICK), color);
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.anchor = GridBagConstraints.EAST;
+		add(explain, constraints);
+		
+		/*for (int i = 0; i < a_numberOfMixes; i++)
 		{
 			//Insert a line from the previous mix
 			if (i != 0)
 			{
 				JSeparator line = new JSeparator();
-				line.setPreferredSize(new Dimension(50, 3));
-				line.setMaximumSize(new Dimension(50, 3));
-				line.setSize(50, 3);
-				line.setMinimumSize(new Dimension(5,3));
-				constraints.weightx = 0.5;
+				constraints.weightx = 1;
 				la.setConstraints(line, constraints);
 				constraints.weightx = 0;
 				add(line);
+				constraints.gridx++;
 			}
 			//Create the mix icon and place it in the panel
 			m_mixButtons[i] = new JRadioButton();
@@ -114,6 +199,8 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			{
 				m_mixButtons[i].setToolTipText(JAPMessages.getString("serverPanelAdditional"));
 			}
+
+			
 			m_mixButtons[i].addActionListener(this);
 			m_mixButtons[i].setBorder(null);
 			m_mixButtons[i].setFocusPainted(false);
@@ -134,7 +221,8 @@ final public class ServerListPanel extends JPanel implements ActionListener
 
 			la.setConstraints(m_mixButtons[i], constraints);
 			add(m_mixButtons[i]);
-
+			constraints.gridx++;
+			
 			m_bgMixe.add(m_mixButtons[i]);
 			m_bEnabled = a_enabled;
 			m_mixButtons[i].setEnabled(m_bEnabled);
@@ -151,7 +239,36 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.anchor = GridBagConstraints.EAST;
 		add(explain, constraints);
-
+		
+		constraints.gridx = 0;
+		constraints.gridy++;
+		
+		for (int i = 0; i < a_numberOfMixes; i++)
+		{
+			constraints.weightx = 0;
+			constraints.anchor = GridBagConstraints.WEST;
+			
+			m_mixFlags[i] = new JLabel();
+			m_mixFlags[i].setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+			add(m_mixFlags[i], constraints);
+			
+			constraints.gridx += 1;
+		}
+		
+		constraints.gridx = 0;
+		constraints.gridy++;
+		
+		for (int i = 0; i < a_numberOfMixes; i++)
+		{
+			constraints.weightx = 0;
+			constraints.anchor = GridBagConstraints.WEST;
+			
+			m_operatorFlags[i] = new JLabel();
+			m_operatorFlags[i].setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+			add(m_operatorFlags[i], constraints);
+			
+			constraints.gridx += 1;
+		}*/
 	}
 
 	public synchronized void fontSizeChanged(final JAPModel.FontResize a_resize, final JLabel a_dummyLabel)
@@ -232,6 +349,32 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		}
 		m_selectedIndex = i;
 		((JRadioButton)mixes.nextElement()).setSelected(true);
+	}
+	
+	public void updateFlag(int i, ServiceLocation a_location)
+	{
+		if(a_location != null)
+		{
+			m_mixFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + a_location.getCountry() + ".png"));		
+	
+		}
+		else
+		{
+			m_mixFlags[i].setIcon(null);
+		}
+	}
+	
+	public void updateOperatorFlag(int i, ServiceOperator a_operator)
+	{
+		if(a_operator != null)
+		{
+			m_operatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + a_operator.getCertificate().getSubject().getCountryCode() + ".png"));
+	
+		}
+		else
+		{
+			m_operatorFlags[i].setIcon(null);
+		}
 	}
 
 	/**
