@@ -142,11 +142,14 @@
   </target>
   <target name="compile" depends="init" description="compile the source ">
     <!-- Compile the java code from ${src} into ${build} -->
-  	<javac sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-  	    destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2" fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
-  	    <include name="**/*.java"/>
-  	</javac>
-
+    <javac 
+    debug="true" debuglevel="lines,source"
+    sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
+    destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
+    	fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
+    <include name="**/*.java"/>
+    </javac>
+  	
   </target>
   <target name="dist" depends="dist-pre-compile,compile,make-only-jap-jar" description="generate the distribution">  </target>
   <target name="make-only-jap-jar" depends="getcurrentjapdllversion">
@@ -263,7 +266,7 @@
   </target>
 	
 	
-	<target name="infoservice-init"
+	<target name="infoservice-init" depends="infoservice-clean" 
 			description="initializes folder structure for infoservice distribution">
 		<mkdir dir="${build}" />
 		<mkdir dir="${build}/infoservice" />
@@ -274,7 +277,8 @@
 	<target name="infoservice-compile" depends="infoservice-init, init-libs"
 			description="compiles infoservices sources">
 		
-		<javac 	srcdir="${src}" 
+		<javac 	debug="true" debuglevel="lines,source"
+				srcdir="${src}" 
 				destdir="${build}" 
 				excludes="${infoservice-excludes}" 
 				classpathref="classpath_all">
@@ -299,4 +303,8 @@
 			
 			</jar>
 	</target>
+	 <target name="infoservice-clean" description="clean up inforvice compiled units">
+	 	<delete dir="${build}/infoservice" />
+	 	<delete file="${dist}/InfoService.jar"/>
+	 </target>
 </project>
