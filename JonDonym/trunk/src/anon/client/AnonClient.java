@@ -849,7 +849,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				synchedAILogin =
 					firstMixSoftwareVersion.compareTo(SYNCH_AI_LOGIN_MIXVERSION) >= 0;
 			}
-			aiControlChannel.setSynchronizedAILogin(synchedAILogin);
+			aiControlChannel.setSynchronizedAILogin(synchedAILogin, m_loginTimeout);
 			if (!aiControlChannel.sendAccountCert())
 			{
 				return ErrorCodes.E_INTERRUPTED;
