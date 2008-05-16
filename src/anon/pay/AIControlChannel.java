@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
 
 import anon.crypto.ByteSignature;
 
+import anon.client.AnonClient;
 import anon.client.ChannelTable;
 import anon.client.Multiplexer;
 import anon.client.PacketCounter;
@@ -76,6 +77,7 @@ public class AIControlChannel extends XmlControlChannel
   //codes for AI events that can be fired
   private static final int EVENT_UNREAL = 1;
 
+  private int m_aiLogin_timeout = AnonClient.DEFAULT_LOGIN_TIMEOUT;
 
 
   private static long m_totalBytes = 0;
@@ -607,7 +609,7 @@ public class AIControlChannel extends XmlControlChannel
 		  {
 			  LogHolder.log(LogLevel.INFO, LogType.PAY, "Performing new synchronous AI login");
 			  try {
-				m_aiLoginSyncObject.wait(AI_LOGIN_TIMEOUT);
+				m_aiLoginSyncObject.wait(m_aiLogin_timeout);
 			  }
 			  catch (InterruptedException e) {
 				/* This happens when a user pushes the anonymity off button before
@@ -797,11 +799,13 @@ public class AIControlChannel extends XmlControlChannel
 		}
 	}
 
-	public void setSynchronizedAILogin(boolean synchronizedAILogin)
+	public void setSynchronizedAILogin(boolean synchronizedAILogin,
+										int aiLogin_timeout)
 	{
 		synchronized(m_aiLoginSyncObject)
 		{
 			m_synchronizedAILogin = synchronizedAILogin;
+			m_aiLogin_timeout = aiLogin_timeout;
 		}
 	}
 }
