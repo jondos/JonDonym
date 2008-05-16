@@ -176,7 +176,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
 
-	
 	private static final int FILTER_SPEED_MAJOR_TICK = 32;
 	private static final int FILTER_SPEED_MAX = 128;
 	private static final int FILTER_SPEED_STEPS = (FILTER_SPEED_MAX / FILTER_SPEED_MAJOR_TICK) + 1;
@@ -979,12 +978,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			if(!location.getCountry().equals(operator.getCertificate().getSubject().getCountryCode()))
 			{
-				m_serverList.updateFlag(i, location);
+				m_serverList.updateFlag(i, location, false);
 				m_serverList.updateOperatorFlag(i, operator);
 			}
 			else
 			{
-				m_serverList.updateFlag(i, location);
+				m_serverList.updateFlag(i, location, true);
 			}
 		}
 		
