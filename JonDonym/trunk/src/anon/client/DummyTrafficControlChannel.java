@@ -46,6 +46,7 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
 {
 	public static final int DT_MIN_INTERVAL_MS = 500;
 	public static final int DT_MAX_INTERVAL_MS = 30000;
+	public static final int DT_DISABLE = Integer.MAX_VALUE;
 
   /**
    * Stores whether the internal thread shall work (true) or come to the end
@@ -92,33 +93,64 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
       try {
         Thread.sleep(m_interval);
         /* if we reach the timeout without interruption, we have to send a dummy */
-        LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sending Dummy!");
+        LogHolder.log(LogLevel.INFO, LogType.NET, "Sending Dummy!");
         sendRawMessage(new byte[0]);
       }
       catch (InterruptedException e) {
+    	  //LogHolder.log(LogLevel.INFO, LogType.NET, "Dummy thread interrupted!");
         /* if we got an interruption within the timeout, everything is ok */
       }
     }
   }
 
-  /**
-   * Holds the internal dummy traffic thread. This method blocks until the
-   * internal thread has come to the end.
-   */
-  public void stop() {
-    synchronized (m_internalSynchronization) {
-      m_bRun = false;
-      if (m_threadRunLoop != null) {
-        m_threadRunLoop.interrupt();
-        try {
-          m_threadRunLoop.join();
-        }
-        catch (Exception e) {
-        }
-        m_threadRunLoop = null;
-      }
-    }
-  }
+	/**
+	 * Holds the internal dummy traffic thread. This method blocks until the
+	 * internal thread has come to the end.
+	 * @todo: stopping dummy traffic sometimes causes deadlocks 
+	 * 		(when Infoservice performance test is running)
+	 */
+  	public void stop() {
+	    synchronized (m_internalSynchronization) {
+	    	m_bRun = false;
+	    	/* the same workaround as in AnonProxy
+	    	 * to kill the dummy traffic thread when 
+	    	 * being stuck.  (not very nice)
+	    	 */
+	    	if (m_threadRunLoop != null) 
+	    	{
+	    	  	int i = 0;
+	    	  	while (m_threadRunLoop.isAlive())
+				{
+					try
+					{
+						m_threadRunLoop.interrupt();
+						m_threadRunLoop.join(1000);
+						if (i > 3)
+						{
+							LogHolder.log(LogLevel.WARNING, LogType.NET, "tried "+(i+1)+
+									" times to interrupt dummy traffic thread. -> Now stop it explicitly");
+							m_threadRunLoop.stop();
+						}
+						i++;
+					}
+					catch (InterruptedException e)
+					{
+					}
+				}
+				/*m_threadRunLoop.interrupt();
+				try 
+				{
+					LogHolder.log(LogLevel.INFO, LogType.NET, "before dummy traffic channel join!");
+					m_threadRunLoop.join();
+					LogHolder.log(LogLevel.INFO, LogType.NET, "after dummy traffic channel join!");
+				}
+				catch (Exception e) 
+				{
+				}*/
+	    	  	m_threadRunLoop = null;
+	    	}
+	    }
+  	}
 
   /**
    * This is the Observer implementation. If a packet is sent or received on
@@ -148,7 +180,11 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
     boolean sendDummy = false;
     synchronized (m_internalSynchronization) {
       stop();
-
+      if(a_interval == DT_DISABLE)
+      {
+    	  LogHolder.log(LogLevel.INFO, LogType.NET, "Dummy traffic disabled!");
+    	  return;
+      }
 	  // force the use of dummy traffic < DT_MAX_INTERVAL_MS, so that the connection to the first Mix is held
 	  if (a_interval < DT_MIN_INTERVAL_MS)
 	  {

@@ -41,6 +41,7 @@ import anon.AnonServiceFactory;
 import anon.ErrorCodes;
 import anon.NotConnectedToMixException;
 import anon.client.AnonClient;
+import anon.client.DummyTrafficControlChannel;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.AbstractMixCascadeContainer;
@@ -327,8 +328,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	{
 		try
 		{
-
-			if ( (!m_forwardedConnection) || (m_maxDummyTrafficInterval < 0))
+			if ( (!m_forwardedConnection) || 
+				 (m_maxDummyTrafficInterval < 0) ||
+				 (a_interval == DummyTrafficControlChannel.DT_DISABLE) )
 			{
 				/* no dummy traffic restrictions */
 				( (AnonClient) m_Anon).setDummyTraffic(a_interval);
