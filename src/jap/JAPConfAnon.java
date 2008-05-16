@@ -965,11 +965,34 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_nrLblExplainBegin.setVisible(m_serverList.areMixButtonsEnabled());
 		m_nrLblExplainEnd.setVisible(m_serverList.areMixButtonsEnabled());
 
-
+		for(int i = 0; i < m_serverList.getNumberOfMixes(); i++)
+		{
+			String mixId = (String) (String) cascade.getMixIds().elementAt(i);
+			
+			ServiceLocation location = m_infoService.getServiceLocation(cascade, mixId);
+			ServiceOperator operator = m_infoService.getServiceOperator(cascade, mixId);
+			
+			if(location == null || operator == null || operator.getCertificate() == null || operator.getCertificate().getSubject() == null) 
+			{
+				continue;
+			}
+			
+			if(!location.getCountry().equals(operator.getCertificate().getSubject().getCountryCode()))
+			{
+				m_serverList.updateFlag(i, location);
+				m_serverList.updateOperatorFlag(i, operator);
+			}
+			else
+			{
+				m_serverList.updateFlag(i, location);
+			}
+		}
+		
 		//m_nrLabel.setToolTipText(m_infoService.getOperator(selectedMixId));
 		m_operatorLabel.setText(GUIUtils.trim(m_infoService.getOperator(cascade, selectedMixId)));
 		//m_operatorLabel.setToolTipText(m_infoService.getOperator(selectedMixId));
-
+		m_operatorLabel.setIcon(GUIUtils.loadImageIcon("flags/" + m_infoService.getServiceOperator(cascade, selectedMixId).getCertificate().getSubject().getCountryCode() + ".png"));
+		
 		m_operatorLabel.setToolTipText(m_infoService.getUrl(cascade, selectedMixId));
 
 		if (getUrlFromLabel(m_operatorLabel) != null)
@@ -1005,8 +1028,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_locationLabel.setForeground(m_nrLabel.getForeground());
 		}
+		m_locationLabel.setIcon(GUIUtils.loadImageIcon("flags/" + m_infoService.getServiceLocation(cascade, selectedMixId).getCountry() + ".png"));
 		m_locationLabel.setToolTipText(m_infoService.getLocation(cascade, selectedMixId));
-
 
 		m_serverInfo = m_infoService.getMixInfo(cascade, selectedMixId);
 		m_serverCert = m_infoService.getMixCertPath(cascade, selectedMixId);
