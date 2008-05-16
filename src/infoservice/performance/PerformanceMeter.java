@@ -27,6 +27,8 @@
  */
 package infoservice.performance;
 
+import jap.pay.AccountUpdater;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,6 +49,7 @@ import org.w3c.dom.Node;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+import anon.client.DummyTrafficControlChannel;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceEntry;
@@ -101,8 +104,9 @@ public class PerformanceMeter implements Runnable
 	private PayAccountsFile m_payAccountsFile;
 
 	private Hashtable m_usedAccountFiles = new Hashtable();
+	private AccountUpdater m_accUpdater = null;
 	
-	public PerformanceMeter(Object[] a_config)
+	public PerformanceMeter(Object[] a_config, AccountUpdater updater)
 	{
 		m_proxyHost = (String) a_config[0];
 		m_proxyPort = ((Integer) a_config[1]).intValue();
@@ -114,7 +118,7 @@ public class PerformanceMeter implements Runnable
 		{
 			//@todo: throw something. Assert InfoServiceConfig is not null
 		}
-		
+		m_accUpdater = updater;
 		m_lKiloBytesRecvd = 0;
 	}
 	
@@ -123,6 +127,7 @@ public class PerformanceMeter implements Runnable
 		try
 		{
 			proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
+			//proxy.setDummyTraffic(DummyTrafficControlChannel.DT_DISABLE);
 		} 
 		catch (UnknownHostException e1) 
 		{
@@ -138,6 +143,7 @@ public class PerformanceMeter implements Runnable
 		}
 
 		loadAccountFiles();
+		m_accUpdater.update();
 		
 		while(true)
 		{
@@ -151,6 +157,7 @@ public class PerformanceMeter implements Runnable
 				if(cascade.hasPerformanceServer())
 				{
 					loadAccountFiles();
+					m_accUpdater.update();
 					performTest(cascade);
 				}
 			}
@@ -204,7 +211,7 @@ public class PerformanceMeter implements Runnable
 						continue;
 					}
 					
-					LogHolder.log(LogLevel.INFO, LogType.PAY, "Trying to add" + file.getName());
+					LogHolder.log(LogLevel.INFO, LogType.PAY, "Trying to add " + file.getName());
 					payAccountXMLFile = XMLUtil.readXMLDocument(file);
 					Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
 					if(payAccountElem != null)

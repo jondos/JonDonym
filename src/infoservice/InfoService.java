@@ -126,9 +126,12 @@ public class InfoService
 			if(Configuration.getInstance().isPerfEnabled())
 			{
 				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting Performance Meter...");
-				
-				Thread thread = new Thread(InfoService.ms_perfMeter = new PerformanceMeter(Configuration.getInstance().getPerformanceMeterConfig()));
-				thread.start();
+				InfoService.ms_perfMeter = 
+					new PerformanceMeter(
+							Configuration.getInstance().getPerformanceMeterConfig(),
+							ms_accountUpdater);
+				Thread perfMeterThread = new Thread(InfoService.ms_perfMeter);
+				perfMeterThread.start();
 			}
 			else
 			{
