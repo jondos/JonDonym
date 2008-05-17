@@ -86,19 +86,19 @@ final public class MyDSAPrivateKey extends AbstractPrivateKey implements DSAPriv
 		}
 
 		Element elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "G");
-		String str = XMLUtil.parseValue(elem, null);
+		String str = XMLUtil.parseValue(elem, (String)null);
 		BigInteger g = new BigInteger(Base64.decode(str));
 
 		elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "P");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		BigInteger p = new BigInteger(Base64.decode(str));
 
 		elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "Q");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		BigInteger q = new BigInteger(Base64.decode(str));
 
 		elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "X");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		m_X = new BigInteger(Base64.decode(str));
 		m_params = new MyDSAParams(
 			  new DSAPrivateKeyParameters(m_X, new DSAParameters(p, q, g)).getParameters());

@@ -125,7 +125,7 @@ public class XMLVolumePlanPurchase implements IXMLEncodable
 		long m_accountNumber = XMLUtil.parseValue(elem, 0);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "VolumePlanName");
-		String m_planName = XMLUtil.parseValue(elem, null);
+		String m_planName = XMLUtil.parseValue(elem, (String)null);
 
 	}
 }

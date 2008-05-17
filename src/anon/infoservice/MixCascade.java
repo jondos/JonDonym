@@ -62,6 +62,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	public static final String XML_ELEMENT_CONTAINER_NAME = "MixCascades";
 
 	private static final String XML_ATTR_USER_DEFINED = "userDefined";
+	private static final String XML_ATTR_STUDY = "study";
 
 	//private static final String XML_ELEM_RSA_KEY_VALUE = "RSAKeyValue";
 
@@ -131,6 +132,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 * InfoService. This value is only meaningful within the context of the JAP client.
 	 */
 	private boolean m_userDefined;
+	
+	/**
+	 * If this Cascade participates in a study.
+	 */
+	private boolean m_bStudy = false;
 
 	/**
 	 * True, if this MixCascade is a payment cascade.
@@ -311,6 +317,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 
 		/* get the information, whether this mixcascade was user-defined within the JAP client */
 		m_userDefined = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_USER_DEFINED, false);
+		
+		m_bStudy = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_STUDY, false);
+		
 
 		/* get the ID */
 		if (a_mixCascadeNode == null || !a_mixCascadeNode.getNodeName().equals(XML_ELEMENT_NAME))
@@ -1063,6 +1072,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			return m_certPath.checkValidity(new Date());
 		}
 		return false;
+	}
+	
+	public boolean isActiveStudy()
+	{
+		return m_bStudy;
 	}
 
 	/**

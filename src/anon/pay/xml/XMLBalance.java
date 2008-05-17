@@ -141,15 +141,15 @@ public class XMLBalance implements IXMLEncodable
 		}
 
 		Element elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "AccountNumber");
-		String str = XMLUtil.parseValue(elem, null);
+		String str = XMLUtil.parseValue(elem, (String)null);
 		m_lAccountNumber = Long.parseLong(str);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Deposit");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		m_lDeposit = Long.parseLong(str);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Spent");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		m_lSpent = Long.parseLong(str);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "BalanceInCent");
@@ -164,7 +164,7 @@ public class XMLBalance implements IXMLEncodable
 		m_volumeBytesleft = XMLUtil.parseValue(elem, 0);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Timestamp");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		if (m_Timestamp != null)
 		{
 			m_Timestamp = java.sql.Timestamp.valueOf(str);

@@ -1797,7 +1797,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 					Element elemMMPwHash = (Element) XMLUtil.getFirstChildByName(elemMixminion,
 							JAPConstants.CONFIG_MIXMINION_PASSWORD_HASH);
-					String pwhash = XMLUtil.parseValue(elemMMPwHash,null);
+					String pwhash = XMLUtil.parseValue(elemMMPwHash, (String)null);
 					if (pwhash != null)
 					{
 						JAPModel.getInstance().setMixinionPasswordHash(Base64.decode(pwhash));
@@ -1816,7 +1816,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 				try{
 					Element elemDialog = (Element) XMLUtil.getFirstChildByName(root,"Dialog");
-					BigInteger d=XMLUtil.parseValue(elemDialog, JAPModel.getInstance().getDialogVersion(),1);
+					BigInteger d=XMLUtil.parseValue(elemDialog, JAPModel.getInstance().getDialogVersion());
 					JAPModel.getInstance().setDialogVersion(d);
 				}
 				catch(Exception e)
@@ -3034,7 +3034,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to start AN.ON service...");
 					}
-//					JAPExtension.doIt();
+					JAPExtension.doIt();
 					ret = m_proxyAnon.start(cascadeContainer);
 
 

@@ -33,6 +33,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
@@ -2480,15 +2481,39 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public String getOperator(MixCascade a_cascade, String a_mixId)
 		{
 			ServiceOperator operator = getServiceOperator(a_cascade, a_mixId);
+			String country = null;
 			String strOperator = null;
 			if (operator != null)
 			{
 				strOperator = operator.getOrganization();
 			}
-			if (strOperator == null)
+			if (strOperator == null || strOperator.trim().length() == 0)
 			{
 				return "N/A";
 			}
+			/*
+			if(operator.getCertificate() != null && operator.getCertificate().getSubject() != null)
+			{
+				country = operator.getCertificate().getSubject().getCountryCode();
+			}
+			
+			
+			if (country != null && country.trim().length() > 0)
+			{
+				strOperator += ", ";
+				
+
+				try
+				{
+					strOperator += new CountryMapper(
+						country, JAPMessages.getLocale()).toString();
+				}
+				catch (IllegalArgumentException a_e)
+				{
+					strOperator += country.trim();
+				}
+			}*/
+			
 			return strOperator;
 		}
 		

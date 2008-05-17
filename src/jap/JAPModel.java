@@ -210,7 +210,7 @@ public final class JAPModel extends Observable
 	/** Boolen value which describes if a dll update is necessary */
 	private boolean m_bUpdateDll = false;
 
-	private BigInteger m_iDialogVersion=new BigInteger("-1");
+	private BigInteger m_iDialogVersion=new BigInteger("-6"); // require 5 connections before study begins
 
 	private JAPModel()
 	{

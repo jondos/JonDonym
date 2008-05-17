@@ -252,13 +252,13 @@ public class XMLVolumePlan implements IXMLEncodable
 		String str;
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Name");
-		m_name = XMLUtil.parseValue(elem, null);
+		m_name = XMLUtil.parseValue(elem, (String)null);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "DisplayName");
-		m_displayName = XMLUtil.parseValue(elem, null);
+		m_displayName = XMLUtil.parseValue(elem, (String)null);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Price");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		m_price = Integer.parseInt(str);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "VolumeLimited");
@@ -268,11 +268,11 @@ public class XMLVolumePlan implements IXMLEncodable
 		m_durationLimited = XMLUtil.parseValue(elem, false);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "VolumeKbytes");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		m_volumeKbytes = Long.parseLong(str);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Duration");
-		str = XMLUtil.parseValue(elem, null);
+		str = XMLUtil.parseValue(elem, (String)null);
 		m_duration = Integer.parseInt(str);
 		m_durationUnit = XMLUtil.parseAttribute(elem,"unit","");
 

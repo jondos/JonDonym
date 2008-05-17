@@ -142,19 +142,19 @@ public class XMLTransCert implements IXMLEncodable
 		}
 
 		Element element = (Element) XMLUtil.getFirstChildByName(elemRoot, "AccountNumber");
-		String str = XMLUtil.parseValue(element, null);
+		String str = XMLUtil.parseValue(element, (String)null);
 		m_accountNumber = Long.parseLong(str);
 
 		element = (Element) XMLUtil.getFirstChildByName(elemRoot, "TransferNumber");
-		str = XMLUtil.parseValue(element, null);
+		str = XMLUtil.parseValue(element, (String)null);
 		m_transferNumber = Long.parseLong(str);
 
 		element = (Element) XMLUtil.getFirstChildByName(elemRoot, "ValidTime");
-		str = XMLUtil.parseValue(element, null);
+		str = XMLUtil.parseValue(element, (String)null);
 		m_validTime = java.sql.Timestamp.valueOf(str);
 
 		element = (Element) XMLUtil.getFirstChildByName(elemRoot, "ReceivedDate");
-		str = XMLUtil.parseValue(element, null);
+		str = XMLUtil.parseValue(element, (String)null);
 		if (str != null)
 		{
 			m_receivedDate = new Date(Long.parseLong(str));
