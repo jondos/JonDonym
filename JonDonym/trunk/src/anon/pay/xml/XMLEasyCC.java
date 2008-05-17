@@ -168,9 +168,9 @@ public class XMLEasyCC implements IXMLEncodable
 		elem = (Element) XMLUtil.getFirstChildByName(element, "TransferredBytes");
 		m_lTransferredBytes = XMLUtil.parseValue(elem, -1l);
 		elem = (Element) XMLUtil.getFirstChildByName(element, "PIID");
-		m_strPIID = XMLUtil.parseValue(elem, null);
+		m_strPIID = XMLUtil.parseValue(elem, (String)null);
 		elem = (Element) XMLUtil.getFirstChildByName(element, "Cascade");
-		m_cascadeID = XMLUtil.parseValue(elem, null);
+		m_cascadeID = XMLUtil.parseValue(elem, (String)null);
 		Element elemPriceCerts;
 		elemPriceCerts	= (Element) XMLUtil.getFirstChildByName(element, "PriceCertificates");
 		Element elemHash; // = (Element) elemPriceCerts.getFirstChild();

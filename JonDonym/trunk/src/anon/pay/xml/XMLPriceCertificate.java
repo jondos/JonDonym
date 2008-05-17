@@ -274,7 +274,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 		Element elem = (Element) XMLUtil.getFirstChildByName(xml, XML_ELEM_SUBJECT_KEY_IDENTIFIER);
 		XMLUtil.assertNotNull(elem);
 
-		m_subjectKeyIdentifier = XMLUtil.parseValue(elem, null);
+		m_subjectKeyIdentifier = XMLUtil.parseValue(elem, (String)null);
 		if (m_subjectKeyIdentifier == null)
 		{
 			throw new XMLParseException(XML_ELEM_SUBJECT_KEY_IDENTIFIER);

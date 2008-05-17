@@ -124,6 +124,7 @@ import java.awt.Rectangle;
  * <LI> 1.3.x </LI>
  * <LI> 1.4.x </LI>
  * <LI> 1.5.x </LI>
+ * <LI> 1.6.x </LI>
  * </UL>
 
  *
@@ -401,6 +402,12 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * @return if this dialog should be on top of all other windows in the system
 		 */
 		public boolean isOnTop();
+		
+		/**
+		 * Returns if a click on the close button of the dialog closes the window.
+		 * @return if a click on the close button of the dialog closes the window
+		 */
+		public boolean isCloseWindowActive();
 	}
 
 	/**
@@ -570,6 +577,11 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		{
 			return false;
 		}
+		
+		public boolean isCloseWindowActive()
+		{
+			return true;
+		}
 	}
 
 	/**
@@ -578,17 +590,24 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	public static abstract class AbstractLinkedURLAdapter extends LinkedInformationAdapter
 	{
 		public abstract URL getUrl();
+		private static final String MAILTO = "mailto:";
 
 		/**
-		 * Returns <CODE>null</CODE> as no message is needed.
-		 * @return <CODE>null</CODE>
+		 * Returns the URL that may be clicked.
+		 * @return the URL that may be clicked
 		 */
 		public String getMessage()
 		{
 			URL url = getUrl();
+			String strMsg;
 			if (url != null)
 			{
-				return getUrl().toString();
+				strMsg = getUrl().toString();
+				if (strMsg.toLowerCase().startsWith(MAILTO) && strMsg.length() > MAILTO.length())
+				{
+					strMsg = strMsg.substring(MAILTO.length(), strMsg.length());
+				}
+				return strMsg;
 			}
 			return null;
 		}
@@ -596,7 +615,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * Opens the URL.
 		 * @param a_bState is ignored
 		 */
-		public final void clicked(boolean a_bState)
+		public void clicked(boolean a_bState)
 		{
 			AbstractOS.getInstance().openURL(getUrl());
 		}
@@ -1334,6 +1353,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		JComponent linkLabel;
 		boolean bForceApplicationModality = false;
 		boolean bOnTop = false;
+		boolean bIsCloseWindowActive = true;
 		String yesOKText = null;
 		String cancelText = null;
 		String noText = null;
@@ -1374,6 +1394,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		{
 			bForceApplicationModality = a_linkedInformation.isApplicationModalityForced();
 			bOnTop = a_linkedInformation.isOnTop();
+			bIsCloseWindowActive = a_linkedInformation.isCloseWindowActive();
 
 			/*
 			 * If the linked information contains a help context, display the help button instead of a link
@@ -1770,7 +1791,14 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 					  "Dialog golden ratio delta: " + getOptimizedFormatDelta(dialog));
 
 		dialog.setResizable(false);
-		dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		if (bIsCloseWindowActive)
+		{
+			dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		}
+		else
+		{
+			dialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		}
 		dialog.addWindowListener(new SimpleDialogButtonFocusWindowAdapter(dialogContentPane));
 		dialog.m_bOnTop = bOnTop;
 		dialog.setVisible(true);

@@ -322,7 +322,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 				return null;
 			}
 			Element elemX509Cert = (Element) a_NodeRoot;
-			String strValue = XMLUtil.parseValue(elemX509Cert, null);
+			String strValue = XMLUtil.parseValue(elemX509Cert, (String)null);
 			byte[] bytecert = Base64.decode(strValue);
 			return getInstance(bytecert);
 		}

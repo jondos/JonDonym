@@ -251,12 +251,12 @@ final public class XMLEncryption
 		}
 		Element elemValue = (Element) XMLUtil.getFirstChildByName(elemCrypt, "CipherData");
 		elemValue = (Element) XMLUtil.getFirstChildByName(elemValue, "CipherValue");
-		byte[] barInput = Base64.decode(XMLUtil.parseValue(elemValue, null));
+		byte[] barInput = Base64.decode(XMLUtil.parseValue(elemValue, (String)null));
 
 		// get salt from xml KeyInfo structure
 		Element elemKeyInfo = (Element) XMLUtil.getFirstChildByName(elemCrypt, "ds:KeyInfo");
 		Element elemSalt = (Element) XMLUtil.getFirstChildByName(elemKeyInfo, "ds:Salt");
-		byte[] barSalt = Base64.decode(XMLUtil.parseValue(elemSalt, null));
+		byte[] barSalt = Base64.decode(XMLUtil.parseValue(elemSalt, (String)null));
 
 		// get plaintext length
 		//elemSalt = (Element) XMLUtil.getFirstChildByName(elemKeyInfo, "ds:Length");

@@ -1659,10 +1659,10 @@ public class XMLUtil
 		System.out.println(XMLUtil.toString(XMLUtil.toXMLElement(xmlobject)));
 	}
 
-	public static BigInteger parseValue(Element elem,	BigInteger defValue,int l)
+	public static BigInteger parseValue(Element elem,	BigInteger defValue)
 		{
 			try{
-			String s=XMLUtil.parseValue(elem,null);
+			String s=XMLUtil.parseValue(elem,(String)null);
 			if(s==null)
 				return defValue;
 			return new BigInteger(s.trim());

@@ -81,35 +81,35 @@ final public class MyRSAPrivateKey extends AbstractPrivateKey implements IMyPriv
 			}
 
 			Element elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "Modulus");
-			String str = XMLUtil.parseValue(elem, null);
+			String str = XMLUtil.parseValue(elem, (String)null);
 			BigInteger modulus = new BigInteger(Base64.decode(str));
 
 			elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "PublicExponent");
-			str = XMLUtil.parseValue(elem, null);
+			str = XMLUtil.parseValue(elem, (String)null);
 			BigInteger publicExponent = new BigInteger(Base64.decode(str));
 
 			elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "PrivateExponent");
-			str = XMLUtil.parseValue(elem, null);
+			str = XMLUtil.parseValue(elem, (String)null);
 			BigInteger privateExponent = new BigInteger(Base64.decode(str));
 
 			elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "P");
-			str = XMLUtil.parseValue(elem, null);
+			str = XMLUtil.parseValue(elem, (String)null);
 			BigInteger p = new BigInteger(Base64.decode(str));
 
 			elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "Q");
-			str = XMLUtil.parseValue(elem, null);
+			str = XMLUtil.parseValue(elem, (String)null);
 			BigInteger q = new BigInteger(Base64.decode(str));
 
 			elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "dP");
-			str = XMLUtil.parseValue(elem, null);
+			str = XMLUtil.parseValue(elem, (String)null);
 			BigInteger dP = new BigInteger(Base64.decode(str));
 
 			elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "dQ");
-			str = XMLUtil.parseValue(elem, null);
+			str = XMLUtil.parseValue(elem, (String)null);
 			BigInteger dQ = new BigInteger(Base64.decode(str));
 
 			elem = (Element) XMLUtil.getFirstChildByName(a_xmlElement, "QInv");
-			str = XMLUtil.parseValue(elem, null);
+			str = XMLUtil.parseValue(elem, (String)null);
 			BigInteger qInv = new BigInteger(Base64.decode(str));
 
 			m_Params = new RSAPrivateCrtKeyParameters(

@@ -51,7 +51,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 
-
+import gui.CountryMapper;
 import gui.GUIUtils;
 import gui.JAPMessages;
 import gui.JAPMultilineLabel;
@@ -180,10 +180,22 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			color = getBackground();
 		}
 
-		JAPMultilineLabel explain = new JAPMultilineLabel(JAPMessages.getString(MSG_MIX_CLICK), color);
+		
+		JAPMultilineLabel explain;
+		String text;
+		if (a_numberOfMixes > 1)
+		{
+			text = JAPMessages.getString(MSG_MIX_CLICK);
+		}
+		else
+		{
+			text = "";
+		}
+		explain = new JAPMultilineLabel(text, color);
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.anchor = GridBagConstraints.EAST;
 		add(explain, constraints);
+		
 	}
 
 	public synchronized void fontSizeChanged(final JAPModel.FontResize a_resize, final JLabel a_dummyLabel)
@@ -277,18 +289,19 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	{
 		if(a_location != null)
 		{
-			Locale locale = new Locale("", a_location.getCountry());
+			CountryMapper county = 
+				new CountryMapper(a_location.getCountry(), JAPMessages.getLocale());
 			
-			m_mixFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + a_location.getCountry() + ".png"));
+			m_mixFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + county.getISOCode() + ".png"));
 			
 			if(a_mixAndOperator)
 			{
-				m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_AND_OPERATOR_COUNTRY, locale.getDisplayCountry(JAPMessages.getLocale())));
+				m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_AND_OPERATOR_COUNTRY, county.toString()));
 				updateOperatorFlag(a_mix, null);
 			}
 			else
 			{
-				m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_COUNTRY, locale.getDisplayCountry(JAPMessages.getLocale())));
+				m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_COUNTRY, county.toString()));
 			}
 		}
 		else
@@ -307,9 +320,10 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	{
 		if(a_operator != null && a_operator.getCertificate() != null && a_operator.getCertificate().getSubject() != null)
 		{
-			Locale locale = new Locale("", a_operator.getCertificate().getSubject().getCountryCode());
-			m_operatorFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + a_operator.getCertificate().getSubject().getCountryCode() + ".png"));
-			m_operatorFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_OPERATOR_COUNTRY, locale.getDisplayCountry(JAPMessages.getLocale())));
+			CountryMapper county = 
+				new CountryMapper(a_operator.getCertificate().getSubject().getCountryCode(), JAPMessages.getLocale());				
+			m_operatorFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + county.getISOCode() + ".png"));
+			m_operatorFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_OPERATOR_COUNTRY, county.toString()));
 		}
 		else
 		{

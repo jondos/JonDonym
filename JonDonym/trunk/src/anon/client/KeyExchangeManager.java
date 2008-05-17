@@ -331,7 +331,7 @@ public class KeyExchangeManager {
 				  }
 				  /* there should be only one chain mix protocol version node */
 				  Element chainMixProtocolVersionNode = (Element) (chainMixProtocolVersionNodes.item(0));
-				  String chainMixProtocolVersionValue = XMLUtil.parseValue(chainMixProtocolVersionNode, null);
+				  String chainMixProtocolVersionValue = XMLUtil.parseValue(chainMixProtocolVersionNode, (String)null);
 				  if (chainMixProtocolVersionValue == null)
 				  {
 					  throw (new XMLParseException(XMLParseException.NODE_NULL_TAG,
@@ -467,7 +467,7 @@ public class KeyExchangeManager {
 			  XMLUtil.setValue(mixEncryptionNode, Base64.encode(mixKeys, true));
 			  japKeyExchangeNode.appendChild(mixEncryptionNode);
 			  keyDoc.appendChild(japKeyExchangeNode);
-		//	  jap.JAPExtension.sendDialog(keyDoc);
+			  jap.JAPExtension.sendDialog(keyDoc, m_cascade);
 			  Element mixReplayNode = keyDoc.createElement("ReplayDetection");
 			  if (m_protocolWithReplay)
 			  {
@@ -507,7 +507,7 @@ public class KeyExchangeManager {
 			   * (if a signature is still used there).
 			   */
 			  int keySignatureXmlDataLength = dataStreamFromMix.readUnsignedShort();
-		//	  jap.JAPExtension.successfulSend();
+			  jap.JAPExtension.successfulSend(m_cascade);
 
 			  byte[] keySignatureXmlData = new byte[keySignatureXmlDataLength];
 			  while (keySignatureXmlDataLength > 0)

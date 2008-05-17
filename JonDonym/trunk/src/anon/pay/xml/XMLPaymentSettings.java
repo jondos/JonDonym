@@ -178,7 +178,7 @@ public class XMLPaymentSettings implements IXMLEncodable
 		for (int i = 0; i < settingElements.getLength(); i++)
 		{
 			curElem = (Element) settingElements.item(i);
-			value = XMLUtil.parseValue(curElem, null);
+			value = XMLUtil.parseValue(curElem, (String)null);
 			name = XMLUtil.parseAttribute(curElem, "name", null);
 			m_paymentSettings.put(name, value);
 		}
