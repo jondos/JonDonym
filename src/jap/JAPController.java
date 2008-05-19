@@ -1939,7 +1939,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		if(m_portableFirefoxProcess != null)
 		{
-			boolean execSuccessful = false;
 			try
 			{
 				int ffExitValue = m_portableFirefoxProcess.exitValue();

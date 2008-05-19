@@ -965,9 +965,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_nrLblExplainBegin.setVisible(m_serverList.areMixButtonsEnabled());
 		m_nrLblExplainEnd.setVisible(m_serverList.areMixButtonsEnabled());
 
-		for(int i = 0; i < m_serverList.getNumberOfMixes(); i++)
-		{
-			String mixId = (String) (String) cascade.getMixIds().elementAt(i);
+		for(int i = 0; i < m_serverList.getNumberOfMixes() && i < cascade.getMixIds().size(); i++)
+		{			
+			String mixId = (String) cascade.getMixIds().elementAt(i);
 			
 			ServiceLocation location = m_infoService.getServiceLocation(cascade, mixId);
 			ServiceOperator operator = m_infoService.getServiceOperator(cascade, mixId);
@@ -991,7 +991,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		//m_nrLabel.setToolTipText(m_infoService.getOperator(selectedMixId));
 		m_operatorLabel.setText(GUIUtils.trim(m_infoService.getOperator(cascade, selectedMixId)));
 		//m_operatorLabel.setToolTipText(m_infoService.getOperator(selectedMixId));
-		m_operatorLabel.setIcon(GUIUtils.loadImageIcon("flags/" + m_infoService.getServiceOperator(cascade, selectedMixId).getCertificate().getSubject().getCountryCode() + ".png"));
+		ServiceOperator operator = m_infoService.getServiceOperator(cascade, selectedMixId);
+		if (operator != null && operator.getCertificate() != null && operator.getCertificate().getSubject() != null)
+		{
+			m_operatorLabel.setIcon(GUIUtils.loadImageIcon("flags/" + operator.getCertificate().getSubject().getCountryCode() + ".png"));
+		}
+		else
+		{
+			m_operatorLabel.setIcon(null);
+		}
 		
 		m_operatorLabel.setToolTipText(m_infoService.getUrl(cascade, selectedMixId));
 
@@ -1028,7 +1036,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_locationLabel.setForeground(m_nrLabel.getForeground());
 		}
-		m_locationLabel.setIcon(GUIUtils.loadImageIcon("flags/" + m_infoService.getServiceLocation(cascade, selectedMixId).getCountry() + ".png"));
+		ServiceLocation location = m_infoService.getServiceLocation(cascade, selectedMixId);
+		if (location != null)
+		{
+			m_locationLabel.setIcon(GUIUtils.loadImageIcon("flags/" + location.getCountry() + ".png"));
+		}
+		else
+		{
+			m_locationLabel.setIcon(null);
+		}
 		m_locationLabel.setToolTipText(m_infoService.getLocation(cascade, selectedMixId));
 
 		m_serverInfo = m_infoService.getMixInfo(cascade, selectedMixId);
@@ -1050,6 +1066,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						 m_viewCertLabel.getText() + m_viewCertLabelValidity.getText());
 			m_viewCertLabelValidity.setToolTipText(
 						 m_viewCertLabel.getText() + m_viewCertLabelValidity.getText());
+			m_ExplainCertLabelBegin.setVisible(true);
+			m_ExplainCertLabel.setVisible(true);
+			m_ExplainCertLabelEnd.setText(")");			
 		}
 		else
 		{
@@ -1057,6 +1076,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_viewCertLabel.setText("N/A");
 			m_viewCertLabel.setToolTipText("N/A");
 			m_viewCertLabel.setForeground(m_nrLabel.getForeground());
+			m_ExplainCertLabelBegin.setVisible(false);
+			m_ExplainCertLabel.setVisible(false);
+			m_ExplainCertLabelEnd.setText("");
 		}
 
 
