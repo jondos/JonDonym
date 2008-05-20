@@ -167,6 +167,11 @@ public class PaymentInfoPane extends DialogContentPane implements IWizardSuitabl
 		baseLink = Util.replaceAll(baseLink, "%item%", paypalItem);
 		baseLink = Util.replaceAll(baseLink, "%amount%", paypalAmount);
 		baseLink = Util.replaceAll(baseLink, "%currency%", paypalCurrency);
+		/** @todo hotfix for paypal language, as they changed "language" to "country" code;*/
+		if (!paypalLang.equals("DE"))
+		{
+			paypalLang = "US";
+		}
 		baseLink = Util.replaceAll(baseLink, "%lang%", paypalLang);
 
 		return baseLink;
