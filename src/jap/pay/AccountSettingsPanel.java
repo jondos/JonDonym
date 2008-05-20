@@ -772,10 +772,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 		c.gridheight = 1;
 		c.gridx++;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_DEPOSIT)), c);
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_FLAT_VOLUME) + ":"), c);		
 		c.gridx++;
-		m_labelDeposit = new JLabel();
-		p.add(m_labelDeposit, c);
+		m_labelVolume = new JLabel();
+		m_labelVolume.addMouseListener(myActionListener);
+		p.add(m_labelVolume, c);
+		
 
 		/*
 		c.gridx--;
@@ -788,10 +790,11 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 		c.gridx--;
 		c.gridy++;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_SPENT)), c);
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_SPENT)), c);		
 		c.gridx++;
 		m_labelSpent = new JLabel();
 		p.add(m_labelSpent, c);
+				
 
 		/*
 		c.gridx--;
@@ -803,11 +806,10 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 		c.gridx--;
 		c.gridy++;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_FLAT_VOLUME) + ":"), c);
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_DEPOSIT)), c);		
 		c.gridx++;
-		m_labelVolume = new JLabel();
-		m_labelVolume.addMouseListener(myActionListener);
-		p.add(m_labelVolume, c);
+		m_labelDeposit = new JLabel();
+		p.add(m_labelDeposit, c);
 
 		c.gridy++;
 		c.gridy++;
