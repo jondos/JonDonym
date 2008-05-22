@@ -3,7 +3,7 @@
 <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
 <body>
-<!--#include virtual="/header.html"-->
+<!--#include virtual="/header_en.html"-->
 
 <H2>JonDonym certificates and their meaning</H2>
 <p>Certificates are used to identify operators of JonDonym services. Typically, a mix cascade consists of two or more consecutive mix servers, operated by different organisations. Only if all of these operators cooperate, the anonymity of users my be revoked. Users of JonDo should consider  themself if they trust the operators of a cascade, and if they connect to this service according to this decision. It is therefore crucial that</p>
@@ -21,7 +21,7 @@
 <h3>States of certificates </h3>
 <p>A certificate is considered as <strong>verified</strong> only if you trust the certification authority who has issued this certificate. Non-verifyable certificates are generally <strong>not trusted</strong> as everyone, who knows a little about computer technology, can generate such certificates by himself. The <strong>validity</strong> of a certificate depends on the time period for which the certificate has been issued. Typically, you should not trust an <strong>expired</strong> certificate any longer, as it is not clear whether the owner still has the right to offer the service. Certificates may also be <strong>revoked</strong>, for example if their encryption was broken, the operator turned out to be dubious, or if the private certificate got into the hands of unauthorized persons.</p>
 <p>JonDo disallows connections to Mix cascades with at least one <em>untrusted</em> Mix at the moment. Expired or revoked certificates are currently ignored, but are displayed as such. We are currently implementing a cascade filter with a finer granularity.
-  <!--#include virtual="/footer.html"-->
+  <!--#include virtual="/footer_en.html"-->
 </p>
 </body>
 </html>
