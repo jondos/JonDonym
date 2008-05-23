@@ -108,13 +108,10 @@ public class PerformanceMeter implements Runnable
 	private Hashtable m_usedAccountFiles = new Hashtable();
 	private AccountUpdater m_accUpdater = null;
 	
-	public PerformanceMeter(Object[] a_config, AccountUpdater updater)
+	public PerformanceMeter(AccountUpdater updater)
 	{
-		m_proxyHost = (String) a_config[0];
-		m_proxyPort = ((Integer) a_config[1]).intValue();
-		m_dataSize = ((Integer) a_config[2]).intValue();
-		m_majorInterval = ((Integer) a_config[3]).intValue();
-		m_requestsPerInterval = ((Integer) a_config[4]).intValue();
+		init();
+		
 		m_infoServiceConfig = Configuration.getInstance(); 
 		if(m_infoServiceConfig == null)
 		{
@@ -122,6 +119,17 @@ public class PerformanceMeter implements Runnable
 		}
 		m_accUpdater = updater;
 		m_lKiloBytesRecvd = 0;
+	}
+	
+	public void init() 
+	{
+		Object[] a_config = m_infoServiceConfig.getPerformanceMeterConfig();
+		
+		m_proxyHost = (String) a_config[0];
+		m_proxyPort = ((Integer) a_config[1]).intValue();
+		m_dataSize = ((Integer) a_config[2]).intValue();
+		m_majorInterval = ((Integer) a_config[3]).intValue();
+		m_requestsPerInterval = ((Integer) a_config[4]).intValue();
 	}
 	
 	public void run() 
