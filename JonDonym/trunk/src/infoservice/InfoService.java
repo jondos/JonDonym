@@ -31,6 +31,9 @@ import java.io.FileInputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Locale;
+import java.util.Observer;
+import java.util.Observable;
+import platform.signal.SignalHandler;
 
 import infoservice.performance.PerformanceMeter;
 import gui.JAPMessages;
@@ -47,7 +50,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 
-public class InfoService
+public class InfoService implements Observer
 {
 
 	protected JWSInternalCommands oicHandler;
@@ -55,6 +58,8 @@ public class InfoService
 	private static int m_connectionCounter;
 	private static PerformanceMeter ms_perfMeter;
 	private static AccountUpdater ms_accountUpdater; 
+	
+	private String m_configFileName;
 	
 	protected ThreadPool m_ThreadPool;
 
@@ -107,9 +112,16 @@ public class InfoService
 		try
 		{
 			InfoService s1 = new InfoService(fn);
+			s1.startServer();
+			
+			SignalHandler handler = new SignalHandler();
+			handler.addObserver(s1);
+			handler.addSignal("HUP");
+			handler.addSignal("TERM");
+			
 			JAPMessages.setLocale(Locale.ENGLISH);
 			
-			s1.startServer();
+
 			System.out.println("InfoService is running!");
 			
 			JAPModel model = JAPModel.getInstance();
@@ -145,6 +157,42 @@ public class InfoService
 			System.exit(1);
 		}
 	}
+	
+	public void update(Observable a_ob, Object a_args)
+	{
+		if(a_args == null || a_args.toString() == null)
+		{
+			return;
+		}
+		
+		String signal = a_args.toString();
+		
+		if(signal.equals("SIGHUP"))
+		{
+			System.out.println("Reloading configuration...");
+			LogHolder.log(LogLevel.ALERT, LogType.ALL, "Caught SIGHUP. Reloading config...");
+			
+			try
+			{
+				loadConfig();
+			}
+			catch(Exception ex)
+			{
+				System.out.println("Could not load configuration. Exiting...");
+				LogHolder.log(LogLevel.ALERT, LogType.ALL, "Could not load configuration. Exiting...");
+			}
+		}
+		
+		if(signal.equals("SIGTERM"))
+		{
+			System.out.println("Exiting...");
+			LogHolder.log(LogLevel.ALERT, LogType.ALL, "Caught SIGTERM. Exiting...");
+			
+			stopServer();
+			
+			System.exit(1);
+		}
+	}
 
 	/**
 	 * Generates a key pair for the infoservice
@@ -164,16 +212,25 @@ public class InfoService
 		}
 	}
 
-	private InfoService(String propertiesFileName) throws Exception
+	private InfoService(String a_configFileName) throws Exception
+	{
+		m_configFileName = a_configFileName;
+		
+		loadConfig();
+		
+		m_connectionCounter = 0;
+	}
+
+	private void loadConfig() throws Exception 
 	{
 		Properties properties = new Properties();
-		if (propertiesFileName == null)
+		if (m_configFileName == null)
 		{
-			propertiesFileName = Constants.DEFAULT_RESSOURCE_FILENAME;
+			m_configFileName = Constants.DEFAULT_RESSOURCE_FILENAME;
 		}
 		try
 		{
-			properties.load(new FileInputStream(propertiesFileName));
+			properties.load(new FileInputStream(m_configFileName));
 		}
 		catch (Exception a_e)
 		{
@@ -182,8 +239,6 @@ public class InfoService
 			System.exit(1);
 		}
 		new Configuration(properties);
-
-		m_connectionCounter = 0;
 	}
 
 	private void startServer() throws Exception
@@ -215,6 +270,11 @@ public class InfoService
 			currentThread.setDaemon(true);
 			currentThread.start();
 		}
+	}
+	
+	private void stopServer()
+	{
+		// TODO: implement
 	}
 
 	protected static int getConnectionCounter()
