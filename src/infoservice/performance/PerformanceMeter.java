@@ -50,6 +50,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.client.DummyTrafficControlChannel;
+import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceEntry;
@@ -263,6 +264,18 @@ public class PerformanceMeter implements Runnable
 	 */
 	private boolean performTest(MixCascade a_cascade) 
 	{
+		// skip cascades on the same host as the infoservice
+		for(int i = 0; i < a_cascade.getNumberOfListenerInterfaces(); i++)
+		{
+			ListenerInterface iface = a_cascade.getListenerInterface(i);
+			
+			if(Configuration.getInstance().getHardwareListeners().contains(iface) ||
+					Configuration.getInstance().getVirtualListeners().contains(iface))
+			{
+				return false;
+			}
+		}
+		
 		if(a_cascade == null)
 		{
 			return false;
@@ -399,8 +412,6 @@ public class PerformanceMeter implements Runnable
         	{
 	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
 	        }
-        	
-        	
         	
     		try 
     		{

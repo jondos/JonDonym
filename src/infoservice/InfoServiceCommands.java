@@ -930,6 +930,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				while (keys.hasMoreElements())
 				{
 					File file = (File) keys.nextElement();
+					
 					htmlData += "<tr><td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(file.lastModified()) + "</td></tr>";
 				}
 				
