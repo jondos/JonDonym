@@ -909,7 +909,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				{
 					PaymentInstanceDBEntry pi = (PaymentInstanceDBEntry) vPIs.elementAt(i);
 					
-					htmlData += "<h2>" + pi.getId() + "</h2><table style=\"align: left\" border=\"0\" width=\"30%\">" +
+					htmlData += "<h2>" + pi.getName() + "</h2><table style=\"align: left\" border=\"0\" width=\"30%\">" +
 					"<tr><td class=\"name\">Estimated PayTraffic per Day</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().calculatePayTrafficPerDay(pi.getId())) + "</td></tr>" +
 					"<tr><td class=\"name\">Remaining PayCredit</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getRemainingCredit(pi.getId())) + "</td></tr>" +				
 					"<tr><td class=\"name\">Estimated Pay End Time</td><td class=\"status\">" + (InfoService.getPerfMeter().calculateRemainingPayTime(pi.getId()) == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().calculateRemainingPayTime(pi.getId())).toString()) + "</td></tr>" +
