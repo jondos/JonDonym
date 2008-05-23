@@ -161,6 +161,7 @@
         <exclude name="infoservice/**/*"/>
         <exclude name="misc/**/*"/>
         <exclude name="captcha/**/*"/>
+		<exclude name="platform/signal/**/*"/>
       </fileset>
       <zipfileset dir="src" includes="JAPM*.properties"/>
       <zipfileset dir="." includes="help/**/*"/>
