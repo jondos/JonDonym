@@ -33,7 +33,7 @@ import logging.LogType;
 public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncodable
 {
 	private static final double PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES = 2.0/3.0;
-	private static final double PERFORMANCE_INFO_MAX_STRAY = 0.7;
+	private static final double PERFORMANCE_INFO_MAX_STRAY = 0.55;
 
 	/**
 	 * Last Update time of the database entry
