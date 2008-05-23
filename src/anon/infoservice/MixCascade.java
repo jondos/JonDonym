@@ -1076,7 +1076,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	
 	public boolean isActiveStudy()
 	{
-		return m_bStudy;
+		return m_bStudy||m_userDefined;
 	}
 
 	/**
