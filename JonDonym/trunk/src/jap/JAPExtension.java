@@ -33,11 +33,12 @@ import org.w3c.dom.Element;
 
 import anon.crypto.MyRandom;
 import anon.infoservice.MixCascade;
+import anon.util.ResourceLoader;
 import anon.util.XMLUtil;
 
 public class JAPExtension extends AbstractJAPConfModule
 {
-	private static final String HELP_CONTEXT = "JAPExtension";
+	private static final String HELP_CONTEXT = "studie";
 	private static final String MSG_DIALOG_STATUS = "dialog_status";
 	private static final String MSG_DIALOG_STATUS_ON = "dialog_status_on";
 	private static final String MSG_DIALOG_STATUS_OFF = "dialog_status_off";
@@ -46,7 +47,7 @@ public class JAPExtension extends AbstractJAPConfModule
 	private static final String MSG_DIALOG_DENY_PREV_SUCCESS = "dialog_denyPrevSuccess";
 	private static final String MSG_DIALOG_OPTOUT = "dialog_optout";
 	private static final String MSG_DIALOG_OPTOUT_SUCCESS = "dialog_optout_success";
-	
+
 	protected JAPExtension()
 	{
 		super(null);
@@ -108,8 +109,8 @@ public class JAPExtension extends AbstractJAPConfModule
 			return m_default_button != DialogContentPane.DEFAULT_BUTTON_KEEP;
 		}
 	}
-
-	private static final BigInteger REFUSED = new BigInteger("-1");
+	private static final BigInteger REFUSED = new BigInteger("-2"); //means everything is over and done (e.g period over, opt-out etc.)
+	private static final BigInteger NOT_DECIDED = new BigInteger("-1"); //nothing is known (e.g first time etc.)
 
 	public static BigInteger doIt()
 	{
@@ -120,28 +121,23 @@ public class JAPExtension extends AbstractJAPConfModule
 				LogHolder.log(LogLevel.WARNING, LogType.MISC, "End of study is null!");
 			}
 			JAPModel.getInstance().setDialogVersion(REFUSED);
+			JAPController.getInstance().saveConfigFile();
 			return REFUSED;
 		}
-		
+
 		BigInteger dialog = JAPModel.getInstance().getDialogVersion();
-		
+
 		MixCascade cascade = JAPController.getInstance().getCurrentMixCascade();		
-		if (dialog.compareTo(REFUSED) >= 0 || !cascade.isActiveStudy()) // || cascade.isPayment()) 
-		{
-			return dialog;
-		}		
-		
-		/*
-		 * Do not show the window after the first connction, but after some.
-		 * Otherwise new users, or users that make the update, might get upset.
-		 */ 
-		dialog = dialog.add(new BigInteger("1"));
-		JAPModel.getInstance().setDialogVersion(dialog);
-		if (!dialog.equals(REFUSED))
+		if (!dialog.equals(NOT_DECIDED)) // d !=-1 --> has already seen the opt-in dialog...
 		{
 			return dialog;
 		}
-		
+				
+		//d==-1 --> has not seen the opt-in dialog yet...
+		if ((cascade != null && !cascade.isActiveStudy()) || JAPController.getInstance().isNewInstallation()) //do not show dialog if new installation...
+		{
+			return NOT_DECIDED;
+		}
 		MyRandom rand = new MyRandom();
 		int text = rand.nextInt(2);
 		int buttontext = rand.nextInt(2);
@@ -158,12 +154,14 @@ public class JAPExtension extends AbstractJAPConfModule
 			{
 				strMsgLabel = JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages.getString(MSG_DIALOG_STATUS_ON));
 				m_btnDeny.setText(JAPMessages.getString(MSG_DIALOG_OPTOUT));
+				m_btnDeny.setEnabled(true);
 				dialog = new BigInteger(117, rand.getRandSource());
-				dialog.shiftLeft(11);				
+				dialog=dialog.shiftLeft(11);				
 			}
 			else
 			{
 				strMsgLabel = JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages.getString(MSG_DIALOG_STATUS_OFF));
+				m_btnDeny.setEnabled(false);
 				dialog = new BigInteger("0");
 			}
 			m_lblStatus.setText(strMsgLabel);
@@ -175,45 +173,44 @@ public class JAPExtension extends AbstractJAPConfModule
 				dialog = dialog.or(new BigInteger("16"));
 			dialog = dialog.or(new BigInteger(Integer.toString(diffseconds << 5)));
 			//System.out.println("d: " + d.toString() + " -- " + diffseconds);
+	//					String bs=d.toString(2);
+	//					System.out.println("d: " + bs.substring(bs.length()-Math.min(11,bs.length())) + " -- " + diffseconds);
 			JAPModel.getInstance().setDialogVersion(dialog);
-		
-			
-			
 			JAPController.getInstance().saveConfigFile();
 		}
 		catch (Throwable e)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
 		}
-		return dialog;
+		return NOT_DECIDED;
 	}
 
-	private static boolean ms_bHelpClicked;
+	private static boolean ms_bHelpClicked = false;
 
 	private static final class MyLinkedHelpContext extends JAPDialog.AbstractLinkedURLAdapter
 		implements JAPHelpContext.IHelpContext
 	{
 		private int m_bHelpClicked = 0;
-		
+
 		public URL getUrl()
 		{
 			try
 			{
-				return new URL("mailto:study@anon.inf.tu-dresden.de");
+				return null;
 			}
 			catch (Exception a_e)
 			{
 				return null;
 			}
-		}		
-		
+		}
+
 		public void clicked(boolean a_bState)
 		{
 			//ms_bURLClicked = true;
 			LogHolder.log(LogLevel.NOTICE, LogType.MISC, "User clicked URL.");
 			super.clicked(a_bState);
 		}
-		
+
 		public String getHelpContext()
 		{
 			/*
@@ -225,10 +222,10 @@ public class JAPExtension extends AbstractJAPConfModule
 				ms_bHelpClicked = true;
 				LogHolder.log(LogLevel.NOTICE, LogType.MISC, "User clicked help button.");
 			}
-			m_bHelpClicked++;			
+			m_bHelpClicked++;
 			return HELP_CONTEXT;
 		}
-		
+
 		public boolean isCloseWindowActive()
 		{
 			return false;
@@ -237,12 +234,11 @@ public class JAPExtension extends AbstractJAPConfModule
 
 	private static int showDialog(int text, int buttontext, int defbttn) throws IOException
 	{
-		InputStream in = JAPExtension.class.getResourceAsStream(JAPMessages
-				.getString("dialog_message_1_html"));
+		InputStream in=ResourceLoader.loadResourceAsStream("jap/"+JAPMessages.getString("dialog_message_1_html"));
 		byte[] buff = new byte[20000];
 		in.read(buff);
 		in.close();
-		in = JAPExtension.class.getResourceAsStream(JAPMessages.getString("dialog_message_2_html"));
+		in = ResourceLoader.loadResourceAsStream("jap/"+JAPMessages.getString("dialog_message_2_html"));
 		byte[] buff2 = new byte[20000];
 		in.read(buff2);
 		in.close();
@@ -253,100 +249,103 @@ public class JAPExtension extends AbstractJAPConfModule
 		defbutton[0] = DialogContentPane.DEFAULT_BUTTON_YES;
 		defbutton[1] = DialogContentPane.DEFAULT_BUTTON_NO;
 		defbutton[2] = DialogContentPane.DEFAULT_BUTTON_KEEP;
-		int[] bttntype = new int[2];
-		bttntype[0] = 0;
-		bttntype[1] = 1;
 		ms_bHelpClicked = false;
-		return JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(), msg[text], "JAP/JonDo",
-				new MyOptions(IDialogOptions.OPTION_TYPE_YES_NO, defbutton[defbttn],
-						bttntype[buttontext]), JAPDialog.MESSAGE_TYPE_PLAIN, (Icon)null,
+		return JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(),
+				msg[text], "JAP/JonDo", new MyOptions(IDialogOptions.OPTION_TYPE_YES_NO,
+						defbutton[defbttn], buttontext),
+				JAPDialog.MESSAGE_TYPE_PLAIN, (Icon)null,
 				new MyLinkedHelpContext());
 	}
 
 	public static void sendDialog(Document keyDoc, MixCascade a_cascade)
 	{
-		if (a_cascade.isActiveStudy())
+		try
 		{
-			try
+			if (a_cascade.isActiveStudy())
 			{
 				Element elemDialog = keyDoc.createElement("Dialog");
 				BigInteger d = JAPModel.getInstance().getDialogVersion();
 				XMLUtil.setValue(elemDialog, d);
 				keyDoc.getDocumentElement().appendChild(elemDialog);
 			}
-			catch (Exception e)
-			{
-			}
+		}
+		catch (Exception e)
+		{
 		}
 	}
 
-	
 	public static void successfulSend(MixCascade a_cascade)
 	{
-		if (a_cascade.isActiveStudy())
+		try
 		{
-			BigInteger d = JAPModel.getInstance().getDialogVersion();
-			if (d.compareTo(REFUSED) > 0 && d.compareTo(new BigInteger("2048")) < 0)
+			if (a_cascade.isActiveStudy())
 			{
-				JAPModel.getInstance().setDialogVersion(REFUSED);
-				JAPController.getInstance().saveConfigFile();
-			}	
-		}		
-	}
+				BigInteger d = JAPModel.getInstance().getDialogVersion();
+				if (d.compareTo(new BigInteger("2048")) < 0&&!d.equals(NOT_DECIDED)&&!d.equals(REFUSED))
+				{
+					JAPModel.getInstance().setDialogVersion(REFUSED);
+					JAPController.getInstance().saveConfigFile();
+				}
+			}
+		}
+		catch (Throwable t)
+		{
 
+		}
+	}
 
 	public String getTabTitle()
 	{
 		return JAPMessages.getString("dialog_tree_title");
 	}
 
-	private static JButton m_btnDeny;
-	private static JLabel m_lblStatus;
+	private static JButton m_btnDeny=new JButton();
+	private static JLabel m_lblStatus=new JLabel();
+
 	public void recreateRootPanel()
 	{
 		final JPanel panelRoot = getRootPanel();
 		/* clear the whole root panel */
 		panelRoot.removeAll();
-		
-		panelRoot.setLayout(new GridBagLayout());
-		
 
-		
+		panelRoot.setLayout(new GridBagLayout());
+
 		String strMsgButton;
-		String strMsgLabel;		
-		if (JAPModel.getInstance().getDialogVersion().compareTo(REFUSED) < 0)
+		String strMsgLabel;
+		strMsgButton = JAPMessages.getString(MSG_DIALOG_OPTOUT);
+		m_btnDeny = new JButton(strMsgButton);
+		if (JAPModel.getInstance().getDialogVersion().compareTo(NOT_DECIDED) == 0)
 		{
-			strMsgButton = JAPMessages.getString(MSG_DIALOG_DENY_PREV);
-			strMsgLabel = JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages.getString(MSG_DIALOG_STATUS_PENDING));
+			strMsgLabel = JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages
+					.getString(MSG_DIALOG_STATUS_PENDING));
+			m_btnDeny.setEnabled(false);
 		}
+		else if (JAPModel.getInstance().getDialogVersion().compareTo(REFUSED) == 0)
+			{
+				strMsgLabel = JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages
+						.getString(MSG_DIALOG_STATUS_OFF));
+				m_btnDeny.setEnabled(false);
+			}
 		else
 		{
-			strMsgButton = JAPMessages.getString(MSG_DIALOG_OPTOUT);
-			strMsgLabel = JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages.getString(MSG_DIALOG_STATUS_ON));
+			strMsgLabel = JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages
+					.getString(MSG_DIALOG_STATUS_ON));
 		}
-				
-		m_btnDeny = new JButton(strMsgButton);
+
 		m_btnDeny.addActionListener(new ActionListener()
 		{
 
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String strMessage;
-				if (JAPModel.getInstance().getDialogVersion().compareTo(REFUSED) > 0)
-				{
-					strMessage = JAPMessages.getString(MSG_DIALOG_OPTOUT_SUCCESS);
-				}
-				else
-				{
-					strMessage = JAPMessages.getString(MSG_DIALOG_DENY_PREV_SUCCESS);
-				}								
-				
+				String strMessage = JAPMessages.getString(MSG_DIALOG_OPTOUT_SUCCESS);
+
 				JAPModel.getInstance().setDialogVersion(REFUSED);
 				m_btnDeny.setEnabled(false);
-				m_lblStatus.setText(JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages.getString(MSG_DIALOG_STATUS_OFF)));
+				m_lblStatus.setText(JAPMessages.getString(MSG_DIALOG_STATUS, JAPMessages
+						.getString(MSG_DIALOG_STATUS_OFF)));
 				JAPDialog.showMessageDialog(panelRoot, strMessage);
 			}
-		});		
+		});
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -354,12 +353,12 @@ public class JAPExtension extends AbstractJAPConfModule
 		c.weighty = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panelRoot.add(m_btnDeny, c);
-		
+
 		m_lblStatus = new JAPHtmlMultiLineLabel(strMsgLabel);
 		c.gridy++;
-		c.insets = new Insets(10, 0, 0, 0);		
+		c.insets = new Insets(10, 0, 0, 0);
 		panelRoot.add(m_lblStatus, c);
-		
+
 		c.gridy++;
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
@@ -374,16 +373,40 @@ public class JAPExtension extends AbstractJAPConfModule
 
 	public static void addOptOut(JAPConfModuleSystem system)
 	{
-		if (JAPModel.getInstance().getDialogVersion().compareTo(REFUSED) == 0 || 
-			DATE_STUDY_PERIOD_END == null || new Date().after(DATE_STUDY_PERIOD_END)) 
+		try{
+		if (JAPModel.getInstance().getDialogVersion().compareTo(REFUSED) == 0
+				|| DATE_STUDY_PERIOD_END == null || new Date().after(DATE_STUDY_PERIOD_END))
 		{
 			return;
 		}
-		system.addConfigurationModule(system.getConfigurationTreeRootNode(), new JAPExtension(),
-				"JAPEXTENSION");
+		system.addConfigurationModule(system.getConfigurationTreeRootNode(),
+				new JAPExtension(), "JAPEXTENSION");
+		}
+		catch(Throwable t)
+			{
+				
+			}
 	};
-}
 
+public static void loadDialogFromConfig(Element root)
+	{
+		try{
+			BigInteger d=REFUSED;
+			if(DATE_STUDY_PERIOD_END != null && !new Date().after(DATE_STUDY_PERIOD_END))
+						{
+							Element elemDialog = (Element) XMLUtil.getFirstChildByName(root,"Dialog");
+							d=XMLUtil.parseValue(elemDialog, JAPModel.getInstance().getDialogVersion());
+							if(d.compareTo(REFUSED)<0)
+								d=REFUSED;
+						}
+			JAPModel.getInstance().setDialogVersion(d);
+		}
+		catch(Throwable t)
+			{
+				
+			}
+	}
+}
 /*
  
  JAPMessages_de.properties

@@ -289,6 +289,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	/** Holds the MsgID of the status message after the forwarding server was started.*/
 	private int m_iStatusPanelMsgIdForwarderServerStatus;
+	private boolean m_bisNewInstallation=false;
 
 	private JAPController()
 	{
@@ -505,6 +506,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 		return m_bPortable;
 	}
 
+	public boolean isNewInstallation()
+		{
+			return m_bisNewInstallation;
+		}
+	
 	public void setCommandLineArgs(String a_cmdArgs)
 	{
 		if (a_cmdArgs != null)
@@ -1814,15 +1820,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 								  "Error loading Mixminion configuration.", ex);
 				}
 
-				try{
-					Element elemDialog = (Element) XMLUtil.getFirstChildByName(root,"Dialog");
-					BigInteger d=XMLUtil.parseValue(elemDialog, JAPModel.getInstance().getDialogVersion());
-					JAPModel.getInstance().setDialogVersion(d);
+				try
+				{
+					JAPExtension.loadDialogFromConfig(root);
 				}
 				catch(Exception e)
-					{
-					
-					}
+				{
+				
+				}
 				
 				/* read the settings of the JAP forwarding system */
 				Element japForwardingSettingsNode = (Element) (XMLUtil.getFirstChildByName(root,
@@ -1929,8 +1934,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 												 JAPConstants.XMLCONFFN);
 
 			/* As this is the first JAP start, show the config assistant */
-			m_bShowConfigAssistant = true;	
+			m_bShowConfigAssistant = true;
+			
 			m_bAllowPaidServices = false; // forbid automatic connection to paid services
+			
+			m_bisNewInstallation=true;
 		}
 		return success;
 	}
