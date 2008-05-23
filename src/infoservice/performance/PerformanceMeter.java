@@ -112,17 +112,18 @@ public class PerformanceMeter implements Runnable
 	{
 		init();
 		
-		m_infoServiceConfig = Configuration.getInstance(); 
-		if(m_infoServiceConfig == null)
-		{
-			//@todo: throw something. Assert InfoServiceConfig is not null
-		}
 		m_accUpdater = updater;
 		m_lKiloBytesRecvd = 0;
 	}
 	
 	public void init() 
 	{
+		m_infoServiceConfig = Configuration.getInstance(); 
+		if(m_infoServiceConfig == null)
+		{
+			//@todo: throw something. Assert InfoServiceConfig is not null
+		}
+		
 		Object[] a_config = m_infoServiceConfig.getPerformanceMeterConfig();
 		
 		m_proxyHost = (String) a_config[0];
