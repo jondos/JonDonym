@@ -1,0 +1,43 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+<body>
+<!--#include virtual="/header.html"-->
+<h2>Feldstudie zur Untersuchung der praktischen Relevanz von Schnittmengenangriffen auf das AN.ON/JonDonym-System</h2>
+<p><b>Zielstellung</b>
+<p>
+Mit Hilfe der Feldstudie soll untersucht werden, wie effektiv die aus der Literatur bekannten und dort nur theoretisch untersuchten Schnittmengenangriffe in der Praxis tats&auml;chlich sind. Nach unserer Einsch&auml;tzung handelt es sich zwar um eine Angriffsart, die aktuell nur mit unverh&auml;ltnism&auml;&szlig;igem Aufwand realisierbar w&auml;re. Insbesondere m&uuml;sste der Angreifer einen Gro&szlig;teil der Internetaktivit&auml;t kontrollieren k&ouml;nnen. Inwieweit jedoch die ggf. ab 2009 notwendige Umsetzung der sogenannten „Vorratsdatenspeicherung“ hieran etwas &auml;ndert, ist ein Teil der Zielsetzung der Studie.
+<p><b>Hintergrund</b>
+<p>
+AN.ON bietet schon heute seinen Nutzern ein sehr hohes Niveau an Anonymit&auml;t. Dies gilt auch im Vergleich zu den meisten anderen Konzepten f&uuml;r Anonymisierungsdienste.
+<br><br>
+Die Hauptidee bei Schnittmengenangriffen ist ziemlich einfach: Ein gedachter Angreifer beobachtet den kompletten Anonymisierungsdienst, d.h. er versucht herauszufinden, welche Nutzer beim Anonymisierungsdienst angemeldet sind und welche Web-Seiten abgerufen werden. Nat&uuml;rlich wei&szlig; er wegen der Anonymisierungsfunktion zun&auml;chst nicht, wer welche Web-Seiten abgerufen hat. Er kann jedoch bei einigen Web-Seiten schlussfolgern, dass bei mehrmaligem Abrufen zu unterschiedlichen Zeiten derselbe Nutzer daf&uuml;r verantwortlich ist. Dies trifft beispielsweise auf Web-Seiten zu, die Login-Daten (Nutzername, Passwort) erfordern. Wenn jetzt der Angreifer ermittelt, welche Nutzer zu allen relevanten Zeitpunkten online waren, kann er die Schnittmenge der Mengen der Nutzer bilden, die jeweils online waren (daher auch der Name: Schnittmengenangriffe). Schnittmengenangriffe k&ouml;nnten in der Praxis eine gr&ouml;&szlig;ere Relevanz bekommen, wenn die ab Januar 2009 drohende Verpflichtung zur Aufzeichnung von Verkehrsdaten (die sogenannte Vorratsdatenspeicherung) tats&auml;chlich umzusetzen ist, da dann Datenbest&auml;nde &uuml;ber Online-Zeiten entstehen.
+<p><b>Umsetzung der Studie</b>
+<p>
+Um zu ermitteln, wie relevant derartige Schnittmengenangriffe in Praxis sind, wollen wir, d.h. die Mitarbeiter des AN.ON Projektes des Lehrstuhls Datenschutz und Datensicherheit der Technischen Universit&auml;t Dresden, selber solche Angriffe simulieren, jedoch ohne Verkn&uuml;pfungen mit abgerufenen Inhalten herzustellen. Dazu ben&ouml;tigen wir die Information, wann jeweils dieselben Nutzer beim Anonymisierungsdienst angemeldet sind. Diese Information steht uns im normalen Betrieb von AN.ON/JonDonym nicht zur Verf&uuml;gung, da Nutzer zwischen mehreren Anmeldungen beim Anonymisierungsdienst nicht wiedererkennbar sind. Um diese Wiedererkennbarkeit dennoch zu erreichen, haben wir die JAP/JonDo Software so ver&auml;ndert, dass der JAP/JonDo—
+<b>und zwar nur nach Ihrer ausdr&uuml;cklichen Zustimmung 
+  zur Teilnahme an der Studie</b>—einmalig eine Zufallszahl erzeugt und dann 
+  an den ersten Mix der von Ihnen gew&auml;hlten, an der Studie teilnehmenden, 
+  Kaskade &uuml;bertr&auml;gt. 
+  Die kostenpflichtigen Premiumdienste nehmen nicht an der Untersuchung teil. 
+  Melden Sie sich erneut beim Anonymisierungsdienst an,
+   so wird wieder dieselbe Zufallszahl &uuml;bertragen, 
+   und wir k&ouml;nnen erkennen, dass sich derselbe Nutzer angemeldet hat. 
+<br><br>
+      Die Zufallszahl wird dabei immer nur zum ersten Mix &uuml;bertragen.
+Es wird im Rahmen der Studie insbesondere nicht ermittelt oder gar aufgezeichnet, welche Inhalte Sie abrufen. 
+<b>Ihre Anonymit&auml;t gegen&uuml;ber dem Web-Seitenanbieter bleibt somit gewahrt.</b>
+<br><br>
+Sollten Sie Ihre Zustimmung zur Teilnahme an der Studie zur&uuml;ckziehen wollen, so k&ouml;nnen Sie das jederzeit tun, indem Sie den JAP/JonDo-Konfigurationsdialog aufrufen, dort die Option f&uuml;r „Studie“ aufrufen und auf den Button zum Zur&uuml;ckziehen der Zustimmung klicken. Daraufhin wird die zuvor generierte Zufallszahl gel&ouml;scht und folglich nicht mehr &uuml;bertragen. Sie werden au&szlig;erdem nicht wiederholt um eine Teilnahme an der Studie gebeten, und es wird keine neue Zufallszahl erzeugt.
+<br><br>
+Die Zufallszahl wird in der Konfigurationsdatei namens jap.conf gespeichert. Dabei handelt es sich um eine XML-Datei, die mit einem normalen Text-Editor betrachtet werden kann. Sie k&ouml;nnen nach <Dialog> suchen, um die gespeicherte Zufallszahl in der Konfigurationsdatei zu finden. Dabei bedeutet der Wert -2, dass Sie nicht an der Studie teilnehmen wollen. 
+<br><br>
+Die Studie endet am 20. Juli 2008. Wenn Sie nach diesem Datum JAP/JonDo starten, so wird die Zufallszahl automatisch gel&ouml;scht und nicht mehr an den Anonymisierungsdienst &uuml;bertragen.
+<br><br>
+Die Studie wird vom <A HREF="http://dud.inf.tu-dresden.de/">Lehrstuhl Datenschutz und Datensicherheit</A> der Fakult&auml;t Informatik der TU Dresden durchgef&uuml;hrt.
+Sollten Sie noch weitere Fragen, Anregungen oder Kommentare haben, so schreiben Sie uns bitte eine e-Mail. Die Adresse lautet: <a href="mailto:study@anon.inf.tu-dresden.de">study@anon.inf.tu-dresden.de</a>
+
+<!--#include virtual="/footer.html"-->
+</body>
+</html>
