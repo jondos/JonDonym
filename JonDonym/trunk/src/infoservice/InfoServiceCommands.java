@@ -916,6 +916,11 @@ final public class InfoServiceCommands implements JWSInternalCommands
 					"</table><br />";
 				}
 				
+				if(vPIs.size() == 0)
+				{
+					htmlData += "Waiting for PaymentInstance data...<br /><br />";
+				}
+				
 				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\">" +
 				"<tr><th>Account File</th><th>Last Modified</th></tr>\n";
 				
