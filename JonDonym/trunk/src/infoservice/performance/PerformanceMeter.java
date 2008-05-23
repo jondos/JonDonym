@@ -36,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Vector;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
@@ -265,20 +266,25 @@ public class PerformanceMeter implements Runnable
 	private boolean performTest(MixCascade a_cascade) 
 	{
 		// skip cascades on the same host as the infoservice
-		for(int i = 0; i < a_cascade.getNumberOfListenerInterfaces(); i++)
+		Vector cascadeHosts = a_cascade.getHosts();
+		Vector isHosts = m_infoServiceConfig.getHostList();
+		
+		Vector blackList = m_infoServiceConfig.getPerfBlackList();
+		Vector whiteList = m_infoServiceConfig.getPerfWhiteList();
+		
+		for(int i = 0; i < cascadeHosts.size(); i++)
 		{
-			ListenerInterface iface = a_cascade.getListenerInterface(i);
+			String host = (String) cascadeHosts.elementAt(i);
 			
-			if(Configuration.getInstance().getHardwareListeners().contains(iface) ||
-					Configuration.getInstance().getVirtualListeners().contains(iface))
+			if(blackList.contains(host))
 			{
 				return false;
 			}
-		}
-		
-		if(a_cascade == null)
-		{
-			return false;
+			
+			if(isHosts.contains(host) && !whiteList.contains(host))
+			{
+				return false;
+			}
 		}
 		
 		PerformanceEntry entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
