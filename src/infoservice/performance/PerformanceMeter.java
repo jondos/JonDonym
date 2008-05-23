@@ -477,20 +477,20 @@ public class PerformanceMeter implements Runnable
 		return m_usedAccountFiles;
 	}
 	
-	public long calculateRemainingPayTime()
+	public long calculateRemainingPayTime(String a_piid)
 	{
 		long remainingTests;
-		long trafficPerTest = calculatePayTrafficPerTest();
+		long trafficPerTest = calculatePayTrafficPerTest(a_piid);
 		if(trafficPerTest == 0)
 		{
 			return 0;
 		}
 		
-		remainingTests = getRemainingCredit() / trafficPerTest;
+		remainingTests = getRemainingCredit(a_piid) / trafficPerTest;
 		return System.currentTimeMillis() + (remainingTests * m_majorInterval);
 	}
 
-	private long calculatePayTrafficPerTest() 
+	private long calculatePayTrafficPerTest(String a_piid) 
 	{
 		int payCascades = 0;
 		long trafficPerTest = 0;
@@ -500,7 +500,8 @@ public class PerformanceMeter implements Runnable
 		while(cascades.hasNext()) 
 		{
 			MixCascade cascade = (MixCascade) cascades.next();
-			if(cascade.hasPerformanceServer() && cascade.isPayment())
+			
+			if(cascade.hasPerformanceServer() && cascade.isPayment() && cascade.getPIID() != null && cascade.getPIID().equals(a_piid))
 			{
 				payCascades++;
 			}
@@ -510,23 +511,32 @@ public class PerformanceMeter implements Runnable
 		return trafficPerTest;
 	}
 	
-	public long calculatePayTrafficPerDay()
+	public long calculatePayTrafficPerDay(String a_piid)
 	{
 		int testsPerDay = (3600 * 24 * 1000) / (m_majorInterval);
 		
-		return calculatePayTrafficPerTest() * testsPerDay;
+		return calculatePayTrafficPerTest(a_piid) * testsPerDay;
 	}
 	
-	public long getRemainingCredit()
+	public long getRemainingCredit(String a_piid)
 	{
+		if(a_piid == null)
+		{
+			return 0;
+		}
+		
 		Enumeration accounts = m_payAccountsFile.getAccounts();
 		long credit = 0;
 		
 		while(accounts.hasMoreElements())
 		{
 			PayAccount account = (PayAccount) accounts.nextElement();
-			// balance credit is kb
-			credit += account.getBalance().getCredit() * 1000;
+			
+			if(account.getBI() != null && account.getBI().getId().equals(a_piid))
+			{
+				// balance credit is kb
+				credit += account.getBalance().getCredit() * 1000;
+			}
 		}
 		
 		return credit;
