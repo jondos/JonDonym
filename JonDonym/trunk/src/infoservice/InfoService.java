@@ -139,9 +139,8 @@ public class InfoService implements Observer
 			{
 				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting Performance Meter...");
 				InfoService.ms_perfMeter = 
-					new PerformanceMeter(
-							Configuration.getInstance().getPerformanceMeterConfig(),
-							ms_accountUpdater);
+					new PerformanceMeter(ms_accountUpdater);
+				
 				Thread perfMeterThread = new Thread(InfoService.ms_perfMeter);
 				perfMeterThread.start();
 			}
@@ -175,6 +174,7 @@ public class InfoService implements Observer
 			try
 			{
 				loadConfig();
+				ms_perfMeter.init();
 			}
 			catch(Exception ex)
 			{
@@ -211,7 +211,7 @@ public class InfoService implements Observer
 			e.printStackTrace();
 		}
 	}
-
+	
 	private InfoService(String a_configFileName) throws Exception
 	{
 		m_configFileName = a_configFileName;
