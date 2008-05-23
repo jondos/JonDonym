@@ -269,15 +269,16 @@ final public class Configuration
 			StringTokenizer stVirtual = new StringTokenizer(strVirtualListeners, ",");
 
 			/* create a list of all interfaces we are listening on */
+			m_hostList = new Vector();
 			m_hardwareListenerList = new Vector();
 			while (stHardware.hasMoreTokens())
 			{
 				ListenerInterface iface = new ListenerInterface(stHardware.nextToken());
 				m_hardwareListenerList.addElement(iface);
 				
-				if(!m_hostList.contains(iface.getHost()))
+				if(iface != null && !m_hostList.contains(iface.getHost()))
 				{
-					m_hostList.addElement(iface);
+					m_hostList.addElement(iface.getHost());
 				}
 			}
 			
@@ -287,9 +288,9 @@ final public class Configuration
 				ListenerInterface iface = new ListenerInterface(stVirtual.nextToken());
 				m_virtualListenerList.addElement(iface);
 				
-				if(!m_hostList.contains(iface.getHost()))
+				if(iface != null && !m_hostList.contains(iface.getHost()))
 				{
-					m_hostList.addElement(iface);
+					m_hostList.addElement(iface.getHost());
 				}
 			}
 
