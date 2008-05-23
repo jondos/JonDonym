@@ -785,6 +785,23 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		}
 		return returnedListener;
 	}
+	
+	public Vector getHosts()
+	{
+		Vector hosts = new Vector();
+		
+		for(int i = 0; i < getNumberOfListenerInterfaces(); i++)
+		{
+			String host = ((ListenerInterface) m_listenerInterfaces.elementAt(0)).getHost();
+			
+			if(!hosts.contains(host))
+			{
+				hosts.addElement(host);
+			}
+		}
+		
+		return hosts;
+	}
 
 	/**
 	 * Returns the number of mixes in the cascade.
