@@ -35,6 +35,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -900,10 +901,20 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"</table><br />" +
 				"<table style=\"align: left\" border=\"0\" width=\"30%\">" +
 				"<tr><td class=\"name\">Accumulated Total Traffic</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getKiloBytesRecvd() * 1000) + "</td></tr>" +
-				"<tr><td class=\"name\">Estimated PayTraffic per Day</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().calculatePayTrafficPerDay()) + "</td></tr>" +
-				"<tr><td class=\"name\">Remaining PayCredit</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getRemainingCredit()) + "</td></tr>" +				
-				"<tr><td class=\"name\">Estimated Pay End Time</td><td class=\"status\">" + (InfoService.getPerfMeter().calculateRemainingPayTime() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().calculateRemainingPayTime()).toString()) + "</td></tr>" +
 				"</table><br />";
+				
+				Vector vPIs = Database.getInstance(PaymentInstanceDBEntry.class).getEntryList();
+				
+				for(int i = 0; i < vPIs.size(); i++)
+				{
+					PaymentInstanceDBEntry pi = (PaymentInstanceDBEntry) vPIs.elementAt(i);
+					
+					htmlData += "<h2>" + pi.getId() + "</h2><table style=\"align: left\" border=\"0\" width=\"30%\">" +
+					"<tr><td class=\"name\">Estimated PayTraffic per Day</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().calculatePayTrafficPerDay(pi.getId())) + "</td></tr>" +
+					"<tr><td class=\"name\">Remaining PayCredit</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getRemainingCredit(pi.getId())) + "</td></tr>" +				
+					"<tr><td class=\"name\">Estimated Pay End Time</td><td class=\"status\">" + (InfoService.getPerfMeter().calculateRemainingPayTime(pi.getId()) == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().calculateRemainingPayTime(pi.getId())).toString()) + "</td></tr>" +
+					"</table><br />";
+				}
 				
 				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\">" +
 				"<tr><th>Account File</th><th>Last Modified</th></tr>\n";
