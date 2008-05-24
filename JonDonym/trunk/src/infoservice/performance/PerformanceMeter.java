@@ -94,11 +94,12 @@ public class PerformanceMeter implements Runnable
 	
 	private Configuration m_infoServiceConfig = null;
 	
-	private long m_lastUpdate;
-	private long m_nextUpdate;
+	private long m_lastUpdate = 0;
+	private long m_nextUpdate = 0;
+	private int m_lastTotalUpdates = 0;
 	
 	private String m_lastCascadeUpdated = "(none)";
-	private long m_lKiloBytesRecvd;
+	private long m_lBytesRecvd;
 	
 	public static final int PERFORMANCE_SERVER_TIMEOUT = 5000;
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60;
@@ -113,7 +114,7 @@ public class PerformanceMeter implements Runnable
 		init();
 		
 		m_accUpdater = updater;
-		m_lKiloBytesRecvd = 0;
+		m_lBytesRecvd = 0;
 	}
 	
 	public void init() 
@@ -161,7 +162,7 @@ public class PerformanceMeter implements Runnable
 			m_nextUpdate = System.currentTimeMillis() + m_majorInterval;
 			
 			Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
-
+			m_lastTotalUpdates = 0;
 			while(knownMixCascades.hasNext()) 
 			{
 				MixCascade cascade = (MixCascade) knownMixCascades.next();
@@ -169,7 +170,10 @@ public class PerformanceMeter implements Runnable
 				{
 					loadAccountFiles();
 					m_accUpdater.update();
-					performTest(cascade);
+					if (performTest(cascade))
+					{
+						m_lastTotalUpdates++;
+					}
 				}
 			}
 			
@@ -264,17 +268,8 @@ public class PerformanceMeter implements Runnable
 		return true;
 	}
 
-	/**
-	 * Performs a performance test on the given MixCascade using the parameters
-	 * of m_minorInterval and m_requestsPerInterval
-	 * 
-	 * @param a_cascade The MixCascade that should be tested
-	 * 
-	 * @return true if the test was successful, false otherwise
-	 */
-	private boolean performTest(MixCascade a_cascade) 
+	private boolean isPerftestAllowed(MixCascade a_cascade)
 	{
-		// skip cascades on the same host as the infoservice
 		Vector cascadeHosts = a_cascade.getHosts();
 		Vector isHosts = m_infoServiceConfig.getHostList();
 		
@@ -294,6 +289,25 @@ public class PerformanceMeter implements Runnable
 			{
 				return false;
 			}
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * Performs a performance test on the given MixCascade using the parameters
+	 * of m_minorInterval and m_requestsPerInterval
+	 * 
+	 * @param a_cascade The MixCascade that should be tested
+	 * 
+	 * @return true if the test was successful, false otherwise
+	 */
+	private boolean performTest(MixCascade a_cascade) 
+	{
+		// skip cascades on the same host as the infoservice
+		if (!isPerftestAllowed(a_cascade))
+		{
+			return false;
 		}
 		
 		PerformanceEntry entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
@@ -408,7 +422,7 @@ public class PerformanceMeter implements Runnable
         		// delay in ms
         		delay = responseStartTime - transferInitiatedTime;
         		
-        		// speed in kbit/sec
+        		// speed in kbit/sec;
         		speed = (m_dataSize * 8) / (responseEndTime - responseStartTime);
         		
         		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
@@ -416,10 +430,12 @@ public class PerformanceMeter implements Runnable
         		entry.updateDelay(delay, m_requestsPerInterval);
         		entry.updateSpeed(speed, m_requestsPerInterval);
         		
-        		m_lKiloBytesRecvd += bytesRead / 1024;
+        		m_lBytesRecvd += bytesRead;
         		
-        		if(m_lKiloBytesRecvd < 0) 
-        			m_lKiloBytesRecvd = 0;
+        		if(m_lBytesRecvd < 0) 
+        		{
+        			m_lBytesRecvd = 0;
+        		}
         		
 		       	s.close();
         	}
@@ -478,6 +494,11 @@ public class PerformanceMeter implements Runnable
 		return r;
 	}
 	
+	public int getLastTotalUpdates()
+	{
+		return m_lastTotalUpdates;
+	}
+	
 	public long getLastSuccessfulUpdate()
 	{
 		return m_lastUpdate;
@@ -493,9 +514,9 @@ public class PerformanceMeter implements Runnable
 		return m_lastCascadeUpdated;
 	}
 	
-	public long getKiloBytesRecvd()
+	public long getBytesRecvd()
 	{
-		return m_lKiloBytesRecvd;
+		return m_lBytesRecvd;
 	}
 	
 	public Hashtable getUsedAccountFiles()
@@ -527,7 +548,9 @@ public class PerformanceMeter implements Runnable
 		{
 			MixCascade cascade = (MixCascade) cascades.next();
 			
-			if(cascade.hasPerformanceServer() && cascade.isPayment() && cascade.getPIID() != null && cascade.getPIID().equals(a_piid))
+			if(cascade.hasPerformanceServer() && cascade.isPayment() && 
+				cascade.getPIID() != null && cascade.getPIID().equals(a_piid) &&
+				isPerftestAllowed(cascade))
 			{
 				payCascades++;
 			}
@@ -545,8 +568,8 @@ public class PerformanceMeter implements Runnable
 	}
 	
 	public long getRemainingCredit(String a_piid)
-	{
-		if(a_piid == null)
+	{			
+		if(a_piid == null || m_payAccountsFile == null)
 		{
 			return 0;
 		}

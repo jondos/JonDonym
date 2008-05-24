@@ -884,7 +884,7 @@ final public class Configuration
 				System.err.println("Exception: " + e2.toString());
 			}
 			
-			m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "false")).booleanValue();
+			m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "true")).booleanValue();
 			
 			if(m_bPerfEnabled)
 			{
@@ -896,7 +896,7 @@ final public class Configuration
 				if(value != null)
 					m_aPerfMeterConf[1] = Integer.valueOf(value);
 
-				value = a_properties.getProperty("perf.dataSize", "524288");
+				value = a_properties.getProperty("perf.dataSize", "200000");
 				if(value != null)
 				{
 					m_aPerfMeterConf[2] = new Integer(Math.min(512*1024*2, Integer.parseInt(value)));
@@ -908,7 +908,7 @@ final public class Configuration
 					m_aPerfMeterConf[3] = new Integer(Math.max(60*1000, Integer.parseInt(value)));
 				}
 				
-				value = a_properties.getProperty("perf.requestsPerInterval", "3");
+				value = a_properties.getProperty("perf.requestsPerInterval", "5");
 				if(value != null)
 				{
 					m_aPerfMeterConf[4] = Integer.valueOf(value);

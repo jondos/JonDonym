@@ -91,6 +91,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public void updateDelay(long a_lDelay, int maxEntries) 
 	{
+		if (a_lDelay <= 0)
+		{
+			return;
+		}
+		
 		if(m_aDelays == null)
 		{
 			m_aDelays = new long[maxEntries];
@@ -99,7 +104,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int numEntries = 1;
 		for(int i = 1; i < m_aDelays.length; i++)
 		{
-			if(m_aDelays[i] != 0) numEntries++;
+			if(m_aDelays[i] != 0) 
+			{
+				numEntries++;
+			}
 			m_lDelay += (m_aDelays[i-1] = m_aDelays[i]);
 		}
 		m_aDelays[m_aDelays.length-1] = a_lDelay;
@@ -110,6 +118,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public void updateSpeed(long a_iSpeed, int maxEntries) 
 	{
+		if (a_iSpeed <= 0)
+		{
+			return;
+		}
+		
 		if(m_aSpeeds == null)
 		{
 			m_aSpeeds = new long[maxEntries];
@@ -118,7 +131,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int numEntries = 1;
 		for(int i=1; i < m_aSpeeds.length; i++)
 		{
-			if(m_aSpeeds[i] != 0) numEntries++;
+			if(m_aSpeeds[i] != 0) 
+			{
+				numEntries++;
+			}
 			m_lSpeed += (m_aSpeeds[i-1] = m_aSpeeds[i]);
 		}
 		m_aSpeeds[m_aSpeeds.length-1] = a_iSpeed;
