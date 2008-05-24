@@ -889,18 +889,20 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			if(Configuration.getInstance().isPerfEnabled() && InfoService.getPerfMeter() != null)
 			{
 				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\"><tr><th colspan=\"2\">Performance Monitoring Enabled</th></tr>\n" + 
-				"<tr><td class=\"name\">Proxy Host</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[0] + "</td></tr>" +
-				"<tr><td class=\"name\">Proxy Port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
+				"<tr><td class=\"name\">Proxy host</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[0] + "</td></tr>" +
+				"<tr><td class=\"name\">Proxy port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
 				"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(((Integer)Configuration.getInstance().getPerformanceMeterConfig()[2]).intValue()) + "<td></tr>" +
-				"<tr><td class=\"name\">Major Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + " ms<td></tr>" +
-				"<tr><td class=\"name\">Requests per Interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[4] + "<td></tr>" +
+				"<tr><td class=\"name\">Major interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + " ms<td></tr>" +
+				"<tr><td class=\"name\">Requests per interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[4] + "<td></tr>" +
 				"<tr><td class=\"name\">Account directory</td><td class=\"status\">" + Configuration.getInstance().getPerfAccountDirectory() + "<td></tr>" +
-				"<tr><td class=\"name\">Last Successful Update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastSuccessfulUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastSuccessfulUpdate()).toString()) + "</td></tr>" +
-				"<tr><td class=\"name\">Next Update Attempt</td><td class=\"status\">" + (InfoService.getPerfMeter().getNextUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getNextUpdate()).toString()) + "</td></tr>" +
-				"<tr><td class=\"name\">Last Cascade Updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
+				"<tr><td class=\"name\">Last successful update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastSuccessfulUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastSuccessfulUpdate()).toString()) + "</td></tr>" +
+				"<tr><td class=\"name\">Current time</td><td class=\"status\">" + new Date().toString() + "</td></tr>" +
+				"<tr><td class=\"name\">Next update attempt</td><td class=\"status\">" + (InfoService.getPerfMeter().getNextUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getNextUpdate()).toString()) + "</td></tr>" +
+				"<tr><td class=\"name\">Last run total updates</td><td class=\"status\">" + InfoService.getPerfMeter().getLastTotalUpdates() + "</td></tr>" +
+				"<tr><td class=\"name\">Last Cascade updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
 				"</table><br />" +
 				"<table style=\"align: left\" border=\"0\" width=\"30%\">" +
-				"<tr><td class=\"name\">Accumulated Total Traffic</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getKiloBytesRecvd() * 1000) + "</td></tr>" +
+				"<tr><td class=\"name\">Accumulated Total Traffic</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getBytesRecvd()) + "</td></tr>" +
 				"</table><br />";
 				
 				Vector vPIs = Database.getInstance(PaymentInstanceDBEntry.class).getEntryList();
@@ -1044,11 +1046,21 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			Element mixesNode = doc.createElement("Mixes");
 			/* append the nodes of all mixes we know */
 			Enumeration knownMixes = Database.getInstance(MixInfo.class).getEntrySnapshotAsEnumeration();
+			Element mixNode;
+			MixInfo mixInfo;
 			while (knownMixes.hasMoreElements())
 			{
 				/* import the mix node in this document */
-				Element mixNode = (Element) (XMLUtil.importNode(doc,
-					( (MixInfo) (knownMixes.nextElement())).getXmlStructure(), true));
+				mixInfo = (MixInfo) knownMixes.nextElement();
+				mixNode = mixInfo.getXmlStructure();
+				if (mixNode == null)
+				{
+					LogHolder.log(LogLevel.EMERG, LogType.MISC, 
+							"Mix node XML is null for Mix " + mixInfo.getId() + 
+							" (" + mixInfo.getName() + ")!");
+					continue;
+				}
+				mixNode = (Element) XMLUtil.importNode(doc, mixNode, true);
 				mixesNode.appendChild(mixNode);
 			}
 			SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, mixesNode);

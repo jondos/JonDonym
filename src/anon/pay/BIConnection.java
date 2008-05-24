@@ -104,6 +104,10 @@ public class BIConnection implements ICaptchaSender
 	 */
 	public BIConnection(PaymentInstanceDBEntry theBI)
 	{
+		if (theBI == null)
+		{
+			throw new IllegalArgumentException("PI is null! No connection is possibble.");
+		}
 		m_theBI = theBI;
 		m_biConnectionListeners = new Vector();
 	}

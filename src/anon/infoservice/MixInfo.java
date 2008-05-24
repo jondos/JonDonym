@@ -299,11 +299,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 
 	  if (!checkId())
 	  {
-		  /**
-		   * @todo Activate, if all cascades have been updated to version 00.25 at least. Otherwise
-		   * it will not be possible to connect to such a cascade...
-		   */
-		//  throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix ID: " + m_mixId);
+		  throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix ID: " + m_mixId);
 	  }
 
 	  m_name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixNode, "Name"), DEFAULT_NAME);

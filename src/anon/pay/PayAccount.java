@@ -869,6 +869,10 @@ public class PayAccount implements IXMLEncodable
 
 		XMLAccountInfo info = null;
 		m_theBI = this.getBI();
+		if (m_theBI == null)
+		{			
+			return null;
+		}
 		BIConnection biConn = null;
 		try
 		{
