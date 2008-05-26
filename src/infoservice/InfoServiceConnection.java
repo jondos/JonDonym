@@ -162,12 +162,12 @@ final public class InfoServiceConnection implements Runnable
 				}
 				catch (SocketException a_e)
 				{
-					LogHolder.log(LogLevel.WARNING, LogType.NET, "No request received. " + a_e.getMessage());						
+					LogHolder.log(LogLevel.WARNING, LogType.NET, "No client request received. " + a_e.getMessage());						
 					requestLine = null;
 				}
 				catch (SocketTimeoutException a_e)
 				{
-					LogHolder.log(LogLevel.WARNING, LogType.NET, "Request timed out. " + a_e.getMessage());
+					LogHolder.log(LogLevel.WARNING, LogType.NET, "Client request timed out. " + a_e.getMessage());
 					requestLine = null;
 				}
 				if (requestLine == null)
@@ -330,29 +330,45 @@ final public class InfoServiceConnection implements Runnable
 				byte[] theResponse = response.getResponseData();
 				int index = 0;
 				int len = theResponse.length;
+				int transferLen = 0;
 				//we send the data batch to the client in smaller chunks in order
 				//to avoid unwanted timeouts for large messages and slow connections
-				while (len > RESPONSE_CHUNK_SIZE)
+				while (true)
 				{
-					streamToClient.write(theResponse, index, RESPONSE_CHUNK_SIZE);
-					streamToClient.flush();
-					index += RESPONSE_CHUNK_SIZE;
-					len -= RESPONSE_CHUNK_SIZE;
+					if (len > RESPONSE_CHUNK_SIZE)
+					{
+						transferLen = RESPONSE_CHUNK_SIZE;
+					}
+					else
+					{
+						if (len > 0)
+						{
+							transferLen = len;
+						}
+						else
+						{
+							break;
+						}
+					}
+											
+					try
+					{
+						streamToClient.write(theResponse, index, transferLen);
+						streamToClient.flush();
+					}
+					catch (SocketException a_e)
+					{
+						LogHolder.log(LogLevel.WARNING, LogType.NET, 
+								"Client closed our response. " + a_e.getMessage());
+					}					
+					catch (InterruptedIOException a_e)
+					{
+						LogHolder.log(LogLevel.WARNING, LogType.NET, 
+								"Response to client timed out. " + a_e.getMessage());
+					}					
+					index += transferLen;
+					len -= transferLen;
 				}
-				try
-				{
-					if (len > 0)
-					{						
-							streamToClient.write(theResponse, index, len);
-							streamToClient.flush();					
-					}			
-					streamToClient.close();
-				}
-				catch (SocketException a_e)
-				{
-					LogHolder.log(LogLevel.WARNING, LogType.NET, 
-							"Client did not get response. " + a_e.getMessage());
-				}				
 			}
 			catch (Exception e)
 			{
