@@ -59,7 +59,7 @@ public final class LogHolder
 	private static final String TRACED_LOG_MESSAGE = "[Traced log Message]:";
 	private static final String LOGGED_THROWABLE = " Logged Throwable: ";
 	private static final int LINE_LENGTH_HIGH_DETAIL = 40;
-	private static final int LINE_LENGTH_HIGHEST_DETAIL = 80;
+	private static final int LINE_LENGTH_HIGHEST_DETAIL = 70;
 
 	/**
 	 * Stores the instance of LogHolder (Singleton).

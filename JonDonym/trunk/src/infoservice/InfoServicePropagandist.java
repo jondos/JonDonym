@@ -38,6 +38,7 @@ import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.InfoServiceIDEntry;
+import anon.pay.PaymentInstanceDBEntry;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -90,7 +91,7 @@ public class InfoServicePropagandist implements Runnable
 			Vector virtualListeners = Configuration.getInstance().getVirtualListeners();
 			if (virtualListeners.size() > 0)
 			{
-				for (int i = 0; i < 3; i++)
+				for (int i = 0; i < 4; i++)
 				{
 					if (i == 1 && !bInit)
 					{
@@ -116,6 +117,11 @@ public class InfoServicePropagandist implements Runnable
 								enumTmp = ( (InfoServiceDBEntry) tmpEntry).getInfoServices(false).elements();
 							}
 							else if (i == 1)
+							{								
+								enumTmp = ( (InfoServiceDBEntry) tmpEntry).getPaymentInstances(false).elements();
+								
+							}
+							else if (i == 2)
 							{
 								enumTmp = ( (InfoServiceDBEntry) tmpEntry).getMixCascades(false).elements();
 							}
@@ -154,11 +160,19 @@ public class InfoServicePropagandist implements Runnable
 						}
 						else if (i == 1)
 						{
+							LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Updating payment instances...");
+							if (Database.getInstance(PaymentInstanceDBEntry.class).update(tmpEntry, false))
+							{
+								LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Payment instances updated!");
+							}							
+						}
+						else if (i == 2)
+						{
 							Database.getInstance(MixCascade.class).update(tmpEntry, false);
 						}
 						else
 						{
-							Database.getInstance(MixInfo.class).update(tmpEntry, false);
+							Database.getInstance(MixInfo.class).update(tmpEntry, false);							
 						}
 					}
 				}
@@ -175,9 +189,11 @@ public class InfoServicePropagandist implements Runnable
 				if (!Database.getInstance(InfoServiceDBEntry.class).update(generatedOwnEntry))
 				{
 					LogHolder.log(LogLevel.ALERT, LogType.MISC, "Could not update own InfoService entry: " +
-								  generatedOwnEntry.getName() + ":" + generatedOwnEntry.getId() + ":" +
-								  generatedOwnEntry.getLastUpdate() + ":" +
-								  generatedOwnEntry.getVersionNumber());
+								  generatedOwnEntry.getName() + ":" + generatedOwnEntry.getId() + 
+								  ":LastUpdate:" +
+								  generatedOwnEntry.getLastUpdate() + 
+								  ":VersionNumber:" + generatedOwnEntry.getVersionNumber());
+					/*
 					Enumeration entries =
 						Database.getInstance(InfoServiceDBEntry.class).getEntrySnapshotAsEnumeration();
 					InfoServiceDBEntry entry;
@@ -185,9 +201,9 @@ public class InfoServicePropagandist implements Runnable
 					{
 						entry = (InfoServiceDBEntry) entries.nextElement();
 						LogHolder.log(LogLevel.ALERT, LogType.MISC,
-									  entry.getName() + ":" + entry.getId() + ":" +
-									  entry.getLastUpdate() + ":" + entry.getVersionNumber());
-					}
+									  entry.getName() + ":" + entry.getId() + ":LastUpdate:" +
+									  entry.getLastUpdate() + ":VersionNumber:" + entry.getVersionNumber());
+					}*/
 					// reset serial number
 					ms_serialNumber = System.currentTimeMillis();
 				}

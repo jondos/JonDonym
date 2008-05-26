@@ -215,7 +215,7 @@ final public class Configuration
 	 *  <li>Requests per interval</li>
 	 * </ul>
 	 */
-	private Object[] m_aPerfMeterConf = new Object[5];
+	private final Object[] m_aPerfMeterConf = new Object[6];
 	
 	private File m_strPerfAccountDirectory = null;
 	
@@ -233,6 +233,8 @@ final public class Configuration
 	
 	public final static String IS_PROP_NAME_WHITELIST =
 		IS_PROP_NAME_PERFORMANCE_MONITORING+".whiteList";
+	public final static String PROP_MAX_TEST_TIME =
+		IS_PROP_NAME_PERFORMANCE_MONITORING+".maxTestTime";
 	
 	public final static String IS_PROP_NAME_PERFACCOUNT_DIRECTORY =
 		IS_PROP_NAME_PERFACCOUNT+".directory";
@@ -358,168 +360,27 @@ final public class Configuration
 			}
 			//if (SignatureVerifier.getInstance().isCheckSignatures())
 			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Loading certificates...");
-				/* load the trusted mix root certificates */
-				String trustedRootCertificateFiles = a_properties.getProperty("trustedRootCertificateFiles");
-				if ( (trustedRootCertificateFiles != null) && (!trustedRootCertificateFiles.trim().equals("")))
-				{
-					StringTokenizer stTrustedRootCertificates = new StringTokenizer(
-						trustedRootCertificateFiles.trim(), ",");
-					while (stTrustedRootCertificates.hasMoreTokens())
-					{
-						String currentCertificateFile = stTrustedRootCertificates.nextToken().trim();
-						JAPCertificate currentCertificate = loadX509Certificate(currentCertificateFile);
-						if (currentCertificate != null)
-						{
-							SignatureVerifier.getInstance().getVerificationCertificateStore().
-								addCertificateWithoutVerification(currentCertificate,
-								JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX, true, false);
-							LogHolder.log(LogLevel.WARNING, LogType.MISC,
-										  "Added the following file to the store of the trusted mix root certificates: " +
-										  currentCertificateFile);
-						}
-						else
-						{
-							LogHolder.log(LogLevel.ERR, LogType.MISC,
-										  "Error loading trusted mix root certificate: " +
-										  currentCertificateFile);
-						}
-					}
-				}
-				else
-				{
-					LogHolder.log(LogLevel.WARNING, LogType.MISC, "No trusted root certificates specified.");
-				}
-				/* load the trusted infoservice root certificates */
-				trustedRootCertificateFiles = a_properties.getProperty(
-					"trustedInfoServiceRootCertificateFiles");
-				if ( (trustedRootCertificateFiles != null) && (!trustedRootCertificateFiles.trim().equals("")))
-				{
-					StringTokenizer stTrustedRootCertificates = new StringTokenizer(
-						trustedRootCertificateFiles.trim(), ",");
-					while (stTrustedRootCertificates.hasMoreTokens())
-					{
-						String currentCertificateFile = stTrustedRootCertificates.nextToken().trim();
-						JAPCertificate currentCertificate = loadX509Certificate(currentCertificateFile);
-						if (currentCertificate != null)
-						{
-							SignatureVerifier.getInstance().getVerificationCertificateStore().
-								addCertificateWithoutVerification(currentCertificate,
-								JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE, true, false);
-							LogHolder.log(LogLevel.WARNING, LogType.MISC,
-										  "Added the following file to the store of the trusted infoservice root certificates: " +
-										  currentCertificateFile);
-						}
-						else
-						{
-							LogHolder.log(LogLevel.ERR, LogType.MISC,
-										  "Error loading trusted infoservice root certificate: " +
-										  currentCertificateFile);
-						}
-					}
-				}
-				/* load the infoservice certificates */
-				LogHolder.log(LogLevel.WARNING, LogType.MISC,
-							  "Try to load trusted InfoService certificates specified.");
-				String trustedInfoServiceCertificateFiles = a_properties.getProperty(
-					"trustedInfoServiceCertificateFiles");
-				if ( (trustedInfoServiceCertificateFiles != null) &&
-					(!trustedInfoServiceCertificateFiles.trim().equals("")))
-				{
-					StringTokenizer stTrustedInfoServiceCertificates = new StringTokenizer(
-						trustedInfoServiceCertificateFiles.trim(), ",");
-					LogHolder.log(LogLevel.WARNING, LogType.MISC,
-								  "trustedInfoServiceCertificateFiles: " + trustedInfoServiceCertificateFiles);
-					while (stTrustedInfoServiceCertificates.hasMoreTokens())
-					{
-						String currentCertificateFile = stTrustedInfoServiceCertificates.nextToken().trim();
-						JAPCertificate currentCertificate = loadX509Certificate(currentCertificateFile);
-						if (currentCertificate != null)
-						{
-							SignatureVerifier.getInstance().getVerificationCertificateStore().
-								addCertificateWithoutVerification(currentCertificate,
-								JAPCertificate.CERTIFICATE_TYPE_INFOSERVICE, true, false);
-							LogHolder.log(LogLevel.WARNING, LogType.MISC,
-										  "Added the following file to the store of trusted infoservice certificates: " +
-										  currentCertificateFile);
-						}
-						else
-						{
-							LogHolder.log(LogLevel.ERR, LogType.MISC,
-										  "Error loading trusted infoservice certificate: " +
-										  currentCertificateFile);
-						}
-					}
-				}
-				else
-				{
-					LogHolder.log(LogLevel.DEBUG, LogType.MISC,
-								  "No trusted infoservice certificates specified.");
-				}
-				/* load the mix certificates */
-				String trustedMixCertificateFiles = a_properties.getProperty("trustedMixCertificateFiles");
-				if ( (trustedMixCertificateFiles != null) && (!trustedMixCertificateFiles.trim().equals("")))
-				{
-					StringTokenizer stTrustedMixCertificates = new StringTokenizer(trustedMixCertificateFiles.
-						trim(), ",");
-					while (stTrustedMixCertificates.hasMoreTokens())
-					{
-						String currentCertificateFile = stTrustedMixCertificates.nextToken().trim();
-						JAPCertificate currentCertificate = loadX509Certificate(currentCertificateFile);
-						if (currentCertificate != null)
-						{
-							SignatureVerifier.getInstance().getVerificationCertificateStore().
-								addCertificateWithoutVerification(currentCertificate,
-								JAPCertificate.CERTIFICATE_TYPE_MIX, true, false);
-							LogHolder.log(LogLevel.DEBUG, LogType.MISC,
-										  "Added the following file to the store of trusted mix certificates: " +
-										  currentCertificateFile);
-						}
-						else
-						{
-							LogHolder.log(LogLevel.ERR, LogType.MISC,
-										  "Error loading trusted mix certificate: " + currentCertificateFile);
-						}
-					}
-				}
-				else
-				{
-					LogHolder.log(LogLevel.DEBUG, LogType.MISC, "No trusted mix certificates specified.");
-				}
-				/* load the update certificates */
-				String trustedUpdateCertificateFiles = a_properties.getProperty(
-					"trustedUpdateCertificateFiles");
-				if ( (trustedUpdateCertificateFiles != null) &&
-					(!trustedUpdateCertificateFiles.trim().equals("")))
-				{
-					StringTokenizer stTrustedUpdateCertificates = new StringTokenizer(
-						trustedUpdateCertificateFiles.trim(), ",");
-					while (stTrustedUpdateCertificates.hasMoreTokens())
-					{
-						String currentCertificateFile = stTrustedUpdateCertificates.nextToken().trim();
-						JAPCertificate currentCertificate = loadX509Certificate(currentCertificateFile);
-						if (currentCertificate != null)
-						{
-							SignatureVerifier.getInstance().getVerificationCertificateStore().
-								addCertificateWithoutVerification(currentCertificate,
-								JAPCertificate.CERTIFICATE_TYPE_UPDATE, true, false);
-							LogHolder.log(LogLevel.DEBUG, LogType.MISC,
-										  "Added the following file to the store of trusted debug certificates: " +
-										  currentCertificateFile);
-						}
-						else
-						{
-							LogHolder.log(LogLevel.ERR, LogType.MISC,
-										  "Error loading trusted update certificate: " +
-										  currentCertificateFile);
-						}
-					}
-				}
-				else
-				{
-					LogHolder.log(LogLevel.WARNING, LogType.MISC, "No trusted update certificates specified.");
-				}
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Loading certificates...");												
+				
+				loadTrustedCertificateFiles(a_properties, "trustedRootCertificateFiles", 
+						JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX, "mix root", true);
+				
+				loadTrustedCertificateFiles(a_properties, "trustedInfoServiceRootCertificateFiles", 
+						JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE, "infoservice root", true);
+				
+				loadTrustedCertificateFiles(a_properties, "trustedInfoServiceCertificateFiles", 
+						JAPCertificate.CERTIFICATE_TYPE_INFOSERVICE, "infoservice", false);
+				
+				loadTrustedCertificateFiles(a_properties, "trustedMixCertificateFiles", 
+						JAPCertificate.CERTIFICATE_TYPE_MIX, "mix", false);
 
+				loadTrustedCertificateFiles(a_properties, "trustedUpdateCertificateFiles", 
+						JAPCertificate.CERTIFICATE_TYPE_UPDATE, "update", true);
+				
+				loadTrustedCertificateFiles(a_properties, "trustedPICertificateFiles", 
+						JAPCertificate.CERTIFICATE_TYPE_PAYMENT, "PI", true);						
+				
+				
 				try
 				{
 					String b = a_properties.getProperty("checkInfoServiceSignatures").trim();
@@ -733,7 +594,7 @@ final public class Configuration
 					/** @todo don't know why, this leads to "NoSuchMethodError" (Z)V on some systems */
 					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
 				}
-				Database.getInstance(InfoServiceDBEntry.class).update(entry);
+				Database.getInstance(InfoServiceDBEntry.class).update(entry, false);
 			}
 
 			/* start the UpdateInformationHandler announce thread */
@@ -914,12 +775,24 @@ final public class Configuration
 					m_aPerfMeterConf[4] = Integer.valueOf(value);
 				}
 				
+				value = a_properties.getProperty("perf.maxWaitForSingleTest", "60000");
+				if(value != null)
+				{
+					m_aPerfMeterConf[5] = new Integer(Math.max(5*1000, Integer.parseInt(value)));
+				}
+				
 				m_strPerfAccountDirectory = 
 					new File(a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_DIRECTORY, 
 							 				 IS_PROP_VALUE_PERFACCOUNT_DIRECTORY));
 				m_strPerfAccountPassword = 
 					a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_PASSWORD, 
 		 				 					 IS_PROP_VALUE_PERFACCOUNT_PASSWORD);
+				
+				//value = a_properties.getProperty(PROP_MAX_TEST_TIME, "60000");				
+				//m_aPerfMeterConf[4] = Long.valueOf(value);
+				
+				
+					
 				
 				String strPerfBlackList = a_properties.getProperty(IS_PROP_NAME_BLACKLIST, "").trim();
 				String strPerfWhiteList = a_properties.getProperty(IS_PROP_NAME_WHITELIST, "").trim();
@@ -1164,6 +1037,42 @@ final public class Configuration
 		return m_holdForwarderList;
 	}
 
+	private void loadTrustedCertificateFiles(Properties a_properties, String a_strProperty, int a_certificateType,
+			String a_strName, boolean bWarnIfNotAvailable)
+	{
+		String trustedCertFiles = a_properties.getProperty(a_strProperty);
+		if ( (trustedCertFiles != null) && (!trustedCertFiles.trim().equals("")))
+		{
+			StringTokenizer stTrustedCertificates = new StringTokenizer(trustedCertFiles.
+				trim(), ",");
+			while (stTrustedCertificates.hasMoreTokens())
+			{
+				String currentCertificateFile = stTrustedCertificates.nextToken().trim();
+				JAPCertificate currentCertificate = loadX509Certificate(currentCertificateFile);
+				if (currentCertificate != null)
+				{
+					SignatureVerifier.getInstance().getVerificationCertificateStore().
+						addCertificateWithoutVerification(currentCertificate, a_certificateType, true, false);
+					LogHolder.log(LogLevel.DEBUG, LogType.MISC,
+								  "Added the following file to the store of trusted " + 
+								  a_strName + " certificates: " +
+								  currentCertificateFile);
+				}
+				else
+				{
+					LogHolder.log(LogLevel.ERR, LogType.MISC,
+								  "Error loading trusted " + a_strName + 
+								  " certificate: " + currentCertificateFile);
+				}
+			}
+		}
+		else if (bWarnIfNotAvailable)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, "No trusted " + a_strName + " certificates specified.");
+		}			
+	}
+	
+	
 	/**
 	 * Loads a PKCS12 certificate from a file.
 	 *

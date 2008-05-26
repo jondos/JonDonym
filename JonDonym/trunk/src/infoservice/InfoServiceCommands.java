@@ -157,16 +157,19 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			AbstractDatabaseEntry idEntry = Database.getInstance(InfoServiceIDEntry.class).getEntryById(
 				newEntry.getId());
 
-			if (newEntry.isVerified() && !newEntry.getId().equals(Configuration.getInstance().getID()) &&
-				newEntry.isNewerThan(idEntry))
+			if (newEntry.isVerified())
 			{
-				Database.getInstance(InfoServiceIDEntry.class).update(new InfoServiceIDEntry(newEntry));
-				Database.getInstance(InfoServiceDBEntry.class).update(newEntry);
+				if (newEntry.isNewerThan(idEntry) && 
+					!newEntry.getId().equals(Configuration.getInstance().getID()))
+				{
+					Database.getInstance(InfoServiceIDEntry.class).update(new InfoServiceIDEntry(newEntry));
+					Database.getInstance(InfoServiceDBEntry.class).update(newEntry);
+				}
 			}
-			else
+			else 
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.NET,
-							  "Signature check failed for infoservice entry! XML: " + (new String(a_postData)));
+							  "Security check failed for infoservice entry! XML: " + (new String(a_postData)));
 				httpResponse = new HttpResponseStructure(HttpResponseStructure.
 					HTTP_RETURN_INTERNAL_SERVER_ERROR);
 			}
@@ -888,17 +891,21 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			
 			if(Configuration.getInstance().isPerfEnabled() && InfoService.getPerfMeter() != null)
 			{
+				int totalUpdates = InfoService.getPerfMeter().getLastTotalUpdates();
 				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\"><tr><th colspan=\"2\">Performance Monitoring Enabled</th></tr>\n" + 
 				"<tr><td class=\"name\">Proxy host</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[0] + "</td></tr>" +
 				"<tr><td class=\"name\">Proxy port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
 				"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(((Integer)Configuration.getInstance().getPerformanceMeterConfig()[2]).intValue()) + "<td></tr>" +
 				"<tr><td class=\"name\">Major interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + " ms<td></tr>" +
 				"<tr><td class=\"name\">Requests per interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[4] + "<td></tr>" +
+				"<tr><td class=\"name\">Stop requests after</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[5] + " ms<td></tr>" +
 				"<tr><td class=\"name\">Account directory</td><td class=\"status\">" + Configuration.getInstance().getPerfAccountDirectory() + "<td></tr>" +
 				"<tr><td class=\"name\">Last successful update</td><td class=\"status\">" + (InfoService.getPerfMeter().getLastSuccessfulUpdate() == 0 ? "(never)" : new Date(InfoService.getPerfMeter().getLastSuccessfulUpdate()).toString()) + "</td></tr>" +
 				"<tr><td class=\"name\">Current time</td><td class=\"status\">" + new Date().toString() + "</td></tr>" +
 				"<tr><td class=\"name\">Next update attempt</td><td class=\"status\">" + (InfoService.getPerfMeter().getNextUpdate() == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().getNextUpdate()).toString()) + "</td></tr>" +
-				"<tr><td class=\"name\">Last run total updates</td><td class=\"status\">" + InfoService.getPerfMeter().getLastTotalUpdates() + "</td></tr>" +
+				"<tr><td class=\"name\">Last run total updates</td><td class=\"status\">" + totalUpdates + "</td></tr>" +
+				"<tr><td class=\"name\">Update runtime / average</td><td class=\"status\">" + InfoService.getPerfMeter().getLastUpdateRuntime() + " ms" + 
+				(totalUpdates > 1 ? " / " +(InfoService.getPerfMeter().getLastUpdateRuntime() / totalUpdates) + " ms" : "") + "</td></tr>" +
 				"<tr><td class=\"name\">Last Cascade updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
 				"</table><br />" +
 				"<table style=\"align: left\" border=\"0\" width=\"30%\">" +

@@ -74,14 +74,11 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 {
 
 	/**
-	 * @todo For most people, 15s are sufficient, but some cannot connect with this short
+	 * @todo For most people, 20s are sufficient, but some cannot connect with this short
 	 * timeout. Make this configurable.
 	 */
 	public static final int DEFAULT_LOGIN_TIMEOUT = 20000;
 	private static final int CONNECT_TIMEOUT = 8000;
-	private static final int CONNECTION_ERROR_WAIT_TIME = 5000; // time interval to report proxy errors
-	// 4 errors in 5 seconds should be enough to be sure there is really a connection error
-	private static final int CONNECTION_ERROR_WAIT_COUNT = 4;
 
 	private static final int FIRST_MIX = 0;
 	private static final String SYNCH_AI_LOGIN_MIXVERSION = "00.07.20";
