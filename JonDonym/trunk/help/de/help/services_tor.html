@@ -5,12 +5,25 @@
 <body>
 <!--#include virtual="/header.html"-->
 
-<H2>Dienste: Tor</H2>
-<i>Dieses Panel steht nur in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung. (Nur in der Entwicklerversion von JonDo sichtbar)</i>
-<P>
-Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i>, w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Dienste</i> und &ouml;ffnen anschlie&szlig;end den Tab <i>Tor</i>.
-Auf dieser Seite sehen Sie Informationen und Einstellungen die sich auf das Tor-Anonymisierungsnetzwerk beziehen.<BR>
-Wenn Sie den JonDo als Zugang zum Tor-Netzwerk nutzen wollen, m&uuml;ssen Sie ihn als Socks-Proxy (nicht als HTTP/HTTPS-Proxy) bei Ihrem Browser eintragen.
+<h2>TOR</h2>
+<p>
+Dieses Panel steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung allerdings nur in der Entwicklerversion von JonDo. Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i>, w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Dienste</i> und &ouml;ffnen anschlie&szlig;end den Tab <i>Tor</i>.
+</p>
+
+<h3>TOR versus JonDonym</h3>
+
+<p>
+Auf dieser Seite sehen Sie Informationen und Einstellungen die sich auf das <a href="http://tor.eff.org"> TOR-Anonymisierungsnetzwerk</a> beziehen.</a> TOR ist ein Anonymisierungsdienst, der die Technik des <b>Onion-Routings</b> umsetzt. Sie ist der <b>Mixtechnik</b>, die JonDonym zugrundeliegt, &auml;hnlich was die kryptographische Verarbeitung der Daten betrifft. Beide Techniken unterscheiden sich jedoch in der Art, wie die Daten zum Empf&auml;nger weitergeleitet werden. W&auml;hrend beim Onion-Routing die Route und damit die Sequenz der Zwischenstationen h&auml;ufig wechselt, ist diese bei der Mixtechnik stets fest. Dadurch wird beim Onion-Routing eine hohe Verteilung der Verkehrslasten auf eine Vielzahl von ONION-Routern beabsichtigt, wohingegen Mixdienste die gesamte Last wenigen Zwischenstatzionen, den sog. Mixen auferlegt, die zudem in einer festen Sequenz, der sog. Mixkaskade verschaltet sind. So besteht das TOR-Netzwerk aus einer Vielzahl von Onion-Routern, den sog. TOR-Nodes, wobei ein einzelner TOR-Node keine hohen Anforderungen bez&uuml;glich der bereitgestellten Ressourcen erf&uuml;llen muss, da die Verkehrslasten auf das gesamte Netz verteilt werden. Dadurch ergibt sich bei TOR eine Vielzahl m&ouml;glicher Routen, die die Daten der Nutzer zu Ihrem Ziel durchlaufen k&ouml;nnen. JonDonym, hingegen besitzt im Verh&auml;ltnis dazu nur wenige Mixkaskaden. &Uuml;ber diese verschickt eine Vielzahl von Nutzern Ihre Daten. Mixe ben&ouml;tigen von daher wesentlich mehr Ressourcen als TOR-Nodes und der Betrieb eines Mixes ist mit mehr Aufwand und Kosten verbunden. 
+</p>
+<p>
+Die Frage, welche der beiden Techniken &quot;besser&quot; ist, wird hei&szlig; diskutiert und hat bisher auch kein eindeutiges Ergebnis gebracht.
+Fest steht jedoch, dass Mixdienste die Nase vorn haben, wenn es um die Gesamtsicherheit der Organisation des Dienstes geht, denn ONION-Router-Dienste wie TOR sind sehr anf&auml;llig, wenn die Betreiber der TOR-Nodes selbst angreifen oder kompromittiert werden, obwohl beide Dienste diesem Fall Rechnung tragen. In beiden F&auml;llen gen&uuml;gt n&auml;mlich bereits ein vertrauensw&uuml;rdiger Mix, bzw. TOR-Node, um die Sicherheit zu gew&auml;hrleisten. Allerdings ist es bei einer &uuml;berschaubaren Anzahl von Mixbetreibern, leichter diese zu kontrollieren, an Vertr&auml;ge zu binden und zu sanktionieren, falls Vertragspflichten verletzt werden. Bei JonDonym ist dies auch organistorisch auf eine solche Weise geregelt. TOR hingegen bietet jedem Nutzer die Gelegenheit selbst eigene TOR-Nodes zu betreiben und das TOR-Netzwerk zu erweitern, ohne dass entsprechende Richtlinien oder Vertr&auml;ge erf&uuml;llt werden m&uuml;ssen. So kann ein TOR-Nutzer wesentlich schlechter als ein JonDonym-Nutzer &uuml;berschauen, ob er seine Daten, &uuml;ber vertrauensw&uuml;rdige Zwischenstationen versendet. Aus diesem Grund eignet sich TOR weniger zur kommerziellen Nutzung und kann auch weniger Garantien f&uuml;r Sicherheit und Performanz geben, als dies bei JonDonym der Fall ist.
+</p>
+
+<h3>Zugang zum Tor-Netzwerk mit JonDo</h3>
+<p>
+JonDo besitzt eine TOR-Unterst&uuml;tzung, die allerdings experimentell ist. Aus diesem Grund garantieren wir nicht, dass diese vollst&auml;ndig und fehlerfrei funktioniert. Wenn Sie den JonDo als Zugang zum Tor-Netzwerk nutzen wollen, m&uuml;ssen Sie ihn als Socks-Proxy (nicht als HTTP/HTTPS-Proxy) bei Ihrem Browser eintragen.
+</p>
 
 <UL>
     <LI><B>Aktivieren</B><BR>
