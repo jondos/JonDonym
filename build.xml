@@ -148,7 +148,7 @@
     destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
     	fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
     <include name="**/*.java"/>
-    </javac>	
+    </javac>
   </target>
   <target name="dist" depends="dist-pre-compile,compile,make-only-jap-jar" description="generate the distribution">  </target>
   <target name="make-only-jap-jar" depends="getcurrentjapdllversion">
@@ -277,7 +277,7 @@
 	<target name="infoservice-compile" depends="infoservice-init, init-libs"
 			description="compiles infoservices sources">
 		
-		<javac 	debug="true" debuglevel="lines,source"
+		<javac debug="true" debuglevel="lines,source"
 				srcdir="${src}" 
 				destdir="${build}" 
 				excludes="${infoservice-excludes}" 
@@ -298,6 +298,7 @@
 				<zipfileset src="${classpath_xmllib_file_name}"/>
 				<zipfileset src="${classpath_ftplib_file_name}"/>
 				<zipfileset src="${classpath_log4j_file_name}"/>
+				<zipfileset src="${classpath_jama_file_name}"/>		
 				<zipfileset src="${classpath_bouncy_file_name}"/>
 				<zipfileset src="${classpath_xmlrpc_file_name}"/>
 			
