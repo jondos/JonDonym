@@ -128,7 +128,7 @@ public class InfoService implements Observer
 			model.allowPaymentViaDirectConnection(true);
 			model.allowUpdateViaDirectConnection(true);
 			model.setAnonConnectionChecker(JAPController.getInstance().new AnonConnectionChecker());
-			model.setAutoReConnect(false);
+			model.setAutoReConnect(true);
 			model.setCascadeAutoSwitch(false);
 			
 			InfoService.ms_accountUpdater = new AccountUpdater();

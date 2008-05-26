@@ -159,6 +159,10 @@ public abstract class AbstractLog4jLog implements Log
 		{
 			level = LogLevel.INFO;
 		}
+		else if (m_Log.isEnabledFor(Level.WARN))
+		{
+			level = LogLevel.WARNING;
+		}
 		else if (m_Log.isEnabledFor(Level.ERROR))
 		{
 			level = LogLevel.ERR;
