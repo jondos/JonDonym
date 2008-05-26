@@ -6,7 +6,7 @@
   <property name="src" location="src"/>
   <property name="certificates" location="certificates"/>
   
-  <property name="excludesSrcJap" value="jpi/** infoservice/** misc/**"/>
+  <property name="excludesSrcJap" value="jpi/** infoservice/** misc/** anon/crypto/tinytls/test/**"/>
   <property name="infoservice-excludes" value="jpi/** infoservice/performance/** misc/**"/>
   <property name="build" location="build"/>
   <property name="build.libs" location="build/libs"/>
@@ -21,6 +21,8 @@
   <property name="classpath_xmllib_file_name" location="${build.libs}/xml.jar"/>
   <property name="classpath_ftplib_file_name" location="${build.libs}/ApacheFTPClient.jar"/>
   <property name="classpath_log4j_file_name" location="${build.libs}/log4j.jar"/>
+  <property name="classpath_mail_file_name" location="${build.libs}/mail.jar"/>
+  <property name="classpath_jama_file_name" location="${build.libs}/jama.jar"/>
   <property name="classpath_bouncy_file_name" location="${build.libs}/BouncyCastleLightForJAP.jar"/>
   <property name="classpath_xmlrpc_file_name" location="${build.libs}/apache-xml-rpc-1.1.jar"/>
   <property name="classpath_jaf_file_name" location="${build.libs}/activation.jar"/>
@@ -142,14 +144,11 @@
   </target>
   <target name="compile" depends="init" description="compile the source ">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac 
-    debug="true" debuglevel="lines,source"
-    sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
+    <javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
     destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
     	fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
     <include name="**/*.java"/>
-    </javac>
-  	
+    </javac>	
   </target>
   <target name="dist" depends="dist-pre-compile,compile,make-only-jap-jar" description="generate the distribution">  </target>
   <target name="make-only-jap-jar" depends="getcurrentjapdllversion">
