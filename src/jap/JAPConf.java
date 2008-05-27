@@ -200,8 +200,8 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 			m_moduleSystem.addComponent(rootNode, null, "ngAnonymitaet", null, null);
 		if (!m_bIsSimpleView)
 		{
-			m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfInfoService(), INFOSERVICE_TAB);
 			m_moduleSystem.addConfigurationModule(nodeAnon, m_confServices, ANON_SERVICES_TAB);
+			m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfInfoService(), INFOSERVICE_TAB);			
 			//m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfTrust(), ANON_TRUST_TAB);
 			m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfForwardingServer(),
 												  FORWARDING_SERVER_TAB);
