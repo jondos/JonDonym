@@ -5,29 +5,66 @@
 <body>
 <!--#include virtual="/header.html"-->
 
-<H2>Zertifikatsstellen</H2>
-<i>Dieses Panel steht nur in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.</i><P>
-Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i> und w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Zertifikatsstellen</i>.
-<P>Ein Zertifikat ist ein von einer Zertifizierungsinstanz (z.B. dem JonDo-Team) digital unterschriebener (digitaler) Beh&auml;lter f&uuml;r einen &ouml;ffentlichen Verschl&uuml;sselungsschl&uuml;ssel, der gegen&uuml;ber Dritten (z.B. den Nutzern) durch die Signatur best&auml;tigt, dass dieser Schl&uuml;ssel einer ganz bestimmten Person oder Organisation geh&ouml;rt. G&auml;be es diese Best&auml;tigung f&uuml;r die Zertifikate  nicht, so k&ouml;nnte sich z.B. jeder als JonDo-Team oder als vertrauensw&uuml;rdiger Mixbetreiber ausgeben und etwa Honeypot-Mixe betreiben, oder sich ganz einfach in die Kommunikation zwischen Nutzern und tats&auml;chlich vertrauensw&uuml;rdigen Mixen/Betreibern einschalten und s&auml;mtliche Daten mitlesen. Auch das Einspielen falscher Update-Nachrichten w&auml;re leicht m&ouml;glich. (<a href="certificates.html">Weitere Informationen zu Zertifikaten...</a>)
-<UL>
-    <LI><B>Ich will nur von folgenden Stellen zertifizierte Server verwenden:</B><BR>
-    Diese Liste enth&auml;lt alle Zertifizierungsstellen, denen Sie vertrauen. Wird ein Server nicht von einer Stelle, die in dieser Liste enthalten ist, zertifiziert, so wird JonDo keine Verbindung mit diesem Server aufbauen.
-    <P>
-    <LI><B>Importieren:</B><BR>
+<h2>Zertifikatsstellen</h2>
+<p>
+Dieses Panel steht nur in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung. Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i> und w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Zertifikatsstellen</i>.
+</p>
+
+<p>
+Um die Authentizit&auml;t und Integrit&auml;t digitaler Daten zu sichern, werden unf&auml;lschbare digitale Signaturen mithilfe von geheimen Signierschl&uuml;sseln erstellt. Die G&uuml;ltigkeit solcher Signaturen kann mit einem &ouml;ffentlich zug&auml;nglichen Pr&uuml;fschl&uuml;ssel sichergestellt werden, der genau zu diesem geheimen Signierschl&uuml;ssel passt, wie ein Schlo&szlig; zum entsprechenden Schl&uuml;ssel. Allerdings wird dazu ein rechtsg&uuml;ltiger Nachweis ben&ouml;tigt, dass ein Pr&uuml;fschl&uuml;ssel auch zu einer bestimmten Person oder Organisation geh&ouml;rt. 
+</p>
+<p>
+Zu diesem Zweck werden <b>Zertifikate</b> verwendet. Dies sind Datens&auml;tze, die die Identit&auml;t einer Person oder Organistation sowie deren Pr&uuml;fschl&uuml;ssel enthalten. Um eine Rechtsg&uuml;ltigkeit dieser Zuordnung von Schl&uuml;ssel und Identit&auml;t zu erhalten, wird das Zertifikat wiederum von einer autorisierten Zertifizierungsstelle (Certification Authority) signiert, deren Signatur allgemein &uuml;berpr&uuml;ft werden kann. <br>
+&rarr; <a href="certificates.html">Weitere Informationen zu Zertifikaten...</a>
+</p>
+<p>
+F&uuml;r die Nutzung von JonDonym spielen Zertifikate eine sehr entscheidende Rolle: So beweisen Mixe ihre Authentizit&auml;t gegen&uuml;ber dem JonDo mithilfe von Signaturen, deren G&uuml;ltigkeit vom JonDo wiederum nur durch g&uuml;ltige Zertifikate &uuml;berpr&uuml;ft werden kann.
+Ihr JonDo besitzt bereits alle notwendigen Zertifikate, um sicherzustellen, dass er sich nur mit Diensten von zertifizierten Anbietern verbindet. In diesem Einstellungsfenster haben Sie jedoch die M&ouml;glichkeit eigene Zertifkate hinzuzuf&uuml;gen und zu verwalten, falls Sie sich mit Kaskaden verbinden wollen, f&uuml;r die der JonDo noch keine Zertifikate besitzt.
+</p>
+<p>
+<b>VORSICHT:</b><br>
+Das Hinzuf&uuml;gen von neuen Zertifikaten ist ein sehr sensibler und sicherheitskritischer Bereich. &Uuml;bernehmen Sie Zertifikate von nicht vertrauensw&uuml;rdigen Zertifikatsstellen, besteht die Gefahr, dass Sie sich zu b&ouml;sartigen Diensten verbinden k&ouml;nnen und Ihnen somit Schaden entsteht. F&uuml;gen Sie also neue Zertifikate nur dann hinzu, wenn Sie sich absolut sicher sind, was Sie tun.
+</p>
+
+<h3>Zertifikatsstellen</h3>
+<ul>
+    <li>
+	<p>
+	<b>Ich will nur von folgenden Stellen zertifizierte Server verwenden:</b><br>
+    Diese Liste enth&auml;lt alle Zertifizierungsstellen, denen Sie vertrauen. Wird ein Server nicht von einer Stelle, die in dieser Liste enthalten ist, zertifiziert, so wird JonDo keine Verbindung zu diesem Server aufbauen.
+    </p>
+	</li>
+	
+    <li>
+	<p>
+	<b>Importieren:</b><br>
     Mit dieser Schaltfl&auml;che f&uuml;gen Sie Zertifizierungsstellen hinzu. Im erscheinenden Dateidialog muss das entsprechende Zertifikat ausgew&auml;hlt werden.
-    <P>
-    <LI><B>Entfernen:</B><BR>
+    </p>
+	</li>
+	
+    <li>
+	<p>
+	<b>Entfernen:</b><br>
     Hiermit l&ouml;schen Sie den markierten Eintrag aus der Liste.
-    <P>
-    <LI><B>Deaktivieren:</B><BR>
+    </p>
+	</li>
+	
+    <li>
+	<p>
+	<b>Deaktivieren:</b><br>
     Durch Klicken dieses Knopfes schalten Sie den markierten Eintrag vor&uuml;bergehend in den Status "nicht vertrauensw&uuml;rdig".
-    <P>
-    <LI><B>Details...</B><BR>
+    </p>
+	</li>
+	
+    <li>
+	<p>
+	<B>Details...</b><br>
     Durch Klicken dieses Knopfes k&ouml;nnen Sie das Zertifikat des gew&auml;hlten Eintrages ansehen.
-    <P>
-</UL>
+    </p>
+	</li>
+</ul>
     <H3>Informationen &uuml;ber Zertifikatsstelle:</H3>
-    Hier sehen Sie Informationen zur momentan markierten Zertifikatsstelle.
+    Hier sehen Sie entsprechende Informationen zur momentan markierten Zertifikatsstelle.
 
 <!--#include virtual="/footer.html"-->
 </body>

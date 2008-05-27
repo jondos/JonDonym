@@ -5,31 +5,59 @@
 <body>
 <!--#include virtual="/header.html"-->
 
-<H2>Forwarding-Server</H2>
-<i>Dieses Panel steht nur in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.</i><P>
-Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i> und w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Forwarding-Server</i>.<br>
-In diesem Fenster treffen Sie Einstellungen, wenn Sie wollen, dass Ihr JonDo als Forwarding-Server agiert. Durch diese Funktion k&ouml;nnen andere JonDo-Benutzer, die sich nicht direkt mit einem Anonymisierungsdienst verbinden k&ouml;nnen, Ihren JonDo als Zugangspunkt benutzen. Bitte beachten Sie jedoch, dass dadurch f&uuml;r Sie die Gefahr besteht, in den Verdacht einer Straftat zu geraten, die von einem JonDo-Benutzer begangen wurde, der Ihr System als Forwarder nutzt.
+<h2>Forwarding-Server</h2>
 
-<H3>Forwarding-Server Einstellungen</H3>
-<UL>
-    <LI><B>Portnummer:</B><BR>
-    Tragen Sie hier den Port ein, auf dem Ihr JonDo Forwarding-Verbindungen annimmt. Dieser Port muss in Ihrer Firewall f&uuml;r eingehende Verbindungen freigeschaltet sein.
-    <P>
-    <LI><B>Meine Internetverbindung:</B><BR>
+<p>
+Dieses Panel steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung. Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i> und w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Forwarding-Server</i>.
+</p>
+<p>
+Ein Forwarding-Server dient zur Umgehung von Zugangssperren zu JonDonym-Diensten. Durch Zensur oder andere restriktive Ma&szlig;nahmen ist es manchen JonDo-Nutzern nicht m&ouml;glich, eine direkte Verbindung zu JonDonym-Diensten herzustellen. Aus diesem Grund kann ein JonDo, dem dies m&ouml;glich ist, als Forwarding-Server agieren, &uuml;ber den andere JonDo-Nutzern sich mit Mixkaskaden verbinden k&ouml;nnen. Wenn Sie Ihren JonDo als Forwarding-Server freischalten m&ouml;chten, nehmen Sie in diesem Fenster die entsprechenden Einstellungen vor. 
+</p>
+<p>
+<b>Bitte beachten Sie</b>:<br> 
+Wenn Sie den Forwarding-Server aktivieren, kann jeder JonDonym-Nutzer Ihren JonDo als Zugangspunkt verwenden. Sie gehen auch das Risiko ein, dass Nutzer Ihren JonDo verwenden k&ouml;nnen, um strafbare Handlungen im Internet durchzuf&uuml;hren.
+</p>
+
+<h3>Forwarding-Server Einstellungen</h3>
+<ul>
+    <li>
+	<p>
+	<b>Portnummer:</b><br>
+    Tragen Sie hier den Port ein, auf dem Ihr JonDo Forwarding-Verbindungen annimmt. Dazu ist es erforderlich, dass Sie diesen Port in Ihrer Firewall f&uuml;r eingehende Verbindungen freischalten.
+	</p>
+	</li>
+    
+    <li>
+	<p>
+	<b>Meine Internetverbindung:</b><br>
     W&auml;hlen Sie hier die Art und Geschwindigkeit Ihrer Internetverbindung aus. Dadurch wird der Wert im Feld "Max. Bandbreite" automatisch gesetzt.
-    <P>
-    <LI><B>Anteil f&uuml;r Forwarding:</B><BR>
+    </p>
+	</li>
+	
+    <li>
+	<p>
+	<b>Anteil f&uuml;r Forwarding:</b><br>
     W&auml;hlen Sie in diesem Feld den Prozentsatz aus, der von Ihrer gesamten Upload-Bandbreite f&uuml;r das Forwarding zur Verf&uuml;gung stehen soll.
-    <P>
-    <LI><B>Max. benutzte Bandbreite:</B><BR>
+    </p>
+	</li>
+	
+    <li>
+	<p>
+	<b>Max. benutzte Bandbreite:</b><br>
     Hier wird Ihnen angezeigt, wie viel Bandbreite tats&auml;chlich gem&auml;&szlig; den obigen Einstellungen f&uuml;r das Forwarding genutzt wird.
-</UL>
+	</p>
+	</li>
+</ul>
 
-<H3>Erlaubte Mixkaskaden</H3>
+<h3>Erlaubte Mixkaskaden</h3>
+<p>
 In diesem Abschnitt haben Sie grunds&auml;tzlich zwei Einstellungsm&ouml;glichkeiten. Entweder, Sie erlauben allen Clients, die Ihren JonDo als Forwarder benutzen, den Zugriff auf alle Ihrem JonDo bekannten Kaskaden ("Erlaube Client-Zugriff auf alle verf&uuml;gbaren Mixkaskaden" ist markiert) oder Sie erlauben den Zugriff nur auf bestimmte Kaskaden. Auf welche Kaskaden zugegriffen werden darf, legen Sie mit den Schaltfl&auml;chen "Zu erlaubten Kaskaden hinzuf&uuml;gen" und "Von erlaubten Kaskaden entfernen" fest. Der Zugriff ist dann nur auf Kaskaden m&ouml;glich, die sich im Feld "Erlaubte Mixkaskaden" befinden.
+</p>
 
-<H3>InfoService Anmeldung</H3>
+<h3>InfoService Anmeldung</h3>
+<p>
 Damit JonDo-Benutzer, die einen Forwarding-Server ben&ouml;tigen, Ihren JonDo finden k&ouml;nnen, muss Ihr JonDo bei mindestens einem InfoService als Forwarder registriert sein. Sie k&ouml;nnen sich bei allen InfoServices oder nur bei bestimmten anmelden. Die Verfahrensweise ist analog zum Vorgehen bei den erlaubten Mixkaskaden.
+</p>
 <!--#include virtual="/footer.html"-->
 </body>
 </html>

@@ -5,70 +5,97 @@
 <body>
 <!--#include virtual="/header.html"-->
 
-<H2>Kommandozeilenargumente f&uuml;r JonDo</H2>
+<h2>Kommandozeilenargumente f&uuml;r JonDo</h2>
 
-JonDo kann auch &uuml;ber die Kommandozeile gestartet werden. Dabei k&ouml;nnen ihm verschiedene Befehle mitgegeben werden.
-<UL>
-  <B>Befehle (jeweils <em>lange Version, kurze Version</em>):</B>
-  <P>
-<LI><B> --help, -h</B>
-  <P>
-Zeigt die Hilfe an.
-<LI><B>--console</B>
-  <P>
-JonDo l&auml;uft nur in der Konsole, hat also keine Benutzeroberfl&auml;che.<br>
-Zum Beenden von JonDo tippen Sie "exit" und best&auml;tigen Sie mit <i>Enter</i>.<br>
-Zum Speichern der Konfiguration tippen Sie "save" und best&auml;tigen Sie mit <i>Enter</i>.
+JonDo kann auch &uuml;ber die Kommandozeile gestartet werden. F&uuml;hren Si dazu die Datei <code>JAP.jar</code> mit dem folgenden Befehl aus: 
+<p>
+<code>java -jar JAP.jar &lt;Kommandozeilenoptionen&gt;</code>.
+</p>
 
-<LI><B>--cascade {[host][:port]}</B>
+Dabei k&ouml;nnen Sie folgende Kommandozeilen-Optionen mitangegeben:
+<ul>
+  
+	<li>
+	<p><b> --help, -h</b></p>
 	<p>
-		Stelle eine Verbindung zur angegebenen Mixkaskade her.
-</p>  	
-</li>
+	Zeigt die Hilfe an.
+	</p>
+	</li>
+	
+	<li>
+	<p><b>--console</b></p>
+	<p>
+	JonDo l&auml;uft nur in der Konsole, hat also keine Benutzeroberfl&auml;che.<br>
+	Zum Beenden von JonDo tippen Sie "exit" und best&auml;tigen Sie mit <i>Enter</i>.<br>
+	Zum Speichern der Konfiguration tippen Sie "save" und best&auml;tigen Sie mit <i>Enter</i>.
+	</p>
+	</li>
+	
+	<li>
+	<p><b>--cascade {[host][:port]}</b></p>
+	<p>
+	Stelle eine Verbindung zur angegebenen Mixkaskade her.
+	</p>  	
+	</li>
 
-
-<LI><B>--minimized, -m </B>
-  <P>
-JonDo minimiert sein Fenster direkt beim Start.
-</li>
-<LI><B>--noSplash, -s</B>
-  <P> Unterdr&uuml;ckt das Wartefenster (Splash-Screen) beim Start von JonDo. Der Start wird dadurch etwas l&auml;nger erscheinen, da es einige Zeit dauert, bis das Hauptfenster von JonDo initialisiert ist. Der Spash-Screen ist  dazu da, diese Zeit zu &uuml;berbr&uuml;cken.
+	<li>
+	<p><b>--minimized, -m </b></p>
+	<p>
+	JonDo minimiert sein Fenster direkt beim Start.
+	</p>
+	</li>
+	
+	<li>
+	<p><b>--noSplash, -s</b></p>
+	<p>
+	Unterdr&uuml;ckt das Wartefenster (Splash-Screen) beim Start von JonDo. Der Start wird dadurch etwas l&auml;nger erscheinen, da es einige Zeit dauert, bis das Hauptfenster von JonDo initialisiert ist. Der Spash-Screen ist  dazu da, diese Zeit zu &uuml;berbr&uuml;cken.
+	</p>
+	</li>
   	
-<LI><B>--portable [Pfad_zum_Browser]</B>
+	<li>
+	<p><b>--portable [Pfad_zum_Browser]</b></p>
 	<p>
-		Teilt JonDo mit, dass es in einer portablen Umgebung l&auml;uft.
-		Wenn ein Pfad zu einem portablen Browser angegeben ist, kann er
-		direkt von JonDo aus gestartet werden. URLs in JonDo werden in diesem
-		Browser ge&ouml;ffnet statt mit dem Standardbrowser des Systems.
-</p>  	
-</li>
-  	
-<LI><B>--portable-browserprofile [Profil]</B>
-	<p>
- Pfad zum Profil des portablen Browsers, wenn er nicht automtisch erkannt wird.
-</p>  	
-</li>
- <LI><B>--portable-help-path [html]</B>
-     <p> Pfad zur externen HTML-Hilfe zur Verwendung im portablen Modus.</p>
- </li>
- <LI> <B>--portable-jre</B>
- <p> Sollte gesetzt werden, wenn JonDo mit einem portablen JRE l&auml;uft. Unterdr&uuml;ckt Updatenachrichten f&uuml;r Java. </p>
-</LI>
-<LI><B>--version, -v </B>
-  <P>
-Auf der Konsole werden Versionsinformationen zu JonDo und Java ausgegeben.
-<LI><B>--config {Filename}, -c {Filename} </B>
-  <P>
-JonDo wird diese Konfigurationsdatei verwenden.
-</UL>
-<b>Beispiel</b><P>
-Um JonDo minimiert zu starten, &ouml;ffnen Sie eine Eingabeaufforderung, wechseln Sie in das Verzeichnis von JonDo und geben Sie folgenden Befehl ein:
-<P><code>java -jar JAP.jar -minimized</code>
-<P>Sie k&ouml;nnen diese Argumente auch in Windows-Verkn&uuml;pfungen verwenden. Klicken Sie daf&uuml;r einfach mit der rechten Maustaste auf die JonDo-Verkn&uuml;pfung, w&auml;hlen Sie <em>Einstellungen</em> und editieren Sie die Verkn&uuml;pfung wie folgt: 
-<P>Ziel: &lt;Pfad zu JonDo&gt;\jap.exe<br>
-  Ausf&uuml;hren in: &lt;Pfad zu JAP.jar&gt;
-<p>Ersetzen Sie dabei &lt;Pfad zu JonDo&gt; durch den Pfad, in dem die JAP.jar und die japdll.dll liegen (typischerweise <code>C:\Programme\Jap</code>).</p>
-<P>
+	Teilt JonDo mit, dass es in einer portablen Umgebung l&auml;uft. Wenn ein Pfad zu einem portablen Browser angegeben ist, kann erdirekt von JonDo aus gestartet werden. URLs in JonDo werden in diesem Browser ge&ouml;ffnet statt mit dem Standardbrowser des Systems.
+	</p>  	
+	</li>
+
+	<li>
+	<p><b>--portable-help-path [html]</b></p>
+    <p> Pfad zur externen HTML-Hilfe zur Verwendung im portablen Modus.</p>
+	</li>
+
+	<li> 
+	<p><b>--portable-jre</b></p>
+	<p> Sollte gesetzt werden, wenn JonDo mit einem portablen JRE l&auml;uft. Unterdr&uuml;ckt Updatenachrichten f&uuml;r Java. </p>
+	</li>
+	
+	<li>
+	<p><b>--version, -v </b></p>
+	<p>Auf der Konsole werden Versionsinformationen zu JonDo und Java ausgegeben.</p>
+	</li>
+	
+	<li>
+	<p><b>--config {Filename}, -c {Filename} </b></p>
+	<p>JonDo wird diese Konfigurationsdatei verwenden.</p>
+	</li>
+</ul>
+<p>
+<b>Beispiel</b>:<br>
+Um JonDo im minimierten Fenster zu starten, &ouml;ffnen Sie eine Eingabeaufforderung, wechseln Sie in das Verzeichnis von JonDo und geben Sie folgenden Befehl ein:
+</p>
+<p>
+<code>java -jar JAP.jar -minimized</code>
+</p>
+<p>
+Sie k&ouml;nnen diese Argumente auch in Windows-Verkn&uuml;pfungen verwenden. Klicken Sie daf&uuml;r einfach mit der rechten Maustaste auf die JonDo-Verkn&uuml;pfung, w&auml;hlen Sie <em>Einstellungen</em> und editieren Sie die Verkn&uuml;pfung wie folgt: 
+</p>
+<p>
+Ziel: &lt;Pfad zu JonDo&gt;\jap.exe<br>
+Ausf&uuml;hren in: &lt;Pfad zu JAP.jar&gt;
+<p>
+Ersetzen Sie dabei &lt;Pfad zu JonDo&gt; durch den Pfad, in dem die JAP.jar und die japdll.dll liegen (typischerweise <code>C:\Programme\Jap</code>).
+</p>
+
   <!--#include virtual="/footer.html"-->
     
 </body>
