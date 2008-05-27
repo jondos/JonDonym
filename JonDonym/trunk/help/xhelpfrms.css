@@ -23,3 +23,5 @@ a:active {color:#FF0000;font-weight:bold;}
 a:hover {color:#FF0000;font-weight:bold;}
 td.name {border-bottom-style:solid;border-bottom-width:1pt;border-color:#006699;background:#eeeeff;}
 td.status {border-bottom-style:solid;border-bottom-width:1pt;border-color:#006699;}
+
+span.nowrap { white-space:nowrap;}
