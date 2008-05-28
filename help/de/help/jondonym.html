@@ -6,38 +6,22 @@
 <!--#include virtual="/header.html"-->
 
 
-<h2>JonDonym-Dienst</h2>
-<P>
-JonDonym, der Anonymit&auml;tsdienst, besteht aus mehreren einzelnen w&auml;hlbaren Mixkaskaden, wobei deren einzelne Mixe im Regelfall von jeweils voneinander unabh&auml;ngigen Organisationen betrieben werden. Diese Institutionen haben
-in einer <a href="http://anon.inf.tu-dresden.de/operators/help/operatorCommitment.html">Selbstverpflichtung</a> erkl&auml;rt, dass sie weder
-Log-Files &uuml;ber die transportierten Verbindungen speichern, noch mit
-den anderen Mix-Betreibern Daten austauschen, die dazu f&uuml;hren
-k&ouml;nnten, dass ein Benutzer von JonDo enttarnt wird.
-Die Mixbetreiber sind au&szlig;erdem <a href="certificates.html">zertifiziert</a>, so dass deren Identit&auml;t immer &uuml;berpr&uuml;fbar ist. 
-<P>
-Da jedoch keiner der zwischengeschalteten Stationen vollst&auml;ndig vertraut
-werden soll, werden alle gesendeten Daten mehrfach verschl&uuml;sselt (1
-mal pro Station). Die Verschl&uuml;sselung der Anfragen und die Entschl&uuml;sselung der
-Antworten erfolgt im JonDo. Der Nutzer muss nur noch seinen Browser so
-<A HREF="browser.html">konfigurieren</A>, dass alle WWW-Anfragen
-&uuml;ber den JonDo gesendet werden.
+<h2>JonDonym</h2>
+<p>
+Der Anonymit&auml;tsdienst JonDonym besteht aus mehreren einzelnen w&auml;hlbaren Mixkaskaden. Diese wiederum setzen sich aus mehreren Mixen zusammen, die im Regelfall von jeweils voneinander unabh&auml;ngigen Organisationen betrieben werden. Als Mixe werden die Zwischenstationen bezeichnet, die die Nutzerdaten anoynm zustellen. Die Betreiber dieser Mixe haben in einer <a href="http://anon.inf.tu-dresden.de/operators/help/operatorCommitment.html">Selbstverpflichtung</a> erkl&auml;rt, dass sie weder Verbindungsdaten speichern, noch mit den anderen Mix-Betreibern Daten austauschen, die dazu f&uuml;hren k&ouml;nnten, dass ein Benutzer von JonDo enttarnt wird. Die Mixbetreiber sind au&szlig;erdem <a href="certificates.html">zertifiziert</a>, so dass deren Identit&auml;t immer &uuml;berpr&uuml;fbar ist. 
+</p>
+<p>
+Um jedoch den maximalen Schutz der Privatssph&auml;r zu erreichen, wird davon ausgegangen, dass nicht allen Mixanbieter  uneingeschr&auml;nkt vertrauensw&uuml;rdig sind, auch wenn dies unwahrscheinlich ist. Wenn bereits einer der meist drei Anbieter den Mix ordnungsgem&auml;&szlig; und sicher betreibt, ist der vollst&auml;ndige Schutz dennoch gew&auml;hrleistet, auch wenn die anderen Anbieter dies nicht tun w&uuml;rden oder sogar selbst b&ouml;sartig w&auml;ren.
+</p>
 
-<P>
-Die Anonymisierung der Nutzer erfolgt dadurch, dass jede Anfrage
-mehrfach verschl&uuml;sselt &uuml;ber eine Folge von Zwischenstationen, die
-auf dem Mix-Konzept von David Chaum basieren, gesendet werden. Da sich in
-der endg&uuml;ltigen Version alle Nutzer gleich verhalten (gleich viele
-Daten pro Zeiteinheit &uuml;ber die gleiche Folge von Mixen senden), sind
-unter der Annahme, dass mindestens ein Mix nicht mit einem globalen
-Angreifer zusammenarbeitet, die Aktionen des einzelnen Teilnehmers nicht
-mehr erkennbar.
+<p>
+Die Anonymisierung des Datenverkehrs erfolgt dadurch, dass jede Anfrage des Nutzers mehrfach verschl&uuml;sselt &uuml;ber Mixkaskade gesendet werden. Jeder Mix in dieser Sequenz kann davon jeweils eine Entschl&uuml;sselungsoperation durchf&uuml;hren. So k&ouml;nnen die Datenpakete sukzessivehergestellt werden, wenn sie die Kaskade durchlaufen. Durch die Mehrfache Verschl&uuml;sselung jedoch wird sichergestellt, dass jeder Mix nur einen Teil des Wiederherstellungsprozess &uuml;bernehmen und den Nutzer nicht allein enttarnen kann. 
+</p>
+<p>
+Bei JonDonym haben Sie die Wahl zwischen <b>kostenlosen Diensten</b> und den <b>Premiumdiensten</b>. Bei den kostenlosen Dienste ist Ihre Sicherheit allerdings etwas geringer, da Sie nur von maximal zwei unabh&auml;ngigen Anbietern betrieben werden. Dar&uuml;berhinaus bieten Sie keine Garantien im Hinblick auf Verf&uuml;gbarkeit, &Uuml;bertragungsgeschwindigkeit und Antwortverz&ouml;gerung.
+</p>
 
-<P>
-Unser Ziel ist es, einen Dienst zur Verf&uuml;gung zu stellen, welcher
-diesen Anforderungen wirklich gen&uuml;gt.
-
-<P>
-<B>Achtung!</B> Die momentan vorliegende Version erreicht diese Sicherheit
+<!-- Die momentan vorliegende Version erreicht diese Sicherheit
 noch nicht vollst&auml;ndig, da sich die Software noch in der Entwicklung
 befindet! Diese Version garantiert jedoch bereits eine wesentlich
 h&ouml;here Sicherheit  als beispielsweise Systeme, die einfache
@@ -75,7 +59,7 @@ Ihnen dankbar, wenn Sie den Anonymisierungsdienst dauerhaft nutzen
 w&uuml;rden und uns Ihre Probleme, Meinungen und
 Verbesserungsvorschl&auml;ge mitteilen w&uuml;rden.
 
-<P>
+<P>-->
 
 <h3>Premiumdienste</h3>
 
