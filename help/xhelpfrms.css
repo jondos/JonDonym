@@ -17,11 +17,29 @@ body {background-color:white;margin:10;font-family:geneva,arial,helvetica,sans-s
 blockquote {font-family:geneva,arial,helvetica,sans-serif;}
 
 hr {font-weight:bold;color:#006699;}
-a:link {color:#0000FF;font-weight:bold;}
-a:visited {color:#C0C0C0;font-weight:bold;}
-a:active {color:#FF0000;font-weight:bold;}
-a:hover {color:#FF0000;font-weight:bold;}
+
+/*a {color:#0000C0;font-weight:bold;text-decoration:none;}*/
+a:link {color:#0000C0;font-weight:bold;text-decoration:none;}
+a:visited {color:#0000C0;font-weight:bold;text-decoration:none;}
+a:active {color:#000000;font-weight:bold;text-decoration:none;}
+a:hover {color:#FFFFFF;font-weight:bold;background-color:#0000C0;text-decoration:none;}
+
+/*.nextlink {position:absolute;right:1%;}
+.midlink {position:relative;left:25%;}
+.prevlink {position:absolute;left:1%;}*/
+
+.nextlink {padding-left:10px;}
+.midlink {padding-left:10px;padding-right:10px;}
+.prevlink {padding-right:10px;}
+
+.topdown_navi {text-align:center;}
+
 td.name {border-bottom-style:solid;border-bottom-width:1pt;border-color:#006699;background:#eeeeff;}
 td.status {border-bottom-style:solid;border-bottom-width:1pt;border-color:#006699;}
 
 span.nowrap { white-space:nowrap;}
+
+.bitem {font-weight:bold;font-size:16pt;color:#800000;}
+.contentsbox {font-size:14pt;padding-top:7px;padding-bottom:7px;}
+
+.navipar {text-align:center;}

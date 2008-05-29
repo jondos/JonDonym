@@ -5,6 +5,13 @@
 <body>
 <!--#include virtual="/header.html"-->
 
+<p class="navipar">
+<span class="prevlink"><a href="services_anon.html">&larr; AN.ON/JonDonym</a></span> 
+<span class="midlink"><a name="doctop" href="index.html#mi_toc">Inhalt </a><a href="index.html#mi_config"> &rarr; Konfiguration </a><a href="anon.html"> &rarr; Anonymit&auml;t </a><a href="services.html">&rarr; Dienste</a></span>
+<span class="nextlink"><a href="services_mixminion.html">Mixminion &rarr;</a></span> 
+</p>
+<hr>
+
 <h2>TOR</h2>
 <p>
 Dieses Panel steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung allerdings nur in der Entwicklerversion von JonDo. Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i>, w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Dienste</i> und &ouml;ffnen anschlie&szlig;end den Tab <i>Tor</i>.
@@ -30,35 +37,69 @@ Die Frage, welche der beiden Techniken &quot;besser&quot; ist, wird hei&szlig; d
 JonDo besitzt eine TOR-Unterst&uuml;tzung, die allerdings experimentell ist. Aus diesem Grund garantieren wir nicht, dass diese vollst&auml;ndig und fehlerfrei funktioniert. Wenn Sie den JonDo als Zugang zum Tor-Netzwerk nutzen wollen, m&uuml;ssen Sie ihn als Socks-Proxy (nicht als HTTP/HTTPS-Proxy) bei Ihrem Browser eintragen.
 </p>
 
-<UL>
-    <LI><B>Aktivieren</B><BR>
+<ul>
+    <li>
+	<p>
+	<b>Aktivieren</b><br>
     Der Zugriff auf das Tor-Netzwerk &uuml;ber JonDo ist noch experimentell. Wenn Sie diese Option deaktivieren, verringern Sie den Speicherverbrauch von JonDo und verhindern eine ungewollte Nutzung von Tor.
-    <P>
-    <LI><B>Verf&uuml;gbare Tor Knoten:</B><BR>
+    </p>
+    </li>
+	
+	<li>
+	<p>
+	<b>Verf&uuml;gbare Tor Knoten:</b><br>
     In diesem Feld werden Ihnen Rechner angezeigt, die eine Verbindung ins Tor-Netzwerk zur Verf&uuml;gung stellen.
-    <P>
-    <LI><B>Neu laden:</B><BR>
+    </p>
+    </li>
+	
+	<li>
+	<p>
+	<b>Neu laden:</b><br>
     Mit diesem Knopf wird die Liste der verf&uuml;gbaren Knoten aktualisiert.
-    <P>
-    <LI><B>Einstellungen f&uuml;r die anonymen Routen:</B><BR>
-    <P>
-    <UL>
-        <LI><B>Minimale Knoten pro Verbindung:</B><BR>
+    </p>
+	</li>
+    <li>
+	<p>
+	<b>Einstellungen f&uuml;r die anonymen Routen:</b>
+    </p>
+    <ul> 
+		<li>
+		<p>
+		<B>Minimale Knoten pro Verbindung:</B><BR>
         Hier stellen Sie ein, &uuml;ber wie viele Tor-Knoten eine Verbindung mindestens geleitet werden soll, bevor Sie an ihr eigentliches Ziel geschickt wird. Je mehr Knoten genutzt werden, desto zuverl&auml;ssiger ist die Anonymisierung der Verbindung.
-        <P>
-        <LI><B>Maximale Knoten pro Verbindung:</B><BR>
+        </p>
+        </li>
+		
+		<li>
+		<p>
+		<b>Maximale Knoten pro Verbindung:</b><br>
         Mit diesem Schieberegler stellen Sie die maximale Anzahl von Tor-Knoten f&uuml;r eine Verbindung ein. Je gr&ouml;&szlig;er diese Zahl ist, desto langsamer ist die Verbindung.
-        <P>
-        <LI><B>Wechsel der Route alle x Verbindungen:</B><BR>
+        </p>
+        </li>
+		
+		<li>
+		<p>
+		<b>Wechsel der Route alle x Verbindungen:</b><br>
         Hier legen Sie fest, wie oft eine neue Route aufgebaut werden soll. Immer, wenn so viele Verbindungen erstellt wurden, wie die hier eingestellte Zahl, dann wird die alte Route abgebaut und eine neue Route durch das Tor-Netzwerk erzeugt.
-        <P>
-        <LI><B>Anonyme Route im Voraus erstellen:</B><BR>
+        </p>
+        </li>
+		
+		<li>
+		<p>
+		<b>Anonyme Route im Voraus erstellen:</b><br>
         Wenn dieses Feld markiert ist, erstellt der JonDo gleich nach dem Start eine Route durch das Tor-Netzwerk. Ist das Feld nicht markiert, wird erst eine Route erstellt, wenn ein Verbindungswunsch vorliegt.
-    </UL>
-</UL>
+		</p>
+		</li>
+    </ul>
+	</li>
+</ul>
 
-
-
+<hr>
+<p class="navipar">
+<span class="prevlink"><a href="services_anon.html">&larr; AN.ON/JonDonym</a></span> 
+<span class="midlink"><a name="docbottom" href="index.html#mi_toc">Inhalt </a><a href="index.html#mi_config"> &rarr; Konfiguration </a><a href="anon.html"> &rarr; Anonymit&auml;t </a><a href="services.html">&rarr; Dienste</a></span>
+<span class="nextlink"><a href="services_mixminion.html">Mixminion &rarr;</a></span> 
+</p>
 <!--#include virtual="/footer.html"-->
 </body>
 </html>
