@@ -12,22 +12,19 @@ ul {font-family:geneva,arial,helvetica,sans-serif;}
 tr {font-family:geneva,arial,helvetica,sans-serif;}
 td {font-family:geneva,arial,helvetica,sans-serif;}
 th {color:white;background:#006699;font-weight:bold;text-align:left;font-family:geneva,arial,helvetica,sans-serif;}
-body {background-color:white;margin:10;font-family:geneva,arial,helvetica,sans-serif;}
+body {background-color:white;margin:10px;font-family:geneva,arial,helvetica,sans-serif;}
 
 blockquote {font-family:geneva,arial,helvetica,sans-serif;}
 
 hr {font-weight:bold;color:#006699;}
 
-/*a {color:#0000C0;font-weight:bold;text-decoration:none;}*/
 img {border:none;}
+
 a:link {color:#0000C0;font-weight:bold;text-decoration:none;}
 a:visited {color:#0000C0;font-weight:bold;text-decoration:none;}
 a:active {color:#000000;font-weight:bold;text-decoration:none;}
 a:hover {color:#FFFFFF;font-weight:bold;background-color:#0000C0;text-decoration:none;}
 
-/*.nextlink {position:absolute;right:1%;}
-.midlink {position:relative;left:25%;}
-.prevlink {position:absolute;left:1%;}*/
 
 .nextlink {padding-left:10px;}
 .midlink {padding-left:10px;padding-right:10px;}
