@@ -19,6 +19,7 @@ blockquote {font-family:geneva,arial,helvetica,sans-serif;}
 hr {font-weight:bold;color:#006699;}
 
 /*a {color:#0000C0;font-weight:bold;text-decoration:none;}*/
+img {border:none;}
 a:link {color:#0000C0;font-weight:bold;text-decoration:none;}
 a:visited {color:#0000C0;font-weight:bold;text-decoration:none;}
 a:active {color:#000000;font-weight:bold;text-decoration:none;}
