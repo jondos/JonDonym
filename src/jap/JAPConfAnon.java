@@ -2601,49 +2601,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public String getLocation(MixCascade a_cascade, String a_mixId)
 		{
 			ServiceLocation location = getServiceLocation(a_cascade, a_mixId);
-			String strLocation = "";
-
-			if (location != null)
+			if(location != null)
 			{
-				if (location.getCity() != null && location.getCity().trim().length() > 0)
-				{
-					strLocation = location.getCity().trim();
-				}
-
-				if (location.getState() != null && location.getState().trim().length() > 0 &&
-					!strLocation.equals(location.getState().trim()))
-				{
-					if (strLocation.length() > 0)
-					{
-						strLocation += ", ";
-					}
-					strLocation += location.getState().trim();
-				}
-
-				if (location.getCountry() != null && location.getCountry().trim().length() > 0)
-				{
-					if (strLocation.length() > 0)
-					{
-						strLocation += ", ";
-					}
-
-					try
-					{
-						strLocation += new CountryMapper(
-							location.getCountry(), JAPMessages.getLocale()).toString();
-					}
-					catch (IllegalArgumentException a_e)
-					{
-						strLocation += location.getCountry().trim();
-					}
-				}
+				return location.getDisplayString();
 			}
-
-			if (strLocation.trim().length() == 0)
+			else
 			{
 				return "N/A";
 			}
-			return strLocation;
 		}
 
 		/**

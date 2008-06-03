@@ -102,6 +102,7 @@ import gui.JAPDll;
 import gui.JAPHelp;
 import gui.JAPMessages;
 import gui.JAPProgressBar;
+import gui.MixDetailsDialog;
 import gui.PopupMenu;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
@@ -232,6 +233,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JLabel m_labelAnonymityUser, m_labelAnonymityUserLabel, m_labelMixCountries, m_labelOperatorCountries;
 	
 	private JLabel m_labelMixFlags[], m_labelOperatorFlags[];
+	private MixMouseAdapter m_adapterMix[];
 	
 	private JLabel m_labelOwnTraffic, m_labelOwnTrafficSmall;
 	private JLabel m_labelOwnActivity, m_labelForwarderActivity;
@@ -806,6 +808,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 		m_labelMixFlags = new JLabel[3];
 		m_labelOperatorFlags = new JLabel[3];
+		m_adapterMix = new MixMouseAdapter[3];
 		c1.gridwidth = 1;
 		c1.insets = new Insets(5, 2, 0, 5);
 		for(int i = 0; i < 3; i++)
@@ -815,6 +818,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_labelMixFlags[i] = new JLabel("");
 			c1.gridy = 2;
 			p.add(m_labelMixFlags[i], c1);
+			
+			m_labelMixFlags[i].addMouseListener(m_adapterMix[i] = 
+				new MixMouseAdapter(null));			
 			
 			c1.gridy = 3;
 			m_labelOperatorFlags[i] = new JLabel("");
@@ -2847,6 +2853,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					CountryMapper country = new CountryMapper(mixCountry, JAPMessages.getLocale());
 					m_labelMixFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + mixCountry + ".png"));
 					m_labelMixFlags[i].setToolTipText(country.toString());
+					m_adapterMix[i].setMixInfo(mixInfo);
 				}
 				else
 				{
@@ -3342,6 +3349,28 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		public boolean hasMoved()
 		{
 			return m_bMoved;
+		}
+	}
+	
+	private final class MixMouseAdapter extends MouseAdapter
+	{
+		private MixInfo m_mixInfo;
+		
+		public MixMouseAdapter(MixInfo a_mixInfo)
+		{
+			m_mixInfo = a_mixInfo;
+		}
+		
+		public void mouseClicked(MouseEvent a_event)
+		{
+			MixDetailsDialog dialog = new MixDetailsDialog(JAPNewView.this, m_mixInfo);
+			dialog.pack();
+			dialog.setVisible(true);
+		}
+		
+		public void setMixInfo(MixInfo a_mixInfo)
+		{
+			m_mixInfo = a_mixInfo;
 		}
 	}
 }
