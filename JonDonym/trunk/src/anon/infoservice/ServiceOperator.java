@@ -238,7 +238,19 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	{
 		return m_strUrl;
 	}
-
+	
+	public String getCountryCode()
+	{
+		if(getCertificate() != null && getCertificate().getSubject() != null)
+		{
+			return getCertificate().getSubject().getOrganisation();
+		}
+		else
+		{
+			return "";
+		}
+	}
+	
 	public boolean equals(Object a_obj)
 	{
 		if(a_obj == null || m_certificate == null) return false;
