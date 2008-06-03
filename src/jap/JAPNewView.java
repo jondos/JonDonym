@@ -86,6 +86,7 @@ import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.JavaVersionDBEntry;
 import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixInfo;
 import anon.infoservice.NewCascadeIDEntry;
 import anon.infoservice.StatusInfo;
 import anon.pay.IMessageListener;
@@ -226,9 +227,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JAPMixCascadeComboBox m_comboAnonServices;
 	private JLabel m_labelAnonService, m_labelAnonymity, m_labelAnonymitySmall, m_labelAnonymityOnOff;
 	private JLabel m_labelAnonMeter, m_labelAnonymityLow, m_labelAnonymityHigh;
-	private JAPProgressBar m_progressAnonTraffic;
-	private JLabel m_labelAnonymityUser, m_labelAnonymityUserLabel, m_labelAnonymityTrafficLabel;
 
+	private JLabel m_labelAnonymityUser, m_labelAnonymityUserLabel, m_labelMixCountries, m_labelOperatorCountries;
+	
+	private JLabel m_labelMixFlags[], m_labelOperatorFlags[];
+	
 	private JLabel m_labelOwnTraffic, m_labelOwnTrafficSmall;
 	private JLabel m_labelOwnActivity, m_labelForwarderActivity;
 	private JLabel m_labelOwnActivitySmall, m_labelForwarderActivitySmall;
@@ -775,29 +778,48 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_labelAnonymity = new JLabel(JAPMessages.getString("ngAnonymitaet"));
 		c1.insets = new Insets(0, 5, 0, 0);
 		p.add(m_labelAnonymity, c1);
+		
 		m_labelAnonymityUserLabel = new JLabel(JAPMessages.getString("ngNrOfUsers") + ":");
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
-		c1.insets = new Insets(10, 15, 0, 10);
+		c1.insets = new Insets(5, 15, 0, 10);
 		p.add(m_labelAnonymityUserLabel, c1);
-		m_labelAnonymityTrafficLabel = new JLabel(JAPMessages.getString("ngAnonymityTraffic"));
+		
+		m_labelMixCountries = new JLabel(JAPMessages.getString("ngMixCountries"));
 		c1.gridy = 2;
-		p.add(m_labelAnonymityTrafficLabel, c1);
-		m_labelAnonymityUser = new JLabel("", SwingConstants.CENTER);
-		c1.insets = new Insets(10, 0, 0, 0);
-		c1.anchor = GridBagConstraints.CENTER;
-		c1.weightx = 1;
+		p.add(m_labelMixCountries, c1);
+		
+		m_labelOperatorCountries = new JLabel(JAPMessages.getString("ngOperatorCountries"));
+		c1.gridy = 3;
+		p.add(m_labelOperatorCountries, c1);
+		
+		m_labelAnonymityUser = new JLabel("", SwingConstants.LEFT);
+		c1.insets = new Insets(0, 0, 0, 0);
+		c1.anchor = GridBagConstraints.WEST;
+		c1.weightx = 0;
 		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.gridy = 1;
 		c1.gridx = 1;
+		c1.gridwidth = 3;
 		p.add(m_labelAnonymityUser, c1);
-		m_progressAnonTraffic = new JAPProgressBar();
-		m_progressAnonTraffic.setMinimum(0);
-		m_progressAnonTraffic.setMaximum(5);
-		m_progressAnonTraffic.setBorderPainted(false);
-		c1.gridy = 2;
-		p.add(m_progressAnonTraffic, c1);
 
+		m_labelMixFlags = new JLabel[3];
+		m_labelOperatorFlags = new JLabel[3];
+		c1.gridwidth = 1;
+		c1.insets = new Insets(5, 2, 0, 5);
+		for(int i = 0; i < 3; i++)
+		{
+			c1.gridx = i + 1;
+			
+			m_labelMixFlags[i] = new JLabel("");
+			c1.gridy = 2;
+			p.add(m_labelMixFlags[i], c1);
+			
+			c1.gridy = 3;
+			m_labelOperatorFlags[i] = new JLabel("");
+			p.add(m_labelOperatorFlags[i], c1);
+		}
+		
 		m_labelAnonMeter = new JLabel(getMeterImage(3));
 		m_labelAnonMeter.setToolTipText(JAPMessages.getString(MSG_ANONYMETER_TOOL_TIP));
 		m_labelAnonMeter.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -809,11 +831,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				JAPHelp.getInstance().setVisible(true);
 			}
 		});
-		c1.gridx = 2;
+		c1.gridx = 4;
 		c1.gridy = 0;
-		c1.gridheight = 3;
-		c1.anchor = GridBagConstraints.WEST;
-		c1.weightx = 0;
+		c1.gridheight = 4;
+		c1.anchor = GridBagConstraints.EAST;
+		c1.weightx = 1;
 		c1.fill = GridBagConstraints.NONE;
 		c1.insets = new Insets(0, 10, 0, 10);
 		p.add(m_labelAnonMeter, c1);
@@ -841,7 +863,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c2.gridy = 2;
 		p2.add(m_rbAnonOff, c2);
 
-		c1.gridx = 3;
+		c1.gridx = 5;
+		c1.weightx = 0;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(0, 10, 0, 0);
 		p.add(p2, c1);
@@ -2778,7 +2801,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						m_labelAnonymityUser.setText(strTemp);
 					}
 				}
-				int t = currentStatus.getTrafficSituation();
+				/*int t = currentStatus.getTrafficSituation();
 				if (t > -1)
 				{
 					//map 0..100 --> 0..5
@@ -2788,22 +2811,60 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					//41..60 --> 3
 					//61..80 --> 4
 					//81..100 --> 5
-					m_progressAnonTraffic.setValue( (t + 19) / 20);
+					//m_progressAnonTraffic.setValue( (t + 19) / 20);
 				}
 				else
 				{
 					// no value from InfoService
-					m_progressAnonTraffic.setValue(0);
+					// TODO: labelFlags
+					//m_progressAnonTraffic.setValue(0);
 
-				}
+				}*/
 			}
 			else
 			{
 				/* we are not in anonymity mode */
-				m_progressAnonTraffic.setValue(0);
+				//m_progressAnonTraffic.setValue(0);
 				m_labelAnonymityUser.setText("");
 				m_progressAnonLevel.setValue(0);
 			}
+			
+			int numMixes = currentMixCascade.getNumberOfMixes();
+			
+			for(int i = 0; i < numMixes; i++)
+			{
+				MixInfo mixInfo = currentMixCascade.getMixInfo(i);
+				
+				if(mixInfo != null && mixInfo.getCertificate() != null && 
+						mixInfo.getCertificate().getSubject() != null) 
+				{
+					String mixCountry = mixInfo.getCertificate().getSubject().getCountryCode();
+					m_labelMixFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + mixCountry + ".png"));
+				}
+				else
+				{
+					m_labelMixFlags[i].setIcon(null);
+				}
+				
+				if(mixInfo != null && mixInfo.getOperatorCertificate() != null && 
+						mixInfo.getOperatorCertificate().getSubject() != null) 
+				{
+					String operatorCountry = mixInfo.getOperatorCertificate().getSubject().getCountryCode();
+					m_labelOperatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + operatorCountry + ".png"));
+				}
+				else
+				{
+					m_labelOperatorFlags[i].setIcon(null);
+				}
+			}
+			
+			// clear the unused labels
+			for(int i = numMixes; i < 3; i++)
+			{
+				m_labelMixFlags[i].setIcon(null);
+				m_labelOperatorFlags[i].setIcon(null);
+			}
+						
 			if (m_Controller.isAnonConnected())
 			{
 				JAPDll.setSystrayTooltip("JAP (connected)\n" + currentMixCascade.getName());
