@@ -24,6 +24,7 @@ public class MixDetailsDialog extends JAPDialog
 		GridBagConstraints c = new GridBagConstraints();
 		JPanel p = (JPanel) getContentPane();
 		p.setLayout(new GridBagLayout());
+		JLabel lbl;
 
 		if(m_mixInfo == null)
 		{
@@ -38,11 +39,23 @@ public class MixDetailsDialog extends JAPDialog
 			return;
 		}
 		
-		JLabel lbl = new JLabel(JAPMessages.getString("mixOperator"));
-		c.gridx = 0;
+		lbl = new JLabel(JAPMessages.getString("mixLocation") + ":");
 		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
+		c.gridx = 0;
 		c.insets = new Insets(15, 15, 10, 15);
+		p.add(lbl, c);
+		
+		lbl = new JLabel(loc.getDisplayString());
+		c.gridy = 0;
+		c.gridx = 1;
+		lbl.setIcon(GUIUtils.loadImageIcon("flags/" + loc.getCountry() + ".png"));
+		p.add(lbl, c);
+		
+		lbl = new JLabel(JAPMessages.getString("mixOperator"));
+		c.gridx = 0;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 15, 15, 15);
 		p.add(lbl, c);
 		
 		lbl = new JLabel(op.getOrganization());
@@ -51,18 +64,6 @@ public class MixDetailsDialog extends JAPDialog
 			lbl.setIcon(GUIUtils.loadImageIcon("flags/" + op.getCertificate().getSubject().getCountryCode() + ".png"));
 		}
 		c.gridx = 1;
-		p.add(lbl, c);
-		
-		lbl = new JLabel(JAPMessages.getString("mixLocation"));
-		c.gridy = 1;
-		c.gridx = 0;
-		c.insets = new Insets(0, 15, 15, 15);
-		p.add(lbl, c);
-		
-		lbl = new JLabel(loc.getDisplayString());
-		c.gridy = 1;
-		c.gridx = 1;
-		lbl.setIcon(GUIUtils.loadImageIcon("flags/" + loc.getCountry() + ".png"));
 		p.add(lbl, c);
 		
 		this.pack();
