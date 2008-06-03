@@ -95,6 +95,7 @@ import anon.pay.PayMessage;
 import anon.proxy.IProxyListener;
 import anon.util.JobQueue;
 import anon.util.Util;
+import gui.CountryMapper;
 import gui.FlippingPanel;
 import gui.GUIUtils;
 import gui.JAPDll;
@@ -2830,6 +2831,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			
 			int numMixes = currentMixCascade.getNumberOfMixes();
+			if(currentMixCascade.getNumberOfOperators() <= 1)
+			{
+				numMixes = 1;
+			}
 			
 			for(int i = 0; i < numMixes; i++)
 			{
@@ -2839,7 +2844,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						mixInfo.getCertificate().getSubject() != null) 
 				{
 					String mixCountry = mixInfo.getCertificate().getSubject().getCountryCode();
+					CountryMapper country = new CountryMapper(mixCountry, JAPMessages.getLocale());
 					m_labelMixFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + mixCountry + ".png"));
+					m_labelMixFlags[i].setToolTipText(country.toString());
 				}
 				else
 				{
@@ -2850,7 +2857,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						mixInfo.getOperatorCertificate().getSubject() != null) 
 				{
 					String operatorCountry = mixInfo.getOperatorCertificate().getSubject().getCountryCode();
+					CountryMapper country = new CountryMapper(operatorCountry, JAPMessages.getLocale());
 					m_labelOperatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + operatorCountry + ".png"));
+					m_labelOperatorFlags[i].setToolTipText(country.toString());
 				}
 				else
 				{
