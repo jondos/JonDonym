@@ -58,10 +58,9 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 
-/** This class provides a dialog showing a map section loaded from MapQuest(R)
+/** This class provides a dialog showing a map section loaded from Yahoo(R)
  * according to the specified latitude and longitude.
  */
-
 public class MapBox extends JAPDialog implements ChangeListener
 {
 	public static final String MSG_ERROR_WHILE_LOADING = MapBox.class.getName() + "_errorLoading";
@@ -74,24 +73,24 @@ public class MapBox extends JAPDialog implements ChangeListener
 	private static final String MSG_TITLE = MapBox.class.getName() + "_title";
 	private static final String MSG_ZOOM = MapBox.class.getName() + "_zoom";
 
-        /** The URL pointing to the real map image */
+	/** The URL pointing to the real map image */
 	private String m_urlString;
-        /** The label containing the map in form of an <CODE>ImageIcon</CODE> */
+	/** The label containing the map in form of an <CODE>ImageIcon</CODE> */
 	private JLabel map;
 	private JSlider s;
 	private JButton m_btnClose;
-        /** The longitude of the center of the map */
+	/** The longitude of the center of the map */
 	private String m_longitude;
-        /** The latitude of the center of the map */
+	/** The latitude of the center of the map */
 	private String m_latitude;
 
-        /** Constructs a new <CODE>MapBox</CODE> instance.
-         * @param parent The parent of the dialog window
-         * @param lat The latitude of the point to show on the map
-         * @param lon The longitude of the point to show on the map
-         * @param level The zoom level to be set (0 - 9)
-         * @throws Exception If an error occurs
-         */
+	/** Constructs a new <CODE>MapBox</CODE> instance.
+	 * @param parent The parent of the dialog window
+	 * @param lat The latitude of the point to show on the map
+	 * @param lon The longitude of the point to show on the map
+	 * @param level The zoom level to be set (0 - 9)
+	 * @throws Exception If an error occurs
+	 */
 	public MapBox(Component parent, String lat, String lon, int level) throws IOException
 	{
 		super(parent, "");
@@ -177,11 +176,11 @@ public class MapBox extends JAPDialog implements ChangeListener
 		setResizable(false);
 	}
 
-        /** Sets the coordinates to be displayed on the map.
-         * @param a_latitude The latitude
-         * @param a_longitude The longitude
-         * @throws IOException If an error occurs while reading the map from www.mapquest.com
-         */
+	/** Sets the coordinates to be displayed on the map.
+	 * @param a_latitude The latitude
+	 * @param a_longitude The longitude
+	 * @throws IOException If an error occurs while reading the map from www.mapquest.com
+	 */
 	public void setGeo(String a_latitude, String a_longitude) throws IOException
 	{
 		m_longitude = a_longitude;
@@ -192,8 +191,7 @@ public class MapBox extends JAPDialog implements ChangeListener
 	public void setVisible(boolean a_bVisible)
 	{
 		super.setVisible(a_bVisible);
-
-}
+	}
 
 	public void stateChanged(ChangeEvent e)
 	{
