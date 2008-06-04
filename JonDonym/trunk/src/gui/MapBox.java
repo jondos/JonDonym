@@ -27,10 +27,7 @@
  */
 package gui;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
+import gui.dialog.JAPDialog;
 
 import java.awt.Component;
 import java.awt.Font;
@@ -39,6 +36,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -46,15 +48,14 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTML.Attribute;
 import javax.swing.text.html.HTML.Tag;
-import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 import javax.swing.text.html.parser.DTD;
 import javax.swing.text.html.parser.DocumentParser;
 
-import gui.dialog.JAPDialog;
+import logging.LogHolder;
+import logging.LogLevel;
 import logging.LogType;
 
 /** This class provides a dialog showing a map section loaded from MapQuest(R)
@@ -65,8 +66,8 @@ public class MapBox extends JAPDialog implements ChangeListener
 {
 	public static final String MSG_ERROR_WHILE_LOADING = MapBox.class.getName() + "_errorLoading";
 
-
-	private static final String IMG_MAPQUEST = MapBox.class.getName() + "_mapquest-logo.gif";
+	//private static final String IMG_MAPQUEST = MapBox.class.getName() + "_mapquest-logo.gif";
+	private static final String IMG_YAHOO = MapBox.class.getName() + "_yahoo-logo.gif";
 
 	private static final String MSG_PLEASE_WAIT = MapBox.class.getName() + "_pleaseWait";
 	private static final String MSG_CLOSE = MapBox.class.getName() + "_close";
@@ -119,7 +120,8 @@ public class MapBox extends JAPDialog implements ChangeListener
 		layout.setConstraints(l, c);
 		getContentPane().add(l);
 
-		s = new JSlider(JSlider.VERTICAL, 0, 9, level);
+		//s = new JSlider(JSlider.VERTICAL, 0, 9, level);
+		s = new JSlider(JSlider.VERTICAL, 0, 16, level);
 		s.setPaintTicks(true);
 		s.setMajorTickSpacing(1);
 		s.setMinorTickSpacing(1);
@@ -146,9 +148,11 @@ public class MapBox extends JAPDialog implements ChangeListener
 		layout.setConstraints(site, c);
 		getContentPane().add(site);
 
+		// This is how you would embed an image from the Internet:
 		//String logo = "http://art.mapquest.com/mqsite_english/logo";
 		//URL MapLogo = new URL(logo);
-		ImageIcon maplogo = GUIUtils.loadImageIcon(IMG_MAPQUEST);
+		
+		ImageIcon maplogo = GUIUtils.loadImageIcon(IMG_YAHOO);
 		JLabel logolabel = new JLabel(maplogo);
 		c.gridx = 1;
 		c.gridy = 2;
@@ -207,56 +211,61 @@ public class MapBox extends JAPDialog implements ChangeListener
 		}
 	}
 
-        /** Contacts <a href="http://www.mapquest.com">MapQuest</a> to re-load the map.
-         * To retrieve the map image, it is necessary to submit a HTTP Get request to the
-         * web site, parse the returned HTML page and search for the image.<br>
-         * As of June 2004, the HTML page contains the following tag:<br>
-         * <br>
-         * &lt;INPUT TYPE=&quot;IMAGE&quot; NAME=&quot;mqmap&quot;
-         * SRC=&quot;&lt;MAP-URL&gt;&quot;&gt;<br>
-         * <br>
-         * The SRC= attribute contains the real URL of the map image.
-         * @throws IOException If an error occurs while retrieving the web site
-         */
+	/** Contact <a href="http://maps.yahoo.com">Yahoo Maps</a> to re-load the map.
+	 * To retrieve the image, it is necessary to submit a HTTP GET request to the
+	 * web site and parse the returned HTML page for the image.<br>
+
+	 * @throws IOException If an error occurs while retrieving the web site
+	 */
 	private void refresh() throws IOException
 	{
-		BufferedReader bissmall;
+		BufferedReader reader;
 		String Title = "";
 
 		map.setIcon(null);
 		map.setText(JAPMessages.getString(MSG_PLEASE_WAIT) + "...");
 		map.repaint();
 
-		String site = "http://www.mapquest.com/maps/map.adp?latlongtype=" +
-			"decimal&latitude=" + m_latitude + "&longitude=" + m_longitude +
-			"&zoom=" + s.getValue();
-
+		// Create the URL
+		String site = "http://maps.yahoo.com/print?ard=1&clat=" + m_latitude +
+			"&clon=" + m_longitude + "&mag=" + s.getValue() + 
+			"&q1=" + m_latitude + "%2C" + m_longitude;
+		
+		// The previously used URL (TODO: Remove)
+		//String site = "http://www.mapquest.com/maps/map.adp?latlongtype=" +
+		//	"decimal&latitude=" + m_latitude + "&longitude=" + m_longitude +
+		//	"&zoom=" + s.getValue();
+		
+		// Set the title
 		Title = JAPMessages.getString(MSG_TITLE, new String[]{m_latitude, m_longitude});
-
 		setTitle(Title);
-		URL urlsmall = new URL(site);
-		bissmall = new BufferedReader(new InputStreamReader(urlsmall.openStream()), 1024);
-		MapQuestSiteParser mqsp = new MapQuestSiteParser();
-		DocumentParser dp = new DocumentParser(DTD.getDTD("-//W3C//DTD HTML 4.01 Transitional//EN"));
-
+		// Request the site and parse for the image-URL
+		URL url = new URL(site);
+		reader = new BufferedReader(new InputStreamReader(url.openStream()), 1024);
+		SiteParser sp = new SiteParser();
+		DocumentParser dp = new DocumentParser(DTD.getDTD("-//W3C//DTD HTML 4.01//EN"));
 		m_urlString = null;
-
-		dp.parse(bissmall, mqsp, true);
-
+		// m_urlString is set from outside
+		dp.parse(reader, sp, true);
 		if (m_urlString == null)
 		{
 			throw new IOException("Image reference not found on site " + site);
 		}
-
 		map.setText("");
 		map.setIcon(new ImageIcon(new URL(m_urlString)));
 	}
 
-        /** A subclass of <CODE>javax.swing.text.html.HTMLEditorKit.ParserCallback</CODE>
-         * that parses the HTML page downloaded from www.mapquest.com and searches for the
-         * URL of the map image.
-         */
-	private class MapQuestSiteParser extends ParserCallback
+    /** A subclass of <CODE>javax.swing.text.html.HTMLEditorKit.ParserCallback</CODE>
+     * that parses the HTML page requested from http://maps.yahoo.com and searches for
+     * the URL of the actual map image. As of June 2008, the page contains an img-tag
+     * that contains the actual URL:<br>
+	 * <br>
+	 * &lt;img id=&quot;map&quot; name=&quot;map&quot;
+	 * src=&quot;&lt;URL-of-the-map-image&gt;&quot;&gt;<br>
+	 * <br>
+	 * The 'src'-attribute contains the real URL of the map image.
+     */
+	private class SiteParser extends ParserCallback
 	{
 		public void handleSimpleTag(Tag t, MutableAttributeSet a, int pos)
 		{
@@ -269,15 +278,15 @@ public class MapBox extends JAPDialog implements ChangeListener
 			{
 				try
 				{
-					if (a.getAttribute(Attribute.ALT).toString().equals("map"))
+					if (a.getAttribute(Attribute.ID).toString().equals("map"))
 					{
-						MapBox.this.m_urlString =
-							a.getAttribute(Attribute.SRC).toString();
+						LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Map image found: "+a.getAttribute(Attribute.SRC).toString());
+						MapBox.this.m_urlString = a.getAttribute(Attribute.SRC).toString();
 					}
 				}
 				catch (NullPointerException npe)
 				{
-					/* IGNORE */
+					/* IGNORE: This happens if there is an IMG that has no attribute ID */
 				}
 			}
 		}

@@ -1655,7 +1655,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						try
 						{
 							new MapBox(getRootPanel(), (String) m_locationCoordinates.elementAt(0),
-									   (String) m_locationCoordinates.elementAt(1), 6).setVisible(true);
+									   (String) m_locationCoordinates.elementAt(1), 12).setVisible(true);
 						}
 						catch (IOException a_e)
 						{
