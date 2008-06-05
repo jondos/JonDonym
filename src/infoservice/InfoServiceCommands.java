@@ -57,6 +57,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.PerformanceEntry;
+import anon.pay.PayAccount;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
@@ -930,8 +931,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 					htmlData += "Waiting for PaymentInstance data...<br /><br />";
 				}
 				
-				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\">" +
-				"<tr><th>Account File</th><th>Last Modified</th></tr>\n";
+				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"50%\">" +
+				"<tr><th>Account Number</th><th>Remaining Credits</th><th>Account File</th><th>Last Modified</th></tr>\n";
 				
 				Hashtable usedFiles = InfoService.getPerfMeter().getUsedAccountFiles();
 				
@@ -939,8 +940,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				while (keys.hasMoreElements())
 				{
 					File file = (File) keys.nextElement();
-					
-					htmlData += "<tr><td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(file.lastModified()) + "</td></tr>";
+					PayAccount account = (PayAccount)usedFiles.get(file);
+					htmlData += "<tr>" + "<td class=\"name\">" + account.getAccountNumber() + "</td>" 
+					+ "<td class=\"status\">"  + JAPUtil.formatBytesValueWithUnit(account.getBalance().getVolumeBytesLeft()) + "</td>"
+					+ "<td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(account.getBackupTime()) + "</td></tr>";
 				}
 				
 				htmlData += "</table><br />";

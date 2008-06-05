@@ -27,9 +27,13 @@
  */
 package anon.pay;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -55,12 +59,9 @@ import logging.LogType;
 import anon.infoservice.IMutableProxyInterface;
 import anon.pay.xml.XMLGenericStrings;
 import anon.pay.xml.XMLGenericText;
-import java.util.Calendar;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import anon.util.ZLibTools;
 import anon.util.Base64;
-import java.text.ParseException;
+
 
 
 /**
@@ -126,7 +127,7 @@ public class PayAccount implements IXMLEncodable
 
 	private Vector m_messageListeners = new Vector();
 
-	private boolean m_bBackupDone = false;
+	private long m_lBackupDone = 0;
 
 	private Calendar m_termsDate;
 
@@ -203,7 +204,16 @@ public class PayAccount implements IXMLEncodable
 			throw new XMLParseException("PayAccount wrong XML format");
 		}
 		boolean bActive = XMLUtil.parseAttribute(elemRoot, XML_ATTR_ACTIVE, true);
-		m_bBackupDone = XMLUtil.parseAttribute(elemRoot, XML_BACKUP_DONE, false);
+		// for compatibility
+		boolean bBackupDone = XMLUtil.parseAttribute(elemRoot, XML_BACKUP_DONE, false);
+		if (bBackupDone)
+		{
+			m_lBackupDone = System.currentTimeMillis();
+		}
+		else
+		{
+			m_lBackupDone = XMLUtil.parseAttribute(elemRoot, XML_BACKUP_DONE, 0);
+		}
 
 		// fill vector with transfer certificates
 		m_transCerts = new Vector();
@@ -279,7 +289,7 @@ public class PayAccount implements IXMLEncodable
 			elemTmp = m_accountCertificate.toXmlElement(a_doc);
 			elemRoot.appendChild(elemTmp);
 
-			XMLUtil.setAttribute(elemRoot, XML_BACKUP_DONE, m_bBackupDone);
+			XMLUtil.setAttribute(elemRoot, XML_BACKUP_DONE, m_lBackupDone);
 
 			// import Private Key XML Representation
 			if (m_encryptedPrivateKey != null)
@@ -471,12 +481,21 @@ public class PayAccount implements IXMLEncodable
 
 	public boolean isBackupDone()
 	{
-		return m_bBackupDone;
+		if (m_lBackupDone > 0)
+		{
+			return true;
+		}
+		return false;
 	}
-
-	public void setBackupDone(boolean a_bDone)
+	
+	public long getBackupTime()
 	{
-		m_bBackupDone = a_bDone;
+		return m_lBackupDone;
+	}
+	
+	public void setBackupDone(long a_backupTime)
+	{
+		m_lBackupDone = a_backupTime;
 	}
 
 	/**
