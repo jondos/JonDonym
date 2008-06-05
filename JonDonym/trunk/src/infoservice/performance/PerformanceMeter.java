@@ -268,7 +268,7 @@ public class PerformanceMeter implements Runnable
 	{
 		LogHolder.log(LogLevel.INFO, LogType.PAY, "Looking for new account files");
 		Document payAccountXMLFile = null;
-		Long oldModifyDate;
+		PayAccount oldAccount;
 		File file;
 		
 		File accountDir = m_infoServiceConfig.getPerfAccountDirectory();
@@ -292,16 +292,16 @@ public class PerformanceMeter implements Runnable
 			{
 				try
 				{
-					file = new File(accountDir.getAbsolutePath() + File.separator + files[i]);
-					oldModifyDate = (Long) m_usedAccountFiles.get(file);
+					file = new File(accountDir.getAbsolutePath() + File.separator + files[i]);					
+					oldAccount = (PayAccount) m_usedAccountFiles.get(file);
 					
 					/* skip files that already used and have the same modify date */
-					if(oldModifyDate != null && oldModifyDate.longValue() == file.lastModified())
+					if(oldAccount != null && oldAccount.getBackupTime() == file.lastModified())
 					{
 						continue;
 					}
 					
-					LogHolder.log(LogLevel.INFO, LogType.PAY, "Trying to add " + file.getName());
+					LogHolder.log(LogLevel.NOTICE, LogType.PAY, "Trying to add " + file.getName());
 					payAccountXMLFile = XMLUtil.readXMLDocument(file);
 					Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
 					if(payAccountElem != null)
@@ -315,10 +315,10 @@ public class PerformanceMeter implements Runnable
 							LogHolder.log(LogLevel.INFO, LogType.PAY, "Added account file " + file.getName() + ".");
 							m_payAccountsFile.addAccount(payAccount);
 							m_payAccountsFile.setActiveAccount(payAccount.getAccountNumber());
+							payAccount.setBackupDone(file.lastModified());
+							m_usedAccountFiles.put(file, payAccount);
 						}
-					}
-					
-					m_usedAccountFiles.put(file, new Long(file.lastModified()));
+					}										
 				}
 				catch (IOException e)
 				{

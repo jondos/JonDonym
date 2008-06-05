@@ -2958,7 +2958,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			{
 				if (exportAccount(selectedAccount, this.getRootPanel(), new String(p.getPassword())))
 				{
-					selectedAccount.setBackupDone(true);
+					selectedAccount.setBackupDone(System.currentTimeMillis());
 					doShowDetails(selectedAccount);
 				}
 			}
@@ -2968,7 +2968,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			// account is already encrypted, save it only
 			if (exportAccount(selectedAccount, this.getRootPanel(), null))
 			{
-				selectedAccount.setBackupDone(true);
+				selectedAccount.setBackupDone(System.currentTimeMillis());
 				doShowDetails(selectedAccount);
 			}
 		}
@@ -3137,7 +3137,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					XMLUtil.removeComments(elemAccount);
 
 					importedAccount = new PayAccount(elemAccount, null);
-					importedAccount.setBackupDone(true); // we know there is a backup file...
+					importedAccount.setBackupDone(f.lastModified()); // we know there is a backup file...
 					PayAccountsFile accounts = PayAccountsFile.getInstance();
 					accounts.addAccount(importedAccount);
 					doActivateAccount(importedAccount);
