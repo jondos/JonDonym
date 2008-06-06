@@ -986,7 +986,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <COL WIDTH=\"20%\">\n" +
 				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				"        <COL WIDTH=\"2%\">\n" +
+				//"        <COL WIDTH=\"2%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
 				"        <COL WIDTH=\"5%\">\n" +				
 				"        <COL WIDTH=\"17%\">\n" +
