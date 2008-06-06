@@ -997,7 +997,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <TH>Cascade Name</TH>\n" +
 				"        <TH>Cascade ID</TH>\n" +
 				"        <TH>Active Users</TH>\n" +
-				"        <TH>Current Risk</TH>\n" +
+				//"        <TH>Current Risk</TH>\n" +
 				"        <TH>Traffic Situation</TH>\n" +
 				"        <TH>Avg Delay</TH>\n" +
 				"        <TH>Avg Speed</TH>\n" +
