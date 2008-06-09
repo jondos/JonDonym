@@ -28,24 +28,26 @@
 package anon.pay.xml;
 
 import java.io.ByteArrayInputStream;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
 import anon.crypto.IMyPrivateKey;
 import anon.crypto.XMLSignature;
-import anon.util.IXMLEncodable;
-import anon.util.XMLUtil;
-import anon.util.XMLParseException;
-import java.util.Enumeration;
-import logging.LogType;
-import logging.LogLevel;
-import logging.LogHolder;
-import java.text.SimpleDateFormat;
-import java.text.NumberFormat;
-import java.util.Locale;
 import anon.pay.PaymentInstanceDBEntry;
+import anon.util.IXMLEncodable;
+import anon.util.XMLParseException;
+import anon.util.XMLUtil;
 
 /**
  * Contains the functionality for creating and parsing XML Price Certificates
@@ -58,7 +60,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 {
 	public static final String XML_ELEMENT_NAME = "PriceCertificate";
 
-	//private fields
+	// Private fields
 
 	private String  m_subjectKeyIdentifier; //the X509SubjectKeyIdentifier of the corresponding Mix
 	private double m_rate; //cents per MB, may be fractional
@@ -66,7 +68,6 @@ public class XMLPriceCertificate implements IXMLEncodable
 	private String m_biID;
 	private String m_hashValue;
 	private Document m_docThePriceCert;
-
 
 	private static final String XML_ELEM_SUBJECT_KEY_IDENTIFIER = "SubjectKeyIdentifier";
 	private static final String XML_ELEM_RATE = "Rate";
@@ -93,7 +94,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 	}
 
 	/**
-	 * XMLPriceCertificate: new price cert that has not been signed yet, and therefor has no signature-node and signatureTime
+	 * XMLPriceCertificate: new price cert that has not been signed yet, and therefore has no signature-node and signatureTime
 	 *
 	 * @param subjectKeyIdentifier String
 	 * @param rate double
@@ -109,7 +110,6 @@ public class XMLPriceCertificate implements IXMLEncodable
 		m_docThePriceCert.appendChild(internal_toXmlElement(m_docThePriceCert));
 		m_hashValue = XMLSignature.getHashValueOfElement(m_docThePriceCert);
 	}
-
 
 	public XMLPriceCertificate(String subjectKeyIdentifier, double rate, java.sql.Timestamp signatureTime, String biID, String signatureXml)
 	{
