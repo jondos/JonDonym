@@ -122,7 +122,7 @@ import anon.pay.PayAccountsFile;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ListCellRenderer;
 
-class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, ActionListener,
+public class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, ActionListener,
 	ListSelectionListener, ItemListener, KeyListener, Observer
 {
 	private static final String MSG_LABEL_CERTIFICATE = JAPConfAnon.class.getName() + "_certificate";
@@ -888,7 +888,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		int server = m_serverList.getSelectedIndex();
 		MixCascade cascade = (MixCascade)m_tableMixCascade.getValueAt(m_tableMixCascade.getSelectedRow(), 1);
 		String selectedMixId = null;
-
+		
 		if (cascade != null)
 		{
 			selectedMixId = (String) cascade.getMixIds().elementAt(server);

@@ -88,6 +88,7 @@ import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.NewCascadeIDEntry;
+import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
 import anon.pay.IMessageListener;
 import anon.pay.PayAccountsFile;
@@ -103,6 +104,7 @@ import gui.JAPHelp;
 import gui.JAPMessages;
 import gui.JAPProgressBar;
 import gui.MixDetailsDialog;
+import gui.OperatorDetailsDialog;
 import gui.PopupMenu;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
@@ -234,6 +236,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	
 	private JLabel m_labelMixFlags[], m_labelOperatorFlags[];
 	private MixMouseAdapter m_adapterMix[];
+	private OperatorMouseAdapter m_adapterOperator[];
 	
 	private JLabel m_labelOwnTraffic, m_labelOwnTrafficSmall;
 	private JLabel m_labelOwnActivity, m_labelForwarderActivity;
@@ -809,6 +812,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_labelMixFlags = new JLabel[3];
 		m_labelOperatorFlags = new JLabel[3];
 		m_adapterMix = new MixMouseAdapter[3];
+		m_adapterOperator = new OperatorMouseAdapter[3];
+		
 		c1.gridwidth = 1;
 		c1.insets = new Insets(5, 2, 0, 5);
 		for(int i = 0; i < 3; i++)
@@ -820,11 +825,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			p.add(m_labelMixFlags[i], c1);
 			
 			m_labelMixFlags[i].addMouseListener(m_adapterMix[i] = 
-				new MixMouseAdapter(null));			
+				new MixMouseAdapter(null, i));
+			m_labelMixFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			
 			c1.gridy = 3;
 			m_labelOperatorFlags[i] = new JLabel("");
 			p.add(m_labelOperatorFlags[i], c1);
+			
+			m_labelOperatorFlags[i].addMouseListener(m_adapterOperator[i] =
+				new OperatorMouseAdapter(null));
+			m_labelOperatorFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		}
 		
 		m_labelAnonMeter = new JLabel(getMeterImage(3));
@@ -2867,6 +2877,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					CountryMapper country = new CountryMapper(operatorCountry, JAPMessages.getLocale());
 					m_labelOperatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + operatorCountry + ".png"));
 					m_labelOperatorFlags[i].setToolTipText(country.toString());
+					m_adapterOperator[i].setOperator(mixInfo.getServiceOperator());
 				}
 				else
 				{
@@ -3355,15 +3366,17 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private final class MixMouseAdapter extends MouseAdapter
 	{
 		private MixInfo m_mixInfo;
+		private int m_mixType;
 		
-		public MixMouseAdapter(MixInfo a_mixInfo)
+		public MixMouseAdapter(MixInfo a_mixInfo, int a_mixType)
 		{
 			m_mixInfo = a_mixInfo;
+			m_mixType = a_mixType;
 		}
 		
 		public void mouseClicked(MouseEvent a_event)
 		{
-			MixDetailsDialog dialog = new MixDetailsDialog(JAPNewView.this, m_mixInfo);
+			MixDetailsDialog dialog = new MixDetailsDialog(JAPNewView.this, m_mixInfo, m_mixType);
 			dialog.pack();
 			dialog.setVisible(true);
 		}
@@ -3371,6 +3384,28 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		public void setMixInfo(MixInfo a_mixInfo)
 		{
 			m_mixInfo = a_mixInfo;
+		}
+	}
+	
+	private final class OperatorMouseAdapter extends MouseAdapter
+	{
+		private ServiceOperator m_operator;
+		
+		public OperatorMouseAdapter(ServiceOperator a_operator)
+		{
+			m_operator = a_operator;
+		}
+		
+		public void mouseClicked(MouseEvent a_event)
+		{
+			OperatorDetailsDialog dialog = new OperatorDetailsDialog(JAPNewView.this, m_operator);
+			dialog.pack();
+			dialog.setVisible(true);
+		}
+		
+		public void setOperator(ServiceOperator a_operator)
+		{
+			m_operator = a_operator;
 		}
 	}
 }
