@@ -27,8 +27,6 @@
  */
 package anon.infoservice;
 
-/*import gui.CountryMapper;
-import gui.JAPMessages;*/
 
 import java.util.Vector;
 
@@ -228,6 +226,5 @@ public class ServiceLocation
 	{
 		return latitude;
 	}
-	
-	
+
 }
