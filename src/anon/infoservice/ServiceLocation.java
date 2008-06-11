@@ -27,8 +27,8 @@
  */
 package anon.infoservice;
 
-import gui.CountryMapper;
-import gui.JAPMessages;
+/*import gui.CountryMapper;
+import gui.JAPMessages;*/
 
 import java.util.Vector;
 
@@ -229,48 +229,5 @@ public class ServiceLocation
 		return latitude;
 	}
 	
-	public String getDisplayString()
-	{
-		String strLocation = "";
-
-		if (getCity() != null && getCity().trim().length() > 0)
-		{
-			strLocation = getCity().trim();
-		}
-
-		if (getState() != null && getState().trim().length() > 0 &&
-			!strLocation.equals(getState().trim()))
-		{
-			if (strLocation.length() > 0)
-			{
-				strLocation += ", ";
-			}
-			strLocation += getState().trim();
-		}
-
-		if (getCountry() != null && getCountry().trim().length() > 0)
-		{
-			if (strLocation.length() > 0)
-			{
-				strLocation += ", ";
-			}
-
-			try
-			{
-				strLocation += new CountryMapper(
-					getCountry(), JAPMessages.getLocale()).toString();
-			}
-			catch (IllegalArgumentException a_e)
-			{
-				strLocation += getCountry().trim();
-			}
-		}
-
-		if (strLocation.trim().length() == 0)
-		{
-			return "N/A";
-		}
 	
-		return strLocation;
-	}
 }

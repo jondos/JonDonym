@@ -19,7 +19,6 @@ import anon.infoservice.MixInfo;
 import anon.infoservice.ServiceLocation;
 import anon.infoservice.ServiceOperator;
 import gui.dialog.JAPDialog;
-import jap.JAPConfAnon;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -72,7 +71,7 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 		c.insets = new Insets(0, 15, 10, 15);
 		p.add(lbl, c);
 		
-		lbl = new JLabel(loc.getDisplayString());
+		lbl = new JLabel(GUIUtils.getCountryFromServiceLocation(loc));
 		c.gridy = 1;
 		c.gridx = 1;
 		lbl.setIcon(GUIUtils.loadImageIcon("flags/" + loc.getCountry() + ".png"));
