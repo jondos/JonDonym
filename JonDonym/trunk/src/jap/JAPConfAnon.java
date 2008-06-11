@@ -122,7 +122,7 @@ import anon.pay.PayAccountsFile;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ListCellRenderer;
 
-public class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, ActionListener,
+class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, ActionListener,
 	ListSelectionListener, ItemListener, KeyListener, Observer
 {
 	private static final String MSG_LABEL_CERTIFICATE = JAPConfAnon.class.getName() + "_certificate";
@@ -2603,7 +2603,7 @@ public class JAPConfAnon extends AbstractJAPConfModule implements MouseListener,
 			ServiceLocation location = getServiceLocation(a_cascade, a_mixId);
 			if(location != null)
 			{
-				return location.getDisplayString();
+				return GUIUtils.getCountryFromServiceLocation(location);
 			}
 			else
 			{

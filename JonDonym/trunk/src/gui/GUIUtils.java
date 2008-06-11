@@ -80,6 +80,7 @@ import javax.swing.plaf.FontUIResource;
 import anon.util.ClassUtil;
 import anon.util.JobQueue;
 import anon.util.ResourceLoader;
+import anon.infoservice.ServiceLocation;
 import gui.dialog.JAPDialog;
 import gui.dialog.WorkerContentPane;
 import logging.LogHolder;
@@ -2196,5 +2197,55 @@ public final class GUIUtils
 		}
 
 
+	}
+	
+	public static String getCountryFromServiceLocation(ServiceLocation a_loc)
+	{
+		if(a_loc == null)
+		{
+			return "";
+		}
+			
+		String strLocation = "";
+
+		if (a_loc.getCity() != null && a_loc.getCity().trim().length() > 0)
+		{
+			strLocation = a_loc.getCity().trim();
+		}
+
+		if (a_loc.getState() != null && a_loc.getState().trim().length() > 0 &&
+			!strLocation.equals(a_loc.getState().trim()))
+		{
+			if (strLocation.length() > 0)
+			{
+				strLocation += ", ";
+			}
+			strLocation += a_loc.getState().trim();
+		}
+
+		if (a_loc.getCountry() != null && a_loc.getCountry().trim().length() > 0)
+		{
+			if (strLocation.length() > 0)
+			{
+				strLocation += ", ";
+			}
+
+			try
+			{
+				strLocation += new CountryMapper(
+						a_loc.getCountry(), JAPMessages.getLocale()).toString();
+			}
+			catch (IllegalArgumentException a_e)
+			{
+				strLocation += a_loc.getCountry().trim();
+			}
+		}
+
+		if (strLocation.trim().length() == 0)
+		{
+			return "N/A";
+		}
+	
+		return strLocation;
 	}
 }
