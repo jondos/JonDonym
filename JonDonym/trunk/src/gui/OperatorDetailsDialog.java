@@ -30,9 +30,11 @@ public class OperatorDetailsDialog extends JAPDialog implements MouseListener
 	private JLabel m_lblOperator;
 	private JLabel m_lblEMail;
 	
+	private static String MSG_TITLE = OperatorDetailsDialog.class.getName() + "_title";
+	
 	public OperatorDetailsDialog(Component a_parent, ServiceOperator a_operator)
 	{
-		super(a_parent, a_operator != null ? a_operator.getOrganization() : "");
+		super(a_parent, JAPMessages.getString(MSG_TITLE));
 		m_operator = a_operator;
 		
 		GridBagConstraints c = new GridBagConstraints();

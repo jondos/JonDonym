@@ -29,16 +29,19 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 	private MixInfo m_mixInfo;
 	private JLabel m_lblOperator;
 	
+	private static String MSG_MIX_NAME = MixDetailsDialog.class.getName() + "_mixName";
+	private static String MSG_TITLE = MixDetailsDialog.class.getName() + "_title";
+	
 	public MixDetailsDialog(Component a_parent, MixInfo a_mixInfo, int a_mixType)
 	{
-		super(a_parent, a_mixInfo != null ? a_mixInfo.getName() : "");
+		super(a_parent, JAPMessages.getString(MSG_TITLE));
 		m_mixInfo = a_mixInfo;
 		
 		GridBagConstraints c = new GridBagConstraints();
 		JPanel p = (JPanel) getContentPane();
 		p.setLayout(new GridBagLayout());
 		JLabel lbl;
-
+		
 		if(m_mixInfo == null)
 		{
 			return;
@@ -52,19 +55,14 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 			return;
 		}
 		
-		lbl = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_mixPosition") + ":");
+		lbl = new JLabel(JAPMessages.getString(MSG_MIX_NAME));
 		c.gridy = 0;
 		c.gridx = 0;
 		c.insets = new Insets(15, 15, 10, 15);
 		c.anchor = GridBagConstraints.WEST;
 		p.add(lbl, c);
 		
-		String mixType = "";
-		if(a_mixType == 0) mixType = JAPMessages.getString(JAPConfAnon.class.getName() + "_mixFirst");
-		else if(a_mixType == 1) mixType = JAPMessages.getString(JAPConfAnon.class.getName() + "_mixMiddle");
-		else if(a_mixType == 2) mixType = JAPMessages.getString(JAPConfAnon.class.getName() + "_mixLast");
-		
-		lbl = new JLabel(mixType);
+		lbl = new JLabel(a_mixInfo.getName());
 		c.gridx = 1;
 		p.add(lbl, c);
 		
