@@ -26,9 +26,9 @@ a:active {color:#000000;font-weight:bold;text-decoration:none;}
 a:hover {color:#FFFFFF;font-weight:bold;background-color:#0000C0;text-decoration:none;}
 
 
-.nextlink {padding-left:10px;}
-.midlink {padding-left:10px;padding-right:10px;}
-.prevlink {padding-right:10px;}
+.nextlink {padding-left:20px;}
+.midlink {padding-left:20px;padding-right:20px;}
+.prevlink {padding-right:20px;}
 
 .topdown_navi {text-align:center;}
 
