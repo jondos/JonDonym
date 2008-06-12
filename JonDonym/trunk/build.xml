@@ -145,7 +145,7 @@
   <target name="compile" depends="init" description="compile the source ">
     <!-- Compile the java code from ${src} into ${build} -->
     <javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-    destdir="${build}"  classpathref="classpath_all" 
+    destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
     	fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
     <include name="**/*.java"/>
     </javac>
