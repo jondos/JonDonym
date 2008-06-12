@@ -76,6 +76,8 @@ import platform.AbstractOS;
 public class JAP
 {
 	private static final String MSG_ERROR_NEED_NEWER_JAVA = "errorNeedNewerJava";
+	private static final String MSG_ERROR_JONDO_ALREADY_RUNNING = "errorAlreadyRunning";
+	private static final String MSG_ERROR_JONDO_ALREADY_RUNNING_WIN = "errorAlreadyRunningWin";
 	private static final String MSG_GNU_NOT_COMPATIBLE = JAP.class.getName() + "_gnuNotCompatible";
 	private static final String MSG_LOADING_INTERNATIONALISATION = JAP.class.getName() +
 		"_loadingInternationalisation";
@@ -200,6 +202,7 @@ public class JAP
 		{
 			bConsoleOnly = true;
 		}
+	
 
 		if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
 		{
@@ -214,13 +217,30 @@ public class JAP
 				if(vm.toString().equals("JAP") || vm.toString().equals("JAP.jar") || vm.toString().equals("JAPMacintosh")) numJAPInstances++;
 				if(numJAPInstances > 1)
 				{
+					JAPMessages.init(JAPConstants.MESSAGESFN);
 					// multiple instances of JAP have been started, what to do?
-					System.out.println("There is already an instance of JAP/JonDo running.");
+					String errorString = JAPMessages.getString(MSG_ERROR_JONDO_ALREADY_RUNNING);
+				
+					if(os.startsWith("Windows"))
+					{
+						errorString += "\n" + JAPMessages.getString(MSG_ERROR_JONDO_ALREADY_RUNNING_WIN); 
+					}
+					
+					if(bConsoleOnly) 
+					{
+						System.out.println(errorString);
+					}
+					else
+					{
+						JAPAWTMsgBox.MsgBox(
+								new Frame(),errorString,
+								JAPMessages.getString("error"));
+					}
 					System.exit(0);
 				}
 			}
 		}
-
+		
 		// Test (part 2) for right JVM....
 		if (vendor.startsWith("Transvirtual"))
 		{ // Kaffe
@@ -274,6 +294,8 @@ public class JAP
 				System.exit(0);
 			}
 		}
+		
+		
 		
 		// init controller and preload config
 		m_controller = JAPController.getInstance();
@@ -332,7 +354,7 @@ public class JAP
 		{
 			splashText = "Loading internationalisation";
 		}
-
+		
 		if (bConsoleOnly)
 		{
 			JAPDialog.setConsoleOnly(true);
