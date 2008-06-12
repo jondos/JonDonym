@@ -2,7 +2,7 @@
 <project name="AN.ON" default="dist" basedir=".">
   <description>Ant Build file for the various compontens of the AN.ON project</description>
   <!-- set global properties for this build -->
-  <property name="javac1.3.exe" value="C:\Program Files\Java\jdk1.3.1_20\bin\javac.exe" />
+  <property name="javac1.3.exe" value="/usr/bin/javac" />
   <property name="src" location="src"/>
   <property name="certificates" location="certificates"/>
   
@@ -145,7 +145,7 @@
   <target name="compile" depends="init" description="compile the source ">
     <!-- Compile the java code from ${src} into ${build} -->
     <javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-    destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
+    destdir="${build}"  classpathref="classpath_all" 
     	fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
     <include name="**/*.java"/>
     </javac>
