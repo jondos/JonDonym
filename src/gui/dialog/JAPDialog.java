@@ -2479,7 +2479,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				LogHolder.log(LogLevel.DEBUG, a_logType, a_throwable);
 			}
 		}
-
+		
 		try
 		{
 			if (a_title == null)

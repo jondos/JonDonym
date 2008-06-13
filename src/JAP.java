@@ -67,6 +67,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
+import platform.WindowsOS;
 
 /** This is the main class of the JAP project. It starts everything. It can be inherited by another
  *  class that wants to initialize platform dependend features, e.g. see
@@ -204,42 +205,6 @@ public class JAP
 		}
 	
 
-		if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
-		{
-			// Try to detect running instances of JAP
-			Vector activeVMs = AbstractOS.getInstance().getActiveVMs();
-			Object vm;
-			int numJAPInstances = 0;
-			for(int i = 0; i < activeVMs.size(); i++)
-			{
-				vm = activeVMs.elementAt(i);
-				if(vm == null || vm.toString() == null ) continue;
-				if(vm.toString().equals("JAP") || vm.toString().equals("JAP.jar") || vm.toString().equals("JAPMacintosh")) numJAPInstances++;
-				if(numJAPInstances > 1)
-				{
-					JAPMessages.init(JAPConstants.MESSAGESFN);
-					// multiple instances of JAP have been started, what to do?
-					String errorString = JAPMessages.getString(MSG_ERROR_JONDO_ALREADY_RUNNING);
-				
-					if(os.startsWith("Windows"))
-					{
-						errorString += "\n" + JAPMessages.getString(MSG_ERROR_JONDO_ALREADY_RUNNING_WIN); 
-					}
-					
-					if(bConsoleOnly) 
-					{
-						System.out.println(errorString);
-					}
-					else
-					{
-						JAPAWTMsgBox.MsgBox(
-								new Frame(),errorString,
-								JAPMessages.getString("error"));
-					}
-					System.exit(0);
-				}
-			}
-		}
 		
 		// Test (part 2) for right JVM....
 		if (vendor.startsWith("Transvirtual"))
@@ -295,7 +260,69 @@ public class JAP
 			}
 		}
 		
-		
+		if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
+		{
+			// Try to detect running instances of JAP
+			Vector activeVMs = AbstractOS.getInstance().getActiveVMs();
+			Object vm;
+			int numJAPInstances = 0;
+			for(int i = 0; i < activeVMs.size(); i++)
+			{
+				vm = activeVMs.elementAt(i);
+				if(vm == null || vm.toString() == null ) continue;
+				if(vm.toString().equals("JAP") || vm.toString().equals("JAP.jar") || vm.toString().equals("JAPMacintosh")) numJAPInstances++;
+				if(numJAPInstances > 1)
+				{
+					JAPMessages.init(JAPConstants.MESSAGESFN);
+					// multiple instances of JAP have been started, what to do?
+					String errorString = 
+						JAPMessages.getString(MSG_ERROR_JONDO_ALREADY_RUNNING) +
+						((AbstractOS.getInstance() instanceof WindowsOS) ? 
+						"\n" + JAPMessages.getString(MSG_ERROR_JONDO_ALREADY_RUNNING_WIN) : "");
+					
+					if(bConsoleOnly) 
+					{
+						System.out.println(errorString);
+					}
+					else
+					{
+						JAPDialog.ILinkedInformation test = new JAPDialog.ILinkedInformation() {
+							public boolean isOnTop() 
+							{
+								return true;
+							}
+							
+							public String getMessage()
+							{
+								return null;
+							}
+							
+							public boolean isApplicationModalityForced() 
+							{
+								return true;
+							}
+							
+							public int getType()
+							{
+								return JAPDialog.ILinkedInformation.TYPE_DEFAULT;
+							}
+							
+							public boolean isCloseWindowActive()
+							{
+								return true;
+							}
+							
+							public void clicked(boolean a_bState)
+							{
+								
+							}
+						};
+						JAPDialog.showErrorDialog(null, errorString, LogType.MISC, test);
+					System.exit(0);
+					}
+				}
+			}
+		}
 		
 		// init controller and preload config
 		m_controller = JAPController.getInstance();
