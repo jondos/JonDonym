@@ -16,7 +16,7 @@
 
 <h2>Kommandozeilenargumente f&uuml;r JonDo</h2>
 <p>
-JonDo kann auch &uuml;ber die Kommandozeile gestartet werden. F&uuml;hren Si dazu die Datei <code>JAP.jar</code> mit dem folgenden Befehl aus: 
+JonDo kann auch &uuml;ber die Kommandozeile gestartet werden. F&uuml;hren Sie dazu die Datei <code>JAP.jar</code> mit dem folgenden Befehl aus: 
 </p>
 <p>
 <code>java -jar JAP.jar &lt;Kommandozeilenoptionen&gt;</code>.
@@ -45,7 +45,7 @@ Dabei k&ouml;nnen Sie folgende Kommandozeilen-Optionen mitangegeben:
 	<li>
 	<p><b>--cascade {[host][:port]}</b></p>
 	<p>
-	Stelle eine Verbindung zur angegebenen Mixkaskade her.
+	Stellt eine Verbindung zur angegebenen Mixkaskade her.
 	</p>  	
 	</li>
 
@@ -59,25 +59,25 @@ Dabei k&ouml;nnen Sie folgende Kommandozeilen-Optionen mitangegeben:
 	<li>
 	<p><b>--noSplash, -s</b></p>
 	<p>
-	Unterdr&uuml;ckt das Wartefenster (Splash-Screen) beim Start von JonDo. Der Start wird dadurch etwas l&auml;nger erscheinen, da es einige Zeit dauert, bis das Hauptfenster von JonDo initialisiert ist. Der Spash-Screen ist  dazu da, diese Zeit zu &uuml;berbr&uuml;cken.
+	Unterdr&uuml;ckt das Wartefenster (Splash-Screen) beim Start von JonDo. Der Start wird dadurch etwas l&auml;nger erscheinen, da es einige Zeit dauert, bis das Hauptfenster von JonDo initialisiert ist.
 	</p>
 	</li>
   	
 	<li>
 	<p><b>--portable [Pfad_zum_Browser]</b></p>
 	<p>
-	Teilt JonDo mit, dass es in einer portablen Umgebung l&auml;uft. Wenn ein Pfad zu einem portablen Browser angegeben ist, kann erdirekt von JonDo aus gestartet werden. URLs in JonDo werden in diesem Browser ge&ouml;ffnet statt mit dem Standardbrowser des Systems.
+	Teilt JonDo mit, dass es in einer portablen Umgebung l&auml;uft. Wenn ein Pfad zu einem portablen Browser angegeben ist, kann dieser direkt von JonDo aus gestartet werden. JonDo verwendet diesen Browser auch intern zum Aufrufen Webseiten.
 	</p>  	
 	</li>
 
 	<li>
 	<p><b>--portable-help-path [html]</b></p>
-    <p> Pfad zur externen HTML-Hilfe zur Verwendung im portablen Modus.</p>
+    <p> Pfad zur externen HTML-Hilfe im portablen Modus.</p>
 	</li>
 
 	<li> 
 	<p><b>--portable-jre</b></p>
-	<p> Sollte gesetzt werden, wenn JonDo mit einem portablen JRE l&auml;uft. Unterdr&uuml;ckt Updatenachrichten f&uuml;r Java. </p>
+	<p> Sollte gesetzt werden, wenn JonDo mit einem portablen JRE l&auml;uft. Unterdr&uuml;ckt Update-Nachrichten f&uuml;r Java. </p>
 	</li>
 	
 	<li>
@@ -87,12 +87,12 @@ Dabei k&ouml;nnen Sie folgende Kommandozeilen-Optionen mitangegeben:
 	
 	<li>
 	<p><b>--config {Filename}, -c {Filename} </b></p>
-	<p>JonDo wird diese Konfigurationsdatei verwenden.</p>
+	<p>JonDo wird die angegebene anstelle der <a href="japconf.html">Standard-Konfigurationsdatei</a> zum Laden der Einstellungen verwenden.</p>
 	</li>
 </ul>
 <p>
 <b>Beispiel</b>:<br>
-Um JonDo im minimierten Fenster zu starten, &ouml;ffnen Sie eine Eingabeaufforderung, wechseln Sie in das Verzeichnis von JonDo und geben Sie folgenden Befehl ein:
+Um JonDo im minimierten Fenster zu starten, &ouml;ffnen Sie eine Eingabeaufforderung, wechseln Sie in das Verzeichnis in der die Datei <code>JAP.jar</code> liegt und geben Sie folgenden Befehl ein:
 </p>
 <p>
 <code>java -jar JAP.jar -minimized</code>
@@ -101,10 +101,10 @@ Um JonDo im minimierten Fenster zu starten, &ouml;ffnen Sie eine Eingabeaufforde
 Sie k&ouml;nnen diese Argumente auch in Windows-Verkn&uuml;pfungen verwenden. Klicken Sie daf&uuml;r einfach mit der rechten Maustaste auf die JonDo-Verkn&uuml;pfung, w&auml;hlen Sie <em>Einstellungen</em> und editieren Sie die Verkn&uuml;pfung wie folgt: 
 </p>
 <p>
-Ziel: &lt;Pfad zu JonDo&gt;\jap.exe<br>
-Ausf&uuml;hren in: &lt;Pfad zu JAP.jar&gt;
+Ziel: <code>&lt;Pfad zu JonDo&gt;\jap.exe &lt;Kommandozeilenargumente&gt;</code><br>
+Ausf&uuml;hren in: <code>&lt;Pfad zu JAP.jar&gt;</code>
 <p>
-Ersetzen Sie dabei &lt;Pfad zu JonDo&gt; durch den Pfad, in dem die JAP.jar und die japdll.dll liegen (typischerweise <code>C:\Programme\Jap</code>).
+Ersetzen Sie dabei <code>&lt;Pfad zu JonDo&gt;</code> durch den Pfad, in dem die Dateien <i>JAP.jar</i> und <i>japdll.dll</i> liegen, (typischerweise <code>C:\Programme\Jap</code>) und w&auml;hlen sie f&uuml;r <code>&lt;Kommandozeilenargumente&gt;</code>, die von Ihnen gew&uuml;nschten Argumente.
 </p>
 
   <!--#include virtual="/footer.html"-->
