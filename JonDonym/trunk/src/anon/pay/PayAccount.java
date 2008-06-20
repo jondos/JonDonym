@@ -463,6 +463,22 @@ public class PayAccount implements IXMLEncodable
 		return m_accountCertificate.getAccountNumber();
 	}
 
+	public boolean hasExpired(Timestamp a_time)
+	{
+		XMLBalance balance = getBalance();
+		if (balance == null)
+		{
+			return false;
+		}
+		
+		if ((balance.getCredit() > 0 || balance.getSpent() > 0) && 
+			balance.getFlatEnddate() != null && balance.getFlatEnddate().before(a_time))
+		{
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Returns true if this account currently has a positive and usable balance.
 	 * @return boolean
