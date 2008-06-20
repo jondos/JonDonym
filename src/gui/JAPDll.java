@@ -61,10 +61,14 @@ final public class JAPDll {
 	private static final String JAP_DLL_REQUIRED_VERSION = "00.03.003";
 	private static final String UPDATE_PATH;
 
-	private static final String DLL_LIBRARY_NAME = "japdll";
-	private static final String JAP_DLL = DLL_LIBRARY_NAME + ".dll";
-	private static final String JAP_DLL_NEW  = JAP_DLL + "." + JAP_DLL_REQUIRED_VERSION;
-	private static final String JAP_DLL_OLD = DLL_LIBRARY_NAME + ".old";
+	private static final String DLL_LIBRARY_NAME_32bit = "japdll";
+	private static final String DLL_LIBRARY_NAME_64bit = "japdll_x64";
+	private static final String JAP_DLL_32bit = DLL_LIBRARY_NAME_32bit + ".dll";
+	private static final String JAP_DLL_64bit = DLL_LIBRARY_NAME_32bit + ".dll";
+	private static final String JAP_DLL_NEW_32bit  = JAP_DLL_32bit + "." + JAP_DLL_REQUIRED_VERSION;
+	private static final String JAP_DLL_NEW_64bit  = JAP_DLL_64bit + "." + JAP_DLL_REQUIRED_VERSION;
+	private static final String JAP_DLL_OLD_32bit = DLL_LIBRARY_NAME_32bit + ".old";
+	private static final String JAP_DLL_OLD_64bit = DLL_LIBRARY_NAME_64bit + ".old";
 
 	/** Messages */
 	private static final String MSG_DLL_UPDATE = JAPDll.class.getName() + "_updateRestartMessage";
@@ -83,6 +87,26 @@ final public class JAPDll {
 
 	private static boolean m_sbHasOnTraffic = true;
 
+	private static void loadDll()
+	{
+		//Load either 32 bit or 64 bit version of dll
+		try
+			{
+				System.loadLibrary(DLL_LIBRARY_NAME_32bit);
+			}
+		catch(Throwable t)
+			{
+				
+			}
+		try
+			{
+				System.loadLibrary(DLL_LIBRARY_NAME_64bit);
+			}
+		catch(Throwable t)
+			{
+				
+			}
+	}
 	static
 	{
 		File japdir = ClassUtil.getClassDirectory(JAPDll.class);
@@ -129,7 +153,7 @@ final public class JAPDll {
 					}
 				}
 
-				System.loadLibrary(DLL_LIBRARY_NAME);
+				loadDll();
 
 				if (UPDATE_PATH == null)
 				{
@@ -187,19 +211,19 @@ final public class JAPDll {
 			return;
 		}
 
-		LogHolder.log(LogLevel.INFO, LogType.GUI, "Existing " + JAP_DLL + " version: " + JAPDll.getDllVersion());
-		LogHolder.log(LogLevel.INFO, LogType.GUI, "Required " + JAP_DLL + " version: " + JAP_DLL_REQUIRED_VERSION);
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Existing " + JAP_DLL_32bit + " version: " + JAPDll.getDllVersion());
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Required " + JAP_DLL_32bit + " version: " + JAP_DLL_REQUIRED_VERSION);
 
 
 		// checks, if the japdll.dll must (and can) be extracted from jar-file.
 		if (JAPDll.getDllVersion() != null && // != null means that there is a loaded dll
 			JAPDll.getDllVersion().compareTo(JAP_DLL_REQUIRED_VERSION) < 0 &&
-			ResourceLoader.getResourceURL(JAP_DLL_NEW) != null &&
+			ResourceLoader.getResourceURL(JAP_DLL_NEW_32bit) != null &&
 			UPDATE_PATH != null) // null means there is no new dll available
 		{
 
 			// check, if NO japdll.dll exists in jar-path
-			File file = new File(UPDATE_PATH + JAP_DLL);
+			File file = new File(UPDATE_PATH + JAP_DLL_32bit);
 			if (!file.exists())
 			{
 				askUserWhatToDo();
@@ -222,8 +246,8 @@ final public class JAPDll {
 			{
 				// update was successful
 				LogHolder.log(LogLevel.INFO, LogType.GUI,
-							  "Update successful, existing " + JAP_DLL + " version: " + JAPDll.getDllVersion());
-				System.loadLibrary(DLL_LIBRARY_NAME);
+							  "Update successful, existing " + JAP_DLL_32bit + " version: " + JAPDll.getDllVersion());
+				loadDll();
 				if ( JAPDll.getDllVersion().compareTo(JAP_DLL_REQUIRED_VERSION) < 0 )
 				{
 					JAPModel.getInstance().setDLLupdate(true);
@@ -260,8 +284,8 @@ final public class JAPDll {
 
 	private static boolean update()
 	{
-		if (renameDLL(JAP_DLL, JAP_DLL_OLD) &&
-			extractDLL(new File(UPDATE_PATH + JAP_DLL )))
+		if (renameDLL(JAP_DLL_32bit, JAP_DLL_OLD_32bit) &&
+			extractDLL(new File(UPDATE_PATH + JAP_DLL_32bit )))
 		{
 			JAPModel.getInstance().setDLLupdate(false);
 			JAPController.getInstance().saveConfigFile();
@@ -269,7 +293,7 @@ final public class JAPDll {
 		}
 		else
 		{
-			renameDLL(JAP_DLL_OLD, JAP_DLL);
+			renameDLL(JAP_DLL_OLD_32bit, JAP_DLL_32bit);
 			return false;
 		}
 	}
@@ -309,12 +333,12 @@ final public class JAPDll {
 	*/
    private static boolean extractDLL(File a_file)
    {
-		LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Extracting " + JAP_DLL_NEW + " from jar-file: ");
+		LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Extracting " + JAP_DLL_NEW_32bit + " from jar-file: ");
 		FileOutputStream fos;
 
 		try
 		{
-			InputStream is = ResourceLoader.loadResourceAsStream(JAP_DLL_NEW);
+			InputStream is = ResourceLoader.loadResourceAsStream(JAP_DLL_NEW_32bit);
 			if (is == null)
 			{
 				return false;
@@ -358,7 +382,7 @@ final public class JAPDll {
 	private static void askUserWhatToDo()
 	{
 		String[] args = new String[2];
-		args[0] = "'" + JAP_DLL + "'";
+		args[0] = "'" + JAP_DLL_32bit + "'";
 		args[1] = "'" + UPDATE_PATH + "'";
 		int answer =
 			JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(),
@@ -380,7 +404,7 @@ final public class JAPDll {
 	{
 		boolean b_extractOK = false;
 		final JFileChooser chooser = new JFileChooser();
-		chooser.setSelectedFile(new File(UPDATE_PATH + JAP_DLL));
+		chooser.setSelectedFile(new File(UPDATE_PATH + JAP_DLL_32bit));
 		MyFileFilter filter = new MyFileFilter();
 		chooser.setFileFilter(filter);
 		int returnVal = chooser.showSaveDialog(JAPController.getInstance().getViewWindow());
@@ -450,7 +474,7 @@ final public class JAPDll {
 	{
 		//Inform the User about the necessary JAP restart
 		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
-									JAPMessages.getString(MSG_DLL_UPDATE, "'" + JAP_DLL + "'"));
+									JAPMessages.getString(MSG_DLL_UPDATE, "'" + JAP_DLL_32bit + "'"));
 		//close JAP
 		JAPController.getInstance().goodBye(false);
 	}

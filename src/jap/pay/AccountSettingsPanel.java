@@ -3284,15 +3284,18 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			return;
 		}
 		PayAccountsFile accounts = PayAccountsFile.getInstance();
-		boolean reallyDelete = false;
+		Timestamp now = new Timestamp(new java.util.Date().getTime());
+		XMLBalance balance;
+		String message;
 
 		if (accounts.getActiveAccount() == selectedAccount && JAPController.getInstance().getAnonMode() &&
 			!hasDisconnected())
 		{
 				return;
 		}
-
-		if (!selectedAccount.hasAccountInfo())
+		
+		balance = selectedAccount.getBalance();
+		if (balance == null)
 		{
 			boolean yes = JAPDialog.showYesNoDialog(GUIUtils.getParentWindow(this.getRootPanel()),
 				JAPMessages.getString("ngDeleteAccountStatement"));
@@ -3301,13 +3304,14 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			{
 				doGetStatement(selectedAccount);
 			}
-		}
-		if (selectedAccount.hasAccountInfo())
+		}		
+		
+		if (!selectedAccount.hasExpired(now))
 		{
-			XMLAccountInfo accInfo = selectedAccount.getAccountInfo();
-			if (accInfo.getBalance().getTimestamp().getTime() <
-				(System.currentTimeMillis() - 1000 * 60 * 60 * 24))
+			balance = selectedAccount.getBalance();
+			if (balance.getTimestamp().getTime() < (System.currentTimeMillis() - 1000 * 60 * 60 * 24))
 			{
+				// update account information, as there was no update for a long time
 				boolean yes = JAPDialog.showYesNoDialog(GUIUtils.getParentWindow(this.getRootPanel()),
 					JAPMessages.getString(MSG_OLDSTATEMENT));
 
@@ -3316,39 +3320,22 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					doGetStatement(selectedAccount);
 				}
 			}
-
-			if (accInfo.getBalance().getCredit() > 0)
+			
+			if (selectedAccount.isCharged(now))
 			{
-				boolean yes = JAPDialog.showYesNoDialog(GUIUtils.getParentWindow(this.getRootPanel()),
-					JAPMessages.getString("ngDeleteAccountCreditLeft"));
-
-				if (yes)
-				{
-					reallyDelete = true;
-				}
+				message = JAPMessages.getString("ngDeleteAccountCreditLeft");
 			}
 			else
 			{
-				boolean yes = JAPDialog.showYesNoDialog(GUIUtils.getParentWindow(this.getRootPanel()),
-					JAPMessages.getString("ngReallyDeleteAccount"));
-
-				if (yes)
-				{
-					reallyDelete = true;
-				}
+				message = JAPMessages.getString("ngReallyDeleteAccount");
 			}
 		}
 		else
 		{
-			boolean yes = JAPDialog.showYesNoDialog(GUIUtils.getParentWindow(this.getRootPanel()),
-				JAPMessages.getString("ngReallyDeleteAccount"));
-
-			if (yes)
-			{
-				reallyDelete = true;
-			}
+			message = JAPMessages.getString("ngReallyDeleteAccount");			
 		}
-		if (reallyDelete)
+		
+		if (JAPDialog.showYesNoDialog(GUIUtils.getParentWindow(this.getRootPanel()), message))
 		{
 			try
 			{
