@@ -781,7 +781,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1 = new GridBagConstraints();
 		c1.anchor = GridBagConstraints.NORTHWEST;
 		p.setLayout(gbl1);
-		m_labelAnonymity = new JLabel(JAPMessages.getString("ngAnonymitaet"));
+		m_labelAnonymity = new JLabel(JAPMessages.getString("ngCascadeInfo"));
 		c1.insets = new Insets(0, 5, 0, 0);
 		p.add(m_labelAnonymity, c1);
 		
