@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -128,10 +129,12 @@ public class RecursiveCopyTool {
 		}
 	}
 	
-	private static void copySingleFile(File src, File dest) throws IOException
+	
+	static void copySingleFile(File src, File dest) throws IOException
 	{
 		FileInputStream fromSrcFile = new FileInputStream(src);
-		FileOutputStream toDestFile = new FileOutputStream(dest);
+		copySingleFile(fromSrcFile, dest);
+		/*FileOutputStream toDestFile = new FileOutputStream(dest);
 		byte[] copyBuffer = new byte[COPY_BUFFER_SIZE];
 		int bytesReadFromSrcFile = 0;
 		
@@ -142,11 +145,43 @@ public class RecursiveCopyTool {
 			if(bytesReadFromSrcFile == EOF) break;
 		}
 		fromSrcFile.close();
-		toDestFile.close();
+		toDestFile.close();*/
 	}
 	
-	public static void main(String args[])
+	static void copySingleFile(InputStream src, File dest) throws IOException
 	{
-		copyRecursive(new File(args[0]), new File(args[1]));
+		//FileInputStream fromSrcFile = new FileInputStream(src);
+		if(src == null)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Abort copy process: InputStream is null");
+			return;
+		}
+		FileOutputStream toDestFile = null;
+		try {
+			toDestFile = new FileOutputStream(dest);
+			byte[] copyBuffer = new byte[COPY_BUFFER_SIZE];
+			int bytesReadFromSrcFile = 0;
+			
+			while(src.available()>0)
+			{
+				bytesReadFromSrcFile = src.read(copyBuffer);
+				toDestFile.write(copyBuffer);
+				if(bytesReadFromSrcFile == EOF) break;
+			}
+		}
+		catch(IOException ioe)
+		{
+			/* Catch this Exception just to close the streams */ 
+			try 
+			{
+				if(toDestFile != null)
+				{
+					toDestFile.close();
+				}
+				src.close();
+			}
+			catch (IOException ioe1) {}
+			throw new IOException(ioe.getMessage());
+		}
 	}
 }
