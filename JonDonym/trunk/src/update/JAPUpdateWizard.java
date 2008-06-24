@@ -38,6 +38,7 @@ import java.awt.Container;
 import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
 import anon.infoservice.HTTPConnectionFactory;
+import anon.infoservice.IProxyInterfaceGetter;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.ListenerInterface;
 import gui.JAPMessages;
@@ -478,7 +479,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 				boolean bAnonProxy = false;
 				IMutableProxyInterface proxyInterface =
 					JAPModel.getInstance().getUpdateProxyInterface();
-				IMutableProxyInterface.IProxyInterfaceGetter proxyInterfaceGetter;
+				IProxyInterfaceGetter proxyInterfaceGetter;
 
 
 				for (int i = 0; (i < 2) && !Thread.currentThread().isInterrupted(); i++)

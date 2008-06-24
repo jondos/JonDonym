@@ -47,11 +47,7 @@ public interface IMutableProxyInterface
 	 */
 	public IProxyInterfaceGetter getProxyInterface(boolean a_bAnonInterface);
 
-	public interface IProxyInterfaceGetter
-	{
-		public ImmutableProxyInterface getProxyInterface();
-	}
-
+	
 	public static class DummyMutableProxyInterface implements IMutableProxyInterface
 	{
 		private IProxyInterfaceGetter m_dummyGetter = new IProxyInterfaceGetter()

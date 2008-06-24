@@ -115,7 +115,7 @@ public class KeyExchangeManager {
   public KeyExchangeManager(InputStream a_inputStream, OutputStream a_outputStream, MixCascade a_cascade,
 							ITrustModel a_trustModel)
 	  throws XMLParseException, SignatureException, IOException, UnknownProtocolVersionException,
-	  ITrustModel.TrustException
+	  TrustException
   {
 	  try
 	  {
@@ -143,7 +143,7 @@ public class KeyExchangeManager {
 		   Element elem = XMLUtil.toXMLDocument(xmlData).getDocumentElement();
 		   m_cascade = new MixCascade(elem, Long.MAX_VALUE, a_cascade.getId());
 
-		  ITrustModel.TrustException excepTrust = null;
+		  TrustException excepTrust = null;
 		  SignatureException execSignature = null;
 		  if (a_cascade.isUserDefined())
 		  {
@@ -176,7 +176,7 @@ public class KeyExchangeManager {
 					  a_trustModel.checkTrust(m_cascade);
 					  bCascadeTrust = true;
 				  }
-				  catch (ITrustModel.TrustException a_e)
+				  catch (TrustException a_e)
 				  {
 					  excepTrust = a_e;
 				  }
@@ -189,7 +189,7 @@ public class KeyExchangeManager {
 					  a_trustModel.checkTrust(cascadeInDB);
 					  bCascadeInDBTrust = true;
 				  }
-				  catch (ITrustModel.TrustException a_e)
+				  catch (TrustException a_e)
 				  {
 				  }
 				  catch (SignatureException a_e)

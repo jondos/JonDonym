@@ -781,7 +781,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		/* make sure that we are connected */
 		int connectionCounter = 0;
 		HTTPConnectionDescriptor currentConnectionDescriptor = null;
-		IMutableProxyInterface.IProxyInterfaceGetter proxyInterfaceGetter = null;
+		IProxyInterfaceGetter proxyInterfaceGetter = null;
 		IMutableProxyInterface proxyInterface;
 		boolean bAnonProxy;
 

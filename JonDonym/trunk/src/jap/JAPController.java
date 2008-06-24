@@ -128,6 +128,7 @@ import proxy.DirectProxy.AllowUnprotectedConnectionCallback;
 import update.JAPUpdateWizard;
 import jap.pay.AccountUpdater;
 import anon.infoservice.ClickedMessageIDDBEntry;
+import anon.client.TrustException;
 
 /* This is the Controller of All. It's a Singleton!*/
 public final class JAPController extends Observable implements IProxyListener, Observer,

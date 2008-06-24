@@ -34,6 +34,7 @@ import java.io.File;
 import java.math.BigInteger;
 
 import anon.crypto.JAPCertificate;
+import anon.infoservice.IProxyInterfaceGetter;
 import anon.infoservice.ProxyInterface;
 import anon.util.ResourceLoader;
 import anon.infoservice.ImmutableProxyInterface;
@@ -1323,7 +1324,7 @@ public final class JAPModel extends Observable
 		return JAPController.getInstance().isShuttingDown();
 	}
 
-	private IMutableProxyInterface.IProxyInterfaceGetter getProxyInterface(
+	private IProxyInterfaceGetter getProxyInterface(
 		   int a_component, boolean a_bAnonInterface)
 	{
 		if (isShuttingDown())
@@ -1331,8 +1332,8 @@ public final class JAPModel extends Observable
 			return null;
 		}
 
-		IMutableProxyInterface.IProxyInterfaceGetter proxyDirect, proxyAnon;
-		proxyDirect = new IMutableProxyInterface.IProxyInterfaceGetter()
+		IProxyInterfaceGetter proxyDirect, proxyAnon;
+		proxyDirect = new IProxyInterfaceGetter()
 		{
 			public ImmutableProxyInterface getProxyInterface()
 			{
@@ -1340,7 +1341,7 @@ public final class JAPModel extends Observable
 				return JAPModel.getInstance().getProxyInterface();
 			}
 		};
-		proxyAnon = new IMutableProxyInterface.IProxyInterfaceGetter()
+		proxyAnon = new IProxyInterfaceGetter()
 		{
 			public ImmutableProxyInterface getProxyInterface()
 			{
