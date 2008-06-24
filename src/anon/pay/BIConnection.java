@@ -47,6 +47,7 @@ import anon.crypto.IMyPrivateKey;
 import anon.crypto.XMLSignature;
 import anon.crypto.tinytls.TinyTLS;
 import anon.infoservice.IMutableProxyInterface;
+import anon.infoservice.IProxyInterfaceGetter;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.ListenerInterface;
 import anon.pay.xml.XMLAccountCertificate;
@@ -152,7 +153,7 @@ public class BIConnection implements ICaptchaSender
 		}
 
 		m_proxyInterface = a_proxyInterface;
-		IMutableProxyInterface.IProxyInterfaceGetter proxyInterfaceGetter;
+		IProxyInterfaceGetter proxyInterfaceGetter;
 		boolean bAnonProxy = false;
 
 		for (int i = 0; (i < 2) && !Thread.currentThread().isInterrupted(); i++)

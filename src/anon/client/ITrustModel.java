@@ -42,11 +42,4 @@ public interface ITrustModel
 
 	public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException;
 
-	public static class TrustException extends Exception
-	{
-		public TrustException(String a_message)
-		{
-			super(a_message);
-		}
-	}
 }

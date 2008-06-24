@@ -66,7 +66,7 @@ import logging.LogType;
 import HTTPClient.HTTPConnection;
 import anon.infoservice.IMutableProxyInterface;
 import anon.IServiceContainer;
-
+import anon.client.TrustException;
 /**
  * @author Stefan Lieske
  */
@@ -683,7 +683,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				closeSocketHandler();
 				return ErrorCodes.E_INTERRUPTED;
 			}
-			catch (ITrustModel.TrustException a_e)
+			catch (TrustException a_e)
 			{
 				LogHolder.log(LogLevel.INFO, LogType.NET, a_e);
 				closeSocketHandler();
