@@ -29,6 +29,7 @@ package platform;
 
 import java.io.File;
 import anon.util.ClassUtil;
+import anon.util.Util;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -73,15 +74,16 @@ public class MacOS extends AbstractOS
 	
 	protected boolean openLink(String a_link)
 	{
+		String urlString = Util.encodeWhiteSpaces(a_link);
 		try
 		{
-			Runtime.getRuntime().exec("open " + a_link);
+			Runtime.getRuntime().exec("open " + urlString);
 			return true;
 		}
 		catch (Exception ex)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC,
-						  "Cannot open '" + a_link + "' in MacOS default program.");
+						  "Cannot open '" + urlString + "' in MacOS default program.");
 		}
 
 		return false;

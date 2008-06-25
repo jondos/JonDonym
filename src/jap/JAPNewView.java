@@ -29,6 +29,7 @@ package jap;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -36,6 +37,9 @@ import java.util.Hashtable;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -96,6 +100,7 @@ import anon.pay.PayMessage;
 import anon.proxy.IProxyListener;
 import anon.util.JobQueue;
 import anon.util.Util;
+import anon.util.ZLibTools;
 import gui.CountryMapper;
 import gui.FlippingPanel;
 import gui.GUIUtils;
@@ -2522,9 +2527,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
-		JAPHelp help = JAPHelp.getInstance();
-		help.getContextObj().setContext("index");
-		help.loadCurrentContext();
+		
+		boolean helpOpened = AbstractOS.getInstance().openHelp();
+		
+		if(!helpOpened)
+		{
+			addStatusMsg("TODO: Fehlermeldung - Hilfe nicht gefunden", JAPDialog.MESSAGE_TYPE_ERROR, true);
+			JAPHelp help = JAPHelp.getInstance();
+			help.getContextObj().setContext("index");
+			help.loadCurrentContext();
+		}
 	}
 
 	public void setVisible(boolean a_bVisible)

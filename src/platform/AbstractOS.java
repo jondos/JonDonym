@@ -32,12 +32,14 @@ import jap.JAPConstants;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Vector;
 import java.util.jar.JarFile;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import anon.util.ClassUtil;
@@ -284,7 +286,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	 * @param versionFile the XML file where the help version is specified.
 	 * @return the help version number as string, or null if no version string was found in versionFile
 	 */
-	public static String getHelpVersionString(File versionFile)
+	public static String getHelpVersion(File versionFile)
 	{
 		try 
 		{
@@ -295,15 +297,19 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		} 
 		catch (IOException ioe) 
 		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Error: an I/O error occured while parsing help version file: "+ioe.getMessage());
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Error: an I/O error occured while parsing help version file: ", ioe);
 		} 
 		catch (XMLParseException xpe) 
 		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Error: help version file cannot be parsed: "+xpe.getMessage());
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Error: help version file cannot be parsed: ", xpe);
 		}
 		return null;
 	}
 	
+	/**
+	 * returns the path to the folder which contains the Jarfile or null if JonDo is not executed from a Jar file
+	 * @return the path to the folder which contains the Jarfile or null if JonDo is not executed from a Jar file
+	 */
 	public String getDefaultHelpPath()
 	{
 		File classParentFile = ClassUtil.getClassDirectory(this.getClass());
@@ -316,12 +322,22 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		return null;
 	}
 	
+	/**
+	 * returns a handle to the help parent folder based on the default help parent folder
+	 * @return a handle to the help parent folder based on the default help parent folder
+	 */
 	public File getDefaultHelpFolder()
 	{
 		return new File(getDefaultHelpPath()+File.separator+
 				JAPConstants.HELP_FOLDER);
 	}
 	
+	/**
+	 * checks if there is a help installed in the specified external help path
+	 * @return true if a help folder exists in the user defined help path. If no help 
+	 * 			path is specified by the user the default path (the folder where the 
+	 * 			Jarfile is situated) is checked.
+	 */
 	public boolean isHelpInstalled()
 	{
 		return getDefaultHelpFolder().exists();
@@ -339,28 +355,41 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		return getDefaultHelpFolder();
 	}
 	
-	public boolean helpJonDoVersionMismatch()
+	/**
+	 * checks whether the help version number matches the JonDo version number
+	 * @return true if and only if the stored help version number is exactly the same 
+	 * 			as the JonDo version number
+	 */
+	public boolean helpVersionMismatch()
 	{
 		File versionFile = 
 			new File(getDefaultHelpPath()+File.separator+
 				JAPConstants.HELP_FOLDER+
 				JAPConstants.HELP_VERSION_FILE);
-		String versionString = getHelpVersionString(versionFile);
+		String versionString = getHelpVersion(versionFile);
 		return !JAPConstants.aktVersion.equals(versionString);
 	}
 	
+	/**
+	 * installs the JonDo help externally out the JonDo Jarfile in the specified external destination folder. If no folder 
+	 * was specified the help is installed in the same directory where the JAR file is situated. If JonDo is not executed 
+	 * from a Jar-Archive the installation process aborts. This routibne also performs an installation if there is already 
+	 * a help version installed which does not match the JonDo version number (even if the help version is more recent than 
+	 * the JonDo version)
+	 */
 	public void installHelp()
 	{
 		File helpFolder = getHelpFolder();
+		File versionFile = 
+			new File(getDefaultHelpPath()+File.separator+
+				JAPConstants.HELP_FOLDER+
+				JAPConstants.HELP_VERSION_FILE);
+		
 		if(helpFolder.exists())
-		{
-			File versionFile = 
-				new File(getDefaultHelpPath()+File.separator+
-					JAPConstants.HELP_FOLDER+
-					JAPConstants.HELP_VERSION_FILE);
-			String versionString = getHelpVersionString(versionFile);
+		{	
+			String versionString = getHelpVersion(versionFile);
 			
-			if(!helpJonDoVersionMismatch())
+			if(!helpVersionMismatch())
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help is already installed!");
 				return;
@@ -378,25 +407,66 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Not running a jar file: Installing help is not necessary");
 			return;
 		}
-		ZLibTools.extractArchive(japArchive, JAPConstants.HELP_FOLDER, getHelpPath());
+		boolean installationSuccessful = ZLibTools.extractArchive(japArchive, JAPConstants.HELP_FOLDER, getHelpPath());
+		if(installationSuccessful)
+		{
+			Document helpVersionDoc = createHelpVersionDoc();
+			try
+			{
+				XMLUtil.write(helpVersionDoc, versionFile);
+			} 
+			catch (IOException ioe)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Could not write help version due to an I/O error: ", ioe);
+			}
+		}
 	}
 	
+	/**
+	 * creates an XML document containing the version of the JonDo help which has to match the actual JonDo version
+	 * @return an XML document containing the version of the JonDo help
+	 */
+	private Document createHelpVersionDoc()
+	{
+		Document helpVersionDoc = XMLUtil.createDocument();
+		Element helpVersionNode = helpVersionDoc.createElement(HELP_VERSION_NODE);
+		XMLUtil.setAttribute(helpVersionNode, HELP_VERSION_ATTRIBUTE, JAPConstants.aktVersion);
+		helpVersionDoc.appendChild(helpVersionNode);
+		return helpVersionDoc;
+	}
+	
+	/**
+	 * Opens the start page of the JonDo help
+	 * @return true if the start page could be found, false otherwise
+	 */
 	public boolean openHelp()
 	{
-		if(!isHelpInstalled() || helpJonDoVersionMismatch())
+		if(!isHelpInstalled() || helpVersionMismatch())
 		{
 			installHelp();
 		}
 		Locale loc = JAPMessages.getLocale();
 		String startPath =
 			loc.toString().equalsIgnoreCase("de") ? "de/help/" : "en/help/";
-		if(!isHelpInstalled()) return false;
-		
-		openLink(getHelpPath()+
-				 File.separator+
-				 JAPConstants.HELP_FOLDER+
-				 startPath+
-				 JAPConstants.HELP_START);
+		if(!isHelpInstalled()) 
+		{	
+			return false;
+		}
+		try
+		{
+			URL helpURL = 
+				new URL("file://"+getHelpPath()+
+					 File.separator+
+					 JAPConstants.HELP_FOLDER+
+					 startPath+
+					 JAPConstants.HELP_START);
+			openURL(helpURL);	
+		} 
+		catch (MalformedURLException e)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Malformed URL Excpetion: ", e);
+			return false;
+		}
 		return true;
 		
 	}
@@ -417,8 +487,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 				} 
 				catch (IOException ioe)
 				{
-					LogHolder.log(LogLevel.ERR, LogType.MISC, "An I/O error occured while opening the JAR file: "+
-										ioe.getMessage());
+					LogHolder.log(LogLevel.ERR, LogType.MISC, "An I/O error occured while opening the JAR file: ", ioe);
 				}
 		}
 		return null;
@@ -426,7 +495,6 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	
 	/**
 	 * Returns a vector of all running VMs. This only works on the Sun VM
-	 *
 	 * @return a vector of all running Virtual Machines
 	 */
 	public Vector getActiveVMs()

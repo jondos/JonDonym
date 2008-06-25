@@ -38,7 +38,10 @@ public final class Util
 {
 	/** Defines the format of version numbers in the AN.ON project. */
 	public static final String VERSION_FORMAT = "00.00.000";
-
+	
+	private final static String WHITESPACE_ENCODED = "%20";
+	private final static String WHITESPACE = " ";
+	
 	/**
 	 * This class works without being initialised and is completely static.
 	 * Therefore, the constructor is not needed and private.
@@ -531,7 +534,24 @@ public final class Util
 
 		return a_source;
 	}
-
+	
+	public static String encodeWhiteSpaces(String stringWithWhitespaces)
+	{
+		/*replace any white space encodings with white spaces */
+		StringBuffer encodeBuffer = new StringBuffer("");
+		int whiteSpIndex = stringWithWhitespaces.indexOf(WHITESPACE, 0);
+		int lastIx = 0;
+		while(whiteSpIndex != -1)
+		{
+			encodeBuffer.append(stringWithWhitespaces.substring(lastIx, whiteSpIndex));				
+			encodeBuffer.append(WHITESPACE_ENCODED);
+			lastIx = whiteSpIndex+WHITESPACE.length();
+			whiteSpIndex = stringWithWhitespaces.indexOf(WHITESPACE, (whiteSpIndex+1));
+		}
+		encodeBuffer.append(stringWithWhitespaces.substring(lastIx));
+		return encodeBuffer.toString();
+	}
+	
 	/**
 	 * Uses the reflection API to get the value of a static field in the given class, if the field
 	 * is present.
