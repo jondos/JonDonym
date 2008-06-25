@@ -704,10 +704,13 @@ public class PerformanceMeter implements Runnable
 	
 	public HttpResponseStructure generateRandomData()
 	{
+		byte[] data = new byte[100*1024];
+		new java.util.Random().nextBytes(data);
+		
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
 				HttpResponseStructure.HTTP_ENCODING_PLAIN, 
-				new String(java.security.SecureRandom.getSeed(256*1024)));
-		
+				new String(data));
+				
 		return httpResponse;
 	}
 	
