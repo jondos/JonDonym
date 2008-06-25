@@ -46,16 +46,14 @@ import java.util.Hashtable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+import HTTPClient.HTTPConnection;
 import anon.ErrorCodes;
-import anon.client.DummyTrafficControlChannel;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
-import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.SimpleMixCascadeContainer;
 import anon.infoservice.Database;
@@ -67,8 +65,6 @@ import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import infoservice.Configuration;
 import infoservice.HttpResponseStructure;
-
-import java.math.BigInteger;
 
 /**
  * A simple performance meter for Mix cascades.<br>
@@ -114,7 +110,7 @@ public class PerformanceMeter implements Runnable
 
 	private Hashtable m_usedAccountFiles = new Hashtable();
 	private AccountUpdater m_accUpdater = null;
-	
+
 	public PerformanceMeter(AccountUpdater updater)
 	{
 		init();
@@ -436,20 +432,69 @@ public class PerformanceMeter implements Runnable
 		       	String host = iface.getHost();
 		       	int port = iface.getPort();
 		       	
-		       	stream.write(("GET http://" + host + ":" + port + "/generaterandomdata HTTP/1.0\r\n\r\n").getBytes());
+		       	PerformanceToken token = null;
+		       	
+		       	Document doc = XMLUtil.createDocument();
+		       	String xml = null;
+		       	
+		       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
+		       	doc.appendChild(tokenRequest.toXmlElement(doc));
+		       	xml = XMLUtil.toString(doc);
+		       	
+		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
+		       	
+		       	stream.write(("POST http://" + host + ":" + port + "/requestperformancetoken HTTP/1.0\r\n").getBytes());
+		       	stream.write(("Content-Length: " + xml.length() + "\r\n\r\n").getBytes());
+		       	stream.write((xml + "\r\n").getBytes());
+		       	
+		        // read HTTP header from PerformanceServer
+		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
+		        {
+		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
+		        	s.close();
+		        	// TODO: try it twice?
+		        	break;
+		        }
+		        
+		        char[] buff = new char[resp.m_length];
+		        reader.read(buff);
+		        
+		        reader.close();
+		        stream.close();
+	        	s.close();
+		        
+		        try
+		        {
+		        	doc = XMLUtil.toXMLDocument(buff);
+		        	token = new PerformanceToken(doc.getDocumentElement());
+		        	
+		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Received Token " + token.getId() + ".");
+		        }
+		        catch(XMLParseException ex)
+		        {
+		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Error while parsing performance token.");
+		        	return false;
+		        }
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
 		       	
-		        /*String data = 
-		        	"<SendDummyDataRequest dataLength=\"" + m_dataSize +"\">" +
-		        	"	<InfoService id=\"" + m_infoServiceConfig.getID() + "\">" +
-		        	"	</InfoService>" +
-		        	"</SendDummyDataRequest>";
-		        
-				stream.write("POST /senddummydata\r\n".getBytes());
-				stream.write(("Content-Length: " + data.getBytes().length +"\r\n\r\n").getBytes());*/
-				//stream.write(data.getBytes());
-					
+		       	s = new Socket(m_proxyHost, m_proxyPort);
+		       	s.setSoTimeout(PERFORMANCE_SERVER_TIMEOUT);
+		       	
+		       	stream = s.getOutputStream();
+
+		       	reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+		       	
+		       	PerformanceRequest perfRequest = new PerformanceRequest(token.getId(), m_dataSize);
+		       	doc.appendChild(perfRequest.toXmlElement(doc));
+		       	xml = XMLUtil.toString(doc);
+		       	
+		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
+		       	
+		       	stream.write(("POST http://" + host + ":" + port + "/requestperformance HTTP/1.0\r\n").getBytes());
+		       	stream.write(("Content-Length: " + xml.length() + "\r\n\r\n").getBytes());
+		       	stream.write((xml + "\r\n").getBytes());
+		       	
 				// read first byte for delay
 		        long transferInitiatedTime = System.currentTimeMillis();
 		        	
@@ -686,19 +731,7 @@ public class PerformanceMeter implements Runnable
 		
 		return credit;
 	}
-	
-	public HttpResponseStructure generateRandomData()
-	{
-		byte[] data = new byte[m_dataSize];
-		new java.util.Random().nextBytes(data);
 		
-		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
-				HttpResponseStructure.HTTP_ENCODING_PLAIN, 
-				new String(data));
-				
-		return httpResponse;
-	}
-	
 	private class HTTPResponse
 	{
 		int m_statusCode = -1;
