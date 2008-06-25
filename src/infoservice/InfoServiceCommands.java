@@ -69,6 +69,7 @@ import infoservice.dynamic.DynamicConfiguration;
 import infoservice.japforwarding.JapForwardingTools;
 import infoservice.tor.MixminionDirectoryAgent;
 import infoservice.tor.TorDirectoryAgent;
+import infoservice.performance.PerformanceRequestHandler;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -120,6 +121,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 
 	private DynamicCommandsExtension m_dynamicExtension = new DynamicCommandsExtension();
 
+	private PerformanceRequestHandler m_perfRequestHandler =  new PerformanceRequestHandler();
+	
 	// Ok the cache the StatusInfo DB here for performance reasonses (the
 	// database objete itself will always remain the same during the lifetime of
 	// the Is -so
@@ -934,19 +937,21 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"50%\">" +
 				"<tr><th>Account Number</th><th>Remaining Credits</th><th>Account File</th><th>Last Modified</th></tr>\n";
 				
-				Hashtable usedFiles = InfoService.getPerfMeter().getUsedAccountFiles();
-				
-				Enumeration keys = usedFiles.keys();
-				while (keys.hasMoreElements())
+				if(vPIs.size() != 0)
 				{
-					File file = (File) keys.nextElement();
-					PayAccount account = (PayAccount)usedFiles.get(file);
-					htmlData += "<tr>" + "<td class=\"name\">" + account.getAccountNumber() + "</td>" 
-					+ "<td class=\"status\">"  + JAPUtil.formatBytesValueWithUnit(account.getBalance().getVolumeBytesLeft() * 1000) + "</td>"
-					+ "<td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(account.getBackupTime()) + "</td></tr>";
-				}
+					Hashtable usedFiles = InfoService.getPerfMeter().getUsedAccountFiles();
 				
-				htmlData += "</table><br />";
+					Enumeration keys = usedFiles.keys();
+					while (keys.hasMoreElements())
+					{
+						File file = (File) keys.nextElement();
+						PayAccount account = (PayAccount)usedFiles.get(file);
+						htmlData += "<tr>" + "<td class=\"name\">" + account.getAccountNumber() + "</td>" 
+						+ "<td class=\"status\">"  + JAPUtil.formatBytesValueWithUnit(account.getBalance().getVolumeBytesLeft() * 1000) + "</td>"
+						+ "<td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(account.getBackupTime()) + "</td></tr>";
+					}
+					htmlData += "</table><br />";
+				}
 			}
 			else
 			{
@@ -1896,9 +1901,15 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		{
 			httpResponse = m_dynamicExtension.virtualCascadeStatus();
 		}
-		else if(command.startsWith("/generaterandomdata"))
+		else if(command.startsWith("/requestperformancetoken") 
+				&& (method == Constants.REQUEST_METHOD_POST))
 		{
-			httpResponse = InfoService.getPerfMeter().generateRandomData();
+			httpResponse = m_perfRequestHandler.handlePerformanceTokenRequest(postData);
+		}
+		else if(command.startsWith("/requestperformance") 
+				&& (method == Constants.REQUEST_METHOD_POST))
+		{
+			httpResponse = m_perfRequestHandler.handlePerformanceRequest(postData);
 		}
 		else
 		{
