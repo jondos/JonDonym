@@ -1896,6 +1896,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		{
 			httpResponse = m_dynamicExtension.virtualCascadeStatus();
 		}
+		else if(command.startsWith("/generaterandomdata"))
+		{
+			httpResponse = InfoService.getPerfMeter().generateRandomData();
+		}
 		else
 		{
 			ISRuntimeStatistics.ms_lNrOfUnknownRequests++;

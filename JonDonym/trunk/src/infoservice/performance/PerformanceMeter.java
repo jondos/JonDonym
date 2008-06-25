@@ -66,6 +66,8 @@ import anon.util.IMiscPasswordReader;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import infoservice.Configuration;
+import infoservice.HttpResponseStructure;
+
 import java.math.BigInteger;
 
 /**
@@ -175,8 +177,8 @@ public class PerformanceMeter implements Runnable
 			while(knownMixCascades.hasNext()) 
 			{
 				final MixCascade cascade = (MixCascade) knownMixCascades.next();
-				if(cascade.hasPerformanceServer())
-				{
+				/*if(cascade.hasPerformanceServer())
+				{*/
 					loadAccountFiles();
 					m_accUpdater.update();
 					performTestThread = new Thread(new Runnable()
@@ -241,7 +243,7 @@ public class PerformanceMeter implements Runnable
 							}
 						}
 					}
-				}
+				//}
 			}
 			if (m_lastTotalUpdates > 0)
 			{
@@ -432,9 +434,15 @@ public class PerformanceMeter implements Runnable
 		       	
 		       	MixInfo lastMix = a_cascade.getMixInfo(a_cascade.getNumberOfMixes() - 1);
 		       	
-		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Connecting to Performance Server at " + lastMix.getPerformanceServerHost() + ":" + lastMix.getPerformanceServerPort() + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
+		       	//stream.write(("CONNECT " + lastMix.getPerformanceServerHost()  + ":" + lastMix.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
 		       	
-		       	stream.write(("CONNECT " + lastMix.getPerformanceServerHost()  + ":" + lastMix.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
+		       	ListenerInterface iface = (ListenerInterface) m_infoServiceConfig.getHardwareListeners().elementAt(0);
+		       	String host = iface.getHost();
+		       	int port = iface.getPort();
+		       	
+		       	stream.write(("GET " + host + ":" + port + "/generaterandomdata HTTP/1.0").getBytes());
+		       	
+		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
 		       	
 		       	// read HTTP header from Anon Proxy
 		       	if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
@@ -446,15 +454,15 @@ public class PerformanceMeter implements Runnable
 		        	break;
 		        }
 		        
-		        String data = 
+		        /*String data = 
 		        	"<SendDummyDataRequest dataLength=\"" + m_dataSize +"\">" +
 		        	"	<InfoService id=\"" + m_infoServiceConfig.getID() + "\">" +
 		        	"	</InfoService>" +
 		        	"</SendDummyDataRequest>";
 		        
 				stream.write("POST /senddummydata\r\n".getBytes());
-				stream.write(("Content-Length: " + data.getBytes().length +"\r\n\r\n").getBytes());
-				stream.write(data.getBytes());
+				stream.write(("Content-Length: " + data.getBytes().length +"\r\n\r\n").getBytes());*/
+				//stream.write(data.getBytes());
 					
 				// read first byte for delay
 		        long transferInitiatedTime = System.currentTimeMillis();
@@ -462,7 +470,7 @@ public class PerformanceMeter implements Runnable
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Reading first byte for performance test...");
 		        reader.mark(2);
 		        reader.read();
-		        	
+		        
 		        long responseStartTime = System.currentTimeMillis();
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Downloading bytes for performance test...");
 		        reader.reset();
@@ -692,6 +700,15 @@ public class PerformanceMeter implements Runnable
 		}
 		
 		return credit;
+	}
+	
+	public HttpResponseStructure generateRandomData()
+	{
+		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
+				HttpResponseStructure.HTTP_ENCODING_PLAIN, 
+				new String(java.security.SecureRandom.getSeed(256*1024)));
+		
+		return httpResponse;
 	}
 	
 	private class HTTPResponse
