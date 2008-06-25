@@ -440,7 +440,7 @@ public class PerformanceMeter implements Runnable
 		       	String host = iface.getHost();
 		       	int port = iface.getPort();
 		       	
-		       	stream.write(("GET " + host + ":" + port + "/generaterandomdata HTTP/1.0").getBytes());
+		       	stream.write(("GET " + host + ":" + port + "/generaterandomdata HTTP/1.0\r\n\r\n").getBytes());
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
 		       	
@@ -580,18 +580,22 @@ public class PerformanceMeter implements Runnable
 		do
 		{
 			line = a_reader.readLine();
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "Recvied Line:" + line);
 			if(line == null || (i == 0 && !line.startsWith("HTTP"))) return null;
 			
 			if(line.startsWith("HTTP"))
 			{
 				int c = line.indexOf(" ");
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "HTTP line");
 				if(c == -1) return null;
 				r.m_statusCode = Integer.parseInt(line.substring(c + 1, c + 4));
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "status code: " + r.m_statusCode);
 			}
 			
 			if(line.startsWith("Content-Length: "))
 			{
 				r.m_length = Integer.parseInt(line.substring(16));
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "content-length:" + r.m_length);
 			}
 			
 			i++;
