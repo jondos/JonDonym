@@ -111,7 +111,7 @@ final public class ZLibTools
 		return resultData;
 	}
 	
-	public static void extractArchive(ZipFile archive, String pathName, String destination)
+	public static boolean extractArchive(ZipFile archive, String pathName, String destination)
 	{
 		
 		String dest = destination;
@@ -128,13 +128,13 @@ final public class ZLibTools
 		if(archive == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Archive is null");		
-			return;
+			return false;
 		}
 		if(destination == null)
 		{
 				LogHolder.log(LogLevel.ERR, LogType.MISC, "Error while extracting archive "+
 						archive.getName()+": destination address is null");
-				return;
+				return false;
 		}
 		try
 		{	
@@ -165,7 +165,7 @@ final public class ZLibTools
 			if( (matchedFileEntries.size() == 0) && (matchedDirEntries.size() == 0) )
 			{
 				LogHolder.log(LogLevel.ERR, LogType.MISC, "No matching files for "+pathName+"found in archive "+archive.getName());
-				return;
+				return false;
 			}
 			
 			for (Iterator iterator = matchedDirEntries.iterator(); iterator.hasNext(); dirIndex++) {
@@ -178,30 +178,33 @@ final public class ZLibTools
 						LogHolder.log(LogLevel.ERR, LogType.MISC, "Error while extracting archive "+
 								archive.getName()+": could not create directory "+dir.getName());
 						rollback(matchedDirEntries, dirIndex, dest);
-						return;
+						return false;
 					}
 				}
 			}
 			
-			for (Iterator iterator = matchedFileEntries.iterator(); iterator.hasNext(); fileIndex++) {
+			for (Iterator iterator = matchedFileEntries.iterator(); iterator.hasNext(); fileIndex++) 
+			{
 				ZipEntry zEntry = (ZipEntry) iterator.next();
 				File destFile = new File(dest+File.separator+zEntry.getName());
 				InputStream zEntryInputStream = archive.getInputStream(zEntry);
-				RecursiveCopyTool.copySingleFile(zEntryInputStream, destFile);
-				
+				RecursiveCopyTool.copySingleFile(zEntryInputStream, destFile);		
 			}
 		}
 		catch(IllegalStateException ise)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+archive.getName()+": file already closed");
+			return false;
 		} 
 		catch (IOException ioe) 
 		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+archive.getName()+": I/O error occured: "+ioe.getMessage());
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+archive.getName()+": I/O error occured: ", ioe);
 			
 			rollback(matchedFileEntries, fileIndex, destination);
 			rollback(matchedDirEntries, matchedDirEntries.size(), destination);
+			return false;
 		}
+		return true;
 	}
 
 	private static void rollback(Vector entries, int dirIndex, String destination) {
