@@ -1263,11 +1263,4 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			m_strMixIds += m_mixIds.elementAt(i);
 		}
 	}
-
-
-	
-	public boolean hasPerformanceServer()
-	{
-		return m_bPerformanceServer;
-	}
 }

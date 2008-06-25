@@ -431,11 +431,7 @@ public class PerformanceMeter implements Runnable
 
 		       	BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		       	HTTPResponse resp;
-		       	
-		       	MixInfo lastMix = a_cascade.getMixInfo(a_cascade.getNumberOfMixes() - 1);
-		       	
-		       	//stream.write(("CONNECT " + lastMix.getPerformanceServerHost()  + ":" + lastMix.getPerformanceServerPort() +" HTTP/1.0\r\n\r\n").getBytes());
-		       	
+		       			       	
 		       	ListenerInterface iface = (ListenerInterface) m_infoServiceConfig.getHardwareListeners().elementAt(0);
 		       	String host = iface.getHost();
 		       	int port = iface.getPort();
@@ -512,7 +508,7 @@ public class PerformanceMeter implements Runnable
         		// delay in ms
         		delay = responseStartTime - transferInitiatedTime;
         		
-        		// speed in kbit/sec;
+        		// speed in bit/sec;
         		speed = (m_dataSize * 8) / (responseEndTime - responseStartTime);
         		
         		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
@@ -649,7 +645,7 @@ public class PerformanceMeter implements Runnable
 		{
 			MixCascade cascade = (MixCascade) cascades.next();
 			
-			if(cascade.hasPerformanceServer() && cascade.isPayment() && 
+			if(cascade.isPayment() && 
 				cascade.getPIID() != null && cascade.getPIID().equals(a_piid) &&
 				isPerftestAllowed(cascade))
 			{
