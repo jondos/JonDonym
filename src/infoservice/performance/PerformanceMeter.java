@@ -485,6 +485,7 @@ public class PerformanceMeter implements Runnable
 
 		       	reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		       	
+		       	doc = XMLUtil.createDocument();
 		       	PerformanceRequest perfRequest = new PerformanceRequest(token.getId(), m_dataSize);
 		       	doc.appendChild(perfRequest.toXmlElement(doc));
 		       	xml = XMLUtil.toString(doc);
