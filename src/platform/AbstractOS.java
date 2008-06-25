@@ -27,14 +27,29 @@
  */
 package platform;
 
+import jap.JAPConstants;
+
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Vector;
+import java.util.jar.JarFile;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import anon.util.ClassUtil;
+import anon.util.RecursiveCopyTool;
+import anon.util.XMLParseException;
+import anon.util.XMLUtil;
+import anon.util.ZLibTools;
 
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+import gui.JAPMessages;
 import gui.JAPHelp.IExternalURLCaller;
 import gui.JAPHelp.IExternalEMailCaller;
 import gui.dialog.JAPDialog;
@@ -72,6 +87,9 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 
 	private static File ms_tmpDir;
 
+	public final static String HELP_VERSION_NODE = "jondohelp";
+	public final static String HELP_VERSION_ATTRIBUTE = "version";
+	
 	static
 	{
 		// Needs to be done according to the JDK because java.io.tmpdir
@@ -259,6 +277,153 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		return a_url.toString();
 	}
 
+	/**
+	 * Reads the version string out of the help version XML file
+	 * The help version number corresponds to the version number of the JonDo
+	 * 
+	 * @param versionFile the XML file where the help version is specified.
+	 * @return the help version number as string, or null if no version string was found in versionFile
+	 */
+	public static String getHelpVersionString(File versionFile)
+	{
+		try 
+		{
+			Document doc = XMLUtil.readXMLDocument(versionFile);
+			Node versionNode = XMLUtil.getFirstChildByName(doc, HELP_VERSION_NODE);
+			String versionString = XMLUtil.parseAttribute(versionNode, HELP_VERSION_ATTRIBUTE, null);
+			return versionString;
+		} 
+		catch (IOException ioe) 
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Error: an I/O error occured while parsing help version file: "+ioe.getMessage());
+		} 
+		catch (XMLParseException xpe) 
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Error: help version file cannot be parsed: "+xpe.getMessage());
+		}
+		return null;
+	}
+	
+	public String getDefaultHelpPath()
+	{
+		File classParentFile = ClassUtil.getClassDirectory(this.getClass());
+		if(classParentFile!= null)
+		{
+			String path = classParentFile.getPath();
+			int p_index = path.indexOf("JAP.jar");
+			return (p_index == -1) ? path : path.substring(0, p_index);
+		}
+		return null;
+	}
+	
+	public File getDefaultHelpFolder()
+	{
+		return new File(getDefaultHelpPath()+File.separator+
+				JAPConstants.HELP_FOLDER);
+	}
+	
+	public boolean isHelpInstalled()
+	{
+		return getDefaultHelpFolder().exists();
+	}
+	
+	public String getHelpPath()
+	{
+		//TODO: can be specified by user
+		return getDefaultHelpPath();
+	}
+	
+	public File getHelpFolder()
+	{
+		//TODO: can be specified by user
+		return getDefaultHelpFolder();
+	}
+	
+	public boolean helpJonDoVersionMismatch()
+	{
+		File versionFile = 
+			new File(getDefaultHelpPath()+File.separator+
+				JAPConstants.HELP_FOLDER+
+				JAPConstants.HELP_VERSION_FILE);
+		String versionString = getHelpVersionString(versionFile);
+		return !JAPConstants.aktVersion.equals(versionString);
+	}
+	
+	public void installHelp()
+	{
+		File helpFolder = getHelpFolder();
+		if(helpFolder.exists())
+		{
+			File versionFile = 
+				new File(getDefaultHelpPath()+File.separator+
+					JAPConstants.HELP_FOLDER+
+					JAPConstants.HELP_VERSION_FILE);
+			String versionString = getHelpVersionString(versionFile);
+			
+			if(!helpJonDoVersionMismatch())
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help is already installed!");
+				return;
+			}
+			else
+			{
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Removing old help");
+				RecursiveCopyTool.deleteRecursion(helpFolder);
+			}
+		}
+		// We can go on extracting the help from the JarFile if necessary
+		JarFile japArchive = getJarFile();
+		if(japArchive == null)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Not running a jar file: Installing help is not necessary");
+			return;
+		}
+		ZLibTools.extractArchive(japArchive, JAPConstants.HELP_FOLDER, getHelpPath());
+	}
+	
+	public boolean openHelp()
+	{
+		if(!isHelpInstalled() || helpJonDoVersionMismatch())
+		{
+			installHelp();
+		}
+		Locale loc = JAPMessages.getLocale();
+		String startPath =
+			loc.toString().equalsIgnoreCase("de") ? "de/help/" : "en/help/";
+		if(!isHelpInstalled()) return false;
+		
+		openLink(getHelpPath()+
+				 File.separator+
+				 JAPConstants.HELP_FOLDER+
+				 startPath+
+				 JAPConstants.HELP_START);
+		return true;
+		
+	}
+	
+	/**
+	 * returns a handle to the JAP.jar or null if JAP is not started as jar-file
+	 * @returns a handle to the JAP.jar or null if JAP is not started as jar-file
+	 */
+	public JarFile getJarFile()
+	{
+		File classParentFile = ClassUtil.getClassDirectory(this.getClass());
+		if(classParentFile != null)
+		{
+			if(classParentFile.getPath().endsWith(".jar"))
+				try
+				{
+					return new JarFile(classParentFile);
+				} 
+				catch (IOException ioe)
+				{
+					LogHolder.log(LogLevel.ERR, LogType.MISC, "An I/O error occured while opening the JAR file: "+
+										ioe.getMessage());
+				}
+		}
+		return null;
+	}
+	
 	/**
 	 * Returns a vector of all running VMs. This only works on the Sun VM
 	 *
