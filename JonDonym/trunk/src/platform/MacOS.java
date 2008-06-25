@@ -217,8 +217,5 @@ public class MacOS extends AbstractOS
 		}
 		return getBundlePath()+File.separator+BUNDLE_MAC_OS_EXECUTABLES+bundleExecutable;*/
 		return null;
-	}
-	
-	
-	
+	}	
 }

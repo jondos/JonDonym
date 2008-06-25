@@ -40,6 +40,8 @@ import java.util.zip.Inflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import platform.AbstractOS;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -130,7 +132,9 @@ final public class ZLibTools
 		}
 		if(destination == null)
 		{
-			dest = System.getProperty("user.dir");
+				LogHolder.log(LogLevel.ERR, LogType.MISC, "Error while extracting archive "+
+						archive.getName()+": destination address is null");
+				return;
 		}
 		try
 		{	

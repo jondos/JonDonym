@@ -148,6 +148,36 @@ public class RecursiveCopyTool {
 		toDestFile.close();*/
 	}
 	
+	/* WARNING False usage of this method is dangerous! */
+	public static void deleteRecursion(File src)
+	{
+		if(src == null)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
+					"Source file is null: This should never happen");
+			return;
+		}
+		if(!src.exists())
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, 
+					"There is no such file or directory: "+src.getName());
+			return;
+		}
+		if(src.isDirectory())
+		{
+			String[] filesInCurrentDirectory = src.list();
+			for (int i = 0; i < filesInCurrentDirectory.length; i++) 
+			{
+				String currentFileName = filesInCurrentDirectory[i];
+				deleteRecursion(new File(src.getAbsolutePath()+File.separator+currentFileName));
+			}
+		}
+		String lstr = src.getName() + 
+						(src.delete() ? " was successfully deleted." : 
+										" was not successfully deleted.");
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, lstr);
+	}
+	
 	static void copySingleFile(InputStream src, File dest) throws IOException
 	{
 		//FileInputStream fromSrcFile = new FileInputStream(src);
