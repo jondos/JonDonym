@@ -107,7 +107,7 @@ public class PerformanceMeter implements Runnable
 	private String m_lastCascadeUpdated = "(none)";
 	private long m_lBytesRecvd;
 	
-	public static final int PERFORMANCE_SERVER_TIMEOUT = 5000;
+	public static final int PERFORMANCE_SERVER_TIMEOUT = 60000;
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60;
 	public static final int MINOR_INTERVAL = 1000;	
 	private PayAccountsFile m_payAccountsFile;
@@ -423,7 +423,7 @@ public class PerformanceMeter implements Runnable
         	{
         		long delay;
         		long speed;
-					
+				
 		       	Socket s = new Socket(m_proxyHost, m_proxyPort);
 		       	s.setSoTimeout(PERFORMANCE_SERVER_TIMEOUT);
 		       	
@@ -440,20 +440,10 @@ public class PerformanceMeter implements Runnable
 		       	String host = iface.getHost();
 		       	int port = iface.getPort();
 		       	
-		       	stream.write(("GET " + host + ":" + port + "/generaterandomdata HTTP/1.0\r\n\r\n").getBytes());
+		       	stream.write(("GET http://" + host + ":" + port + "/generaterandomdata HTTP/1.0\r\n\r\n").getBytes());
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
 		       	
-		       	// read HTTP header from Anon Proxy
-		       	if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
-		       	{
-		       		LogHolder.log(LogLevel.WARNING, LogType.NET, "Connection to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
-		       		s.close();
-		       		
-		       		// TODO: try it twice?
-		        	break;
-		        }
-		        
 		        /*String data = 
 		        	"<SendDummyDataRequest dataLength=\"" + m_dataSize +"\">" +
 		        	"	<InfoService id=\"" + m_infoServiceConfig.getID() + "\">" +
@@ -580,22 +570,18 @@ public class PerformanceMeter implements Runnable
 		do
 		{
 			line = a_reader.readLine();
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "Recvied Line:" + line);
 			if(line == null || (i == 0 && !line.startsWith("HTTP"))) return null;
 			
 			if(line.startsWith("HTTP"))
 			{
 				int c = line.indexOf(" ");
-				LogHolder.log(LogLevel.WARNING, LogType.NET, "HTTP line");
 				if(c == -1) return null;
 				r.m_statusCode = Integer.parseInt(line.substring(c + 1, c + 4));
-				LogHolder.log(LogLevel.WARNING, LogType.NET, "status code: " + r.m_statusCode);
 			}
 			
 			if(line.startsWith("Content-Length: "))
 			{
 				r.m_length = Integer.parseInt(line.substring(16));
-				LogHolder.log(LogLevel.WARNING, LogType.NET, "content-length:" + r.m_length);
 			}
 			
 			i++;
@@ -698,7 +684,6 @@ public class PerformanceMeter implements Runnable
 			
 			if(account.getBI() != null && account.getBI().getId().equals(a_piid))
 			{
-				// balance credit is kb
 				credit += account.getBalance().getCredit() * 1000;
 			}
 		}
@@ -708,7 +693,7 @@ public class PerformanceMeter implements Runnable
 	
 	public HttpResponseStructure generateRandomData()
 	{
-		byte[] data = new byte[100*1024];
+		byte[] data = new byte[m_dataSize];
 		new java.util.Random().nextBytes(data);
 		
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,

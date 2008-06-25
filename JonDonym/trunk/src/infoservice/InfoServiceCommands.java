@@ -942,7 +942,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 					File file = (File) keys.nextElement();
 					PayAccount account = (PayAccount)usedFiles.get(file);
 					htmlData += "<tr>" + "<td class=\"name\">" + account.getAccountNumber() + "</td>" 
-					+ "<td class=\"status\">"  + JAPUtil.formatBytesValueWithUnit(account.getBalance().getVolumeBytesLeft()) + "</td>"
+					+ "<td class=\"status\">"  + JAPUtil.formatBytesValueWithUnit(account.getBalance().getVolumeBytesLeft() * 1000) + "</td>"
 					+ "<td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(account.getBackupTime()) + "</td></tr>";
 				}
 				
