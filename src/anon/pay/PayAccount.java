@@ -212,7 +212,7 @@ public class PayAccount implements IXMLEncodable
 		}
 		else
 		{
-			m_lBackupDone = XMLUtil.parseAttribute(elemRoot, XML_BACKUP_DONE, 0);
+			m_lBackupDone = XMLUtil.parseAttribute(elemRoot, XML_BACKUP_DONE, 0l);
 		}
 
 		// fill vector with transfer certificates
