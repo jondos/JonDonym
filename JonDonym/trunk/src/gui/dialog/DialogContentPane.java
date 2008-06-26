@@ -278,7 +278,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
 	 * @param a_options the button definitions
 	 */
-	public DialogContentPane(JDialog a_parentDialog, String a_strText, Options a_options)
+	public DialogContentPane(JDialog a_parentDialog, String a_strText, DialogContentPaneOptions a_options)
 	{
 		this((RootPaneContainer)a_parentDialog, a_strText, new Layout(""), a_options);
 	}
@@ -294,7 +294,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
 	 * @param a_options the button definitions
 	 */
-	public DialogContentPane(JAPDialog a_parentDialog, String a_strText, Options a_options)
+	public DialogContentPane(JAPDialog a_parentDialog, String a_strText, DialogContentPaneOptions a_options)
 	{
 		this((RootPaneContainer)a_parentDialog, a_strText, new Layout(""), a_options);
 	}
@@ -311,7 +311,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * @param a_layout the general layout of the content pane (icon, title, border, ...)
 	 * @param a_options the button definitions
 	 */
-	public DialogContentPane(JDialog a_parentDialog, String a_strText, Layout a_layout, Options a_options)
+	public DialogContentPane(JDialog a_parentDialog, String a_strText, Layout a_layout, DialogContentPaneOptions a_options)
 	{
 		this((RootPaneContainer)a_parentDialog, a_strText, a_layout, a_options);
 	}
@@ -328,7 +328,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * @param a_layout the general layout of the content pane (icon, title, border, ...)
 	 * @param a_options the button definitions
 	 */
-	public DialogContentPane(JAPDialog a_parentDialog, String a_strText, Layout a_layout, Options a_options)
+	public DialogContentPane(JAPDialog a_parentDialog, String a_strText, Layout a_layout, DialogContentPaneOptions a_options)
 	{
 		this((RootPaneContainer)a_parentDialog, a_strText, a_layout, a_options);
 	}
@@ -386,7 +386,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * may not change it in lifetime.
 	 * @param a_options the button definitions
 	 */
-	public DialogContentPane(JDialog a_parentDialog, Options a_options)
+	public DialogContentPane(JDialog a_parentDialog, DialogContentPaneOptions a_options)
 	{
 		this((RootPaneContainer)a_parentDialog, null, new Layout(""), a_options);
 	}
@@ -398,7 +398,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * may not change it in lifetime.
 	 * @param a_options the button definitions
 	 */
-	public DialogContentPane(JAPDialog a_parentDialog, Options a_options)
+	public DialogContentPane(JAPDialog a_parentDialog, DialogContentPaneOptions a_options)
 	{
 		this((RootPaneContainer)a_parentDialog, null, new Layout(""), a_options);
 	}
@@ -411,7 +411,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * @param a_layout the general layout of the content pane (icon, title, border, ...)
 	 * @param a_options the button definitions
 	 */
-	public DialogContentPane(JDialog a_parentDialog, Layout a_layout, Options a_options)
+	public DialogContentPane(JDialog a_parentDialog, Layout a_layout, DialogContentPaneOptions a_options)
 	{
 		this((RootPaneContainer)a_parentDialog, null, a_layout, a_options);
 	}
@@ -424,7 +424,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * @param a_layout the general layout of the content pane (icon, title, border, ...)
 	 * @param a_options the button definitions
 	 */
-	public DialogContentPane(JAPDialog a_parentDialog, Layout a_layout, Options a_options)
+	public DialogContentPane(JAPDialog a_parentDialog, Layout a_layout, DialogContentPaneOptions a_options)
 	{
 		this((RootPaneContainer)a_parentDialog, null, a_layout, a_options);
 	}
@@ -442,7 +442,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 * @param a_options the button definitions
 	 */
 	private DialogContentPane(RootPaneContainer a_parentDialog, String a_strText,
-							  Layout a_layout, Options a_options)
+							  Layout a_layout, DialogContentPaneOptions a_options)
 	{
 		if (a_layout == null)
 		{
@@ -450,7 +450,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		}
 		if (a_options == null)
 		{
-			a_options = new Options((JAPHelpContext.IHelpContext)null);
+			a_options = new DialogContentPaneOptions((JAPHelpContext.IHelpContext)null);
 		}
 
 		init(a_parentDialog, a_layout.getTitle(), a_strText, SwingConstants.CENTER, a_options.getOptionType(),
@@ -788,165 +788,6 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		public final boolean hasDisplayableErrorMessage()
 		{
 			return JAPDialog.retrieveErrorMessage(m_strMessage, m_throwable) != null;
-		}
-	}
-
-	/**
-	 * Defines the buttons that are available in a dialog.
-	 */
-	public static final class Options
-	{
-		private int m_optionType;
-		private DialogContentPane m_previousContentPane;
-		private JAPHelpContext.IHelpContext m_helpContext;
-
-		/**
-		 * Creates new button options.
-		 * @param a_optionType one of the available option types the define the type and number of buttons
-		 */
-		public Options(int a_optionType)
-		{
-			this(a_optionType, (JAPHelpContext.IHelpContext)null, null);
-		}
-
-		/**
-		 * Creates new button options. No buttons are shown by default.
-		 * @param a_strHelpContext a IHelpContext; if it returns an other help context value than null,
-		 * a help button is shown that opens the context;
-		 */
-		public Options(String a_strHelpContext)
-		{
-			this(OPTION_TYPE_EMPTY, a_strHelpContext, null);
-		}
-
-		/**
-		 * Creates new button options. No buttons are shown by default.
-		 * @param a_helpContext a IHelpContext; if it returns an other help context value than null,
-		 * a help button is shown that opens the context;
-		 */
-		public Options(JAPHelpContext.IHelpContext a_helpContext)
-		{
-			this(OPTION_TYPE_EMPTY, a_helpContext, null);
-		}
-
-		/**
-		 * Creates new button options. No buttons are shown by default.
-		 * @param a_previousContentPane A DialogContentPane that will be linked with this one; it gets this
-		 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
-		 * move between the panes.
-		 */
-		public Options(DialogContentPane a_previousContentPane)
-		{
-			this(OPTION_TYPE_EMPTY, (JAPHelpContext.IHelpContext)null, a_previousContentPane);
-		}
-
-		/**
-		 * Creates new button options. No buttons are shown by default.
-		 * @param a_strHelpContext a IHelpContext; if it returns an other help context value than null,
-		 * a help button is shown that opens the context;
-		 * @param a_previousContentPane A DialogContentPane that will be linked with this one; it gets this
-		 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
-		 * move between the panes.
-		 */
-		public Options(String a_strHelpContext, DialogContentPane a_previousContentPane)
-		{
-			this(OPTION_TYPE_EMPTY, a_strHelpContext, a_previousContentPane);
-		}
-
-		/**
-		 * Creates new button options. No buttons are shown by default.
-		 * @param a_helpContext a IHelpContext; if it returns an other help context value than null,
-		 * a help button is shown that opens the context;
-		 * @param a_previousContentPane A DialogContentPane that will be linked with this one; it gets this
-		 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
-		 * move between the panes.
-		 */
-		public Options(JAPHelpContext.IHelpContext a_helpContext, DialogContentPane a_previousContentPane)
-		{
-			this(OPTION_TYPE_EMPTY, a_helpContext, a_previousContentPane);
-		}
-
-		/**
-		 * Creates new button options.
-		 * @param a_optionType one of the available option types the define the type and number of buttons
-		 * @param a_previousContentPane A DialogContentPane that will be linked with this one; it gets this
-		 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
-		 * move between the panes.
-		 */
-		public Options(int a_optionType, DialogContentPane a_previousContentPane)
-		{
-			this(a_optionType, (JAPHelpContext.IHelpContext)null, a_previousContentPane);
-		}
-
-		/**
-		 * Creates new button options.
-		 * @param a_optionType one of the available option types the define the type and number of buttons
-		 * @param a_helpContext a IHelpContext; if it returns an other help context value than null,
-		 * a help button is shown that opens the context;
-		 */
-		public Options(int a_optionType, JAPHelpContext.IHelpContext a_helpContext)
-		{
-			this(a_optionType, a_helpContext, null);
-		}
-
-		/**
-		 * Creates new button options.
-		 * @param a_optionType one of the available option types the define the type and number of buttons
-		 * @param a_strHelpContext a IHelpContext; if it returns an other help context value than null,
-		 * a help button is shown that opens the context;
-		 */
-		public Options(int a_optionType, String a_strHelpContext)
-		{
-			this(a_optionType, a_strHelpContext, null);
-		}
-
-
-		/**
-		 * Creates new button options.
-		 * @param a_optionType one of the available option types the define the type and number of buttons
-		 * @param a_strHelpContext a IHelpContext; if it returns an other help context value than null,
-		 * a help button is shown that opens the context;
-		 * @param a_previousContentPane A DialogContentPane that will be linked with this one; it gets this
-		 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
-		 * move between the panes.
-		 */
-		public Options(int a_optionType, final String a_strHelpContext, DialogContentPane a_previousContentPane)
-		{
-			this(a_optionType,
-				 new JAPHelpContext.IHelpContext(){public String getHelpContext(){return a_strHelpContext;}},
-				a_previousContentPane);
-		}
-
-		/**
-		 * Creates new button options.
-		 * @param a_optionType one of the available option types the define the type and number of buttons
-		 * @param a_helpContext a IHelpContext; if it returns an other help context value than null,
-		 * a help button is shown that opens the context;
-		 * @param a_previousContentPane A DialogContentPane that will be linked with this one; it gets this
-		 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
-		 * move between the panes.
-		 */
-		public Options(int a_optionType, JAPHelpContext.IHelpContext a_helpContext,
-					   DialogContentPane a_previousContentPane)
-		{
-			m_optionType = a_optionType;
-			m_helpContext = a_helpContext;
-			m_previousContentPane = a_previousContentPane;
-		}
-
-		public int getOptionType()
-		{
-			return m_optionType;
-		}
-
-		public JAPHelpContext.IHelpContext getHelpContext()
-		{
-			return m_helpContext;
-		}
-
-		public DialogContentPane getPreviousContentPane()
-		{
-			return m_previousContentPane;
 		}
 	}
 

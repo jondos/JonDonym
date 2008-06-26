@@ -31,6 +31,7 @@ package jap.pay.wizardnew;
 
 import gui.dialog.DialogContentPane;
 import gui.JAPMessages;
+import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.WorkerContentPane;
 import gui.dialog.JAPDialog;
 import anon.pay.PaymentInstanceDBEntry;
@@ -76,7 +77,7 @@ public class JpiSelectionPane extends DialogContentPane implements ActionListene
 	{
 		super(a_parentDialog, JAPMessages.getString(MSG_CHOOSEAJPI),
 		  new Layout(JAPMessages.getString(MSG_CHOOSEAJPI_TITLE), MESSAGE_TYPE_PLAIN),
-		  new Options(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
+		  new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
       	setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG | ON_YESOK_SHOW_NEXT_CONTENT |
 							  ON_NO_SHOW_PREVIOUS_CONTENT);
 

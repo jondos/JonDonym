@@ -59,6 +59,7 @@ import gui.JAPMessages;
 import gui.JTextComponentToClipboardCopier;
 import gui.LanguageMapper;
 import gui.dialog.DialogContentPane;
+import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import logging.LogType;
@@ -214,7 +215,7 @@ public class ConfigAssistant extends JAPDialog
 
 		final DialogContentPane paneSetLang = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_SET_NEW_LANGUAGE),
-			  layout, new DialogContentPane.Options(paneWelcome))
+			  layout, new DialogContentPaneOptions(paneWelcome))
 		{
 			public CheckError[] checkUpdate()
 			{
@@ -247,7 +248,7 @@ public class ConfigAssistant extends JAPDialog
 		});
 
 		DialogContentPane paneBrowserConf = new SimpleWizardContentPane(
-				  this, JAPMessages.getString(MSG_BROWSER_CONF), layout, new DialogContentPane.Options(paneSetLang))
+				  this, JAPMessages.getString(MSG_BROWSER_CONF), layout, new DialogContentPaneOptions(paneSetLang))
 		{
 			public CheckError[] checkUpdate()
 			{
@@ -316,7 +317,7 @@ public class ConfigAssistant extends JAPDialog
 			  this, JAPMessages.getString(MSG_BROWSER_TEST,
 										  JAPMessages.getString(
 			JAPDialog.LinkedCheckBox.MSG_REMEMBER_ANSWER)), layout,
-			  new DialogContentPane.Options(paneBrowserConf))
+			  new DialogContentPaneOptions(paneBrowserConf))
 		{
 			public CheckError[] checkYesOK()
 			{
@@ -367,7 +368,7 @@ public class ConfigAssistant extends JAPDialog
 
 		DialogContentPane paneBrowserTestNoWarning = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_EXPLAIN_NO_WARNING), layout,
-			  new DialogContentPane.Options(paneBrowserTest))
+			  new DialogContentPaneOptions(paneBrowserTest))
 		{
 			public boolean isSkippedAsNextContentPane()
 			{
@@ -392,7 +393,7 @@ public class ConfigAssistant extends JAPDialog
 										JAPMessages.getString("settingsInfoServiceConfigAdvancedSettingsTabTitle"),
 										JAPMessages.getString(
 		  JAPConfAnonGeneral.MSG_DENY_NON_ANONYMOUS_SURFING)}), layout,
-			new DialogContentPane.Options(paneBrowserTestNoWarning))
+			new DialogContentPaneOptions(paneBrowserTestNoWarning))
 		{
 
 			public boolean isSkippedAsNextContentPane()
@@ -416,7 +417,7 @@ public class ConfigAssistant extends JAPDialog
 			  JAPMessages.getString(JAPConf.MSG_READ_PANEL_HELP, new Object[]{
 									JAPMessages.getString("confButton"),
 									JAPMessages.getString("ngTreeNetwork")}), layout,
-			  new DialogContentPane.Options(paneExplainWarningInBrowser))
+			  new DialogContentPaneOptions(paneExplainWarningInBrowser))
 		{
 
 			public boolean isSkippedAsNextContentPane()
@@ -438,7 +439,7 @@ public class ConfigAssistant extends JAPDialog
 
 		DialogContentPane paneAnonTest = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_ANON_TEST), layout,
-			  new DialogContentPane.Options(paneExplainNoDirectConnection))
+			  new DialogContentPaneOptions(paneExplainNoDirectConnection))
 		{
 			public CheckError[] checkYesOK()
 			{
@@ -490,7 +491,7 @@ public class ConfigAssistant extends JAPDialog
 										  JAPMessages.getString("ngSettingsViewNormal"),
 										  JAPMessages.getString("confButton"),
 										  JAPMessages.getString("ngTreeNetwork")}),
-			  layout, new DialogContentPane.Options(paneAnonTest))
+			  layout, new DialogContentPaneOptions(paneAnonTest))
 		{
 			public boolean isSkippedAsNextContentPane()
 			{
@@ -511,7 +512,7 @@ public class ConfigAssistant extends JAPDialog
 
 		DialogContentPane paneExplainNoConnection = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_EXPLAIN_NO_CONNECTION), layout,
-			  new DialogContentPane.Options(paneExplainNoServiceAvailable))
+			  new DialogContentPaneOptions(paneExplainNoServiceAvailable))
 		{
 			public CheckError[] checkUpdate()
 			{
@@ -540,7 +541,7 @@ public class ConfigAssistant extends JAPDialog
 
 		DialogContentPane paneExplainBadConnection = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_EXPLAIN_BAD_CONNECTION), layout,
-			  new DialogContentPane.Options(paneExplainNoConnection))
+			  new DialogContentPaneOptions(paneExplainNoConnection))
 		{
 
 			public boolean isSkippedAsNextContentPane()
@@ -565,7 +566,7 @@ public class ConfigAssistant extends JAPDialog
 
 		DialogContentPane paneDeactivateActiveContents = new SimpleWizardContentPane(
 			this, JAPMessages.getString(MSG_DEACTIVATE_ACTIVE), layout,
-			new DialogContentPane.Options(paneExplainBadConnection));
+			new DialogContentPaneOptions(paneExplainBadConnection));
 		contentPane = paneDeactivateActiveContents.getContentPane();
 		contentPane.setLayout(new GridBagLayout());
 		constraints = new GridBagConstraints();
@@ -583,7 +584,7 @@ public class ConfigAssistant extends JAPDialog
 
 		final DialogContentPane paneView = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_SELECT_VIEW), layout,
-			  new DialogContentPane.Options(paneDeactivateActiveContents))
+			  new DialogContentPaneOptions(paneDeactivateActiveContents))
 		{
 			public CheckError[] checkYesOK()
 			{
@@ -627,7 +628,7 @@ public class ConfigAssistant extends JAPDialog
 
 		DialogContentPane paneHelp = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_HELP),
-			  layout, new DialogContentPane.Options(paneView))
+			  layout, new DialogContentPaneOptions(paneView))
 		{
 			/*
 			public boolean isMoveForwardAllowed()
@@ -652,7 +653,7 @@ public class ConfigAssistant extends JAPDialog
 		final DialogContentPane paneFinish = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_FINISHED) + "<br><br>" +
 			  JAPMessages.getString(MSG_SELECT_VIEW_RESTART), layout,
-			  new DialogContentPane.Options(paneHelp))
+			  new DialogContentPaneOptions(paneHelp))
 		{
 			public CheckError[] checkUpdate()
 			{

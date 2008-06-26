@@ -112,12 +112,14 @@ import gui.GUIUtils;
 import gui.JAPMessages;
 import gui.dialog.CaptchaContentPane;
 import gui.dialog.DialogContentPane;
-import gui.dialog.DialogContentPane.Options;
+import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.IDialogOptions;
+import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.PasswordContentPane;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
+import gui.dialog.DialogContentPane.Layout;
 import jap.AbstractJAPConfModule;
 import jap.JAPConfInfoService;
 import jap.JAPConstants;
@@ -1480,7 +1482,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 		//*********** fetch volume plans ************************//
 
-		WorkerContentPane.IReturnRunnable fetchPlans = new WorkerContentPane.IReturnRunnable()
+		IReturnRunnable fetchPlans = new IReturnRunnable()
 		{
 			private XMLVolumePlans m_volumePlans;
 			public void run()
@@ -1544,7 +1546,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		   fetchPlansPane, isNewAccount);
 
 		// ********** fetch payment options *********************//
-	   WorkerContentPane.IReturnRunnable fetchOptions = new WorkerContentPane.IReturnRunnable()
+	   IReturnRunnable fetchOptions = new IReturnRunnable()
 	   {
 		   private XMLPaymentOptions m_paymentOptions;
 		   public void run()
@@ -1630,7 +1632,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		};
 
 		/******** fetch transaction number ****************/
-		final WorkerContentPane.IReturnRunnable fetchTan = new WorkerContentPane.IReturnRunnable()
+		final IReturnRunnable fetchTan = new IReturnRunnable()
 		{
 			private XMLTransCert m_transCert;
 			public void run()
@@ -1760,7 +1762,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		};
 
 		//********* send passive payment ************
-		 WorkerContentPane.IReturnRunnable sendPassive = new WorkerContentPane.IReturnRunnable()
+		 IReturnRunnable sendPassive = new IReturnRunnable()
 		 {
 			 private Boolean m_successful = new Boolean(true);
 
@@ -1858,10 +1860,11 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		};
 
 		//************** show confirmation / result of payment  (dependent on method and outcome) ****************/
+		final DialogContentPane tmpPane=createUpdateAccountPane(a_accountCreationThread, methodSelectionPane, a_parentDialog, sendPassivePane);
+		final DialogContentPaneOptions tmpOptions=new DialogContentPaneOptions(tmpPane);
 		final SimpleWizardContentPane sentPane = new SimpleWizardContentPane(a_parentDialog,
-			JAPMessages.getString(MSG_SENTPASSIVE), null,
-			new Options(createUpdateAccountPane(
-				a_accountCreationThread, methodSelectionPane, a_parentDialog, sendPassivePane)))
+			JAPMessages.getString(MSG_SENTPASSIVE), (Layout)null,
+			tmpOptions)
 		{
 			public boolean isSkippedAsNextContentPane()
 			{
@@ -1992,7 +1995,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	}
 
 	//************ fetch AGBs (terms and conditions) *******//
-	private final class FetchTermsRunnable implements WorkerContentPane.IReturnRunnable
+	private final class FetchTermsRunnable implements IReturnRunnable
 	{
 		private XMLGenericText m_termsAndConditions;
 		private JAPDialog m_parentDialog;
@@ -2088,8 +2091,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				JAPDialog dialog =
 					new JAPDialog(AccountSettingsPanel.this.getRootPanel(),
 								  JAPMessages.getString(TransactionOverviewDialog.MSG_FETCHING_TAN), true);
-				WorkerContentPane.IReturnRunnable run =
-					new WorkerContentPane.IReturnRunnable()
+				IReturnRunnable run =
+					new IReturnRunnable()
 				{
 					Object data;
 					public void run()
@@ -2271,7 +2274,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		a_parentDialog.setResizable(false);
 
 		/******************** get available JPIs   ********************/
-		WorkerContentPane.IReturnRunnable fetchJpisThread = new WorkerContentPane.IReturnRunnable()
+		IReturnRunnable fetchJpisThread = new IReturnRunnable()
 		{
 				private Vector allJpis; //Vector<PaymentInstanceDBEntry>
 
@@ -2402,7 +2405,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 
 	   //****************** fetch cancellation policy **********************//
-	   WorkerContentPane.IReturnRunnable fetchPolicy = new WorkerContentPane.IReturnRunnable()
+	   IReturnRunnable fetchPolicy = new IReturnRunnable()
 	   {
 		   private XMLGenericText cancellationPolicy;
 		   public void run()
@@ -2469,7 +2472,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		};
 
 	    /*************** create keypair ****************/
-		final WorkerContentPane.IReturnRunnable keyCreationThread = new WorkerContentPane.IReturnRunnable()
+		final IReturnRunnable keyCreationThread = new IReturnRunnable()
 		{
 			private DSAKeyPair m_keyPair;
 
@@ -2719,7 +2722,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		DialogContentPane saveErrorPane = new SimpleWizardContentPane(
 			a_parentDialog, "<Font color=\"red\">" + JAPMessages.getString(MSG_CREATED_ACCOUNT_NOT_SAVED) + "</Font>",
 			new DialogContentPane.Layout("", DialogContentPane.MESSAGE_TYPE_ERROR),
-			new DialogContentPane.Options(saveConfig))
+			new DialogContentPaneOptions(saveConfig))
 		{
 			public boolean isSkippedAsNextContentPane()
 			{
@@ -3538,16 +3541,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 			return l;
 		}
-	}
-
-	private static interface IReturnAccountRunnable extends WorkerContentPane.IReturnRunnable
-	{
-		public PayAccount getAccount();
-	}
-
-	private static interface IReturnBooleanRunnable extends WorkerContentPane.IReturnRunnable
-	{
-		public boolean isTrue();
 	}
 
 	private static final class FixedReturnAccountRunnable implements IReturnAccountRunnable
