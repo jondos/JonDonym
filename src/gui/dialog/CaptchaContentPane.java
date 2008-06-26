@@ -79,7 +79,7 @@ public class CaptchaContentPane extends DialogContentPane implements
 	{
 		super(a_parentDialog, JAPMessages.getString(MSG_SOLVE),
 			  new Layout(JAPMessages.getString(MSG_TITLE), MESSAGE_TYPE_PLAIN),
-			  new Options(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
+			  new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
 		setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG | ON_YESOK_SHOW_PREVIOUS_CONTENT |
 								  ON_NO_SHOW_PREVIOUS_CONTENT);
 

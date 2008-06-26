@@ -464,9 +464,7 @@ public final class JAPHelp extends JAPDialog
 				};
 			}
 			m_emailCaller = a_emailCaller;
-			//html = new JEditorPane("text/html", "<html><body></body></html>");
-			html = new JEditorPane("text/html","");
-			
+			html = new JEditorPane("text/html", "<html><body></body></html>");
 			/*
 			StyleSheet style = ((HTMLEditorKit)html.getEditorKit()).getStyleSheet();
 			style.addRule("body { font-size: 30pt }");

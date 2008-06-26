@@ -35,13 +35,13 @@ import javax.swing.JDialog;
 public class SimpleWizardContentPane extends DialogContentPane implements DialogContentPane.IWizardSuitable
 {
 	public SimpleWizardContentPane(JAPDialog a_parentDialog, String a_strText,
-								   Layout a_layout, Options a_options)
+								   Layout a_layout, DialogContentPaneOptions a_options)
 	{
 		super(a_parentDialog, a_strText, a_layout, a_options);
 	}
 
 	public SimpleWizardContentPane(JDialog a_parentDialog, String a_strText,
-								   Layout a_layout, Options a_options)
+								   Layout a_layout, DialogContentPaneOptions a_options)
 	{
 		super(a_parentDialog, a_strText, a_layout, a_options);
 	}

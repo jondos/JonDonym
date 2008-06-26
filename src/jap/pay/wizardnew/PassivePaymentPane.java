@@ -50,6 +50,7 @@ import anon.util.Util;
 import gui.JAPMessages;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPane.IWizardSuitable;
+import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;
 import gui.dialog.WorkerContentPane;
 import logging.LogType;
@@ -100,7 +101,7 @@ public class PassivePaymentPane extends DialogContentPane implements IWizardSuit
 	{
 		super(a_parentDialog, "Dummy Text<br>Dummy Text<br>DummyText",
 			  new Layout(JAPMessages.getString(MSG_ENTER), MESSAGE_TYPE_PLAIN),
-			  new Options(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
+			  new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
 		setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG | ON_YESOK_SHOW_NEXT_CONTENT |
 								  ON_NO_SHOW_PREVIOUS_CONTENT);
 		m_language = JAPMessages.getLocale().getLanguage();

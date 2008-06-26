@@ -58,6 +58,7 @@ import anon.pay.xml.XMLTransactionOverview;
 import anon.util.IXMLEncodable;
 import gui.GUIUtils;
 import gui.JAPMessages;
+import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.WorkerContentPane;
 import jap.JAPConstants;
@@ -330,8 +331,8 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 
 			JAPDialog dialog =
 				new JAPDialog(this, JAPMessages.getString(TransactionOverviewDialog.MSG_FETCHING_TAN));
-			WorkerContentPane.IReturnRunnable run2 =
-				new WorkerContentPane.IReturnRunnable()
+			IReturnRunnable run2 =
+				new IReturnRunnable()
 			{
 				Object xmlReply;
 				public void run()

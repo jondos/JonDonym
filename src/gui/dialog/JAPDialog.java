@@ -1435,7 +1435,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		dialog = new JAPDialog(a_parentComponent, a_title, true, bForceApplicationModality);
 		dialogContentPane = new DialogContentPane(dialog,
 												  new DialogContentPane.Layout(null, a_messageType, a_icon),
-												  new DialogContentPane.Options(a_options.getOptionType(),
+												  new DialogContentPaneOptions(a_options.getOptionType(),
 			helpContext));
 		if (dialogContentPane.getButtonHelp() != null)
 		{

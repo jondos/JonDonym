@@ -42,7 +42,7 @@ import org.w3c.dom.NodeList;
 import anon.util.XMLParseException;
 import anon.util.Util;
 import anon.infoservice.MixCascade;
-import anon.infoservice.MixCascade.MixPosition;
+import anon.infoservice.MixPosition;
 
 /**
  * XML structure for a easy cost confirmation (without mircopayment function) which is sent to the AI by the Jap
@@ -196,7 +196,7 @@ public class XMLEasyCC implements IXMLEncodable
 					{
 						m_bOldHashFormat = true;
 					}
-					m_priceCerts.put(new MixCascade.MixPosition(position, curId), curHash);
+					m_priceCerts.put(new MixPosition(position, curId), curHash);
 				}
 			}
 		}
@@ -243,11 +243,11 @@ public class XMLEasyCC implements IXMLEncodable
 		elemRoot.appendChild(elemPriceCerts);
 		Enumeration certs = m_priceCerts.keys();
 		String curHash;
-		MixCascade.MixPosition curId;
+		MixPosition curId;
 		Element curElem;
 		while(certs.hasMoreElements() )
 		{
-			curId = (MixCascade.MixPosition) certs.nextElement();
+			curId = (MixPosition) certs.nextElement();
 			curHash = (String) m_priceCerts.get(curId);
 			curElem = a_doc.createElement("PriceCertHash");
 			XMLUtil.setValue(curElem,curHash);
@@ -380,11 +380,11 @@ public class XMLEasyCC implements IXMLEncodable
 					if (m_bOldHashFormat)
 					{
 						// the position does not tell anything about the real position...
-						ids[i] = ( (MixCascade.MixPosition) currentKey).getId();
+						ids[i] = ( (MixPosition) currentKey).getId();
 					}
 					else
 					{
-						ids[i] = Integer.toString( ( (MixCascade.MixPosition) currentKey).getPosition());
+						ids[i] = Integer.toString( ( (MixPosition) currentKey).getPosition());
 					}
 					hashes[i] = m_priceCerts.get(currentKey).toString();
 				}

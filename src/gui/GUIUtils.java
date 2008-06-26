@@ -81,6 +81,7 @@ import anon.util.ClassUtil;
 import anon.util.JobQueue;
 import anon.util.ResourceLoader;
 import anon.infoservice.ServiceLocation;
+import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.WorkerContentPane;
 import logging.LogHolder;
@@ -403,7 +404,7 @@ public final class GUIUtils
 			// this image must be scaled
 
 			final ImageIcon image = img;
-			WorkerContentPane.IReturnRunnable run = new WorkerContentPane.IReturnRunnable()
+			IReturnRunnable run = new IReturnRunnable()
 			{
 				private ImageIcon m_icon;
 				public void run()

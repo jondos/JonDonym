@@ -30,6 +30,8 @@ package jap.pay.wizardnew;
 
 import gui.dialog.DialogContentPane;
 import java.awt.GridBagConstraints;
+
+import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.WorkerContentPane;
 import gui.dialog.JAPDialog;
 import java.awt.GridBagLayout;
@@ -78,7 +80,7 @@ public class CancellationPolicyPane extends DialogContentPane implements IWizard
 	{
 		super(a_parentDialog,
 			  new Layout(JAPMessages.getString(MSG_HEADING), MESSAGE_TYPE_PLAIN),
-			  new Options(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
+			  new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
 		setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG | ON_YESOK_SHOW_NEXT_CONTENT |
 								  ON_NO_SHOW_PREVIOUS_CONTENT);
 		m_fetchPolicyPane = a_previousContentPane;

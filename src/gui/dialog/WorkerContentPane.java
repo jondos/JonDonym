@@ -84,7 +84,7 @@ public class WorkerContentPane extends DialogContentPane implements
 							 DialogContentPane a_previousContentPane, Runnable a_workerRunnable)
 	{
 		super(a_parentDialog, a_strText, new Layout(a_strTitle),
-			  new Options(OPTION_TYPE_CANCEL, a_previousContentPane));
+			  new DialogContentPaneOptions(OPTION_TYPE_CANCEL, a_previousContentPane));
 		setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG);
 		m_workerRunnable = a_workerRunnable;
 
@@ -346,12 +346,6 @@ public class WorkerContentPane extends DialogContentPane implements
 		}
 	}
 
-	/**
-	 * Implement this interface if you want your runnable object to return some kind of value.
-	 */
-	public static interface IReturnRunnable extends Runnable
-	{
-		public Object getValue();
-	}
+
 
 }

@@ -54,7 +54,7 @@ public class FinishedContentPane extends DialogContentPane implements
 	{
 		super(a_parentDialog, a_strText,
 			  new DialogContentPane.Layout(a_strTitle, DialogContentPane.MESSAGE_TYPE_INFORMATION),
-			  new DialogContentPane.Options(a_previousContentPane));
+			  new DialogContentPaneOptions(a_previousContentPane));
 		setDefaultButtonOperation(ON_CANCEL_DISPOSE_DIALOG | ON_YESOK_DISPOSE_DIALOG |
 								  ON_NO_SHOW_PREVIOUS_CONTENT);
 	}

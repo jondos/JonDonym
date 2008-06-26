@@ -62,6 +62,8 @@ import gui.JAPMessages;
 import gui.LanguageMapper;
 import gui.TitledGridBagPanel;
 import gui.dialog.DialogContentPane;
+import gui.dialog.DialogContentPaneOptions;
+import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
@@ -292,7 +294,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 												new DialogContentPane.Layout(
 					JAPMessages.getString(JAPDialog.MSG_TITLE_WARNING),
 					DialogContentPane.MESSAGE_TYPE_WARNING),
-												null)
+												(DialogContentPaneOptions)null)
 				{
 					boolean m_bCanceled = false;
 
@@ -328,7 +330,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 					}
 				};
 
-				final WorkerContentPane.IReturnRunnable doIt = new WorkerContentPane.IReturnRunnable()
+				final IReturnRunnable doIt = new IReturnRunnable()
 				{
 					Object m_value;
 
@@ -385,7 +387,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 					new DialogContentPane.Layout(
 						JAPMessages.getString(JAPDialog.MSG_TITLE_INFO),
 						DialogContentPane.MESSAGE_TYPE_INFORMATION),
-					new DialogContentPane.Options(importPane))
+					new DialogContentPaneOptions(importPane))
 				{
 					public CheckError[] checkUpdate()
 					{
@@ -411,7 +413,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 					new DialogContentPane.Layout(
 						JAPMessages.getString(JAPDialog.MSG_TITLE_ERROR),
 						DialogContentPane.MESSAGE_TYPE_ERROR),
-					new DialogContentPane.Options(goodResultPane))
+					new DialogContentPaneOptions(goodResultPane))
 				{
 					public boolean isSkippedAsPreviousContentPane()
 					{

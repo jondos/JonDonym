@@ -38,6 +38,7 @@ import anon.util.ResourceLoader;
 import gui.JAPDll;
 import gui.JAPMessages;
 import gui.dialog.DialogContentPane;
+import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;
 import javax.swing.event.HyperlinkEvent;
 import java.net.URL;
@@ -63,7 +64,7 @@ public class JAPAboutNew extends JAPDialog implements HyperlinkListener
 		   JAPDll.getDllVersion() + ")" :
 		   ""));
 		DialogContentPane contentPane =
-			new DialogContentPane(this, (DialogContentPane.Layout)null, new DialogContentPane.Options(DialogContentPane.OPTION_TYPE_DEFAULT));
+			new DialogContentPane(this, (DialogContentPane.Layout)null, new DialogContentPaneOptions(DialogContentPane.OPTION_TYPE_DEFAULT));
 		contentPane.setDefaultButtonOperation(DialogContentPane.ON_CLICK_DISPOSE_DIALOG);
 
 		String htmlText = new String(ResourceLoader.loadResource(JAPMessages.getString("htmlfileAbout")));

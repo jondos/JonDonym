@@ -47,6 +47,7 @@ import anon.pay.xml.XMLVolumePlan;
 import gui.JAPMessages;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPane.IWizardSuitable;
+import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;
 import gui.dialog.WorkerContentPane;
 import jap.JAPConstants;
@@ -83,7 +84,7 @@ public class MethodSelectionPane extends DialogContentPane implements IWizardSui
 	{
 		super(a_parentDialog, "",
 			  new Layout(JAPMessages.getString(MSG_SELECTOPTION), MESSAGE_TYPE_PLAIN),
-			  new Options(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
+			  new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
 		setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG | ON_YESOK_SHOW_NEXT_CONTENT |
 								  ON_NO_SHOW_PREVIOUS_CONTENT);
 

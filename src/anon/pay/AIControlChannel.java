@@ -54,6 +54,7 @@ import java.util.Enumeration;
 import anon.infoservice.IMutableProxyInterface;
 import anon.IServiceContainer;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixPosition;
 import java.util.Hashtable;
 import java.sql.Timestamp;
 
@@ -682,11 +683,11 @@ public class AIControlChannel extends XmlControlChannel
 				Hashtable inCascade = m_connectedCascade.getPriceCertificateHashes();
 				String curCascadeHash;
 				String curCcHash;
-				MixCascade.MixPosition ski;
+				MixPosition ski;
 				int i = 0;
 				while (priceCertHashesInCascade.hasMoreElements()) //enough to use one enum in condition, since we already checked for equal size
 				{
-					ski = ((MixCascade.MixPosition)priceCertHashesInCascade.nextElement());
+					ski = ((MixPosition)priceCertHashesInCascade.nextElement());
 					curCascadeHash = (String)inCascade.get(ski);
 					curCcHash = (String)hashPriceCertHashesInCC.get(ski);
 
