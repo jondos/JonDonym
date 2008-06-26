@@ -168,11 +168,11 @@ public class PerformanceMeter implements Runnable
 			m_nextUpdate = updateBegin + m_majorInterval;
 			
 			
-			Iterator knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
+			Enumeration knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().elements();
 			m_lastTotalUpdates = 0;
-			while(knownMixCascades.hasNext()) 
+			while(knownMixCascades.hasMoreElements()) 
 			{
-				final MixCascade cascade = (MixCascade) knownMixCascades.next();
+				final MixCascade cascade = (MixCascade) knownMixCascades.nextElement();
 				/*if(cascade.hasPerformanceServer())
 				{*/
 					loadAccountFiles();
@@ -202,23 +202,38 @@ public class PerformanceMeter implements Runnable
 					{
 						// test is finished
 					}
+										
 					// interrupt the test if it is not finished yet
+					if (m_proxy.isConnected())
+					{
+						m_proxy.stop();
+					}
+					try
+					{
+						performTestThread.join(500);						
+					}
+					catch (InterruptedException e)
+					{
+						// test is finished
+					}					
 					int iWait = 0;
 					while (performTestThread.isAlive())
 					{	
 						iWait++;
-	
-						performTestThread.interrupt();
-						if (m_proxy.isConnected())
-						{
-							m_proxy.stop();
-						}						
+		
+						performTestThread.interrupt();											
 						
 						if (iWait >= 5)
 						{			
 							if (iWait == 5)
 							{
 								LogHolder.log(LogLevel.EMERG, LogType.THREAD, "Problems finishing meter thread!");
+							}
+							if (iWait > 5)
+							{
+								LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
+										"Using deprecated stop routine to finish meter thread!");
+								performTestThread.stop();
 							}
 							try
 							{
@@ -448,7 +463,8 @@ public class PerformanceMeter implements Runnable
 		       	stream.write((xml + "\r\n").getBytes());
 		       	
 		        // read HTTP header from PerformanceServer
-		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
+		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200 || 
+		        	Thread.currentThread().isInterrupted())
 		        {
 		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
 		        	s.close();
