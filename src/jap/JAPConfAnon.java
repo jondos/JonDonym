@@ -177,8 +177,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
 
-	private static final int FILTER_SPEED_MAJOR_TICK = 32;
-	private static final int FILTER_SPEED_MAX = 128;
+	private static final int FILTER_SPEED_MAJOR_TICK = 256;
+	private static final int FILTER_SPEED_MAX = 1024;
 	private static final int FILTER_SPEED_STEPS = (FILTER_SPEED_MAX / FILTER_SPEED_MAJOR_TICK) + 1;
 	
 	private static final int FILTER_LATENCY_STEPS = 5;
