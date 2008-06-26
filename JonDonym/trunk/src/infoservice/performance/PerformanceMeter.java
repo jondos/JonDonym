@@ -237,7 +237,7 @@ public class PerformanceMeter implements Runnable
 							}
 							try
 							{
-								Thread.sleep(500);
+								performTestThread.join(1000);
 							}
 							catch (InterruptedException e)
 							{								
@@ -247,7 +247,7 @@ public class PerformanceMeter implements Runnable
 						{
 							try
 							{
-								Thread.sleep(100);
+								performTestThread.join(500);
 							}
 							catch (InterruptedException e)
 							{								
