@@ -63,7 +63,7 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
    * Stores the dummy traffic interval in milliseconds. After that interval of
    * inactivity (no traffic) on the connection, a dummy packet is sent.
    */
-  private long m_interval;
+  private long m_interval = DT_MIN_INTERVAL_MS;
 
   private Object m_internalSynchronization;
 
