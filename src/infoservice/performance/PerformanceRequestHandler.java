@@ -9,10 +9,8 @@ import logging.LogLevel;
 import logging.LogType;
 import anon.util.XMLUtil;
 import anon.util.XMLParseException;
-import anon.util.IXMLEncodable;
 import anon.infoservice.Database;
 import anon.crypto.SignatureVerifier;
-import anon.crypto.SignatureCreator;
 
 public class PerformanceRequestHandler 
 {
