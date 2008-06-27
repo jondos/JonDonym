@@ -52,6 +52,7 @@ import logging.LogLevel;
 import logging.LogType;
 import HTTPClient.HTTPConnection;
 import anon.ErrorCodes;
+import anon.client.DummyTrafficControlChannel;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.PerformanceEntry;
@@ -143,7 +144,7 @@ public class PerformanceMeter implements Runnable
 		try
 		{
 			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
-			//proxy.setDummyTraffic(DummyTrafficControlChannel.DT_DISABLE);
+			//m_proxy.setDummyTraffic(DummyTrafficControlChannel.DT_DISABLE);
 		} 
 		catch (UnknownHostException e1) 
 		{

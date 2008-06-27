@@ -133,10 +133,10 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	/**
 	 * Stores the maximum dummy traffic interval in milliseconds -> we need dummy
 	 * traffic with at least that rate. If this value is -1, there is no need for
-	 * dummy traffic on a forwarded connection on the server side. Tis value is
+	 * dummy traffic on a forwarded connection on the server side. This value is
 	 * only meaningful, if m_forwardedConnection is true.
 	 */
-	private int m_maxDummyTrafficInterval;
+	private int m_maxDummyTrafficInterval = DummyTrafficControlChannel.DT_MAX_INTERVAL_MS;
 
 	/**
 	 * Creates a new AnonProxy. This proxy uses as default only the AN.ON service.

@@ -63,7 +63,7 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
    * Stores the dummy traffic interval in milliseconds. After that interval of
    * inactivity (no traffic) on the connection, a dummy packet is sent.
    */
-  private long m_interval = DT_MIN_INTERVAL_MS;
+  private long m_interval = DT_MAX_INTERVAL_MS;
 
   private Object m_internalSynchronization;
 
@@ -89,19 +89,21 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
    * This is the implementation for the dummy traffic thread.
    */
   public void run() {
-    while (m_bRun) {
-      try {
-        Thread.sleep(m_interval);
-        /* if we reach the timeout without interruption, we have to send a dummy */
-        LogHolder.log(LogLevel.INFO, LogType.NET, "Sending Dummy!");
-        sendRawMessage(new byte[0]);
-      }
-      catch (InterruptedException e) {
-    	  //LogHolder.log(LogLevel.INFO, LogType.NET, "Dummy thread interrupted!");
-        /* if we got an interruption within the timeout, everything is ok */
-      }
-    }
-  }
+	  synchronized (m_internalSynchronization) {
+		while (m_bRun) {
+		  try {
+			  m_internalSynchronization.wait(m_interval);
+		    /* if we reach the timeout without interruption, we have to send a dummy */
+		    LogHolder.log(LogLevel.INFO, LogType.NET, "Sending Dummy!");
+		    sendRawMessage(new byte[0]);
+		  }
+		  catch (InterruptedException e) {
+			  //LogHolder.log(LogLevel.INFO, LogType.NET, "Dummy thread interrupted!");
+		    /* if we got an interruption within the timeout, everything is ok */
+		      }
+		    }
+		  }
+	 }
 
 	/**
 	 * Holds the internal dummy traffic thread. This method blocks until the
