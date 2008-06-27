@@ -434,7 +434,19 @@ public class PerformanceMeter implements Runnable
         		long delay;
         		long speed;
 				
-		       	Socket s = new Socket(m_proxyHost, m_proxyPort);
+		       	
+        		// TODO: connect to other infoservices?
+		       	ListenerInterface iface = (ListenerInterface) m_infoServiceConfig.getHardwareListeners().elementAt(0);
+		       	if(iface == null)
+		       	{
+		       		return false;
+		       	}
+		       	
+		       	String host = iface.getHost();
+		       	int port = iface.getPort();
+        		
+		       	// request token from infoservice directly
+        		Socket s = new Socket(host, port);
 		       	s.setSoTimeout(PERFORMANCE_SERVER_TIMEOUT);
 		       	
 		       	OutputStream stream = s.getOutputStream();
@@ -442,10 +454,6 @@ public class PerformanceMeter implements Runnable
 		       	BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		       	HTTPResponse resp;
 		       			       	
-		       	ListenerInterface iface = (ListenerInterface) m_infoServiceConfig.getHardwareListeners().elementAt(0);
-		       	String host = iface.getHost();
-		       	int port = iface.getPort();
-		       	
 		       	PerformanceToken token = null;
 		       	
 		       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
@@ -454,7 +462,7 @@ public class PerformanceMeter implements Runnable
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
 		       	
-		       	stream.write(("POST http://" + host + ":" + port + "/requestperformancetoken HTTP/1.0\r\n").getBytes());
+		       	stream.write(("POST /requestperformancetoken HTTP/1.0\r\n").getBytes());
 		       	stream.write(("Content-Length: " + xml.length() + "\r\n\r\n").getBytes());
 		       	stream.write((xml + "\r\n").getBytes());
 		       	
