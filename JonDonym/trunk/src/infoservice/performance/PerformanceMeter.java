@@ -43,6 +43,7 @@ import java.net.Socket;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
+import java.util.Random;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -59,6 +60,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.SimpleMixCascadeContainer;
 import anon.infoservice.Database;
+import anon.infoservice.InfoServiceDBEntry;
 import anon.pay.PayAccount;
 import anon.pay.PayAccountsFile;
 import anon.proxy.AnonProxy;
@@ -112,6 +114,8 @@ public class PerformanceMeter implements Runnable
 
 	private Hashtable m_usedAccountFiles = new Hashtable();
 	private AccountUpdater m_accUpdater = null;
+	
+	private Random ms_rnd = new Random();
 
 	public PerformanceMeter(AccountUpdater updater)
 	{
@@ -168,8 +172,7 @@ public class PerformanceMeter implements Runnable
 			long updateBegin = System.currentTimeMillis();	
 			m_lastUpdateRuntime = 0;
 			m_nextUpdate = updateBegin + m_majorInterval;
-			
-			
+						
 			Enumeration knownMixCascades = Database.getInstance(MixCascade.class).getEntryList().elements();
 			m_lastTotalUpdates = 0;
 			while(knownMixCascades.hasMoreElements()) 
@@ -435,8 +438,7 @@ public class PerformanceMeter implements Runnable
         		long speed;
 				
 		       	
-        		// TODO: connect to other infoservices?
-		       	ListenerInterface iface = (ListenerInterface) m_infoServiceConfig.getHardwareListeners().elementAt(0);
+		       	ListenerInterface iface = chooseRandomInfoService();
 		       	if(iface == null)
 		       	{
 		       		return false;
@@ -732,6 +734,28 @@ public class PerformanceMeter implements Runnable
 		}
 		
 		return credit;
+	}
+	
+	public ListenerInterface chooseRandomInfoService()
+	{
+		Vector knownIS = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
+		
+		while(!knownIS.isEmpty())
+		{
+			int i = ms_rnd.nextInt(knownIS.size());
+		
+			InfoServiceDBEntry entry = (InfoServiceDBEntry) knownIS.elementAt(i);
+			if(entry.isPerfServerEnabled() && !entry.getListenerInterfaces().isEmpty())
+			{
+				return (ListenerInterface) entry.getListenerInterfaces().elementAt(0); 
+			}
+			else
+			{
+				knownIS.remove(entry);
+			}
+		}
+		
+		return null;
 	}
 		
 	private class HTTPResponse

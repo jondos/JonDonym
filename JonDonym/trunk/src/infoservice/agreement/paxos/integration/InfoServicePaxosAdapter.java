@@ -147,7 +147,7 @@ public class InfoServicePaxosAdapter extends PaxosAdapter implements IInfoServic
         Vector virtualListeners = Configuration.getInstance().getVirtualListeners();
         return new InfoServiceDBEntry(Configuration.getInstance().getOwnName(), Configuration
                 .getInstance().getID(), virtualListeners, Configuration.getInstance()
-                .holdForwarderList(), false, System.currentTimeMillis(), System.currentTimeMillis());
+                .holdForwarderList(), false, System.currentTimeMillis(), System.currentTimeMillis(), Configuration.getInstance().isPerfServerEnabled());
     }
 
     /**

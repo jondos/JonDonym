@@ -155,6 +155,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	private CertPath m_certPath;
 
 	private long m_serial;
+	
+	private boolean m_bPerfServerEnabled;
 
 	/**
 	 * This is only for compatibility and will be rewritten next time.
@@ -252,6 +254,16 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			m_userDefined = true;
 		}
 
+		/* get the information, whether this infoservice has a performance server*/
+		if (XMLUtil.getFirstChildByName(a_infoServiceNode, "PerformanceServer") == null)
+		{
+			m_bPerfServerEnabled = false;
+		}
+		else
+		{
+			m_bPerfServerEnabled = true;
+		}
+		
 		/* get the ID */
 		m_strInfoServiceId = a_infoServiceNode.getAttribute(XML_ATTR_ID);
 
@@ -335,7 +347,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 */
 	public InfoServiceDBEntry(String a_host, int a_port) throws IllegalArgumentException
 	{
-		this(null, null, new ListenerInterface(a_host, a_port).toVector(), false, true, 0, 0);
+		this(null, null, new ListenerInterface(a_host, a_port).toVector(), false, true, 0, 0, false);
 	}
 
 	/**
@@ -360,7 +372,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 */
 	public InfoServiceDBEntry(String a_strName, String a_id, Vector a_listeners,
 							  boolean a_primaryForwarderList, boolean a_japClientContext,
-							  long a_creationTime, long a_serialNumber) throws IllegalArgumentException
+							  long a_creationTime, long a_serialNumber, boolean a_bPerfServerEnabled) throws IllegalArgumentException
 	{
 		super(a_japClientContext ? System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE_JAP :
 			  System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE);
@@ -411,6 +423,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		/* locally created infoservices are never neighbours of our infoservice */
 		m_neighbour = false;
 
+		m_bPerfServerEnabled = a_bPerfServerEnabled;
+		
 		/* generate the XML representation for this InfoServiceDBEntry */
 		m_xmlDescription = generateXmlRepresentation();
 	}
@@ -503,6 +517,12 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			Element userDefinedNode = doc.createElement("UserDefined");
 			infoServiceNode.appendChild(userDefinedNode);
 		}
+		
+		if(m_bPerfServerEnabled)
+		{
+			Element perfServerNode = doc.createElement("PerformanceServer");
+			infoServiceNode.appendChild(perfServerNode);
+		}
 
 		/* sign the XML node */
 		try
@@ -562,6 +582,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			return m_certPath.checkValidity(new Date());
 		}
 		return false;
+	}
+	
+	public boolean isPerfServerEnabled()
+	{
+		return m_bPerfServerEnabled;
 	}
 
 	public boolean checkId()

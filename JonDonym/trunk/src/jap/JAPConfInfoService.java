@@ -982,7 +982,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 						new
 						ListenerInterface(addInfoServiceHostField.getText().trim(),
 										  Integer.parseInt(addInfoServicePortField.getText().trim())).
-						toVector(), false, true, 0, 0);
+						toVector(), false, true, 0, 0, false);
 					newInfoService.setUserDefined(true);
 					Database.getInstance(InfoServiceDBEntry.class).update(newInfoService);
 					addInfoServicePanel.setVisible(false);

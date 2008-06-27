@@ -217,6 +217,8 @@ final public class Configuration
 	 */
 	private final Object[] m_aPerfMeterConf = new Object[6];
 	
+	private boolean m_bPerfServerEnabled;
+	
 	private File m_strPerfAccountDirectory = null;
 	
 	private String m_strPerfAccountPassword = null;
@@ -243,6 +245,10 @@ final public class Configuration
 	public final static String IS_PROP_NAME_PERFACCOUNT_PASSWORD = 
 		IS_PROP_NAME_PERFACCOUNT+".passw";
 	public final static String IS_PROP_VALUE_PERFACCOUNT_PASSWORD = null;
+	
+	public final static String IS_PROP_NAME_PERF_SERVER =
+		IS_PROP_NAME_PERFORMANCE_MONITORING + ".server";
+	public final static String IS_PROP_VALUE_PERF_SERVER = "false";
 	
 	
 	public Configuration(Properties a_properties) throws Exception
@@ -579,7 +585,7 @@ final public class Configuration
 				entry =
 					new InfoServiceDBEntry(null, null,
 										   ( (ListenerInterface) m_initialNeighbourInfoServices.elementAt(i)).
-										   toVector(), false, false, System.currentTimeMillis(), 0);
+										   toVector(), false, false, System.currentTimeMillis(), 0, false);
 
 				//entry.setNeighbour(true);
 				try
@@ -809,6 +815,9 @@ final public class Configuration
 				{
 					m_perfWhiteList.addElement(stWhite.nextToken());
 				}
+				
+				m_bPerfServerEnabled = Boolean.valueOf(a_properties.getProperty(IS_PROP_NAME_PERF_SERVER,
+						IS_PROP_VALUE_PERF_SERVER)).booleanValue();
 			}
 		}
 		catch (Exception e)
@@ -1131,6 +1140,11 @@ final public class Configuration
 	public boolean isPerfEnabled()
 	{
 		return m_bPerfEnabled;
+	}
+	
+	public boolean isPerfServerEnabled()
+	{
+		return m_bPerfServerEnabled;
 	}
 	
 	public File getPerfAccountDirectory()
