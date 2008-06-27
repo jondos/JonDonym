@@ -110,7 +110,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 	private DummyTrafficControlChannel m_dummyTrafficControlChannel;
 
-	private int m_dummyTrafficInterval;
+	private int m_dummyTrafficInterval = DummyTrafficControlChannel.DT_MAX_INTERVAL_MS;
 
 	private KeyExchangeManager m_keyExchangeManager;
 
