@@ -89,21 +89,28 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
    * This is the implementation for the dummy traffic thread.
    */
   public void run() {
-	  synchronized (m_internalSynchronization) {
-		while (m_bRun) {
-		  try {
-			  m_internalSynchronization.wait(m_interval);
-		    /* if we reach the timeout without interruption, we have to send a dummy */
-		    LogHolder.log(LogLevel.INFO, LogType.NET, "Sending Dummy!");
-		    sendRawMessage(new byte[0]);
-		  }
-		  catch (InterruptedException e) {
-			  //LogHolder.log(LogLevel.INFO, LogType.NET, "Dummy thread interrupted!");
-		    /* if we got an interruption within the timeout, everything is ok */
-		      }
-		    }
-		  }
-	 }
+	  synchronized (m_internalSynchronization)
+      {
+	    while (m_bRun) {
+	      try {
+	    	  m_internalSynchronization.wait(m_interval);	        
+	        	if (!m_bRun)
+	        	{
+	        		/* if we reach the timeout without interruption, we have to send a dummy */
+	        		LogHolder.log(LogLevel.INFO, LogType.NET, "Sending Dummy!");
+	        		sendRawMessage(new byte[0]);
+	        	}
+	        }
+	     
+	      catch (InterruptedException e) {
+	    	  //LogHolder.log(LogLevel.INFO, LogType.NET, "Dummy thread interrupted!");
+	        /* if we got an interruption within the timeout, everything is ok */
+	      }
+	    }
+
+	    m_internalSynchronization.notify();
+      }
+  }
 
 	/**
 	 * Holds the internal dummy traffic thread. This method blocks until the
@@ -114,41 +121,22 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
   	public void stop() {
 	    synchronized (m_internalSynchronization) {
 	    	m_bRun = false;
-	    	/* the same workaround as in AnonProxy
-	    	 * to kill the dummy traffic thread when 
-	    	 * being stuck.  (not very nice)
-	    	 */
 	    	if (m_threadRunLoop != null) 
 	    	{
-	    	  	int i = 0;
 	    	  	while (m_threadRunLoop.isAlive())
 				{
 					try
-					{
-						m_threadRunLoop.interrupt();
-						m_threadRunLoop.join(1000);
-						if (i > 3)
-						{
-							LogHolder.log(LogLevel.WARNING, LogType.NET, "tried "+(i+1)+
-									" times to interrupt dummy traffic thread. -> Now stop it explicitly");
-							m_threadRunLoop.stop();
-						}
-						i++;
+					{	
+						LogHolder.log(LogLevel.NOTICE, LogType.NET, "Shutting down dummy traffic channel...");
+						m_internalSynchronization.notify();
+						m_internalSynchronization.wait();						
+						m_threadRunLoop.join();
+						LogHolder.log(LogLevel.NOTICE, LogType.NET, "Down dummy traffic channel joined!");
 					}
 					catch (InterruptedException e)
 					{
 					}
 				}
-				/*m_threadRunLoop.interrupt();
-				try 
-				{
-					LogHolder.log(LogLevel.INFO, LogType.NET, "before dummy traffic channel join!");
-					m_threadRunLoop.join();
-					LogHolder.log(LogLevel.INFO, LogType.NET, "after dummy traffic channel join!");
-				}
-				catch (Exception e) 
-				{
-				}*/
 	    	  	m_threadRunLoop = null;
 	    	}
 	    }
