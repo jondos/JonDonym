@@ -463,7 +463,6 @@ public class PerformanceMeter implements Runnable
 		       	}
 		       	
 		       	PerformanceToken token = null;
-		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "XML: " + new String(httpResponse.getData()));
 		        try
 		        {
 		        	doc = XMLUtil.toXMLDocument(httpResponse.getData());

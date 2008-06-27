@@ -46,7 +46,6 @@ public class PerformanceRequestHandler
 		
 		LogHolder.log(LogLevel.WARNING, LogType.NET, "Token " + token.getId() + " issued.");
 		
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "XML: " + XMLUtil.toString(doc));
 		return httpResponse;
 	}
 	
