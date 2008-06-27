@@ -61,6 +61,8 @@ import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 
 import anon.util.Util;
+import anon.crypto.SignatureCreator;
+import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -1272,6 +1274,19 @@ public class XMLUtil
 		}
 		doc.appendChild(element);
 
+		return doc;
+	}
+	
+	/**
+	 * Transforms an IXMLEncodable object into an signed XML document.
+	 * @param a_xmlEncodable an IXMLEncodable
+	 * @return an XML document
+	 */	
+	public static Document toSignedXMLDocument(IXMLEncodable a_xmlEncodable, int a_iDocumentClass)
+	{
+		Document doc = XMLUtil.toXMLDocument(a_xmlEncodable);
+		SignatureCreator.getInstance().signXml(a_iDocumentClass, doc);
+		
 		return doc;
 	}
 

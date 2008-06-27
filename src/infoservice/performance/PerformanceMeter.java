@@ -53,6 +53,7 @@ import logging.LogType;
 import HTTPClient.HTTPConnection;
 import anon.ErrorCodes;
 import anon.client.DummyTrafficControlChannel;
+import anon.crypto.SignatureVerifier;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.PerformanceEntry;
@@ -174,88 +175,85 @@ public class PerformanceMeter implements Runnable
 			while(knownMixCascades.hasMoreElements()) 
 			{
 				final MixCascade cascade = (MixCascade) knownMixCascades.nextElement();
-				/*if(cascade.hasPerformanceServer())
-				{*/
-					loadAccountFiles();
-					m_accUpdater.update();
-					performTestThread = new Thread(new Runnable()
+
+				loadAccountFiles();
+				m_accUpdater.update();
+				performTestThread = new Thread(new Runnable()
+				{
+					public void run()
 					{
-						public void run()
+						try
+						{					
+							if (performTest(cascade))
+							{
+								m_lastTotalUpdates++;
+							}
+						}
+						catch (InterruptedException a_e)
+						{								
+						}
+					}
+				});	
+				performTestThread.start();
+				try
+				{
+					performTestThread.join(m_maxWaitForTest);						
+				}
+				catch (InterruptedException e)
+				{
+					// test is finished
+				}
+									
+				// interrupt the test if it is not finished yet
+				if (m_proxy.isConnected())
+				{
+					m_proxy.stop();
+				}
+				try
+				{
+					performTestThread.join(500);						
+				}
+				catch (InterruptedException e)
+				{
+					// test is finished
+				}					
+				int iWait = 0;
+				while (performTestThread.isAlive())
+				{	
+					iWait++;
+					performTestThread.interrupt();											
+					
+					if (iWait >= 5)
+					{			
+						if (iWait == 5)
 						{
-							try
-							{					
-								if (performTest(cascade))
-								{
-									m_lastTotalUpdates++;
-								}
-							}
-							catch (InterruptedException a_e)
-							{								
-							}
+							LogHolder.log(LogLevel.EMERG, LogType.THREAD, "Problems finishing meter thread!");
 						}
-					});	
-					performTestThread.start();
-					try
-					{
-						performTestThread.join(m_maxWaitForTest);						
-					}
-					catch (InterruptedException e)
-					{
-						// test is finished
-					}
-										
-					// interrupt the test if it is not finished yet
-					if (m_proxy.isConnected())
-					{
-						m_proxy.stop();
-					}
-					try
-					{
-						performTestThread.join(500);						
-					}
-					catch (InterruptedException e)
-					{
-						// test is finished
-					}					
-					int iWait = 0;
-					while (performTestThread.isAlive())
-					{	
-						iWait++;
-		
-						performTestThread.interrupt();											
-						
-						if (iWait >= 5)
-						{			
-							if (iWait == 5)
-							{
-								LogHolder.log(LogLevel.EMERG, LogType.THREAD, "Problems finishing meter thread!");
-							}
-							if (iWait > 5)
-							{
-								LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
-										"Using deprecated stop routine to finish meter thread!");
-								performTestThread.stop();
-							}
-							try
-							{
-								performTestThread.join(1000);
-							}
-							catch (InterruptedException e)
-							{								
-							}
-						}
-						else
+						if (iWait > 5)
 						{
-							try
-							{
-								performTestThread.join(500);
-							}
-							catch (InterruptedException e)
-							{								
-							}
+							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
+									"Using deprecated stop routine to finish meter thread!");
+							performTestThread.stop();
+						}
+						try
+						{
+							performTestThread.join(1000);
+						}
+						catch (InterruptedException e)
+						{	
 						}
 					}
-				//}
+					else
+					{
+						try
+						{
+							performTestThread.join(500);
+						}
+						catch (InterruptedException e)
+						{								
+						}
+					}
+				}
 			}
 			if (m_lastTotalUpdates > 0)
 			{
@@ -270,7 +268,7 @@ public class PerformanceMeter implements Runnable
     				LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sleeping for " + sleepFor + "ms.");
     				Thread.sleep(sleepFor);
     			}
-    		} 
+    		}
     		catch (InterruptedException e)
     		{
     			//break;
@@ -385,7 +383,7 @@ public class PerformanceMeter implements Runnable
 	
 	/**
 	 * Performs a performance test on the given MixCascade using the parameters
-	 * of m_minorInterval and m_requestsPerInterval
+	 * of m_majorInterval and m_requestsPerInterval
 	 * 
 	 * @param a_cascade The MixCascade that should be tested
 	 * 
@@ -450,12 +448,9 @@ public class PerformanceMeter implements Runnable
 		       	
 		       	PerformanceToken token = null;
 		       	
-		       	Document doc = XMLUtil.createDocument();
-		       	String xml = null;
-		       	
 		       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
-		       	doc.appendChild(tokenRequest.toXmlElement(doc));
-		       	xml = XMLUtil.toString(doc);
+		       	Document doc = XMLUtil.toSignedXMLDocument(tokenRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+		       	String xml = XMLUtil.toString(doc);
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
 		       	
@@ -499,12 +494,11 @@ public class PerformanceMeter implements Runnable
 		       	s.setSoTimeout(PERFORMANCE_SERVER_TIMEOUT);
 		       	
 		       	stream = s.getOutputStream();
-
+		       	
 		       	reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		       	
-		       	doc = XMLUtil.createDocument();
 		       	PerformanceRequest perfRequest = new PerformanceRequest(token.getId(), m_dataSize);
-		       	doc.appendChild(perfRequest.toXmlElement(doc));
+		       	doc = XMLUtil.toSignedXMLDocument(perfRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		       	xml = XMLUtil.toString(doc);
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");

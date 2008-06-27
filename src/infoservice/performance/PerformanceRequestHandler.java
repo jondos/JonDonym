@@ -9,9 +9,10 @@ import logging.LogLevel;
 import logging.LogType;
 import anon.util.XMLUtil;
 import anon.util.XMLParseException;
+import anon.util.IXMLEncodable;
 import anon.infoservice.Database;
-import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
+import anon.crypto.SignatureCreator;
 
 public class PerformanceRequestHandler 
 {
@@ -36,9 +37,9 @@ public class PerformanceRequestHandler
 		LogHolder.log(LogLevel.WARNING, LogType.NET, "InfoService " + request.getInfoServiceId() + " is requesting a performance token.");
 	
 		PerformanceToken token = new PerformanceToken();
-		Node node = token.toXmlElement(doc);
-		SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, node);
 		Database.getInstance(PerformanceToken.class).update(token);
+		
+		doc = XMLUtil.toSignedXMLDocument(token, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
 				HttpResponseStructure.HTTP_ENCODING_PLAIN, XMLUtil.toString(token.toXmlElement(doc)));
@@ -70,11 +71,14 @@ public class PerformanceRequestHandler
 		
 		byte[] data = new byte[request.getDataSize()];
 		new java.util.Random().nextBytes(data);
-			
+		
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
-				HttpResponseStructure.HTTP_ENCODING_PLAIN, 
-				new String(data));
-					
+				HttpResponseStructure.HTTP_ENCODING_PLAIN, data);
+
+		LogHolder.log(LogLevel.WARNING, LogType.NET, data.length + " bytes sent. Removed token.");
+		
+		Database.getInstance(PerformanceToken.class).remove(request.getTokenId());
+		
 		return httpResponse;
 	}
 }

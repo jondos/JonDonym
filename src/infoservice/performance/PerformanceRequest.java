@@ -4,6 +4,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import anon.crypto.SignatureCreator;
+import anon.crypto.SignatureVerifier;
 import anon.infoservice.Database;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.util.IXMLEncodable;
@@ -22,6 +24,11 @@ public class PerformanceRequest implements IXMLEncodable
 	public PerformanceRequest(Element a_node) throws XMLParseException
 	{
 		XMLUtil.assertNodeName(a_node, XML_ELEMENT_NAME);
+		
+		if(!SignatureVerifier.getInstance().verifyXml(a_node, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+		{
+			throw new XMLParseException("Could not verify XML Document.");
+		}
 		
 		Node nodeToken = XMLUtil.getFirstChildByName(a_node, XML_ELEMENT_TOKEN_ID);
 		
