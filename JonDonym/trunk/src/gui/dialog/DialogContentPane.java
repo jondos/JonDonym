@@ -74,11 +74,11 @@ import java.awt.event.MouseListener;
  * where own components can be placed. The content pane of the parent dialog is automatically replaced
  * with this one by calling the method <CODE>updateDialog()</CODE>. If the size of the dialog has not been
  * defined before, you will need to call pack() afterwards.
- * <P>Dialog content panes can be implemented as a  chained list, so that if someone clicks on a button,
+ * <P>Dialog content panes can be implemented as a chained list, so that if someone clicks on a button,
  * the next or previous content pane in the list is displayed in the dialog. Use setDefaultButtonOperation()
- * and the ON_... events to activate this behaviour. Of course, the foward and back operations can be done
+ * and the ON_... events to activate this behaviour. Of course, the forward and back operations can be done
  * explicitly and without those events, too.</P>
- * If you have a chained list, you can display it as a Wizard, too. Every content pane in the list must
+ * If you have a chained list, you can display it as a wizard. Every content pane in the list then must
  * implement the interface DialogContentPane.IWizardSuitable and each content pane is recommended to
  * support BUTTON_OPERATION_WIZARD. Their "YES/OK" and "NO" buttons will automatically
  * be transformed into "Next" and "Previous", and all buttons are shown (Cancel, Previous, Next). If a class

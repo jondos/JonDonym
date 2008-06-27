@@ -1607,6 +1607,15 @@ final public class InfoServiceCommands implements JWSInternalCommands
 	 *
 	 * @return The response to send back to the client. This value is null, if the request cannot
 	 *         be handled by this implementation (maybe because of an invalid command, ...).
+	 *         
+	 * note for developers: please add a comment for each command using the template below. This way the list of commands the IS understand could be generated automatically.
+	 * <br>
+	 * Template for doc IS commands:
+	 * <br>
+	 * {@code Full command: GET|POST /commandname/[parameter]}<br>
+	 * {@code Source: JAP|Mix|IS}<br>
+	 * (Note: Please indicate the original source of information, i.e. do not specify IS if the message is jsut forwarded throught the distirbuted IS distribution algorithm.)
+	 * {@code Description: real cool command which basically does nothing...}
 	 */
 	public HttpResponseStructure processCommand(int method, int a_supportedEncodings,
 												String command, byte[] postData, InetAddress a_sourceAddress)
@@ -1627,44 +1636,55 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		HttpResponseStructure httpResponse = null;
 		if ( (command.startsWith("/mixcascadestatus/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* JAP or someone else wants to get information about the status of the cascade with the
+			/** Full Command: GET /mixcascadestatus/[cascadeid]
+			 * Source: JAP
+			  *  Description: JAP or someone else wants to get information about the status of the cascade with the
 			 * given ID
-			 * Full command: GET /mixcascadestatus/cascadeid
 			 */
 			String cascadeId = command.substring(18);
 			httpResponse = japGetCascadeStatus(cascadeId);
 		}
 		else if (command.equals("/infoservice") && (method == Constants.REQUEST_METHOD_POST))
 		{
-			/** message from another infoservice (can be forwared by an infoservice), which includes
+			/** Full Command: POST /infoservice
+			 * Source: IS
+			* Descrption: message from another infoservice (can be forwared by an infoservice), which includes
 			 * information about that infoservice
 			 */
 			httpResponse = infoServerPostHelo(postData);
 		}
 		else if (command.startsWith("/infoservice/") && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* get information about the InfoService with the given ID (it's the same information as
+			/** Full command: GET /infoservice/[infoserviceid]
+			 * Source: JAP 
+			* Description: get information about the InfoService with the given ID (it's the same information as
 			 * /infoservices but there you get information about all known infoservices)
-			 * Full command: GET /infoservice/infoserviceId
 			 */
 			String infoserviceId = command.substring(13);
 			httpResponse = getInfoServiceInfo(infoserviceId);
 		}
 		else if ( (command.equals("/infoservices")) && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /infoservices
+			 * Source: JAP
+			 * Description: JAP or someone else wants to get information about all infoservices we know
+			 *  */
 			ISRuntimeStatistics.ms_lNrOfGetInfoservicesRequests++;
-			/* JAP or someone else wants to get information about all infoservices we know */
 			httpResponse = m_isResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals("/infoserviceserials")) && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /infoserviceserials
+			 * Source: JAP
+			 * Description: JAP or someone else wants to get information about all infoservices we know */
 			ISRuntimeStatistics.ms_lNrOfGetInfoserviceserialsRequests++;
-			/* JAP or someone else wants to get information about all infoservices we know */
 			httpResponse = m_isResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
 		else if ( (command.equals("/cascade")) && (method == Constants.REQUEST_METHOD_POST))
 		{
-			/* message from the first mix of a cascade (can be forwarded by an infoservice), which
+			/** Full Command: POST /cascade
+			 * Source: Mix
+			 * Description: message from the first mix of a cascade (can be forwarded by an infoservice), which
 			 * includes information about the cascade, or from other IS
 			 */
 //			httpResponse = cascadePostHelo(postData, a_supportedEncodings);
@@ -1672,163 +1692,234 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		else if ( (command.equals("/cascadeserials")) && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /cascadeserials
+			 * Source: JAP
+			 * Description: JAP or someone else wants to get information about all cascade serial numbers we know */
 			ISRuntimeStatistics.ms_lNrOfGetCascadeserialsRequests++;
-			/* JAP or someone else wants to get information about all cascade serial numbers we know */
 			httpResponse = m_cascadeResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
 		else if ( (command.equals("/cascades")) && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /cascades
+			 * Source: JAP
+			 * Description: JAP or someone else wants to get information about all cascades we know */
 			ISRuntimeStatistics.ms_lNrOfGetCascadesRequests++;
-			/* JAP or someone else wants to get information about all cascades we know */
 			httpResponse = m_cascadeResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if( (command.startsWith("/performanceinfo") && (method == Constants.REQUEST_METHOD_GET)))
 		{
+			/** Full Command: GET /performanceinfo
+			 * Source: 
+			 * Descriptioin: ?
+			 */
 			ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
 			httpResponse = m_performanceResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals("/helo")) && (method == Constants.REQUEST_METHOD_POST))
 		{
-			/* message from a mix (can be forwarded by an infoservice), which includes information
+			/** Full Command: POST /helo
+			 * Source: Mix
+			 * Description: message from a mix (can be forwarded by an infoservice), which includes information
 			 * about that mix
 			 */
 			httpResponse = mixPostHelo(postData);
 		}
 		else if ( (command.equals("/configure")) && (method == Constants.REQUEST_METHOD_POST))
 		{
-			/* message from a mix requesting configuration */
+			/** Full Command: POST /configure 
+			 * Source: Mix
+			 * Description: message from a mix requesting configuration */
 			httpResponse = mixPostConfigure(postData);
 		}
 		else if ( (command.startsWith("/mixinfo/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			ISRuntimeStatistics.ms_lNrOfGetMixinfoRequests++;
-			/* JAP or someone else wants to get information about the mix with the given ID
-			 * Full command: GET /mixinfo/mixid
+			/** Full Command: GET /mixinfo/[mixid]
+			 * Source: JAP
+			 * JAP or someone else wants to get information about the mix with the given ID
 			 */
+			ISRuntimeStatistics.ms_lNrOfGetMixinfoRequests++;
 			String mixId = command.substring(9);
 			httpResponse = japGetMix(mixId);
 		}
 		else if ( (command.equals("/feedback")) && (method == Constants.REQUEST_METHOD_POST))
 		{
-			/* message from the first mix of a cascade (can be forwarded by an infoservice), which
+			/** Full Command: POST /feedback
+			 * Source: Mix
+			 * Description: message from the first mix of a cascade (can be forwarded by an infoservice), which
 			 * includes status information (traffic) of that cascade
 			 */
 			httpResponse = cascadePostStatus(postData);
 		}
 		else if ( (command.equals("/status")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* get the status (traffic) information about all cascades for human view as html file */
+			/** Full Command: GET /status
+			 * Source: Browser
+			 * Description: get the status (traffic) information about all cascades for human view as html file */
 			ISRuntimeStatistics.ms_lNrOfGetStatus++;
 			httpResponse = humanGetStatus();
 		}
 		else if ( (command.equals("/perfstatus")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* get the status information about the performance monitoring for human view as html file */
+			/** Full Command: GET /perfstatus
+			 * Source: Browser
+			 * Description: get the status information about the performance monitoring for human view as html file */
 			httpResponse = humanGetPerfStatus();
 		}		
 		else if ( (command.equals("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* get information about all mixes (mixes of all cascades) */
+			/** Full Command: GET /mixes 
+			 * Source: JAP
+			 * Description: get information about all mixes (mixes of all cascades) */
 			httpResponse = fetchAllMixes();
 		}
 		else if ( (command.equals("/availablemixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* get information about all mixes (mixes of all cascades) */
+			/** Full Command: GET /availablemixes
+			 * Source: JAP
+			 * Description: get information about all mixes (mixes of all cascades) */
 			httpResponse = fetchAvailableMixes();
 		}
 		else if ( (command.equals(MessageDBEntry.HTTP_REQUEST_STRING)) &&
 				 (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /messages
+			 * Source: JAP
+			 * Description: gets all informational messages about the AN.ON system
+			 */
 			httpResponse = m_messageResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals(MessageDBEntry.HTTP_SERIALS_REQUEST_STRING)) &&
 				 (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /messagesserials
+			 * Source: JAP
+			 * Description: gets the serials of all informational messages about the AN.ON system
+			 */
 			httpResponse = m_messageResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
 		else if ( (command.equals(MessageDBEntry.POST_FILE)) && (method == Constants.REQUEST_METHOD_POST))
 		{
+			/** Full Command: POST /message
+			 * Source: JAP
+			 * Description: ?
+			 */
 			httpResponse = messagePost(postData, a_supportedEncodings);
 		}
 		else if ( (command.startsWith("/cascadeinfo/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			ISRuntimeStatistics.ms_lNrOfGetCascadeinfoRequests++;
-			/* get information about the cascade with the given ID (it's the same information as
+			/** Full command: GET /cascadeinfo/[cascadeid]
+			 * Source: JAP
+			 * Description: get information about the cascade with the given ID (it's the same information as
 			 * /cascades but there you get information about all known cascades)
-			 * Full command: GET /cascadeinfo/cascadeid
 			 */
+			ISRuntimeStatistics.ms_lNrOfGetCascadeinfoRequests++;
 			String cascadeId = command.substring(13);
 			httpResponse = getCascadeInfo(a_supportedEncodings, cascadeId);
 		}
 		else if ( (command.equals("/tornodes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* get the list with all known tor nodes */
+			/** Full Command: GET /tornodes
+			 * Source: JAP
+			 * Description: get the list with all known tor nodes */
 			httpResponse = getTorNodesList(a_supportedEncodings);
 		}
 		else if ( (command.equals("/mixminionnodes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* get the list with all known mixminion nodes in an XML structure */
+			/** Full Command: GET /mixminionnodes
+			 * Source: JAP
+			 * Description: get the list with all known mixminion nodes in an XML structure */
 			httpResponse = getMixminionNodesList();
 		}
 		else if ( (command.equals("/addforwarder")) && (method == Constants.REQUEST_METHOD_POST))
 		{
+			/** Full Command: POST /addforwarder
+			 * Source: JAP
+			 * Description: adds a new JAP forwarder to the database of known forwarders */
 			ISRuntimeStatistics.ms_lNrOfGetForwarding++;
-			/* adds a new JAP forwarder to the database of known forwarders */
 			httpResponse = addJapForwarder(postData, a_sourceAddress);
 		}
 		else if ( (command.equals("/renewforwarder")) && (method == Constants.REQUEST_METHOD_POST))
 		{
+			/** Full Command: POST /renewforwarder
+			 * Source: JAP
+			 * Description: renews a JAP forwarder in the database of known forwarders */
 			ISRuntimeStatistics.ms_lNrOfGetForwarding++;
-			/* renews a JAP forwarder in the database of known forwarders */
 			httpResponse = renewJapForwarder(postData);
 		}
 		else if ( (command.equals("/getforwarder")) && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /getforwarder
+			 * Source: JAP
+			 * Description: get a captcha with information about a JAP forwarder */
 			ISRuntimeStatistics.ms_lNrOfGetForwarding++;
-			/* get a captcha with information about a JAP forwarder */
 			httpResponse = getJapForwarder();
 		}
 		else if (command.equals(JavaVersionDBEntry.HTTP_REQUEST_STRING))
 		{
 			if (method == Constants.REQUEST_METHOD_GET)
 			{
+				/** Full Command: GET /currentjavaversion
+			 * Source: JAP
+				 * Description: Returns information about known "good" java versions
+				 */
 				httpResponse = m_javaVersionResponseGetter.fetchResponse(a_supportedEncodings, false);
 				//httpResponse = getLatestJavaVersions();
 			}
 			else if (method == Constants.REQUEST_METHOD_POST)
 			{
+				/** Full Command: POST /currentjavaversion
+			 * Source: IS
+				 * Description: adds information about known "good" java versions
+				 */
 				httpResponse = postLatestJavaVersions(postData);
 			}
 		}
 		else if (command.equals(JavaVersionDBEntry.HTTP_SERIALS_REQUEST_STRING))
 		{
+			/** Full Command: GET /currentjavaversionSerials
+			 * Source: JAP
+			 * Description: ?
+			 */
 			httpResponse = m_javaVersionResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
 		else if ( (command.equals("/currentjapversion")) && (method == Constants.REQUEST_METHOD_POST))
 		{
-			/* message from another infoservice about the minimal needed JAP version */
+			/** Full Command: POST /currentjapversion
+			 * Source: 
+			 * Description: message from another infoservice about the minimal needed JAP version */
 			httpResponse = japPostCurrentJapVersion(postData);
 		}
 		else if ( (command.equals("/currentjapversion")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* get the current version of the client software */
+			/** Full Command: GET /currentjapversion
+			 * Source: JAP
+			 * Description: get the current version of the client software */
 			httpResponse = japGetCurrentJapVersion();
 		}
 		else if ( ( (command.equals("/japRelease.jnlp")) || (command.equals("/japDevelopment.jnlp"))) &&
 				 (method == Constants.REQUEST_METHOD_POST))
 		{
-			/* message from another infoservice with information about new JAP software */
+			/** Full Command: POST /japRelease.jnlp
+			 * Source: 
+			 * Full Command: POST /japDevelopment.jnlp
+			 * Description: message from another infoservice with information about new JAP software */
 			httpResponse = postJnlpFile(command, postData);
 		}
 		else if ( ( (command.equals("/japRelease.jnlp")) || (command.equals("/japDevelopment.jnlp"))) &&
 				 ( (method == Constants.REQUEST_METHOD_GET) || (method == Constants.REQUEST_METHOD_HEAD)))
 		{
-			// request for JNLP File (WebStart or Update Request
+			/** Full Command: GET /japRelease.jnlp
+			 * Full Command: GET /japDevelopment.jnlp
+			 * Source: 
+			* request for JNLP File (WebStart or Update Request
+			*/
 			httpResponse = getJnlpFile(command, method);
 		}
 		else if ( (command.equals("/proxyAddresses")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* returns the addresses from the proxies at the end of the cascades, only
+			/** Full Command: GET /proxyAddresses
+			 * Source: 
+			 * Description: returns the addresses from the proxies at the end of the cascades, only
 			 * for compatibility with some old scripts (written before world war II)
 			 */
 			/** @todo remove it */
@@ -1837,12 +1928,17 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		else if (command.equals("/echoip") && (method == Constants.REQUEST_METHOD_GET ||
 											   method == Constants.REQUEST_METHOD_HEAD))
 		{
-			// just echo the clients ip adresse - for mix autoconfig resons
+			/** Full Command: GET /echoip
+			 * Source: Mix
+			* Description:just echo the clients ip adresse - for mix autoconfig resons
+			*/
 			httpResponse = echoIP(a_sourceAddress);
 		}
 		else if ( (command.equals("/paymentinstance")) && (method == Constants.REQUEST_METHOD_POST))
 		{
-			/* message from a payment instance or another infoservice (can be forwared by an infoservice), which includes
+			/** Full Command: POST /paymentinstance
+			 * Source: 
+			 * Description: message from a payment instance or another infoservice (can be forwared by an infoservice), which includes
 			 * information about that payment instance
 			 */
 			ISRuntimeStatistics.ms_lNrOfGetPaymentRequests++;
@@ -1850,14 +1946,19 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		else if ( (command.equals("/paymentinstances")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* JAP or someone else wants to get information about all payment instacnes we know */
+			/** Full Command: GET /paymentinstances
+			 * Source: JAP
+			 * Description: JAP or someone else wants to get information about all payment instacnes we know */
 			ISRuntimeStatistics.ms_lNrOfGetPaymentRequests++;
 			httpResponse = japFetchPaymentInstances();
 
 		}
 		else if ( (command.startsWith("/paymentinstance/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/* JAP or someone else wants to get information about a special payment instance */
+			/** Full Command: GET /paymentinstance/[paymentinstanceid]
+			 * Source: JAP
+			 * JAP or someone else wants to get information about a special payment instance 
+			 */
 			ISRuntimeStatistics.ms_lNrOfGetPaymentRequests++;
 			String piID = command.substring(17);
 			httpResponse = japFetchPaymentInstanceInfo(piID);
@@ -1866,39 +1967,66 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		// LERNGRUPPE
 		else if (command.startsWith("/connectivity") && (method == Constants.REQUEST_METHOD_POST))
 		{
+			/** Full Command: POST /connectivity
+			 * Source: Mix
+			 * Description: ?
+			 */
 			httpResponse = m_dynamicExtension.mixPostConnectivityTest(a_sourceAddress, postData);
 		}
-		else if (command.startsWith("/dynacasade") && (method == Constants.REQUEST_METHOD_POST))
+		else if (command.startsWith("/dynacascade") && (method == Constants.REQUEST_METHOD_POST))
 		{
+			/** Full Command: POST /dynacascade
+			 * Source: Mix
+			 * Description: ?
+			 */
 			httpResponse = m_dynamicExtension.lastMixPostDynaCascade(postData);
 		}
 		else if ( (command.startsWith("/newcascadeinformationavailable/"))
 				 && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /newcascadeinformationavailable/[id]
+			 * Source: 
+			 * Description: ?
+			 */
 			String piID = command.substring(32);
 			httpResponse = m_dynamicExtension.isNewCascadeAvailable(piID);
 		}
 		else if ( (command.startsWith("/reconfigure/"))
 				 && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /reconfigure[id]
+			 * Source: 
+			 * Description: ?
+			 */
 			String piID = command.substring(13);
 			httpResponse = m_dynamicExtension.reconfigureMix(piID);
 		}
 		else if (command.startsWith("/agreement") && (method == Constants.REQUEST_METHOD_POST))
 		{
-
+			/** Full Command: POST /agreement
+			 * Source: IS
+			 * Description: ?
+			 */
 			httpResponse = m_agreementAdapter.handleMessage(postData);
 
 		}
 		else if (command.startsWith("/startagreement")
 				 && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /startagreement
+			 * Source: IS
+			 * Description: ?
+			 */
 			m_agreementAdapter.startProtocolByOperator();
 			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
 		}
 		else if (command.startsWith("/virtualcascades")
 				 && (method == Constants.REQUEST_METHOD_GET))
 		{
+			/** Full Command: GET /virtualcascades
+			 * Source: 
+			 * Description: ?
+			 */
 			httpResponse = m_dynamicExtension.virtualCascadeStatus();
 		}
 		else if(command.startsWith("/requestperformancetoken") 

@@ -52,6 +52,7 @@ import anon.util.XMLUtil;
 import java.util.Vector;
 import java.util.Enumeration;
 import anon.infoservice.IMutableProxyInterface;
+import anon.ErrorCodes;
 import anon.IServiceContainer;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixPosition;
@@ -265,7 +266,7 @@ public class AIControlChannel extends XmlControlChannel
 	//if requested, send account certificate
 	if (request.isAccountRequest())
 	{
-		if (!sendAccountCert())
+		if (sendAccountCert() != ErrorCodes.E_SUCCESS)
 		{
 			LogHolder.log(LogLevel.ALERT, LogType.PAY, "Could not send account certificate!");
 		}
@@ -474,7 +475,7 @@ public class AIControlChannel extends XmlControlChannel
   }
 
 
-  public boolean sendAccountCert()
+  public int sendAccountCert()
   {
 
 	  String message = null;
@@ -549,7 +550,7 @@ public class AIControlChannel extends XmlControlChannel
 	  if (!PayAccountsFile.getInstance().signalAccountRequest(m_connectedCascade) ||
 		  PayAccountsFile.getInstance().getActiveAccount() == null)
 	  {
-		  return false;
+		  return ErrorCodes.E_UNKNOWN;
 	  }
 
 
@@ -589,7 +590,7 @@ public class AIControlChannel extends XmlControlChannel
 				  new XMLErrorMessage(XMLErrorMessage.ERR_INVALID_PRICE_CERTS, message));
 
 
-		  return false;
+		  return ErrorCodes.E_UNKNOWN;
 	  }
 
 	  PayAccountsFile.getInstance().getActiveAccount().resetCurrentBytes();
@@ -598,7 +599,7 @@ public class AIControlChannel extends XmlControlChannel
 	   * new ai login procedure: wait until all messages are
 	   * exchanged or until login is timed out
 	   */
-	  boolean aiLoginSuccess = true;
+	  int error = ErrorCodes.E_UNKNOWN;
 	  synchronized(m_aiLoginSyncObject)
 	  {
 		  /* Only if the new synchronized AI login procedure is suppported by the first mix
@@ -617,17 +618,22 @@ public class AIControlChannel extends XmlControlChannel
 				 * the synchronous login hasn't finished. Therefore just leave. false will be returned
 				 * automatically.
 				 */
+				 error = ErrorCodes.E_INTERRUPTED;
 			  }
 			  //LogHolder.log(LogLevel.ALERT, LogType.PAY, m_aiLoginSyncObject);
-			  aiLoginSuccess = m_aiLoginSyncObject.size() != 0;
+			  if ( m_aiLoginSyncObject.size() > 0)
+			  {
+				  error = ErrorCodes.E_SUCCESS;
+			  }
 			  m_aiLoginSyncObject.removeAllElements();
 		  }
 		  else
 		  {
+			  error = ErrorCodes.E_SUCCESS;
 			  LogHolder.log(LogLevel.WARNING, LogType.PAY, "Old Mix version does not support synchronous AI login! Performing old asynchronous login procedure");
 		  }
 	  }
-	  return aiLoginSuccess;
+	  return error;
   }
 
   private void fireAIEvent(int a_eventType, long a_additionalInfo) {

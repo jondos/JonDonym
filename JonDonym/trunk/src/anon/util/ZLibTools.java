@@ -32,15 +32,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Vector;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import platform.AbstractOS;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -154,11 +151,11 @@ final public class ZLibTools
 								break;		
 							}
 						}
-						matchedDirEntries.add(index, entryName);
+						matchedDirEntries.insertElementAt(entryName, index);
 					}
 					else
 					{
-						matchedFileEntries.add(entry);
+						matchedFileEntries.addElement(entry);
 					}
 				}
 			}
@@ -168,8 +165,8 @@ final public class ZLibTools
 				return false;
 			}
 			
-			for (Iterator iterator = matchedDirEntries.iterator(); iterator.hasNext(); dirIndex++) {
-				String dirName = (String) iterator.next();
+			for (Enumeration iterator = matchedDirEntries.elements(); iterator.hasMoreElements(); dirIndex++) {
+				String dirName = (String) iterator.nextElement();
 				File dir = new File(dest+File.separator+dirName);
 				if(dir != null)
 				{
@@ -183,9 +180,9 @@ final public class ZLibTools
 				}
 			}
 			
-			for (Iterator iterator = matchedFileEntries.iterator(); iterator.hasNext(); fileIndex++) 
+			for (Enumeration iterator = matchedFileEntries.elements(); iterator.hasMoreElements(); fileIndex++) 
 			{
-				ZipEntry zEntry = (ZipEntry) iterator.next();
+				ZipEntry zEntry = (ZipEntry) iterator.nextElement();
 				File destFile = new File(dest+File.separator+zEntry.getName());
 				InputStream zEntryInputStream = archive.getInputStream(zEntry);
 				RecursiveCopyTool.copySingleFile(zEntryInputStream, destFile);		
