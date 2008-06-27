@@ -39,7 +39,7 @@ public class PerformanceTokenRequest implements IXMLEncodable
 		
 		if(infoService == null)
 		{
-			//throw new XMLParseException("Request did not specify a valid infoservice id.");
+			throw new XMLParseException("Request did not specify a valid infoservice id.");
 		}
 	}
 	

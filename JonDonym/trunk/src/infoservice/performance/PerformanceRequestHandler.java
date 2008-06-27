@@ -42,7 +42,7 @@ public class PerformanceRequestHandler
 		doc = XMLUtil.toSignedXMLDocument(token, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
-				HttpResponseStructure.HTTP_ENCODING_PLAIN, XMLUtil.toString(token.toXmlElement(doc)));
+				HttpResponseStructure.HTTP_ENCODING_PLAIN, XMLUtil.toString(doc));
 		
 		LogHolder.log(LogLevel.WARNING, LogType.NET, "Token " + token.getId() + " issued.");
 		
