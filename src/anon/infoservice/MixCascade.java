@@ -143,11 +143,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	private boolean m_isPayment;
 	
-	/**
-	 * True, if this MixCascade has a performance server. 
-	 */
-	private boolean m_bPerformanceServer;
-	
 	private long m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
 
 	private String m_mixProtocolVersion;
@@ -404,9 +399,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				m_mixInfos[i] = null;
 			}
 		}
-
-		Node perfNode = XMLUtil.getFirstChildByName(a_mixCascadeNode, "PerformanceServer");
-		m_bPerformanceServer = perfNode == null ? false : XMLUtil.parseValue(perfNode, false);
 		
 		if (m_mixCascadeId == null)
 		{

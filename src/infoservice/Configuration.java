@@ -248,7 +248,7 @@ final public class Configuration
 	
 	public final static String IS_PROP_NAME_PERF_SERVER =
 		IS_PROP_NAME_PERFORMANCE_MONITORING + ".server";
-	public final static String IS_PROP_VALUE_PERF_SERVER = "false";
+	public final static String IS_PROP_VALUE_PERF_SERVER = "true";
 	
 	
 	public Configuration(Properties a_properties) throws Exception
