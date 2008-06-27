@@ -492,7 +492,7 @@ public class PerformanceMeter implements Runnable
 		        }
 		        catch(XMLParseException ex)
 		        {
-		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Error while parsing performance token.");
+		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Error while parsing performance token: " + ex.getMessage());
 		        	return false;
 		        }
 		       	
