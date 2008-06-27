@@ -127,11 +127,11 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
 				{
 					try
 					{	
-						LogHolder.log(LogLevel.NOTICE, LogType.NET, "Shutting down dummy traffic channel...");
+						LogHolder.log(LogLevel.WARNING, LogType.NET, "Shutting down dummy traffic channel...");
 						m_internalSynchronization.notify();
 						m_internalSynchronization.wait();						
 						m_threadRunLoop.join();
-						LogHolder.log(LogLevel.NOTICE, LogType.NET, "Down dummy traffic channel joined!");
+						LogHolder.log(LogLevel.WARNING, LogType.NET, "Down dummy traffic channel joined!");
 					}
 					catch (InterruptedException e)
 					{

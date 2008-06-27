@@ -74,7 +74,7 @@ public class PerformanceToken extends AbstractDatabaseEntry implements IXMLEncod
 		XMLUtil.setValue(elemToken, m_id);
 		
 		elem.appendChild(elemToken);
-
+		
 		return elem;
 	}
 }
