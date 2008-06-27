@@ -454,7 +454,7 @@ public class PerformanceMeter implements Runnable
 		       	
 		       	HTTPConnection conn = new HTTPConnection(host, port);
 		       	HTTPClient.HTTPResponse httpResponse = conn.Post("/requestperformancetoken", xml);
-   	
+		       	
 		       	if(httpResponse.getStatusCode() != 200 || 
 			       Thread.currentThread().isInterrupted())
 		       	{
@@ -463,7 +463,7 @@ public class PerformanceMeter implements Runnable
 		       	}
 		       	
 		       	PerformanceToken token = null;
-		       	
+		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "XML: " + new String(httpResponse.getData()));
 		        try
 		        {
 		        	doc = XMLUtil.toXMLDocument(httpResponse.getData());
