@@ -441,6 +441,7 @@ public class PerformanceMeter implements Runnable
 		       	ListenerInterface iface = chooseRandomInfoService();
 		       	if(iface == null)
 		       	{
+		       		LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not find any info services that are running a performance server.");
 		       		return false;
 		       	}
 		       	
@@ -491,7 +492,7 @@ public class PerformanceMeter implements Runnable
 		       	doc = XMLUtil.toSignedXMLDocument(perfRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		       	xml = XMLUtil.toString(doc);
 		       	
-		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
+		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance data");
 		       	
 		       	stream.write(("POST http://" + host + ":" + port + "/requestperformance HTTP/1.0\r\n").getBytes());
 		       	stream.write(("Content-Length: " + xml.length() + "\r\n\r\n").getBytes());
