@@ -445,47 +445,28 @@ public class PerformanceMeter implements Runnable
 		       	String host = iface.getHost();
 		       	int port = iface.getPort();
         		
-		       	// request token from infoservice directly
-        		Socket s = new Socket(host, port);
-		       	s.setSoTimeout(PERFORMANCE_SERVER_TIMEOUT);
-		       	
-		       	OutputStream stream = s.getOutputStream();
-
-		       	BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-		       	HTTPResponse resp;
-		       			       	
-		       	PerformanceToken token = null;
-		       	
+		       	// request token from info service directly
 		       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
 		       	Document doc = XMLUtil.toSignedXMLDocument(tokenRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		       	String xml = XMLUtil.toString(doc);
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
 		       	
-		       	stream.write(("POST /requestperformancetoken HTTP/1.0\r\n").getBytes());
-		       	stream.write(("Content-Length: " + xml.length() + "\r\n\r\n").getBytes());
-		       	stream.write((xml + "\r\n").getBytes());
-		       	
-		        // read HTTP header from PerformanceServer
-		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200 || 
-		        	Thread.currentThread().isInterrupted())
-		        {
-		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
-		        	s.close();
-		        	// TODO: try it twice?
+		       	HTTPConnection conn = new HTTPConnection(host, port);
+		       	HTTPClient.HTTPResponse httpResponse = conn.Post("/requestperformancetoken", xml);
+   	
+		       	if(httpResponse.getStatusCode() != 200 || 
+			       Thread.currentThread().isInterrupted())
+		       	{
+		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed. Status Code: " + httpResponse.getStatusCode());
 		        	break;
-		        }
-		        
-		        char[] buff = new char[resp.m_length];
-		        reader.read(buff);
-		        
-		        reader.close();
-		        stream.close();
-	        	s.close();
-		        
+		       	}
+		       	
+		       	PerformanceToken token = null;
+		       	
 		        try
 		        {
-		        	doc = XMLUtil.toXMLDocument(buff);
+		        	doc = XMLUtil.toXMLDocument(httpResponse.getData());
 		        	token = new PerformanceToken(doc.getDocumentElement());
 		        	
 		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Received Token " + token.getId() + ".");
@@ -498,12 +479,12 @@ public class PerformanceMeter implements Runnable
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
 		       	
-		       	s = new Socket(m_proxyHost, m_proxyPort);
+		       	Socket s = new Socket(m_proxyHost, m_proxyPort);
 		       	s.setSoTimeout(PERFORMANCE_SERVER_TIMEOUT);
 		       	
-		       	stream = s.getOutputStream();
+		       	OutputStream stream = s.getOutputStream();
 		       	
-		       	reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+		       	BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		       	
 		       	PerformanceRequest perfRequest = new PerformanceRequest(token.getId(), m_dataSize);
 		       	doc = XMLUtil.toSignedXMLDocument(perfRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
@@ -525,6 +506,8 @@ public class PerformanceMeter implements Runnable
 		        long responseStartTime = System.currentTimeMillis();
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Downloading bytes for performance test...");
 		        reader.reset();
+		        
+		        HTTPResponse resp = null;
 		        
 		        // read HTTP header from PerformanceServer
 		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
