@@ -110,7 +110,6 @@ public class PerformanceMeter implements Runnable
 	private long m_lBytesRecvd;
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60;
-	public static final int MINOR_INTERVAL = 1000;	
 	private PayAccountsFile m_payAccountsFile;
 	
 	private Object SYNC_SOCKET = new Object();
@@ -438,6 +437,12 @@ public class PerformanceMeter implements Runnable
 		boolean bUpdated = false;
 		int errorCode = ErrorCodes.E_UNKNOWN; 
 		boolean bRetry = true;
+		Hashtable hashBadInfoServices = new Hashtable();
+		HTTPClient.HTTPResponse httpResponse;
+		Document doc;
+		String host;
+		int port;
+		String xml;
 		
 		// skip cascades on the same host as the infoservice
 		if (a_cascade == null || !isPerftestAllowed(a_cascade))
@@ -472,10 +477,10 @@ public class PerformanceMeter implements Runnable
 		{
 			// interrupted or any other not recoverable error 
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not start performance test. Connection to cascade " + a_cascade.getName() + " failed.");
-			return false;
+			return bUpdated;
 		}					
 		
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + MINOR_INTERVAL + " ms interval.");
+		LogHolder.log(LogLevel.WARNING, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
 		
 		for(int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
 			m_proxy.isConnected(); i++)
@@ -488,30 +493,43 @@ public class PerformanceMeter implements Runnable
         		OutputStream stream;
         		BufferedReader reader;
 		       	
-		       	ListenerInterface iface = chooseRandomInfoService();
-		       	if(iface == null)
+		       	InfoServiceDBEntry infoservice;
+		       	
+		       	while (true)
 		       	{
-		       		LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not find any info services that are running a performance server.");
-		       		return false;
-		       	}
-		       	
-		       	String host = iface.getHost();
-		       	int port = iface.getPort();
-        		
-		       	// request token from info service directly
-		       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
-		       	Document doc = XMLUtil.toSignedXMLDocument(tokenRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
-		       	String xml = XMLUtil.toString(doc);
-		       	
-		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
-		       	
-		       	HTTPConnection conn = new HTTPConnection(host, port);
-		       	HTTPClient.HTTPResponse httpResponse = conn.Post("/requestperformancetoken", xml);
-		       	
-		       	if(httpResponse.getStatusCode() != 200 || Thread.currentThread().isInterrupted())
-		       	{
-		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to performance server failed. Status Code: " + httpResponse.getStatusCode());
-		        	break;
+		       		infoservice = chooseRandomInfoService(hashBadInfoServices);
+			       	if(infoservice == null)
+			       	{
+			       		LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not find any info services that are running a performance server.");
+			       		return bUpdated;
+			       	}
+			        
+			       	host = 
+			       		((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getHost();
+			       	port = 
+			       		((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getPort();
+	        		
+			       	// request token from info service directly
+			       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
+			       	doc = XMLUtil.toSignedXMLDocument(tokenRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+			       	xml = XMLUtil.toString(doc);
+			       	
+			       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
+			       	
+			       	HTTPConnection conn = new HTTPConnection(host, port);
+			       	httpResponse = conn.Post("/requestperformancetoken", xml);
+			       	
+			       	if(httpResponse.getStatusCode() != 200 || Thread.currentThread().isInterrupted())
+			       	{
+			        	LogHolder.log(LogLevel.WARNING, LogType.NET, 
+			        			"Token request to performance server failed. Status Code: " + httpResponse.getStatusCode());			        	
+			        	if (!Thread.currentThread().isInterrupted())
+			        	{
+			        		hashBadInfoServices.put(infoservice.getId(), infoservice);
+			        		continue;
+			        	}
+			       	}
+			       	break;
 		       	}
 		       	
 		       	PerformanceToken token = null;
@@ -525,7 +543,7 @@ public class PerformanceMeter implements Runnable
 		        catch(XMLParseException ex)
 		        {
 		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Error while parsing performance token: " + ex.getMessage());
-		        	return false;
+		        	return bUpdated;
 		        }
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
@@ -650,15 +668,6 @@ public class PerformanceMeter implements Runnable
         	{
 	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
 	        }
-        	
-    		try 
-    		{
-    			Thread.sleep(MINOR_INTERVAL);
-    		} 
-    		catch (InterruptedException e) 
-    		{
-    			break;
-    		}
 		}
 		
     	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Avg Delay: " + entry.getAverageDelay() + " ms; Avg Throughput: " + entry.getAverageSpeed() + " kb/sec");
@@ -808,7 +817,7 @@ public class PerformanceMeter implements Runnable
 		return credit;
 	}
 	
-	public ListenerInterface chooseRandomInfoService()
+	public InfoServiceDBEntry chooseRandomInfoService(Hashtable a_badInfoServices)
 	{
 		Vector knownIS = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
 		
@@ -817,12 +826,14 @@ public class PerformanceMeter implements Runnable
 			int i = ms_rnd.nextInt(knownIS.size());
 		
 			InfoServiceDBEntry entry = (InfoServiceDBEntry) knownIS.elementAt(i);
-			if(entry.isPerfServerEnabled() && !entry.getListenerInterfaces().isEmpty())
+			if (a_badInfoServices.get(entry.getId()) == null &&
+				entry.isPerfServerEnabled() && !entry.getListenerInterfaces().isEmpty())
 			{
-				return (ListenerInterface) entry.getListenerInterfaces().elementAt(0); 
+				return entry; 
 			}
 			else
 			{
+				a_badInfoServices.put(entry.getId(), entry);
 				knownIS.remove(entry);
 			}
 		}
