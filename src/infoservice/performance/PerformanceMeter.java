@@ -430,13 +430,18 @@ public class PerformanceMeter implements Runnable
 		for (int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted(); i++)
 		{			
 		    errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
-		    if (errorCode == ErrorCodes.E_CONNECT)
+		    if (errorCode == ErrorCodes.E_CONNECT || errorCode == ErrorCodes.E_UNKNOWN)
 		    {
 		    	//	try to recover from this error; maybe a temporary problem
 				Thread.yield();
 		    }
 		    else
 		    {
+		    	if (errorCode != ErrorCodes.E_SUCCESS)
+		    	{
+		    		LogHolder.log(LogLevel.WARNING, LogType.NET, 
+		    				"Error connecting to cascade " + a_cascade.getName() + ": " + errorCode);
+		    	}
 		    	break;
 		    }
 		}
