@@ -182,7 +182,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final int FILTER_SPEED_STEPS = (FILTER_SPEED_MAX / FILTER_SPEED_MAJOR_TICK) + 1;
 	
 	private static final int FILTER_LATENCY_STEPS = 5;
-	private static final int FILTER_LATENCY_MAJOR_TICK = 500;
+	private static final int FILTER_LATENCY_MAJOR_TICK = 1000;
 	private static final int FILTER_LATENCY_MAX = FILTER_LATENCY_STEPS * FILTER_LATENCY_MAJOR_TICK;
 	
 	private static final String DEFAULT_MIX_NAME = "Mix";
