@@ -141,9 +141,6 @@ public final class JAPConstants
 	public static final String DOWNLOADFN = "install.gif";
 	static final String IICON16FN = "icon16.gif";
 	static final String ICONFN = "icon.gif";
-	public static final String HELP_FOLDER = "help/";
-	public static final String HELP_VERSION_FILE = "jondohelp.xml";
-	public static final String HELP_START = "index.html";
 	
 	//static final String   CONFIGICONFN                 = "icoc.gif";
 	static final String ENLARGEYICONFN = "enlarge.gif";

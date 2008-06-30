@@ -1849,7 +1849,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	 * @param a_message The message to be displayed. It is interpreted as HTML. You do not need to put in
 	 * formatting tags, as the text will be auto-formatted in a way that the dialog's size is very close
 	 * to the golden ratio.
-	 * @return true if the answer was 'yes'; fale otherwise
+	 * @return true if the answer was 'yes'; false otherwise
 	 */
 	public static boolean showYesNoDialog(Component a_parentComponent, String a_message)
 	{

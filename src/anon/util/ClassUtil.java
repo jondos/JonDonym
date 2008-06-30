@@ -34,6 +34,7 @@ import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Hashtable;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.StringTokenizer;
@@ -41,6 +42,10 @@ import java.net.URL;
 import java.lang.reflect.*;
 import java.io.*;
 import java.net.*;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 /**
  * This class performs some basic operations related to Class objects.
@@ -420,6 +425,28 @@ public final class ClassUtil
 		}
 	}
 
+	/**
+	 * returns a Java Object of the JAP.jar or null if JAP is not started as jar-file
+	 * @returns a handle to the JAP.jar or null if JAP is not started as jar-file
+	 */
+	public static JarFile getJarFile()
+	{
+		File classParentFile = ClassUtil.getClassDirectory(ClassUtil.class);
+		if(classParentFile != null)
+		{
+			if(classParentFile.getPath().endsWith(".jar"))
+				try
+				{
+					return new JarFile(classParentFile);
+				} 
+				catch (IOException ioe)
+				{
+					LogHolder.log(LogLevel.ERR, LogType.MISC, "An I/O error occured while opening the JAR file: ", ioe);
+				}
+		}
+		return null;
+	}
+	
 	/**
 	 * Returns the class directory of the specified class. The class directory is either the
 	 * directory in that the highest package in the package structure of the class is contained,

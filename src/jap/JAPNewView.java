@@ -28,8 +28,7 @@
 package jap;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -37,9 +36,6 @@ import java.util.Hashtable;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -100,7 +96,6 @@ import anon.pay.PayMessage;
 import anon.proxy.IProxyListener;
 import anon.util.JobQueue;
 import anon.util.Util;
-import anon.util.ZLibTools;
 import gui.CountryMapper;
 import gui.FlippingPanel;
 import gui.GUIUtils;
@@ -125,7 +120,6 @@ import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
 import update.JAPUpdateWizard;
-import javax.swing.BorderFactory;
 
 final public class JAPNewView extends AbstractJAPMainView implements IJAPMainView, ActionListener,
 	JAPObserver, Observer, IMessageListener
@@ -2527,16 +2521,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
+		//boolean helpOpened = JAPHelpController.getInstance().openHelp();
 		
-		boolean helpOpened = AbstractOS.getInstance().openHelp();
-		
-		if(!helpOpened)
-		{
-			addStatusMsg("TODO: Fehlermeldung - Hilfe nicht gefunden", JAPDialog.MESSAGE_TYPE_ERROR, true);
+		//if(!helpOpened)
+		//{
 			JAPHelp help = JAPHelp.getInstance();
 			help.getContextObj().setContext("index");
 			help.loadCurrentContext();
-		}
+		//}
 	}
 
 	public void setVisible(boolean a_bVisible)
@@ -3419,5 +3411,26 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			m_operator = a_operator;
 		}
+	}
+
+	public void showHelpInstallDialog() 
+	{
+		if(JAPDialog.showYesNoDialog(this, "choose path for external help install"))
+		{
+			JFileChooser chooser = new JFileChooser();
+			JAPModel model = JAPModel.getInstance();
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+			{
+				File f = chooser.getSelectedFile();
+				model.setHelpPath(f.getPath());
+			}
+		}
+	}
+	
+	public JAPHelpProgressDialog displayInstallProgress()
+	{
+		JAPHelpProgressDialog hpd = new JAPHelpProgressDialog(this);
+		return hpd;
 	}
 }
