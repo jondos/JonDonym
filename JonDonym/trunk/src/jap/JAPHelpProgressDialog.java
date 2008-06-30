@@ -1,5 +1,8 @@
 package jap;
 
+import gui.JAPMessages;
+import gui.dialog.JAPDialog;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,20 +23,22 @@ public class JAPHelpProgressDialog implements Observer
 {
 	
 	private JProgressBar m_helpProgressBar;
-	private JDialog m_displayProgress;
+	private JAPDialog m_displayProgress;
 	private JLabel m_progressLabel;
+	
+	public final static String MSG_HELP_INSTALL = "helpInstall";
 	
 	long m_totalSizeExceedingInt = ZipEvent.UNDEFINED;
 			
 	public JAPHelpProgressDialog(JFrame parent)
 	{
 		m_helpProgressBar = new JProgressBar();
-		m_displayProgress = new JDialog(parent, "help install progress", true);
+		m_displayProgress = new JAPDialog(parent, JAPMessages.getString(MSG_HELP_INSTALL), true);
 		
 		m_progressLabel = new JLabel("help progress");
 		m_helpProgressBar.setBorderPainted(true);
 		m_helpProgressBar.setStringPainted(true);
-		m_displayProgress.setSize(400, 300);
+		//m_displayProgress.setSize(400, 300);
 		m_displayProgress.getContentPane().setLayout(new BorderLayout());
 		
 		m_displayProgress.getContentPane().add(m_progressLabel, BorderLayout.NORTH);

@@ -197,7 +197,7 @@ public class ConsoleJAPMainView implements IJAPMainView
 	{
 	}
 
-	public void showHelpInstallDialog() 
+	public void askForHelpInstallationPath(boolean withDialog) 
 	{
 	}
 }

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
-import java.util.jar.JarFile;
+import java.util.zip.ZipFile;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -80,7 +80,7 @@ public final class JAPHelpController {
 	{
 		if(!model.isHelpPathDefined())
 		{
-			JAPController.getInstance().getView().showHelpInstallDialog();
+			JAPController.getInstance().getView().askForHelpInstallationPath(IJAPMainView.WITH_DIALOG);
 			if(!model.isHelpPathDefined())
 			{
 				boolean stdInstall = 
@@ -119,7 +119,7 @@ public final class JAPHelpController {
 			}
 		}
 		// We can go on extracting the help from the JarFile if necessary
-		JarFile japArchive = ClassUtil.getJarFile();
+		ZipFile japArchive = ClassUtil.getJarFile();
 		if(japArchive == null)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Not running a jar file: Installing help is not necessary");
