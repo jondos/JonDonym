@@ -427,7 +427,7 @@ public class PerformanceMeter implements Runnable
 		
 		m_recvBuff = new char[m_dataSize];				
 		
-		for (int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted(); i++)
+		for (int i = 0; i < m_requestsPerInterval * 2 && !Thread.currentThread().isInterrupted(); i++)
 		{			
 		    errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
 		    if (errorCode == ErrorCodes.E_CONNECT || errorCode == ErrorCodes.E_UNKNOWN)
