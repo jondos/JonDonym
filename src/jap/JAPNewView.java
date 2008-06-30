@@ -3413,9 +3413,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 	}
 
-	public void showHelpInstallDialog() 
+	public void askForHelpInstallationPath(boolean withDialog) 
 	{
-		if(JAPDialog.showYesNoDialog(this, "choose path for external help install"))
+		boolean openFileChooser = !withDialog;
+		if(withDialog)
+		{
+			openFileChooser = 
+				JAPDialog.showYesNoDialog(this, "choose path for external help install");
+		}
+		if(openFileChooser)
 		{
 			JFileChooser chooser = new JFileChooser();
 			JAPModel model = JAPModel.getInstance();

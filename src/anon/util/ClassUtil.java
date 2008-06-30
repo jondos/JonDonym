@@ -429,7 +429,7 @@ public final class ClassUtil
 	 * returns a Java Object of the JAP.jar or null if JAP is not started as jar-file
 	 * @returns a handle to the JAP.jar or null if JAP is not started as jar-file
 	 */
-	public static JarFile getJarFile()
+	public static ZipFile getJarFile()
 	{
 		File classParentFile = ClassUtil.getClassDirectory(ClassUtil.class);
 		if(classParentFile != null)
