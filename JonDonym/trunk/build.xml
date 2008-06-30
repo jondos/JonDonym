@@ -9,7 +9,7 @@
   <property name="excludesSrcJap" value="jpi/** infoservice/** misc/** anon/crypto/tinytls/test/** platform/signal/**/*"/>
   <property name="infoservice-excludes" value="jpi/** infoservice/performance/** misc/**"/>
   <property name="build" location="build"/>
-  <property name="build.libs" location="build/libs"/>
+  <property name="build.libs" location="lib"/>
   <property name="dist" location="dist"/>
   <property name="japrelease.jnlp" location="/home/infoservice/japRelease.jnlp"/>
   <property name="japtomcat" location="/home/tomcat/webapps/jap/"/>
@@ -53,6 +53,7 @@
   	<path refid="classpath_jaf"/>
   </path>
   <path id="java_1_1_boot_classes" location="${build.libs}/java_1_1_classes.zip"/>
+ 
   <target name="init-dirs">
     <!-- Create the time stamp -->
     <tstamp/>
@@ -60,27 +61,122 @@
     <mkdir dir="${build}"/>
     <mkdir dir="${build.libs}"/>
   </target>
+ 
   <target name="init-libs" depends="init-dirs">
-    <get src="http://anon.inf.tu-dresden.de/develop/java_1_1_classes.zip" verbose="true" dest="${build.libs}/java_1_1_classes.zip">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/swingall.jar" verbose="true" dest="${build.libs}/swingall.jar">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/http.jar" verbose="true" dest="${classpath_httplib_file_name}">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/xml.jar" verbose="true" dest="${classpath_xmllib_file_name}">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/BouncyCastleLightForJAP.jar" verbose="true" dest="${classpath_bouncy_file_name}">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/ApacheFTPClient.jar" verbose="true" dest="${classpath_ftplib_file_name}">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/apache-xmlrpc-1.1.jar" verbose="true" dest="${classpath_xmlrpc_file_name}">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/mail.jar" verbose="true" dest="${build.libs}/mail.jar">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/Jama.jar" verbose="true" dest="${build.libs}/jama.jar">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/log4j.jar" verbose="true" dest="${classpath_log4j_file_name}">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/MRJClasses.zip" verbose="true" dest="${build.libs}/MRJClasses.zip">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/AppleJavaExtensions.jar" verbose="true" dest="${build.libs}/AppleJavaExtensions.jar">    </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/japdll.dll" verbose="true" dest="${build.libs}/japdll.dll"> </get>
-    <get src="http://anon.inf.tu-dresden.de/develop/activation.jar" verbose="true" dest="${build.libs}/activation.jar"> </get>
-   
-    <get src="http://anon.inf.tu-dresden.de/develop/japdllversion.txt" verbose="true" dest="${build.libs}/japdllversion.txt">
-    </get>
+    <get src="http://anon.inf.tu-dresden.de/develop/java_1_1_classes.zip" 
+    	 verbose="true" 
+    	 usetimestamp="true"
+    	 ignoreerrors="true"
+    	 dest="${build.libs}/java_1_1_classes.zip"/>    
+    
+  	<get src="http://anon.inf.tu-dresden.de/develop/swingall.jar" 
+    	 verbose="true" 
+    	 usetimestamp="true"
+    	 ignoreerrors="true"
+    	 dest="${build.libs}/swingall.jar"/>    
+  
+    <get src="http://anon.inf.tu-dresden.de/develop/http.jar" 
+   	  	verbose="true"
+   		usetimestamp="true"
+   	    ignoreerrors="true"
+   		dest="${classpath_httplib_file_name}"/>
+  	
+    <get src="http://anon.inf.tu-dresden.de/develop/xml.jar" 
+    	 verbose="true" 
+    	 usetimestamp="true"
+    	 ignoreerrors="true"
+    	 dest="${classpath_xmllib_file_name}"/>
+  	
+   <get src="http://anon.inf.tu-dresden.de/develop/BouncyCastleLightForJAP.jar" 
+    	 verbose="true" 
+   		 usetimestamp="true"
+    	 ignoreerrors="true"
+    	 dest="${classpath_bouncy_file_name}"/>
+    
+    <get src="http://anon.inf.tu-dresden.de/develop/ApacheFTPClient.jar" 
+    	 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true" 
+    	 dest="${classpath_ftplib_file_name}"/> 
+    
+  	<get src="http://anon.inf.tu-dresden.de/develop/apache-xmlrpc-1.1.jar" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${classpath_xmlrpc_file_name}"/>
+    
+  	<get src="http://anon.inf.tu-dresden.de/develop/mail.jar" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/mail.jar"/>    
+  
+    <get src="http://anon.inf.tu-dresden.de/develop/Jama.jar" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/jama.jar"/>
+  	
+    <get src="http://anon.inf.tu-dresden.de/develop/log4j.jar" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${classpath_log4j_file_name}"/>
+  	
+    <get src="http://anon.inf.tu-dresden.de/develop/MRJClasses.zip" 
+  		 verbose="true"
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/MRJClasses.zip"/>
+  	
+    <get src="http://anon.inf.tu-dresden.de/develop/AppleJavaExtensions.jar" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/AppleJavaExtensions.jar"/>    
+  
+    <get src="http://anon.inf.tu-dresden.de/develop/japdll.dll" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/japdll.dll"/>
+  	
+    <get src="http://anon.inf.tu-dresden.de/develop/activation.jar" 
+  		 verbose="true"
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/activation.jar"/>
+  	
+    <get src="http://anon.inf.tu-dresden.de/develop/japdllversion.txt" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/japdllversion.txt"/> 
+  	 
+  	<available file="${classpath_httplib_file_name}" property="httplib.available"/>
+  	<available file="${classpath_xmllib_file_name}" property="xmllib.available"/>
+  	<available file="${classpath_ftplib_file_name}" property="ftplib.available"/>
+  	<available file="${classpath_log4j_file_name}" property="log4j.available"/>
+  	<available file="${classpath_mail_file_name}" property="mail.available"/>
+  	<available file="${classpath_jama_file_name}" property="jama.available"/>
+  	<available file="${classpath_bouncy_file_name}" property="bouncy.available"/>
+  	<available file="${classpath_xmlrpc_file_name}" property="xmlrpc.available"/>
+  	<available file="${classpath_jaf_file_name}" property="jaf.available"/>
+  	
+  	<fail unless="httplib.available" message="HTTP lib not available"/>
+	<fail unless="xmllib.available" message="XML lib not available"/>
+  	<fail unless="ftplib.available" message="FTP lib not available"/>
+  	<fail unless="log4j.available" message="Log4J not available"/>
+  	<fail unless="mail.available" message="Java Mail not available"/>
+  	<fail unless="jama.available" message="Java Matrix not available"/>
+  	<fail unless="bouncy.available" message="Bouncy Castle not available"/>
+  	<fail unless="xmlrpc.available" message="XML RPC not available"/>
+  	<fail unless="jaf.available" message="Java Activation not available"/>
   </target>
+  
   <target name="init" depends="init-libs"/>
-<target name="dist-pre-compile">
+
+  <target name="dist-pre-compile">
   <!-- Use javac from Java1.3, because this compiler (at the moment) is the only one know
       to produce byte codes which could be processed by all java 1.1 compatible implementation
       Note: Java 1.4 and 1.5 are know to prodcue "bad" bytecode even if target="1.1" is specified!
