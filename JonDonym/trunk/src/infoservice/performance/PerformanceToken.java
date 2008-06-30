@@ -15,7 +15,7 @@ import anon.util.Base64;
 
 public class PerformanceToken extends AbstractDatabaseEntry implements IXMLEncodable
 {
-	public static final int PERFORMANCE_TOKEN_TTL = 60*1000;
+	public static final int PERFORMANCE_TOKEN_TTL = 120*1000;
 	public static final int PERFORMANCE_TOKEN_BASE_LENGTH = 16;
 	
 	public static final String XML_ELEMENT_NAME = "PerformanceToken";
