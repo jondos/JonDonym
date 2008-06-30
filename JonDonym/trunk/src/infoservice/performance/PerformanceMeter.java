@@ -433,7 +433,7 @@ public class PerformanceMeter implements Runnable
 		    if (errorCode == ErrorCodes.E_CONNECT || errorCode == ErrorCodes.E_UNKNOWN)
 		    {
 		    	//	try to recover from this error; maybe a temporary problem
-				Thread.yield();
+				Thread.sleep(2000);
 		    }
 		    else
 		    {
