@@ -101,7 +101,7 @@ public abstract class AbstractControlChannel extends AbstractChannel
 				sendPacket(currentMixPacket);
 				bytesToSend = bytesToSend - currentPacketLength;
 			}
-			while (bytesToSend > 0);
+			while (bytesToSend > 0 && !Thread.currentThread().isInterrupted());
 			return ErrorCodes.E_SUCCESS;
 		}
 		catch (IOException e)

@@ -27,6 +27,8 @@
  */
 package infoservice;
 
+import infoservice.performance.PerformanceMeter;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -56,15 +58,18 @@ public class InfoServicePropagandist implements Runnable
 	 * Stores whether ther is already an instance of InfoServicePropagandist running or not.
 	 */
 	private static boolean alreadyRunning = false;
+	
+	private static PerformanceMeter m_meter;
 
 	/**
 	 * Generates an instance of InfoServicePropagandist if there isn't already one running.
 	 */
-	public static void generateInfoServicePropagandist()
+	public static void generateInfoServicePropagandist(PerformanceMeter a_meter)
 	{
 		if (alreadyRunning == false)
 		{
 			alreadyRunning = true;
+			m_meter = a_meter;
 			ms_serialNumber = System.currentTimeMillis();
 			InfoServicePropagandist propaganda = new InfoServicePropagandist();
 			Thread propagandist = new Thread(propaganda, "Propaganda Thread");
@@ -97,6 +102,14 @@ public class InfoServicePropagandist implements Runnable
 					{
 						// update MixCascades and Mixes at startup only
 						break;
+					}
+					if (i == 3)
+					{
+						// all cascades are fetched, start meter thread
+						if (m_meter != null)
+						{
+							m_meter.update();
+						}
 					}
 
 					hashEntries = new Hashtable();

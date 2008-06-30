@@ -103,8 +103,7 @@ public class Multiplexer extends Observable implements Runnable
 				
 				if(!coChPacket)
 				{
-					if((m_controlMessageQueue.size() > 1) 
-					|| (m_sendJobQueue.size() > 1)	)
+					if((m_controlMessageQueue.size() > 1) || (m_sendJobQueue.size() > 1))
 					{
 						/* data channel packets have to wait until 
 						 * control channel packets are processed
@@ -118,7 +117,7 @@ public class Multiplexer extends Observable implements Runnable
 					{
 						/* control channel packets have higher priority and are processed 
 						 * before any data traffic can be transmitted so cost confirmations 
-						 * can be delivered at time in case of data congestion.
+						 * can be delivered on time in case of data congestion.
 						 */
 						waitForAccess = true;
 						LogHolder.log(LogLevel.WARNING, LogType.NET,

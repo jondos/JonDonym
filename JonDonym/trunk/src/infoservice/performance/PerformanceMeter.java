@@ -53,6 +53,7 @@ import logging.LogLevel;
 import logging.LogType;
 import HTTPClient.HTTPConnection;
 import anon.ErrorCodes;
+import anon.client.AnonClient;
 import anon.client.DummyTrafficControlChannel;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.ListenerInterface;
@@ -87,6 +88,7 @@ import infoservice.HttpResponseStructure;
  */
 public class PerformanceMeter implements Runnable 
 {	
+	private Object SYNC_METER = new Object();
 	private String m_proxyHost;
 	private int m_proxyPort;
 	private int m_dataSize;
@@ -134,6 +136,7 @@ public class PerformanceMeter implements Runnable
 		}
 		
 		Object[] a_config = m_infoServiceConfig.getPerformanceMeterConfig();
+		AnonClient.setLoginTimeout(PERFORMANCE_SERVER_TIMEOUT);
 		
 		m_proxyHost = (String) a_config[0];
 		m_proxyPort = ((Integer) a_config[1]).intValue();
@@ -149,7 +152,7 @@ public class PerformanceMeter implements Runnable
 		try
 		{
 			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
-			//m_proxy.setDummyTraffic(DummyTrafficControlChannel.DT_DISABLE);
+			m_proxy.setDummyTraffic(DummyTrafficControlChannel.DT_MIN_INTERVAL_MS);
 		} 
 		catch (UnknownHostException e1) 
 		{
@@ -191,9 +194,14 @@ public class PerformanceMeter implements Runnable
 							{
 								m_lastTotalUpdates++;
 							}
+							else
+							{
+								Database.getInstance(PerformanceEntry.class).remove(cascade.getId());
+							}
 						}
 						catch (InterruptedException a_e)
-						{								
+						{
+							Database.getInstance(PerformanceEntry.class).remove(cascade.getId());
 						}
 					}
 				});	
@@ -224,20 +232,21 @@ public class PerformanceMeter implements Runnable
 				while (performTestThread.isAlive())
 				{	
 					iWait++;
-					performTestThread.interrupt();											
+					performTestThread.interrupt();
 					
 					if (iWait >= 5)
 					{			
-						if (iWait == 5)
+						//if (iWait == 5)
 						{
 							LogHolder.log(LogLevel.EMERG, LogType.THREAD, "Problems finishing meter thread!");
 						}
+						/*
 						if (iWait > 5)
 						{
 							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
 									"Using deprecated stop routine to finish meter thread!");
 							performTestThread.stop();
-						}
+						}*/
 						try
 						{
 							performTestThread.join(1000);
@@ -257,28 +266,43 @@ public class PerformanceMeter implements Runnable
 						}
 					}
 				}
-			}
-			if (m_lastTotalUpdates > 0)
-			{
-				m_lastUpdateRuntime = System.currentTimeMillis() - updateBegin;
-			}
+				if (m_lastTotalUpdates > 0)
+				{
+					m_lastUpdateRuntime = System.currentTimeMillis() - updateBegin;
+				}
+			}			
 			
-    		try 
-    		{
-    			long sleepFor = m_nextUpdate - System.currentTimeMillis();
-    			if (sleepFor > 0)
-    			{
-    				LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sleeping for " + sleepFor + "ms.");
-    				Thread.sleep(sleepFor);
-    			}
-    		}
-    		catch (InterruptedException e)
-    		{
-    			//break;
-    		}
+			synchronized (SYNC_METER)
+			{
+				long sleepFor = m_nextUpdate - System.currentTimeMillis();    			
+				if (sleepFor > 0)
+				{
+					LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sleeping for " + sleepFor + "ms.");
+		    		try 
+		    		{	    			    			
+	    				SYNC_METER.wait(sleepFor);	    				
+		    		}
+		    		catch (InterruptedException e)
+		    		{
+		    			//break;
+		    		}	    		
+	    		}
+			}
 		}
 	}
 
+	/**
+	 * Force an update if thread is waiting.
+	 */
+	public void update()
+	{
+		synchronized (SYNC_METER)
+		{
+			m_nextUpdate = System.currentTimeMillis();
+			SYNC_METER.notify();
+		}
+	}
+	
 	private boolean loadAccountFiles() 
 	{
 		LogHolder.log(LogLevel.INFO, LogType.PAY, "Looking for new account files");
@@ -396,6 +420,7 @@ public class PerformanceMeter implements Runnable
 	{
 		boolean bUpdated = false;
 		int errorCode = ErrorCodes.E_UNKNOWN; 
+		boolean bRetry = true;
 		
 		// skip cascades on the same host as the infoservice
 		if (a_cascade == null || !isPerftestAllowed(a_cascade))
@@ -407,17 +432,18 @@ public class PerformanceMeter implements Runnable
 		
 		m_recvBuff = new char[m_dataSize];				
 		
-		for (int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
-		     (errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade))) == ErrorCodes.E_CONNECT;
-			 i++)
-		{
-			// try to recover from this error
-			Thread.yield();			
-		}
-		
-		if (Thread.currentThread().isInterrupted())
-		{
-			return false;
+		for (int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted(); i++)
+		{			
+		    errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
+		    if (errorCode == ErrorCodes.E_CONNECT)
+		    {
+		    	//	try to recover from this error; maybe a temporary problem
+				Thread.yield();
+		    }
+		    else
+		    {
+		    	break;
+		    }
 		}
 		
 		if (errorCode != ErrorCodes.E_SUCCESS || !m_proxy.isConnected())
@@ -435,8 +461,7 @@ public class PerformanceMeter implements Runnable
         	try 
         	{
         		long delay;
-        		long speed;
-				
+        		long speed;				
 		       	
 		       	ListenerInterface iface = chooseRandomInfoService();
 		       	if(iface == null)
@@ -458,10 +483,9 @@ public class PerformanceMeter implements Runnable
 		       	HTTPConnection conn = new HTTPConnection(host, port);
 		       	HTTPClient.HTTPResponse httpResponse = conn.Post("/requestperformancetoken", xml);
 		       	
-		       	if(httpResponse.getStatusCode() != 200 || 
-			       Thread.currentThread().isInterrupted())
+		       	if(httpResponse.getStatusCode() != 200 || Thread.currentThread().isInterrupted())
 		       	{
-		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed. Status Code: " + httpResponse.getStatusCode());
+		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to performance server failed. Status Code: " + httpResponse.getStatusCode());
 		        	break;
 		       	}
 		       	
@@ -516,8 +540,18 @@ public class PerformanceMeter implements Runnable
 		        {
 		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
 		        	s.close();
-		        	// TODO: try it twice?
-		        	break;
+		        	if (bRetry)
+		        	{
+		        		bRetry = false;
+		        		m_proxy.stop();		        	
+		        		errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
+		    		    if (errorCode == ErrorCodes.E_SUCCESS && m_proxy.isConnected())
+		    		    {
+		    		    	bRetry = true;
+		    		    	continue;
+		    		    }		        		
+		        	}		        	
+		        	break;		        	
 		        }
 		        
 		        if(resp.m_length != m_dataSize)
@@ -550,16 +584,19 @@ public class PerformanceMeter implements Runnable
 		        
         		if(bytesRead != m_dataSize)
         		{
-        			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not verify incoming package. Recieved " + bytesRead + " of " + m_dataSize + " bytes.");
-        			s.close();
-        			continue;
+        			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not get all requested bytes. Received " + bytesRead + " of " + m_dataSize + " bytes.");
+        			if (bytesRead < (m_dataSize / 3))
+        			{
+        				s.close();
+        				continue;
+        			}
         		}
         		
         		// delay in ms
         		delay = responseStartTime - transferInitiatedTime;
         		
         		// speed in bit/sec;
-        		speed = (m_dataSize * 8) / (responseEndTime - responseStartTime);
+        		speed = (bytesRead * 8) / (responseEndTime - responseStartTime);
         		
         		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
         		

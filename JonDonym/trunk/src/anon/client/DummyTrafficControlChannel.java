@@ -47,6 +47,8 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
 	public static final int DT_MIN_INTERVAL_MS = 500;
 	public static final int DT_MAX_INTERVAL_MS = 30000;
 	public static final int DT_DISABLE = Integer.MAX_VALUE;
+	
+	private Observable m_observedMultiplexer;
 
   /**
    * Stores whether the internal thread shall work (true) or come to the end
@@ -81,34 +83,33 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
     m_bRun = false;
     m_threadRunLoop = null;
     m_interval = -1;
-    a_multiplexer.addObserver(this);
+    m_observedMultiplexer = a_multiplexer;
   }
 
 
   /**
    * This is the implementation for the dummy traffic thread.
    */
-  public void run() {
-	  synchronized (m_internalSynchronization)
-      {
-	    while (m_bRun) {
-	      try {
-	    	  m_internalSynchronization.wait(m_interval);	        
-	        	if (!m_bRun)
-	        	{
-	        		/* if we reach the timeout without interruption, we have to send a dummy */
-	        		LogHolder.log(LogLevel.INFO, LogType.NET, "Sending Dummy!");
-	        		sendRawMessage(new byte[0]);
-	        	}
-	        }
-	     
-	      catch (InterruptedException e) {
-	    	  //LogHolder.log(LogLevel.INFO, LogType.NET, "Dummy thread interrupted!");
-	        /* if we got an interruption within the timeout, everything is ok */
-	      }
-	    }
-
-	    m_internalSynchronization.notify();
+  public void run() 
+  {
+	  LogHolder.log(LogLevel.WARNING, LogType.NET, "Dummy traffic interval: " + m_interval + "ms");
+	  while (m_bRun) 
+	  {
+		  try 
+		  {
+			  Thread.sleep(m_interval);
+			  if (m_bRun)
+			  {
+				  /* if we reach the timeout without interruption, we have to send a dummy */
+				  LogHolder.log(LogLevel.INFO, LogType.NET, "Sending Dummy!");
+				  sendRawMessage(new byte[0]);
+			  }
+	      }	     
+		  catch (InterruptedException e) 
+		  {
+			  //LogHolder.log(LogLevel.WARNING, LogType.NET, "Dummy thread interrupted!");
+			  /* if we got an interruption within the timeout, everything is ok */
+		  }
       }
   }
 
@@ -118,25 +119,29 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
 	 * @todo: stopping dummy traffic sometimes causes deadlocks 
 	 * 		(when Infoservice performance test is running)
 	 */
-  	public void stop() {
-	    synchronized (m_internalSynchronization) {
+  	public void stop() 
+  	{
+	    synchronized (m_internalSynchronization) 
+	    {
 	    	m_bRun = false;
+	    	m_observedMultiplexer.deleteObserver(this);
+	    	
 	    	if (m_threadRunLoop != null) 
 	    	{
 	    	  	while (m_threadRunLoop.isAlive())
 				{
-					try
-					{	
-						LogHolder.log(LogLevel.NOTICE, LogType.NET, "Shutting down dummy traffic channel...");
-						m_internalSynchronization.notify();
-						m_internalSynchronization.wait();						
-						m_threadRunLoop.join();
-						LogHolder.log(LogLevel.NOTICE, LogType.NET, "Dummy traffic channel joined!");
-					}
+	    	  		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Shutting down dummy traffic channel...");
+	    	  		m_threadRunLoop.interrupt(); 
+	    	  		
+	    	  		try
+	    	  		{
+	    	  			m_threadRunLoop.join();
+	    	  		}					
 					catch (InterruptedException e)
 					{
 					}
 				}
+	    	  	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Dummy traffic channel closed!");
 	    	  	m_threadRunLoop = null;
 	    	}
 	    }
@@ -172,7 +177,7 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
       stop();
       if(a_interval == DT_DISABLE)
       {
-    	  LogHolder.log(LogLevel.INFO, LogType.NET, "Dummy traffic disabled!");
+    	  LogHolder.log(LogLevel.WARNING, LogType.NET, "Dummy traffic disabled!");
     	  return;
       }
 	  // force the use of dummy traffic < DT_MAX_INTERVAL_MS, so that the connection to the first Mix is held
@@ -186,7 +191,7 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
 	  }
 
       m_interval = (long)a_interval;
-      if (a_interval > -1) {
+      if (a_interval > 0) {
         start();
         /*
          * send a dummy, else the interval until a dummy is sent could be the
@@ -224,6 +229,7 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
         m_bRun = true;
         m_threadRunLoop = new Thread(this, "JAP - Dummy Traffic");
         m_threadRunLoop.setDaemon(true);
+        m_observedMultiplexer.addObserver(this);
         m_threadRunLoop.start();
       }
     }

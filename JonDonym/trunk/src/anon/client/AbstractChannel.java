@@ -32,6 +32,10 @@
 package anon.client;
 
 import java.io.IOException;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 import anon.IServiceContainer;
 
 

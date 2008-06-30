@@ -112,6 +112,24 @@ public class InfoService implements Observer
 		try
 		{
 			InfoService s1 = new InfoService(fn);
+						
+//			 configure the performance meter
+			if(Configuration.getInstance().isPerfEnabled())
+			{				
+				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting Performance Meter...");
+				
+				ms_accountUpdater = new AccountUpdater();		
+				ms_accountUpdater.start(false);				
+				ms_perfMeter = new PerformanceMeter(ms_accountUpdater);
+				Thread perfMeterThread = new Thread(InfoService.ms_perfMeter);			
+				perfMeterThread.start();
+			}
+			else
+			{
+				InfoService.ms_perfMeter = null;
+			}
+			
+			// start info service server
 			s1.startServer();
 			
 			SignalHandler handler = new SignalHandler();
@@ -119,8 +137,7 @@ public class InfoService implements Observer
 			handler.addSignal("HUP");
 			handler.addSignal("TERM");
 			
-			JAPMessages.setLocale(Locale.ENGLISH);
-			
+			JAPMessages.setLocale(Locale.ENGLISH);			
 
 			System.out.println("InfoService is running!");
 			
@@ -129,25 +146,7 @@ public class InfoService implements Observer
 			model.allowUpdateViaDirectConnection(true);
 			model.setAnonConnectionChecker(JAPController.getInstance().new AnonConnectionChecker());
 			model.setAutoReConnect(true);
-			model.setCascadeAutoSwitch(false);
-			
-			InfoService.ms_accountUpdater = new AccountUpdater();
-			InfoService.ms_accountUpdater.start(false);
-			
-			// start the performance meter
-			if(Configuration.getInstance().isPerfEnabled())
-			{
-				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting Performance Meter...");
-				InfoService.ms_perfMeter = 
-					new PerformanceMeter(ms_accountUpdater);
-				
-				Thread perfMeterThread = new Thread(InfoService.ms_perfMeter);
-				perfMeterThread.start();
-			}
-			else
-			{
-				InfoService.ms_perfMeter = null;
-			}
+			model.setCascadeAutoSwitch(false);										
 		}
 		catch (Exception e)
 		{
@@ -250,7 +249,7 @@ public class InfoService implements Observer
 		/* initialize internal commands of InfoService */
 		oicHandler = new InfoServiceCommands();
 		/* initialize propagandist for our infoservice */
-		InfoServicePropagandist.generateInfoServicePropagandist();
+		InfoServicePropagandist.generateInfoServicePropagandist(ms_perfMeter);
 		// start server
 		LogHolder.log(LogLevel.EMERG, LogType.MISC, "InfoService -- Version " + Constants.INFOSERVICE_VERSION);
 		LogHolder.log(LogLevel.EMERG, LogType.MISC, System.getProperty("java.version"));
