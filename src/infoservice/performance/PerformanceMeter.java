@@ -240,21 +240,12 @@ public class PerformanceMeter implements Runnable
 					
 					if (iWait >= 5)
 					{	
-						if (iWait == 5)
-						{
-							closeMeterSocket();
-						}
-						else
+						closeMeterSocket();
+						if (iWait > 5)
 						{
 							LogHolder.log(LogLevel.EMERG, LogType.THREAD, "Problems finishing meter thread!");
 						}
-						/*
-						if (iWait > 5)
-						{
-							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
-									"Using deprecated stop routine to finish meter thread!");
-							performTestThread.stop();
-						}*/
+
 						try
 						{
 							performTestThread.join(1000);
