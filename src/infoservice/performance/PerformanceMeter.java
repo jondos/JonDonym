@@ -194,14 +194,9 @@ public class PerformanceMeter implements Runnable
 							{
 								m_lastTotalUpdates++;
 							}
-							else
-							{
-								Database.getInstance(PerformanceEntry.class).remove(cascade.getId());
-							}
 						}
 						catch (InterruptedException a_e)
 						{
-							Database.getInstance(PerformanceEntry.class).remove(cascade.getId());
 						}
 					}
 				});	
