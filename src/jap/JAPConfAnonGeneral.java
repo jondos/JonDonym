@@ -147,7 +147,7 @@ final class JAPConfAnonGeneral extends AbstractJAPConfModule implements Observer
 		{
 			if (a_message.equals(JAPModel.CHANGED_AUTO_RECONNECT))
 			{
-				m_cbAutoReConnect.setSelected(JAPModel.getInstance().isAutomaticallyReconnected());
+				m_cbAutoReConnect.setSelected(JAPModel.isAutomaticallyReconnected());
 			}
 			else if (a_message.equals(JAPModel.CHANGED_CASCADE_AUTO_CHANGE))
 			{
@@ -156,7 +156,7 @@ final class JAPConfAnonGeneral extends AbstractJAPConfModule implements Observer
 			}
 			else if (a_message.equals(JAPModel.CHANGED_AUTO_CONNECT))
 			{
-				m_cbAutoConnect.setSelected(JAPModel.getInstance().isAutoConnect());
+				m_cbAutoConnect.setSelected(JAPModel.isAutoConnect());
 			}
 			else if (a_message.equals(JAPModel.CHANGED_DENY_NON_ANONYMOUS))
 			{

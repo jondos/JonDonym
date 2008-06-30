@@ -309,16 +309,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	}
 
 	public void shutdown(boolean a_bResetTransferredBytes)
-	{
-		synchronized (m_internalSynchronizationForDummyTraffic)
-		{
-			if (m_dummyTrafficControlChannel != null)
-			{
-				m_dummyTrafficControlChannel.stop();
-				m_dummyTrafficControlChannel = null;
-			}
-		}
-		
+	{	
 		synchronized (m_internalSynchronizationForSocket)
 		{
 			if (m_socketHandler != null)
@@ -340,6 +331,15 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			m_multiplexer = null;
 			m_connected = false;
 
+			synchronized (m_internalSynchronizationForDummyTraffic)
+			{
+				if (m_dummyTrafficControlChannel != null)
+				{
+					m_dummyTrafficControlChannel.stop();
+					m_dummyTrafficControlChannel = null;
+				}
+			}
+			
 			if (m_packetCounter != null)
 			{
 				m_packetCounter.deleteObserver(this);
