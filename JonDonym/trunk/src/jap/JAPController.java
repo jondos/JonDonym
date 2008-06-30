@@ -202,6 +202,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static final String XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT = "isConnectionTimeout";
 	private static final String XML_ATTR_ASK_SAVE_PAYMENT = "askIfNotSaved";
 	private static final String XML_ATTR_SHOW_SPLASH_SCREEN = "ShowSplashScreen";
+	private static final String XML_ATTR_HELP_PATH ="helpPath";
 
 	// store classpath as it may not be created successfully after update
 	private final String CLASS_PATH = ClassUtil.getClassPath().trim();
@@ -746,6 +747,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 *    neverAskPayment="true"/"false" // should we remind the user about payment for cascades ?
 	 *    Locale="LOCALE_IDENTIFIER" (two letter iso 639 code) //the Language for the UI to use
 	 *    LookAndFeel="..."             //the LookAndFeel class name
+	 *    helpPath="..."					//the path for an external installation of the help files
 	 *  >
 	 * <MixCascades>								//info about known MixCascades (since version 0.16)
 	 *	<MixCascade>...</MixCascade>
@@ -1019,10 +1021,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 								XMLUtil.parseAttribute(root, XML_ATTR_AUTO_CHOOSE_CASCADES_ON_STARTUP, true));
 				JAPModel.getInstance().denyNonAnonymousSurfing(
 								XMLUtil.parseAttribute(root, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING, false));
-
-
-
-
+				
+				JAPModel.getInstance().setHelpPath(
+								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
+						
 
 	            m_Model.setHttpListenerPortNumber(XMLUtil.parseAttribute(root,
 					JAPConstants.CONFIG_PORT_NUMBER,
@@ -2377,8 +2379,13 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, XML_ATTR_LOGIN_TIMEOUT, AnonClient.getLoginTimeout());
 			XMLUtil.setAttribute(e, XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT,
 								 InfoServiceDBEntry.getConnectionTimeout());
-
-
+			
+			if(JAPModel.getInstance().isHelpPathDefined())
+			{
+				XMLUtil.setAttribute(e, XML_ATTR_HELP_PATH, 
+									 JAPModel.getInstance().getHelpPath());
+			}
+			
 			try
 			{
 				PayAccountsFile accounts = PayAccountsFile.getInstance();

@@ -27,17 +27,12 @@
  */
 package anon.util;
 
+
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.Vector;
+
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -107,112 +102,4 @@ final public class ZLibTools
 		}
 		return resultData;
 	}
-	
-	public static boolean extractArchive(ZipFile archive, String pathName, String destination)
-	{
-		
-		String dest = destination;
-		Enumeration allZipEntries = null;
-		Vector matchedFileEntries = new Vector();
-		Vector matchedDirEntries = new Vector();
-		ZipEntry entry = null;
-		String entryName = null;
-		int index = 0;
-		int dirIndex = 0;
-		int fileIndex = 0;
-		//TreeSet matchedEntries
-		
-		if(archive == null)
-		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Archive is null");		
-			return false;
-		}
-		if(destination == null)
-		{
-				LogHolder.log(LogLevel.ERR, LogType.MISC, "Error while extracting archive "+
-						archive.getName()+": destination address is null");
-				return false;
-		}
-		try
-		{	
-			allZipEntries = archive.entries();
-			while(allZipEntries.hasMoreElements() )
-			{
-				entry = (ZipEntry) allZipEntries.nextElement();
-				entryName = entry.getName();
-				if( (pathName == null) || (entryName.startsWith(pathName)) )
-				{
-					if( entry.isDirectory() )
-					{
-						for(index=0; index < matchedDirEntries.size(); index++)
-						{
-							if( ((String)matchedDirEntries.elementAt(index)).compareTo(entryName) > 0)
-							{
-								break;		
-							}
-						}
-						matchedDirEntries.insertElementAt(entryName, index);
-					}
-					else
-					{
-						matchedFileEntries.addElement(entry);
-					}
-				}
-			}
-			if( (matchedFileEntries.size() == 0) && (matchedDirEntries.size() == 0) )
-			{
-				LogHolder.log(LogLevel.ERR, LogType.MISC, "No matching files for "+pathName+"found in archive "+archive.getName());
-				return false;
-			}
-			
-			for (Enumeration iterator = matchedDirEntries.elements(); iterator.hasMoreElements(); dirIndex++) {
-				String dirName = (String) iterator.nextElement();
-				File dir = new File(dest+File.separator+dirName);
-				if(dir != null)
-				{
-					if(!dir.mkdir() )
-					{
-						LogHolder.log(LogLevel.ERR, LogType.MISC, "Error while extracting archive "+
-								archive.getName()+": could not create directory "+dir.getName());
-						rollback(matchedDirEntries, dirIndex, dest);
-						return false;
-					}
-				}
-			}
-			
-			for (Enumeration iterator = matchedFileEntries.elements(); iterator.hasMoreElements(); fileIndex++) 
-			{
-				ZipEntry zEntry = (ZipEntry) iterator.nextElement();
-				File destFile = new File(dest+File.separator+zEntry.getName());
-				InputStream zEntryInputStream = archive.getInputStream(zEntry);
-				RecursiveCopyTool.copySingleFile(zEntryInputStream, destFile);		
-			}
-		}
-		catch(IllegalStateException ise)
-		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+archive.getName()+": file already closed");
-			return false;
-		} 
-		catch (IOException ioe) 
-		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+archive.getName()+": I/O error occured: ", ioe);
-			
-			rollback(matchedFileEntries, fileIndex, destination);
-			rollback(matchedDirEntries, matchedDirEntries.size(), destination);
-			return false;
-		}
-		return true;
-	}
-
-	private static void rollback(Vector entries, int dirIndex, String destination) {
-		
-		for(int i = dirIndex; i > 0; i--)
-		{
-			File f = new File(destination+File.separator+
-								entries.elementAt(i-1));
-			String was = f.delete() ? " " : " not ";
-			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Rollback: file "+f.getName()+was+"successfully deleted");
-		}
-	}
-
 }

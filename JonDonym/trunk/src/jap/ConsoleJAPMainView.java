@@ -196,4 +196,8 @@ public class ConsoleJAPMainView implements IJAPMainView
 	public void transferedBytes(long bytes, int protocolType)
 	{
 	}
+
+	public void showHelpInstallDialog() 
+	{
+	}
 }

@@ -190,13 +190,13 @@ public class RecursiveCopyTool {
 		try {
 			toDestFile = new FileOutputStream(dest);
 			byte[] copyBuffer = new byte[COPY_BUFFER_SIZE];
-			int bytesReadFromSrcFile = 0;
+			int bytesReadFromSrcFile = 1;
 			
-			while(src.available()>0)
+			while(src.available() > 0)
 			{
 				bytesReadFromSrcFile = src.read(copyBuffer);
-				toDestFile.write(copyBuffer);
 				if(bytesReadFromSrcFile == EOF) break;
+				toDestFile.write(copyBuffer, 0, bytesReadFromSrcFile);
 			}
 		}
 		catch(IOException ioe)

@@ -49,6 +49,8 @@ public interface IJAPMainView extends JAPObserver, IStatusLine, AnonServiceEvent
 	public void doClickOnCascadeChooser();
 
 	public void disableSetAnonMode();
+	
+	public void showHelpInstallDialog();
 
 	/**
 	 * Performs GUI update operations. Should not be called directly!!

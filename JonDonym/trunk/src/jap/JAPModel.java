@@ -31,12 +31,16 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Vector;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 
 import anon.crypto.JAPCertificate;
 import anon.infoservice.IProxyInterfaceGetter;
 import anon.infoservice.ProxyInterface;
+import anon.util.ClassUtil;
 import anon.util.ResourceLoader;
+import anon.util.XMLParseException;
+import anon.util.XMLUtil;
 import anon.infoservice.ImmutableProxyInterface;
 import gui.JAPDll;
 import gui.dialog.JAPDialog;
@@ -47,6 +51,14 @@ import anon.mixminion.mmrdescription.MMRList;
 
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
 import gui.GUIUtils;
 import platform.AbstractOS;
 
@@ -180,6 +192,8 @@ public final class JAPModel extends Observable
 	private boolean m_bShowSplashDisabled = false;
 	
 	private boolean m_bStartPortableFirefox = true;
+	
+	private String m_helpPath = null;
 	
 	private Dimension m_iconifiedSize;
 	private Dimension m_configSize;
@@ -1260,7 +1274,33 @@ public final class JAPModel extends Observable
 		return m_paymentPassword;
 	}
 
-
+	public String getHelpPath()
+	{
+		return m_helpPath != null ?
+					m_helpPath : AbstractOS.getInstance().getDefaultHelpPath();
+	}
+	
+	public void setHelpPath(String helpPath)
+	{
+		if(helpPath != null)
+		{
+			File hpFile = new File(helpPath);
+			/* a validity check */
+			if(hpFile.exists())
+			{
+				if(hpFile.canWrite())
+				{
+					m_helpPath = helpPath;
+				}
+			}
+		}
+	}
+	
+	public boolean isHelpPathDefined()
+	{
+		return m_helpPath != null;
+	}
+	
 	public void setDLLupdate(boolean a_update) {
 		m_bUpdateDll = a_update;
     }
