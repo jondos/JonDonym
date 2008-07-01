@@ -41,7 +41,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
-	public static final String XML_ELEMENT = "PerformanceEntry";	
+	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
 
 	
 	public PerformanceEntry(String a_strCascadeId, long a_lExpireTime)
@@ -58,19 +58,19 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		super(System.currentTimeMillis() + PERFORMANCE_ENTRY_TTL);
 		
-		XMLUtil.assertNodeName(a_entry, XML_ELEMENT);
+		XMLUtil.assertNodeName(a_entry, XML_ELEMENT_NAME);
 		
 		m_strCascadeId = XMLUtil.parseAttribute(a_entry, XML_ATTR_ID, "");
 		
 		if(m_strCascadeId == "")
 		{
-			throw new XMLParseException(XML_ELEMENT + ": invalid id");
+			throw new XMLParseException(XML_ELEMENT_NAME + ": invalid id");
 		}
 		
 		Node elemCurrentData = XMLUtil.getFirstChildByName(a_entry, XML_ELEMENT_CURRENT_DATA);
 		if(elemCurrentData == null)
 		{
-			throw new XMLParseException(XML_ELEMENT + ": Could not find node " + XML_ELEMENT_CURRENT_DATA);
+			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + XML_ELEMENT_CURRENT_DATA);
 		}
 		
 		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
@@ -79,14 +79,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
 		if(elemDelay == null)
 		{
-			throw new XMLParseException(XML_ELEMENT + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
+			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
 		}
 		m_delay[dayOfWeek][hour] = new PerformanceAttributeEntry(elemDelay);
 		
 		Node elemSpeed = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
 		if(elemSpeed == null)
 		{
-			throw new XMLParseException(XML_ELEMENT + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
+			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
 		}
 		m_speed[dayOfWeek][hour] = new PerformanceAttributeEntry(elemSpeed);
 		
@@ -230,7 +230,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public Element toXmlElement(Document a_doc, boolean a_bDisplayWeeklyData)
 	{
-		Element elem = a_doc.createElement(XML_ELEMENT);
+		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
 		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_DATA);
