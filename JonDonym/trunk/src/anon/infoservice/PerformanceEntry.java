@@ -13,6 +13,15 @@ import anon.util.IXMLEncodable;
 
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
+	private static final String XML_ATTR_HOUR = "hour";
+	private static final String XML_ATTR_DAY = "day";
+	public static final String XML_ATTR_ID = "id";
+	
+	private static final String XML_ELEMENT_CURRENT_DATA = "CurrentData";
+	private static final String XML_ELEMENT_HOURLY_DATA = "HourlyData";
+	private static final String XML_ELEMENT_DAILY_DATA = "DailyData";
+	private static final String XML_ELEMENT_WEEKLY_DATA = "WeeklyData";
+	
 	private String m_strCascadeId;
 	private Calendar m_cal = Calendar.getInstance();
 	
@@ -28,13 +37,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private PerformanceAttributeEntry[][] m_speed = new PerformanceAttributeEntry[7][24];
 	private PerformanceAttributeEntry[][] m_delay = new PerformanceAttributeEntry[7][24];
 	
-	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
+	public static final String XML_ELEMENT_CONTAINER = "PerformanceInfo";
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
-	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
+	public static final String XML_ELEMENT = "PerformanceEntry";	
 
-	public static final String XML_ATTR_ID = "id";
 	
 	public PerformanceEntry(String a_strCascadeId, long a_lExpireTime)
 	{
@@ -50,19 +58,19 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		super(System.currentTimeMillis() + PERFORMANCE_ENTRY_TTL);
 		
-		XMLUtil.assertNodeName(a_entry, XML_ELEMENT_NAME);
+		XMLUtil.assertNodeName(a_entry, XML_ELEMENT);
 		
 		m_strCascadeId = XMLUtil.parseAttribute(a_entry, XML_ATTR_ID, "");
 		
 		if(m_strCascadeId == "")
 		{
-			throw new XMLParseException(XML_ELEMENT_NAME + ": invalid id");
+			throw new XMLParseException(XML_ELEMENT + ": invalid id");
 		}
 		
-		Node elemCurrentData = XMLUtil.getFirstChildByName(a_entry, "CurrentData");
+		Node elemCurrentData = XMLUtil.getFirstChildByName(a_entry, XML_ELEMENT_CURRENT_DATA);
 		if(elemCurrentData == null)
 		{
-			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + "CurrentData");
+			throw new XMLParseException(XML_ELEMENT + ": Could not find node " + XML_ELEMENT_CURRENT_DATA);
 		}
 		
 		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
@@ -71,14 +79,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
 		if(elemDelay == null)
 		{
-			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
+			throw new XMLParseException(XML_ELEMENT + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
 		}
 		m_delay[dayOfWeek][hour] = new PerformanceAttributeEntry(elemDelay);
 		
 		Node elemSpeed = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
 		if(elemSpeed == null)
 		{
-			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
+			throw new XMLParseException(XML_ELEMENT + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
 		}
 		m_speed[dayOfWeek][hour] = new PerformanceAttributeEntry(elemSpeed);
 		
@@ -217,10 +225,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public Element toXmlElement(Document a_doc)
 	{
-		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
+		return toXmlElement(a_doc, false);
+	}
+	
+	public Element toXmlElement(Document a_doc, boolean a_bDisplayWeeklyData)
+	{
+		Element elem = a_doc.createElement(XML_ELEMENT);
 		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
 		
-		Element elemCurrent = a_doc.createElement("CurrentData");
+		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_DATA);
 
 		Element elemDelay = getCurrentSpeedEntry().toXmlElement(a_doc);
 		Element elemSpeed = getCurrentDelayEntry().toXmlElement(a_doc);
@@ -228,37 +241,41 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		elemCurrent.appendChild(elemDelay);
 		elemCurrent.appendChild(elemSpeed);
 		
-		Element elemWeeklyData = a_doc.createElement("WeeklyData");
-		
-		for(int i = 0; i < 7; i++)
+		if(a_bDisplayWeeklyData)
 		{
-			Element elemDailyData = a_doc.createElement("DailyData");
-			XMLUtil.setAttribute(elemDailyData, "day", i);
-			elemWeeklyData.appendChild(elemDailyData);
-			
-			for(int j = 0; j < 24; j++)
+			Element elemWeeklyData = a_doc.createElement(XML_ELEMENT_WEEKLY_DATA);
+		
+			for(int i = 0; i < 7; i++)
 			{
-				Element elemHourlyData = a_doc.createElement("HourlyData");
-				XMLUtil.setAttribute(elemHourlyData, "hour", j);
-				Element e = m_speed[i][j] != null ? m_speed[i][j].toXmlElement(a_doc) : null;
-				Element f = m_delay[i][j] != null ? m_delay[i][j].toXmlElement(a_doc) : null;
-				
-				if(e != null)
+				Element elemDailyData = a_doc.createElement(XML_ELEMENT_DAILY_DATA);
+				XMLUtil.setAttribute(elemDailyData, XML_ATTR_DAY, i);
+				elemWeeklyData.appendChild(elemDailyData);
+			
+				for(int j = 0; j < 24; j++)
 				{
-					elemHourlyData.appendChild(e);
-				}
+					Element elemHourlyData = a_doc.createElement(XML_ELEMENT_HOURLY_DATA);
+					XMLUtil.setAttribute(elemHourlyData, XML_ATTR_HOUR, j);
+					Element e = m_speed[i][j] != null ? m_speed[i][j].toXmlElement(a_doc) : null;
+					Element f = m_delay[i][j] != null ? m_delay[i][j].toXmlElement(a_doc) : null;
 				
-				if(f != null)
-				{
-					elemHourlyData.appendChild(f);
-				}
+					if(e != null)
+					{
+						elemHourlyData.appendChild(e);
+					}
 				
-				elemDailyData.appendChild(elemHourlyData);
+					if(f != null)
+					{
+						elemHourlyData.appendChild(f);
+					}
+				
+					elemDailyData.appendChild(elemHourlyData);
+				}
 			}
+			
+			elem.appendChild(elemWeeklyData);
 		}
 		
 		elem.appendChild(elemCurrent);
-		elem.appendChild(elemWeeklyData);
 		
 		return elem;
 	}
@@ -268,13 +285,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public static final String PERFORMANCE_ATTRIBUTE_DELAY = "Delay";
 		public static final String PERFORMANCE_ATTRIBUTE_SPEED = "Speed";
 		
-		public static final String XML_ELEMENT_MIN = "Min";
-		public static final String XML_ELEMENT_MAX = "Max";
-		public static final String XML_ELEMENT_AVERAGE = "Average";
+		public static final String XML_ATTR_MIN = "Min";
+		public static final String XML_ATTR_MAX = "Max";
+		public static final String XML_ATTR_AVERAGE = "Average";
+		
 		public static final String XML_ELEMENT_VALUES = "Values";
 		public static final String XML_ELEMENT_VALUE = "Value";
 		
-		private String m_name;
+		private String m;
 		
 		private long m_lMaxValue;
 		private long m_lMinValue;
@@ -282,18 +300,18 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		private Vector m_Values = new Vector();
 		
-		public PerformanceAttributeEntry(String a_name)
+		public PerformanceAttributeEntry(String a)
 		{
-			m_name = a_name;
+			m = a;
 		}
 		
 		public PerformanceAttributeEntry(Node a_node)
 		{
-			m_name = XMLUtil.parseValue(a_node, "UnknownAttribute");
+			m = XMLUtil.parseValue(a_node, "UnknownAttribute");
 			
-			m_lMinValue = XMLUtil.parseAttribute(a_node, XML_ELEMENT_MIN, 0);
-			m_lMaxValue = XMLUtil.parseAttribute(a_node, XML_ELEMENT_MAX, 0);
-			m_lAverageValue = XMLUtil.parseAttribute(a_node, XML_ELEMENT_AVERAGE, 0);
+			m_lMinValue = XMLUtil.parseAttribute(a_node, XML_ATTR_MIN, 0);
+			m_lMaxValue = XMLUtil.parseAttribute(a_node, XML_ATTR_MAX, 0);
+			m_lAverageValue = XMLUtil.parseAttribute(a_node, XML_ATTR_AVERAGE, 0);
 		}
 		
 		public void addValue(long a_lValue)
@@ -349,7 +367,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public String getName()
 		{
-			return m_name;
+			return m;
 		}
 		
 		public void overrideAverageValue(long a_lValue)
@@ -359,34 +377,30 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public Element toXmlElement(Document a_doc)
 		{
+			return toXmlElement(a_doc, false);
+		}
+		
+		public Element toXmlElement(Document a_doc, boolean a_bDisplayValues)
+		{
 			Element elem = a_doc.createElement(getName());
 			
-			XMLUtil.setAttribute(elem, XML_ELEMENT_MIN, m_lMinValue);
-			XMLUtil.setAttribute(elem, XML_ELEMENT_MAX, m_lMaxValue);
-			XMLUtil.setAttribute(elem, XML_ELEMENT_AVERAGE, m_lAverageValue);
+			XMLUtil.setAttribute(elem, XML_ATTR_MIN, m_lMinValue);
+			XMLUtil.setAttribute(elem, XML_ATTR_MAX, m_lMaxValue);
+			XMLUtil.setAttribute(elem, XML_ATTR_AVERAGE, m_lAverageValue);
 			
-			/*Element elemMin = a_doc.createElement(XML_ELEMENT_MIN);
-			XMLUtil.setValue(elemMin, m_lMinValue);
-			
-			Element elemMax = a_doc.createElement(XML_ELEMENT_MAX);
-			XMLUtil.setValue(elemMax, m_lMaxValue);
-			
-			Element elemAverage = a_doc.createElement(XML_ELEMENT_AVERAGE);
-			XMLUtil.setValue(elemAverage, m_lAverageValue);*/
-			
-			/*Element elemValues = a_doc.createElement(XML_ELEMENT_VALUES);
-			
-			for(int i = 0; i < m_Values.size(); i++)
+			if(a_bDisplayValues)
 			{
-				Element elemValue = a_doc.createElement(XML_ELEMENT_VALUE);
-				XMLUtil.setValue(elemValue, ((Long) m_Values.elementAt(i)).longValue());
-				elemValues.appendChild(elemValue);
-			}*/
+				Element elemValues = a_doc.createElement(XML_ELEMENT_VALUES);
 			
-			/*elem.appendChild(elemMin);
-			elem.appendChild(elemMax);
-			elem.appendChild(elemAverage);*/
-			//elem.appendChild(elemValues);
+				for(int i = 0; i < m_Values.size(); i++)
+				{
+					Element elemValue = a_doc.createElement(XML_ELEMENT_VALUE);
+					XMLUtil.setValue(elemValue, ((Long) m_Values.elementAt(i)).longValue());
+					elemValues.appendChild(elemValue);
+				}
+			
+				elem.appendChild(elemValues);
+			}
 			
 			return elem;
 		}
