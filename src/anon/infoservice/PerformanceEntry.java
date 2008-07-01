@@ -285,9 +285,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public static final String PERFORMANCE_ATTRIBUTE_DELAY = "Delay";
 		public static final String PERFORMANCE_ATTRIBUTE_SPEED = "Speed";
 		
-		public static final String XML_ATTR_MIN = "Min";
-		public static final String XML_ATTR_MAX = "Max";
-		public static final String XML_ATTR_AVERAGE = "Average";
+		public static final String XML_ATTR_MIN = "min";
+		public static final String XML_ATTR_MAX = "max";
+		public static final String XML_ATTR_AVERAGE = "average";
 		
 		public static final String XML_ELEMENT_VALUES = "Values";
 		public static final String XML_ELEMENT_VALUE = "Value";
