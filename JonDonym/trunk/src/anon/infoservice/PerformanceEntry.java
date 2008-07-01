@@ -37,7 +37,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private PerformanceAttributeEntry[][] m_speed = new PerformanceAttributeEntry[7][24];
 	private PerformanceAttributeEntry[][] m_delay = new PerformanceAttributeEntry[7][24];
 	
-	public static final String XML_ELEMENT_CONTAINER = "PerformanceInfo";
+	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
