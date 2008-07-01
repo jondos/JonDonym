@@ -288,6 +288,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public static final String XML_ATTR_MIN = "min";
 		public static final String XML_ATTR_MAX = "max";
 		public static final String XML_ATTR_AVERAGE = "average";
+		public static final String XML_ATTR_STD_DEVIATION = "stdDeviaton";
 		
 		public static final String XML_ELEMENT_VALUES = "Values";
 		public static final String XML_ELEMENT_VALUE = "Value";
@@ -297,6 +298,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		private long m_lMaxValue;
 		private long m_lMinValue;
 		private long m_lAverageValue;
+		private double m_lStdDeviation;
 		
 		private Vector m_Values = new Vector();
 		
@@ -312,6 +314,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_lMinValue = XMLUtil.parseAttribute(a_node, XML_ATTR_MIN, 0);
 			m_lMaxValue = XMLUtil.parseAttribute(a_node, XML_ATTR_MAX, 0);
 			m_lAverageValue = XMLUtil.parseAttribute(a_node, XML_ATTR_AVERAGE, 0);
+			m_lStdDeviation = XMLUtil.parseAttribute(a_node, XML_ATTR_STD_DEVIATION, 0);
 		}
 		
 		public void addValue(long a_lValue)
@@ -330,6 +333,18 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			
 			m_lAverageValue = lValues / m_Values.size();
+			
+			// mean squared error
+			double mseValue = 0;
+			for(int i = 0; i < m_Values.size(); i++)
+			{
+				mseValue += Math.pow(((Long) m_Values.elementAt(i)).longValue() - m_lAverageValue, 2);
+			}
+			
+			mseValue /= m_Values.size();
+			
+			// standard deviation
+			m_lStdDeviation = Math.sqrt(mseValue);
 			
 			if(m_lMinValue == 0)
 			{
@@ -387,6 +402,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			XMLUtil.setAttribute(elem, XML_ATTR_MIN, m_lMinValue);
 			XMLUtil.setAttribute(elem, XML_ATTR_MAX, m_lMaxValue);
 			XMLUtil.setAttribute(elem, XML_ATTR_AVERAGE, m_lAverageValue);
+			XMLUtil.setAttribute(elem, XML_ATTR_STD_DEVIATION, m_lStdDeviation);
 			
 			if(a_bDisplayValues)
 			{
