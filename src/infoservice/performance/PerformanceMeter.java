@@ -450,7 +450,12 @@ public class PerformanceMeter implements Runnable
 			return false;
 		}
 		
-		PerformanceEntry entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
+		PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascade.getId());
+		
+		if(entry == null)
+		{
+			entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
+		}
 		
 		m_recvBuff = new char[m_dataSize];				
 		
@@ -588,7 +593,7 @@ public class PerformanceMeter implements Runnable
 		        
 		        // read HTTP header from PerformanceServer
 		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
-		        {		        		        
+		        {       
 		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
 		        	closeMeterSocket();
 		        	if (bRetry)
@@ -645,15 +650,18 @@ public class PerformanceMeter implements Runnable
         				// less than 1 kb was received; not enough for testing download performance
         				bytesRead = 0;
         			}
-        		}        		        		        		        		
+        		}        		        		
         		
         		// speed in bit/sec;
         		speed = (bytesRead * 8) / (responseEndTime - responseStartTime);
         		
         		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
         		
-        		entry.updateDelay(delay, m_requestsPerInterval);
-        		entry.updateSpeed(speed, m_requestsPerInterval);        		        		        		
+        		entry.addDelay(delay);
+        		entry.addSpeed(speed);
+        		
+            	Database.getInstance(PerformanceEntry.class).update(entry);
+        		
         		m_lBytesRecvd += bytesRead;        		        		
         		bUpdated = true;
         		
@@ -672,7 +680,6 @@ public class PerformanceMeter implements Runnable
 		
     	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Avg Delay: " + entry.getAverageDelay() + " ms; Avg Throughput: " + entry.getAverageSpeed() + " kb/sec");
 		
-    	Database.getInstance(PerformanceEntry.class).update(entry);
     	if (m_proxy.isConnected())
 		{
     		m_proxy.stop();
