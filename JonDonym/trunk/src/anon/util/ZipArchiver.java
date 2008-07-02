@@ -127,12 +127,12 @@ public class ZipArchiver extends Observable
 				sizeOfCopied += zEntry.getSize();
 				notifyAboutExtractedEntry(zEntry.getName(), zEntry.getSize(), sizeOfCopied);
 				
-				try {
+				/*try {
 					Thread.sleep(20);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 			}
 		}
 		catch(IllegalStateException ise)

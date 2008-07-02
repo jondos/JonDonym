@@ -171,6 +171,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private static final String MSG_STD_HELP_PATH_INSTALLATION = JAPNewView.class.getName() + "_stdHelpPathInstallation";
 	private static final String MSG_HELP_PATH_CHOICE = JAPNewView.class.getName() + "_helpPathChoice";
+	private static final String MSG_HELP_PATH_CONFIRM = JAPNewView.class.getName() + "_helpPathConfirm";
+
 	
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
@@ -208,7 +210,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		JAPNewView.class.getName() + "_meter09.gif",
 		JAPNewView.class.getName() + "_meter10.gif"
 	};
-
+	
 	private final Object FONT_UPDATE = new Object();
 	private boolean m_bFontsUpdated = false;
 	private final JLabel DEFAULT_LABEL = new JLabel();
@@ -2553,11 +2555,36 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			String pathValidation = pathChosen ? 
 					JAPModel.getInstance().helpPathValidityCheck(f) : JAPModel.HELP_INVALID_NULL;
 			boolean pathValid = JAPModel.getInstance().helpPathValidityCheck(f).equals(JAPModel.HELP_VALID);
+			boolean installationConfirmed = false;
+			if(pathChosen && pathValid)
+			{
+				installationConfirmed = JAPDialog.showYesNoDialog(this, 
+													JAPMessages.getString(MSG_HELP_PATH_CONFIRM)+
+													f.getPath());
+				/* when setting a valid path: help is automatically installed */
+				if(installationConfirmed)
+				{
+					JAPModel.getInstance().setHelpPath(f);
+					m_dlgConfig.updateValues();
+					/* When the Path is changed outside of
+				
+					/* TODO: improve asynchronous help installation when model updates */
+					synchronized(JAPHelpController.class)
+					{
+						try 
+						{
+							JAPHelpController.asynchHelpFileInstallThread.join();
+						} 
+						catch (InterruptedException e) 
+						{}
+					}
+				}
+			}
 			
-			if(!pathChosen || !pathValid)
+			if(!pathChosen || !pathValid || !installationConfirmed)
 			{
 				boolean stdInstall = JAPDialog.showYesNoDialog(this, 
-													JAPMessages.getString(pathValidation)+
+													((!pathValid || !pathChosen) ? JAPMessages.getString(pathValidation) : "")+
 													JAPMessages.getString(MSG_STD_HELP_PATH_INSTALLATION));
 				if(stdInstall)
 				{
@@ -2566,26 +2593,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				else
 				{
 					showHelpInternal = true;
-				}
-			}
-			else
-			{
-				//TODO: Ask for Confirmation
-				
-				/* when setting a valid path: help is automatically installed */
-				JAPModel.getInstance().setHelpPath(f);
-				m_dlgConfig.updateValues();
-				/* When the Path is changed outside of
-				
-				/* TODO: improve asynchronous help installation when model updates */
-				synchronized(JAPHelpController.class)
-				{
-					try 
-					{
-						JAPHelpController.asynchHelpFileInstallThread.join();
-					} 
-					catch (InterruptedException e) 
-					{}
 				}
 			}
 		}

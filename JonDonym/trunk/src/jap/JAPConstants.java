@@ -35,7 +35,7 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.10.013"; //Never change the layout of this line!
+	public static final String aktVersion = "00.10.014"; //Never change the layout of this line!
 	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-04-11 13:04:12 $";
 
 	//Warning: This is a little bit tricky,
@@ -316,7 +316,7 @@ public final class JAPConstants
 	public final static int PAYSAFECARD_TIMEOUT = 60;
 
 	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr", "ru"}; // "zh", "ca", "es", "ru"}; //pt
-	public static final boolean EXT_HELP_NOTFINISHED = true;;
+	public static final boolean EXT_HELP_NOTFINISHED = true;
 
 	public static String[] getSupportedLanguages()
 	{

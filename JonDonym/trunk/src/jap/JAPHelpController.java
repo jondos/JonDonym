@@ -294,19 +294,21 @@ public final class JAPHelpController implements Observer {
 				removeOldHelp((String) arg);
 				if(model.isHelpPathDefined())
 				{
-					if((asynchHelpFileInstallThread != null) && !asynchHelpFileInstallThread.isAlive() ) 
-					synchronized(JAPHelpController.class)
+					if((asynchHelpFileInstallThread == null) || !asynchHelpFileInstallThread.isAlive() )
 					{
-						asynchHelpFileInstallThread =
-							new Thread(
-									new Runnable()
-									{
-										public void run()
+						synchronized(JAPHelpController.class)
+						{
+							asynchHelpFileInstallThread =
+								new Thread(
+										new Runnable()
 										{
-											installHelp();
-										}
-									});
-						asynchHelpFileInstallThread.start();
+											public void run()
+											{
+												installHelp();
+											}
+										});
+							asynchHelpFileInstallThread.start();
+						}
 					}
 				}
 			}
