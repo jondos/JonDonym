@@ -237,7 +237,7 @@
     <touch file="${src}/jap/JAPConstants.java">    </touch>
   </target>
 	
-  <target name="compile" depends="init" description="compile the source">
+  <target name="compile" depends="dist-pre-compile, init" description="compile the source">
     <!-- Compile the java code from ${src} into ${build} -->
     <javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
     destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
@@ -254,7 +254,7 @@
 	</javac>
   </target>	
 	
-  <target name="dist" depends="dist-pre-compile,compile,make-only-jap-jar" description="generate the distribution">  </target>
+  <target name="dist" depends="compile, make-only-jap-jar" description="generate the distribution">  </target>
 
   <target name="make-only-jap-jar" depends="getcurrentjapdllversion">
     <!-- Create the distribution directory -->
