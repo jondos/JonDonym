@@ -43,6 +43,7 @@ import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.infoservice.ImmutableProxyInterface;
 import gui.JAPDll;
+import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import java.util.Observable;
 import jap.forward.JAPRoutingSettings;
@@ -81,6 +82,14 @@ public final class JAPModel extends Observable
 	public static final String XML_ATTR_HEIGHT = "height";
 	public static final String XML_ATTR_SAVE = "save";
 
+	public static final String HELP_INVALID_P1 = "invalidHelpPathP1";
+	public static final String HELP_INVALID_P2 = "invalidHelpPathP2";
+	public static final String HELP_INVALID_NULL = "invalidHelpPathNull";
+	public static final String HELP_INVALID_PATH_NOT_EXISTS = "invalidHelpPathNotExists";
+	public static final String HELP_INVALID_NOWRITE = "invalidHelpPathNoWrite";
+	public static final String HELP_DIR_EXISTS = "helpDirExists";
+	
+	public static final String HELP_VALID = "HELP_IS_VALID";
 
 	public static final String AUTO_CHANGE_NO_RESTRICTION = "none";
 	public static final String AUTO_CHANGE_RESTRICT_TO_PAY = "pay";
@@ -1280,19 +1289,125 @@ public final class JAPModel extends Observable
 					m_helpPath : AbstractOS.getInstance().getDefaultHelpPath();
 	}
 	
+	void initHelpPath(String helpPath)
+	{
+		String initPathValidity = (helpPathValidityCheck(helpPath));
+		
+		if( initPathValidity.equals(HELP_VALID) || 
+			initPathValidity.equals(HELP_DIR_EXISTS) )
+		{
+			m_helpPath = helpPath;
+		}
+		else
+		{
+			m_helpPath = null;
+		}
+	}
+	
+	public void setHelpPath(File hpFile)
+	{
+		if(hpFile == null)
+		{
+			resetHelpPath();
+		}
+		else
+		{
+			setHelpPath(hpFile.getPath());
+		}
+	}
+	
 	public void setHelpPath(String helpPath)
 	{
-		if(helpPath != null)
+		if(helpPath == null)
 		{
-			File hpFile = new File(helpPath);
+			resetHelpPath();
+			return;
+		}
+		if(helpPath.equals(""))
+		{
+			resetHelpPath();
+			return;
+		}
+		if(helpPathValidityCheck(helpPath).equals(HELP_VALID))
+		{
+			String prevHelpPath = getHelpPath();
+			m_helpPath = helpPath;
+			if(!m_helpPath.equals(prevHelpPath))
+			{
+				setChanged();
+				notifyObservers(prevHelpPath);
+			}
+		}
+	}
+	
+	/**
+	 * performs a validity check whether the specified path is a valid 
+	 * path for external installation of the help files.
+	 * @param helpPath the path of the parent directory where the help files should be installed 
+	 * @return a string that signifies a valid path or a key for a corresponding error message otherwise
+	 */
+	public String helpPathValidityCheck(String helpPath)
+	{
+		if(helpPath == null)
+		{
+			return JAPMessages.getString(HELP_INVALID_NULL);
+		}
+		return helpPathValidityCheck(new File(helpPath));
+	}
+	
+	/**
+	 * performs a validity check wether the specified path is a valid 
+	 * path for external installation of the help files.
+	 * @param hpFile the parent directory where the help files should be installed 
+	 * @return a string that signifies a valid path or a key for a corresponding error message otherwise
+	 */
+	public String helpPathValidityCheck(File hpFile)
+	{
+		if(hpFile != null)
+		{
 			/* a validity check */
 			if(hpFile.exists())
 			{
 				if(hpFile.canWrite())
 				{
-					m_helpPath = helpPath;
+					File anotherFileWithSameName =
+						new File(hpFile.getPath()+
+								File.separator+
+								JAPHelpController.HELP_FOLDER);
+					if(!anotherFileWithSameName.exists())
+					{
+						return HELP_VALID;
+					}
+					else
+					{
+						return HELP_DIR_EXISTS;
+					}
+				}
+				else
+				{
+					return HELP_INVALID_NOWRITE;
 				}
 			}
+			else
+			{
+				return HELP_INVALID_PATH_NOT_EXISTS;
+			}
+		}
+		else
+		{
+			return HELP_INVALID_NULL;
+		}
+	}
+	
+	private void resetHelpPath()
+	{
+		String prevHelpPath = m_helpPath;
+		m_helpPath = null;
+		if(prevHelpPath != null)
+		{
+			System.out.println("resetting help path");
+			setChanged();
+			notifyObservers(prevHelpPath);
 		}
 	}
 	
@@ -1444,5 +1559,4 @@ public final class JAPModel extends Observable
 		{
 			m_iDialogVersion = dialogVersion;
 		}
-
 }

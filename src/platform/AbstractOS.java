@@ -235,7 +235,6 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		}
 		if (!success)
 		{
-			System.out.println("trying open link: "+url);
 			success = openLink(url);
 		}
 		if (!success)

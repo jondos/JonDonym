@@ -45,6 +45,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -168,6 +169,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";
 	private static final String MSG_EXPLAIN_NO_FIREFOX_FOUND = JAPNewView.class.getName() + "_explainNoFirefoxFound";
 
+	private static final String MSG_STD_HELP_PATH_INSTALLATION = JAPNewView.class.getName() + "_stdHelpPathInstallation";
+	private static final String MSG_HELP_PATH_CHOICE = JAPNewView.class.getName() + "_helpPathChoice";
+	
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
 	private static final String MSG_LBL_HTTP_DATA =
@@ -702,7 +706,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_bttnReload.setSelectedIcon(tmpIcon);
 		m_bttnReload.setRolloverSelectedIcon(tmpIcon);
 		m_bttnReload.setPressedIcon(tmpIcon);
-		m_bttnReload.setDisabledIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_RELOAD_DISABLED, true, false));
+		ImageIcon reloadDisabledIcon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_RELOAD_DISABLED, true, false);
+		//if(reloadDisabledIcon != null)
+		//{
+		//	if( (reloadDisabledIcon.getImageLoadStatus() & MediaTracker.COMPLETE) != 0)
+		//	{
+				m_bttnReload.setDisabledIcon(reloadDisabledIcon);
+		//	}
+		//}
 		m_bttnReload.setBorder(new EmptyBorder(0, 0, 0, 0));
 		m_bttnReload.setFocusPainted(false);
 		m_bttnReload.setBorderPainted(true);
@@ -2521,14 +2532,80 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
-		//boolean helpOpened = JAPHelpController.getInstance().openHelp();
+		if(JAPConstants.EXT_HELP_NOTFINISHED)
+		{
+			showHelpInJonDo();
+			return;
+		}
 		
-		//if(!helpOpened)
-		//{
-			JAPHelp help = JAPHelp.getInstance();
-			help.getContextObj().setContext("index");
-			help.loadCurrentContext();
-		//}
+		JAPHelpController helpController = JAPHelpController.getInstance();
+		JAPModel model = JAPModel.getInstance();
+		boolean showHelpInternal = false;
+		
+		/* If no external help path is specified and no help is installed: 
+		 * open dialog to ask the user
+		 */
+		if(!model.isHelpPathDefined() && !helpController.isHelpInstalled())
+		{
+			File f = askForHelpInstallationPath(IJAPMainView.WITH_DIALOG);
+			
+			boolean pathChosen = (f != null);
+			String pathValidation = pathChosen ? 
+					JAPModel.getInstance().helpPathValidityCheck(f) : JAPModel.HELP_INVALID_NULL;
+			boolean pathValid = JAPModel.getInstance().helpPathValidityCheck(f).equals(JAPModel.HELP_VALID);
+			
+			if(!pathChosen || !pathValid)
+			{
+				boolean stdInstall = JAPDialog.showYesNoDialog(this, 
+													JAPMessages.getString(pathValidation)+
+													JAPMessages.getString(MSG_STD_HELP_PATH_INSTALLATION));
+				if(stdInstall)
+				{
+					JAPHelpController.getInstance().installHelp();
+				}
+				else
+				{
+					showHelpInternal = true;
+				}
+			}
+			else
+			{
+				//TODO: Ask for Confirmation
+				
+				/* when setting a valid path: help is automatically installed */
+				JAPModel.getInstance().setHelpPath(f);
+				m_dlgConfig.updateValues();
+				/* When the Path is changed outside of
+				
+				/* TODO: improve asynchronous help installation when model updates */
+				synchronized(JAPHelpController.class)
+				{
+					try 
+					{
+						JAPHelpController.asynchHelpFileInstallThread.join();
+					} 
+					catch (InterruptedException e) 
+					{}
+				}
+			}
+		}
+		
+		boolean helpOpened = false;
+		if(!showHelpInternal)
+		{
+			helpOpened = JAPHelpController.getInstance().openHelp();
+		}
+		if(!helpOpened)
+		{
+			showHelpInJonDo();
+		}
+	}
+	
+	private void showHelpInJonDo()
+	{
+		JAPHelp help = JAPHelp.getInstance();
+		help.getContextObj().setContext("index");
+		help.loadCurrentContext();
 	}
 
 	public void setVisible(boolean a_bVisible)
@@ -3413,30 +3490,39 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 	}
 
-	public void askForHelpInstallationPath(boolean withDialog) 
+	public File askForHelpInstallationPath(boolean withDialog) 
 	{
 		boolean openFileChooser = !withDialog;
 		if(withDialog)
 		{
 			openFileChooser = 
-				JAPDialog.showYesNoDialog(this, "choose path for external help install");
+				JAPDialog.showYesNoDialog(this, JAPMessages.getString(MSG_HELP_PATH_CHOICE));
 		}
 		if(openFileChooser)
 		{
 			JFileChooser chooser = new JFileChooser();
-			JAPModel model = JAPModel.getInstance();
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 			{
 				File f = chooser.getSelectedFile();
-				model.setHelpPath(f.getPath());
+				return f;
 			}
 		}
+		return null;
 	}
 	
 	public JAPHelpProgressDialog displayInstallProgress()
 	{
-		JAPHelpProgressDialog hpd = new JAPHelpProgressDialog(this);
+		JAPHelpProgressDialog hpd = null;
+		if(m_dlgConfig != null)
+		{
+			if(m_dlgConfig.isVisible())
+			{
+				hpd = new JAPHelpProgressDialog(m_dlgConfig);
+				return hpd;
+			}
+		}
+		hpd = new JAPHelpProgressDialog(this);
 		return hpd;
 	}
 }

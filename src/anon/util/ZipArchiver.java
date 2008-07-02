@@ -128,7 +128,7 @@ public class ZipArchiver extends Observable
 				notifyAboutExtractedEntry(zEntry.getName(), zEntry.getSize(), sizeOfCopied);
 				
 				try {
-					Thread.sleep(30);
+					Thread.sleep(20);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

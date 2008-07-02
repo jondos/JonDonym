@@ -48,6 +48,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -98,6 +99,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 		+ "_dialogFormatTestBtn";
 	private static final String MSG_DIALOG_FORMAT_GOLDEN_RATIO = JAPConfUI.class.getName()
 		+ "_dialogFormatGoldenRatio";
+	
+	private static final String MSG_HELP_PATH = JAPConfUI.class.getName() + "_helpPath";
+	private static final String MSG_HELP_PATH_CHOOSE = JAPConfUI.class.getName() + "_helpPathChoose";
+	
 	private static final String MSG_NO_NATIVE_LIBRARY = JAPConfUI.class.getName() + "_noNativeLibrary";
 	private static final String MSG_NO_NATIVE_WINDOWS_LIBRARY = JAPConfUI.class.getName() +
 		"_noNativeWindowsLibrary";
@@ -120,6 +125,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 	private JSlider m_slidFontSize;
 	private JButton m_btnAddUI, m_btnDeleteUI;
 	private File m_currentDirectory;
+	private JTextField m_helpPathField;
+	private JButton m_helpPathButton;
 
 	public JAPConfUI()
 	{
@@ -180,13 +187,24 @@ final class JAPConfUI extends AbstractJAPConfModule
 		{
 			panelRoot.add(tempPanel, c1);
 		}
-
-		c1.gridy++;
-		c1.anchor = GridBagConstraints.NORTHWEST;
+		
+		c1.gridx = 0;
+		c1.gridy+=2;
 		c1.fill = GridBagConstraints.BOTH;
 		c1.weighty = 1;
-		tempPanel = new JPanel();
-		panelRoot.add(tempPanel, c1);
+		tempPanel =  createHelpPathPanel(); //new JPanel();
+		if(!JAPConstants.EXT_HELP_NOTFINISHED)
+		{
+			panelRoot.add(tempPanel, c1);
+		}
+		/*c1.gridx = 0;
+		c1.gridy++;
+		//c1.anchor = GridBagConstraints.NORTHWEST;
+		c1.fill = GridBagConstraints.BOTH;
+		//c1.gridheight = 1;
+		c1.weighty = 1;
+		tempPanel =  new JPanel();
+		panelRoot.add(tempPanel, c1);*/
 	}
 
 	/**
@@ -753,6 +771,67 @@ final class JAPConfUI extends AbstractJAPConfModule
 		p.add(m_cbStartPortableFirefox, c);
 		return p;
 	}
+	
+	private JPanel createHelpPathPanel()
+	{
+		GridBagConstraints c = new GridBagConstraints();
+		JPanel p = new JPanel(new GridBagLayout());
+		p.setBorder(new TitledBorder(JAPMessages.getString(MSG_HELP_PATH)));
+		
+		c.weightx = 1;
+		
+		m_helpPathField = new JTextField(15);
+		m_helpPathButton = new JButton(JAPMessages.getString(MSG_HELP_PATH_CHOOSE));
+		if(JAPModel.getInstance().isHelpPathDefined())
+		{
+			System.out.println("Setting help path textfield to model value");
+			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
+		}
+		else
+		{
+			System.out.println("Setting empty textfield for help path");
+			m_helpPathField.setText("");
+		}
+		m_helpPathField.setEditable(false);
+		
+		ActionListener helpInstallButtonActionListener = 
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent aev)
+				{
+					IJAPMainView mv = JAPController.getInstance().getView();
+					JAPModel model = JAPModel.getInstance();
+					File hpFile = mv.askForHelpInstallationPath(IJAPMainView.WITHOUT_DIALOG);
+					if(hpFile != null)
+					{
+						String hpFileValidation = model.helpPathValidityCheck(hpFile);
+						if(hpFileValidation.equals(JAPModel.HELP_VALID))
+						{
+							m_helpPathField.setText(hpFile.getPath());
+							m_helpPathField.setEditable(false);
+							m_helpPathField.repaint();
+						}
+						else
+						{
+							//TODO: parent must not be main view
+							JAPDialog.showErrorDialog(((JAPNewView) mv), 
+									JAPMessages.getString(hpFileValidation), LogType.MISC);
+						}
+					}
+				}
+			};
+		m_helpPathButton.addActionListener(helpInstallButtonActionListener);
+		
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.gridy = 0;
+		c.gridx = 0;
+		c.insets = new Insets(0, 10, 0, 10);
+		p.add(m_helpPathField, c);
+		c.gridx++;
+		p.add(m_helpPathButton, c);
+		
+		return p;
+	}
 
 	public String getTabTitle()
 	{
@@ -785,7 +864,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 		JAPModel.getInstance().setSaveHelpWindowPosition(m_cbSaveWindowLocationHelp.isSelected());
 		JAPModel.getInstance().setSaveHelpWindowSize(m_cbSaveWindowSizeHelp.isSelected());
 		JAPModel.getInstance().setSaveConfigWindowSize(m_cbSaveWindowSizeConfig.isSelected());
+		JAPModel.getInstance().setHelpPath(m_helpPathField.getText());
+		
 		JAPHelp.getInstance().resetAutomaticLocation(m_cbSaveWindowLocationHelp.isSelected());
+		
 
 		if (JAPModel.getInstance().isConfigWindowSizeSaved())
 		{
@@ -946,6 +1028,16 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_cbWarnOnClose.setSelected(!JAPModel.getInstance().isNeverRemindGoodbye());
 		m_cbShowSplash.setSelected(JAPModel.getInstance().getShowSplashScreen());
 		m_cbStartPortableFirefox.setSelected(JAPModel.getInstance().getStartPortableFirefox());
+		if(JAPModel.getInstance().isHelpPathDefined())
+		{
+			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
+		}
+		else
+		{
+			m_helpPathField.setText("");
+		}
+		m_helpPathField.setEditable(false);
+		
 		boolean b = JAPModel.getMoveToSystrayOnStartup() || JAPModel.getMinimizeOnStartup();
 		for (int i = 0; i < m_comboDialogFormat.getItemCount(); i++)
 		{
@@ -985,8 +1077,12 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_cbShowSplash.setSelected(true);
 		m_cbStartPortableFirefox.setSelected(true);
 		m_cbWarnOnClose.setSelected(JAPConstants.DEFAULT_WARN_ON_CLOSE);
+		m_helpPathField.setText("");
+		m_helpPathField.setEditable(false);
 		updateThirdPanel(JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP ||
 						 JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP);
+		
+		
 	}
 
 	private void updateThirdPanel(boolean bAfterStart)

@@ -34,6 +34,7 @@ import logging.LogType;
 import anon.infoservice.MixCascade;
 import anon.AnonServerDescription;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 /**
  *
@@ -197,7 +198,8 @@ public class ConsoleJAPMainView implements IJAPMainView
 	{
 	}
 
-	public void askForHelpInstallationPath(boolean withDialog) 
+	public File askForHelpInstallationPath(boolean withDialog) 
 	{
+		return null;
 	}
 }

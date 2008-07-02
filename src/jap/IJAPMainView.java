@@ -27,6 +27,8 @@
  */
 package jap;
 
+import java.io.File;
+
 import gui.IStatusLine;
 import anon.AnonServiceEventListener;
 
@@ -53,7 +55,7 @@ public interface IJAPMainView extends JAPObserver, IStatusLine, AnonServiceEvent
 
 	public void disableSetAnonMode();
 	
-	public void askForHelpInstallationPath(boolean withDialog);
+	public File askForHelpInstallationPath(boolean withDialog);
 
 	/**
 	 * Performs GUI update operations. Should not be called directly!!
