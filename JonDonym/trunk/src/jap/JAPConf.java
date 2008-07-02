@@ -664,12 +664,13 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		setVisible(false);
 	}
 
-	/** Checks if all Input in all Fiels make sense. Displays InfoBoxes about what is wrong.
+	/** Checks if all Input in all Files make sense. Displays InfoBoxes about what is wrong.
 	 * @return true if all is ok
 	 *					false otherwise
 	 */
 	private boolean checkValues()
 	{
+		//TODO: implement me
 		return true;
 	}
 
@@ -769,7 +770,19 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 
 				if (a_bCloseConfiguration && !isRestartNeeded())
 				{
-					setVisible(false);
+					synchronized(JAPHelpController.class)
+					{
+						if(JAPHelpController.asynchHelpFileInstallThread != null)
+						{
+							try 
+							{
+								JAPHelpController.asynchHelpFileInstallThread.join();
+							} 
+							catch (InterruptedException e) 
+							{}
+						}
+						setVisible(false);
+					}
 				}
 
 				// force notifying the observers set the right server name

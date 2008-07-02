@@ -296,6 +296,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private JAPController()
 	{
 		m_Model = JAPModel.getInstance();
+		JAPHelpController.getInstance();
 	}
 	
 	public void start() {
@@ -1022,7 +1023,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				JAPModel.getInstance().denyNonAnonymousSurfing(
 								XMLUtil.parseAttribute(root, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING, false));
 				
-				JAPModel.getInstance().setHelpPath(
+				JAPModel.getInstance().initHelpPath(
 								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
 						
 

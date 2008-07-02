@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.zip.ZipFile;
 
 import org.w3c.dom.Document;
@@ -32,7 +34,7 @@ import logging.LogType;
  * @author Simon Pecher
  *
  */
-public final class JAPHelpController {
+public final class JAPHelpController implements Observer {
 	
 
 	public final static String HELP_VERSION_NODE = "jondohelp";
@@ -40,10 +42,11 @@ public final class JAPHelpController {
 	
 	private static JAPHelpController helpController = null;
 	
-	public static final String HELP_FOLDER = "help/";
+	public static final String HELP_FOLDER = "help"+File.separator;
 	public static final String HELP_VERSION_FILE = "jondohelp.xml";
 	public static final String HELP_START = "index.html";
-	private final File VERSION_INFO;
+	
+	public static Thread asynchHelpFileInstallThread = null;
 	
 	JAPModel model = null;
 	
@@ -54,8 +57,7 @@ public final class JAPHelpController {
 			throw new NullPointerException("JAPModel is null: cannot instantiate HelpController");
 		}
 		model = japModel;
-		VERSION_INFO = new File(model.getHelpPath()+File.separator+
-								HELP_FOLDER+HELP_VERSION_FILE);
+		model.addObserver(this);
 	}
 	
 	/**
@@ -78,30 +80,11 @@ public final class JAPHelpController {
 	 */
 	public void installHelp()
 	{
-		if(!model.isHelpPathDefined())
-		{
-			JAPController.getInstance().getView().askForHelpInstallationPath(IJAPMainView.WITH_DIALOG);
-			if(!model.isHelpPathDefined())
-			{
-				boolean stdInstall = 
-					JAPDialog.showYesNoDialog((JAPNewView)JAPController.getInstance().getView(), 
-											"Could not install in that folder. Do you want to install int help std dir?");
-				if(stdInstall == false)
-				{
-					LogHolder.log(LogLevel.ERR, LogType.MISC, "help was not installed");
-					//TODO: Show dialog ?
-					return;
-				}
-												
-			}
-		}
-		
 		File helpFolder = getHelpFolder();
 		if(helpFolder == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Fatal: Destination folder is null: Aborting help installation");
 		}
-		/**/
 		
 		if(helpFolder.exists())
 		{	
@@ -128,31 +111,27 @@ public final class JAPHelpController {
 		final JAPHelpProgressDialog hpd = ((JAPNewView)JAPController.getInstance().getView()).displayInstallProgress();
 		ZipArchiver archiver = new ZipArchiver(japArchive);
 		archiver.addObserver(hpd);
-		
-		new Thread(
-			new Runnable()
-			{
-				public void run()
-				{
-					hpd.setVisible();	
-				}
-			}).start();
+		hpd.showDialogAsynch();
 		
 		boolean installationSuccessful = archiver.extractArchive(HELP_FOLDER, model.getHelpPath());
 		if(installationSuccessful)
 		{
 			createHelpVersionDoc();
 		}
-		/*if(japArchive != null)
+		else
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Extracting help files was not succesful.");
+		}
+		if(japArchive != null)
 		{
 			try 
 			{
 				japArchive.close();
 			} 
 			catch (IOException e) {
-				LogHolder.log(LogLevel.ERR, LogType.MISC, "Error: Could not close Jar-Archive");
+				LogHolder.log(LogLevel.ERR, LogType.MISC, "Could not close Jar-Archive");
 			}
-		}*/
+		}
 	}
 	
 	/**
@@ -166,9 +145,11 @@ public final class JAPHelpController {
 		XMLUtil.setAttribute(helpVersionNode, HELP_VERSION_ATTRIBUTE, JAPConstants.aktVersion);
 		helpVersionDoc.appendChild(helpVersionNode);
 		
+		File versionInfoFile = new File(model.getHelpPath()+File.separator+
+				HELP_FOLDER+HELP_VERSION_FILE);
 		try
 		{
-			XMLUtil.write(helpVersionDoc, VERSION_INFO);
+			XMLUtil.write(helpVersionDoc, versionInfoFile);
 		} 
 		catch (IOException ioe)
 		{
@@ -217,6 +198,25 @@ public final class JAPHelpController {
 		
 	}
 	
+	public void removeOldHelp(String parentPath)
+	{
+		if(parentPath == null)
+		{
+			return;
+		}
+		File helpFolder = new File(parentPath+File.separator+HELP_FOLDER);
+		File helpVersionFile = new File(parentPath+File.separator+HELP_FOLDER+HELP_VERSION_FILE);
+		
+		if(!helpFolder.exists() || !helpVersionFile.exists())
+		{
+			LogHolder.log(LogLevel.INFO, LogType.MISC, "No old help found in "+helpFolder.getPath());
+			return;
+		}
+		/* Make sure that there will be never the wrong directory as parameter!!! */
+		RecursiveCopyTool.deleteRecursion(helpFolder);
+		LogHolder.log(LogLevel.INFO, LogType.MISC, "removed old help from "+parentPath);
+	}
+	
 	/**
 	 * checks if there is a help installed in the specified external help path
 	 * @return true if a help folder exists in the user defined help path. If no help 
@@ -244,7 +244,9 @@ public final class JAPHelpController {
 	{
 		try 
 		{
-			Document doc = XMLUtil.readXMLDocument(VERSION_INFO);
+			File versionInfoFile = new File(model.getHelpPath()+File.separator+
+					HELP_FOLDER+HELP_VERSION_FILE);
+			Document doc = XMLUtil.readXMLDocument(versionInfoFile);
 			Node versionNode = XMLUtil.getFirstChildByName(doc, HELP_VERSION_NODE);
 			String versionString = XMLUtil.parseAttribute(versionNode, HELP_VERSION_ATTRIBUTE, null);
 			return versionString;
@@ -261,8 +263,8 @@ public final class JAPHelpController {
 	}
 	
 	/**
-	 * conveinience function that returns a file reference to the help root folder
-	 * @return a file reference to the help root folder or null if helpPath is null
+	 * convenience function that returns a file reference to the current help root folder 
+	 * @return a file reference to the current help root folder or null if helpPath is null
 	 */ 
 	public File getHelpFolder()
 	{
@@ -281,5 +283,33 @@ public final class JAPHelpController {
 			helpController = new JAPHelpController(JAPModel.getInstance());
 		}
 		return helpController;
+	}
+
+	public void update(Observable o, Object arg) 
+	{
+		if( (o instanceof JAPModel) && (arg instanceof String) )
+		{
+			if(arg != null)
+			{
+				removeOldHelp((String) arg);
+				if(model.isHelpPathDefined())
+				{
+					if((asynchHelpFileInstallThread != null) && !asynchHelpFileInstallThread.isAlive() ) 
+					synchronized(JAPHelpController.class)
+					{
+						asynchHelpFileInstallThread =
+							new Thread(
+									new Runnable()
+									{
+										public void run()
+										{
+											installHelp();
+										}
+									});
+						asynchHelpFileInstallThread.start();
+					}
+				}
+			}
+		}		
 	}
 }

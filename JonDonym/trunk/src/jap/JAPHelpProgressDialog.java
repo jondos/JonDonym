@@ -4,6 +4,7 @@ import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Observable;
@@ -27,6 +28,8 @@ public class JAPHelpProgressDialog implements Observer
 	private JLabel m_progressLabel;
 	
 	public final static String MSG_HELP_INSTALL = "helpInstall";
+	public final static String MSG_HELP_INSTALL_PROGRESS = "helpInstallProgress";
+	public final static String MSG_HELP_INSTALL_EXTRACTING = "helpInstallExtracting";
 	
 	long m_totalSizeExceedingInt = ZipEvent.UNDEFINED;
 			
@@ -34,24 +37,47 @@ public class JAPHelpProgressDialog implements Observer
 	{
 		m_helpProgressBar = new JProgressBar();
 		m_displayProgress = new JAPDialog(parent, JAPMessages.getString(MSG_HELP_INSTALL), true);
-		
-		m_progressLabel = new JLabel("help progress");
+		initView();
+	}
+	
+	public JAPHelpProgressDialog(JAPDialog parent)
+	{
+		m_helpProgressBar = new JProgressBar();
+		m_displayProgress = new JAPDialog(parent, JAPMessages.getString(MSG_HELP_INSTALL), true);
+		initView();
+	}
+	
+	private void initView()
+	{
+		m_progressLabel = new JLabel(JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS));
 		m_helpProgressBar.setBorderPainted(true);
 		m_helpProgressBar.setStringPainted(true);
+		
+		m_helpProgressBar.setPreferredSize(new Dimension(300,100));
+		
 		//m_displayProgress.setSize(400, 300);
 		m_displayProgress.getContentPane().setLayout(new BorderLayout());
 		
 		m_displayProgress.getContentPane().add(m_progressLabel, BorderLayout.NORTH);
 		m_displayProgress.getContentPane().add(m_helpProgressBar, BorderLayout.CENTER);
-		//m_displayProgress.setVisible(true);
+		
+		m_helpProgressBar.setVisible(true);
 		
 		m_helpProgressBar.addChangeListener(new ProgressStateListener());
 		m_totalSizeExceedingInt = ZipEvent.UNDEFINED;
 	}
 	
-	public void setVisible()
+	public void showDialogAsynch()
 	{
-		m_displayProgress.setVisible(true);
+		new Thread(
+			new Runnable()
+			{
+				public void run()
+				{
+					m_displayProgress.setVisible(true);
+					m_helpProgressBar.setVisible(true);
+				}
+			}).start();
 	}
 	
 	public void update(Observable o, Object arg)
@@ -88,17 +114,15 @@ public class JAPHelpProgressDialog implements Observer
 					double byteCountRatio =
 						((double) byteCount) / ((double) m_totalSizeExceedingInt);
 					m_helpProgressBar.setValue((int) (byteCountRatio*Integer.MAX_VALUE));
-					System.out.println("Case: exceed: "+byteCount+"/"+m_totalSizeExceedingInt+": "+byteCountRatio+", "+((int) (byteCountRatio*Integer.MAX_VALUE)));
 				}
 				else
 				{
-					System.out.println("Case: normal");
 					m_helpProgressBar.setValue((int) byteCount);
 				}
 			}
 			if(entryName != null)
 			{
-				m_progressLabel.setText("Extracting file: "+entryName);
+				m_progressLabel.setText(JAPMessages.getString(MSG_HELP_INSTALL_EXTRACTING)+entryName);
 			}
 			m_helpProgressBar.repaint();
 			m_progressLabel.repaint();
