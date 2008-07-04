@@ -101,7 +101,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		+ "_dialogFormatGoldenRatio";
 	
 	private static final String MSG_HELP_PATH = JAPConfUI.class.getName() + "_helpPath";
-	private static final String MSG_HELP_PATH_CHOOSE = JAPConfUI.class.getName() + "_helpPathChoose";
+	public static final String MSG_HELP_PATH_CHOOSE = JAPConfUI.class.getName() + "_helpPathChoose";
 	
 	private static final String MSG_NO_NATIVE_LIBRARY = JAPConfUI.class.getName() + "_noNativeLibrary";
 	private static final String MSG_NO_NATIVE_WINDOWS_LIBRARY = JAPConfUI.class.getName() +
@@ -784,12 +784,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_helpPathButton = new JButton(JAPMessages.getString(MSG_HELP_PATH_CHOOSE));
 		if(JAPModel.getInstance().isHelpPathDefined())
 		{
-			System.out.println("Setting help path textfield to model value");
 			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
 		}
 		else
 		{
-			System.out.println("Setting empty textfield for help path");
 			m_helpPathField.setText("");
 		}
 		m_helpPathField.setEditable(false);
