@@ -49,5 +49,5 @@ public interface IVerifyable
 	 */
 	public boolean isValid();
 
-	public CertificationPath getCertPath();
+	public CertPath getCertPath();
 }

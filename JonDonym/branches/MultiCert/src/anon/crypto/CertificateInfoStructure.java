@@ -29,7 +29,7 @@ package anon.crypto;
 
 public class CertificateInfoStructure
 {
-  private CertificationPath m_certPath;
+  private CertPath m_certPath;
 
   private JAPCertificate m_parentCertificate;
 
@@ -48,12 +48,12 @@ public class CertificateInfoStructure
 										boolean a_certificateNeedsVerification, boolean a_onlyHardRemovable,
 									boolean a_notRemovable)
 	{
-		this (new CertificationPath(a_certificate), a_parentCertificate, a_certificateType, a_enabled,
+		this (new CertPath(a_certificate), a_parentCertificate, a_certificateType, a_enabled,
 			  a_certificateNeedsVerification, a_onlyHardRemovable, a_notRemovable);
 	}
 
 
-	public CertificateInfoStructure(CertificationPath a_certPath, JAPCertificate a_parentCertificate,
+	public CertificateInfoStructure(CertPath a_certPath, JAPCertificate a_parentCertificate,
 									int a_certificateType, boolean a_enabled,
 									boolean a_certificateNeedsVerification, boolean a_onlyHardRemovable,
 									boolean a_notRemovable)
@@ -82,7 +82,7 @@ public class CertificateInfoStructure
 	}
 
 
-	public CertificationPath getCertPath()
+	public CertPath getCertPath()
 	{
 		return m_certPath;
 	}

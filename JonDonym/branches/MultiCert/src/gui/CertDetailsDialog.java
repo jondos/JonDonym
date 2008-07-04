@@ -51,7 +51,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 
-import anon.crypto.CertificationPath;
+import anon.crypto.CertPath;
 import anon.crypto.CertificateInfoStructure;
 import anon.crypto.IMyPublicKey;
 import anon.crypto.JAPCertificate;
@@ -184,7 +184,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 	 * @param a_certPath the certPath of the displayed certificate
 	 */
 	public CertDetailsDialog(Component a_parent, JAPCertificate a_cert, boolean a_bIsVerifyable,
-							 Locale a_locale, CertificationPath a_certPath)
+							 Locale a_locale, CertPath a_certPath)
 	{
 		super(a_parent, JAPMessages.getString(MSG_TITLE));
 		m_Locale = a_locale;
@@ -867,7 +867,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 	 * @todo make a special CellRenderer, so we do not have to use
 	 *       a certificate InfoStructure here
 	 */
-	private JPanel drawCertPathPanel(CertificationPath a_certPath)
+	private JPanel drawCertPathPanel(CertPath a_certPath)
 	{
 		//init Panel and Layout
 		JPanel certPathPanel = new JPanel();
