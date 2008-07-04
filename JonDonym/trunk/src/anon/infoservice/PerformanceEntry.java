@@ -1,6 +1,7 @@
 package anon.infoservice;
 
-import java.util.Vector;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Calendar;
 
 import org.w3c.dom.Element;
@@ -109,7 +110,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_serial;
 	}
 	
-	public void addDelay(long a_lDelay) 
+	public void addDelay(long a_lTimeStamp, long a_lDelay) 
 	{
 		PerformanceAttributeEntry entry = null;
 		
@@ -122,10 +123,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_delay[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY); 
 		}
 		
-		entry.addValue(a_lDelay);
+		entry.addValue(a_lTimeStamp, a_lDelay);
 	}
 	
-	public void addSpeed(long a_lSpeed) 
+	public void addSpeed(long a_lTimeStamp, long a_lDelay) 
 	{
 		PerformanceAttributeEntry entry = null;
 		
@@ -138,7 +139,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_speed[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED); 
 		}
 		
-		entry.addValue(a_lSpeed);
+		entry.addValue(a_lTimeStamp, a_lDelay);
 	}
 	
 	public PerformanceAttributeEntry getCurrentSpeedEntry()
@@ -293,23 +294,24 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public static final String XML_ELEMENT_VALUES = "Values";
 		public static final String XML_ELEMENT_VALUE = "Value";
 		
-		private String m;
+		private String m_name;
 		
 		private long m_lMaxValue;
 		private long m_lMinValue;
 		private long m_lAverageValue;
 		private double m_lStdDeviation;
 		
-		private Vector m_Values = new Vector();
+		//private Vector m_Values = new Vector();
+		private Hashtable m_Values = new Hashtable();
 		
-		public PerformanceAttributeEntry(String a)
+		public PerformanceAttributeEntry(String a_name)
 		{
-			m = a;
+			m_name = a_name;
 		}
 		
 		public PerformanceAttributeEntry(Node a_node)
 		{
-			m = XMLUtil.parseValue(a_node, "UnknownAttribute");
+			m_name = XMLUtil.parseValue(a_node, "UnknownAttribute");
 			
 			m_lMinValue = XMLUtil.parseAttribute(a_node, XML_ATTR_MIN, 0);
 			m_lMaxValue = XMLUtil.parseAttribute(a_node, XML_ATTR_MAX, 0);
@@ -317,28 +319,30 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_lStdDeviation = XMLUtil.parseAttribute(a_node, XML_ATTR_STD_DEVIATION, 0);
 		}
 		
-		public void addValue(long a_lValue)
+		public void addValue(long a_lTimeStamp, long a_lValue)
 		{
 			if (a_lValue <= 0)
 			{
 				return;
 			}
 			
-			m_Values.add(new Long(a_lValue));
+			m_Values.put(new Long(a_lTimeStamp), new Long(a_lValue));
 			
 			long lValues = 0;
-			for(int i = 0; i < m_Values.size(); i++)
+			Enumeration enum = m_Values.elements();
+			while(enum.hasMoreElements())
 			{
-				lValues += ((Long) m_Values.elementAt(i)).longValue();
+				lValues += ((Long) enum.nextElement()).longValue();
 			}
 			
 			m_lAverageValue = lValues / m_Values.size();
 			
 			// mean squared error
 			double mseValue = 0;
-			for(int i = 0; i < m_Values.size(); i++)
+			enum = m_Values.elements();
+			while(enum.hasMoreElements())
 			{
-				mseValue += Math.pow(((Long) m_Values.elementAt(i)).longValue() - m_lAverageValue, 2);
+				mseValue += Math.pow(((Long) enum.nextElement()).longValue() - m_lAverageValue, 2);
 			}
 			
 			mseValue /= m_Values.size();
@@ -382,7 +386,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public String getName()
 		{
-			return m;
+			return m_name;
 		}
 		
 		public void overrideAverageValue(long a_lValue)
@@ -392,31 +396,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public Element toXmlElement(Document a_doc)
 		{
-			return toXmlElement(a_doc, false);
-		}
-		
-		public Element toXmlElement(Document a_doc, boolean a_bDisplayValues)
-		{
 			Element elem = a_doc.createElement(getName());
 			
 			XMLUtil.setAttribute(elem, XML_ATTR_MIN, m_lMinValue);
 			XMLUtil.setAttribute(elem, XML_ATTR_MAX, m_lMaxValue);
 			XMLUtil.setAttribute(elem, XML_ATTR_AVERAGE, m_lAverageValue);
 			XMLUtil.setAttribute(elem, XML_ATTR_STD_DEVIATION, m_lStdDeviation);
-			
-			if(a_bDisplayValues)
-			{
-				Element elemValues = a_doc.createElement(XML_ELEMENT_VALUES);
-			
-				for(int i = 0; i < m_Values.size(); i++)
-				{
-					Element elemValue = a_doc.createElement(XML_ELEMENT_VALUE);
-					XMLUtil.setValue(elemValue, ((Long) m_Values.elementAt(i)).longValue());
-					elemValues.appendChild(elemValue);
-				}
-			
-				elem.appendChild(elemValues);
-			}
 			
 			return elem;
 		}
