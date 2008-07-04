@@ -33,8 +33,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.io.FileOutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.FileNotFoundException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
@@ -110,6 +112,8 @@ public class PerformanceMeter implements Runnable
 	private long m_lBytesRecvd;
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60;
+	private static final String PERFORMANCE_LOG_FILE = "performance.log"; 
+	
 	private PayAccountsFile m_payAccountsFile;
 	
 	private Object SYNC_SOCKET = new Object();
@@ -119,6 +123,8 @@ public class PerformanceMeter implements Runnable
 	private AccountUpdater m_accUpdater = null;
 	
 	private Random ms_rnd = new Random();
+	
+	private FileOutputStream m_stream = null;
 
 	public PerformanceMeter(AccountUpdater updater)
 	{
@@ -145,6 +151,15 @@ public class PerformanceMeter implements Runnable
 		m_requestsPerInterval = ((Integer) a_config[4]).intValue();
 		m_maxWaitForTest = ((Integer) a_config[5]).intValue();
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
+		
+		try
+		{
+			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE, true);
+		}
+		catch(FileNotFoundException ex)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
+		}
 	}
 	
 	public void run() 
@@ -657,8 +672,13 @@ public class PerformanceMeter implements Runnable
         		
         		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
         		
-        		entry.addDelay(delay);
-        		entry.addSpeed(speed);
+        		long timestamp = System.currentTimeMillis();
+        		
+        		entry.addDelay(timestamp, delay);
+        		entry.addSpeed(timestamp, speed);
+        		
+        		m_stream.write((timestamp + "\t" + a_cascade.getId() + "\t" + delay + "\t" + speed + "\n").getBytes());
+        		//m_stream.flush();
         		
             	Database.getInstance(PerformanceEntry.class).update(entry);
         		
