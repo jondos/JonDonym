@@ -39,7 +39,7 @@ import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
-import anon.crypto.CertificationPath;
+import anon.crypto.CertPath;
 import anon.crypto.IVerifyable;
 import anon.crypto.JAPCertificate;
 import anon.crypto.X509SubjectKeyIdentifier;
@@ -120,7 +120,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	/**
 	 * The certificate path
 	 */
-	private CertificationPath m_certPath;
+	private CertPath m_certPath;
 	
 	/**
 	 * The associated certificate
@@ -430,7 +430,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		return m_certificate;
 	}
 
-	public CertificationPath getCertPath()
+	public CertPath getCertPath()
 	{
 		return m_certPath;
 	}
