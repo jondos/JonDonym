@@ -39,7 +39,7 @@ import anon.AnonServerDescription;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
-import anon.crypto.CertPath;
+import anon.crypto.CertificationPath;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.ZLibTools;
@@ -122,7 +122,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private byte[] m_compressedXmlStructure;
 
 	private XMLSignature m_signature;
-	private CertPath m_certPath;
+	private CertificationPath m_certPath;
 
 	private int m_nrCountries = 0;
 	private int m_nrOperators = 0;
@@ -242,7 +242,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				SignatureVerifier.DOCUMENT_CLASS_MIX);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertPath();
+				m_certPath = m_signature.getCertificationPath();
 				if (m_certPath != null && m_certPath.getFirstCertificate() != null)
 				{
 					m_mixCascadeCertificate = m_certPath.getFirstCertificate();
@@ -1016,7 +1016,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return m_nrPriceCerts;
 	}
 
-	public CertPath getCertPath()
+	public CertificationPath getCertPath()
 	{
 		return m_certPath;
 	}

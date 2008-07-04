@@ -39,7 +39,7 @@ import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
-import anon.crypto.CertPath;
+import anon.crypto.CertificationPath;
 import anon.crypto.IVerifyable;
 import anon.crypto.JAPCertificate;
 import anon.crypto.X509SubjectKeyIdentifier;
@@ -120,7 +120,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	/**
 	 * The certificate path
 	 */
-	private CertPath m_certPath;
+	private CertificationPath m_certPath;
 	
 	/**
 	 * The associated certificate
@@ -220,7 +220,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 				SignatureVerifier.DOCUMENT_CLASS_MIX);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertPath();
+				m_certPath = m_signature.getCertificationPath();
 				if (m_certPath != null)
 				{
 					m_certificate = m_certPath.getFirstCertificate();
@@ -430,7 +430,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		return m_certificate;
 	}
 
-	public CertPath getCertPath()
+	public CertificationPath getCertPath()
 	{
 		return m_certPath;
 	}

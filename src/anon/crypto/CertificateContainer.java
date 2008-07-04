@@ -59,7 +59,7 @@ public class CertificateContainer implements IXMLEncodable
 	 */
 	private JAPCertificate m_parentCertificate;
 
-	private CertPath m_certPath;
+	private CertificationPath m_certPath;
 
 	/**
 	 * Stores the certificate type of this certificate. See the CERTIFICATE_TYPE constants within
@@ -111,7 +111,7 @@ public class CertificateContainer implements IXMLEncodable
 	public CertificateContainer(JAPCertificate a_certificate, int a_certificateType,
 								boolean a_certificateNeedsVerification)
 	{
-		this(new CertPath(a_certificate), a_certificateType, a_certificateNeedsVerification);
+		this(new CertificationPath(a_certificate), a_certificateType, a_certificateNeedsVerification);
 	}
 
 
@@ -125,7 +125,7 @@ public class CertificateContainer implements IXMLEncodable
 	 *                                       certificate store, if it can be verified against an
 	 *                                       active root certificate from the store.
 	 */
-	public CertificateContainer(CertPath a_certPath, int a_certificateType,
+	public CertificateContainer(CertificationPath a_certPath, int a_certificateType,
 								boolean a_certificateNeedsVerification)
 	{
 		if (a_certPath == null || a_certPath.getFirstCertificate() == null)
@@ -195,14 +195,14 @@ public class CertificateContainer implements IXMLEncodable
 			JAPCertificate.XML_ELEMENT_NAME));
 		if (certificate == null)
 		{
-			m_certPath = new CertPath((Element)XMLUtil.getFirstChildByName(
-						 certificateDataNode, CertPath.XML_ELEMENT_NAME));
+			m_certPath = new CertificationPath((Element)XMLUtil.getFirstChildByName(
+						 certificateDataNode, CertificationPath.XML_ELEMENT_NAME));
 			//throw (new Exception("Invalid CertificateData value. Cannot get the certificate."));
 		}
 		else
 		{
 			// for compatibility with older versions of this class
-			m_certPath = new CertPath(certificate);
+			m_certPath = new CertificationPath(certificate);
 		}
 
 		m_parentCertificate = null;
@@ -224,7 +224,7 @@ public class CertificateContainer implements IXMLEncodable
 		return m_certPath.getFirstCertificate();
 	}
 
-	public CertPath getCertPath()
+	public CertificationPath getCertPath()
 	{
 		return m_certPath;
 	}

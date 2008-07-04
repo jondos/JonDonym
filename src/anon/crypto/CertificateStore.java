@@ -164,7 +164,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 		return returnedCertificates;
 	}
 
-	public int addCertificateWithVerification(CertPath a_certificate, int a_certificateType,
+	public int addCertificateWithVerification(CertificationPath a_certificate, int a_certificateType,
 											  boolean a_onlyHardRemovable)
 	{
 		int lockId = -1;
@@ -239,11 +239,11 @@ public class CertificateStore extends Observable implements IXMLEncodable
 	public int addCertificateWithoutVerification(JAPCertificate a_certificate, int a_certificateType,
 												 boolean a_onlyHardRemovable, boolean a_bNotRemovable)
 	{
-		return addCertificateWithoutVerification(new CertPath(a_certificate), a_certificateType,
+		return addCertificateWithoutVerification(new CertificationPath(a_certificate), a_certificateType,
 												 a_onlyHardRemovable, a_bNotRemovable);
 	}
 
-	public int addCertificateWithoutVerification(CertPath a_certPath, int a_certificateType,
+	public int addCertificateWithoutVerification(CertificationPath a_certPath, int a_certificateType,
 												 boolean a_onlyHardRemovable, boolean a_bNotRemovable)
 	{
 		int lockId = -1;

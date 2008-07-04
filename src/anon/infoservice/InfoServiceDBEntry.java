@@ -44,7 +44,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
-import anon.crypto.CertPath;
+import anon.crypto.CertificationPath;
 import anon.crypto.IVerifyable;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureCreator;
@@ -152,7 +152,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	/**
 	 *
 	 */
-	private CertPath m_certPath;
+	private CertificationPath m_certPath;
 
 	private long m_serial;
 	
@@ -231,7 +231,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		if (m_signature != null)
 		{
-			m_certPath = m_signature.getCertPath();
+			m_certPath = m_signature.getCertificationPath();
 			if (m_certPath != null)
 			{
 				m_certificate = m_certPath.getFirstCertificate();
@@ -531,7 +531,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, infoServiceNode);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertPath();
+				m_certPath = m_signature.getCertificationPath();
 			}
 		}
 		catch (Exception a_e)
@@ -599,7 +599,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return m_certificate;
 	}
 
-	public CertPath getCertPath()
+	public CertificationPath getCertPath()
 	{
 		return m_certPath;
 	}

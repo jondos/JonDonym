@@ -54,8 +54,9 @@ public abstract class AbstractX509Extension
 	public static final String IDENTIFIER = null;
 
 	private static Class[] AVAILABLE_EXTENSIONS = new Class[]
-		{X509UnknownExtension.class, X509SubjectKeyIdentifier.class,
-		X509SubjectAlternativeName.class, X509IssuerAlternativeName.class};
+		{X509UnknownExtension.class, X509SubjectKeyIdentifier.class, X509AuthorityKeyIdentifier.class,
+		X509SubjectAlternativeName.class, X509IssuerAlternativeName.class,
+		X509BasicConstraints.class, X509KeyUsage.class};
 
 	private static Vector ms_classExtensions;
 

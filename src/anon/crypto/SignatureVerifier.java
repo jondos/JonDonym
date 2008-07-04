@@ -392,7 +392,7 @@ public class SignatureVerifier implements IXMLEncodable
 					{
 						signature.setVerified(true);
 					}
-					signature.getCertPath().setDocType(a_documentClass);
+					signature.getCertificationPath().setDocType(a_documentClass);
 				}
 				catch (Exception e)
 				{

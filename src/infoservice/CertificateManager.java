@@ -35,7 +35,7 @@ import java.util.Vector;
 
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
-import anon.crypto.CertPath;
+import anon.crypto.CertificationPath;
 import anon.infoservice.Database;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.MixCascade;
@@ -117,7 +117,7 @@ public class CertificateManager implements Observer
 	{
 		synchronized (m_certificateLocks)
 		{
-			CertPath newCertificate = a_newEntry.getCertPath();
+			CertificationPath newCertificate = a_newEntry.getCertPath();
 			Integer oldEntryCertificateLock = null;
 			boolean removeCertificateLock = false;
 			if (newCertificate != null)

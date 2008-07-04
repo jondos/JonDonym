@@ -84,7 +84,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.JComboBox;
 
 import anon.crypto.AbstractX509AlternativeName;
-import anon.crypto.CertPath;
+import anon.crypto.CertificationPath;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.X509SubjectAlternativeName;
@@ -282,7 +282,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private final Object LOCK_OBSERVABLE = new Object();
 
 	/** the Certificate of the selected Mix-Server */
-	private CertPath m_serverCert;
+	private CertificationPath m_serverCert;
 	private MixInfo m_serverInfo;
 	
 	private Vector m_locationCoordinates;
@@ -2457,10 +2457,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return null;
 		}
 
-		public CertPath getMixCertPath(MixCascade a_cascade, String a_mixID)
+		public CertificationPath getMixCertPath(MixCascade a_cascade, String a_mixID)
 		{
 			MixInfo mixinfo = getMixInfo(a_cascade, a_mixID);
-			CertPath certificate = null;
+			CertificationPath certificate = null;
 			if (mixinfo != null)
 			{
 				certificate = mixinfo.getCertPath();
@@ -2676,7 +2676,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				if (cascade != null)
 				{
 					// this is a first mix
-					CertPath certPath = cascade.getCertPath();
+					CertificationPath certPath = cascade.getCertPath();
 					if (certPath != null)
 					{
 						mixCertificate = certPath.getSecondCertificate();
@@ -2705,7 +2705,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				if (cascade != null)
 				{
 					// this is a first mix
-					CertPath certPath = cascade.getCertPath();
+					CertificationPath certPath = cascade.getCertPath();
 					if (certPath != null)
 					{
 						mixCertificate = certPath.getSecondCertificate();

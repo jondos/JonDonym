@@ -45,7 +45,7 @@ import anon.util.XMLUtil;
  * @see also gui.CertDetailsDialog, anon.crypto.XMLSignature
  * @author Robert Hirschberger
  */
-public class CertPath implements IXMLEncodable
+public class CertificationPath implements IXMLEncodable
 {
 	public static final String XML_ELEMENT_NAME = "CertPath";
 	public static final String XML_ATTR_CLASS = "rootCertificateClass";
@@ -62,7 +62,7 @@ public class CertPath implements IXMLEncodable
 	 * @param firstCert The first certifiacte of the path
 	 *                  (it will be on the lowest Level of the cert hierarchy)
 	 */
-	protected CertPath(JAPCertificate firstCert)
+	protected CertificationPath(JAPCertificate firstCert)
 	{
 		m_certificates = new Vector();
 
@@ -75,7 +75,7 @@ public class CertPath implements IXMLEncodable
 		add(firstCert);
 	}
 
-	protected CertPath(Element a_elemCertPath) throws XMLParseException
+	protected CertificationPath(Element a_elemCertPath) throws XMLParseException
 	{
 		if (a_elemCertPath == null || !a_elemCertPath.getNodeName().equals(XML_ELEMENT_NAME))
 		{
