@@ -329,20 +329,20 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_Values.put(new Long(a_lTimeStamp), new Long(a_lValue));
 			
 			long lValues = 0;
-			Enumeration enum = m_Values.elements();
-			while(enum.hasMoreElements())
+			Enumeration e = m_Values.elements();
+			while(e.hasMoreElements())
 			{
-				lValues += ((Long) enum.nextElement()).longValue();
+				lValues += ((Long) e.nextElement()).longValue();
 			}
 			
 			m_lAverageValue = lValues / m_Values.size();
 			
 			// mean squared error
 			double mseValue = 0;
-			enum = m_Values.elements();
-			while(enum.hasMoreElements())
+			e = m_Values.elements();
+			while(e.hasMoreElements())
 			{
-				mseValue += Math.pow(((Long) enum.nextElement()).longValue() - m_lAverageValue, 2);
+				mseValue += Math.pow(((Long) e.nextElement()).longValue() - m_lAverageValue, 2);
 			}
 			
 			mseValue /= m_Values.size();
