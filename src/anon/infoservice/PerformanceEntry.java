@@ -18,7 +18,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private static final String XML_ATTR_DAY = "day";
 	public static final String XML_ATTR_ID = "id";
 	
-	private static final String XML_ELEMENT_CURRENT_DATA = "CurrentData";
+	private static final String XML_ELEMENT_LAST_DATA = "LastData";
+	private static final String XML_ELEMENT_CURRENT_HOURLY_DATA = "CurrentHourlyData";
 	private static final String XML_ELEMENT_HOURLY_DATA = "HourlyData";
 	private static final String XML_ELEMENT_DAILY_DATA = "DailyData";
 	private static final String XML_ELEMENT_WEEKLY_DATA = "WeeklyData";
@@ -29,14 +30,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private long m_lastUpdate;
 	private long m_serial;
 	
-	/*private long m_lDelay;
-	private long m_lSpeed;
-	
-	private long[] m_aDelays;
-	private long[] m_aSpeeds;*/
-	
 	private PerformanceAttributeEntry[][] m_speed = new PerformanceAttributeEntry[7][24];
 	private PerformanceAttributeEntry[][] m_delay = new PerformanceAttributeEntry[7][24];
+	
+	private long m_lastSpeed = -1;
+	private long m_lastDelay = -1;
 	
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
 	
@@ -46,7 +44,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 
 	
 	public PerformanceEntry(String a_strCascadeId, long a_lExpireTime)
-	{
+	{	
 		super(a_lExpireTime);
 		
 		m_strCascadeId = a_strCascadeId;
@@ -68,10 +66,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			throw new XMLParseException(XML_ELEMENT_NAME + ": invalid id");
 		}
 		
-		Node elemCurrentData = XMLUtil.getFirstChildByName(a_entry, XML_ELEMENT_CURRENT_DATA);
+		Node elemCurrentData = XMLUtil.getFirstChildByName(a_entry, XML_ELEMENT_CURRENT_HOURLY_DATA);
 		if(elemCurrentData == null)
 		{
-			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + XML_ELEMENT_CURRENT_DATA);
+			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + XML_ELEMENT_CURRENT_HOURLY_DATA);
 		}
 		
 		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
@@ -140,6 +138,26 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		entry.addValue(a_lTimeStamp, a_lDelay);
+	}
+	
+	public void setLastDelay(long a_lDelay)
+	{
+		m_lastDelay = a_lDelay;
+	}
+	
+	public void setLastSpeed(long a_lSpeed)
+	{
+		m_lastSpeed = a_lSpeed;
+	}
+	
+	public long getLastDelay()
+	{
+		return m_lastDelay;
+	}
+	
+	public long getLastSpeed()
+	{
+		return m_lastSpeed;
 	}
 	
 	public PerformanceAttributeEntry getCurrentSpeedEntry()
@@ -234,7 +252,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
 		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
 		
-		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_DATA);
+		Element elemLast = a_doc.createElement(XML_ELEMENT_LAST_DATA);
+		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_lastDelay);
+		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_lastSpeed);
+		
+		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
 
 		Element elemDelay = getCurrentSpeedEntry().toXmlElement(a_doc);
 		Element elemSpeed = getCurrentDelayEntry().toXmlElement(a_doc);
@@ -276,6 +298,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			elem.appendChild(elemWeeklyData);
 		}
 		
+		elem.appendChild(elemLast);
 		elem.appendChild(elemCurrent);
 		
 		return elem;
