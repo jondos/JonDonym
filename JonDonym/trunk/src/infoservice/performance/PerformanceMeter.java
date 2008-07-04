@@ -46,6 +46,7 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Random;
+import java.util.Calendar;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -112,7 +113,7 @@ public class PerformanceMeter implements Runnable
 	private long m_lBytesRecvd;
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60;
-	private static final String PERFORMANCE_LOG_FILE = "performance.log"; 
+	public static final String PERFORMANCE_LOG_FILE = "performance_"; 
 	
 	private PayAccountsFile m_payAccountsFile;
 	
@@ -125,6 +126,9 @@ public class PerformanceMeter implements Runnable
 	private Random ms_rnd = new Random();
 	
 	private FileOutputStream m_stream = null;
+	
+	private int m_currentWeek;
+	private Calendar m_cal = Calendar.getInstance();
 
 	public PerformanceMeter(AccountUpdater updater)
 	{
@@ -154,7 +158,9 @@ public class PerformanceMeter implements Runnable
 		
 		try
 		{
-			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE, true);
+			m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
+			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
+					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -469,7 +475,25 @@ public class PerformanceMeter implements Runnable
 		
 		if(entry == null)
 		{
-			entry = new PerformanceEntry(a_cascade.getId(), System.currentTimeMillis() + m_majorInterval + PERFORMANCE_ENTRY_TTL);
+			int days = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
+			int hours = m_cal.get(Calendar.HOUR_OF_DAY);
+			int minutes = m_cal.get(Calendar.MINUTE);
+			int seconds = m_cal.get(Calendar.SECOND);
+			int millis = m_cal.get(Calendar.MILLISECOND);
+			
+			long beginningOfWeek = 
+				System.currentTimeMillis() -
+				days * 24 * 60 * 60 * 1000 - 
+				hours * 60 * 60 * 1000 - 
+				minutes * 60 * 1000 - 
+				seconds * 1000 -
+				millis;
+			
+			long beginningOfNextWeek =
+				beginningOfWeek +
+				7 * 24 * 60 * 60 * 1000;
+			
+			entry = new PerformanceEntry(a_cascade.getId(), beginningOfNextWeek);
 		}
 		
 		m_recvBuff = new char[m_dataSize];				
@@ -501,6 +525,9 @@ public class PerformanceMeter implements Runnable
 		}					
 		
 		LogHolder.log(LogLevel.WARNING, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
+		
+		Vector vDelay = new Vector();
+		Vector vSpeed = new Vector();
 		
 		for(int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
 			m_proxy.isConnected(); i++)
@@ -677,8 +704,27 @@ public class PerformanceMeter implements Runnable
         		entry.addDelay(timestamp, delay);
         		entry.addSpeed(timestamp, speed);
         		
+        		if(delay != -1)
+        		{
+        			vDelay.add(new Long(delay));
+        		}
+        		
+        		if(speed != -1)
+        		{
+        			vSpeed.add(new Long(speed));
+        		}
+        		
+        		if(m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
+        		{
+        			m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
+        			
+        			// open a new stream
+        			m_stream.close();
+        			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
+        					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
+        		}
+        		
         		m_stream.write((timestamp + "\t" + a_cascade.getId() + "\t" + delay + "\t" + speed + "\n").getBytes());
-        		//m_stream.flush();
         		
             	Database.getInstance(PerformanceEntry.class).update(entry);
         		
@@ -698,7 +744,27 @@ public class PerformanceMeter implements Runnable
 	        }
 		}
 		
-    	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Avg Delay: " + entry.getAverageDelay() + " ms; Avg Throughput: " + entry.getAverageSpeed() + " kb/sec");
+		long lastSpeed = -1;
+		long lastDelay = -1;
+		
+		for(int i = 0; i < vDelay.size(); i++)
+		{
+			lastDelay += ((Long) vDelay.elementAt(i)).longValue();
+		}
+		lastDelay /= vDelay.size();
+		
+		for(int i = 0; i < vSpeed.size(); i++)
+		{
+			lastSpeed += ((Long) vSpeed.elementAt(i)).longValue();
+		}
+		lastSpeed /= vSpeed.size();
+		
+		entry.setLastDelay(lastDelay);
+		entry.setLastSpeed(lastSpeed);
+		
+		Database.getInstance(PerformanceEntry.class).update(entry);
+		
+    	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/sec");
 		
     	if (m_proxy.isConnected())
 		{

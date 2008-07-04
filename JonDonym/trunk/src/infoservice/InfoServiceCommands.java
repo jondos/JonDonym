@@ -1004,8 +1004,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <TH>Active Users</TH>\n" +
 				//"        <TH>Current Risk</TH>\n" +
 				"        <TH>Traffic Situation</TH>\n" +
-				"        <TH>Avg Delay</TH>\n" +
-				"        <TH>Avg Speed</TH>\n" +
+				"        <TH>Last Delay</TH>\n" +
+				"        <TH>Last Speed</TH>\n" +
 				"        <TH>Mixed Packets</TH>\n" +
 				"        <TH>Last Notification</TH>\n" +
 				"      </TR>\n";
