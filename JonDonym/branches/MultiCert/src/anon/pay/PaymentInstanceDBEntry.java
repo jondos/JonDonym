@@ -48,7 +48,7 @@ import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.infoservice.AbstractDistributableCertifiedDatabaseEntry;
 import java.util.Date;
-import anon.crypto.CertificationPath;
+import anon.crypto.CertPath;
 import anon.crypto.IVerifyable;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -78,7 +78,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	private Element m_xmlDescription;
 
 	private XMLSignature m_signature;
-	private CertificationPath m_certPath;
+	private CertPath m_certPath;
 
 	/**
 	 * Stores the time when this payment instance entry was created by the origin payment instance.
@@ -249,7 +249,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		return false;
 	}
 
-	public CertificationPath getCertPath()
+	public CertPath getCertPath()
 	{
 		return m_certPath;
 	}

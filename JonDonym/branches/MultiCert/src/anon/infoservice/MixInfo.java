@@ -31,7 +31,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import anon.crypto.CertificationPath;
+import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
@@ -131,7 +131,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    * Stores the certPath for this mix.
    * The CertPath is not set (null) if the MixInfo-Object is in the InfoService
    */
-  private CertificationPath m_mixCertPath;
+  private CertPath m_mixCertPath;
 
   /**
    *  The price certificate for the Mix
@@ -192,7 +192,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   }
 
 
-  public MixInfo(String a_mixID, CertificationPath a_certPath)
+  public MixInfo(String a_mixID, CertPath a_certPath)
   {
 	  super(Long.MAX_VALUE);
 	  if (a_mixID == null)
@@ -217,7 +217,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_iPerformanceServerPort = -1;
   }
 
-  public MixInfo(String a_mixID, CertificationPath a_certPath, XMLPriceCertificate a_priceCert, long a_prepaidInterval)
+  public MixInfo(String a_mixID, CertPath a_certPath, XMLPriceCertificate a_priceCert, long a_prepaidInterval)
   {
 	  super(Long.MAX_VALUE);
 	  m_mixId = a_mixID;
@@ -552,7 +552,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    * For MixInfo-Objects in the InfoService the CertPath is null
    * @return the CertPath of the mix
    */
-  public CertificationPath getCertPath()
+  public CertPath getCertPath()
   {
 	  return m_mixCertPath;
   }

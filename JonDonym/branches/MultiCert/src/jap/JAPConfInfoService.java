@@ -64,7 +64,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import anon.crypto.CertificationPath;
+import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
 import anon.infoservice.Database;
 import anon.infoservice.DatabaseMessage;
@@ -135,7 +135,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 	private boolean mb_newInfoService = true;
 
 	private JAPCertificate m_selectedISCert;
-	private CertificationPath m_selectedISCertPath;
+	private CertPath m_selectedISCertPath;
 
 	private JTabbedPane m_infoServiceTabPane;
 

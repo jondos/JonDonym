@@ -44,7 +44,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
-import anon.crypto.CertificationPath;
+import anon.crypto.CertPath;
 import anon.crypto.IVerifyable;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureCreator;
@@ -152,7 +152,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	/**
 	 *
 	 */
-	private CertificationPath m_certPath;
+	private CertPath m_certPath;
 
 	private long m_serial;
 	
@@ -599,7 +599,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return m_certificate;
 	}
 
-	public CertificationPath getCertPath()
+	public CertPath getCertPath()
 	{
 		return m_certPath;
 	}
