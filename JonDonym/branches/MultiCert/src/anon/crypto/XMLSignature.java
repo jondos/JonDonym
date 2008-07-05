@@ -97,7 +97,7 @@ public final class XMLSignature implements IXMLEncodable
 	 * <dt> <b> value </b> </dt> <dd> <i> certificate XML element </i> </dd>
 	 * </dl>
 	 */
-	//private Hashtable m_appendedCertificates;
+	private Hashtable m_certificates;
 
 	/**
 	 * Stores all appended certificates
@@ -131,7 +131,7 @@ public final class XMLSignature implements IXMLEncodable
 	private XMLSignature(Element a_element) throws XMLParseException
 	{
 		Node node, subnode;
-
+		
 		if (a_element == null || !a_element.getNodeName().equals(XML_ELEMENT_NAME))
 		{
 			throw new XMLParseException(XMLParseException.ROOT_TAG, "This is no signature element!");
@@ -139,6 +139,8 @@ public final class XMLSignature implements IXMLEncodable
 
 		m_elemSignature = a_element;
 		setCertificates(m_elemSignature);
+		//MuliCert
+		m_certificates = findCertificates(m_elemSignature);
 
 		node = XMLUtil.getFirstChildByName(m_elemSignature, ELEM_SIGNED_INFO);
 		if (node == null)
@@ -1197,7 +1199,8 @@ public final class XMLSignature implements IXMLEncodable
 				currentCertificate = JAPCertificate.getInstance( (Element) nodeCertificate);
 				if (currentCertificate != null)
 				{
-					certificates.put(currentCertificate, nodeCertificate);
+					//certificates.put(currentCertificate, nodeCertificate);
+					certificates.put(currentCertificate.getCertIdentifier(), currentCertificate);
 				}
 			}
 			catch (ClassCastException a_e)

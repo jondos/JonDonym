@@ -36,6 +36,7 @@ import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodableVector;
@@ -267,7 +268,7 @@ public abstract class AbstractX509AlternativeName extends AbstractX509Extension
 		Vector tempTags, tempValues;
 		StringTokenizer tokenizer;
 
-		values = new DEREncodableVector();
+		values = new ASN1EncodableVector();
 
 		if (a_values != null || a_values.size() != 0)
 		{

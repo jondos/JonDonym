@@ -50,6 +50,7 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -139,13 +140,13 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	private X509DistinguishedName m_subject;
 	private X509DistinguishedName m_issuer;
 	private X509Extensions m_extensions;
+	private X509SubjectKeyIdentifier m_subjectKeyIdentifier;
 
 	private IMyPublicKey m_PubKey;
 	private String m_id;
 	private String m_sha1Fingerprint;
 	private String m_md5Fingerprint;
 	private Validity m_validity;
-
 
 	/**
 	 * Creates a new certificate from a valid X509 certificate structure.
@@ -186,6 +187,12 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		m_issuer = new X509DistinguishedName(m_bcCertificate.getIssuer());
 		m_extensions = new X509Extensions(m_bcCertificate.getTBSCertificate().getExtensions());
 		m_id = m_sha1Fingerprint + m_validity.getValidFrom() + m_validity.getValidTo();
+		m_subjectKeyIdentifier = (X509SubjectKeyIdentifier)m_extensions.getExtension(X509SubjectKeyIdentifier.IDENTIFIER);
+		if(m_subjectKeyIdentifier == null)
+		{
+			m_subjectKeyIdentifier = new X509SubjectKeyIdentifier(this.getPublicKey());
+		}
+		
 	}
 
 	/**
@@ -484,26 +491,12 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	}
 
 	/**
-	 * Determine this certificates SubjectKeyIdentifier from
-	 * the X509Extensions and return its string representation.
+	 * Returns the String representation of the X509SubjectKeyIdentifier
 	 * @return this certificate's SubjectKeyIdentifier as a string
 	 */
 	public String getSubjectKeyIdentifier()
 	{
-		// FIXME: Do this only once and store the SKI as a member of this class?
-		// Get the extensions and determine the identifier
-		X509Extensions extensions = this.getExtensions();
-		AbstractX509Extension ski = extensions.getExtension(X509SubjectKeyIdentifier.IDENTIFIER);
-		// Return it as a string
-		if (ski != null && ski instanceof X509SubjectKeyIdentifier)
-		{
-			return ((X509SubjectKeyIdentifier)ski).getValue();
-		} 
-		else
-		{
-			// TODO: Rather throw an exception
-			return null;	
-		}
+		return m_subjectKeyIdentifier.getValue();
 	}
 	
 	public BigInteger getSerialNumber()
@@ -1078,7 +1071,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		digestData = new byte[a_digestGenerator.getDigestSize()];
 		a_digestGenerator.update(a_data, 0, a_data.length);
 		a_digestGenerator.doFinal(digestData, 0);
-
+		
 		return ByteSignature.toHexString(digestData);
 	}
 
@@ -1187,7 +1180,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 				signature = ByteSignature.sign(bOut.toByteArray(), a_privateKey);
 
 				/* construct certificate */
-				seqv = new DEREncodableVector();
+				seqv = new ASN1EncodableVector();
 				seqv.add(tbsCert);
 				seqv.add(a_privateKey.getSignatureAlgorithm().getIdentifier());
 				seqv.add(new DERBitString(signature));
@@ -1230,5 +1223,10 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 
 			return JAPCertificate.getInstance(a_file.getInputStream(a_entry));
 		}
+	}
+
+	public String getCertIdentifier()
+	{
+		return m_subject.toString()+", "+ m_subjectKeyIdentifier.getValueWithoutColon();
 	}
 }
