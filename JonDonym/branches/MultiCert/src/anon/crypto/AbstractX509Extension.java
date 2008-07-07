@@ -268,6 +268,7 @@ public abstract class AbstractX509Extension
 	 * Returns the extension as BouncyCastle DERSequence.
 	 * @return the extension as BouncyCastle DERSequence
 	 */
+	//TODO: Remove public modifier after debugging!
 	public final DERSequence getBCExtension()
 	{
 		return m_extension;

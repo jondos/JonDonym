@@ -28,8 +28,8 @@
 
 package anon.crypto;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -39,62 +39,135 @@ import logging.LogLevel;
 import logging.LogType;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DEREncodableVector;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V2TBSCertListGenerator;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.crypto.digests.GeneralDigest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
 
+/**
+ * This Class implements Certificate Revocation Lists (CRLs) as specified by RFC 5280.
+ * @author Robert Hirschberger
+ * @see http://tools.ietf.org/html/rfc5280
+ */
 public class CertificateRevocationList
 {	
 	private CertificateList m_crl;
+	private Date m_thisUpdate;
+	private Date m_nextUpdate;
+	private X509DistinguishedName m_issuer;
+	private X509Extensions m_extensions;
 	
 	private static Class[] CRL_EXTENSIONS = 
 		{X509AuthorityKeyIdentifier.class, X509IssuerAlternativeName.class,
 			X509IssuingDistributionPoint.class};
 	
-	private static Class[] CRL_ENTRY_EXTENSIONS = 
-		{X509CertificateIssuer.class};
-	
 	public CertificateRevocationList(
 			PKCS12 a_issuerCertificate,
 			Vector a_certList,
+			Date a_nextUpdate,
 			X509Extensions a_extensions)
 	{
-		m_crl = new CRLGenerator(a_certList, a_extensions).sign(a_issuerCertificate);
+		this(new CRLGenerator(a_issuerCertificate.getSubject().getX509Name(), 
+				a_certList, a_nextUpdate, a_extensions).sign(a_issuerCertificate));
+	}
+		
+	public CertificateRevocationList(CertificateList a_crl)
+	{
+		m_crl = a_crl;
+		m_issuer = new X509DistinguishedName(m_crl.getIssuer());
+		m_extensions = new X509Extensions(m_crl.getTBSCertList().getExtensions());
+		m_thisUpdate = m_crl.getThisUpdate().getDate();
+		m_nextUpdate = m_crl.getNextUpdate().getDate();
+	}
+	
+	public static CertificateRevocationList getInstance(byte[] a_rawCRL)
+	{
+		if (a_rawCRL == null || a_rawCRL.length == 0)
+		{
+			return null;
+		}
+
+		try
+		{
+			ByteArrayInputStream bis = new ByteArrayInputStream(a_rawCRL);
+			ASN1InputStream ais = new ASN1InputStream(bis);
+			DERSequence sequence = (DERSequence)ais.readObject();
+			return new CertificateRevocationList(new CertificateList(sequence));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	public CertificateList getCRL()
 	{
 		return m_crl;
 	}
-		
-	public static BigInteger createPseudoSerial(byte[] a_rawCert)
+	
+	public X509DistinguishedName getIssuer()
 	{
-		GeneralDigest digest = new SHA1Digest();
-		byte[] value = new byte[digest.getDigestSize()];
-		
-		digest.update(a_rawCert, 0, a_rawCert.length);
-		digest.doFinal(value, 0);
-		
-		return new BigInteger(value).abs();		
+		return m_issuer;
 	}
 	
+	public Date getThisUpdate()
+	{
+		return m_thisUpdate;
+	}
+	
+	public X509Extensions getExtensions()
+	{
+		return m_extensions;
+	}
+	
+	public Vector getRevokedCertificates()
+	{
+		Vector v = new Vector();
+		TBSCertList.CRLEntry[]  crlEntries = m_crl.getRevokedCertificates();
+		for(int i=0; i<crlEntries.length; i++)
+		{
+			v.add(new RevokedCertificate(crlEntries[i]));
+		}
+		return v;
+	}
+	
+	public byte[] toByteArray()
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+		try
+		{
+			new DEROutputStream(bos).writeObject(this.m_crl);
+		}
+		catch(Exception e)
+		{
+			//should be impossible
+		}
+		return bos.toByteArray();
+	}
+			
+	/**
+	 * This class is used to generate, sign and modify CRLs.
+	 * @author Robert Hirschberger
+	 */
 	private static final class CRLGenerator extends V2TBSCertListGenerator
 	{
 		public CRLGenerator(
+				X509Name a_issuer,
 				Vector a_certList,
+				Date a_nextUpdate,
 				X509Extensions a_extensions)
 		{
-			setThisUpdate(new DERUTCTime(new Date()));
+			setIssuer(a_issuer);
+			setThisUpdate(new Time(new Date()));
+			setNextUpdate(new Time(a_nextUpdate));
 			setExtensions(a_extensions.getBCX509Extensions());
 			if(a_certList != null)
 			{
@@ -102,21 +175,22 @@ public class CertificateRevocationList
 				while(certificates.hasMoreElements())
 				{
 					JAPCertificate currentCertificate = (JAPCertificate)certificates.nextElement();
-					X509Extensions extensions = new X509Extensions(new X509CertificateIssuer(currentCertificate.getIssuer()));
-					addCRLEntry(new DERInteger(createPseudoSerial(currentCertificate.toByteArray())), 
-							new Time(new Date()), extensions.getBCX509Extensions());
+					RevokedCertificate revCert = new RevokedCertificate(currentCertificate, new Date());
+					if(!currentCertificate.getIssuer().equals(a_issuer))
+					{
+						revCert.addCertificateIssuerExtension();
+					}
+					addCRLEntry(revCert.toASN1Sequence());
 				}
 			}
 		}
 		
 		public CertificateList sign(PKCS12 a_privateIssuerCertificate)
 		{
-			return sign(a_privateIssuerCertificate.getSubject().getX509Name(), a_privateIssuerCertificate.getPrivateKey());
+			return sign(a_privateIssuerCertificate.getPrivateKey());
 		}
 
-		public CertificateList sign(
-				X509Name a_issuer,
-				IMyPrivateKey a_privateKey)
+		public CertificateList sign(IMyPrivateKey a_privateKey)
 		{
 			try
 			{
@@ -125,7 +199,6 @@ public class CertificateRevocationList
 				ByteArrayOutputStream bOut;
 				byte[] signature;
 				
-				setIssuer(a_issuer);
 				setSignature(a_privateKey.getSignatureAlgorithm().getIdentifier());
 
 				/* generate signature */

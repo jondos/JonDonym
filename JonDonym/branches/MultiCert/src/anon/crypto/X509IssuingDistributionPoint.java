@@ -50,6 +50,15 @@ public class X509IssuingDistributionPoint extends AbstractX509Extension
 	
 	private IssuingDistributionPoint m_issuingDistributionPoint;
 	
+	/**
+	 * Creates an new X509IssuingDistributionPoint object with the specified values
+	 * @param distributionPoint the name of the distribution point
+	 * @param onlyContainsUserCerts the CRL contains only revoked UserCerts
+	 * @param onlyContainsCACerts the CRL contains only revoked CA-Certs
+	 * @param onlySomeReasons the CRL contains only certificates revoked because of SomeReasons
+	 * @param indirectCRL the CRL contains revoked certificates issued by other CAs
+	 * @param onlyContainsAttributeCerts the CRL contains only revoked AttributeCerts
+	 */
 	public X509IssuingDistributionPoint(
 			DistributionPointName distributionPoint,
 	        boolean onlyContainsUserCerts,
@@ -57,9 +66,15 @@ public class X509IssuingDistributionPoint extends AbstractX509Extension
 	        ReasonFlags onlySomeReasons,
 	        boolean indirectCRL,
 	        boolean onlyContainsAttributeCerts
-			)
+	        )
 	{
-		
+		/*
+		 * Implementation Note: There seems to be an error in the BouncyCastle class IssuingDistributionPoint,
+		 * because when you call the constructor with true (for any one boolean value) its set to false.
+		 * By default the values are all false, so this makes no sence. To correct this errer we negate
+		 * all incoming values to have the right ones in the extension.
+		 * TODO: Remove negation of values when BC class is corrected!
+		 */
 		super(IDENTIFIER, false, createDEROctets(distributionPoint, !onlyContainsUserCerts,
 											!onlyContainsCACerts, onlySomeReasons, !indirectCRL,
 											!onlyContainsAttributeCerts));
@@ -68,17 +83,30 @@ public class X509IssuingDistributionPoint extends AbstractX509Extension
 				!indirectCRL, !onlyContainsAttributeCerts);
 	}
 	
+	/**
+	 * Creates an new X509IssuingDistributionPoint object with the specified values
+	 * the CRL contains revoked certificates issued by other CAs
+	 * @param a_indirectCRL
+	 */
 	public X509IssuingDistributionPoint(boolean a_indirectCRL)
 	{
-		this(null, !false, !false, null, !a_indirectCRL, !false);
+		this(null, false, false, null, a_indirectCRL, false);
 	}
 	
+	/**
+	 * Creates an new X509BasicConstraints object from a BouncyCastle DERSequence
+	 * @param a_extension the extions as DERSequence
+	 */
 	public X509IssuingDistributionPoint(DERSequence a_extension)
 	{
 		super(a_extension);
 		createValue();
 	}
 	
+	/**
+	 * Instantiates a new BouncyCastle IssuingDistributionPoint from the DEROctets 
+	 * of this extension.
+	 */
 	private void createValue()
 	{
 		try
@@ -92,7 +120,17 @@ public class X509IssuingDistributionPoint extends AbstractX509Extension
 			throw new RuntimeException("Could not read issuing distribution point extension from byte array!");
 		}
 	}
-
+	
+	/**
+	 * Generates the DEROctets of this extension to hand over to the super class.
+	 * @param distributionPoint the name of the distribution point
+	 * @param onlyContainsUserCerts the CRL contains only revoked UserCerts
+	 * @param onlyContainsCACerts the CRL contains only revoked CA-Certs
+	 * @param onlySomeReasons the CRL contains only certificates revoked because of SomeReasons
+	 * @param indirectCRL the CRL contains revoked certificates issued by other CAs
+	 * @param onlyContainsAttributeCerts the CRL contains only revoked AttributeCerts
+	 * @return the DEROctets of this extension
+	 */
 	private static byte[] createDEROctets(
 			DistributionPointName distributionPoint,
 			boolean onlyContainsUserCerts, 
@@ -106,27 +144,37 @@ public class X509IssuingDistributionPoint extends AbstractX509Extension
 				onlyContainsAttributeCerts).getDEREncoded();
 	}
 	
-	@Override
+	/**
+	 * @return "IssuingDistributionPoint"
+	 */
 	public String getName()
 	{
 		return "IssuingDistributionPoint";
 	}
 
-	@Override
+	/**
+	 * 
+	 */
 	public Vector getValues()
 	{
-		// TODO Auto-generated method stub
+		//TODO Implement this when there's something like a CRLDetailsDialog
 		return null;
 	}
 	
+	/**
+	 * @return <code>true</code> if the CRL contains revoked certificates issued by other CAs
+	 */
 	public boolean isIndirectCRL()
 	{
 		return m_issuingDistributionPoint.isIndirectCRL();
 	}
 	
+	/**
+	 * @return the BC IssuingDistributionPoint object represented by this class
+	 */
 	public IssuingDistributionPoint getIssuingDistributionPoint()
 	{
+		//TODO: Remove this method an only allow access to the values!
 		return m_issuingDistributionPoint;
 	}
-
 }
