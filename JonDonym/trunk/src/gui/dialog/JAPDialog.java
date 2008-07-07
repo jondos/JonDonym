@@ -27,27 +27,33 @@
  */
 package gui.dialog;
 
+
 import java.util.EventListener;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.net.URL;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import javax.accessibility.Accessible;
 import javax.accessibility.AccessibleContext;
 
 import java.awt.AWTEvent;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.MenuComponent;
 import java.awt.MenuContainer;
 import java.awt.Point;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -65,6 +71,8 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
@@ -2497,7 +2505,102 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
 		}
 	}
-
+	/**
+	 * a provisoric file chooser dialog 
+	 */
+	public static File showFileChooseDialog(Component a_parent, String a_title, String a_message, String a_defaultValue, int a_fileSelectionMode)
+	{
+		final Component parent = a_parent;
+		final int fileSelectionMode = a_fileSelectionMode;
+		
+		JPanel textPanel = new JPanel();
+		JPanel pathChooserPanel = new JPanel();
+		JPanel buttonPanel = new JPanel();
+		
+		textPanel.setLayout(new FlowLayout());
+		pathChooserPanel.setLayout(new FlowLayout());
+		buttonPanel.setLayout(new FlowLayout());
+		
+		final JAPDialog dialog = new JAPDialog(parent, a_title, true);
+		final StringBuffer returnField = new StringBuffer("");
+		
+		dialog.getContentPane().setLayout(new BorderLayout());
+		
+		JButton pathChooseButton = new JButton(JAPMessages.getString("bttnChoose"));
+		JButton okButton = new JButton(JAPMessages.getString("bttnOk"));
+		JButton cancelButton = new JButton(JAPMessages.getString("bttnCancel"));
+		
+		final JTextField pathField = new JTextField(15);
+		pathField.setText(a_defaultValue);
+		JLabel askForPathLabel = new JLabel(a_message); 
+		
+		textPanel.add(askForPathLabel);
+		
+		pathChooserPanel.add(pathField);
+		pathChooserPanel.add(pathChooseButton);
+		
+		buttonPanel.add(okButton);
+		buttonPanel.add(cancelButton);
+		
+		dialog.getContentPane().add(textPanel, BorderLayout.NORTH);
+		dialog.getContentPane().add(pathChooserPanel, BorderLayout.CENTER);
+		dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+		
+		ActionListener chooseListener = 
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent aev)
+				{
+					JFileChooser chooser = new JFileChooser();
+					chooser.setFileSelectionMode(fileSelectionMode);
+					if(chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
+					{
+						File f = chooser.getSelectedFile();
+						if(f != null)
+						{
+							pathField.setText(f.getPath());
+						}
+					}
+				}
+			};
+		ActionListener okListener = 
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent aev)
+				{
+					returnField.append(pathField.getText());
+					dialog.dispose();
+				}
+			};
+		ActionListener cancelListener = 
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent aev)
+				{
+					dialog.dispose();
+				}
+			};
+		pathChooseButton.addActionListener(chooseListener);
+		okButton.addActionListener(okListener);
+		cancelButton.addActionListener(cancelListener);
+		
+		/*dialog.setResizable(false);
+		dialog.setSize(350,180);*/
+		dialog.pack();
+		dialog.setVisible(true);
+		
+		String helpPathStr = returnField.toString();
+		if(helpPathStr != null)
+		{
+			if(!helpPathStr.equals(""))
+			{
+				return new File(helpPathStr.trim());
+			}
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * Retrieves an error message from a Throwable and a message String that may be shown to the
 	 * user. By default, this is the given message. If no message is given, it is tried to get the error

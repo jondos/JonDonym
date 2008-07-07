@@ -173,10 +173,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";
 	private static final String MSG_EXPLAIN_NO_FIREFOX_FOUND = JAPNewView.class.getName() + "_explainNoFirefoxFound";
 
-	private static final String MSG_STD_HELP_PATH_INSTALLATION = JAPNewView.class.getName() + "_stdHelpPathInstallation";
-	private static final String MSG_HELP_PATH_CHOICE = JAPNewView.class.getName() + "_helpPathChoice";
-	private static final String MSG_HELP_PATH_CONFIRM = JAPNewView.class.getName() + "_helpPathConfirm";
-
+	//private static final String MSG_STD_HELP_PATH_INSTALLATION =  + "_stdHelpPathInstallation";
+	public static final String MSG_HELP_PATH_CHOICE = JAPNewView.class.getName() + "_helpPathChoice";
+	public static final String MSG_HELP_INSTALL = JAPNewView.class.getName()+ "_helpInstall";
+	public static final String MSG_HELP_INSTALL_FAILED = JAPNewView.class.getName() + "_helpInstallFailed";
 	
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
@@ -2553,63 +2553,55 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		 */
 		if(!model.isHelpPathDefined() && !helpController.isHelpInstalled())
 		{
-			File f = askForHelpInstallationPath(IJAPMainView.WITH_DIALOG);
+			File f = 
+				JAPDialog.showFileChooseDialog(this, 
+							JAPMessages.getString(MSG_HELP_INSTALL),
+							JAPMessages.getString(MSG_HELP_PATH_CHOICE),
+							model.getHelpPath(),
+							JFileChooser.DIRECTORIES_ONLY);
 			
-			/*boolean pathChosen = (f != null);
+			boolean pathChosen = (f != null);
 			String pathValidation = pathChosen ? 
 					JAPModel.getInstance().helpPathValidityCheck(f) : JAPModel.HELP_INVALID_NULL;
 			boolean pathValid = JAPModel.getInstance().helpPathValidityCheck(f).equals(JAPModel.HELP_VALID);
-			boolean installationConfirmed = false;
+			
+			
 			if(pathChosen && pathValid)
 			{
-				installationConfirmed = JAPDialog.showYesNoDialog(this, 
-													JAPMessages.getString(MSG_HELP_PATH_CONFIRM)+
-													f.getPath());
-				// when setting a valid path: help is automatically installed 
-				if(installationConfirmed)
+				JAPModel.getInstance().setHelpPath(f);
+				m_dlgConfig.updateValues();
+				// TODO: improve asynchronous help installation when model updates 
+				synchronized(JAPHelpController.class)
 				{
-					JAPModel.getInstance().setHelpPath(f);
-					m_dlgConfig.updateValues();
-					
-				
-					// TODO: improve asynchronous help installation when model updates 
-					synchronized(JAPHelpController.class)
+					try 
 					{
-						try 
+						Thread ht = JAPHelpController.getAsynchHelpFileInstallThread();
+						if(ht != null)
 						{
-							JAPHelpController.asynchHelpFileInstallThread.join();
-						} 
-						catch (InterruptedException e) 
-						{}
-					}
+							ht.join();
+						}
+					} 
+					catch (InterruptedException e) 
+					{}
 				}
 			}
-			
-			if(!pathChosen || !pathValid || !installationConfirmed)
+			else
 			{
-				boolean stdInstall = JAPDialog.showYesNoDialog(this, 
-													((!pathValid || !pathChosen) ? JAPMessages.getString(pathValidation) : "")+
-													JAPMessages.getString(MSG_STD_HELP_PATH_INSTALLATION));
-				if(stdInstall)
-				{
-					JAPHelpController.getInstance().installHelp();
-				}
-				else
-				{
-					showHelpInternal = true;
-				}
-			}*/
+				JAPDialog.showErrorDialog(this, JAPMessages.getString(MSG_HELP_INSTALL_FAILED)+
+						JAPMessages.getString(pathValidation), LogType.MISC);
+				showHelpInternal = true;
+			}
 		}
 		
-		/*boolean helpOpened = false;
+		boolean helpOpened = false;
 		if(!showHelpInternal)
 		{
-		//	helpOpened = JAPHelpController.getInstance().openHelp();
+			helpOpened = JAPHelpController.getInstance().openHelp();
 		}
 		if(!helpOpened)
 		{
 			showHelpInJonDo();
-		}*/
+		}
 	}
 	
 	private void showHelpInJonDo()
@@ -3501,95 +3493,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 	}
 
-	public File askForHelpInstallationPath(boolean withDialog) 
+	/*public File askForHelpInstallationPath(boolean withDialog) 
 	{
-		boolean openFileChooser = !withDialog;
-		int usersChoice = 0;
-		final JAPNewView me = this;
-		if(withDialog)
-		{
-			JPanel textPanel = new JPanel();
-			JPanel pathChooserPanel = new JPanel();
-			JPanel buttonPanel = new JPanel();
-			
-			textPanel.setLayout(new FlowLayout());
-			pathChooserPanel.setLayout(new FlowLayout());
-			buttonPanel.setLayout(new FlowLayout());
-			
-			final JDialog dialog = new JDialog(me, "Hallo", true);
-			final StringBuffer returnField = new StringBuffer("");
-			
-			dialog.getContentPane().setLayout(new BorderLayout());
-			
-			JButton pathChooseButton = new JButton(JAPMessages.getString(JAPConfUI.MSG_HELP_PATH_CHOOSE));
-			JButton okButton = new JButton("OK");
-			JButton cancelButton = new JButton("Cancel");
-			
-			
-			final JTextField pathField = new JTextField(15);
-			pathField.setText(JAPModel.getInstance().getHelpPath());
-			JLabel askForPathLabel = new JLabel(JAPMessages.getString(MSG_HELP_PATH_CHOICE)); 
-			
-			textPanel.add(askForPathLabel);
-			
-			pathChooserPanel.add(pathField);
-			pathChooserPanel.add(pathChooseButton);
-			
-			buttonPanel.add(okButton);
-			buttonPanel.add(cancelButton);
-			
-			dialog.getContentPane().add(textPanel, BorderLayout.NORTH);
-			dialog.getContentPane().add(pathChooserPanel, BorderLayout.CENTER);
-			dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-			
-			ActionListener chooseListener = 
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent aev)
-					{
-						JFileChooser chooser = new JFileChooser();
-						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-						if(chooser.showOpenDialog(me) == JFileChooser.APPROVE_OPTION)
-						{
-							File f = chooser.getSelectedFile();
-							if(f != null)
-							{
-								pathField.setText(f.getPath());
-							}
-						}
-					}
-				};
-			ActionListener okListener = 
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent aev)
-					{
-						returnField.append(pathField.getText());
-						dialog.dispose();
-					}
-				};
-			ActionListener cancelListener = 
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent aev)
-					{
-						dialog.dispose();
-					}
-				};
-			pathChooseButton.addActionListener(chooseListener);
-			okButton.addActionListener(okListener);
-			cancelButton.addActionListener(cancelListener);
-			
-			dialog.setResizable(false);
-			dialog.setSize(350,180);
-			dialog.pack();
-			dialog.setVisible(true);
-			
-			System.out.println("Path returned: "+returnField.toString().trim());
-		}
-		
 		return null;
-	}
+	}*/
 	
 	public JAPHelpProgressDialog displayInstallProgress()
 	{

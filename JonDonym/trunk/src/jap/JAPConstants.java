@@ -316,7 +316,7 @@ public final class JAPConstants
 	public final static int PAYSAFECARD_TIMEOUT = 60;
 
 	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr", "ru"}; // "zh", "ca", "es", "ru"}; //pt
-	public static final boolean EXT_HELP_NOTFINISHED = true;
+	public static final boolean EXT_HELP_NOTFINISHED = false;
 
 	public static String[] getSupportedLanguages()
 	{

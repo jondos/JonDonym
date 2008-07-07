@@ -799,7 +799,13 @@ final class JAPConfUI extends AbstractJAPConfModule
 				{
 					IJAPMainView mv = JAPController.getInstance().getView();
 					JAPModel model = JAPModel.getInstance();
-					File hpFile = mv.askForHelpInstallationPath(IJAPMainView.WITHOUT_DIALOG);
+					File hpFile = null;
+					JFileChooser chooser = new JFileChooser();
+					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					if(chooser.showOpenDialog((JAPNewView)mv) == JFileChooser.APPROVE_OPTION)
+					{
+						hpFile = chooser.getSelectedFile();
+					}
 					if(hpFile != null)
 					{
 						String hpFileValidation = model.helpPathValidityCheck(hpFile);
