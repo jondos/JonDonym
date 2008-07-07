@@ -814,11 +814,12 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 			return false;
 		}
 
-		// the cert is verified, too, if the public key is the same as the test key
-		if (getPublicKey().equals(a_publicKey))
+		//TODO:why?
+		//the cert is verified, too, if the public key is the same as the test key
+		/*if (getPublicKey().equals(a_publicKey))
 		{
 			return true;
-		}
+		}*/
 
 		try
 		{

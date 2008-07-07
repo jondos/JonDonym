@@ -29,10 +29,10 @@ package anon.crypto;
 
 import java.util.Vector;
 
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DEREncodableVector;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
 
 import anon.util.Util;
 
@@ -65,8 +65,8 @@ public final class X509Extensions
 	 */
 	public X509Extensions(Vector a_extensions)
 	{
-		DEREncodableVector extensionWrapper;
-		DEREncodableVector extensions = new DEREncodableVector();
+		ASN1EncodableVector extensionWrapper;
+		ASN1EncodableVector extensions = new ASN1EncodableVector();
 
 		if (a_extensions == null)
 		{
@@ -85,7 +85,7 @@ public final class X509Extensions
 			extensions.add(((AbstractX509Extension)a_extensions.elementAt(i)).getBCExtension());
 		}
 
-		extensionWrapper = new DEREncodableVector();
+		extensionWrapper = new ASN1EncodableVector();
 		extensionWrapper.add(X509_EXTENSIONS_IDENTIFIER);
 		extensionWrapper.add(new DERSet(new DERSequence(extensions)));
 		m_extensions = new DERSet(new DERSequence(extensionWrapper));
