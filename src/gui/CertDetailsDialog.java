@@ -734,13 +734,17 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 				{
 					critical = "*";
 				}
+				else
+				{
+					critical = "";
+				}
 
 				lbl_key = new JLabel(JAPMessages.getString(UNKNOWN_EXTENSION) + critical, JLabel.RIGHT);
 				lbl_key.setFont(KEY_FONT);
 				StringBuffer sb = new StringBuffer();
 				for (int j = 0; j < extensionsVect.getExtension(i).getValues().size(); j++)
 				{
-					// no known values available
+					sb.append(extensionsVect.getExtension(i).getIdentifier());
 				}
 				lbl_val = new JLabel(sb.toString(), JLabel.LEFT);
 				lbl_key.setFont(KEY_FONT);

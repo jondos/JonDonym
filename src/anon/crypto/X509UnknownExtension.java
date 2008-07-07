@@ -68,6 +68,11 @@ public final class X509UnknownExtension extends AbstractX509Extension
 	 */
 	public Vector getValues()
 	{
-		return Util.toVector(getDEROctets());
+		/* Better return the identifier, so that one can find out which extension this is,
+		 * because if he does not know the extension he has no use of the containing data.
+		 * In addition the identifier is properly displayed in the CertDetailsDialog
+		 */
+		return Util.toVector(getIdentifier()); 
+		//return Util.toVector(getDEROctets());
 	}
 }
