@@ -197,9 +197,4 @@ public class ConsoleJAPMainView implements IJAPMainView
 	public void transferedBytes(long bytes, int protocolType)
 	{
 	}
-
-	public File askForHelpInstallationPath(boolean withDialog) 
-	{
-		return null;
-	}
 }

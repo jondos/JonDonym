@@ -46,7 +46,7 @@ public final class JAPHelpController implements Observer {
 	public static final String HELP_VERSION_FILE = "jondohelp.xml";
 	public static final String HELP_START = "index.html";
 	
-	public static Thread asynchHelpFileInstallThread = null;
+	private static Thread asynchHelpFileInstallThread = null;
 	
 	JAPModel model = null;
 	
@@ -294,24 +294,45 @@ public final class JAPHelpController implements Observer {
 				removeOldHelp((String) arg);
 				if(model.isHelpPathDefined())
 				{
-					if((asynchHelpFileInstallThread == null) || !asynchHelpFileInstallThread.isAlive() )
+					synchronized(JAPHelpController.class)
 					{
-						synchronized(JAPHelpController.class)
+						if((asynchHelpFileInstallThread != null))
 						{
-							asynchHelpFileInstallThread =
-								new Thread(
-										new Runnable()
+							while(asynchHelpFileInstallThread.isAlive())
+							{
+								try 
+								{
+									/* It is necessary to wait: when the model is changed the corresponding
+									 * changes need to be performed to maintain a valid state.
+									 */
+									JAPHelpController.class.wait();
+								} 
+								catch (InterruptedException e) 
+								{}
+							}
+						}
+						asynchHelpFileInstallThread =
+							new Thread(
+									new Runnable()
+									{
+										public void run()
 										{
-											public void run()
+											synchronized(JAPHelpController.class)
 											{
 												installHelp();
+												JAPHelpController.class.notifyAll();
 											}
-										});
-							asynchHelpFileInstallThread.start();
-						}
+											
+										}
+									});
+						asynchHelpFileInstallThread.start();
 					}
 				}
 			}
-		}		
+		}
+	}
+
+	public static Thread getAsynchHelpFileInstallThread() {
+		return asynchHelpFileInstallThread;
 	}
 }

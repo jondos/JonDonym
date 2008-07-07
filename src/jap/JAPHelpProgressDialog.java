@@ -27,7 +27,7 @@ public class JAPHelpProgressDialog implements Observer
 	private JAPDialog m_displayProgress;
 	private JLabel m_progressLabel;
 	
-	public final static String MSG_HELP_INSTALL = "helpInstall";
+	//public final static String MSG_HELP_INSTALL = "helpInstall";
 	public final static String MSG_HELP_INSTALL_PROGRESS = "helpInstallProgress";
 	public final static String MSG_HELP_INSTALL_EXTRACTING = "helpInstallExtracting";
 	
@@ -36,14 +36,14 @@ public class JAPHelpProgressDialog implements Observer
 	public JAPHelpProgressDialog(JFrame parent)
 	{
 		m_helpProgressBar = new JProgressBar();
-		m_displayProgress = new JAPDialog(parent, JAPMessages.getString(MSG_HELP_INSTALL), true);
+		m_displayProgress = new JAPDialog(parent, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL), true);
 		initView();
 	}
 	
 	public JAPHelpProgressDialog(JAPDialog parent)
 	{
 		m_helpProgressBar = new JProgressBar();
-		m_displayProgress = new JAPDialog(parent, JAPMessages.getString(MSG_HELP_INSTALL), true);
+		m_displayProgress = new JAPDialog(parent, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL), true);
 		initView();
 	}
 	
