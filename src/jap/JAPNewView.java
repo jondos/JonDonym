@@ -3509,14 +3509,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		return null;
 	}*/
 	
-	public void displayInstallProgress(ProgressObservableAdapter adapter)
+	public void displayInstallProgress(Observable observable)
 	{
 		
 		//Component parent = m_dlgConfig.isVisible() ? m_dlgConfig : this;
 		
 		JAPDialog helpProgressDialog =
 			JAPDialog.showProgressDialog(this, JAPMessages.getString(MSG_HELP_INSTALL), 
-					JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS), null, adapter);		
+					JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS), null, observable);		
 		
 		/*JAPHelpProgressDialog hpd = null;
 		if(m_dlgConfig != null)
