@@ -89,7 +89,7 @@ public class RevokedCertificate
 		m_extVector = new Vector();
 	}
 	
-	public RevokedCertificate(TBSCertList.CRLEntry a_crlEntry)
+	protected RevokedCertificate(TBSCertList.CRLEntry a_crlEntry)
 	{
 		m_serial = a_crlEntry.getUserCertificate().getPositiveValue();
 		m_revocationDate = a_crlEntry.getRevocationDate().getDate();
@@ -119,7 +119,7 @@ public class RevokedCertificate
 		return new BigInteger(value).abs();
 	}
 		
-	public ASN1Sequence toASN1Sequence()
+	protected ASN1Sequence toASN1Sequence()
 	{
 		ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -136,6 +136,7 @@ public class RevokedCertificate
 
 	public void addCertificateIssuerExtension()
 	{
+		//TODO check if already existing
 		m_extVector.add(new X509CertificateIssuer(m_cert.getIssuer()));
 	}
 	

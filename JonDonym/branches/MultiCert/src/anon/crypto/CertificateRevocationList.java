@@ -133,7 +133,7 @@ public class CertificateRevocationList
 		TBSCertList.CRLEntry[]  crlEntries = m_crl.getRevokedCertificates();
 		for(int i=0; i<crlEntries.length; i++)
 		{
-			v.add(new RevokedCertificate(crlEntries[i]));
+			v.addElement(new RevokedCertificate(crlEntries[i]));
 		}
 		return v;
 	}
