@@ -77,7 +77,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.JFileChooser;
+
+import com.apple.component.Component;
 
 import anon.AnonServerDescription;
 import anon.infoservice.BlacklistedCascadeIDEntry;
@@ -115,6 +119,7 @@ import gui.dialog.IDialogOptions;
 import gui.dialog.JAPDialog;
 import gui.dialog.JAPDialog.LinkedInformationAdapter;
 import gui.dialog.JAPDialog.Options;
+import gui.dialog.JAPDialog.ProgressObservableAdapter;
 import jap.forward.JAPRoutingMessage;
 import jap.forward.JAPRoutingRegistrationStatusObserver;
 import jap.forward.JAPRoutingServerStatisticsListener;
@@ -177,6 +182,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	public static final String MSG_HELP_PATH_CHOICE = JAPNewView.class.getName() + "_helpPathChoice";
 	public static final String MSG_HELP_INSTALL = JAPNewView.class.getName()+ "_helpInstall";
 	public static final String MSG_HELP_INSTALL_FAILED = JAPNewView.class.getName() + "_helpInstallFailed";
+	
+	public final static String MSG_HELP_INSTALL_PROGRESS = "helpInstallProgress";
+	public final static String MSG_HELP_INSTALL_EXTRACTING = "helpInstallExtracting";
 	
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
@@ -2565,25 +2573,28 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					JAPModel.getInstance().helpPathValidityCheck(f) : JAPModel.HELP_INVALID_NULL;
 			boolean pathValid = JAPModel.getInstance().helpPathValidityCheck(f).equals(JAPModel.HELP_VALID);
 			
+			if(!pathChosen)
+			{
+				return;
+			}
 			
 			if(pathChosen && pathValid)
 			{
 				JAPModel.getInstance().setHelpPath(f);
 				m_dlgConfig.updateValues();
 				// TODO: improve asynchronous help installation when model updates 
-				synchronized(JAPHelpController.class)
+				try 
 				{
-					try 
+					Thread ht = JAPHelpController.getAsynchHelpFileInstallThread();
+					if(ht != null)
 					{
-						Thread ht = JAPHelpController.getAsynchHelpFileInstallThread();
-						if(ht != null)
-						{
-							ht.join();
-						}
-					} 
-					catch (InterruptedException e) 
-					{}
-				}
+						System.out.println("Joining install thread.");
+						ht.join();
+						System.out.println("Install thread joined.");
+					}
+				} 
+				catch (InterruptedException e) 
+				{}
 			}
 			else
 			{
@@ -3498,9 +3509,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		return null;
 	}*/
 	
-	public JAPHelpProgressDialog displayInstallProgress()
+	public void displayInstallProgress(ProgressObservableAdapter adapter)
 	{
-		JAPHelpProgressDialog hpd = null;
+		
+		//Component parent = m_dlgConfig.isVisible() ? m_dlgConfig : this;
+		
+		JAPDialog helpProgressDialog =
+			JAPDialog.showProgressDialog(this, JAPMessages.getString(MSG_HELP_INSTALL), 
+					JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS), null, adapter);		
+		
+		/*JAPHelpProgressDialog hpd = null;
 		if(m_dlgConfig != null)
 		{
 			if(m_dlgConfig.isVisible())
@@ -3510,6 +3528,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 		}
 		hpd = new JAPHelpProgressDialog(this);
-		return hpd;
+		return hpd;*/
 	}
 }

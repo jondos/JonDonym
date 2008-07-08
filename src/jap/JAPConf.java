@@ -770,19 +770,16 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 
 				if (a_bCloseConfiguration && !isRestartNeeded())
 				{
-					synchronized(JAPHelpController.class)
+					try 
 					{
-						try 
+						Thread ht = JAPHelpController.getAsynchHelpFileInstallThread();
+						if(ht != null)
 						{
-							Thread ht = JAPHelpController.getAsynchHelpFileInstallThread();
-							if(ht != null)
-							{
-								ht.join();
-							}
-						} 
-						catch (InterruptedException e) 
-						{}
-					}
+							ht.join();
+						}
+					} 
+					catch (InterruptedException e) 
+					{}
 					setVisible(false);
 				}
 				// force notifying the observers set the right server name

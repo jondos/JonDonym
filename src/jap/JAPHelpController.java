@@ -2,6 +2,7 @@ package jap;
 
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
+import gui.dialog.JAPDialog.ProgressObservableAdapter;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.zip.ZipFile;
+
+import javax.swing.JProgressBar;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -24,6 +27,7 @@ import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.ZLibTools;
 import anon.util.ZipArchiver;
+import anon.util.ZipArchiver.ZipEvent;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -108,11 +112,11 @@ public final class JAPHelpController implements Observer {
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Not running a jar file: Installing help is not necessary");
 			return;
 		}
-		final JAPHelpProgressDialog hpd = ((JAPNewView)JAPController.getInstance().getView()).displayInstallProgress();
+		ProgressObservableAdapter adapter = new HelpInstallProgressAdapter();
 		ZipArchiver archiver = new ZipArchiver(japArchive);
-		archiver.addObserver(hpd);
-		hpd.showDialogAsynch();
-		
+		archiver.addObserver(adapter);
+		((JAPNewView)JAPController.getInstance().getView()).displayInstallProgress(adapter);
+				
 		boolean installationSuccessful = archiver.extractArchive(HELP_FOLDER, model.getHelpPath());
 		if(installationSuccessful)
 		{
@@ -305,6 +309,7 @@ public final class JAPHelpController implements Observer {
 									/* It is necessary to wait: when the model is changed the corresponding
 									 * changes need to be performed to maintain a valid state.
 									 */
+									System.out.println("Waiting for previous install thread");
 									JAPHelpController.class.wait();
 								} 
 								catch (InterruptedException e) 
@@ -317,12 +322,11 @@ public final class JAPHelpController implements Observer {
 									{
 										public void run()
 										{
+											installHelp();
 											synchronized(JAPHelpController.class)
 											{
-												installHelp();
 												JAPHelpController.class.notifyAll();
 											}
-											
 										}
 									});
 						asynchHelpFileInstallThread.start();
@@ -332,7 +336,63 @@ public final class JAPHelpController implements Observer {
 		}
 	}
 
-	public static Thread getAsynchHelpFileInstallThread() {
+	public static synchronized Thread getAsynchHelpFileInstallThread() {
 		return asynchHelpFileInstallThread;
 	}
+	
+	public class HelpInstallProgressAdapter extends ProgressObservableAdapter
+	{
+		
+		long m_totalSizeExceedingInt = ZipEvent.UNDEFINED;
+		
+		public void updateProgress(Observable observable, Object arg,
+				JProgressBar progressBar) {
+			
+			if( !(arg instanceof ZipEvent) )
+			{
+				return;
+			}
+			ZipEvent ze = (ZipEvent) arg;
+			if(ze.isTotalSizeEvent())
+			{
+				progressBar.setMinimum(0);
+				long totalByteCount = ze.getTotalByteCount();
+				if(totalByteCount > Integer.MAX_VALUE)
+				{
+					m_totalSizeExceedingInt = totalByteCount;
+					progressBar.setMaximum(Integer.MAX_VALUE);
+				}
+				else
+				{
+					m_totalSizeExceedingInt = ZipEvent.UNDEFINED;
+					progressBar.setMaximum((int) totalByteCount);
+				}	
+			}
+			else
+			{
+				long byteCount = ze.getByteCount();
+				String entryName = ze.getZipEntryName();
+				if(byteCount != ZipEvent.UNDEFINED)
+				{
+					if(m_totalSizeExceedingInt != ZipEvent.UNDEFINED)
+					{
+						double byteCountRatio =
+							((double) byteCount) / ((double) m_totalSizeExceedingInt);
+						progressBar.setValue((int) (byteCountRatio*Integer.MAX_VALUE));
+					}
+					else
+					{
+						progressBar.setValue((int) byteCount);
+					}
+				}
+				/*if(entryName != null)
+				{
+					m_progressLabel.setText(JAPMessages.getString(MSG_HELP_INSTALL_EXTRACTING)+entryName);
+				}
+				progressBar.repaint();
+				m_progressLabel.repaint();*/
+			}
+		}
+		
+	}	
 }
