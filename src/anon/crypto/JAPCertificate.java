@@ -66,6 +66,7 @@ import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
@@ -820,7 +821,14 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		{
 			return true;
 		}*/
-
+		
+		AlgorithmIdentifier aid1 = a_publicKey.getSignatureAlgorithm().getIdentifier();
+		AlgorithmIdentifier aid2 = this.m_bcCertificate.getSignatureAlgorithm();
+		if(!aid1.equals(aid2))
+		{
+			return false;
+		}
+		
 		try
 		{
 			ByteArrayOutputStream bArrOStream = new ByteArrayOutputStream();

@@ -165,7 +165,7 @@ public class X509AuthorityKeyIdentifier extends AbstractX509KeyIdentifier {
 	 */
 	public Vector getValues()
 	{
-		Vector<String> v = new Vector();
+		Vector v = new Vector();
 		v.add(m_value);
 		if(m_names != null)
 		{
