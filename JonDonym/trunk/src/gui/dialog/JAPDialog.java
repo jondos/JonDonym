@@ -90,6 +90,8 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import anon.util.ProgressCapsule;
+
 import platform.AbstractOS;
 import gui.GUIUtils;
 import gui.JAPHelpContext;
@@ -2632,7 +2634,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	 * @todo: make it look better and add generic functionality for hitting cancel button
 	 */
 	public static JAPDialog showProgressDialog(JFrame a_parent, String a_title, String a_message, 
-									ChangeListener a_changeListener, ProgressObservableAdapter a_progressObserver)
+									ChangeListener a_changeListener, Observable observable)
 	{
 		final JAPDialog dialog = new JAPDialog(a_parent, a_title, true);
 		
@@ -2650,7 +2652,38 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		
 		progressBar.setBorderPainted(true);
 		progressBar.setStringPainted(true);
-		a_progressObserver.setProgressBar(progressBar);
+		
+		Observer progressObserver = 
+			new Observer()
+			{
+				public void update(Observable o, Object arg)
+				{
+					if((arg != null) && (arg instanceof ProgressCapsule))
+					{
+						ProgressCapsule pc = (ProgressCapsule) arg;
+						
+						int value = pc.getValue();
+						int maximum = pc.getMaximum();
+						int minimum = pc.getMinimum();
+						
+						if(progressBar.getMaximum() != maximum)
+						{
+							progressBar.setMaximum(maximum);
+						}
+						if(progressBar.getMinimum() != minimum)
+						{
+							progressBar.setMinimum(minimum);
+						}
+						progressBar.setValue(value);
+					}
+				}
+			};
+
+		if(observable != null)
+		{
+			observable.addObserver(progressObserver);
+		}
+		
 		if(a_changeListener != null)
 		{
 			progressBar.addChangeListener(a_changeListener);

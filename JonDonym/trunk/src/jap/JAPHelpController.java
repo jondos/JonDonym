@@ -22,6 +22,7 @@ import org.w3c.dom.Node;
 import platform.AbstractOS;
 
 import anon.util.ClassUtil;
+import anon.util.ProgressCapsule;
 import anon.util.RecursiveCopyTool;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
@@ -112,10 +113,10 @@ public final class JAPHelpController implements Observer {
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Not running a jar file: Installing help is not necessary");
 			return;
 		}
-		ProgressObservableAdapter adapter = new HelpInstallProgressAdapter();
+		//ProgressObservableAdapter adapter = new HelpInstallProgressAdapter();
 		ZipArchiver archiver = new ZipArchiver(japArchive);
-		archiver.addObserver(adapter);
-		((JAPNewView)JAPController.getInstance().getView()).displayInstallProgress(adapter);
+		//archiver.addObserver(adapter);
+		((JAPNewView)JAPController.getInstance().getView()).displayInstallProgress(archiver);
 				
 		boolean installationSuccessful = archiver.extractArchive(HELP_FOLDER, model.getHelpPath());
 		if(installationSuccessful)
@@ -338,61 +339,5 @@ public final class JAPHelpController implements Observer {
 
 	public static synchronized Thread getAsynchHelpFileInstallThread() {
 		return asynchHelpFileInstallThread;
-	}
-	
-	public class HelpInstallProgressAdapter extends ProgressObservableAdapter
-	{
-		
-		long m_totalSizeExceedingInt = ZipEvent.UNDEFINED;
-		
-		public void updateProgress(Observable observable, Object arg,
-				JProgressBar progressBar) {
-			
-			if( !(arg instanceof ZipEvent) )
-			{
-				return;
-			}
-			ZipEvent ze = (ZipEvent) arg;
-			if(ze.isTotalSizeEvent())
-			{
-				progressBar.setMinimum(0);
-				long totalByteCount = ze.getTotalByteCount();
-				if(totalByteCount > Integer.MAX_VALUE)
-				{
-					m_totalSizeExceedingInt = totalByteCount;
-					progressBar.setMaximum(Integer.MAX_VALUE);
-				}
-				else
-				{
-					m_totalSizeExceedingInt = ZipEvent.UNDEFINED;
-					progressBar.setMaximum((int) totalByteCount);
-				}	
-			}
-			else
-			{
-				long byteCount = ze.getByteCount();
-				String entryName = ze.getZipEntryName();
-				if(byteCount != ZipEvent.UNDEFINED)
-				{
-					if(m_totalSizeExceedingInt != ZipEvent.UNDEFINED)
-					{
-						double byteCountRatio =
-							((double) byteCount) / ((double) m_totalSizeExceedingInt);
-						progressBar.setValue((int) (byteCountRatio*Integer.MAX_VALUE));
-					}
-					else
-					{
-						progressBar.setValue((int) byteCount);
-					}
-				}
-				/*if(entryName != null)
-				{
-					m_progressLabel.setText(JAPMessages.getString(MSG_HELP_INSTALL_EXTRACTING)+entryName);
-				}
-				progressBar.repaint();
-				m_progressLabel.repaint();*/
-			}
-		}
-		
 	}	
 }

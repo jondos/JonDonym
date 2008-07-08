@@ -116,7 +116,9 @@ public class ZipArchiver extends Observable
 					}
 				}
 			}
-			notifyAboutTotalExtractSize(totalSize);
+			ZipEvent ze = new ZipEvent(0, totalSize);
+			setChanged();
+			notifyObservers(ze);
 			
 			for (Enumeration iterator = matchedFileEntries.elements(); iterator.hasMoreElements(); fileIndex++) 
 			{
@@ -125,8 +127,11 @@ public class ZipArchiver extends Observable
 				InputStream zEntryInputStream = m_archive.getInputStream(zEntry);
 				RecursiveCopyTool.copySingleFile(zEntryInputStream, destFile);
 				sizeOfCopied += zEntry.getSize();
-				notifyAboutExtractedEntry(zEntry.getName(), zEntry.getSize(), sizeOfCopied);
 				
+				ze = new ZipEvent(sizeOfCopied, totalSize);
+				setChanged();
+				notifyObservers(ze);
+			
 				/*try {
 					Thread.sleep(20);
 				} catch (InterruptedException e) {
@@ -149,26 +154,6 @@ public class ZipArchiver extends Observable
 		}
 		return true;
 	}
-
-	public void notifyAboutTotalExtractSize(long totalSize)
-	{
-		ZipEvent ze = new ZipEvent();
-		ze.setTotalByteCount(totalSize);
-		setChanged();
-		notifyObservers(ze);
-	}
-	
-	public void notifyAboutExtractedEntry(String zipEntryName,
-										  long zipEntrySize,
-										  long byteCount)
-	{
-		ZipEvent ze = new ZipEvent();
-		ze.setZipEntryName(zipEntryName);
-		ze.setZipEntrySize(zipEntrySize);
-		ze.setByteCount(byteCount);
-		setChanged();
-		notifyObservers(ze);
-	}
 	
 	private static void extractErrorRollback(Vector entries, int dirIndex, String destination) 
 	{	
@@ -181,82 +166,33 @@ public class ZipArchiver extends Observable
 		}
 	}
 
-	public class ZipEvent
+	public class ZipEvent implements ProgressCapsule
 	{
-		public final static long UNDEFINED = -1;
+		public final static int UNDEFINED = -1;
 		
-		String m_zipEntryName;
-		long m_zipEntrySize;
-		long m_byteCount;
-		long m_totalByteCount;
-		boolean m_totalSizeEvent;
+		private int value;
+		private int maxValue;
+		private int minValue;
 		
-		public ZipEvent()
+		public ZipEvent(long byteCount, long totalByteCount)
 		{
-			this(null, UNDEFINED, UNDEFINED, UNDEFINED);
+			minValue = 0;
+			value = (totalByteCount > Integer.MAX_VALUE) ? 
+					(int) ((double) byteCount / (double) totalByteCount)*Integer.MAX_VALUE : (int) byteCount;
+			maxValue = (totalByteCount > Integer.MAX_VALUE) ? 
+				Integer.MAX_VALUE : (int) totalByteCount;
 		}
 		
-		public ZipEvent(String zipEntryName, 
-						long zipEntrySize, 
-						long byteCount,
-						long totalByteCount)
-		{
-			m_zipEntryName = zipEntryName;
-			m_zipEntrySize = zipEntrySize;
-			m_byteCount = byteCount;
-			m_totalByteCount = totalByteCount;
-			m_totalSizeEvent = (totalByteCount != UNDEFINED);
+		public int getMaximum() {
+			return maxValue;
 		}
 
-		public String getZipEntryName() 
-		{
-			return m_zipEntryName;
+		public int getMinimum() {
+			return minValue;
 		}
 
-		public void setZipEntryName(String entryName) 
-		{
-			m_zipEntryName = entryName;
-		}
-
-		public long getZipEntrySize() 
-		{
-			return m_zipEntrySize;
-		}
-
-		public void setZipEntrySize(long entrySize) 
-		{
-			m_zipEntrySize = entrySize;
-		}
-
-		public long getByteCount() 
-		{
-			return m_byteCount;
-		}
-
-		public void setByteCount(long count) 
-		{
-			m_byteCount = count;
-		}
-
-		public long getTotalByteCount() 
-		{
-			return m_totalByteCount;
-		}
-
-		public void setTotalByteCount(long byteCount) 
-		{
-			m_totalByteCount = byteCount;
-			m_totalSizeEvent = (byteCount != UNDEFINED);
-		}
-
-		public boolean isTotalSizeEvent() 
-		{
-			return m_totalSizeEvent;
-		}
-
-		public void setTotalSizeEvent(boolean sizeEvent) 
-		{
-			m_totalSizeEvent = sizeEvent;
+		public int getValue() {
+			return value;
 		}
 	}
 }
