@@ -27,8 +27,9 @@
  */
 package gui.dialog;
 
-
 import java.util.EventListener;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -72,11 +73,13 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JRootPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -84,6 +87,8 @@ import javax.swing.JCheckBox;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import platform.AbstractOS;
 import gui.GUIUtils;
@@ -717,6 +722,28 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 	}
 
+
+	public static abstract class ProgressObservableAdapter implements Observer
+	{
+		private JProgressBar m_progressBar = null;
+		
+		
+		private void setProgressBar(JProgressBar progressBar)
+		{
+			this.m_progressBar = progressBar;
+		}
+		
+		public void update(Observable observable, Object arg)
+		{
+			if(m_progressBar != null)
+			{
+				updateProgress(observable, arg, m_progressBar);
+			}
+		}
+		
+		public abstract void updateProgress(Observable observable, Object arg, JProgressBar progressBar);
+	}
+	
 	public static class Options
 	{
 		private int m_optionType;
@@ -2505,8 +2532,10 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
 		}
 	}
+	
 	/**
 	 * a provisoric file chooser dialog 
+	 * @todo: make it look better
 	 */
 	public static File showFileChooseDialog(Component a_parent, String a_title, String a_message, String a_defaultValue, int a_fileSelectionMode)
 	{
@@ -2584,8 +2613,6 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		okButton.addActionListener(okListener);
 		cancelButton.addActionListener(cancelListener);
 		
-		/*dialog.setResizable(false);
-		dialog.setSize(350,180);*/
 		dialog.pack();
 		dialog.setVisible(true);
 		
@@ -2599,6 +2626,83 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * @todo: make it look better and add generic functionality for hitting cancel button
+	 */
+	public static JAPDialog showProgressDialog(JFrame a_parent, String a_title, String a_message, 
+									ChangeListener a_changeListener, ProgressObservableAdapter a_progressObserver)
+	{
+		final JAPDialog dialog = new JAPDialog(a_parent, a_title, true);
+		
+		JPanel textPanel = new JPanel();
+		JPanel progressPanel = new JPanel();
+		JPanel buttonPanel = new JPanel();
+		
+		textPanel.setLayout(new FlowLayout());
+		progressPanel.setLayout(new FlowLayout());
+		buttonPanel.setLayout(new FlowLayout());
+		
+		JLabel progressLabel = new JLabel(a_message);
+		final JProgressBar progressBar = new JProgressBar();
+		JButton cancelButton = new JButton(JAPMessages.getString("bttnCancel"));
+		
+		progressBar.setBorderPainted(true);
+		progressBar.setStringPainted(true);
+		a_progressObserver.setProgressBar(progressBar);
+		if(a_changeListener != null)
+		{
+			progressBar.addChangeListener(a_changeListener);
+		}
+		else
+		{
+			ChangeListener changeListener = 
+				new ChangeListener()
+				{
+					public void stateChanged(ChangeEvent e) 
+					{
+						if(progressBar.getPercentComplete() == 1.0)
+						{
+							dialog.dispose();
+						}
+					}
+				};
+			progressBar.addChangeListener(changeListener);
+		}
+		
+		ActionListener cancelListener = 
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent aev)
+				{
+					//@todo: function
+					//dialog.dispose();
+				}
+			};
+		cancelButton.addActionListener(cancelListener);
+			
+		textPanel.add(progressLabel);
+		progressPanel.add(progressBar);
+		buttonPanel.add(cancelButton);
+			
+		dialog.getContentPane().setLayout(new BorderLayout());
+		dialog.getContentPane().add(textPanel, BorderLayout.NORTH);
+		dialog.getContentPane().add(progressPanel, BorderLayout.CENTER);
+		dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+		dialog.pack();
+		Thread displayThread = 
+			new Thread(
+				new Runnable()
+				{
+					public void run()
+					{
+						dialog.setVisible(true);
+					}
+				}
+			); 
+		displayThread.start();
+		return dialog;
 	}
 	
 	/**
