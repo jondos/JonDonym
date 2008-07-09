@@ -30,8 +30,10 @@ package jap;
 import java.io.File;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Observable;
 import java.util.Vector;
 
+import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -193,10 +195,9 @@ final class JAPConfUI extends AbstractJAPConfModule
 		c1.fill = GridBagConstraints.BOTH;
 		c1.weighty = 1;
 		tempPanel =  createHelpPathPanel(); //new JPanel();
-		if(!JAPConstants.EXT_HELP_NOTFINISHED)
-		{
-			panelRoot.add(tempPanel, c1);
-		}
+		
+		panelRoot.add(tempPanel, c1);
+		
 		/*c1.gridx = 0;
 		c1.gridy++;
 		//c1.anchor = GridBagConstraints.NORTHWEST;
@@ -849,9 +850,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 	protected boolean onOkPressed()
 	{
-		int oldFontSize = JAPModel.getInstance().getFontSize();
-		if (JAPModel.getInstance().setFontSize(m_slidFontSize.getValue()) &&
-			!JAPModel.getInstance().isConfigWindowSizeSaved())
+		JAPModel model = JAPModel.getInstance();
+		int oldFontSize = model.getFontSize();
+		if (model.setFontSize(m_slidFontSize.getValue()) &&
+			!model.isConfigWindowSizeSaved())
 		{
 			beforePack();
 			JAPConf.getInstance().doPack();
@@ -862,12 +864,26 @@ final class JAPConfUI extends AbstractJAPConfModule
 			oldFontSize = -1;
 		}
 
-		JAPModel.getInstance().setSaveMainWindowPosition(m_cbSaveWindowLocationMain.isSelected());
-		JAPModel.getInstance().setSaveConfigWindowPosition(m_cbSaveWindowLocationConfig.isSelected());
-		JAPModel.getInstance().setSaveIconifiedWindowPosition(m_cbSaveWindowLocationIcon.isSelected());
-		JAPModel.getInstance().setSaveHelpWindowPosition(m_cbSaveWindowLocationHelp.isSelected());
-		JAPModel.getInstance().setSaveHelpWindowSize(m_cbSaveWindowSizeHelp.isSelected());
-		JAPModel.getInstance().setSaveConfigWindowSize(m_cbSaveWindowSizeConfig.isSelected());
+		model.setSaveMainWindowPosition(m_cbSaveWindowLocationMain.isSelected());
+		model.setSaveConfigWindowPosition(m_cbSaveWindowLocationConfig.isSelected());
+		model.setSaveIconifiedWindowPosition(m_cbSaveWindowLocationIcon.isSelected());
+		model.setSaveHelpWindowPosition(m_cbSaveWindowLocationHelp.isSelected());
+		model.setSaveHelpWindowSize(m_cbSaveWindowSizeHelp.isSelected());
+		model.setSaveConfigWindowSize(m_cbSaveWindowSizeConfig.isSelected());
+		
+		Observable storageObservable = JAPModel.getInstance().getHelpFileStorageObservable();
+		
+		if(storageObservable != null)
+		{
+			if(model.getHelpPath() != null && m_helpPathField.getText() != null)
+			{
+				if(!model.getHelpPath().equals(m_helpPathField.getText()) && !m_helpPathField.getText().equals(""))
+				{
+					JAPDialog.showProgressDialog(JAPConf.getInstance(), JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL), 
+							JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS), null, null, storageObservable);
+				}
+			}
+		}
 		JAPModel.getInstance().setHelpPath(m_helpPathField.getText());
 		
 		JAPHelp.getInstance().resetAutomaticLocation(m_cbSaveWindowLocationHelp.isSelected());

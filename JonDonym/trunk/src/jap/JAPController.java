@@ -296,7 +296,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private JAPController()
 	{
 		m_Model = JAPModel.getInstance();
-		JAPHelpController.getInstance();
 	}
 	
 	public void start() {

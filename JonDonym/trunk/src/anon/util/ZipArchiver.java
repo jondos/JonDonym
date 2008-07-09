@@ -71,7 +71,7 @@ public class ZipArchiver extends Observable
 		try
 		{	
 			allZipEntries = m_archive.entries();
-			while(allZipEntries.hasMoreElements() )
+			while(allZipEntries.hasMoreElements() && !Thread.currentThread().isInterrupted())
 			{
 				entry = (ZipEntry) allZipEntries.nextElement();
 				
@@ -102,7 +102,10 @@ public class ZipArchiver extends Observable
 				return false;
 			}
 			
-			for (Enumeration iterator = matchedDirEntries.elements(); iterator.hasMoreElements(); dirIndex++) {
+			for (Enumeration iterator = matchedDirEntries.elements(); 
+				(iterator.hasMoreElements() && !Thread.currentThread().isInterrupted()); 
+				dirIndex++) 
+			{
 				String dirName = (String) iterator.nextElement();
 				File dir = new File(dest+File.separator+dirName);
 				if(dir != null)
@@ -120,7 +123,9 @@ public class ZipArchiver extends Observable
 			setChanged();
 			notifyObservers(ze);
 			
-			for (Enumeration iterator = matchedFileEntries.elements(); iterator.hasMoreElements(); fileIndex++) 
+			for (Enumeration iterator = matchedFileEntries.elements(); 
+				(iterator.hasMoreElements() && !Thread.currentThread().isInterrupted()); 
+				fileIndex++) 
 			{
 				ZipEntry zEntry = (ZipEntry) iterator.nextElement();
 				File destFile = new File(dest+File.separator+zEntry.getName());
@@ -134,10 +139,8 @@ public class ZipArchiver extends Observable
 			
 				/*try {
 					Thread.sleep(20);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}*/
+				} catch (InterruptedException e) 
+				{}*/
 			}
 		}
 		catch(IllegalStateException ise)

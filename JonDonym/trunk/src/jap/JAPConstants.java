@@ -28,6 +28,7 @@
 package jap;
 
 import java.awt.Font;
+import java.io.File;
 
 import anon.tor.Circuit;
 import anon.tor.Tor;
@@ -316,7 +317,11 @@ public final class JAPConstants
 	public final static int PAYSAFECARD_TIMEOUT = 60;
 
 	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr", "ru"}; // "zh", "ca", "es", "ru"}; //pt
-	public static final boolean EXT_HELP_NOTFINISHED = false;
+	
+	public static final String HELP_FOLDER = "help"+File.separator;
+	public static final String HELP_DE_FOLDER = "de/help/";
+	public static final String HELP_EN_FOLDER = "en/help/";
+	public static final String HELP_START = "index.html";
 
 	public static String[] getSupportedLanguages()
 	{

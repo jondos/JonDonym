@@ -29,10 +29,13 @@ package jap;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.Locale;
 import java.util.Vector;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import anon.crypto.JAPCertificate;
 import anon.infoservice.IProxyInterfaceGetter;
@@ -236,6 +239,8 @@ public final class JAPModel extends Observable
 
 	private BigInteger m_iDialogVersion=new BigInteger("-1");
 
+	private HelpFileStorageManager m_helpFileStorageManager;
+	
 	private JAPModel()
 	{
 		try
@@ -268,6 +273,9 @@ public final class JAPModel extends Observable
 				};
 			}
 		};
+		
+		m_helpFileStorageManager =
+			( ClassUtil.getJarFile() != null) ? new JARHelpFileStorageManager() : null;
 	}
 
 	// m_Locale=Locale.getDefault();
@@ -1289,6 +1297,36 @@ public final class JAPModel extends Observable
 					m_helpPath : AbstractOS.getInstance().getDefaultHelpPath();
 	}
 	
+	public URL getHelpURL()
+	{
+		URL helpURL = null;
+		if(isHelpPathDefined())
+		{
+			Locale loc = JAPMessages.getLocale();
+			String startPath = JAPConstants.HELP_EN_FOLDER;
+			if(loc != null)
+			{
+				startPath = (loc.toString().equalsIgnoreCase("de") ? JAPConstants.HELP_DE_FOLDER : startPath);
+			}
+			
+			try 
+			{
+				helpURL = 
+					new URL("file://"+m_helpPath+
+							File.separator+
+							JAPConstants.HELP_FOLDER+
+							startPath+
+							JAPConstants.HELP_START);
+			} 
+			catch (MalformedURLException e) 
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Malformed URL Excpetion: ", e);
+				return null;
+			}
+		}
+		return helpURL;
+	}
+	
 	void initHelpPath(String helpPath)
 	{
 		String initPathValidity = (helpPathValidityCheck(helpPath));
@@ -1316,27 +1354,51 @@ public final class JAPModel extends Observable
 		}
 	}
 	
-	public void setHelpPath(String helpPath)
+	public void setHelpPath(String newHelpPath)
 	{
-		if(helpPath == null)
+		if(newHelpPath == null)
 		{
 			resetHelpPath();
 			return;
 		}
-		if(helpPath.equals(""))
+		if(newHelpPath.equals(""))
 		{
 			resetHelpPath();
 			return;
 		}
-		if(helpPathValidityCheck(helpPath).equals(HELP_VALID))
+		if(helpPathValidityCheck(newHelpPath).equals(HELP_VALID))
 		{
-			String prevHelpPath = getHelpPath();
-			m_helpPath = helpPath;
-			if(!m_helpPath.equals(prevHelpPath))
+			String oldHelpPath = m_helpPath;
+			boolean helpPathChanged =
+						isHelpPathDefined() ? !m_helpPath.equals(newHelpPath) : true;
+			
+			if(helpPathChanged)
 			{
-				setChanged();
-				notifyObservers(prevHelpPath);
+				boolean storageLayerChanged = true;
+				if(m_helpFileStorageManager != null)
+				{
+						storageLayerChanged = m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, newHelpPath);
+						System.out.println("changed: "+storageLayerChanged);
+				}
+				if(storageLayerChanged)
+				{
+					m_helpPath = newHelpPath;
+				}
 			}
+		}
+	}
+	
+	private void resetHelpPath()
+	{
+		String oldHelpPath = m_helpPath;
+		if(oldHelpPath != null)
+		{
+			System.out.println("resetting help path");
+			if(m_helpFileStorageManager != null)
+			{
+				m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, null);
+			}
+			m_helpPath = null;
 		}
 	}
 	
@@ -1356,7 +1418,7 @@ public final class JAPModel extends Observable
 	}
 	
 	/**
-	 * performs a validity check wether the specified path is a valid 
+	 * performs a validity check whether the specified path is a valid 
 	 * path for external installation of the help files.
 	 * @param hpFile the parent directory where the help files should be installed 
 	 * @return a string that signifies a valid path or a key for a corresponding error message otherwise
@@ -1365,55 +1427,60 @@ public final class JAPModel extends Observable
 	{
 		if(hpFile != null)
 		{
-			/* a validity check */
 			if(hpFile.exists())
 			{
-				if(hpFile.canWrite())
+				if(hpFile.isDirectory())
 				{
-					File anotherFileWithSameName =
-						new File(hpFile.getPath()+
-								File.separator+
-								JAPHelpController.HELP_FOLDER);
-					if(!anotherFileWithSameName.exists())
+					if(hpFile.canWrite())
 					{
-						return HELP_VALID;
+						File anotherFileWithSameName =
+							new File(hpFile.getPath()+
+									File.separator+
+									JAPConstants.HELP_FOLDER);
+						if(!anotherFileWithSameName.exists())
+						{
+							return HELP_VALID;
+						}
+						else
+						{
+							//help directory already exists in specififed folder
+							return HELP_DIR_EXISTS;
+						}
 					}
 					else
 					{
-						return HELP_DIR_EXISTS;
+						//we have no write access to that file
+						return HELP_INVALID_NOWRITE;
 					}
 				}
 				else
 				{
-					return HELP_INVALID_NOWRITE;
+					//path is not a directory
+					return "TODO: Error message key";
 				}
 			}
 			else
 			{
+				//no such directory
 				return HELP_INVALID_PATH_NOT_EXISTS;
 			}
 		}
 		else
 		{
+			//null path specified
 			return HELP_INVALID_NULL;
-		}
-	}
-	
-	private void resetHelpPath()
-	{
-		String prevHelpPath = m_helpPath;
-		m_helpPath = null;
-		if(prevHelpPath != null)
-		{
-			System.out.println("resetting help path");
-			setChanged();
-			notifyObservers(prevHelpPath);
 		}
 	}
 	
 	public boolean isHelpPathDefined()
 	{
 		return m_helpPath != null;
+	}
+	
+	public Observable getHelpFileStorageObservable()
+	{
+		return (m_helpFileStorageManager != null) ? 
+				m_helpFileStorageManager.getStorageObservable() : null;
 	}
 	
 	public void setDLLupdate(boolean a_update) {
