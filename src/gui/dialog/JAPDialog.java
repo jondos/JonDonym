@@ -2631,10 +2631,22 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	}
 	
 	/**
-	 * @todo: make it look better and add generic functionality for hitting cancel button
+	 * @todo: a lot!
 	 */
-	public static JAPDialog showProgressDialog(JFrame a_parent, String a_title, String a_message, 
-									ChangeListener a_changeListener, Observable observable)
+	public static JAPDialog showProgressDialog(JAPDialog parent, String a_title, String a_message, 
+			ChangeListener[] a_changeListeners, ActionListener[] a_cancelListeners,
+			Observable a_progressSource)
+	{
+		return showProgressDialog(getInternalDialog(parent), a_title, a_message,
+				a_changeListeners, a_cancelListeners, a_progressSource);
+	}
+	
+	/**
+	 * @todo:  a lot!
+	 */
+	public static JAPDialog showProgressDialog(Component a_parent, String a_title, String a_message, 
+									ChangeListener[] a_changeListeners, ActionListener[] a_cancelListeners,
+									Observable a_progressSource)
 	{
 		final JAPDialog dialog = new JAPDialog(a_parent, a_title, true);
 		
@@ -2679,17 +2691,20 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				}
 			};
 
-		if(observable != null)
+		if(a_progressSource != null)
 		{
-			observable.addObserver(progressObserver);
+			a_progressSource.addObserver(progressObserver);
 		}
 		
-		if(a_changeListener != null)
+		if(a_changeListeners != null)
 		{
-			progressBar.addChangeListener(a_changeListener);
+			for (int i = 0; i < a_changeListeners.length; i++) 
+			{
+				progressBar.addChangeListener(a_changeListeners[i]);
+			}
+			
 		}
-		else
-		{
+		/* this changeListener that disposes the dialog is added in every case */
 			ChangeListener changeListener = 
 				new ChangeListener()
 				{
@@ -2702,18 +2717,24 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 					}
 				};
 			progressBar.addChangeListener(changeListener);
-		}
 		
+		if(a_cancelListeners != null)
+		{
+			for (int i = 0; i < a_cancelListeners.length; i++) 
+			{
+				cancelButton.addActionListener(a_cancelListeners[i]);
+			}
+		}
+			
 		ActionListener cancelListener = 
 			new ActionListener()
 			{
 				public void actionPerformed(ActionEvent aev)
 				{
-					//@todo: function
 					//dialog.dispose();
 				}
 			};
-		cancelButton.addActionListener(cancelListener);
+		//cancelButton.addActionListener(cancelListener);
 			
 		textPanel.add(progressLabel);
 		progressPanel.add(progressBar);
@@ -2883,6 +2904,10 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		return m_internalDialog.getName();
 	}
 
+	public void setEnabled(boolean b)
+	{
+		m_internalDialog.setEnabled(b);
+	}
 
 	public void setAlwaysOnTop(boolean a_bOnTop)
 	{

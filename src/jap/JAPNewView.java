@@ -30,6 +30,7 @@ package jap;
 import java.io.File;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -94,6 +95,7 @@ import anon.pay.IMessageListener;
 import anon.pay.PayAccountsFile;
 import anon.pay.PayMessage;
 import anon.proxy.IProxyListener;
+import anon.util.ClassUtil;
 import anon.util.JobQueue;
 import anon.util.Util;
 import gui.CountryMapper;
@@ -226,7 +228,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	JLabel m_buttonDeleteMessage;
 
 	//private Icon[] meterIcons;
-	private JAPConf m_dlgConfig;
+	public JAPConf m_dlgConfig;
 	private Object LOCK_CONFIG = new Object();
 	private JAPViewIconified m_ViewIconified;
 	private Object SYNC_ICONIFIED_VIEW = new Object();
@@ -2536,20 +2538,20 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
-		if(JAPConstants.EXT_HELP_NOTFINISHED)
+		if(ClassUtil.getJarFile() == null)
 		{
 			showHelpInJonDo();
 			return;
 		}
 		
-		JAPHelpController helpController = JAPHelpController.getInstance();
+		//JARHelpFileStorageManager helpStorageManager = JARHelpFileStorageManager.getInstance();
 		JAPModel model = JAPModel.getInstance();
 		boolean showHelpInternal = false;
 		
 		/* If no external help path is specified and no help is installed: 
 		 * open dialog to ask the user
 		 */
-		if(!model.isHelpPathDefined() && !helpController.isHelpInstalled())
+		if(!model.isHelpPathDefined())
 		{
 			File f = 
 				JAPDialog.showFileChooseDialog(this, 
@@ -2561,6 +2563,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			boolean pathChosen = (f != null);
 			String pathValidation = pathChosen ? 
 					JAPModel.getInstance().helpPathValidityCheck(f) : JAPModel.HELP_INVALID_NULL;
+			
 			boolean pathValid = JAPModel.getInstance().helpPathValidityCheck(f).equals(JAPModel.HELP_VALID);
 			
 			if(!pathChosen)
@@ -2570,21 +2573,17 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			
 			if(pathChosen && pathValid)
 			{
-				JAPModel.getInstance().setHelpPath(f);
-				m_dlgConfig.updateValues();
-				// TODO: improve asynchronous help installation when model updates 
-				try 
+				Observable helpFileStorageObservable = model.getHelpFileStorageObservable();
+				/* observe the model while it changes during installation. (if we can). */
+				if(helpFileStorageObservable != null)
 				{
-					Thread ht = JAPHelpController.getAsynchHelpFileInstallThread();
-					if(ht != null)
-					{
-						System.out.println("Joining install thread.");
-						ht.join();
-						System.out.println("Install thread joined.");
-					}
-				} 
-				catch (InterruptedException e) 
-				{}
+					JAPDialog hd =
+						JAPDialog.showProgressDialog(this, JAPMessages.getString(MSG_HELP_INSTALL), 
+								JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS), null, null, helpFileStorageObservable);
+				}
+				//When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
+				model.setHelpPath(f);
+				m_dlgConfig.updateValues();
 			}
 			else
 			{
@@ -2597,7 +2596,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		boolean helpOpened = false;
 		if(!showHelpInternal)
 		{
-			helpOpened = JAPHelpController.getInstance().openHelp();
+			URL helpURL = model.getHelpURL();
+			if(helpURL != null)
+			{
+				helpOpened = AbstractOS.getInstance().openURL(helpURL);	
+			}
+			else
+			{
+				helpOpened = false;
+			}	
 		}
 		if(!helpOpened)
 		{
@@ -3499,16 +3506,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		return null;
 	}*/
 	
-	public void displayInstallProgress(Observable observable)
+	/*public JAPDialog displayInstallProgress(Observable observable, ActionListener cancelListener)
 	{
-		
+		ActionListener[] cListenerParam = new ActionListener[]{cancelListener};
 		//Component parent = m_dlgConfig.isVisible() ? m_dlgConfig : this;
+				
+		return hd;
 		
-		JAPDialog helpProgressDialog =
-			JAPDialog.showProgressDialog(this, JAPMessages.getString(MSG_HELP_INSTALL), 
-					JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS), null, observable);		
-		
-		/*JAPHelpProgressDialog hpd = null;
+		JAPHelpProgressDialog hpd = null;
 		if(m_dlgConfig != null)
 		{
 			if(m_dlgConfig.isVisible())
@@ -3518,6 +3523,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 		}
 		hpd = new JAPHelpProgressDialog(this);
-		return hpd;*/
-	}
+		return hpd;
+	}*/
 }

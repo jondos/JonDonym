@@ -4,6 +4,8 @@ import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import gui.dialog.JAPDialog.ProgressObservableAdapter;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -14,6 +16,8 @@ import java.util.Observer;
 import java.util.zip.ZipFile;
 
 import javax.swing.JProgressBar;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,30 +43,41 @@ import logging.LogType;
  * @author Simon Pecher
  *
  */
-public final class JAPHelpController implements Observer {
+public final class JARHelpFileStorageManager implements HelpFileStorageManager  {
 	
 
 	public final static String HELP_VERSION_NODE = "jondohelp";
 	public final static String HELP_VERSION_ATTRIBUTE = "version";
 	
-	private static JAPHelpController helpController = null;
+	private static JARHelpFileStorageManager helpController = null;
 	
-	public static final String HELP_FOLDER = "help"+File.separator;
+	
 	public static final String HELP_VERSION_FILE = "jondohelp.xml";
-	public static final String HELP_START = "index.html";
+	
 	
 	private static Thread asynchHelpFileInstallThread = null;
+	private String helpPath;
+	private ZipArchiver archiver;
 	
-	JAPModel model = null;
-	
-	private JAPHelpController(JAPModel japModel)
+	public JARHelpFileStorageManager()
 	{
-		if(japModel == null)
+		ZipFile japArchive = ClassUtil.getJarFile();
+		if(japArchive == null)
 		{
-			throw new NullPointerException("JAPModel is null: cannot instantiate HelpController");
+			//TODO: Throw something
+			//throw new
 		}
-		model = japModel;
-		model.addObserver(this);
+		archiver = new ZipArchiver(japArchive);
+	}
+	/**
+	 * sets the specified path for external installation of the help files
+	 * performs no validityCheck, because it is only called by
+	 * handleHelpPathChanged, which is invkoed by the JAPModel, which itself 
+	 * performs a validity check
+	 */
+	private void setHelpPath(String helpPath)
+	{
+		this.helpPath = helpPath;
 	}
 	
 	/**
@@ -70,10 +85,31 @@ public final class JAPHelpController implements Observer {
 	 * @return true if and only if the stored help version number is exactly the same 
 	 * 			as the JonDo version number
 	 */
-	public boolean helpVersionMismatch()
+	private boolean helpVersionMismatch()
 	{
 		String versionString = getHelpVersion();
 		return !JAPConstants.aktVersion.equals(versionString);
+	}
+	
+	
+	public boolean handleHelpPathChanged(String oldHelpPath, String newHelpPath)
+	{
+		boolean installationSuccessful = true;
+		setHelpPath(newHelpPath);
+		if(oldHelpPath != null)
+		{
+			removeOldHelp(oldHelpPath);
+		}
+		if(newHelpPath != null)
+		{
+			installationSuccessful = installHelp();
+		}
+		return installationSuccessful;
+	}
+	
+	public Observable getStorageObservable()
+	{
+		return archiver;
 	}
 	
 	/**
@@ -83,14 +119,19 @@ public final class JAPHelpController implements Observer {
 	 * a help version installed which does not match the JonDo version number (even if the help version is more recent than 
 	 * the JonDo version)
 	 */
-	public void installHelp()
+	private boolean installHelp()
 	{
 		File helpFolder = getHelpFolder();
 		if(helpFolder == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Fatal: Destination folder is null: Aborting help installation");
+			return false;
 		}
-		
+		if(archiver == null)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Fatal: JARStorageManager does only work when started from a Jar file");
+			return false;
+		}
 		if(helpFolder.exists())
 		{	
 			String versionString = getHelpVersion();
@@ -98,7 +139,7 @@ public final class JAPHelpController implements Observer {
 			if(!helpVersionMismatch())
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help is already installed!");
-				return;
+				return false;
 			}
 			else
 			{
@@ -107,18 +148,31 @@ public final class JAPHelpController implements Observer {
 			}
 		}
 		// We can go on extracting the help from the JarFile if necessary
-		ZipFile japArchive = ClassUtil.getJarFile();
+		/*ZipFile japArchive = ClassUtil.getJarFile();
 		if(japArchive == null)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Not running a jar file: Installing help is not necessary");
-			return;
-		}
-		//ProgressObservableAdapter adapter = new HelpInstallProgressAdapter();
-		ZipArchiver archiver = new ZipArchiver(japArchive);
-		//archiver.addObserver(adapter);
-		((JAPNewView)JAPController.getInstance().getView()).displayInstallProgress(archiver);
+			return false;
+		}*/
+		
+		//ZipArchiver archiver = new ZipArchiver(japArchive);
+		
+		/*ActionListener cancelListener =
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e) 
+				{
+					synchronized(JARHelpFileStorageManager.class)
+					{
+						asynchHelpFileInstallThread.interrupt();
+						System.out.println("Interrupt the installation progress");
+					}
+				}
+			};
+		
+		((JAPNewView)JAPController.getInstance().getView()).displayInstallProgress(archiver, cancelListener);*/
 				
-		boolean installationSuccessful = archiver.extractArchive(HELP_FOLDER, model.getHelpPath());
+		boolean installationSuccessful = archiver.extractArchive(JAPConstants.HELP_FOLDER, helpPath);
 		if(installationSuccessful)
 		{
 			createHelpVersionDoc();
@@ -126,8 +180,9 @@ public final class JAPHelpController implements Observer {
 		else
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Extracting help files was not succesful.");
+			return false;
 		}
-		if(japArchive != null)
+		/*if(japArchive != null)
 		{
 			try 
 			{
@@ -136,7 +191,8 @@ public final class JAPHelpController implements Observer {
 			catch (IOException e) {
 				LogHolder.log(LogLevel.ERR, LogType.MISC, "Could not close Jar-Archive");
 			}
-		}
+		}*/
+		return installationSuccessful;
 	}
 	
 	/**
@@ -150,8 +206,9 @@ public final class JAPHelpController implements Observer {
 		XMLUtil.setAttribute(helpVersionNode, HELP_VERSION_ATTRIBUTE, JAPConstants.aktVersion);
 		helpVersionDoc.appendChild(helpVersionNode);
 		
-		File versionInfoFile = new File(model.getHelpPath()+File.separator+
-				HELP_FOLDER+HELP_VERSION_FILE);
+		File versionInfoFile = 
+			new File(helpPath+File.separator+
+					JAPConstants.HELP_FOLDER+HELP_VERSION_FILE);
 		try
 		{
 			XMLUtil.write(helpVersionDoc, versionInfoFile);
@@ -166,9 +223,8 @@ public final class JAPHelpController implements Observer {
 	 * Opens the start page of the JonDo help
 	 * @return true if the start page could be found, false otherwise
 	 */
-	public boolean openHelp()
+	/*public boolean openHelp()
 	{
-		String helpPath = model.getHelpPath();
 		if(helpPath == null)
 		{ 
 			return false;
@@ -201,16 +257,16 @@ public final class JAPHelpController implements Observer {
 		}
 		return true;
 		
-	}
+	}*/
 	
-	public void removeOldHelp(String parentPath)
+	private void removeOldHelp(String parentPath)
 	{
 		if(parentPath == null)
 		{
 			return;
 		}
-		File helpFolder = new File(parentPath+File.separator+HELP_FOLDER);
-		File helpVersionFile = new File(parentPath+File.separator+HELP_FOLDER+HELP_VERSION_FILE);
+		File helpFolder = new File(parentPath+File.separator+JAPConstants.HELP_FOLDER);
+		File helpVersionFile = new File(parentPath+File.separator+JAPConstants.HELP_FOLDER+HELP_VERSION_FILE);
 		
 		if(!helpFolder.exists() || !helpVersionFile.exists())
 		{
@@ -228,7 +284,7 @@ public final class JAPHelpController implements Observer {
 	 * 			path is specified by the user the default path (the folder where the 
 	 * 			Jarfile is situated) is checked.
 	 */
-	public boolean isHelpInstalled()
+	private boolean isHelpInstalled()
 	{
 		File helpFolder = getHelpFolder();
 		if(helpFolder == null)
@@ -245,12 +301,12 @@ public final class JAPHelpController implements Observer {
 	 * @param versionFile the XML file where the help version is specified.
 	 * @return the help version number as string, or null if no version string was found in versionFile
 	 */
-	public String getHelpVersion()
+	private String getHelpVersion()
 	{
 		try 
 		{
-			File versionInfoFile = new File(model.getHelpPath()+File.separator+
-					HELP_FOLDER+HELP_VERSION_FILE);
+			File versionInfoFile = new File(helpPath+File.separator+
+					JAPConstants.HELP_FOLDER+HELP_VERSION_FILE);
 			Document doc = XMLUtil.readXMLDocument(versionInfoFile);
 			Node versionNode = XMLUtil.getFirstChildByName(doc, HELP_VERSION_NODE);
 			String versionString = XMLUtil.parseAttribute(versionNode, HELP_VERSION_ATTRIBUTE, null);
@@ -271,26 +327,25 @@ public final class JAPHelpController implements Observer {
 	 * convenience function that returns a file reference to the current help root folder 
 	 * @return a file reference to the current help root folder or null if helpPath is null
 	 */ 
-	public File getHelpFolder()
+	private File getHelpFolder()
 	{
-		String helpPath = model.getHelpPath();
 		if(helpPath == null)
 		{
 			return null;
 		}
-		return new File(model.getHelpPath()+File.separator+HELP_FOLDER);
+		return new File(helpPath+File.separator+JAPConstants.HELP_FOLDER);
 	}
 	
-	public static JAPHelpController getInstance()
+	/*public static synchronized JARHelpFileStorageManager getInstance()
 	{
 		if(helpController == null)
 		{
-			helpController = new JAPHelpController(JAPModel.getInstance());
+			helpController = new JARHelpFileStorageManager(JAPModel.getInstance());
 		}
 		return helpController;
-	}
+	}*/
 
-	public void update(Observable o, Object arg) 
+	/*public void update(Observable o, Object arg) 
 	{
 		if( (o instanceof JAPModel) && (arg instanceof String) )
 		{
@@ -299,7 +354,7 @@ public final class JAPHelpController implements Observer {
 				removeOldHelp((String) arg);
 				if(model.isHelpPathDefined())
 				{
-					synchronized(JAPHelpController.class)
+					synchronized(JARHelpFileStorageManager.class)
 					{
 						if((asynchHelpFileInstallThread != null))
 						{
@@ -307,11 +362,7 @@ public final class JAPHelpController implements Observer {
 							{
 								try 
 								{
-									/* It is necessary to wait: when the model is changed the corresponding
-									 * changes need to be performed to maintain a valid state.
-									 */
-									System.out.println("Waiting for previous install thread");
-									JAPHelpController.class.wait();
+									JARHelpFileStorageManager.class.wait();
 								} 
 								catch (InterruptedException e) 
 								{}
@@ -324,9 +375,9 @@ public final class JAPHelpController implements Observer {
 										public void run()
 										{
 											installHelp();
-											synchronized(JAPHelpController.class)
+											synchronized(JARHelpFileStorageManager.class)
 											{
-												JAPHelpController.class.notifyAll();
+												JARHelpFileStorageManager.class.notifyAll();
 											}
 										}
 									});
@@ -335,9 +386,24 @@ public final class JAPHelpController implements Observer {
 				}
 			}
 		}
-	}
+		else if(arg instanceof InterruptedException)
+		{
+			System.out.println("Abort installation process");
+		}
+	}*/
 
-	public static synchronized Thread getAsynchHelpFileInstallThread() {
+	/*public static synchronized Thread getAsynchHelpFileInstallThread() {
 		return asynchHelpFileInstallThread;
-	}	
+	}*/	
+	
+	/*private static class HelpInstaller implements Runnable
+	{
+		public void run()
+		{
+			if(getInstance() != null)
+			{
+				getInstance().installHelp();
+			}
+		}
+	}*/
 }
