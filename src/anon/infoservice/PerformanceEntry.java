@@ -110,37 +110,67 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_serial;
 	}
 	
-	public long addData(PerformanceAttributeEntry[][] a_entries, Hashtable a_data) 
+	public void addValue(PerformanceAttributeEntry[][] a_entries, long a_timestamp, long a_value)
 	{
 		PerformanceAttributeEntry entry = null;
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(a_timestamp);
+		
+		int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+		int hour = cal.get(Calendar.HOUR_OF_DAY);
 		
 		entry = a_entries[dayOfWeek][hour];
 		if(entry == null)
 		{
-			a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY); 
+			a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
 		}
+
+		entry.addValue(a_timestamp, a_value);
+		
+		m_lastUpdate = a_timestamp;
+	}
+	
+	public long addData(PerformanceAttributeEntry[][] a_entries, Hashtable a_data) 
+	{
+		PerformanceAttributeEntry entry = null;
 		
 		long lAverageFromLastTest = -1;
 		
 		if(a_data.size() > 0)
 		{
+			Long timestamp = null;
 			Enumeration e = a_data.keys();
 		
 			while(e.hasMoreElements())
 			{
-				Long key = (Long) e.nextElement();
-				long value = ((Long) a_data.get(key)).longValue();
-			
+				timestamp = (Long) e.nextElement();
+				long value = ((Long) a_data.get(timestamp)).longValue();
+				
 				lAverageFromLastTest += value;
-				entry.addValue(key.longValue(), value);
+				
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(timestamp.longValue());
+				
+				int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+				int hour = cal.get(Calendar.HOUR_OF_DAY);
+				
+				entry = a_entries[dayOfWeek][hour];
+				if(entry == null)
+				{
+					a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY); 
+				}
+				
+				entry.addValue(timestamp.longValue(), value);
 			}
 			lAverageFromLastTest /= a_data.size();
+			
+			m_lastUpdate = timestamp.longValue();
 		}
-		
-		m_lastUpdate = System.currentTimeMillis();
+		else
+		{
+			m_lastUpdate = System.currentTimeMillis();
+		}
 		
 		return lAverageFromLastTest;
 	}
@@ -153,6 +183,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public long addDelayData(Hashtable a_data)
 	{
 		return m_lastTestAverageDelay = addData(m_delay, a_data);
+	}
+	
+	public void addSpeedValue(long a_timestamp, long a_value)
+	{
+		addValue(m_speed, a_timestamp, a_value);
+	}
+	
+	public void addDelayValue(long a_timestamp, long a_value)
+	{
+		addValue(m_delay, a_timestamp, a_value);
 	}
 	
 	public long getDelayFromLastTest()
@@ -265,20 +305,20 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				"<th>Average</th>" +
 				"<th>Min</th>" +
 				"<th>Max</th>" +
-				"<th>Std. Deviation</th></tr>";
+				"<th>Std. Deviation</th><th>Last Test</th></tr>";
 		
 		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
 		
 		for(int hour = 0; hour < 24; hour++)
 		{
 			htmlData += "<tr>" +
-					"<td>" + hour + ":00 - " + ((hour + 1) % 24) + ":00</td>";
+					"<td CLASS=\"name\">" + hour + ":00 - " + ((hour + 1) % 24) + ":00</td>";
 			
 			PerformanceAttributeEntry entry = a_entries[dayOfWeek][hour];
 			
 			if(entry == null)
 			{
-				htmlData += "<td colspan=\"4\" align=\"center\">No data available</td>";
+				htmlData += "<td colspan=\"5\" align=\"center\">No data available</td>";
 			}
 			else
 			{
@@ -286,6 +326,19 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					"<td>" + entry.getMinValue() + " " + a_unit + "</td>" +
 					"<td>" + entry.getMaxValue() + " " + a_unit + "</td>" +
 					"<td>" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(entry.getStdDeviation()) + " " + a_unit + "</td>";
+			
+				if(hour == m_cal.get(Calendar.HOUR_OF_DAY) && a_entries == m_speed)
+				{
+					htmlData += "<td>" + m_lastTestAverageSpeed + " " + a_unit + "</td>";
+				}
+				else if(hour == m_cal.get(Calendar.HOUR_OF_DAY) && a_entries == m_delay)
+				{
+					htmlData += "<td>" + m_lastTestAverageDelay + " " + a_unit + "</td>";
+				}
+				else
+				{
+					htmlData += "<td></td>";
+				}
 			}
 			
 			htmlData += "</tr>";
@@ -315,7 +368,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		elemCurrent.appendChild(elemSpeed);
 		
 		/*if(a_bDisplayWeeklyData)
-		{
+		{*/
 			Element elemWeeklyData = a_doc.createElement(XML_ELEMENT_WEEKLY_DATA);
 		
 			for(int i = 0; i < 7; i++)
@@ -330,12 +383,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					XMLUtil.setAttribute(elemHourlyData, XML_ATTR_HOUR, j);
 					Element e = m_speed[i][j] != null ? m_speed[i][j].toXmlElement(a_doc) : null;
 					Element f = m_delay[i][j] != null ? m_delay[i][j].toXmlElement(a_doc) : null;
-				
+					
 					if(e != null)
 					{
 						elemHourlyData.appendChild(e);
 					}
-				
+					
 					if(f != null)
 					{
 						elemHourlyData.appendChild(f);
@@ -346,7 +399,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			
 			elem.appendChild(elemWeeklyData);
-		}*/
+		/*}*/
 		
 		elem.appendChild(elemLast);
 		elem.appendChild(elemCurrent);

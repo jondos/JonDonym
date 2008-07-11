@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileNotFoundException;
@@ -156,11 +157,55 @@ public class PerformanceMeter implements Runnable
 		m_maxWaitForTest = ((Integer) a_config[5]).intValue();
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
 		
+		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
+		
 		try
 		{
-			m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
+			FileInputStream stream = new FileInputStream(PERFORMANCE_LOG_FILE + 
+					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log");
+			
+			BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+			String line = null;
+			
+			while((line = reader.readLine()) != null)
+			{
+				int firstTab = line.indexOf('\t');
+				int secondTab = line.indexOf('\t', firstTab + 1);
+				int thirdTab = line.indexOf('\t', secondTab + 1);
+				
+				if(firstTab != -1 && secondTab != -1 && thirdTab != -1)
+				{
+					long timestamp = Long.parseLong(line.substring(0, firstTab));
+					String id = line.substring(firstTab + 1, secondTab);
+					long delay = Long.parseLong(line.substring(secondTab + 1, thirdTab));
+					long speed = Long.parseLong(line.substring(thirdTab + 1));
+					
+					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(id);
+					
+					if(entry == null)
+					{
+						entry = createPerformanceEntry(id);
+					}
+					
+					entry.addDelayValue(timestamp, delay);
+					entry.addSpeedValue(timestamp, speed);
+					
+					Database.getInstance(PerformanceEntry.class).update(entry);
+				}
+			}
+		}
+		catch(IOException ex)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not read "+ PERFORMANCE_LOG_FILE + ". No previous performanace date for this week found.");
+		}
+		
+		LogHolder.log(LogLevel.WARNING, LogType.NET, "Added previous performance data for this week.");
+		
+		try
+		{
 			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
-					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
+				
+			m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -475,25 +520,7 @@ public class PerformanceMeter implements Runnable
 		
 		if(entry == null)
 		{
-			int days = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
-			int hours = m_cal.get(Calendar.HOUR_OF_DAY);
-			int minutes = m_cal.get(Calendar.MINUTE);
-			int seconds = m_cal.get(Calendar.SECOND);
-			int millis = m_cal.get(Calendar.MILLISECOND);
-			
-			long beginningOfWeek = 
-				System.currentTimeMillis() -
-				days * 24 * 60 * 60 * 1000 - 
-				hours * 60 * 60 * 1000 - 
-				minutes * 60 * 1000 - 
-				seconds * 1000 -
-				millis;
-			
-			long beginningOfNextWeek =
-				beginningOfWeek +
-				7 * 24 * 60 * 60 * 1000;
-			
-			entry = new PerformanceEntry(a_cascade.getId(), beginningOfNextWeek);
+			entry = createPerformanceEntry(a_cascade.getId());
 		}
 		
 		m_recvBuff = new char[m_dataSize];				
@@ -760,6 +787,32 @@ public class PerformanceMeter implements Runnable
 		}
     	
 		return bUpdated;
+	}
+
+	private PerformanceEntry createPerformanceEntry(String a_cascadeId)
+	{
+		PerformanceEntry entry;
+		int days = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
+		int hours = m_cal.get(Calendar.HOUR_OF_DAY);
+		int minutes = m_cal.get(Calendar.MINUTE);
+		int seconds = m_cal.get(Calendar.SECOND);
+		int millis = m_cal.get(Calendar.MILLISECOND);
+		
+		long beginningOfWeek = 
+			System.currentTimeMillis() -
+			days * 24 * 60 * 60 * 1000 - 
+			hours * 60 * 60 * 1000 - 
+			minutes * 60 * 1000 - 
+			seconds * 1000 -
+			millis;
+		
+		long beginningOfNextWeek =
+			beginningOfWeek +
+			7 * 24 * 60 * 60 * 1000;
+		
+		entry = new PerformanceEntry(a_cascadeId, beginningOfNextWeek);
+		
+		return entry;
 	}
 		
 	public HTTPResponse parseHTTPHeader(BufferedReader a_reader) throws IOException, NumberFormatException
