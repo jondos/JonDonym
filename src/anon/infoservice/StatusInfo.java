@@ -517,8 +517,12 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			"</TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
 			trafficString +
 
-			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (perfEntry != null ? String.valueOf(perfEntry.getLastDelay()) : "?") + " ms" +
-			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + (perfEntry != null ? String.valueOf(perfEntry.getLastSpeed()) : "?") + " kbit/sec" +
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
+			"Last Test: " + (perfEntry != null ? String.valueOf(perfEntry.getDelayFromLastTest()) : "?") + " ms<br />" +
+			"Average: " + (perfEntry != null ? String.valueOf(perfEntry.getAverageDelay()) : "?") + " ms" +
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
+			"Last Test: " + (perfEntry != null ? String.valueOf(perfEntry.getSpeedFromLastTest()) : "?") + " kbit/sec<br /> " +
+			"Average: " + (perfEntry != null ? String.valueOf(perfEntry.getAverageSpeed()): "?") + " kbit/sec" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + new Date(getLastUpdate()) +

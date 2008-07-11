@@ -993,8 +993,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <COL WIDTH=\"10%\">\n" +
 				//"        <COL WIDTH=\"2%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				"        <COL WIDTH=\"5%\">\n" +				
-				"        <COL WIDTH=\"17%\">\n" +
+				"        <COL WIDTH=\"15%\">\n" +				
+				"        <COL WIDTH=\"20%\">\n" +
 				"        <COL WIDTH=\"3%\">\n" +				
 				"        <COL WIDTH=\"20%\">\n" +
 				"      </COLGROUP>\n" +
@@ -1004,8 +1004,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <TH>Active Users</TH>\n" +
 				//"        <TH>Current Risk</TH>\n" +
 				"        <TH>Traffic Situation</TH>\n" +
-				"        <TH>Last Delay</TH>\n" +
-				"        <TH>Last Speed</TH>\n" +
+				"        <TH>Delay</TH>\n" +
+				"        <TH>Speed</TH>\n" +
 				"        <TH>Mixed Packets</TH>\n" +
 				"        <TH>Last Notification</TH>\n" +
 				"      </TR>\n";
