@@ -810,7 +810,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 					if(hpFile != null)
 					{
 						String hpFileValidation = model.helpPathValidityCheck(hpFile);
-						if(hpFileValidation.equals(JAPModel.HELP_VALID))
+						if(hpFileValidation.equals(HelpFileStorageManager.HELP_VALID) ||
+							hpFileValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) )
 						{
 							m_helpPathField.setText(hpFile.getPath());
 							m_helpPathField.setEditable(false);
@@ -818,8 +819,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 						}
 						else
 						{
-							//TODO: parent must not be main view
-							JAPDialog.showErrorDialog(((JAPNewView) mv), 
+							JAPDialog.showErrorDialog(JAPConf.getInstance(), 
 									JAPMessages.getString(hpFileValidation), LogType.MISC);
 						}
 					}

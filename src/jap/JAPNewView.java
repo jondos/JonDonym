@@ -2562,9 +2562,12 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			
 			boolean pathChosen = (f != null);
 			String pathValidation = pathChosen ? 
-					JAPModel.getInstance().helpPathValidityCheck(f) : JAPModel.HELP_INVALID_NULL;
+					JAPModel.getInstance().helpPathValidityCheck(f) : HelpFileStorageManager.HELP_INVALID_NULL;
 			
-			boolean pathValid = JAPModel.getInstance().helpPathValidityCheck(f).equals(JAPModel.HELP_VALID);
+			//showHelpInternal = pathValidation.equals(JAPModel.NO_HELP_STORAGE_MANAGER);
+			
+			boolean pathValid = pathValidation.equals(HelpFileStorageManager.HELP_VALID) ||
+							 	pathValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS);
 			
 			if(!pathChosen)
 			{

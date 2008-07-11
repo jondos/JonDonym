@@ -2697,7 +2697,6 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 									progressBar.setMinimum(minimum);
 								}
 								progressBar.setValue(value);
-								System.out.println("value: "+value+", maximum: "+maximum);
 							}
 						}
 						else if(progressStatus == ProgressCapsule.PROGRESS_FINISHED)
