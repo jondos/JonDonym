@@ -1290,7 +1290,7 @@ public final class JAPModel extends Observable
 					m_helpPath : AbstractOS.getInstance().getDefaultHelpPath();
 	}
 	
-	public URL getHelpURL()
+	public URL getHelpURL(String a_startDoc)
 	{
 		URL helpURL = null;
 		if(m_helpFileStorageManager != null)
@@ -1312,7 +1312,7 @@ public final class JAPModel extends Observable
 								File.separator+
 								JAPConstants.HELP_FOLDER+
 								startPath+
-								JAPConstants.HELP_START);
+								a_startDoc);
 				} 
 				catch (MalformedURLException e) 
 				{
@@ -1322,6 +1322,11 @@ public final class JAPModel extends Observable
 			}
 		}
 		return helpURL;
+	}
+	
+	public URL getHelpURL()
+	{
+		return getHelpURL(JAPConstants.HELP_START);
 	}
 	
 	void initHelpPath(String helpPath)
@@ -1425,6 +1430,11 @@ public final class JAPModel extends Observable
 			return JAPMessages.getString(HelpFileStorageManager.HELP_INVALID_NULL);
 		}
 		return helpPathValidityCheck(hpFile.getPath());
+	}
+	
+	public boolean isExternalHelpInstallationPossible()
+	{
+		return m_helpFileStorageManager != null;
 	}
 	
 	/**

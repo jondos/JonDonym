@@ -2538,82 +2538,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
-		if(ClassUtil.getJarFile() == null)
-		{
-			showHelpInJonDo();
-			return;
-		}
-		
-		//JARHelpFileStorageManager helpStorageManager = JARHelpFileStorageManager.getInstance();
-		final JAPModel model = JAPModel.getInstance();
-		boolean showHelpInternal = false;
-		
-		/* If no external help path is specified and no help is installed: 
-		 * open dialog to ask the user
-		 */
-		if(!model.isHelpPathDefined() )
-		{
-			final File f = 
-				JAPDialog.showFileChooseDialog(this, 
-							JAPMessages.getString(MSG_HELP_INSTALL),
-							JAPMessages.getString(MSG_HELP_PATH_CHOICE),
-							model.getHelpPath(),
-							JFileChooser.DIRECTORIES_ONLY);
-			
-			boolean pathChosen = (f != null);
-			String pathValidation = pathChosen ? 
-					JAPModel.getInstance().helpPathValidityCheck(f) : HelpFileStorageManager.HELP_INVALID_NULL;
-			
-			//showHelpInternal = pathValidation.equals(JAPModel.NO_HELP_STORAGE_MANAGER);
-			
-			boolean pathValid = pathValidation.equals(HelpFileStorageManager.HELP_VALID) ||
-							 	pathValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS);
-			
-			if(!pathChosen)
-			{
-				return;
-			}
-			
-			if(pathChosen && pathValid)
-			{
-				if(!model.isHelpPathDefined() || !f.getPath().equals(model.getHelpPath()))
-				{
-					Observable helpFileStorageObservable = model.getHelpFileStorageObservable();
-					/* observe the model while it changes during installation. (if we can). */
-					if(helpFileStorageObservable != null)
-					{		
-						JAPDialog hd =
-							JAPDialog.showProgressDialog(this, JAPMessages.getString(MSG_HELP_INSTALL), 
-									JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS), null, 
-									null, helpFileStorageObservable);
-					}
-					//When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
-					model.setHelpPath(f);
-					//m_dlgConfig.updateValues();
-				}
-			}
-			else
-			{
-				JAPDialog.showErrorDialog(this, JAPMessages.getString(MSG_HELP_INSTALL_FAILED)+
-						JAPMessages.getString(pathValidation), LogType.MISC);
-				showHelpInternal = true;
-			}
-		}
-		
-		boolean helpOpened = false;
+		boolean showHelpInternal = !JAPModel.getInstance().isExternalHelpInstallationPossible();
 		if(!showHelpInternal)
 		{
-			URL helpURL = model.getHelpURL();
-			if(helpURL != null)
-			{
-				helpOpened = AbstractOS.getInstance().openURL(helpURL);	
-			}
-			else
-			{
-				helpOpened = false;
-			}	
+			JAPExternalHelpView externalViewer = new JAPExternalHelpView(this);
+			showHelpInternal = !externalViewer.displayHelp();
 		}
-		if(!helpOpened)
+		if(showHelpInternal)
 		{
 			showHelpInJonDo();
 		}
