@@ -83,7 +83,10 @@ public class CertificateRevocationList
 		m_issuer = new X509DistinguishedName(m_crl.getIssuer());
 		m_extensions = new X509Extensions(m_crl.getTBSCertList().getExtensions());
 		m_thisUpdate = m_crl.getThisUpdate().getDate();
-		m_nextUpdate = m_crl.getNextUpdate().getDate();
+		if(m_crl.getNextUpdate() != null)
+		{
+			m_nextUpdate = m_crl.getNextUpdate().getDate();
+		}
 	}
 	
 	public static CertificateRevocationList getInstance(byte[] a_rawCRL)
@@ -167,7 +170,10 @@ public class CertificateRevocationList
 		{
 			setIssuer(a_issuer);
 			setThisUpdate(new Time(new Date()));
-			setNextUpdate(new Time(a_nextUpdate));
+			if(a_nextUpdate != null)
+			{
+				setNextUpdate(new Time(a_nextUpdate));
+			}
 			setExtensions(a_extensions.getBCX509Extensions());
 			if(a_certList != null)
 			{

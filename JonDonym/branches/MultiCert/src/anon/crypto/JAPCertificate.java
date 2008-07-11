@@ -72,6 +72,7 @@ import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.digests.GeneralDigest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -131,6 +132,23 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 
 	private static final String BASE64_TAG = "CERTIFICATE";
 	private static final String BASE64_ALTERNATIVE_TAG = "X509 " + BASE64_TAG;
+	
+	/** SignatureAlgorithmIdentifiers and their names as specified by RFC 3279 */
+	private static final String IDENTIFIER_DSA_WITH_SHA1 = 				"1.2.840.10040.4.3";
+	private static final String DSA_WITH_SHA1 = 						"dsaWithSHA1";
+	
+	private static final String IDENTIFIER_MD2_WITH_RSA_ENCRYPTION = 	"1.2.840.113549.1.1.2";
+	private static final String MD2_WITH_RSA_ENCRYPTION = 				"md2WithRSAEncryption";
+	
+	private static final String IDENTIFIER_MD5_WITH_RSA_ENCRYPTION = 	"1.2.840.113549.1.1.4";
+	private static final String MD5_WITH_RSA_ENCRYPTION = 				"md5WithRSAEncryption";
+	
+	private static final String IDENTIFIER_SHA1_WITH_RSA_ENCRYPTION =   "1.2.840.113549.1.1.5";
+	private static final String SHA1_WITH_RSA_ENCRYPTION = 				"sha-1WithRSAEncryption";
+	
+	private static final String IDENTIFIER_ECDSA_WITH_SHA1 = 			"1.2.840.10045.4.1";
+	private static final String ECDSA_WITH_SHA1 = 						"ecdsa-with-SHA1";
+	
 
 	/**
 	 * The dummy private key is used to create temporary certificates.
@@ -500,6 +518,40 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		return m_subjectKeyIdentifier.getValue();
 	}
 	
+	/**
+	 * Converts the ObjectIdentifier from the certificate's signature algorithm
+	 * into its human-readable Name as specified by RFC 3279.
+	 * @return the human-readable Name of the algorithm the certificate was signed
+	 * 		   with or the ObjectIdentifier as String, if the algorithm is unknown.
+	 */
+	public String getSignatureAlgorithmName()
+	{
+		String id = m_bcCertificate.getSignatureAlgorithm().getObjectId().getId();
+		
+		if(id.equals(IDENTIFIER_DSA_WITH_SHA1))
+		{
+			return DSA_WITH_SHA1;
+		}
+		if(id.equals(IDENTIFIER_SHA1_WITH_RSA_ENCRYPTION))
+		{
+			return SHA1_WITH_RSA_ENCRYPTION;
+		}
+		if(id.equals(IDENTIFIER_MD5_WITH_RSA_ENCRYPTION))
+		{
+			return MD5_WITH_RSA_ENCRYPTION;
+		}
+		if(id.equals(IDENTIFIER_MD2_WITH_RSA_ENCRYPTION))
+		{
+				return MD2_WITH_RSA_ENCRYPTION;
+		}
+		if(id.equals(IDENTIFIER_ECDSA_WITH_SHA1))
+		{
+			return ECDSA_WITH_SHA1;
+		}
+		
+		return m_bcCertificate.getSignatureAlgorithm().getObjectId().getId();		
+	}
+	
 	public BigInteger getSerialNumber()
 	{
 		return m_bcCertificate.getSerialNumber().getPositiveValue();
@@ -817,10 +869,10 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 
 		//TODO:why?
 		//the cert is verified, too, if the public key is the same as the test key
-		/*if (getPublicKey().equals(a_publicKey))
+		if (getPublicKey().equals(a_publicKey))
 		{
 			return true;
-		}*/
+		}
 		
 		AlgorithmIdentifier aid1 = a_publicKey.getSignatureAlgorithm().getIdentifier();
 		AlgorithmIdentifier aid2 = this.m_bcCertificate.getSignatureAlgorithm();

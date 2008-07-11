@@ -846,8 +846,8 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 					keyValues.addElement(new Integer(kLength).toString());
 		}
 		keyKeys.addElement(JAPMessages.getString(TITLE_KEYS_SIGNALGORITHM));
-		keyValues.addElement(a_cert.getPublicKey().getSignatureAlgorithm().getXMLSignatureAlgorithmReference());
-
+		//keyValues.addElement(a_cert.getPublicKey().getSignatureAlgorithm().getXMLSignatureAlgorithmReference());
+		keyValues.addElement(a_cert.getSignatureAlgorithmName());
 		JLabel title_keys = new JLabel(JAPMessages.getString(TITLE_KEYS), JLabel.RIGHT);
 		title_keys.setFont(TITLE_FONT);
 		title_keys.setForeground(TITLE_COLOR);
