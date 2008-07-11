@@ -11,6 +11,13 @@ import java.util.Observable;
  */
 public interface HelpFileStorageManager 
 {
+	public static final String HELP_INVALID_NULL = "invalidHelpPathNull";
+	public static final String HELP_INVALID_PATH_NOT_EXISTS = "invalidHelpPathNotExists";
+	public static final String HELP_INVALID_NOWRITE = "invalidHelpPathNoWrite";
+	public static final String HELP_DIR_EXISTS = "helpDirExists";
+	public static final String HELP_JONDO_EXISTS = "helpJonDoExists";
+	public static final String HELP_VALID = "HELP_IS_VALID";
+	
 	/**
 	 * Performs the specific file storage operation to maintain a consistent file storage state
 	 * when the help path changes
@@ -22,6 +29,8 @@ public interface HelpFileStorageManager
 	 */
 	public boolean handleHelpPathChanged(String oldHelpPath, String newHelpPath);
 	
+	public String helpPathValidityCheck(String absolutePath);
+	
 	/**
 	 * returns an observable object which allows ViewObjects to display storage processes, i.e.
 	 * to display the file installation progress in a JProgressBar
@@ -29,4 +38,8 @@ public interface HelpFileStorageManager
 	 * 			if the manager has no such object associated with it.
 	 */
 	public Observable getStorageObservable();
+	
+	public void ensureMostRecentVersion(String helpPath);
+	
+	public boolean helpInstallationExists(String helpPath);
 }

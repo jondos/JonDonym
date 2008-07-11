@@ -85,7 +85,7 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 	 * @return true if and only if the stored help version number is exactly the same 
 	 * 			as the JonDo version number
 	 */
-	private boolean helpVersionMismatch()
+	public boolean helpVersionMismatch()
 	{
 		String versionString = getHelpVersion();
 		return !JAPConstants.aktVersion.equals(versionString);
@@ -107,17 +107,78 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 		return installationSuccessful;
 	}
 	
+	public String helpPathValidityCheck(String absolutePath) 
+	{
+		if(absolutePath != null)
+		{
+			File hpFile = new File(absolutePath);
+			if(hpFile.exists())
+			{
+				if(hpFile.isDirectory())
+				{
+					if(hpFile.canWrite())
+					{
+						File anotherFileWithSameName =
+							new File(hpFile.getPath()+
+									File.separator+
+									JAPConstants.HELP_FOLDER);
+						
+						if(!anotherFileWithSameName.exists())
+						{
+							return HELP_VALID;
+						}
+						else
+						{
+							//help directory already exists in specified folder
+							File jondoHelpFileVersion =
+								new File(hpFile.getPath()+
+										File.separator+
+										JAPConstants.HELP_FOLDER+
+										File.separator+
+										HELP_VERSION_FILE);
+							if(jondoHelpFileVersion.exists())
+							{
+								return HELP_JONDO_EXISTS;
+							}
+							else
+							{
+								return HELP_DIR_EXISTS;
+							}
+						}
+					}
+					else
+					{
+						//we have no write access to that file
+						return HELP_INVALID_NOWRITE;
+					}
+				}
+				else
+				{
+					//path is not a directory
+					return "TODO: Error message key";
+				}
+			}
+			else
+			{
+				//no such directory
+				return HELP_INVALID_PATH_NOT_EXISTS;
+			}
+		}
+		else
+		{
+			//null path specified
+			return HELP_INVALID_NULL;
+		}
+	}
+	
 	public Observable getStorageObservable()
 	{
 		return archiver;
 	}
 	
 	/**
-	 * installs the JonDo help externally out the JonDo Jarfile in the specified external destination folder. If no folder 
-	 * was specified the help is installed in the same directory where the JAR file is situated. If JonDo is not executed 
-	 * from a Jar-Archive the installation process aborts. This routine also performs an installation if there is already 
-	 * a help version installed which does not match the JonDo version number (even if the help version is more recent than 
-	 * the JonDo version)
+	 * installs the JonDo help externally out the JonDo Jarfile in the specified external destination folder. 
+	 * This routine overrides already installed JonDo help files.
 	 */
 	private boolean installHelp()
 	{
@@ -132,46 +193,16 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Fatal: JARStorageManager does only work when started from a Jar file");
 			return false;
 		}
+		//override old help
 		if(helpFolder.exists())
 		{	
-			String versionString = getHelpVersion();
-			
-			if(!helpVersionMismatch())
+			removeOldHelp(helpPath);
+			if(helpFolder.exists())
 			{
-				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help is already installed!");
 				return false;
 			}
-			else
-			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Removing old help");
-				RecursiveCopyTool.deleteRecursion(helpFolder);
-			}
 		}
-		// We can go on extracting the help from the JarFile if necessary
-		/*ZipFile japArchive = ClassUtil.getJarFile();
-		if(japArchive == null)
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Not running a jar file: Installing help is not necessary");
-			return false;
-		}*/
-		
-		//ZipArchiver archiver = new ZipArchiver(japArchive);
-		
-		/*ActionListener cancelListener =
-			new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e) 
-				{
-					synchronized(JARHelpFileStorageManager.class)
-					{
-						asynchHelpFileInstallThread.interrupt();
-						System.out.println("Interrupt the installation progress");
-					}
-				}
-			};
-		
-		((JAPNewView)JAPController.getInstance().getView()).displayInstallProgress(archiver, cancelListener);*/
-				
+			
 		boolean installationSuccessful = archiver.extractArchive(JAPConstants.HELP_FOLDER, helpPath);
 		if(installationSuccessful)
 		{
@@ -182,16 +213,7 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Extracting help files was not succesful.");
 			return false;
 		}
-		/*if(japArchive != null)
-		{
-			try 
-			{
-				japArchive.close();
-			} 
-			catch (IOException e) {
-				LogHolder.log(LogLevel.ERR, LogType.MISC, "Could not close Jar-Archive");
-			}
-		}*/
+		
 		return installationSuccessful;
 	}
 	
@@ -275,7 +297,7 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 		}
 		/* Make sure that there will be never the wrong directory as parameter!!! */
 		RecursiveCopyTool.deleteRecursion(helpFolder);
-		LogHolder.log(LogLevel.INFO, LogType.MISC, "removed old help from "+parentPath);
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "removed old help from "+parentPath);
 	}
 	
 	/**
@@ -336,74 +358,17 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 		return new File(helpPath+File.separator+JAPConstants.HELP_FOLDER);
 	}
 	
-	/*public static synchronized JARHelpFileStorageManager getInstance()
+	public void ensureMostRecentVersion(String helpPath) 
 	{
-		if(helpController == null)
+		setHelpPath(helpPath);
+		if(helpVersionMismatch() || !isHelpInstalled())
 		{
-			helpController = new JARHelpFileStorageManager(JAPModel.getInstance());
+			installHelp();
 		}
-		return helpController;
-	}*/
-
-	/*public void update(Observable o, Object arg) 
-	{
-		if( (o instanceof JAPModel) && (arg instanceof String) )
-		{
-			if(arg != null)
-			{
-				removeOldHelp((String) arg);
-				if(model.isHelpPathDefined())
-				{
-					synchronized(JARHelpFileStorageManager.class)
-					{
-						if((asynchHelpFileInstallThread != null))
-						{
-							while(asynchHelpFileInstallThread.isAlive())
-							{
-								try 
-								{
-									JARHelpFileStorageManager.class.wait();
-								} 
-								catch (InterruptedException e) 
-								{}
-							}
-						}
-						asynchHelpFileInstallThread =
-							new Thread(
-									new Runnable()
-									{
-										public void run()
-										{
-											installHelp();
-											synchronized(JARHelpFileStorageManager.class)
-											{
-												JARHelpFileStorageManager.class.notifyAll();
-											}
-										}
-									});
-						asynchHelpFileInstallThread.start();
-					}
-				}
-			}
-		}
-		else if(arg instanceof InterruptedException)
-		{
-			System.out.println("Abort installation process");
-		}
-	}*/
-
-	/*public static synchronized Thread getAsynchHelpFileInstallThread() {
-		return asynchHelpFileInstallThread;
-	}*/	
-	
-	/*private static class HelpInstaller implements Runnable
-	{
-		public void run()
-		{
-			if(getInstance() != null)
-			{
-				getInstance().installHelp();
-			}
-		}
-	}*/
+	}
+	public boolean helpInstallationExists(String helpPath) {
+		
+		setHelpPath(helpPath);
+		return isHelpInstalled();
+	}
 }
