@@ -27,7 +27,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private static final String XML_ELEMENT_DAILY_DATA = "DailyData";
 	private static final String XML_ELEMENT_WEEKLY_DATA = "WeeklyData";
 		
-	public static final long LAST_TEST_DATA_TTL = 5 * 60 * 1000;
+	public static final long LAST_TEST_DATA_TTL = 15 * 60 * 1000;
 	
 	private String m_strCascadeId;
 	private Calendar m_cal = Calendar.getInstance();
