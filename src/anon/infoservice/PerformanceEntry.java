@@ -110,7 +110,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_serial;
 	}
 	
-	public void addValue(PerformanceAttributeEntry[][] a_entries, long a_timestamp, long a_value)
+	public void addValue(String a_attributeName, PerformanceAttributeEntry[][] a_entries, long a_timestamp, long a_value)
 	{
 		PerformanceAttributeEntry entry = null;
 		
@@ -123,7 +123,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		entry = a_entries[dayOfWeek][hour];
 		if(entry == null)
 		{
-			a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
+			a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(a_attributeName);
 		}
 
 		entry.addValue(a_timestamp, a_value);
@@ -131,7 +131,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_lastUpdate = a_timestamp;
 	}
 	
-	public long addData(PerformanceAttributeEntry[][] a_entries, Hashtable a_data) 
+	public long addData(String a_attributeName, PerformanceAttributeEntry[][] a_entries, Hashtable a_data) 
 	{
 		PerformanceAttributeEntry entry = null;
 		
@@ -158,7 +158,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				entry = a_entries[dayOfWeek][hour];
 				if(entry == null)
 				{
-					a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY); 
+					a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(a_attributeName); 
 				}
 				
 				entry.addValue(timestamp.longValue(), value);
@@ -177,22 +177,22 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public long addSpeedData(Hashtable a_data) 
 	{
-		return m_lastTestAverageSpeed = addData(m_speed, a_data);
+		return m_lastTestAverageSpeed = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_speed, a_data);
 	}
 		
 	public long addDelayData(Hashtable a_data)
 	{
-		return m_lastTestAverageDelay = addData(m_delay, a_data);
+		return m_lastTestAverageDelay = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_delay, a_data);
 	}
 	
 	public void addSpeedValue(long a_timestamp, long a_value)
 	{
-		addValue(m_speed, a_timestamp, a_value);
+		addValue(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_speed, a_timestamp, a_value);
 	}
 	
 	public void addDelayValue(long a_timestamp, long a_value)
 	{
-		addValue(m_delay, a_timestamp, a_value);
+		addValue(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_delay, a_timestamp, a_value);
 	}
 	
 	public long getDelayFromLastTest()
@@ -361,8 +361,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
 
-		Element elemDelay = getCurrentSpeedEntry().toXmlElement(a_doc);
-		Element elemSpeed = getCurrentDelayEntry().toXmlElement(a_doc);
+		Element elemDelay = getCurrentDelayEntry().toXmlElement(a_doc);
+		Element elemSpeed = getCurrentSpeedEntry().toXmlElement(a_doc);
 		
 		elemCurrent.appendChild(elemDelay);
 		elemCurrent.appendChild(elemSpeed);
