@@ -1,5 +1,6 @@
 package anon.infoservice;
 
+import java.text.NumberFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Calendar;
@@ -246,6 +247,55 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 	}
 	
+	public String delayToHTML()
+	{
+		return toHTML(m_delay, "ms");
+	}
+	
+	public String speedToHTML()
+	{
+		return toHTML(m_speed, "kbit/sec");
+	}
+	
+	public String toHTML(PerformanceAttributeEntry[][] a_entries, String a_unit)
+	{
+		String htmlData = "<table width=\"40%\">" +
+				"<tr>" +
+				"<th width=\"25%\">Hour</th>" +
+				"<th>Average</th>" +
+				"<th>Min</th>" +
+				"<th>Max</th>" +
+				"<th>Std. Deviation</th></tr>";
+		
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		
+		for(int hour = 0; hour < 24; hour++)
+		{
+			htmlData += "<tr>" +
+					"<td>" + hour + ":00 - " + ((hour + 1) % 24) + ":00</td>";
+			
+			PerformanceAttributeEntry entry = a_entries[dayOfWeek][hour];
+			
+			if(entry == null)
+			{
+				htmlData += "<td colspan=\"4\" align=\"center\">No data available</td>";
+			}
+			else
+			{
+				htmlData += "<td>" + entry.getAverageValue() + " " + a_unit + "</td>" +
+					"<td>" + entry.getMinValue() + " " + a_unit + "</td>" +
+					"<td>" + entry.getMaxValue() + " " + a_unit + "</td>" +
+					"<td>" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(entry.getStdDeviation()) + " " + a_unit + "</td>";
+			}
+			
+			htmlData += "</tr>";
+		}
+		
+		htmlData += "</table>";
+		
+		return htmlData;
+	}
+	
 	public Element toXmlElement(Document a_doc)
 	{
 		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
@@ -399,6 +449,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public long getMaxValue()
 		{
 			return m_lMaxValue;
+		}
+		
+		public double getStdDeviation()
+		{
+			return m_lStdDeviation;
 		}
 		
 		public boolean isInvalid()

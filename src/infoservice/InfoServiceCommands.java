@@ -855,10 +855,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		"        address {font-style:normal;}\n" +
 		"        hr {color:#cccccc;}\n" +
 		"        h2,.leftcol {font-weight:bold; color:#006699;}\n" +
-		"        a:link {color:#006699; font-weight:bold; text-decoration:none;}\n" +
-		"        a:visited {color:#666666; font-weight:bold; text-decoration:none;}\n" +
-		"        a:active {color:#006699; font-weight:bold; text-decoration:none;}\n" +
-		"        a:hover {color:#006699; font-weight:bold; text-decoration:underline;}\n" +
+		"        a:link {color:#006699; font-weight:normal; text-decoration:none;}\n" +
+		"        a:visited {color:#666666; font-weight:normal; text-decoration:none;}\n" +
+		"        a:active {color:#006699; font-weight:normal; text-decoration:none;}\n" +
+		"        a:hover {color:#006699; font-weight:normal; text-decoration:underline;}\n" +
 		"        th {color:white; background:#006699; font-weight:bold; text-align:left;}\n" +
 		"        td.name {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699; background:#eeeeff;}\n" +
 		"        td.status {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699;}\n" +
@@ -867,9 +867,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		"    <META HTTP-EQUIV=\"refresh\" CONTENT=\"25\">\n" +
 		"  </HEAD>\n" +
 		"  <BODY BGCOLOR=\"#FFFFFF\">\n" +
-		"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n" +
-		"    <H2>InfoService Status (" + Configuration.getInstance().getID() + ")</H2>\n" +
-		"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "<BR></P>\n";
+		"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n";
 	}
 	
 	private String getHumanStatusFooter()
@@ -972,6 +970,80 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		return httpResponse;
 	}
 	
+	private HttpResponseStructure humanGetDelayValues(String a_cascadeId)
+	{
+		HttpResponseStructure httpResponse;
+		
+		try
+		{
+			String htmlData = getHumanStatusHeader();
+	
+			PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascadeId);
+			
+			htmlData += "<a href=\"/status\">Back to Server Status</a><br /><br />";
+			
+			if(entry == null)
+			{
+				htmlData += "No performance data found.";
+			}
+			else
+			{
+				htmlData += entry.delayToHTML();
+			}
+			
+			htmlData += getHumanStatusFooter();
+				
+			/* send content */
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_HTML,
+					HttpResponseStructure.HTTP_ENCODING_PLAIN, htmlData);
+			
+		}
+		catch (Exception e)
+		{
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR);
+				LogHolder.log(LogLevel.ERR, LogType.MISC, e);
+		}
+		
+		return httpResponse;
+	}
+	
+	private HttpResponseStructure humanGetSpeedValues(String a_cascadeId)
+	{
+		HttpResponseStructure httpResponse;
+		
+		try
+		{
+			String htmlData = getHumanStatusHeader();
+	
+			PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascadeId);
+			
+			htmlData += "<a href=\"/status\">Back to Server Status</a><br /><br />";
+			
+			if(entry == null)
+			{
+				htmlData += "No performance data found.";
+			}
+			else
+			{
+				htmlData += entry.speedToHTML();
+			}
+			
+			htmlData += getHumanStatusFooter();
+				
+			/* send content */
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_HTML,
+					HttpResponseStructure.HTTP_ENCODING_PLAIN, htmlData);
+			
+		}
+		catch (Exception e)
+		{
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR);
+				LogHolder.log(LogLevel.ERR, LogType.MISC, e);
+		}
+		
+		return httpResponse;
+	}
+	
 	/**
 	 * Sends a generated HTML file with all status entrys to the client. This function is not used
 	 * by the JAP client. It's intended to use with a webbrowser to see the status of all cascades.
@@ -986,6 +1058,9 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		{
 				String htmlData = getHumanStatusHeader();
 				
+				htmlData += "    <H2>InfoService Status (" + Configuration.getInstance().getID() + ")</H2>\n" +
+				"    <P>InfoService Name: " + Configuration.getInstance().getOwnName() + "<BR></P>\n";
+				
 				htmlData +="    <TABLE BORDER=\"0\">\n" +
 				"      <COLGROUP>\n" +
 				"        <COL WIDTH=\"20%\">\n" +
@@ -994,7 +1069,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				//"        <COL WIDTH=\"2%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
 				"        <COL WIDTH=\"15%\">\n" +				
-				"        <COL WIDTH=\"20%\">\n" +
+				"        <COL WIDTH=\"25%\">\n" +
 				"        <COL WIDTH=\"3%\">\n" +				
 				"        <COL WIDTH=\"20%\">\n" +
 				"      </COLGROUP>\n" +
@@ -1784,7 +1859,25 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: 
 			 */
 			httpResponse = humanGetPerfStatus();
-		}		
+		}
+		else if ( (command.startsWith("/delayvalues")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			/** Full Command: GET /delayvalues
+			 * Source: Browser
+			 * Description: get the delay values for a specific cascade for human view as html file
+			 * Description_de: 
+			 */
+			httpResponse = humanGetDelayValues(command.substring(13));
+		}
+		else if ( (command.startsWith("/speedvalues")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			/** Full Command: GET /speedvalues
+			 * Source: Browser
+			 * Description: get the speed values for a specific cascade for human view as html file
+			 * Description_de: 
+			 */
+			httpResponse = humanGetSpeedValues(command.substring(13));
+		}			
 		else if ( (command.equals("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /mixes 
