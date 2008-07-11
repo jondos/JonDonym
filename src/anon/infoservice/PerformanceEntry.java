@@ -19,13 +19,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private static final String XML_ATTR_HOUR = "hour";
 	private static final String XML_ATTR_DAY = "day";
 	private static final String XML_ATTR_ID = "id";
-	private static final String XML_ATTR_LAST_UPDATE = "lastUpdate";
+	private static final String XML_ATTR_TIME = "time";
 	
 	private static final String XML_ELEMENT_LAST_TEST = "LastTest";
 	private static final String XML_ELEMENT_CURRENT_HOURLY_DATA = "CurrentHourlyData";
 	private static final String XML_ELEMENT_HOURLY_DATA = "HourlyData";
 	private static final String XML_ELEMENT_DAILY_DATA = "DailyData";
 	private static final String XML_ELEMENT_WEEKLY_DATA = "WeeklyData";
+		
+	public static final long LAST_TEST_DATA_TTL = 5 * 60 * 1000;
 	
 	private String m_strCascadeId;
 	private Calendar m_cal = Calendar.getInstance();
@@ -33,11 +35,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private long m_lastUpdate;
 	private long m_serial;
 	
+	private long m_lastTestTime;
+	
 	private PerformanceAttributeEntry[][] m_speed = new PerformanceAttributeEntry[7][24];
 	private PerformanceAttributeEntry[][] m_delay = new PerformanceAttributeEntry[7][24];
 	
-	private long m_lastTestAverageSpeed = -1;
-	private long m_lastTestAverageDelay = -1;
+	private long m_lastTestAverageSpeed = 0;
+	private long m_lastTestAverageDelay = 0;
 		
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
 	
@@ -110,6 +114,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_serial;
 	}
 	
+	public long getLastTestTime()
+	{
+		return m_lastTestTime;
+	}
+	
 	public void addValue(String a_attributeName, PerformanceAttributeEntry[][] a_entries, long a_timestamp, long a_value)
 	{
 		PerformanceAttributeEntry entry = null;
@@ -165,6 +174,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			lAverageFromLastTest /= a_data.size();
 			
+			m_lastTestTime = timestamp.longValue();
 			m_lastUpdate = timestamp.longValue();
 		}
 		else
@@ -353,14 +363,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
 		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
-		XMLUtil.setAttribute(elem, XML_ATTR_LAST_UPDATE, getLastUpdate());
+		XMLUtil.setAttribute(elem, XML_ATTR_TIME, m_lastTestTime);
 		
 		Element elemLast = a_doc.createElement(XML_ELEMENT_LAST_TEST);
 		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_lastTestAverageDelay);
 		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_lastTestAverageSpeed);
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
-
 		
 		// TODO: no available data for this hour -> use another hour?
 		if(getCurrentDelayEntry() != null)
@@ -376,7 +385,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		/*if(a_bDisplayWeeklyData)
-		{*/
+		{
 			Element elemWeeklyData = a_doc.createElement(XML_ELEMENT_WEEKLY_DATA);
 		
 			for(int i = 0; i < 7; i++)
@@ -407,7 +416,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			
 			elem.appendChild(elemWeeklyData);
-		/*}*/
+		}*/
 		
 		elem.appendChild(elemLast);
 		elem.appendChild(elemCurrent);
