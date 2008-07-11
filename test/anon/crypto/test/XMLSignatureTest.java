@@ -69,7 +69,7 @@ public class XMLSignatureTest extends XtendedPrivateTestCase
 	 * @todo Signing and verifying with RSA does not work yet; {@link anon.crypto.MyRSASignature}
 	 * encoding and decoding methods!
 	 */
-	public void _testSignAndVerifyRSA() throws Exception
+	public void testSignAndVerifyRSA() throws Exception
 	{
 		m_random.setSeed(85922773);
 		testSignAndVerify(new RSATestKeyPairGenerator(m_random));
