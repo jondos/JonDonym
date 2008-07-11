@@ -1440,6 +1440,7 @@ public final class JAPModel extends Observable
 		if(helpPathExists && !helpInstallationExists)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path "+m_helpPath+" configured but no valid help could be found!");
+			m_helpPath = null;
 		}
 		return helpInstallationExists;
 	}
