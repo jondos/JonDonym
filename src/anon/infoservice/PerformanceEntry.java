@@ -361,11 +361,19 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
 
-		Element elemDelay = getCurrentDelayEntry().toXmlElement(a_doc);
-		Element elemSpeed = getCurrentSpeedEntry().toXmlElement(a_doc);
 		
-		elemCurrent.appendChild(elemDelay);
-		elemCurrent.appendChild(elemSpeed);
+		// TODO: no available data for this hour -> use another hour?
+		if(getCurrentDelayEntry() != null)
+		{
+			Element elemDelay = getCurrentDelayEntry().toXmlElement(a_doc);
+			elemCurrent.appendChild(elemDelay);
+		}
+		
+		if(getCurrentSpeedEntry() != null)
+		{
+			Element elemSpeed = getCurrentSpeedEntry().toXmlElement(a_doc);
+			elemCurrent.appendChild(elemSpeed);
+		}
 		
 		/*if(a_bDisplayWeeklyData)
 		{*/
