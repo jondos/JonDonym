@@ -27,18 +27,18 @@ public class ZipArchiver extends Observable
 	{
 		
 		long maxLen = 100l * ((long)Integer.MAX_VALUE);
-		notifyAboutTotalExtractSize(maxLen);
+		notifyAboutChanges(0, maxLen, ProgressCapsule.PROGRESS_ONGOING);
 		System.out.println("Max Len: "+maxLen);
 		for (long i = 0; i <= maxLen; i+=((long)Integer.MAX_VALUE)) {
-			notifyAboutExtractedEntry("dummy "+i, 879, i);
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			notifyAboutChanges(i, maxLen, ProgressCapsule.PROGRESS_ONGOING);
+			try 
+			{
+				Thread.sleep(20);
+			} 
+			catch (InterruptedException e)
+			{}
 		}
-		return true;
+		return false;
 	}*/
 	
 	public boolean extractArchive(String pathName, String destination)
@@ -47,6 +47,9 @@ public class ZipArchiver extends Observable
 		Enumeration allZipEntries = null;
 		Vector matchedFileEntries = new Vector();
 		Vector matchedDirEntries = new Vector();
+		
+		Vector extractedFiles = new Vector();
+		
 		ZipEntry entry = null;
 		String entryName = null;
 		int index = 0;
@@ -55,7 +58,6 @@ public class ZipArchiver extends Observable
 		
 		long totalSize = 0;
 		long sizeOfCopied = 0;
-		//TreeSet matchedEntries
 		
 		if(m_archive == null)
 		{
@@ -107,6 +109,7 @@ public class ZipArchiver extends Observable
 				dirIndex++) 
 			{
 				String dirName = (String) iterator.nextElement();
+				
 				File dir = new File(dest+File.separator+dirName);
 				if(dir != null)
 				{
@@ -114,14 +117,16 @@ public class ZipArchiver extends Observable
 					{
 						LogHolder.log(LogLevel.ERR, LogType.MISC, "Error while extracting archive "+
 								m_archive.getName()+": could not create directory "+dir.getName());
-						extractErrorRollback(matchedDirEntries, dirIndex, dest);
+						extractErrorRollback(matchedDirEntries, destination);
 						return false;
+					}
+					else
+					{
+						extractedFiles.add(dirName);
 					}
 				}
 			}
-			ZipEvent ze = new ZipEvent(0, totalSize);
-			setChanged();
-			notifyObservers(ze);
+			notifyAboutChangesInterruptable(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ONGOING);
 			
 			for (Enumeration iterator = matchedFileEntries.elements(); 
 				(iterator.hasMoreElements() && !Thread.currentThread().isInterrupted()); 
@@ -131,36 +136,62 @@ public class ZipArchiver extends Observable
 				File destFile = new File(dest+File.separator+zEntry.getName());
 				InputStream zEntryInputStream = m_archive.getInputStream(zEntry);
 				RecursiveCopyTool.copySingleFile(zEntryInputStream, destFile);
+				extractedFiles.add(zEntry.getName());
 				sizeOfCopied += zEntry.getSize();
+				notifyAboutChangesInterruptable(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ONGOING);
 				
-				ze = new ZipEvent(sizeOfCopied, totalSize);
-				setChanged();
-				notifyObservers(ze);
-			
-				/*try {
+				/*try 
+				{
 					Thread.sleep(20);
-				} catch (InterruptedException e) 
+				} 
+				catch (InterruptedException e) 
 				{}*/
 			}
 		}
 		catch(IllegalStateException ise)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+m_archive.getName()+": file already closed");
+			notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ABORTED);
 			return false;
 		} 
 		catch (IOException ioe) 
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+m_archive.getName()+": I/O error occured: ", ioe);
-			extractErrorRollback(matchedFileEntries, fileIndex, destination);
-			extractErrorRollback(matchedDirEntries, matchedDirEntries.size(), destination);
+			extractErrorRollback(extractedFiles, destination);
+			notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ABORTED);
 			return false;
 		}
+		 
+		catch (InterruptedException e) 
+		{
+			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Process of extracting "+m_archive.getName()+" cancelled");
+			extractErrorRollback(extractedFiles, destination);
+			notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ABORTED);
+			return false;
+		}
+		notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_FINISHED);
 		return true;
 	}
 	
-	private static void extractErrorRollback(Vector entries, int dirIndex, String destination) 
+	private void notifyAboutChanges(long sizeOfCopied, long totalSize, int progressStatus)
+	{
+		ZipEvent ze = new ZipEvent(sizeOfCopied, totalSize, progressStatus);
+		setChanged();
+		notifyObservers(ze);
+	}
+	
+	private void notifyAboutChangesInterruptable(long sizeOfCopied, long totalSize, int progressStatus) throws InterruptedException
+	{
+		notifyAboutChanges(sizeOfCopied, totalSize, progressStatus);
+		if(Thread.currentThread().interrupted())
+		{
+			throw new InterruptedException();
+		}
+	}
+	
+	private static void extractErrorRollback(Vector entries, String destination) 
 	{	
-		for(int i = dirIndex; i > 0; i--)
+		for(int i = entries.size(); i > 0; i--)
 		{
 			File f = new File(destination+File.separator+
 								entries.elementAt(i-1));
@@ -171,19 +202,31 @@ public class ZipArchiver extends Observable
 
 	public class ZipEvent implements ProgressCapsule
 	{
-		public final static int UNDEFINED = -1;
+		//public final static int UNDEFINED = -1;
 		
 		private int value;
 		private int maxValue;
 		private int minValue;
+		private int status;
 		
-		public ZipEvent(long byteCount, long totalByteCount)
+		public ZipEvent(long byteCount, long totalByteCount, int progressStatus)
 		{
 			minValue = 0;
-			value = (totalByteCount > Integer.MAX_VALUE) ? 
-					(int) ((double) byteCount / (double) totalByteCount)*Integer.MAX_VALUE : (int) byteCount;
-			maxValue = (totalByteCount > Integer.MAX_VALUE) ? 
-				Integer.MAX_VALUE : (int) totalByteCount;
+			if(totalByteCount > Integer.MAX_VALUE)
+			{
+				double byteCountD = (double) byteCount;
+				double totalByteCountD = (double) totalByteCount;
+				double ratio = byteCountD / totalByteCountD;
+				double valueD = ratio * Integer.MAX_VALUE;
+				value = (int) valueD;
+				maxValue = Integer.MAX_VALUE;
+			}
+			else
+			{
+				value = (int) byteCount;
+				maxValue = (int) totalByteCount;
+			}
+			status = progressStatus;
 		}
 		
 		public int getMaximum() {
@@ -196,6 +239,11 @@ public class ZipArchiver extends Observable
 
 		public int getValue() {
 			return value;
+		}
+
+		public int getStatus() 
+		{
+			return status;
 		}
 	}
 }
