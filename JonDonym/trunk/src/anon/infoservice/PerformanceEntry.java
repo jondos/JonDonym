@@ -3,6 +3,7 @@ package anon.infoservice;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Calendar;
+import java.util.Vector;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -16,9 +17,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 {
 	private static final String XML_ATTR_HOUR = "hour";
 	private static final String XML_ATTR_DAY = "day";
-	public static final String XML_ATTR_ID = "id";
+	private static final String XML_ATTR_ID = "id";
+	private static final String XML_ATTR_LAST_UPDATE = "lastUpdate";
 	
-	private static final String XML_ELEMENT_LAST_DATA = "LastData";
+	private static final String XML_ELEMENT_LAST_TEST = "LastTest";
 	private static final String XML_ELEMENT_CURRENT_HOURLY_DATA = "CurrentHourlyData";
 	private static final String XML_ELEMENT_HOURLY_DATA = "HourlyData";
 	private static final String XML_ELEMENT_DAILY_DATA = "DailyData";
@@ -33,15 +35,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private PerformanceAttributeEntry[][] m_speed = new PerformanceAttributeEntry[7][24];
 	private PerformanceAttributeEntry[][] m_delay = new PerformanceAttributeEntry[7][24];
 	
-	private long m_lastSpeed = -1;
-	private long m_lastDelay = -1;
-	
+	private long m_lastTestAverageSpeed = -1;
+	private long m_lastTestAverageDelay = -1;
+		
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
 	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
-
 	
 	public PerformanceEntry(String a_strCascadeId, long a_lExpireTime)
 	{	
@@ -102,62 +103,65 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		return m_lastUpdate;
 	}
-
+	
 	public long getVersionNumber() 
 	{
 		return m_serial;
 	}
 	
-	public void addDelay(long a_lTimeStamp, long a_lDelay) 
+	public long addData(PerformanceAttributeEntry[][] a_entries, Hashtable a_data) 
 	{
 		PerformanceAttributeEntry entry = null;
 		
 		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
-		entry = m_delay[dayOfWeek][hour];
+		entry = a_entries[dayOfWeek][hour];
 		if(entry == null)
 		{
-			m_delay[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY); 
+			a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY); 
 		}
 		
-		entry.addValue(a_lTimeStamp, a_lDelay);
-	}
-	
-	public void addSpeed(long a_lTimeStamp, long a_lDelay) 
-	{
-		PerformanceAttributeEntry entry = null;
+		long lAverageFromLastTest = -1;
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
-		
-		entry = m_speed[dayOfWeek][hour];
-		if(entry == null)
+		if(a_data.size() > 0)
 		{
-			m_speed[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED); 
+			Enumeration e = a_data.keys();
+		
+			while(e.hasMoreElements())
+			{
+				Long key = (Long) e.nextElement();
+				long value = ((Long) a_data.get(key)).longValue();
+			
+				lAverageFromLastTest += value;
+				entry.addValue(key.longValue(), value);
+			}
+			lAverageFromLastTest /= a_data.size();
 		}
 		
-		entry.addValue(a_lTimeStamp, a_lDelay);
+		m_lastUpdate = System.currentTimeMillis();
+		
+		return lAverageFromLastTest;
 	}
 	
-	public void setLastDelay(long a_lDelay)
+	public long addSpeedData(Hashtable a_data) 
 	{
-		m_lastDelay = a_lDelay;
+		return m_lastTestAverageSpeed = addData(m_speed, a_data);
+	}
+		
+	public long addDelayData(Hashtable a_data)
+	{
+		return m_lastTestAverageDelay = addData(m_delay, a_data);
 	}
 	
-	public void setLastSpeed(long a_lSpeed)
+	public long getDelayFromLastTest()
 	{
-		m_lastSpeed = a_lSpeed;
+		return m_lastTestAverageDelay;
 	}
 	
-	public long getLastDelay()
+	public long getSpeedFromLastTest()
 	{
-		return m_lastDelay;
-	}
-	
-	public long getLastSpeed()
-	{
-		return m_lastSpeed;
+		return m_lastTestAverageSpeed;
 	}
 	
 	public PerformanceAttributeEntry getCurrentSpeedEntry()
@@ -244,17 +248,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public Element toXmlElement(Document a_doc)
 	{
-		return toXmlElement(a_doc, false);
-	}
-	
-	public Element toXmlElement(Document a_doc, boolean a_bDisplayWeeklyData)
-	{
 		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
 		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
+		XMLUtil.setAttribute(elem, XML_ATTR_LAST_UPDATE, getLastUpdate());
 		
-		Element elemLast = a_doc.createElement(XML_ELEMENT_LAST_DATA);
-		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_lastDelay);
-		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_lastSpeed);
+		Element elemLast = a_doc.createElement(XML_ELEMENT_LAST_TEST);
+		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_lastTestAverageDelay);
+		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_lastTestAverageSpeed);
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
 
@@ -264,7 +264,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		elemCurrent.appendChild(elemDelay);
 		elemCurrent.appendChild(elemSpeed);
 		
-		if(a_bDisplayWeeklyData)
+		/*if(a_bDisplayWeeklyData)
 		{
 			Element elemWeeklyData = a_doc.createElement(XML_ELEMENT_WEEKLY_DATA);
 		
@@ -296,7 +296,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			
 			elem.appendChild(elemWeeklyData);
-		}
+		}*/
 		
 		elem.appendChild(elemLast);
 		elem.appendChild(elemCurrent);
@@ -324,7 +324,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		private long m_lAverageValue;
 		private double m_lStdDeviation;
 		
-		//private Vector m_Values = new Vector();
 		private Hashtable m_Values = new Hashtable();
 		
 		public PerformanceAttributeEntry(String a_name)

@@ -526,8 +526,8 @@ public class PerformanceMeter implements Runnable
 		
 		LogHolder.log(LogLevel.WARNING, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
 		
-		Vector vDelay = new Vector();
-		Vector vSpeed = new Vector();
+		Hashtable vDelay = new Hashtable();
+		Hashtable vSpeed = new Hashtable();
 		
 		for(int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
 			m_proxy.isConnected(); i++)
@@ -701,17 +701,14 @@ public class PerformanceMeter implements Runnable
         		
         		long timestamp = System.currentTimeMillis();
         		
-        		entry.addDelay(timestamp, delay);
-        		entry.addSpeed(timestamp, speed);
-        		
         		if(delay != -1)
         		{
-        			vDelay.add(new Long(delay));
+        			vDelay.put(new Long(timestamp), new Long(delay));
         		}
         		
         		if(speed != -1)
         		{
-        			vSpeed.add(new Long(speed));
+        			vSpeed.put(new Long(timestamp), new Long(speed));
         		}
         		
         		if(m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
@@ -744,23 +741,8 @@ public class PerformanceMeter implements Runnable
 	        }
 		}
 		
-		long lastSpeed = -1;
-		long lastDelay = -1;
-		
-		for(int i = 0; i < vDelay.size(); i++)
-		{
-			lastDelay += ((Long) vDelay.elementAt(i)).longValue();
-		}
-		lastDelay /= vDelay.size();
-		
-		for(int i = 0; i < vSpeed.size(); i++)
-		{
-			lastSpeed += ((Long) vSpeed.elementAt(i)).longValue();
-		}
-		lastSpeed /= vSpeed.size();
-		
-		entry.setLastDelay(lastDelay);
-		entry.setLastSpeed(lastSpeed);
+		long lastDelay = entry.addDelayData(vDelay);
+		long lastSpeed = entry.addSpeedData(vSpeed);
 		
 		Database.getInstance(PerformanceEntry.class).update(entry);
 		
