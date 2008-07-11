@@ -157,6 +157,7 @@ public class PerformanceMeter implements Runnable
 		m_maxWaitForTest = ((Integer) a_config[5]).intValue();
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
 		
+		m_cal.setTimeInMillis(System.currentTimeMillis());
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
 		
 		try
@@ -738,6 +739,7 @@ public class PerformanceMeter implements Runnable
         			vSpeed.put(new Long(timestamp), new Long(speed));
         		}
         		
+        		m_cal.setTimeInMillis(System.currentTimeMillis());
         		if(m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
         		{
         			m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
@@ -792,6 +794,8 @@ public class PerformanceMeter implements Runnable
 	private PerformanceEntry createPerformanceEntry(String a_cascadeId)
 	{
 		PerformanceEntry entry;
+		m_cal.setTimeInMillis(System.currentTimeMillis());
+		
 		int days = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hours = m_cal.get(Calendar.HOUR_OF_DAY);
 		int minutes = m_cal.get(Calendar.MINUTE);
