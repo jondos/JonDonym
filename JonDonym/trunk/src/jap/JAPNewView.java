@@ -2545,15 +2545,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 		
 		//JARHelpFileStorageManager helpStorageManager = JARHelpFileStorageManager.getInstance();
-		JAPModel model = JAPModel.getInstance();
+		final JAPModel model = JAPModel.getInstance();
 		boolean showHelpInternal = false;
 		
 		/* If no external help path is specified and no help is installed: 
 		 * open dialog to ask the user
 		 */
-		if(!model.isHelpPathDefined())
+		if(!model.isHelpPathDefined() )
 		{
-			File f = 
+			final File f = 
 				JAPDialog.showFileChooseDialog(this, 
 							JAPMessages.getString(MSG_HELP_INSTALL),
 							JAPMessages.getString(MSG_HELP_PATH_CHOICE),
@@ -2573,17 +2573,21 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			
 			if(pathChosen && pathValid)
 			{
-				Observable helpFileStorageObservable = model.getHelpFileStorageObservable();
-				/* observe the model while it changes during installation. (if we can). */
-				if(helpFileStorageObservable != null)
+				if(!model.isHelpPathDefined() || !f.getPath().equals(model.getHelpPath()))
 				{
-					JAPDialog hd =
-						JAPDialog.showProgressDialog(this, JAPMessages.getString(MSG_HELP_INSTALL), 
-								JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS), null, null, helpFileStorageObservable);
+					Observable helpFileStorageObservable = model.getHelpFileStorageObservable();
+					/* observe the model while it changes during installation. (if we can). */
+					if(helpFileStorageObservable != null)
+					{		
+						JAPDialog hd =
+							JAPDialog.showProgressDialog(this, JAPMessages.getString(MSG_HELP_INSTALL), 
+									JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS), null, 
+									null, helpFileStorageObservable);
+					}
+					//When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
+					model.setHelpPath(f);
+					m_dlgConfig.updateValues();
 				}
-				//When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
-				model.setHelpPath(f);
-				m_dlgConfig.updateValues();
 			}
 			else
 			{

@@ -670,7 +670,6 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 	 */
 	private boolean checkValues()
 	{
-		//TODO: implement me
 		return true;
 	}
 
@@ -779,7 +778,10 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 				{
 					JAPController.goodBye(false);
 				}
-				setEnabled(true);
+				else
+				{
+					setEnabled(true);
+				}
 			}
 		});
 		run.setDaemon(true);

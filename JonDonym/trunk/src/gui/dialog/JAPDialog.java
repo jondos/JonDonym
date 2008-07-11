@@ -2634,21 +2634,24 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	 * @todo: a lot!
 	 */
 	public static JAPDialog showProgressDialog(JAPDialog parent, String a_title, String a_message, 
-			ChangeListener[] a_changeListeners, ActionListener[] a_cancelListeners,
+			String a_progressFinishedMessage, String a_progressCancelledMessage,
 			Observable a_progressSource)
 	{
 		return showProgressDialog(getInternalDialog(parent), a_title, a_message,
-				a_changeListeners, a_cancelListeners, a_progressSource);
+				a_progressFinishedMessage, a_progressCancelledMessage, a_progressSource);
 	}
 	
 	/**
 	 * @todo:  a lot!
 	 */
 	public static JAPDialog showProgressDialog(Component a_parent, String a_title, String a_message, 
-									ChangeListener[] a_changeListeners, ActionListener[] a_cancelListeners,
+									String a_progressFinishedMessage, String a_progressCancelledMessage,
 									Observable a_progressSource)
 	{
 		final JAPDialog dialog = new JAPDialog(a_parent, a_title, true);
+		final String progressFinishedMessage = a_progressFinishedMessage;
+		final String progressCancelledMessage = a_progressCancelledMessage;
+		final Observable progressSource = a_progressSource;
 		
 		JPanel textPanel = new JPanel();
 		JPanel progressPanel = new JPanel();
@@ -2665,7 +2668,9 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		progressBar.setBorderPainted(true);
 		progressBar.setStringPainted(true);
 		
-		Observer progressObserver = 
+		final Vector cancelProcessSig = new Vector();
+		
+		final Observer progressObserver = 
 			new Observer()
 			{
 				public void update(Observable o, Object arg)
@@ -2677,16 +2682,58 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 						int value = pc.getValue();
 						int maximum = pc.getMaximum();
 						int minimum = pc.getMinimum();
+						int progressStatus = pc.getStatus();
 						
-						if(progressBar.getMaximum() != maximum)
+						if(progressStatus == ProgressCapsule.PROGRESS_ONGOING)
 						{
-							progressBar.setMaximum(maximum);
+							synchronized(progressBar)
+							{
+								if(progressBar.getMaximum() != maximum)
+								{
+									progressBar.setMaximum(maximum);
+								}
+								if(progressBar.getMinimum() != minimum)
+								{
+									progressBar.setMinimum(minimum);
+								}
+								progressBar.setValue(value);
+								System.out.println("value: "+value+", maximum: "+maximum);
+							}
 						}
-						if(progressBar.getMinimum() != minimum)
+						else if(progressStatus == ProgressCapsule.PROGRESS_FINISHED)
 						{
-							progressBar.setMinimum(minimum);
+							if(progressFinishedMessage != null)
+							{
+								//TODO: show finishedDialog
+							}
+							progressSource.deleteObserver(this);
+							/* In this case we expect progress percentage to reach 100% so dispose dialog via 
+							 * ChangeListener
+							 */
 						}
-						progressBar.setValue(value);
+						else if(progressStatus == ProgressCapsule.PROGRESS_ABORTED)
+						{
+							if(progressCancelledMessage != null)
+							{
+								//TODO: show error dialog
+							}
+							progressSource.deleteObserver(this);
+							dialog.dispose();
+						}
+							
+					}
+					synchronized(cancelProcessSig)
+					{
+						if(!cancelProcessSig.isEmpty())
+						{
+							cancelProcessSig.removeAllElements();
+							/* 
+							 * This is a generic way of interrupting the progress source.
+							 * If the progress source does not want to be interrupted it may ignore 
+							 * this interrupt.
+							 */
+							Thread.currentThread().interrupt();
+						}
 					}
 				}
 			};
@@ -2696,45 +2743,36 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			a_progressSource.addObserver(progressObserver);
 		}
 		
-		if(a_changeListeners != null)
-		{
-			for (int i = 0; i < a_changeListeners.length; i++) 
-			{
-				progressBar.addChangeListener(a_changeListeners[i]);
-			}
-			
-		}
+		
 		/* this changeListener that disposes the dialog is added in every case */
 			ChangeListener changeListener = 
 				new ChangeListener()
 				{
 					public void stateChanged(ChangeEvent e) 
 					{
-						if(progressBar.getPercentComplete() == 1.0)
+						synchronized(progressBar)
 						{
-							dialog.dispose();
+							if(progressBar.getPercentComplete() == 1.0)
+							{
+								dialog.dispose();
+							}
 						}
 					}
 				};
-			progressBar.addChangeListener(changeListener);
+		progressBar.addChangeListener(changeListener);
 		
-		if(a_cancelListeners != null)
-		{
-			for (int i = 0; i < a_cancelListeners.length; i++) 
-			{
-				cancelButton.addActionListener(a_cancelListeners[i]);
-			}
-		}
-			
 		ActionListener cancelListener = 
 			new ActionListener()
 			{
 				public void actionPerformed(ActionEvent aev)
 				{
-					//dialog.dispose();
+					synchronized(cancelProcessSig)
+					{
+						cancelProcessSig.add(new Object());
+					}
 				}
 			};
-		//cancelButton.addActionListener(cancelListener);
+		cancelButton.addActionListener(cancelListener);
 			
 		textPanel.add(progressLabel);
 		progressPanel.add(progressBar);

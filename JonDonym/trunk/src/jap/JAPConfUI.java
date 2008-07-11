@@ -837,7 +837,45 @@ final class JAPConfUI extends AbstractJAPConfModule
 		
 		return p;
 	}
+	
+	private void submitHelpPathChange()
+	{
+		JAPModel model = JAPModel.getInstance();
+		Observable storageObservable = model.getHelpFileStorageObservable();
+		
+		if(storageObservable != null)
+		{
+			if(model.getHelpPath() != null && m_helpPathField.getText() != null)
+			{
+				if(!model.getHelpPath().equals(m_helpPathField.getText()) && !m_helpPathField.getText().equals(""))
+				{
+					JAPDialog.showProgressDialog(JAPConf.getInstance(), JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL), 
+							JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS), null, null, storageObservable);
+				}
+			}
+		}
+		model.setHelpPath(m_helpPathField.getText());
+	}
 
+	private void resetHelpPath()
+	{
+		m_helpPathField.setText("");
+		m_helpPathField.setEditable(false);
+	}
+	
+	private void updateHelpPath()
+	{
+		if(JAPModel.getInstance().isHelpPathDefined())
+		{
+			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
+		}
+		else
+		{
+			m_helpPathField.setText("");
+		}
+		m_helpPathField.setEditable(false);
+	}
+	
 	public String getTabTitle()
 	{
 		return JAPMessages.getString("ngUIPanelTitle");
@@ -870,21 +908,6 @@ final class JAPConfUI extends AbstractJAPConfModule
 		model.setSaveHelpWindowPosition(m_cbSaveWindowLocationHelp.isSelected());
 		model.setSaveHelpWindowSize(m_cbSaveWindowSizeHelp.isSelected());
 		model.setSaveConfigWindowSize(m_cbSaveWindowSizeConfig.isSelected());
-		
-		Observable storageObservable = JAPModel.getInstance().getHelpFileStorageObservable();
-		
-		if(storageObservable != null)
-		{
-			if(model.getHelpPath() != null && m_helpPathField.getText() != null)
-			{
-				if(!model.getHelpPath().equals(m_helpPathField.getText()) && !m_helpPathField.getText().equals(""))
-				{
-					JAPDialog.showProgressDialog(JAPConf.getInstance(), JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL), 
-							JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS), null, null, storageObservable);
-				}
-			}
-		}
-		JAPModel.getInstance().setHelpPath(m_helpPathField.getText());
 		
 		JAPHelp.getInstance().resetAutomaticLocation(m_cbSaveWindowLocationHelp.isSelected());
 		
@@ -1004,7 +1027,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 				}
 			});
 		}
-
+		submitHelpPathChange();
 		return true;
 	}
 
@@ -1048,15 +1071,6 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_cbWarnOnClose.setSelected(!JAPModel.getInstance().isNeverRemindGoodbye());
 		m_cbShowSplash.setSelected(JAPModel.getInstance().getShowSplashScreen());
 		m_cbStartPortableFirefox.setSelected(JAPModel.getInstance().getStartPortableFirefox());
-		if(JAPModel.getInstance().isHelpPathDefined())
-		{
-			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
-		}
-		else
-		{
-			m_helpPathField.setText("");
-		}
-		m_helpPathField.setEditable(false);
 		
 		boolean b = JAPModel.getMoveToSystrayOnStartup() || JAPModel.getMinimizeOnStartup();
 		for (int i = 0; i < m_comboDialogFormat.getItemCount(); i++)
@@ -1069,6 +1083,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 			}
 		}
 		updateThirdPanel(b);
+		updateHelpPath();
 	}
 
 	public void onResetToDefaultsPressed()
@@ -1097,12 +1112,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_cbShowSplash.setSelected(true);
 		m_cbStartPortableFirefox.setSelected(true);
 		m_cbWarnOnClose.setSelected(JAPConstants.DEFAULT_WARN_ON_CLOSE);
-		m_helpPathField.setText("");
-		m_helpPathField.setEditable(false);
 		updateThirdPanel(JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP ||
 						 JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP);
 		
-		
+		resetHelpPath();
 	}
 
 	private void updateThirdPanel(boolean bAfterStart)
