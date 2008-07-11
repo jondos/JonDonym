@@ -2589,7 +2589,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					}
 					//When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
 					model.setHelpPath(f);
-					m_dlgConfig.updateValues();
+					//m_dlgConfig.updateValues();
 				}
 			}
 			else
@@ -2676,7 +2676,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_dlgConfig.addComponentListener(m_configMovedAdapter);
 				setCursor(c);
 			}
-
+			m_dlgConfig.updateValues();
 			m_dlgConfig.selectCard(card, a_value);
 			m_dlgConfig.setVisible(true);
 		}
