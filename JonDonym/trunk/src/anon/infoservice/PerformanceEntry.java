@@ -4,7 +4,6 @@ import java.text.NumberFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Calendar;
-import java.util.Vector;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -80,7 +79,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
 		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
@@ -128,7 +127,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(a_timestamp);
 		
-		int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 		
 		entry = a_entries[dayOfWeek][hour];
@@ -163,7 +162,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				Calendar cal = Calendar.getInstance();
 				cal.setTimeInMillis(timestamp.longValue());
 				
-				int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+				int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
 				int hour = cal.get(Calendar.HOUR_OF_DAY);
 				
 				entry = a_entries[dayOfWeek][hour];
@@ -221,7 +220,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
 		return m_speed[dayOfWeek][hour];
@@ -231,7 +230,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
 		return m_delay[dayOfWeek][hour];		
@@ -243,7 +242,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		PerformanceAttributeEntry entry = null;
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
 		if(m_speed[dayOfWeek][hour] == null)
@@ -260,7 +259,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		PerformanceAttributeEntry entry = null;
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
 		if(m_delay[dayOfWeek][hour] == null)
@@ -275,7 +274,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
 		if(m_speed[dayOfWeek][hour] == null)
@@ -292,7 +291,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
 		if(m_delay[dayOfWeek][hour] == null)
@@ -318,7 +317,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public String speedToHTML()
 	{
-		return toHTML(m_speed, "kbit/sec");
+		return toHTML(m_speed, "kbit/s");
 	}
 	
 	public String toHTML(PerformanceAttributeEntry[][] a_entries, String a_unit)
@@ -338,7 +337,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
 		
 		for(int hour = 0; hour < 24; hour++)
 		{
