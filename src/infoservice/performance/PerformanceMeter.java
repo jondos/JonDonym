@@ -158,7 +158,7 @@ public class PerformanceMeter implements Runnable
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
 		
 		m_cal.setTimeInMillis(System.currentTimeMillis());
-		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
+		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR) - 1;
 		
 		try
 		{
@@ -740,9 +740,9 @@ public class PerformanceMeter implements Runnable
         		}
         		
         		m_cal.setTimeInMillis(System.currentTimeMillis());
-        		if(m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
+        		if((m_cal.get(Calendar.WEEK_OF_YEAR) - 1) != m_currentWeek)
         		{
-        			m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
+        			m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR) - 1;
         			
         			// open a new stream
         			m_stream.close();
