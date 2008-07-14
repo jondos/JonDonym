@@ -518,12 +518,16 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			trafficString +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			"<a href=\"/delayvalues/" + getId() + "\">" + 
-			((perfEntry != null && System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL) ? String.valueOf(perfEntry.getDelayFromLastTest()) : "?") +
-			" (" + (perfEntry != null ? String.valueOf(perfEntry.getAverageDelay()) : "?") + ") ms</a>" +
+			((perfEntry != null &&
+					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
+					perfEntry.getDelayFromLastTest() != 0) ? String.valueOf(perfEntry.getDelayFromLastTest()) : "?") +
+			" (" + ((perfEntry != null && perfEntry.getAverageDelay() != 0) ? String.valueOf(perfEntry.getAverageDelay()) : "?") + ") ms</a>" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			"<a href=\"/speedvalues/" + getId() + "\">" + 
-			((perfEntry != null  && System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL) ? String.valueOf(perfEntry.getSpeedFromLastTest()) : "?") + 
-			" (" + (perfEntry != null ? String.valueOf(perfEntry.getAverageSpeed()): "?") + ") kbit/s</a>" +
+			((perfEntry != null  &&
+					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
+					perfEntry.getSpeedFromLastTest() != 0) ? String.valueOf(perfEntry.getSpeedFromLastTest()) : "?") + 
+			" (" + ((perfEntry != null && perfEntry.getAverageSpeed() != 0) ? String.valueOf(perfEntry.getAverageSpeed()): "?") + ") kbit/sec</a>" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + new Date(getLastUpdate()) +
