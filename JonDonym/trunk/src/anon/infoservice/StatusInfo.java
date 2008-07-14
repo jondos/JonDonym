@@ -523,7 +523,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			"<a href=\"/speedvalues/" + getId() + "\">" + 
 			((perfEntry != null  && System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL) ? String.valueOf(perfEntry.getSpeedFromLastTest()) : "?") + 
-			" (" + (perfEntry != null ? String.valueOf(perfEntry.getAverageSpeed()): "?") + ") kbit/sec</a>" +
+			" (" + (perfEntry != null ? String.valueOf(perfEntry.getAverageSpeed()): "?") + ") kbit/s</a>" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + new Date(getLastUpdate()) +
