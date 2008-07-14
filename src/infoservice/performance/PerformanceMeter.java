@@ -683,7 +683,7 @@ public class PerformanceMeter implements Runnable
 		    		    if (errorCode == ErrorCodes.E_SUCCESS && m_proxy.isConnected())
 		    		    {
 		    		    	bRetry = true;
-		    		    	throw new Exception("Error while reading from mix cascade");;
+		    		    	throw new Exception("Error while reading from mix cascade");
 		    		    }
 		        	}		        	
 		        	break;		        	
