@@ -26,7 +26,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private static final String XML_ELEMENT_HOURLY_DATA = "HourlyData";
 	private static final String XML_ELEMENT_DAILY_DATA = "DailyData";
 	private static final String XML_ELEMENT_WEEKLY_DATA = "WeeklyData";
-		
+	
 	public static final long LAST_TEST_DATA_TTL = 20 * 60 * 1000;
 	
 	private String m_strCascadeId;
@@ -200,7 +200,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		return m_lastTestAverageSpeed = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_speed, a_data);
 	}
-		
+	
 	public long addDelayData(Hashtable a_data)
 	{
 		return m_lastTestAverageDelay = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_delay, a_data);
