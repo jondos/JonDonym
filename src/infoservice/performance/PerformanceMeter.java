@@ -158,7 +158,7 @@ public class PerformanceMeter implements Runnable
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
 		
 		m_cal.setTimeInMillis(System.currentTimeMillis());
-		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR) - 1;
+		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
 		
 		try
 		{
@@ -246,7 +246,7 @@ public class PerformanceMeter implements Runnable
 			
 			m_lastUpdateRuntime = 0;
 			m_nextUpdate = updateBegin + m_majorInterval;
-						
+			
 			Vector knownMixCascades = Database.getInstance(MixCascade.class).getEntryList();		
 			
 			m_lastTotalUpdates = 0;
@@ -315,9 +315,7 @@ public class PerformanceMeter implements Runnable
 							
 						}
 						else if (iWait > 5)
-						{
-							LogHolder.log(LogLevel.EMERG, LogType.THREAD, "Problems finishing meter thread!");
-						}						
+
 
 						try
 						{
@@ -567,11 +565,12 @@ public class PerformanceMeter implements Runnable
 		for(int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
 			m_proxy.isConnected(); i++)
 		{
-        	try 
+    		long delay = -1;
+    		long speed = -1;
+    		long timestamp;
+    		
+			try 
         	{
-        		long delay;
-        		long speed;		
-        		
         		OutputStream stream;
         		BufferedReader reader;
 		       	
@@ -608,7 +607,7 @@ public class PerformanceMeter implements Runnable
 			        	if (!Thread.currentThread().isInterrupted())
 			        	{
 			        		hashBadInfoServices.put(infoservice.getId(), infoservice);
-			        		continue;
+			        		throw new Exception("Error while reading from infoservice");
 			        	}
 			       	}
 			       	break;
@@ -656,7 +655,7 @@ public class PerformanceMeter implements Runnable
 		        if (reader.read() < 0)
 		        {
 		        	closeMeterSocket();
-		        	continue;
+		        	throw new Exception("Error while reading from socket");
 		        }
 		        long responseStartTime = System.currentTimeMillis();
 		        
@@ -684,7 +683,7 @@ public class PerformanceMeter implements Runnable
 		    		    if (errorCode == ErrorCodes.E_SUCCESS && m_proxy.isConnected())
 		    		    {
 		    		    	bRetry = true;
-		    		    	continue;
+		    		    	throw new Exception("Error while reading from mix cascade");;
 		    		    }
 		        	}		        	
 		        	break;		        	
@@ -695,7 +694,7 @@ public class PerformanceMeter implements Runnable
 		        {
         			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
         			closeMeterSocket();
-        			continue;
+        			throw new Exception("Invalid Packet-Length");
 		        }
 		        
 		        int bytesRead = 0;
@@ -704,14 +703,8 @@ public class PerformanceMeter implements Runnable
 		        
 		        while(bytesRead < m_dataSize) 
 		        {
-		        	try
-		        	{
-		        		recvd = reader.read(m_recvBuff, bytesRead, toRead);
-		        	}
-		        	catch(Exception ex)
-		        	{
-		        		continue;
-		        	}
+		        	recvd = reader.read(m_recvBuff, bytesRead, toRead);
+
 		        	if(recvd == -1) break;
 		        	bytesRead += recvd;
 		        	toRead -= recvd;
@@ -734,33 +727,6 @@ public class PerformanceMeter implements Runnable
         		
         		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
         		
-        		long timestamp = System.currentTimeMillis();
-        		
-        		if(delay != -1)
-        		{
-        			vDelay.put(new Long(timestamp), new Long(delay));
-        		}
-        		
-        		if(speed != -1)
-        		{
-        			vSpeed.put(new Long(timestamp), new Long(speed));
-        		}
-        		
-        		m_cal.setTimeInMillis(System.currentTimeMillis());
-        		if((m_cal.get(Calendar.WEEK_OF_YEAR) - 1) != m_currentWeek)
-        		{
-        			m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR) - 1;
-        			
-        			// open a new stream
-        			m_stream.close();
-        			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
-        					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
-        		}
-        		
-        		m_stream.write((timestamp + "\t" + a_cascade.getId() + "\t" + delay + "\t" + speed + "\n").getBytes());
-        		
-            	Database.getInstance(PerformanceEntry.class).update(entry);
-        		
         		m_lBytesRecvd += bytesRead;        		        		
         		bUpdated = true;
         		
@@ -769,12 +735,36 @@ public class PerformanceMeter implements Runnable
         	catch (InterruptedIOException a_e)
         	{
         		LogHolder.log(LogLevel.WARNING, LogType.NET, a_e);
-        		break;
         	}
         	catch(Exception e)
         	{
 	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
 	        }
+        	
+    		timestamp = System.currentTimeMillis();
+    		
+    		vDelay.put(new Long(timestamp), new Long(delay));
+    		vSpeed.put(new Long(timestamp), new Long(speed));
+        	
+    		try
+    		{
+    			m_cal.setTimeInMillis(System.currentTimeMillis());
+    			if(m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
+    			{
+    				m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
+    			
+    				// open a new stream
+    				m_stream.close();
+    				m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
+    						m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
+    			}
+    		
+    			m_stream.write((timestamp + "\t" + a_cascade.getId() + "\t" + delay + "\t" + speed + "\n").getBytes());
+    		}
+    		catch(IOException ex)
+    		{
+    			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, ex);
+    		}
 		}
 		
 		long lastDelay = entry.addDelayData(vDelay);
