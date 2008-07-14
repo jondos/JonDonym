@@ -304,18 +304,21 @@ public class PerformanceMeter implements Runnable
 					iWait++;
 					performTestThread.interrupt();
 					
-					if (iWait >= 5)
+					if (iWait > 5)
 					{	
 						closeMeterSocket();
 						if (iWait > 20)
 						{
 							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
-									"Using deprecated stop method to finish meter thread!");
+								"Using deprecated stop method to finish meter thread!");
 							performTestThread.stop();
 							
 						}
 						else if (iWait > 5)
-
+						{
+							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
+								"Problems finishing meter thread!");
+						}
 
 						try
 						{
