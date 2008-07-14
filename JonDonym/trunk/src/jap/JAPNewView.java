@@ -2803,7 +2803,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					//{
 					//	userProgressBar.setMaximum(currentStatus.getNrOfActiveUsers());
 					//}
-					m_labelAnonymityUser.setText(Integer.toString(currentStatus.getNrOfActiveUsers()));
+					m_labelAnonymityUser.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
+							(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : ""));
 					//strSystrayTooltip += "\n" + JAPMessages.getString("ngNrOfUsers") + ": " +
 					//currentStatus.getNrOfActiveUsers();
 					if (anonLevel >= StatusInfo.ANON_LEVEL_MIN)

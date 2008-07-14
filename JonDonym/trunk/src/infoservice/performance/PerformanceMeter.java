@@ -577,7 +577,7 @@ public class PerformanceMeter implements Runnable
         		OutputStream stream;
         		BufferedReader reader;
 		       	
-		       	InfoServiceDBEntry infoservice;
+		       	InfoServiceDBEntry infoservice;		       	
 		       	
 		       	while (true)
 		       	{
@@ -588,10 +588,8 @@ public class PerformanceMeter implements Runnable
 			       		return bUpdated;
 			       	}
 			        
-			       	host = 
-			       		((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getHost();
-			       	port = 
-			       		((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getPort();
+			       	host = ((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getHost();
+			       	port = ((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getPort();
 	        		
 			       	// request token from info service directly
 			       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
@@ -604,16 +602,22 @@ public class PerformanceMeter implements Runnable
 			       	httpResponse = conn.Post("/requestperformancetoken", xml);
 			       	
 			       	if(httpResponse.getStatusCode() != 200 || Thread.currentThread().isInterrupted())
-			       	{
+			       	{			       		
 			        	LogHolder.log(LogLevel.WARNING, LogType.NET, 
-			        			"Token request to performance server failed. Status Code: " + httpResponse.getStatusCode());			        	
+			        			"Token request to performance server failed. Status Code: " + httpResponse.getStatusCode());
+			        	httpResponse = null;
 			        	if (!Thread.currentThread().isInterrupted())
 			        	{
-			        		hashBadInfoServices.put(infoservice.getId(), infoservice);
-			        		throw new Exception("Error while reading from infoservice");
+			        		hashBadInfoServices.put(infoservice.getId(), infoservice);			        		
+			        		continue;
 			        	}
 			       	}
 			       	break;
+		       	}
+		       	
+		       	if (httpResponse == null)
+		       	{
+		       		throw new Exception("Error while reading from infoservice");
 		       	}
 		       	
 		       	PerformanceToken token = null;
