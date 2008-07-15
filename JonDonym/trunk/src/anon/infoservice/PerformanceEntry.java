@@ -39,10 +39,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	private PerformanceAttributeEntry[][] m_speed = new PerformanceAttributeEntry[7][24];
 	private PerformanceAttributeEntry[][] m_delay = new PerformanceAttributeEntry[7][24];
+	private PerformanceAttributeEntry[][] m_users = new PerformanceAttributeEntry[7][24];
 	
 	private long m_lastTestAverageSpeed = 0;
 	private long m_lastTestAverageDelay = 0;
-		
+	private long m_lastTestAverageUsers = 0;
+	
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
@@ -136,7 +138,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(a_attributeName);
 		}
-
+		
 		entry.addValue(a_timestamp, a_value);
 		
 		m_lastUpdate = a_timestamp;
@@ -156,7 +158,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		Long timestamp = null;
 		Enumeration e = a_data.keys();
-			
+		
 		int values = 0;
 		
 		while(e.hasMoreElements())
@@ -206,6 +208,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_lastTestAverageDelay = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_delay, a_data);
 	}
 	
+	public long addUsersData(Hashtable a_data)
+	{
+		return m_lastTestAverageUsers = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_USERS, m_users, a_data);
+	}
+	
 	public void addSpeedValue(long a_timestamp, long a_value)
 	{
 		addValue(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_speed, a_timestamp, a_value);
@@ -216,6 +223,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		addValue(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_delay, a_timestamp, a_value);
 	}
 	
+	public void addUsersValue(long a_timestamp, long a_value)
+	{
+		addValue(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_USERS, m_users, a_timestamp, a_value);
+	}
+	
 	public long getDelayFromLastTest()
 	{
 		return m_lastTestAverageDelay;
@@ -224,6 +236,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public long getSpeedFromLastTest()
 	{
 		return m_lastTestAverageSpeed;
+	}
+	
+	public long getUsersFromLastTest()
+	{
+		return m_lastTestAverageUsers;
 	}
 	
 	public PerformanceAttributeEntry getCurrentSpeedEntry()
@@ -314,6 +331,23 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 	}
 	
+	public long getAverageUsers()
+	{
+		m_cal.setTimeInMillis(System.currentTimeMillis());
+		
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		
+		if(m_users[dayOfWeek][hour] == null)
+		{
+			return 0;
+		}
+		else
+		{
+			return m_users[dayOfWeek][hour].getAverageValue();
+		}
+	}
+	
 	public boolean isInvalid()
 	{
 		return (getAverageSpeed() == -1 || getAverageDelay() == -1);
@@ -328,6 +362,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public String speedToHTML()
 	{
 		return toHTML(m_speed, "kbit/sec");
+	}
+	
+	public String usersToHTML()
+	{
+		return toHTML(m_users, "");
 	}
 	
 	public String toHTML(PerformanceAttributeEntry[][] a_entries, String a_unit)
@@ -377,6 +416,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				else if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_entries == m_delay)
 				{
 					htmlData += "<td>" + m_lastTestAverageDelay + " " + a_unit + "</td>";
+				}
+				else if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_entries == m_users)
+				{
+					htmlData += "<td>" + m_lastTestAverageUsers + " " + a_unit + "</td>";
 				}
 				else if(hour == m_cal.get(Calendar.HOUR_OF_DAY))
 				{
@@ -474,6 +517,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		public static final String PERFORMANCE_ATTRIBUTE_DELAY = "Delay";
 		public static final String PERFORMANCE_ATTRIBUTE_SPEED = "Speed";
+		public static final String PERFORMANCE_ATTRIBUTE_USERS = "Users";
 		
 		public static final String XML_ATTR_MIN = "min";
 		public static final String XML_ATTR_MAX = "max";

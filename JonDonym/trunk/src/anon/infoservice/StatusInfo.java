@@ -512,9 +512,9 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			trafficString = " (high)";
 		}
 		htmlTableLine = htmlTableLine + "</TD><TD CLASS=\"name\">" + getId() +
-			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + Integer.toString(getNrOfActiveUsers()) +
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\"><a href=\"/usersvalues/" + getId() + "\">" + Integer.toString(getNrOfActiveUsers()) +
 			//"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + Integer.toString(getCurrentRisk()) +
-			"</TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
+			"</a></TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
 			trafficString +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			"<a href=\"/delayvalues/" + getId() + "\">" + 
