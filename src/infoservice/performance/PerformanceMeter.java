@@ -66,6 +66,7 @@ import anon.infoservice.PerformanceEntry;
 import anon.infoservice.SimpleMixCascadeContainer;
 import anon.infoservice.Database;
 import anon.infoservice.InfoServiceDBEntry;
+import anon.infoservice.StatusInfo;
 import anon.pay.PayAccount;
 import anon.pay.PayAccountsFile;
 import anon.proxy.AnonProxy;
@@ -173,14 +174,27 @@ public class PerformanceMeter implements Runnable
 				int firstTab = line.indexOf('\t');
 				int secondTab = line.indexOf('\t', firstTab + 1);
 				int thirdTab = line.indexOf('\t', secondTab + 1);
+				int fourthTab = line.indexOf('\t', thirdTab + 1);
 				
 				if(firstTab != -1 && secondTab != -1 && thirdTab != -1)
 				{
 					long timestamp = Long.parseLong(line.substring(0, firstTab));
 					String id = line.substring(firstTab + 1, secondTab);
 					long delay = Long.parseLong(line.substring(secondTab + 1, thirdTab));
-					long speed = Long.parseLong(line.substring(thirdTab + 1));
 					
+					// old format without users
+					long speed = 0;
+					long users = -1;
+					if(fourthTab == -1)
+					{
+						speed = Long.parseLong(line.substring(thirdTab + 1));
+					}
+					else
+					{
+						speed = Long.parseLong(line.substring(thirdTab + 1, fourthTab));
+						users = Long.parseLong(line.substring(fourthTab +1));
+					}
+						
 					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(id);
 					
 					if(entry == null)
@@ -190,6 +204,11 @@ public class PerformanceMeter implements Runnable
 					
 					entry.addDelayValue(timestamp, delay);
 					entry.addSpeedValue(timestamp, speed);
+					
+					if(users != -1)
+					{
+						entry.addUsersValue(timestamp, users);
+					}
 					
 					Database.getInstance(PerformanceEntry.class).update(entry);
 				}
@@ -564,12 +583,14 @@ public class PerformanceMeter implements Runnable
 		
 		Hashtable vDelay = new Hashtable();
 		Hashtable vSpeed = new Hashtable();
+		Hashtable vUsers = new Hashtable();
 		
 		for(int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
 			m_proxy.isConnected(); i++)
 		{
     		long delay = -1;
     		long speed = -1;
+    		long users = -1;
     		long timestamp;
     		
 			try 
@@ -577,7 +598,15 @@ public class PerformanceMeter implements Runnable
         		OutputStream stream;
         		BufferedReader reader;
 		       	
-		       	InfoServiceDBEntry infoservice;		       	
+		       	InfoServiceDBEntry infoservice;
+		       	
+	    		a_cascade.fetchCurrentStatus(m_maxWaitForTest);
+	    		StatusInfo info = a_cascade.getCurrentStatus();
+	    		
+	    		if(info != null)
+	    		{
+	    			users = info.getNrOfActiveUsers();
+	    		}
 		       	
 		       	while (true)
 		       	{
@@ -752,21 +781,22 @@ public class PerformanceMeter implements Runnable
     		
     		vDelay.put(new Long(timestamp), new Long(delay));
     		vSpeed.put(new Long(timestamp), new Long(speed));
-        	
+    		vUsers.put(new Long(timestamp), new Long(users));
+    		
     		try
     		{
     			m_cal.setTimeInMillis(System.currentTimeMillis());
     			if(m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
     			{
     				m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
-    			
+    				
     				// open a new stream
     				m_stream.close();
     				m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
     						m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
     			}
-    		
-    			m_stream.write((timestamp + "\t" + a_cascade.getId() + "\t" + delay + "\t" + speed + "\n").getBytes());
+    			
+    			m_stream.write((timestamp + "\t" + a_cascade.getId() + "\t" + delay + "\t" + speed + "\t" + users + "\n").getBytes());
     		}
     		catch(IOException ex)
     		{
@@ -776,10 +806,11 @@ public class PerformanceMeter implements Runnable
 		
 		long lastDelay = entry.addDelayData(vDelay);
 		long lastSpeed = entry.addSpeedData(vSpeed);
+		long lastUsers = entry.addUsersData(vUsers);
 		
 		Database.getInstance(PerformanceEntry.class).update(entry);
 		
-    	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/sec");
+    	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/sec; Last Users:" + lastUsers);
 		
     	if (m_proxy.isConnected())
 		{

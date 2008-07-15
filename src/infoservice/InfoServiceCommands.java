@@ -948,8 +948,9 @@ final public class InfoServiceCommands implements JWSInternalCommands
 						+ "<td class=\"status\">"  + JAPUtil.formatBytesValueWithUnit(account.getBalance().getVolumeBytesLeft() * 1000) + "</td>"
 						+ "<td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(account.getBackupTime()) + "</td></tr>";
 					}
-					htmlData += "</table><br />";
 				}
+				
+				htmlData += "</table><br />";
 			}
 			else
 			{
@@ -1026,6 +1027,43 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			else
 			{
 				htmlData += entry.speedToHTML();
+			}
+			
+			htmlData += getHumanStatusFooter();
+				
+			/* send content */
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_HTML,
+					HttpResponseStructure.HTTP_ENCODING_PLAIN, htmlData);
+			
+		}
+		catch (Exception e)
+		{
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR);
+				LogHolder.log(LogLevel.ERR, LogType.MISC, e);
+		}
+		
+		return httpResponse;
+	}
+	
+	private HttpResponseStructure humanGetUsersValues(String a_cascadeId)
+	{
+		HttpResponseStructure httpResponse;
+		
+		try
+		{
+			String htmlData = getHumanStatusHeader();
+	
+			PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascadeId);
+			
+			htmlData += "<a href=\"/status\">Back to Server Status</a><br /><br />";
+			
+			if(entry == null)
+			{
+				htmlData += "No performance data found.";
+			}
+			else
+			{
+				htmlData += entry.usersToHTML();
 			}
 			
 			htmlData += getHumanStatusFooter();
@@ -1877,7 +1915,16 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: 
 			 */
 			httpResponse = humanGetSpeedValues(command.substring(13));
-		}			
+		}
+		else if ( (command.startsWith("/usersvalues")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			/** Full Command: GET /usersvalues
+			 * Source: Browser
+			 * Description: get the speed values for a specific cascade for human view as html file
+			 * Description_de: 
+			 */
+			httpResponse = humanGetUsersValues(command.substring(13));
+		}	
 		else if ( (command.equals("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /mixes 
