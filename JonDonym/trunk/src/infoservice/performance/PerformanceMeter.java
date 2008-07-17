@@ -178,7 +178,7 @@ public class PerformanceMeter implements Runnable
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
 		}
 	}
-
+	
 	private void readOldPerformanceData(int week) 
 	{
 		int year = m_cal.get(Calendar.YEAR);
