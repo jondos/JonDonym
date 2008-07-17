@@ -135,6 +135,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int day = calculateDayIndex(cal);
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 		
+		if(day == -1)
+		{
+			return;
+		}
+		
 		entry = a_entries[day][hour];
 		if(entry == null)
 		{
@@ -173,6 +178,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			int day = calculateDayIndex(cal);
 			int hour = cal.get(Calendar.HOUR_OF_DAY);
+			
+			if(day == -1)
+			{
+				continue;
+			}
 			
 			entry = a_entries[day][hour];
 			if(entry == null)
