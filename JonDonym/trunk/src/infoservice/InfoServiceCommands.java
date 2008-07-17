@@ -35,6 +35,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.w3c.dom.Document;
@@ -971,7 +972,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		return httpResponse;
 	}
 	
-	private HttpResponseStructure humanGetDelayValues(String a_cascadeId)
+	private HttpResponseStructure humanGetDelayValues(String a_cascadeId, int day)
 	{
 		HttpResponseStructure httpResponse;
 		
@@ -989,7 +990,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			}
 			else
 			{
-				htmlData += entry.delayToHTML();
+				htmlData += entry.delayToHTML(day);
 			}
 			
 			htmlData += getHumanStatusFooter();
@@ -1008,7 +1009,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		return httpResponse;
 	}
 	
-	private HttpResponseStructure humanGetSpeedValues(String a_cascadeId)
+	private HttpResponseStructure humanGetSpeedValues(String a_cascadeId, int day)
 	{
 		HttpResponseStructure httpResponse;
 		
@@ -1026,7 +1027,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			}
 			else
 			{
-				htmlData += entry.speedToHTML();
+				htmlData += entry.speedToHTML(day);
 			}
 			
 			htmlData += getHumanStatusFooter();
@@ -1045,7 +1046,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		return httpResponse;
 	}
 	
-	private HttpResponseStructure humanGetUsersValues(String a_cascadeId)
+	private HttpResponseStructure humanGetUsersValues(String a_cascadeId, int day)
 	{
 		HttpResponseStructure httpResponse;
 		
@@ -1063,7 +1064,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			}
 			else
 			{
-				htmlData += entry.usersToHTML();
+				htmlData += entry.usersToHTML(day);
 			}
 			
 			htmlData += getHumanStatusFooter();
@@ -1898,33 +1899,57 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 */
 			httpResponse = humanGetPerfStatus();
 		}
-		else if ( (command.startsWith("/delayvalues")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.startsWith("/values")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			/** Full Command: GET /delayvalues
+			/** Full Command: GET /values
 			 * Source: Browser
 			 * Description: get the delay values for a specific cascade for human view as html file
 			 * Description_de: 
 			 */
-			httpResponse = humanGetDelayValues(command.substring(13));
+			StringTokenizer t = new StringTokenizer(command.substring(7), "/");
+			String cascadeId = null;
+			String entry = null;
+			int day = 6;
+			
+			if(t.hasMoreTokens())
+			{
+				entry = t.nextToken();
+			}
+			
+			if(t.hasMoreTokens())
+			{
+				cascadeId = t.nextToken();
+			}
+			
+			if(t.hasMoreTokens())
+			{
+				try
+				{
+					day = Integer.parseInt(t.nextToken());
+				}
+				catch(NumberFormatException ex)
+				{
+					day = -1;
+				}
+			}
+			
+			if(entry.equals("delay") && cascadeId != null && day >= 0 && day <= 6)
+			{			
+				httpResponse = humanGetDelayValues(cascadeId, day);
+			}
+			else if(entry.equals("speed") && cascadeId != null && day >= 0 && day <= 6)
+			{
+				httpResponse = humanGetSpeedValues(cascadeId, day);
+			}
+			else if(entry.equals("users") && cascadeId != null && day >= 0 && day <= 6)
+			{
+				httpResponse = humanGetUsersValues(cascadeId, day);
+			}
+			else
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_NOT_FOUND);
+			}
 		}
-		else if ( (command.startsWith("/speedvalues")) && (method == Constants.REQUEST_METHOD_GET))
-		{
-			/** Full Command: GET /speedvalues
-			 * Source: Browser
-			 * Description: get the speed values for a specific cascade for human view as html file
-			 * Description_de: 
-			 */
-			httpResponse = humanGetSpeedValues(command.substring(13));
-		}
-		else if ( (command.startsWith("/usersvalues")) && (method == Constants.REQUEST_METHOD_GET))
-		{
-			/** Full Command: GET /usersvalues
-			 * Source: Browser
-			 * Description: get the speed values for a specific cascade for human view as html file
-			 * Description_de: 
-			 */
-			httpResponse = humanGetUsersValues(command.substring(13));
-		}	
 		else if ( (command.equals("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /mixes 

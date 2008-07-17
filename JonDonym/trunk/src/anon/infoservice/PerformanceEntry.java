@@ -1,6 +1,7 @@
 package anon.infoservice;
 
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Calendar;
@@ -16,6 +17,8 @@ import anon.util.IXMLEncodable;
 
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
+	public static final int CURRENT_DAY_INDEX = 6;
+	
 	private static final String XML_ATTR_HOUR = "hour";
 	private static final String XML_ATTR_DAY = "day";
 	private static final String XML_ATTR_ID = "id";
@@ -30,7 +33,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public static final long LAST_TEST_DATA_TTL = 20 * 60 * 1000;
 	
 	private String m_strCascadeId;
-	private Calendar m_cal = Calendar.getInstance();
+	private Calendar m_current = Calendar.getInstance();
 	
 	private long m_lastUpdate;
 	private long m_serial;
@@ -51,9 +54,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
 	
-	public PerformanceEntry(String a_strCascadeId, long a_lExpireTime)
+	public PerformanceEntry(String a_strCascadeId)
 	{	
-		super(a_lExpireTime);
+		super(Long.MAX_VALUE);
 		
 		m_strCascadeId = a_strCascadeId;
 		
@@ -80,24 +83,23 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + XML_ELEMENT_CURRENT_HOURLY_DATA);
 		}
 		
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
 		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
 		if(elemDelay == null)
 		{
 			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
 		}
-		m_delay[dayOfWeek][hour] = new PerformanceAttributeEntry(elemDelay);
+		m_delay[6][hour] = new PerformanceAttributeEntry(elemDelay);
 		
 		Node elemSpeed = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
 		if(elemSpeed == null)
 		{
 			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
 		}
-		m_speed[dayOfWeek][hour] = new PerformanceAttributeEntry(elemSpeed);
+		m_speed[6][hour] = new PerformanceAttributeEntry(elemSpeed);
 		
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
@@ -130,13 +132,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(a_timestamp);
 		
-		int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+		int day = calculateDayIndex(cal);
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 		
-		entry = a_entries[dayOfWeek][hour];
+		entry = a_entries[day][hour];
 		if(entry == null)
 		{
-			a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(a_attributeName);
+			a_entries[day][hour] = entry = new PerformanceAttributeEntry(a_attributeName);
 		}
 		
 		entry.addValue(a_timestamp, a_value);
@@ -169,13 +171,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			Calendar cal = Calendar.getInstance();
 			cal.setTimeInMillis(timestamp.longValue());
 			
-			int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+			int day = calculateDayIndex(cal);
 			int hour = cal.get(Calendar.HOUR_OF_DAY);
 			
-			entry = a_entries[dayOfWeek][hour];
+			entry = a_entries[day][hour];
 			if(entry == null)
 			{
-				a_entries[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(a_attributeName); 
+				a_entries[day][hour] = entry = new PerformanceAttributeEntry(a_attributeName); 
 			}
 			
 			entry.addValue(timestamp.longValue(), value);
@@ -245,36 +247,33 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public PerformanceAttributeEntry getCurrentSpeedEntry()
 	{
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
-		return m_speed[dayOfWeek][hour];
+		return m_speed[6][hour];
 	}
 	
 	public PerformanceAttributeEntry getCurrentDelayEntry()
 	{
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
-		return m_delay[dayOfWeek][hour];
+		return m_delay[6][hour];
 	}
 	
 	public void overrideDailyAverageSpeed(long a_lSpeed)
 	{
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTimeInMillis(System.currentTimeMillis());
 		
 		PerformanceAttributeEntry entry = null;
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
-		if(m_speed[dayOfWeek][hour] == null)
+		if(m_speed[6][hour] == null)
 		{
-			m_speed[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
+			m_speed[6][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
 		}
 		
 		entry.overrideAverageValue(a_lSpeed);
@@ -282,16 +281,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public void overrideDailyAverageDelay(long a_lDelay)
 	{
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTimeInMillis(System.currentTimeMillis());
 		
 		PerformanceAttributeEntry entry = null;
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
-		if(m_delay[dayOfWeek][hour] == null)
+		if(m_delay[CURRENT_DAY_INDEX][hour] == null)
 		{
-			m_delay[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
+			m_delay[CURRENT_DAY_INDEX][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
 		}
 		
 		entry.overrideAverageValue(a_lDelay);
@@ -299,52 +297,49 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public long getAverageSpeed()
 	{
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
-		if(m_speed[dayOfWeek][hour] == null)
+		if(m_speed[CURRENT_DAY_INDEX][hour] == null)
 		{
 			return 0;
 		}
 		else
 		{
-			return m_speed[dayOfWeek][hour].getAverageValue();
+			return m_speed[CURRENT_DAY_INDEX][hour].getAverageValue();
 		}
 	}
 	
 	public long getAverageDelay()
 	{
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
-		if(m_delay[dayOfWeek][hour] == null)
+		if(m_delay[CURRENT_DAY_INDEX][hour] == null)
 		{
 			return 0;
 		}
 		else
 		{
-			return m_delay[dayOfWeek][hour].getAverageValue();
+			return m_delay[CURRENT_DAY_INDEX][hour].getAverageValue();
 		}
 	}
 	
 	public long getAverageUsers()
 	{
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
+		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
-		if(m_users[dayOfWeek][hour] == null)
+		if(m_users[CURRENT_DAY_INDEX][hour] == null)
 		{
 			return 0;
 		}
 		else
 		{
-			return m_users[dayOfWeek][hour].getAverageValue();
+			return m_users[CURRENT_DAY_INDEX][hour].getAverageValue();
 		}
 	}
 	
@@ -354,28 +349,66 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 	}
 	
-	public String delayToHTML()
+	public String delayToHTML(int day)
 	{
-		return toHTML(m_delay, "ms");
+		return toHTML(m_delay, "ms", day);
 	}
 	
-	public String speedToHTML()
+	public String speedToHTML(int day)
 	{
-		return toHTML(m_speed, "kbit/sec");
+		return toHTML(m_speed, "kbit/sec", day);
 	}
 	
-	public String usersToHTML()
+	public String usersToHTML(int day)
 	{
-		return toHTML(m_users, "");
+		return toHTML(m_users, "", day);
 	}
 	
-	public String toHTML(PerformanceAttributeEntry[][] a_entries, String a_unit)
+	public String toHTML(PerformanceAttributeEntry[][] a_entries, String a_unit, int a_selectedDay)
 	{
 		MixCascade cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(m_strCascadeId);
 		
 		String htmlData = 
 				(cascade != null ? cascade.getName() : "") +
-				"<h2>" + m_strCascadeId + "</h2>" +
+				"<h2>" + m_strCascadeId + "</h2>";
+		
+		
+		// TODO: improve
+		String e = "";
+		if(a_entries == m_speed)
+		{
+			e = "speed";
+		}
+		else if(a_entries == m_delay)
+		{
+			e = "delay";
+		}
+		else if(a_entries == m_users)
+		{
+			e = "users";
+		}
+	
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_WEEK, -6);
+		
+		for(int i = 0; i < 7; i++)
+		{
+			SimpleDateFormat df = new SimpleDateFormat("E yyyy-MM-dd");
+			String date = df.format(cal.getTime());
+			
+			if(i == a_selectedDay)
+			{
+				htmlData += "<b> " + (i == CURRENT_DAY_INDEX ? "Today</b>" : date + "</b> | "); 
+			}
+			else
+			{
+				htmlData += "<a href=\"/values/" + e + "/" + m_strCascadeId + "/" + i + "\">" + 
+				(i == CURRENT_DAY_INDEX ? "Today</a>" : date +"</a> | ");
+			}
+			cal.add(Calendar.DAY_OF_WEEK, 1);
+		}
+		
+		htmlData += "<br /><br />" +
 				"<table width=\"60%\">" +
 				"<tr>" +
 				"<th width=\"16%\">Hour</th>" +
@@ -384,16 +417,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				"<th>Max</th>" +
 				"<th>Std. Deviation</th><th>Last Test</th><th>Errors</th></tr>";
 		
-		m_cal.setTimeInMillis(System.currentTimeMillis());
-		
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
-		
+		m_current.setTimeInMillis(System.currentTimeMillis());
+	
 		for(int hour = 0; hour < 24; hour++)
 		{
 			htmlData += "<tr>" +
 					"<td CLASS=\"name\">" + hour + ":00 - " + ((hour + 1) % 24) + ":00</td>";
 			
-			PerformanceAttributeEntry entry = a_entries[dayOfWeek][hour];
+			PerformanceAttributeEntry entry = a_entries[a_selectedDay][hour];
 			
 			Calendar calLastTest = Calendar.getInstance();
 			calLastTest.setTimeInMillis(m_lastTestTime);
@@ -421,7 +452,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				{
 					htmlData += "<td>" + m_lastTestAverageUsers + " " + a_unit + "</td>";
 				}
-				else if(hour == m_cal.get(Calendar.HOUR_OF_DAY))
+				else if(hour == m_current.get(Calendar.HOUR_OF_DAY))
 				{
 					htmlData += "<td>No test since IS startup</td>";
 				}
@@ -446,6 +477,25 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		htmlData += "</table>";
 		
 		return htmlData;
+	}
+	
+	public int calculateDayIndex(Calendar a_cal)
+	{
+		int dayOfWeek = a_cal.get(Calendar.DAY_OF_WEEK);
+		int week = a_cal.get(Calendar.WEEK_OF_YEAR);
+		
+		m_current.setTimeInMillis(System.currentTimeMillis());
+		int currentDayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
+		int currentWeek = m_current.get(Calendar.WEEK_OF_YEAR);
+		
+		if(week - currentWeek > 1 ||
+			(week - currentWeek == 1 &&
+			dayOfWeek <= currentDayOfWeek))
+		{
+			return -1;
+		}
+		
+		return (dayOfWeek + 6 - currentDayOfWeek) % 7;
 	}
 	
 	public Element toXmlElement(Document a_doc)

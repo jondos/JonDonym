@@ -512,18 +512,18 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			trafficString = " (high)";
 		}
 		htmlTableLine = htmlTableLine + "</TD><TD CLASS=\"name\">" + getId() +
-			"</TD><TD CLASS=\"status\" ALIGN=\"right\"><a href=\"/usersvalues/" + getId() + "\">" + Integer.toString(getNrOfActiveUsers()) +
+			"</TD><TD CLASS=\"status\" ALIGN=\"right\"><a href=\"/values/users/" + getId() + "\">" + Integer.toString(getNrOfActiveUsers()) +
 			//"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + Integer.toString(getCurrentRisk()) +
 			"</a></TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
 			trafficString +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
-			"<a href=\"/delayvalues/" + getId() + "\">" + 
+			"<a href=\"/values/delay/" + getId() + "\">" + 
 			((perfEntry != null &&
 					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
 					perfEntry.getDelayFromLastTest() != 0) ? String.valueOf(perfEntry.getDelayFromLastTest()) : "?") +
 			" (" + ((perfEntry != null && perfEntry.getAverageDelay() != 0) ? String.valueOf(perfEntry.getAverageDelay()) : "?") + ") ms</a>" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
-			"<a href=\"/speedvalues/" + getId() + "\">" + 
+			"<a href=\"/values/speed/" + getId() + "\">" + 
 			((perfEntry != null  &&
 					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
 					perfEntry.getSpeedFromLastTest() != 0) ? String.valueOf(perfEntry.getSpeedFromLastTest()) : "?") + 

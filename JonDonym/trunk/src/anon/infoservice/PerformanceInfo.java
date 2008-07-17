@@ -153,7 +153,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		// and calculate the average
 		
 		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
-		PerformanceEntry avgEntry = new PerformanceEntry(a_cascadeId, -1);
+		PerformanceEntry avgEntry = new PerformanceEntry(a_cascadeId);
 		
 		Vector v = new Vector();
 		

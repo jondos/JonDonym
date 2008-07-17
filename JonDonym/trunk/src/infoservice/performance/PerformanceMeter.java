@@ -161,10 +161,37 @@ public class PerformanceMeter implements Runnable
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
 		
+		readOldPerformanceData(m_currentWeek);
+		if(m_cal.get(Calendar.DAY_OF_WEEK) != 6)
+		{
+			readOldPerformanceData(m_currentWeek - 1);
+		}
+		
+		try
+		{
+			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
+				
+			m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
+		}
+		catch(FileNotFoundException ex)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
+		}
+	}
+
+	private void readOldPerformanceData(int week) 
+	{
+		int year = m_cal.get(Calendar.YEAR);
+		
+		if(week < 0)
+		{
+			year--;
+		}
+		
 		try
 		{
 			FileInputStream stream = new FileInputStream(PERFORMANCE_LOG_FILE + 
-					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log");
+					year + "_" + week + ".log");
 			
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 			String line = null;
@@ -199,7 +226,7 @@ public class PerformanceMeter implements Runnable
 					
 					if(entry == null)
 					{
-						entry = createPerformanceEntry(id);
+						entry = new PerformanceEntry(id);
 					}
 					
 					entry.addDelayValue(timestamp, delay);
@@ -219,18 +246,7 @@ public class PerformanceMeter implements Runnable
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not read "+ PERFORMANCE_LOG_FILE + ". No previous performanace date for this week found.");
 		}
 		
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "Added previous performance data for this week.");
-		
-		try
-		{
-			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
-				
-			m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
-		}
-		catch(FileNotFoundException ex)
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
-		}
+		LogHolder.log(LogLevel.WARNING, LogType.NET, "Added previous performance data for week" + week);
 	}
 	
 	public void run() 
@@ -548,7 +564,7 @@ public class PerformanceMeter implements Runnable
 		
 		if(entry == null)
 		{
-			entry = createPerformanceEntry(a_cascade.getId());
+			entry = new PerformanceEntry(a_cascade.getId());
 		}
 		
 		m_recvBuff = new char[m_dataSize];				
@@ -719,10 +735,9 @@ public class PerformanceMeter implements Runnable
 		    		    if (errorCode == ErrorCodes.E_SUCCESS && m_proxy.isConnected())
 		    		    {
 		    		    	bRetry = true;
-		    		    	throw new Exception("Error while reading from mix cascade");
 		    		    }
 		        	}		        	
-		        	break;		        	
+		        	throw new Exception("Error while reading from mix cascade");  	
 		        }
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance meter parsed server header.");
 		        
@@ -824,34 +839,6 @@ public class PerformanceMeter implements Runnable
 		}
     	
 		return bUpdated;
-	}
-
-	private PerformanceEntry createPerformanceEntry(String a_cascadeId)
-	{
-		PerformanceEntry entry;
-		m_cal.setTimeInMillis(System.currentTimeMillis());
-		
-		int days = m_cal.get(Calendar.DAY_OF_WEEK) - 1;
-		int hours = m_cal.get(Calendar.HOUR_OF_DAY);
-		int minutes = m_cal.get(Calendar.MINUTE);
-		int seconds = m_cal.get(Calendar.SECOND);
-		int millis = m_cal.get(Calendar.MILLISECOND);
-		
-		long beginningOfWeek = 
-			System.currentTimeMillis() -
-			days * 24 * 60 * 60 * 1000 - 
-			hours * 60 * 60 * 1000 - 
-			minutes * 60 * 1000 - 
-			seconds * 1000 -
-			millis;
-		
-		long beginningOfNextWeek =
-			beginningOfWeek +
-			7 * 24 * 60 * 60 * 1000;
-		
-		entry = new PerformanceEntry(a_cascadeId, beginningOfNextWeek);
-		
-		return entry;
 	}
 		
 	public HTTPResponse parseHTTPHeader(BufferedReader a_reader) throws IOException, NumberFormatException
