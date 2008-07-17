@@ -297,7 +297,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public String speedToHTML(int day)
 	{
-		return toHTML(m_entries[SPEED], "kbit/sec", day);
+		return toHTML(m_entries[SPEED], "kbits/sec", day);
 	}
 	
 	public String usersToHTML(int day)

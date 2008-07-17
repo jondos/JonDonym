@@ -234,7 +234,7 @@ public class PerformanceMeter implements Runnable
 					
 					if(users != -1)
 					{
-						entry.importValue(PerformanceEntry.SPEED, timestamp, users);
+						entry.importValue(PerformanceEntry.USERS, timestamp, users);
 					}
 					
 					Database.getInstance(PerformanceEntry.class).update(entry);
