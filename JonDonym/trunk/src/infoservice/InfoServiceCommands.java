@@ -37,6 +37,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.Calendar;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -1909,7 +1910,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			StringTokenizer t = new StringTokenizer(command.substring(7), "/");
 			String cascadeId = null;
 			String entry = null;
-			int day = 6;
+			int day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
 			
 			if(t.hasMoreTokens())
 			{
@@ -1933,15 +1934,15 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				}
 			}
 			
-			if(entry.equals("delay") && cascadeId != null && day >= 0 && day <= 6)
+			if(entry.equals("delay") && cascadeId != null && day >= 0 && day <= 7)
 			{			
 				httpResponse = humanGetDelayValues(cascadeId, day);
 			}
-			else if(entry.equals("speed") && cascadeId != null && day >= 0 && day <= 6)
+			else if(entry.equals("speed") && cascadeId != null && day >= 0 && day <= 7)
 			{
 				httpResponse = humanGetSpeedValues(cascadeId, day);
 			}
-			else if(entry.equals("users") && cascadeId != null && day >= 0 && day <= 6)
+			else if(entry.equals("users") && cascadeId != null && day >= 0 && day <= 7)
 			{
 				httpResponse = humanGetUsersValues(cascadeId, day);
 			}
