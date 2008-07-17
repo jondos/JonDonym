@@ -375,7 +375,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		htmlData += "<br /><br />" +
-				"<table width=\"60%\">" +
+				"<table width=\"100%\">" +
 				"<tr>" +
 				"<th width=\"16%\">Hour</th>" +
 				"<th>Average</th>" +
