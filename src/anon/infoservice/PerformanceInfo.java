@@ -175,8 +175,8 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		long avgDelay = 0;
 		for(int j = 0; j < v.size(); j++)
 		{
-			avgSpeed += ((PerformanceEntry) v.elementAt(j)).getAverageSpeed();
-			avgDelay += ((PerformanceEntry) v.elementAt(j)).getAverageDelay();
+			avgSpeed += ((PerformanceEntry) v.elementAt(j)).getAverage(PerformanceEntry.SPEED);
+			avgDelay += ((PerformanceEntry) v.elementAt(j)).getAverage(PerformanceEntry.DELAY);
 		}
 		avgSpeed /= v.size();
 		avgDelay /= v.size();
@@ -213,21 +213,21 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		avgDelay = 0;
 		for(int j = 0; j < vResult.size(); j++)
 		{
-			if(((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed() != 0)
+			if(((PerformanceEntry) vResult.elementAt(j)).getAverage(PerformanceEntry.SPEED) != 0)
 			{
-				avgSpeed += ((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed();
+				avgSpeed += ((PerformanceEntry) vResult.elementAt(j)).getAverage(PerformanceEntry.SPEED);
 			}
 			
-			if(((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed() != 0)
+			if(((PerformanceEntry) vResult.elementAt(j)).getAverage(PerformanceEntry.DELAY) != 0)
 			{
-				avgDelay += ((PerformanceEntry) vResult.elementAt(j)).getAverageDelay();
+				avgDelay += ((PerformanceEntry) vResult.elementAt(j)).getAverage(PerformanceEntry.DELAY);
 			}
 		}
 		avgSpeed /= vResult.size();
 		avgDelay /= vResult.size();
 		
-		avgEntry.overrideDailyAverageSpeed(avgSpeed);
-		avgEntry.overrideDailyAverageDelay(avgDelay);
+		avgEntry.overrideDailyAverage(PerformanceEntry.SPEED, avgSpeed);
+		avgEntry.overrideDailyAverage(PerformanceEntry.DELAY, avgDelay);
 		
 		return avgEntry;
 	}
@@ -272,11 +272,11 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		{
 			PerformanceEntry entry = ((PerformanceEntry) a_vec.elementAt(k));
 			
-			double straySpeed = (double) Math.abs(a_avgSpeed - entry.getAverageSpeed()) / (double) a_avgSpeed;
-			double strayDelay = (double) Math.abs(a_avgDelay - entry.getAverageDelay()) / (double) a_avgDelay;
+			double straySpeed = (double) Math.abs(a_avgSpeed - entry.getAverage(PerformanceEntry.SPEED)) / (double) a_avgSpeed;
+			double strayDelay = (double) Math.abs(a_avgDelay - entry.getAverage(PerformanceEntry.DELAY)) / (double) a_avgDelay;
 			if(straySpeed > a_maxStray)
 			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with speed " + entry.getAverageSpeed());
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with speed " + entry.getAverage(PerformanceEntry.SPEED));
 				
 				r_vecDeleted.addElement(entry);
 				
@@ -293,7 +293,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 			
 			if(strayDelay > a_maxStray)
 			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with delay " + entry.getAverageDelay());
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with delay " + entry.getAverage(PerformanceEntry.DELAY));
 				
 				r_vecDeleted.addElement(entry);
 				

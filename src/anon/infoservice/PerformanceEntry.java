@@ -26,6 +26,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private static final String XML_ELEMENT_HOURLY_DATA = "HourlyData";
 	private static final String XML_ELEMENT_DAILY_DATA = "DailyData";
 	private static final String XML_ELEMENT_WEEKLY_DATA = "WeeklyData";
+
+	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
+	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
 	
 	public static final long LAST_TEST_DATA_TTL = 20 * 60 * 1000;
 	
@@ -37,19 +40,18 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	private long m_lastTestTime;
 	
-	private PerformanceAttributeEntry[][] m_speed = new PerformanceAttributeEntry[8][24];
-	private PerformanceAttributeEntry[][] m_delay = new PerformanceAttributeEntry[8][24];
-	private PerformanceAttributeEntry[][] m_users = new PerformanceAttributeEntry[8][24];
-		
-	private long m_lastTestAverageSpeed = 0;
-	private long m_lastTestAverageDelay = 0;
-	private long m_lastTestAverageUsers = 0;
+	private PerformanceAttributeEntry[][][] m_entries =
+		new PerformanceAttributeEntry[ATTRIBUTES.length][8][24];
 	
-	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
+	private long m_lastTestAverage[] = new long[3];
+	
+	public static final int SPEED = 0;
+	public static final int DELAY = 1;
+	public static final int USERS = 2;
+	
+	public static final String[] ATTRIBUTES = new String[]{ "Speed", "Delay", "Users" };
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
-	
-	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
 	
 	public PerformanceEntry(String a_strCascadeId)
 	{	
@@ -85,19 +87,19 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
 		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		
-		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
+		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[DELAY]);
 		if(elemDelay == null)
 		{
-			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
+			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + ATTRIBUTES[DELAY]);
 		}
-		m_delay[dayOfWeek][hour] = new PerformanceAttributeEntry(elemDelay);
+		m_entries[DELAY][dayOfWeek][hour] = new PerformanceAttributeEntry(elemDelay);
 		
-		Node elemSpeed = XMLUtil.getFirstChildByName(elemCurrentData, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
+		Node elemSpeed = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[SPEED]);
 		if(elemSpeed == null)
 		{
-			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
+			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + ATTRIBUTES[SPEED]);
 		}
-		m_speed[dayOfWeek][hour] = new PerformanceAttributeEntry(elemSpeed);
+		m_entries[SPEED][dayOfWeek][hour] = new PerformanceAttributeEntry(elemSpeed);
 		
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
@@ -123,7 +125,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_lastTestTime;
 	}
 	
-	public void importValue(String a_attributeName, PerformanceAttributeEntry[][] a_entries, long a_timestamp, long a_value)
+	public void importValue(int a_attribute, long a_timestamp, long a_value)
 	{
 		if(System.currentTimeMillis() - a_timestamp > 7 * 24 * 60 * 60 * 1000 ||
 			a_timestamp > System.currentTimeMillis())
@@ -139,18 +141,18 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int day = cal.get(Calendar.DAY_OF_WEEK);
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 		
-		entry = a_entries[day][hour];
+		entry = m_entries[a_attribute][day][hour];
 		if(entry == null)
 		{
-			a_entries[day][hour] = entry = new PerformanceAttributeEntry(a_attributeName);
+			m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute);
 		}
 		else
 		{
 			// check if entry is obsolete
 			if(System.currentTimeMillis() - 
-				a_entries[day][hour].getDayTimestamp() > 7 * 24 * 60 * 60 * 1000)
+				m_entries[a_attribute][day][hour].getDayTimestamp() > 7 * 24 * 60 * 60 * 1000)
 			{
-				a_entries[day][hour] = entry = new PerformanceAttributeEntry(a_attributeName);
+				m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute);
 			}
 		}
 		
@@ -159,7 +161,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_lastUpdate = a_timestamp;
 	}
 	
-	public long addData(String a_attributeName, PerformanceAttributeEntry[][] a_entries, Hashtable a_data) 
+	public long addData(int a_attribute, Hashtable a_data) 
 	{
 		PerformanceAttributeEntry entry = null;
 		
@@ -192,18 +194,18 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			int day = cal.get(Calendar.DAY_OF_WEEK);
 			int hour = cal.get(Calendar.HOUR_OF_DAY);
 			
-			entry = a_entries[day][hour];
+			entry = m_entries[a_attribute][day][hour];
 			if(entry == null)
 			{
-				a_entries[day][hour] = entry = new PerformanceAttributeEntry(a_attributeName);
+				m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute);
 			}
 			else
 			{
 				// check if entry is obsolete
 				if(System.currentTimeMillis() - 
-					a_entries[day][hour].getDayTimestamp() > 7 * 24 * 60 * 60 * 1000)
+					m_entries[a_attribute][day][hour].getDayTimestamp() > 7 * 24 * 60 * 60 * 1000)
 				{
-					a_entries[day][hour] = entry = new PerformanceAttributeEntry(a_attributeName);
+					m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute);
 				}
 			}	
 			
@@ -222,54 +224,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		m_lastTestTime = timestamp.longValue();
+		m_lastTestAverage[a_attribute] = lAverageFromLastTest;
 		m_lastUpdate = timestamp.longValue();
-				
+		
 		return lAverageFromLastTest;
 	}
-	
-	public long addSpeedData(Hashtable a_data) 
+
+	public long getLastTestAverage(int a_attribute)
 	{
-		return m_lastTestAverageSpeed = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_speed, a_data);
-	}
-	
-	public long addDelayData(Hashtable a_data)
-	{
-		return m_lastTestAverageDelay = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_delay, a_data);
-	}
-	
-	public long addUsersData(Hashtable a_data)
-	{
-		return m_lastTestAverageUsers = addData(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_USERS, m_users, a_data);
-	}
-	
-	public void addSpeedValue(long a_timestamp, long a_value)
-	{
-		importValue(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_speed, a_timestamp, a_value);
-	}
-	
-	public void addDelayValue(long a_timestamp, long a_value)
-	{
-		importValue(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_delay, a_timestamp, a_value);
-	}
-	
-	public void addUsersValue(long a_timestamp, long a_value)
-	{
-		importValue(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_USERS, m_users, a_timestamp, a_value);
-	}
-	
-	public long getDelayFromLastTest()
-	{
-		return m_lastTestAverageDelay;
-	}
-	
-	public long getSpeedFromLastTest()
-	{
-		return m_lastTestAverageSpeed;
-	}
-	
-	public long getUsersFromLastTest()
-	{
-		return m_lastTestAverageUsers;
+		return m_lastTestAverage[a_attribute];
 	}
 	
 	public PerformanceAttributeEntry getCurrentSpeedEntry()
@@ -278,7 +241,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
 		
-		return m_speed[dayOfWeek][hour];
+		return m_entries[SPEED][dayOfWeek][hour];
 	}
 	
 	public PerformanceAttributeEntry getCurrentDelayEntry()
@@ -287,10 +250,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
 		
-		return m_delay[dayOfWeek][hour];
+		return m_entries[DELAY][dayOfWeek][hour];
 	}
 	
-	public void overrideDailyAverageSpeed(long a_lSpeed)
+	public void overrideDailyAverage(int a_attribute, long a_lValue)
 	{
 		m_current.setTimeInMillis(System.currentTimeMillis());
 		int hour = m_current.get(Calendar.HOUR_OF_DAY);
@@ -298,96 +261,48 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		PerformanceAttributeEntry entry = null;
 		
-		if(m_speed[dayOfWeek][hour] == null)
+		if(m_entries[a_attribute][dayOfWeek][hour] == null)
 		{
-			m_speed[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED);
+			m_entries[a_attribute][dayOfWeek][hour] = entry = new PerformanceAttributeEntry(a_attribute);
 		}
 		
-		entry.overrideAverageValue(a_lSpeed);
+		entry.overrideAverageValue(a_lValue);
 	}
 	
-	public void overrideDailyAverageDelay(long a_lDelay)
+	public long getAverage(int a_attribute)
 	{
 		m_current.setTimeInMillis(System.currentTimeMillis());
 		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
 		
-		PerformanceAttributeEntry entry = null;
-		
-		if(m_delay[dayOfWeek][hour] == null)
-		{
-			m_delay[dayOfWeek][hour] = entry = new PerformanceAttributeEntry(PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY);
-		}
-		
-		entry.overrideAverageValue(a_lDelay);
-	}
-	
-	public long getAverageSpeed()
-	{
-		m_current.setTimeInMillis(System.currentTimeMillis());
-		int hour = m_current.get(Calendar.HOUR_OF_DAY);
-		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
-		
-		if(m_speed[dayOfWeek][hour] == null)
+		if(m_entries[a_attribute][dayOfWeek][hour] == null)
 		{
 			return 0;
 		}
 		else
 		{
-			return m_speed[dayOfWeek][hour].getAverageValue();
-		}
-	}
-	
-	public long getAverageDelay()
-	{
-		m_current.setTimeInMillis(System.currentTimeMillis());
-		int hour = m_current.get(Calendar.HOUR_OF_DAY);
-		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
-		
-		if(m_delay[dayOfWeek][hour] == null)
-		{
-			return 0;
-		}
-		else
-		{
-			return m_delay[dayOfWeek][hour].getAverageValue();
-		}
-	}
-	
-	public long getAverageUsers()
-	{
-		m_current.setTimeInMillis(System.currentTimeMillis());
-		int hour = m_current.get(Calendar.HOUR_OF_DAY);
-		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
-		
-		if(m_users[dayOfWeek][hour] == null)
-		{
-			return 0;
-		}
-		else
-		{
-			return m_users[dayOfWeek][hour].getAverageValue();
+			return m_entries[a_attribute][dayOfWeek][hour].getAverageValue();
 		}
 	}
 	
 	public boolean isInvalid()
 	{
-		return (getAverageSpeed() == -1 || getAverageDelay() == -1);
+		return (getAverage(SPEED) == -1 || getAverage(DELAY) == -1);
 	}
 	
 	public String delayToHTML(int day)
 	{
-		return toHTML(m_delay, "ms", day);
+		return toHTML(m_entries[DELAY], "ms", day);
 	}
 	
 	public String speedToHTML(int day)
 	{
-		return toHTML(m_speed, "kbit/sec", day);
+		return toHTML(m_entries[SPEED], "kbit/sec", day);
 	}
 	
 	public String usersToHTML(int day)
 	{
-		return toHTML(m_users, "", day);
+		return toHTML(m_entries[USERS], "", day);
 	}
 	
 	private long getDayTimestamp(PerformanceAttributeEntry[][] a_entries, int a_dayOfWeek)
@@ -422,15 +337,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		// TODO: improve
 		String e = "";
-		if(a_entries == m_speed)
+		if(a_entries == m_entries[SPEED])
 		{
 			e = "speed";
 		}
-		else if(a_entries == m_delay)
+		else if(a_entries == m_entries[DELAY])
 		{
 			e = "delay";
 		}
-		else if(a_entries == m_users)
+		else if(a_entries == m_entries[USERS])
 		{
 			e = "users";
 		}
@@ -495,17 +410,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				
 				if(a_selectedDay == dayOfWeek)
 				{
-					if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_entries == m_speed)
+					if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_entries == m_entries[SPEED])
 					{
-						htmlData += "<td>" + m_lastTestAverageSpeed + " " + a_unit + "</td>";
+						htmlData += "<td>" + m_lastTestAverage[SPEED] + " " + a_unit + "</td>";
 					}
-					else if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_entries == m_delay)
+					else if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_entries == m_entries[DELAY])
 					{
-						htmlData += "<td>" + m_lastTestAverageDelay + " " + a_unit + "</td>";
+						htmlData += "<td>" + m_lastTestAverage[DELAY] + " " + a_unit + "</td>";
 					}
-					else if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_entries == m_users)
+					else if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_entries == m_entries[USERS])
 					{
-						htmlData += "<td>" + m_lastTestAverageUsers + " " + a_unit + "</td>";
+						htmlData += "<td>" + m_lastTestAverage[USERS] + " " + a_unit + "</td>";
 					}
 					else if(hour == m_current.get(Calendar.HOUR_OF_DAY))
 					{
@@ -541,8 +456,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
 		
 		Element elemLast = a_doc.createElement(XML_ELEMENT_LAST_TEST);
-		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_DELAY, m_lastTestAverageDelay);
-		XMLUtil.setAttribute(elemLast, PerformanceAttributeEntry.PERFORMANCE_ATTRIBUTE_SPEED, m_lastTestAverageSpeed);
+		
+		for(int i = 0; i < ATTRIBUTES.length; i++)
+		{
+			XMLUtil.setAttribute(elemLast, ATTRIBUTES[i], m_lastTestAverage[i]);
+		}
+		
 		XMLUtil.setAttribute(elemLast, XML_ATTR_TIME, m_lastTestTime);
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
@@ -574,8 +493,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				{
 					Element elemHourlyData = a_doc.createElement(XML_ELEMENT_HOURLY_DATA);
 					XMLUtil.setAttribute(elemHourlyData, XML_ATTR_HOUR, j);
-					Element e = m_speed[i][j] != null ? m_speed[i][j].toXmlElement(a_doc) : null;
-					Element f = m_delay[i][j] != null ? m_delay[i][j].toXmlElement(a_doc) : null;
+					Element e = m_entries[ATTRIBUTE_SPEED][i][j] != null ? m_entries[ATTRIBUTE_SPEED][i][j].toXmlElement(a_doc) : null;
+					Element f = m_entries[ATTRIBUTE_DELAY][i][j] != null ? m_entries[ATTRIBUTE_DELAY][i][j].toXmlElement(a_doc) : null;
 					
 					if(e != null)
 					{
@@ -602,10 +521,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 
 	class PerformanceAttributeEntry implements IXMLEncodable
 	{
-		public static final String PERFORMANCE_ATTRIBUTE_DELAY = "Delay";
-		public static final String PERFORMANCE_ATTRIBUTE_SPEED = "Speed";
-		public static final String PERFORMANCE_ATTRIBUTE_USERS = "Users";
-		
 		public static final String XML_ATTR_MIN = "min";
 		public static final String XML_ATTR_MAX = "max";
 		public static final String XML_ATTR_AVERAGE = "average";
@@ -614,7 +529,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public static final String XML_ELEMENT_VALUES = "Values";
 		public static final String XML_ELEMENT_VALUE = "Value";
 		
-		private String m_name;
+		private int m_attribute = -1;
 		
 		private long m_lMaxValue = 0;
 		private long m_lMinValue = 0;
@@ -627,15 +542,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		private int m_iErrors = 0;
 		
-		public PerformanceAttributeEntry(String a_name)
+		public PerformanceAttributeEntry(int a_attribute)
 		{
-			m_name = a_name;
+			m_attribute = a_attribute;
 		}
 		
 		public PerformanceAttributeEntry(Node a_node)
 		{
-			m_name = XMLUtil.parseValue(a_node, "UnknownAttribute");
-			
 			m_lMinValue = XMLUtil.parseAttribute(a_node, XML_ATTR_MIN, 0);
 			m_lMaxValue = XMLUtil.parseAttribute(a_node, XML_ATTR_MAX, 0);
 			m_lAverageValue = XMLUtil.parseAttribute(a_node, XML_ATTR_AVERAGE, 0);
@@ -729,11 +642,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			return m_Values.size() + m_iErrors;
 		}
 		
-		public String getName()
-		{
-			return m_name;
-		}
-		
 		public void overrideAverageValue(long a_lValue)
 		{
 			m_lAverageValue = a_lValue;
@@ -751,7 +659,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public Element toXmlElement(Document a_doc)
 		{
-			Element elem = a_doc.createElement(getName());
+			Element elem = a_doc.createElement(ATTRIBUTES[m_attribute]);
 			
 			XMLUtil.setAttribute(elem, XML_ATTR_MIN, m_lMinValue);
 			XMLUtil.setAttribute(elem, XML_ATTR_MAX, m_lMaxValue);
