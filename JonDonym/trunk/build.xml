@@ -406,7 +406,7 @@
 				<zipfileset src="${classpath_xmllib_file_name}"/>
 				<zipfileset src="${classpath_ftplib_file_name}"/>
 				<zipfileset src="${classpath_log4j_file_name}"/>
-				<zipfileset src="${classpath_jama_file_name}"/>		
+				<zipfileset src="${classpath_jama_file_name}"/>
 				<zipfileset src="${classpath_bouncy_file_name}"/>
 				<zipfileset src="${classpath_xmlrpc_file_name}"/>
 			

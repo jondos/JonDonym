@@ -464,7 +464,8 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 				XMLPaymentOption curOption = (XMLPaymentOption) options.nextElement();
 
 				//skip passive payment options
-				if (curOption.getType().equals("passive") )
+				if (curOption.getType().equals("passive") || 
+					!curOption.worksWithJapVersion(JAPConstants.aktVersion))
 				{
 					continue; //we only need data for active and mixed payment options
 				}
