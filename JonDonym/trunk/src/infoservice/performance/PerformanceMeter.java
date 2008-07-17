@@ -229,12 +229,12 @@ public class PerformanceMeter implements Runnable
 						entry = new PerformanceEntry(id);
 					}
 					
-					entry.addDelayValue(timestamp, delay);
-					entry.addSpeedValue(timestamp, speed);
+					entry.importValue(PerformanceEntry.DELAY, timestamp, delay);
+					entry.importValue(PerformanceEntry.SPEED, timestamp, speed);
 					
 					if(users != -1)
 					{
-						entry.addUsersValue(timestamp, users);
+						entry.importValue(PerformanceEntry.SPEED, timestamp, users);
 					}
 					
 					Database.getInstance(PerformanceEntry.class).update(entry);
@@ -819,9 +819,9 @@ public class PerformanceMeter implements Runnable
     		}
 		}
 		
-		long lastDelay = entry.addDelayData(vDelay);
-		long lastSpeed = entry.addSpeedData(vSpeed);
-		long lastUsers = entry.addUsersData(vUsers);
+		long lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
+		long lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
+		long lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
 		
 		Database.getInstance(PerformanceEntry.class).update(entry);
 		
