@@ -264,46 +264,6 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 		}
 	}
 	
-	/**
-	 * Opens the start page of the JonDo help
-	 * @return true if the start page could be found, false otherwise
-	 */
-	/*public boolean openHelp()
-	{
-		if(helpPath == null)
-		{ 
-			return false;
-		}
-		if(!isHelpInstalled() || helpVersionMismatch())
-		{
-			installHelp();
-		}
-		Locale loc = JAPMessages.getLocale();
-		String startPath =
-			loc.toString().equalsIgnoreCase("de") ? "de/help/" : "en/help/";
-		if(!isHelpInstalled()) 
-		{	
-			return false;
-		}
-		try
-		{
-			URL helpURL = 
-				new URL("file://"+helpPath+
-					 File.separator+
-					 HELP_FOLDER+
-					 startPath+
-					 HELP_START);
-			AbstractOS.getInstance().openURL(helpURL);	
-		} 
-		catch (MalformedURLException e)
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Malformed URL Excpetion: ", e);
-			return false;
-		}
-		return true;
-		
-	}*/
-	
 	private void removeOldHelp(String parentPath)
 	{
 		if(parentPath == null)
