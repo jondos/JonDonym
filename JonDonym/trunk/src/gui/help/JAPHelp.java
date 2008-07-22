@@ -206,10 +206,9 @@ public abstract class JAPHelp
 	 */
 	public static JMenuItem createHelpMenuItem(IHelpContext a_helpContext)
 	{
-		/*JMenuItem helpButton = new JMenuItem(JAPMessages.getString(MSG_HELP_MENU_ITEM));
+		JMenuItem helpButton = new JMenuItem(JAPMessages.getString(MSG_HELP_MENU_ITEM));
 		helpButton.addActionListener(new HelpContextActionListener(a_helpContext));
-		return helpButton;*/
-		return null;
+		return helpButton;
 	}
 
 	public abstract void loadCurrentContext();
