@@ -2,11 +2,9 @@ package gui.help;
 
 
 import gui.GUIUtils;
-import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JTextComponentToClipboardCopier;
 import gui.LanguageMapper;
-import gui.JAPHelpContext.IHelpContext;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp.IExternalEMailCaller;
 import gui.help.JAPHelp.IExternalURLCaller;
@@ -32,7 +30,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -161,27 +158,6 @@ public class JAPInternalHelpViewer extends JAPDialog
 		m_initializing = false;
 		m_delegator = new JAPInternalHelpDelegator(this);
 	}
-
-	/*public static JButton createHelpButton(IHelpContext a_helpContext)
-	{
-		//JButton helpButton = new JButton(GUIUtils.loadImageIcon(JAPHelp.IMG_HELP, true));
-		JButton helpButton = new JButton(JAPMessages.getString(JAPHelp.MSG_HELP_BUTTON));
-		helpButton.setToolTipText(JAPMessages.getString(JAPHelp.MSG_HELP_BUTTON));
-		helpButton.addActionListener(new  JAPHelp.HelpContextActionListener(a_helpContext));
-		return helpButton;
-	}*/
-
-	/**
-	 * Creates a menu item that opens the help window with the given context.
-	 * @param a_helpContext a help context
-	 * @return a menu item that opens the help window with the given context
-	 */
-	/*public static JMenuItem createHelpMenuItem(IHelpContext a_helpContext)
-	{
-		JMenuItem helpButton = new JMenuItem(JAPMessages.getString(JAPHelp.MSG_HELP_MENU_ITEM));
-		helpButton.addActionListener(new JAPHelp.HelpContextActionListener(a_helpContext));
-		return helpButton;
-	}*/
 
 	public void loadCurrentContext()
 	{
