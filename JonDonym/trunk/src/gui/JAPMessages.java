@@ -242,7 +242,7 @@ public final class JAPMessages
 
 			if (string == null || string.trim().length() == 0)
 			{
-			LogHolder.log(LogLevel.INFO, LogType.GUI, "Could not load messsage string: " + a_key, true);
+			LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Could not load messsage string: " + a_key, true);
 				string = a_key;
 		}
 	}
