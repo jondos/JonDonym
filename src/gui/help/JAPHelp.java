@@ -25,6 +25,7 @@
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
+
 package gui.help;
 
 import jap.JAPModel;
@@ -66,25 +67,10 @@ public abstract class JAPHelp
 	public static final String IMG_PREVIOUS = JAPHelp.class.getName() + ("_previous.gif");
 	public static final String IMG_NEXT = JAPHelp.class.getName() + ("_next.gif");
 
-	/*public String m_helpPath = " ";
-	public LanguageMapper m_language = new LanguageMapper();
-	public JComboBox m_comBoxLanguage;
-	public HtmlPane m_htmlpaneTheHelpPane;
-
-	public JButton m_closeButton;
-	public JButton m_backButton;
-	public JButton m_forwardButton;
-	public JButton m_homeButton;
-
-	private boolean m_initializing;*/
+	
 	private IHelpContext m_helpContext;
 
 	protected static JAPHelp ms_theJAPHelp = null;
-
-	/*private JAPHelp(Frame parent, IExternalURLCaller a_urlCaller, IExternalEMailCaller a_emailCaller)
-	{
-		
-	}*/
 
 	/**
 	 * Creates and initialises a new global help object with the given frame as parent frame.
@@ -215,19 +201,6 @@ public abstract class JAPHelp
 		return ms_theJAPHelp.getOwnDialog();
 	}
 
-	/*private static String getHelpPath(int a_languageIndex)
-	{
-		String strMessage = MSG_HELP_PATH + String.valueOf(a_languageIndex);
-		String strHelpPath = JAPMessages.getString(strMessage);
-
-		if (strHelpPath.equals(strMessage) || strHelpPath.trim().length() == 0)
-		{
-			return JAPMessages.getString(MSG_HELP_PATH);
-		}
-
-		return strHelpPath;
-	}*/
-	
 	private static class JAPHelpFactory
 	{
 		private static JAPHelp createJAPhelp(Frame a_parent,
