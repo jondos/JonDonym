@@ -1,6 +1,5 @@
 package gui.help;
 
-import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPHelpContext.IHelpContext;
 import gui.dialog.JAPDialog;
@@ -16,10 +15,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Observable;
 
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JMenuItem;
-import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 
 
