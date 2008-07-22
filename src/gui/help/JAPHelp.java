@@ -255,6 +255,7 @@ public abstract class JAPHelp
 
 		return strHelpPath;
 	}*/
+	
 	private static class JAPHelpFactory
 	{
 		private static JAPHelp createJAPhelp(Frame a_parent,
@@ -262,12 +263,12 @@ public abstract class JAPHelp
 		{
 			if(JAPModel.getInstance().isExternalHelpInstallationPossible())
 			{
-				LogHolder.log(LogLevel.WARNING, LogType.GUI, "Creating external help viewer.");
+				LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Creating external help viewer.");
 				return new JAPExternalHelpViewer(a_parent, a_urlCaller, a_emailCaller);
 			}
 			else
 			{
-				LogHolder.log(LogLevel.WARNING, LogType.GUI, "Creating internal help viewer.");
+				LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Creating internal help viewer.");
 				JAPInternalHelpViewer internalViewer = 
 					new JAPInternalHelpViewer(a_parent, a_urlCaller, a_emailCaller);
 				return internalViewer.getHelp();
