@@ -29,41 +29,15 @@ package gui.help;
 
 import jap.JAPModel;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.net.URL;
-import java.util.Locale;
-import java.util.Vector;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.Toolkit;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.text.Document;
 
-import org.omg.CORBA._PolicyStub;
-
-import anon.util.ResourceLoader;
-import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPHelpContext.IHelpContext;
 
@@ -71,8 +45,6 @@ import gui.dialog.JAPDialog;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-import platform.AbstractOS;
-
 
 public abstract class JAPHelp
 {
