@@ -27,52 +27,80 @@
  */
 package gui;
 
+import javax.swing.RootPaneContainer;
+
 /**
  * This class represents the help context of JAP.
  */
 public final class JAPHelpContext
 {
 	public static final String INDEX = "index";
-
-	private String m_currentContext;
-
-	public JAPHelpContext()
+//
+//	private String m_currentContext;
+//
+//	public JAPHelpContext()
+//	{
+//		m_currentContext = INDEX;
+//	}
+//
+//	/**
+//	 * Sets the current help context.
+//	 * @param a_helpFile String
+//	 */
+//	public void setContext(String a_helpFile)
+//	{
+//		m_currentContext = a_helpFile;
+//	}
+//
+//	/**
+//	 * Sets the current help context.
+//	 * @param a_helpContext IHelpContext
+//	 */
+//	public void setContext(IHelpContext a_helpContext)
+//	{
+//		setContext(a_helpContext.getHelpContext());
+//	}
+//
+//	/**
+//	 * Returns the current help context
+//	 * @return String
+//	 */
+//	public String getContext()
+//	{
+//		return m_currentContext;
+//	}
+//
+//	/**
+//	 * An interface that is used to get the help context of an object.
+//	 */
+	
+	public static IHelpContext createHelpContext(String a_context)
 	{
-		m_currentContext = INDEX;
+		return createHelpContext(a_context, null);
 	}
-
-	/**
-	 * Sets the current help context.
-	 * @param a_helpFile String
-	 */
-	public void setContext(String a_helpFile)
+	
+	public static IHelpContext createHelpContext(String a_context, RootPaneContainer a_container)
 	{
-		m_currentContext = a_helpFile;
-	}
+		final RootPaneContainer container = a_container;
+		final String context = a_context;
+		
+		return new IHelpContext()
+		{
+			public RootPaneContainer getDisplayContext() 
+			{
+				return container;
+			}
 
-	/**
-	 * Sets the current help context.
-	 * @param a_helpContext IHelpContext
-	 */
-	public void setContext(IHelpContext a_helpContext)
-	{
-		setContext(a_helpContext.getHelpContext());
+			public String getHelpContext() 
+			{
+				return context;
+			}
+		};
 	}
-
-	/**
-	 * Returns the current help context
-	 * @return String
-	 */
-	public String getContext()
-	{
-		return m_currentContext;
-	}
-
-	/**
-	 * An interface that is used to get the help context of an object.
-	 */
+	
 	public interface IHelpContext
 	{
 		String getHelpContext();
+		RootPaneContainer getDisplayContext();
 	}
 }

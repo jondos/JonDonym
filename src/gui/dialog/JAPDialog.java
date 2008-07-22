@@ -27,6 +27,8 @@
  */
 package gui.dialog;
 
+import jap.JAPNewView;
+
 import java.util.EventListener;
 import java.util.Observable;
 import java.util.Observer;
@@ -73,7 +75,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuBar;
@@ -391,6 +392,8 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * @return the information message
 		 */
 		public String getMessage();
+		
+		//public String bal();
 		/**
 		 * Performs an action when the link is clicked, for example opening a browser
 		 * window, an E-Mail client or a help page.
@@ -483,11 +486,14 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * @param a_bDefault the default value of the checkbox
 		 * @param a_strHelpContext the help context that is opened when the help button is clicked
 		 */
-		public LinkedCheckBox(String a_strMessage, boolean a_bDefault, final String a_strHelpContext)
+		public LinkedCheckBox(String a_strMessage, boolean a_bDefault, 
+				final String a_strHelpContext)
 		{
 			this(a_strMessage, a_bDefault, new JAPHelpContext.IHelpContext()
 			{
 				public String getHelpContext(){ return a_strHelpContext;}
+				public RootPaneContainer getDisplayContext(){ return null;}
+				
 			});
 		}
 
@@ -506,7 +512,13 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			m_bDefault = a_bDefault;
 			m_bState = m_bDefault;
 		}
-
+		
+		private LinkedCheckBox(final LinkedCheckBox a_box, final RootPaneContainer a_container)
+		{
+			this(a_box.m_strMessage, a_box.m_bDefault, 
+					JAPHelpContext.createHelpContext(a_box.getHelpContext(), a_container));		
+		}
+		
 		/**
 		 * Returns the information message of the checkbox.
 		 * @return the information message of the checkbox
@@ -671,13 +683,18 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			m_helpContext = a_helpContext;
 		}
 
-		public LinkedHelpContext(final String a_strHelpContext)
+		public LinkedHelpContext(final String a_strHelpContext , final RootPaneContainer a_rootPaneContainer )
 		{
 			m_helpContext = new JAPHelpContext.IHelpContext()
 			{
 				public String getHelpContext()
 				{
 					return a_strHelpContext;
+				}
+				
+				public RootPaneContainer getDisplayContext()
+				{
+					return a_rootPaneContainer;
 				}
 			};
 		}
@@ -689,6 +706,15 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				return null;
 			}
 			return m_helpContext.getHelpContext();
+		}
+		
+		public RootPaneContainer getDisplayContext() 
+		{
+			if (m_helpContext == null)
+			{
+				return null;
+			}
+			return m_helpContext.getDisplayContext();
 		}
 
 		/**
@@ -1396,7 +1422,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		String cancelText = null;
 		String noText = null;
 		Vector vecOptions = new Vector();
-
+				
 		if (ms_bConsoleOnly)
 		{
 			LogHolder.log(LogLevel.ALERT, LogType.GUI, a_message);
@@ -1471,6 +1497,17 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * Set the dialog parameters and get its label and content pane.
 		 */
 		dialog = new JAPDialog(a_parentComponent, a_title, true, bForceApplicationModality);
+		
+		if(a_linkedInformation != null)
+		{
+			if(a_linkedInformation instanceof LinkedCheckBox)
+			{
+				LinkedCheckBox box = (LinkedCheckBox) a_linkedInformation;
+				a_linkedInformation = new LinkedCheckBox(box, dialog);
+				helpContext = (JAPHelpContext.IHelpContext) a_linkedInformation;
+			}
+		}
+		
 		dialogContentPane = new DialogContentPane(dialog,
 												  new DialogContentPane.Layout(null, a_messageType, a_icon),
 												  new DialogContentPaneOptions(a_options.getOptionType(),
@@ -2221,6 +2258,18 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		return showConfirmDialog(a_parentComponent, a_message, a_title, a_optionType, a_messageType,
 									null, a_linkedInformation);
 	}
+	
+	public static void showErrorDialog(RootPaneContainer a_container, String a_message, int a_logType)
+	{
+		if(a_container instanceof JAPDialog)
+		{
+			showErrorDialog((JAPDialog) a_container, a_message, a_logType);
+		}
+		else if(a_container instanceof Component)
+		{
+			showErrorDialog((Component) a_container, a_message, a_logType);
+		}
+	}
 
 	/**
 	 * Displays a dialog showing an error message to the user and logs the error message
@@ -2535,6 +2584,29 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 	}
 	
+	public static File showFileChooseDialog(RootPaneContainer a_container, String a_title, String a_message, String a_defaultValue, int a_fileSelectionMode)
+	{
+		if(a_container instanceof JAPDialog)
+		{
+			return showFileChooseDialog((JAPDialog) a_container, a_title, a_message, 
+					a_defaultValue, a_fileSelectionMode);
+		}
+		else if(a_container instanceof Component)
+		{
+			return showFileChooseDialog((Component) a_container, a_title, a_message, 
+					a_defaultValue, a_fileSelectionMode);
+		}
+		else 
+		{
+			return null;
+		}
+	}
+	
+	public static File showFileChooseDialog(JAPDialog a_parent, String a_title, String a_message, String a_defaultValue, int a_fileSelectionMode)
+	{
+		return showFileChooseDialog(getInternalDialog(a_parent), a_title, a_message, a_defaultValue, a_fileSelectionMode);
+	}
+	
 	/**
 	 * a provisoric file chooser dialog 
 	 * @todo: make it look better
@@ -2633,6 +2705,29 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	/**
 	 * @todo: a lot!
 	 */
+	public static JAPDialog showProgressDialog(RootPaneContainer a_container, String a_title, String a_message, 
+			String a_progressFinishedMessage, String a_progressCancelledMessage,
+			Observable a_progressSource)
+	{
+		if(a_container instanceof JAPDialog)
+		{
+			return showProgressDialog((JAPDialog) a_container, a_title, a_message,
+					a_progressFinishedMessage, a_progressCancelledMessage, a_progressSource);
+		}
+		else if(a_container instanceof Component)
+		{
+			return showProgressDialog((Component) a_container, a_title, a_message,
+					a_progressFinishedMessage, a_progressCancelledMessage, a_progressSource);
+		}
+		else 
+		{
+			return null;
+		}
+	}
+	
+	/**
+	 * @todo: a lot!
+	 */
 	public static JAPDialog showProgressDialog(JAPDialog parent, String a_title, String a_message, 
 			String a_progressFinishedMessage, String a_progressCancelledMessage,
 			Observable a_progressSource)
@@ -2697,6 +2792,9 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 									progressBar.setMinimum(minimum);
 								}
 								progressBar.setValue(value);
+								
+								Window dia = getInternalDialog(dialog);
+								dia.update(dia.getGraphics());
 							}
 						}
 						else if(progressStatus == ProgressCapsule.PROGRESS_FINISHED)
@@ -2772,7 +2870,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				}
 			};
 		cancelButton.addActionListener(cancelListener);
-			
+		cancelButton.setEnabled(false);	
 		textPanel.add(progressLabel);
 		progressPanel.add(progressBar);
 		buttonPanel.add(cancelButton);

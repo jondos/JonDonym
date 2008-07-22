@@ -103,15 +103,16 @@ import anon.infoservice.StatusInfo;
 import anon.infoservice.PerformanceInfo;
 import anon.util.Util;
 import anon.util.Util.Comparable;
-import gui.JAPHelp;
 import gui.CertDetailsDialog;
 import gui.CountryMapper;
 import gui.GUIUtils;
+import gui.JAPHelpContext;
 import gui.JAPJIntField;
 import gui.JAPMessages;
 import gui.JAPMultilineLabel;
 import gui.MapBox;
 import gui.dialog.JAPDialog;
+import gui.help.JAPHelp;
 import jap.forward.JAPRoutingMessage;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -760,7 +761,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							JAPDialog.showMessageDialog(m_payLabel,
 								JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 								TrustModel.getCurrentTrustModel().getName()),
-								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName())); //,
+								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName(), JAPConf.getInstance())); //,
 						}
 
 					}
@@ -1266,7 +1267,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					JAPDialog.showMessageDialog(m_payLabel,
 							JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 							TrustModel.getCurrentTrustModel().getName()),
-							new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName()));
+							new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName(), JAPConf.getInstance()));
 				} else {
 					JAPController.getInstance().setCurrentMixCascade(newCascade);
 					m_selectCascadeButton.setEnabled(false);
@@ -1617,7 +1618,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						JAPDialog.showMessageDialog(m_payLabel,
 								JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 								TrustModel.getCurrentTrustModel().getName()),
-								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName()));
+								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName(), JAPConf.getInstance()));
 					} 
 					else 
 					{
@@ -3125,7 +3126,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 					if (m_ExplainCertLabel.isVisible())
 					{
-						JAPHelp.getInstance().getContextObj().setContext("certificates");
+						JAPHelp.getInstance().setContext(
+								JAPHelpContext.createHelpContext("certificates",JAPConf.getInstance()));
 						JAPHelp.getInstance().setVisible(true);
 					}
 

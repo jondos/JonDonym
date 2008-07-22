@@ -102,7 +102,7 @@ import gui.CountryMapper;
 import gui.FlippingPanel;
 import gui.GUIUtils;
 import gui.JAPDll;
-import gui.JAPHelp;
+import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPProgressBar;
 import gui.MixDetailsDialog;
@@ -112,6 +112,7 @@ import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.JAPDialog.LinkedInformationAdapter;
 import gui.dialog.JAPDialog.Options;
+import gui.help.JAPHelp;
 import jap.forward.JAPRoutingMessage;
 import jap.forward.JAPRoutingRegistrationStatusObserver;
 import jap.forward.JAPRoutingServerStatisticsListener;
@@ -860,7 +861,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void mouseClicked(MouseEvent a_event)
 			{
-				JAPHelp.getInstance().getContextObj().setContext(HLP_ANONYMETER);
+				JAPHelp.getInstance().setContext(
+						JAPHelpContext.createHelpContext(HLP_ANONYMETER, JAPNewView.this));
 				JAPHelp.getInstance().setVisible(true);
 			}
 		});
@@ -1351,17 +1353,21 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		JAPModel.getInstance().getRoutingSettings().addObserver(this);
 
 		JAPHelp.init(this, AbstractOS.getInstance(), AbstractOS.getInstance());
-		JAPHelp.getInstance().setLocationCenteredOnOwner();
-		JAPHelp.getInstance().resetAutomaticLocation(JAPModel.getInstance().isHelpWindowLocationSaved());
-		JAPHelp.getInstance().restoreLocation(JAPModel.getInstance().getHelpWindowLocation());
-		JAPHelp.getInstance().restoreSize(JAPModel.getInstance().getHelpWindowSize());
-
+		if(JAPHelp.getHelpDialog() != null)
+		{
+			JAPHelp.getHelpDialog().setLocationCenteredOnOwner();
+			JAPHelp.getHelpDialog().resetAutomaticLocation(JAPModel.getInstance().isHelpWindowLocationSaved());
+			JAPHelp.getHelpDialog().restoreLocation(JAPModel.getInstance().getHelpWindowLocation());
+			JAPHelp.getHelpDialog().restoreSize(JAPModel.getInstance().getHelpWindowSize());
+		}
 		m_mainMovedAdapter = new ComponentMovedAdapter();
 		m_helpMovedAdapter = new ComponentMovedAdapter();
 		m_configMovedAdapter = new ComponentMovedAdapter();
 		addComponentListener(m_mainMovedAdapter);
-		JAPHelp.getInstance().addComponentListener(m_helpMovedAdapter);
-
+		if(JAPHelp.getHelpDialog() != null)
+		{
+			JAPHelp.getHelpDialog().addComponentListener(m_helpMovedAdapter);
+		}
 		//new GUIUtils.WindowDocker(this);
 
 
@@ -2216,7 +2222,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 							{
 								JAPDialog.showMessageDialog(JAPNewView.this,
 									JAPMessages.getString(JAPConfNetwork.MSG_SLOW_ANTI_CENSORSHIP),
-									new JAPDialog.LinkedHelpContext("forwarding_client"));
+									new JAPDialog.LinkedHelpContext("forwarding_client", JAPNewView.this));
 							}
 						});
 					}
@@ -2538,7 +2544,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
-		boolean showHelpInternal = !JAPModel.getInstance().isExternalHelpInstallationPossible();
+		/*boolean showHelpInternal = !JAPModel.getInstance().isExternalHelpInstallationPossible();
 		if(!showHelpInternal)
 		{
 			JAPExternalHelpView externalViewer = new JAPExternalHelpView(this);
@@ -2547,13 +2553,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		if(showHelpInternal)
 		{
 			showHelpInJonDo();
-		}
-	}
-	
-	private void showHelpInJonDo()
-	{
+		}*/
 		JAPHelp help = JAPHelp.getInstance();
-		help.getContextObj().setContext("index");
+		help.setContext(
+				JAPHelpContext.createHelpContext("index", this));
 		help.loadCurrentContext();
 	}
 
@@ -2590,9 +2593,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 		//if (m_helpMovedAdapter.hasMoved())
 		{
-			JAPModel.getInstance().setHelpWindowLocation(JAPHelp.getInstance().getLocation());
+			if(JAPHelp.getHelpDialog() != null)
+			{
+				JAPModel.getInstance().setHelpWindowLocation(JAPHelp.getHelpDialog().getLocation());
+			}
 		}
-		JAPModel.getInstance().setHelpWindowSize(JAPHelp.getInstance().getSize());
+		if(JAPHelp.getHelpDialog() != null)
+		{
+			JAPModel.getInstance().setHelpWindowSize(JAPHelp.getHelpDialog().getSize());
+		}
 	}
 
 	public void showConfigDialog(String card, Object a_value)

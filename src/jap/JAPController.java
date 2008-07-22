@@ -53,6 +53,8 @@ import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -620,7 +622,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 									  {
 									  JAPMessages.getString("confButton"),
 									  JAPMessages.getString("confListenerTab")}), LogType.NET,
-				new JAPDialog.LinkedHelpContext("portlistener")
+				new JAPDialog.LinkedHelpContext("portlistener", 
+						(getViewWindow() instanceof JFrame ? (JFrame) getViewWindow() : null ))
 			{
 				public boolean isOnTop()
 				{
@@ -638,7 +641,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			JAPDialog.showWarningDialog(
 				getViewWindow(),
 				JAPMessages.getString(JAPConfCert.MSG_NO_CHECK_WARNING),
-				new JAPDialog.LinkedHelpContext("cert")
+				new JAPDialog.LinkedHelpContext("cert",
+						(getViewWindow() instanceof JFrame ? (JFrame) getViewWindow() : null ))
 			{
 				public boolean isOnTop()
 				{
@@ -664,7 +668,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			if (m_bAskAutoConnect)
 			{
 				if (JAPDialog.showYesNoDialog(getViewWindow(), JAPMessages.getString(MSG_ASK_AUTO_CONNECT),
-					new JAPDialog.LinkedHelpContext("services_general")))
+					new JAPDialog.LinkedHelpContext("services_general",
+							(getViewWindow() instanceof JFrame ? (JFrame) getViewWindow() : null ))))
 				{
 					JAPModel.getInstance().setAutoConnect(true);
 				}
@@ -3079,7 +3084,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 												  {
 												  JAPMessages.getString("confButton"),
 												  JAPMessages.getString("confListenerTab")})
-							, LogType.NET, new JAPDialog.LinkedHelpContext("portlistener")
+							, LogType.NET, new JAPDialog.LinkedHelpContext("portlistener",
+													(getViewWindow() instanceof JFrame ? (JFrame) getViewWindow() : null ))
 							  {
 								  public boolean isOnTop()
 								  {

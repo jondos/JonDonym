@@ -1334,7 +1334,8 @@ public final class JAPModel extends Observable
 		String initPathValidity = (helpPathValidityCheck(helpPath));
 		
 		if( initPathValidity.equals(HelpFileStorageManager.HELP_VALID) || 
-			initPathValidity.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) )
+			initPathValidity.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) ||
+			initPathValidity.equals(NO_HELP_STORAGE_MANAGER))
 		{
 			m_helpPath = helpPath;
 		}
@@ -1381,7 +1382,6 @@ public final class JAPModel extends Observable
 				if(m_helpFileStorageManager != null)
 				{
 						storageLayerChanged = m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, newHelpPath);
-						System.out.println("changed: "+storageLayerChanged);
 				}
 				if(storageLayerChanged)
 				{
@@ -1445,8 +1445,12 @@ public final class JAPModel extends Observable
 	 */
 	public boolean isHelpPathDefined()
 	{
-		boolean helpPathExists = (m_helpFileStorageManager != null) ? (m_helpPath != null) : false;
-		boolean helpInstallationExists = helpPathExists ? m_helpFileStorageManager.helpInstallationExists(m_helpPath) : false;
+		boolean helpPathExists = m_helpPath != null;
+		
+		/* if no storageManager is defined: don't check if installation exists */
+		boolean helpInstallationExists = m_helpFileStorageManager != null ?
+											m_helpFileStorageManager.helpInstallationExists(m_helpPath) : helpPathExists;
+		
 		if(helpPathExists && !helpInstallationExists)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path "+m_helpPath+" configured but no valid help could be found!");

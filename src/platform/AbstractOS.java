@@ -52,9 +52,9 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import gui.JAPMessages;
-import gui.JAPHelp.IExternalURLCaller;
-import gui.JAPHelp.IExternalEMailCaller;
 import gui.dialog.JAPDialog;
+import gui.help.JAPHelp.IExternalEMailCaller;
+import gui.help.JAPHelp.IExternalURLCaller;
 
 
 /**
@@ -174,7 +174,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			return null;
 		}
 
-		JAPDialog.ILinkedInformation link = new JAPDialog.LinkedHelpContext(a_helpContext)
+		JAPDialog.ILinkedInformation link = new JAPDialog.LinkedHelpContext(a_helpContext, null)
 		{
 			public int getType()
 			{

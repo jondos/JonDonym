@@ -69,11 +69,11 @@ import anon.infoservice.ImmutableListenerInterface;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.ProxyInterface;
 import anon.infoservice.MixCascade;
-import gui.JAPHelp;
 import gui.JAPJIntField;
 import gui.JAPMessages;
 import gui.JAPMultilineLabel;
 import gui.dialog.JAPDialog;
+import gui.help.JAPHelp;
 
 import jap.forward.JAPConfForwardingServer;
 import jap.forward.JAPConfForwardingState;
@@ -452,7 +452,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 	{
 		if (e.getSource() == m_bttnHelp)
 		{
-			JAPHelp.getInstance().getContextObj().setContext(m_moduleSystem);
+			JAPHelp.getInstance().setContext(m_moduleSystem);
 			JAPHelp.getInstance().loadCurrentContext();
 		}
 	}
@@ -710,65 +710,65 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 
 	private void okPressed(final boolean a_bCloseConfiguration)
 	{
-		setEnabled(false);
+		if (!checkValues())
+		{
+			return;
+		}
+		m_vecConfigChangesNeedRestart.removeAllElements();
+		if (m_moduleSystem.processOkPressedEvent() == false)
+		{
+			m_vecConfigChangesNeedRestart.removeAllElements();
+			return;
+		}
+		onOkPressed();
+		resetAutomaticLocation(JAPModel.getInstance().isConfigWindowLocationSaved());
+
+		if (m_vecConfigChangesNeedRestart.size() > 0)
+		{
+			String strChanges = "<ul>";
+			AbstractRestartNeedingConfigChange change;
+			for (int i = 0; i < m_vecConfigChangesNeedRestart.size(); i++)
+			{
+				change = (AbstractRestartNeedingConfigChange)m_vecConfigChangesNeedRestart.elementAt(i);
+				strChanges += "<li>" + change.getName();
+				if (change.getMessage() != null && change.getMessage().trim().length() > 0)
+				{
+					strChanges += "<br>" + change.getMessage();
+				}
+				strChanges += "</li>";
+
+			}
+			strChanges += "</ul>";
+
+			if (JAPDialog.showYesNoDialog(this, JAPMessages.getString(MSG_NEED_RESTART, strChanges)))
+			{
+				for (int i = 0; i < m_vecConfigChangesNeedRestart.size(); i++)
+				{
+					((AbstractRestartNeedingConfigChange)m_vecConfigChangesNeedRestart.elementAt(i)).doChange();
+				}
+			}
+			else
+			{
+				for (int i = 0; i < m_vecConfigChangesNeedRestart.size(); i++)
+				{
+					((AbstractRestartNeedingConfigChange)m_vecConfigChangesNeedRestart.elementAt(i)).doCancel();
+				}
+				m_vecConfigChangesNeedRestart.removeAllElements();
+				return;
+			}
+		}
+
+
 		// We are in event dispatch thread!!
 		Thread run = new Thread(new Runnable()
 		{
 			public void run()
 			{
-				if (!checkValues())
-				{
-					return;
-				}
-				m_vecConfigChangesNeedRestart.removeAllElements();
-				if (m_moduleSystem.processOkPressedEvent() == false)
-				{
-					m_vecConfigChangesNeedRestart.removeAllElements();
-					return;
-				}
-				onOkPressed();
-				resetAutomaticLocation(JAPModel.getInstance().isConfigWindowLocationSaved());
-
-				if (m_vecConfigChangesNeedRestart.size() > 0)
-				{
-					String strChanges = "<ul>";
-					AbstractRestartNeedingConfigChange change;
-					for (int i = 0; i < m_vecConfigChangesNeedRestart.size(); i++)
-					{
-						change = (AbstractRestartNeedingConfigChange)m_vecConfigChangesNeedRestart.elementAt(i);
-						strChanges += "<li>" + change.getName();
-						if (change.getMessage() != null && change.getMessage().trim().length() > 0)
-						{
-							strChanges += "<br>" + change.getMessage();
-						}
-						strChanges += "</li>";
-
-					}
-					strChanges += "</ul>";
-
-					if (JAPDialog.showYesNoDialog(JAPConf.this, JAPMessages.getString(MSG_NEED_RESTART, strChanges)))
-					{
-						for (int i = 0; i < m_vecConfigChangesNeedRestart.size(); i++)
-						{
-							((AbstractRestartNeedingConfigChange)m_vecConfigChangesNeedRestart.elementAt(i)).doChange();
-						}
-					}
-					else
-					{
-						for (int i = 0; i < m_vecConfigChangesNeedRestart.size(); i++)
-						{
-							((AbstractRestartNeedingConfigChange)m_vecConfigChangesNeedRestart.elementAt(i)).doCancel();
-						}
-						m_vecConfigChangesNeedRestart.removeAllElements();
-						return;
-					}
-				}
 				// save configuration
 				m_Controller.saveConfigFile();
 
 				if (a_bCloseConfiguration && !isRestartNeeded())
 				{
-					//wait until they are finished
 					setVisible(false);
 				}
 				// force notifying the observers set the right server name
@@ -777,10 +777,6 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 				if (isRestartNeeded())
 				{
 					JAPController.goodBye(false);
-				}
-				else
-				{
-					setEnabled(true);
 				}
 			}
 		});

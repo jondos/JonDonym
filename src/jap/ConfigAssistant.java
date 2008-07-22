@@ -54,7 +54,7 @@ import javax.swing.JTextPane;
 import javax.swing.border.Border;
 
 import gui.GUIUtils;
-import gui.JAPHelp;
+import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JTextComponentToClipboardCopier;
 import gui.LanguageMapper;
@@ -62,6 +62,7 @@ import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
+import gui.help.JAPHelp;
 import logging.LogType;
 import platform.AbstractOS;
 
@@ -809,7 +810,8 @@ public class ConfigAssistant extends JAPDialog
 			{
 				if (a_bHelpContext)
 				{
-					JAPHelp.getInstance().getContextObj().setContext(a_context);
+					JAPHelp.getInstance().setContext(
+							JAPHelpContext.createHelpContext(a_context,ConfigAssistant.this));
 					JAPHelp.getInstance().setVisible(true);
 				}
 				else
