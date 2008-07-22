@@ -37,6 +37,7 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Window;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JWindow;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -389,7 +390,9 @@ final public class JAPDll {
 										JAPMessages.getString(MSG_DLL_UPDATE_FAILED, args),
 										JAPMessages.getString(JAPDialog.MSG_TITLE_ERROR),
 										JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR,
-										new JAPDialog.LinkedHelpContext(JAPDll.class.getName()));
+										new JAPDialog.LinkedHelpContext(JAPDll.class.getName(),
+												(JAPController.getInstance().getViewWindow() instanceof JFrame ? 
+														(JFrame) JAPController.getInstance().getViewWindow() : null )));
 
 		if ( answer == JAPDialog.RETURN_VALUE_YES )
 		{

@@ -23,6 +23,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.RootPaneContainer;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -225,7 +226,12 @@ public class JAPExtension extends AbstractJAPConfModule
 			m_bHelpClicked++;
 			return HELP_CONTEXT;
 		}
-
+		
+		public RootPaneContainer getDisplayContext() 
+		{
+			return JAPConf.getInstance();
+		}
+		
 		public boolean isCloseWindowActive()
 		{
 			return false;

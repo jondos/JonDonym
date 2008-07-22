@@ -60,7 +60,6 @@ import javax.swing.filechooser.FileFilter;
 import anon.util.ClassUtil;
 import gui.GUIUtils;
 import gui.JAPDll;
-import gui.JAPHelp;
 import gui.JAPMessages;
 import gui.LanguageMapper;
 import gui.TitledGridBagPanel;
@@ -70,6 +69,7 @@ import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
+import gui.help.JAPHelp;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -826,7 +826,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 				}
 			};
 		m_helpPathButton.addActionListener(helpInstallButtonActionListener);
-		
+		if(!JAPModel.getInstance().isExternalHelpInstallationPossible())
+		{
+			m_helpPathButton.setEnabled(false);
+		}
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.gridy = 0;
 		c.gridx = 0;
@@ -909,8 +912,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 		model.setSaveHelpWindowSize(m_cbSaveWindowSizeHelp.isSelected());
 		model.setSaveConfigWindowSize(m_cbSaveWindowSizeConfig.isSelected());
 		
-		JAPHelp.getInstance().resetAutomaticLocation(m_cbSaveWindowLocationHelp.isSelected());
-		
+		if(JAPHelp.getHelpDialog() != null)
+		{
+			JAPHelp.getHelpDialog().resetAutomaticLocation(m_cbSaveWindowLocationHelp.isSelected());
+		}
 
 		if (JAPModel.getInstance().isConfigWindowSizeSaved())
 		{

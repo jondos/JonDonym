@@ -59,10 +59,10 @@ import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import gui.GUIUtils;
-import gui.JAPHelp;
 import gui.JAPHelpContext;
 import gui.JAPHtmlMultiLineLabel;
 import gui.JAPMessages;
+import gui.help.JAPHelp;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -530,6 +530,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		}
 
 		m_helpContext = a_helpContext;
+		
 		m_rootPane = new JPanel(new BorderLayout());
 		m_titlePane = new JPanel(new GridBagLayout());
 		m_rootPane.add(m_titlePane, BorderLayout.CENTER);
@@ -1341,6 +1342,16 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		return m_helpContext.getHelpContext();
 	}
 
+	public RootPaneContainer getDisplayContext() 
+	{
+		if (m_helpContext == null)
+		{
+			return null;
+		}
+
+		return m_helpContext.getDisplayContext();
+	}
+	
 	public final void clearStatusMessage(int a_messageID)
 	{
 		if (m_idStatusMessage == a_messageID)

@@ -1,5 +1,7 @@
 package gui.dialog;
 
+import javax.swing.RootPaneContainer;
+
 import gui.JAPHelpContext;
 
 /**
@@ -59,9 +61,9 @@ public final class DialogContentPaneOptions
 	 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
 	 * move between the panes.
 	 */
-	public DialogContentPaneOptions(String a_strHelpContext, DialogContentPane a_previousContentPane)
+	public DialogContentPaneOptions(String a_strHelpContext, RootPaneContainer a_rootPaneContainer, DialogContentPane a_previousContentPane)
 	{
-		this(IDialogOptions.OPTION_TYPE_EMPTY, a_strHelpContext, a_previousContentPane);
+		this(IDialogOptions.OPTION_TYPE_EMPTY, a_strHelpContext, a_rootPaneContainer, a_previousContentPane);
 	}
 
 	/**
@@ -106,9 +108,9 @@ public final class DialogContentPaneOptions
 	 * @param a_strHelpContext a IHelpContext; if it returns an other help context value than null,
 	 * a help button is shown that opens the context;
 	 */
-	public DialogContentPaneOptions(int a_optionType, String a_strHelpContext)
+	public DialogContentPaneOptions(int a_optionType, String a_strHelpContext, RootPaneContainer a_rootPaneContainer)
 	{
-		this(a_optionType, a_strHelpContext, null);
+		this(a_optionType, a_strHelpContext, a_rootPaneContainer, null);
 	}
 
 
@@ -121,10 +123,13 @@ public final class DialogContentPaneOptions
 	 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
 	 * move between the panes.
 	 */
-	public DialogContentPaneOptions(int a_optionType, final String a_strHelpContext, DialogContentPane a_previousContentPane)
+	public DialogContentPaneOptions(int a_optionType, final String a_strHelpContext, final RootPaneContainer a_rootPaneContainer, DialogContentPane a_previousContentPane)
 	{
 		this(a_optionType,
-			 new JAPHelpContext.IHelpContext(){public String getHelpContext(){return a_strHelpContext;}},
+			 new JAPHelpContext.IHelpContext(){
+				public String getHelpContext(){return a_strHelpContext;}
+				public RootPaneContainer getDisplayContext(){return a_rootPaneContainer;}
+				},
 			a_previousContentPane);
 	}
 

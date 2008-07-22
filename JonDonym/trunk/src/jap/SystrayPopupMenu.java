@@ -39,6 +39,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -50,9 +51,10 @@ import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.StatusInfo;
 import gui.GUIUtils;
-import gui.JAPHelp;
+import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.PopupMenu;
+import gui.help.JAPHelp;
 
 /**
  *
@@ -220,10 +222,16 @@ public class SystrayPopupMenu extends PopupMenu
 			public void actionPerformed(ActionEvent a_event)
 			{
 				m_mainWindowListener.onShowHelp();
-				JAPHelp.getInstance().getContextObj().setContext("index");
-				JAPHelp.getInstance().setAlwaysOnTop(true);
-				JAPHelp.getInstance().setVisible(true);
-				JAPHelp.getInstance().setAlwaysOnTop(false);
+				JAPHelp.getInstance().setContext(
+						JAPHelpContext.createHelpContext("index", 
+								 (JAPController.getInstance().getViewWindow() instanceof JFrame) ?
+									(JFrame) JAPController.getInstance().getViewWindow() : null));
+				if(JAPHelp.getHelpDialog() != null)
+				{
+					JAPHelp.getHelpDialog().setAlwaysOnTop(true);
+					JAPHelp.getHelpDialog().setVisible(true);
+					JAPHelp.getHelpDialog().setAlwaysOnTop(false);
+				}
 			}
 		});
 
