@@ -134,18 +134,6 @@ public class RecursiveCopyTool {
 	{
 		FileInputStream fromSrcFile = new FileInputStream(src);
 		copySingleFile(fromSrcFile, dest);
-		/*FileOutputStream toDestFile = new FileOutputStream(dest);
-		byte[] copyBuffer = new byte[COPY_BUFFER_SIZE];
-		int bytesReadFromSrcFile = 0;
-		
-		while(fromSrcFile.available()>0)
-		{
-			bytesReadFromSrcFile = fromSrcFile.read(copyBuffer);
-			toDestFile.write(copyBuffer);
-			if(bytesReadFromSrcFile == EOF) break;
-		}
-		fromSrcFile.close();
-		toDestFile.close();*/
 	}
 	
 	/* WARNING False usage of this method is dangerous! */
@@ -180,7 +168,6 @@ public class RecursiveCopyTool {
 	
 	static void copySingleFile(InputStream src, File dest) throws IOException
 	{
-		//FileInputStream fromSrcFile = new FileInputStream(src);
 		if(src == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Abort copy process: InputStream is null");
