@@ -27,31 +27,21 @@
  */
 package jap;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.util.Locale;
-import java.util.Vector;
-import java.io.File;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import anon.crypto.JAPCertificate;
-import anon.infoservice.IProxyInterfaceGetter;
-import anon.infoservice.ProxyInterface;
-import anon.util.ClassUtil;
-import anon.util.ResourceLoader;
-import anon.util.XMLParseException;
-import anon.util.XMLUtil;
-import anon.infoservice.ImmutableProxyInterface;
+import gui.GUIUtils;
 import gui.JAPDll;
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
-import java.util.Observable;
 import jap.forward.JAPRoutingSettings;
-import anon.infoservice.IMutableProxyInterface;
-import anon.mixminion.mmrdescription.MMRList;
+
+import java.awt.Dimension;
+import java.awt.Point;
+import java.io.File;
+import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Locale;
+import java.util.Observable;
+import java.util.Vector;
 
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -59,12 +49,15 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
-import gui.GUIUtils;
 import platform.AbstractOS;
+import anon.crypto.JAPCertificate;
+import anon.infoservice.IMutableProxyInterface;
+import anon.infoservice.IProxyInterfaceGetter;
+import anon.infoservice.ImmutableProxyInterface;
+import anon.infoservice.ProxyInterface;
+import anon.mixminion.mmrdescription.MMRList;
+import anon.util.ClassUtil;
+import anon.util.ResourceLoader;
 
 /* This is the Model of All. It's a Singelton!*/
 public final class JAPModel extends Observable
