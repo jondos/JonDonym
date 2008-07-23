@@ -23,6 +23,7 @@
  */
 package gui.help;
 
+import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPHelpContext.IHelpContext;
 import gui.dialog.JAPDialog;
@@ -60,8 +61,8 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		m_parent = a_parent;
 		m_urlCaller = a_urlCaller;
 		m_emailCaller = a_emailCaller;
-		//m_alternativeHelp = 
-		//	new JAPInternalHelpViewer(a_parent, a_urlCaller, a_emailCaller).getHelp();
+		m_alternativeHelp = 
+			new JAPInternalHelpViewer(a_parent, a_urlCaller, a_emailCaller).getHelp();
 	}
 	
 	public void setVisible(boolean a_bVisible)
@@ -71,6 +72,8 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		if(getHelpContext() == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.GUI, "Cannot show help externally: No help context specified");
+			m_alternativeHelp.setContext(JAPHelpContext.INDEX_CONTEXT);
+			m_alternativeHelp.setVisible(a_bVisible);
 			return;
 		}
 		RootPaneContainer container = context.getDisplayContext();
@@ -78,6 +81,8 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		if(container == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.GUI, "Cannot show help externally: No display context specified");
+			m_alternativeHelp.setContext(getHelpContext());
+			m_alternativeHelp.setVisible(a_bVisible);
 			return;
 		}
 		/* If no external help path is specified and no help is installed: 
@@ -133,7 +138,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		URL helpURL = model.getHelpURL(context.getHelpContext()+".html");
 		if(helpURL != null)
 		{
-			AbstractOS.getInstance().openURL(helpURL);	
+			m_urlCaller.openURL(helpURL);	
 		}
 	}	
 
@@ -150,6 +155,18 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			{
 				setVisible(true);
 			}
+			else
+			{
+				LogHolder.log(LogLevel.ERR, LogType.GUI, "Cannot show help externally: No display context specified");
+				m_alternativeHelp.setContext(getHelpContext());
+				m_alternativeHelp.loadCurrentContext();
+			}
+		}
+		else
+		{
+			LogHolder.log(LogLevel.ERR, LogType.GUI, "Cannot show help externally: No help context specified");
+			m_alternativeHelp.setContext(JAPHelpContext.INDEX_CONTEXT);
+			m_alternativeHelp.loadCurrentContext();
 		}
 	}
 }

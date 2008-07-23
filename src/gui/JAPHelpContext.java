@@ -35,6 +35,8 @@ import javax.swing.RootPaneContainer;
 public final class JAPHelpContext
 {
 	public static final String INDEX = "index";
+	public static final IHelpContext INDEX_CONTEXT =
+						createHelpContext(INDEX);
 //
 //	private String m_currentContext;
 //

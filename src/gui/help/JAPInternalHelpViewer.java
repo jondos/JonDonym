@@ -24,9 +24,11 @@
 package gui.help;
 
 import gui.GUIUtils;
+import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JTextComponentToClipboardCopier;
 import gui.LanguageMapper;
+import gui.JAPHelpContext.IHelpContext;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp.IExternalEMailCaller;
 import gui.help.JAPHelp.IExternalURLCaller;
@@ -191,7 +193,8 @@ public class JAPInternalHelpViewer extends JAPDialog
 		boolean bURL = false;
 		if (a_bVisible)
 		{
-			String strContext = m_delegator.getHelpContext().getHelpContext();		
+			IHelpContext helpContext = m_delegator.getHelpContext();
+			String strContext = (helpContext != null) ? helpContext.getHelpContext() : JAPHelpContext.INDEX;		
 			try
 			{
 				URL url = new URL(strContext);
