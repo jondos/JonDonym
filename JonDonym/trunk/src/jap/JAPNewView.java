@@ -2544,16 +2544,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
-		/*boolean showHelpInternal = !JAPModel.getInstance().isExternalHelpInstallationPossible();
-		if(!showHelpInternal)
-		{
-			JAPExternalHelpView externalViewer = new JAPExternalHelpView(this);
-			showHelpInternal = !externalViewer.displayHelp();
-		}
-		if(showHelpInternal)
-		{
-			showHelpInJonDo();
-		}*/
 		JAPHelp help = JAPHelp.getInstance();
 		help.setContext(
 				JAPHelpContext.createHelpContext("index", this));
