@@ -984,6 +984,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascadeId);
 			
 			htmlData += "<a href=\"/status\">Back to Server Status</a><br /><br />";
+			htmlData += "<b>Delay values</b><br /><br />";
 			
 			if(entry == null)
 			{
@@ -993,7 +994,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			{
 				htmlData += entry.delayToHTML(day);
 			}
-			
+
 			htmlData += getHumanStatusFooter();
 				
 			/* send content */
@@ -1021,6 +1022,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascadeId);
 			
 			htmlData += "<a href=\"/status\">Back to Server Status</a><br /><br />";
+			htmlData += "<b>Speed values</b><br /><br />";
 			
 			if(entry == null)
 			{

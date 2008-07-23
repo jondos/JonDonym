@@ -773,10 +773,10 @@ public class PerformanceMeter implements Runnable
         			}
         		}        		        		
         		
-        		// speed in bit/sec;
+        		// speed in bit/s;
         		speed = (bytesRead * 8) / (responseEndTime - responseStartTime);
         		
-        		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/sec.");
+        		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/s.");
         		
         		m_lBytesRecvd += bytesRead;        		        		
         		bUpdated = true;
@@ -825,7 +825,7 @@ public class PerformanceMeter implements Runnable
 		
 		Database.getInstance(PerformanceEntry.class).update(entry);
 		
-    	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/sec; Last Users:" + lastUsers);
+    	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers);
 		
     	if (m_proxy.isConnected())
 		{

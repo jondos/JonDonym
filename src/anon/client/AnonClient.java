@@ -77,7 +77,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	 * @todo For most people, 20s are sufficient, but some cannot connect with this short
 	 * timeout. Make this configurable.
 	 */
-	public static final int DEFAULT_LOGIN_TIMEOUT = 20000;
+	public static final int DEFAULT_LOGIN_TIMEOUT = 30000;
 	private static final int CONNECT_TIMEOUT = 8000;
 
 	private static final int FIRST_MIX = 0;
