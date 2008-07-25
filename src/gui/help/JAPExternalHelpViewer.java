@@ -26,7 +26,12 @@ package gui.help;
 import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPHelpContext.IHelpContext;
+import gui.dialog.FileChooserContentPane;
+import gui.dialog.FinishedContentPane;
 import gui.dialog.JAPDialog;
+import gui.dialog.SimpleWizardContentPane;
+import gui.dialog.WorkerContentPane;
+import gui.dialog.DialogContentPane;
 
 import jap.HelpFileStorageManager;
 import jap.JAPConf;
@@ -34,6 +39,7 @@ import jap.JAPModel;
 import jap.JAPNewView;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Frame;
 import java.io.File;
 import java.net.URL;
@@ -41,6 +47,8 @@ import java.util.Observable;
 
 import javax.swing.JFileChooser;
 import javax.swing.RootPaneContainer;
+
+import anon.util.ProgressCapsule;
 
 
 import logging.LogHolder;
@@ -76,7 +84,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			m_alternativeHelp.setVisible(a_bVisible);
 			return;
 		}
-		RootPaneContainer container = context.getDisplayContext();
+		Container container = context.getHelpExtractionDisplayContext();
 		
 		if(container == null)
 		{
@@ -90,51 +98,91 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		 */
 		if(!model.isHelpPathDefined() )
 		{
-			final File f = 
-				JAPDialog.showFileChooseDialog(container, 
-							JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL),
-							JAPMessages.getString(JAPNewView.MSG_HELP_PATH_CHOICE),
-							model.getHelpPath(),
-							JFileChooser.DIRECTORIES_ONLY);
-			
-			boolean pathChosen = (f != null);
-			String pathValidation = pathChosen ? 
-					JAPModel.getInstance().helpPathValidityCheck(f) : HelpFileStorageManager.HELP_INVALID_NULL;
-				
-			boolean pathValid = pathValidation.equals(HelpFileStorageManager.HELP_VALID) ||
-							 	pathValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS);
-			
-			if(!pathChosen)
+			final JAPDialog dialog = 
+				new JAPDialog(container, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL));
+			final FileChooserContentPane fileChooser = 
+				new FileChooserContentPane(dialog, JAPMessages.getString(JAPNewView.MSG_HELP_PATH_CHOICE),
+						model.getHelpPath(), JFileChooser.DIRECTORIES_ONLY)
 			{
-				return; //false;
-			}
-			
-			if(pathChosen && pathValid)
-			{
-				if(!model.isHelpPathDefined() || !f.getPath().equals(model.getHelpPath()))
+				public CheckError[] checkYesOK()
 				{
-					Observable helpFileStorageObservable = model.getHelpFileStorageObservable();
-					/* observe the model while it changes during installation. (if we can). */
-					if(helpFileStorageObservable != null)
-					{		
-						JAPDialog hd =
-							JAPDialog.showProgressDialog(container, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL), 
-									JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS), null, 
-									null, helpFileStorageObservable);
+					CheckError[] errors = super.checkYesOK();
+					
+					if (errors != null && errors.length > 0)
+					{
+						return errors;
 					}
-					//When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
-					model.setHelpPath(f);
+					
+					String pathValidation = JAPModel.getInstance().helpPathValidityCheck(getFile());
+					
+					if (!pathValidation.equals(HelpFileStorageManager.HELP_VALID) &&
+						!pathValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS))
+					{
+						errors = new CheckError[]{
+								new CheckError(JAPMessages.getString(pathValidation), LogType.GUI)};
+					}
+					
+					return errors;
+				}
+				
+				public boolean isSkippedAsPreviousContentPane()
+				{
+					return true;
+				}
+			};					
+				
+			Runnable run = new Runnable()
+			{
+				public void run()
+				{
+//					When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
+					model.setHelpPath(fileChooser.getFile());
 					//Not really happy about that:
 					JAPConf.getInstance().updateValues();
 				}
-			}
-			else
+			};
+						
+			final WorkerContentPane workerPane = 
+				new WorkerContentPane(dialog, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS),
+						fileChooser, run, model.getHelpFileStorageObservable())
 			{
-				JAPDialog.showErrorDialog(container, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_FAILED)+
-						JAPMessages.getString(pathValidation), LogType.MISC);
-				return; //false;
+				public boolean isSkippedAsNextContentPane()
+				{
+					return model.isHelpPathDefined() && fileChooser.getFile().getPath().equals(model.getHelpPath());
+				}
+			};
+			//workerPane.setInterruptThreadSafe(true);
+						
+			SimpleWizardContentPane finish = 
+				new SimpleWizardContentPane(dialog, 
+						"Die Hilfetexte wurden erfolgreich installiert", workerPane)
+			{
+				public CheckError[] checkUpdate()
+				{
+					if (workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
+					{					
+						dialog.setTitle(JAPMessages.getString(JAPDialog.MSG_ERROR_UNKNOWN));
+						setText("<font color='red'>Die Hilfetexte konnten leider nicht installiert werden! Es wird nun ein internes Hilfefenster geöffnet, das allerdings keine optimale Darstellung ermöglicht.</font>");
+					}
+					return null;
+				}
+			};
+			finish.getButtonCancel().setVisible(false);
+			
+			fileChooser.updateDialogOptimalSized();
+			dialog.setResizable(false);
+			dialog.setVisible(true);		
+			
+			if(workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.GUI, 
+						"Cannot show help externally: Help installation failed");
+				m_alternativeHelp.setContext(getHelpContext());
+				m_alternativeHelp.setVisible(a_bVisible);
+				return;
 			}
-		}
+		}		
+		
 		URL helpURL = model.getHelpURL(context.getHelpContext()+".html");
 		if(helpURL != null)
 		{
@@ -151,7 +199,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 	{
 		if(getHelpContext() != null)
 		{
-			if(getHelpContext().getDisplayContext() != null)
+			if(getHelpContext().getHelpExtractionDisplayContext() != null)
 			{
 				setVisible(true);
 			}

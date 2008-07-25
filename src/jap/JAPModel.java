@@ -149,7 +149,8 @@ public final class JAPModel extends Observable
 	private Vector m_vecLookAndFeels = new Vector();
 	private LookAndFeelInfo[] m_systemLookAndFeels;
 	private Object LOOK_AND_FEEL_SYNC = new Object();
-
+	private Object HELP_PATH_SYNC = new Object();
+	
 	private boolean m_bShowDialogFormat = false;
 
 	private int m_fontSize = 0;
@@ -1279,42 +1280,48 @@ public final class JAPModel extends Observable
 
 	public String getHelpPath()
 	{
-		return m_helpPath != null ?
+		synchronized (HELP_PATH_SYNC)
+		{
+			return m_helpPath != null ?
 					m_helpPath : AbstractOS.getInstance().getDefaultHelpPath();
+		}
 	}
 	
 	public URL getHelpURL(String a_startDoc)
 	{
-		URL helpURL = null;
-		if(m_helpFileStorageManager != null)
+		synchronized (HELP_PATH_SYNC)
 		{
-			if(isHelpPathDefined())
+			URL helpURL = null;
+			if(m_helpFileStorageManager != null)
 			{
-				m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath);
-				Locale loc = JAPMessages.getLocale();
-				String startPath = JAPConstants.HELP_EN_FOLDER;
-				if(loc != null)
+				if(isHelpPathDefined())
 				{
-					startPath = (loc.toString().equalsIgnoreCase("de") ? JAPConstants.HELP_DE_FOLDER : startPath);
-				}
-				
-				try 
-				{
-					helpURL = 
-						new URL("file://"+m_helpPath+
-								File.separator+
-								JAPConstants.HELP_FOLDER+
-								startPath+
-								a_startDoc);
-				} 
-				catch (MalformedURLException e) 
-				{
-					LogHolder.log(LogLevel.WARNING, LogType.MISC, "Malformed URL Excpetion: ", e);
-					return null;
+					m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath);
+					Locale loc = JAPMessages.getLocale();
+					String startPath = JAPConstants.HELP_EN_FOLDER;
+					if(loc != null)
+					{
+						startPath = (loc.toString().equalsIgnoreCase("de") ? JAPConstants.HELP_DE_FOLDER : startPath);
+					}
+					
+					try 
+					{
+						helpURL = 
+							new URL("file://"+m_helpPath+ "/" +
+									//File.separator+
+									JAPConstants.HELP_FOLDER+ "/" +
+									startPath+
+									a_startDoc);
+					} 
+					catch (MalformedURLException e) 
+					{
+						LogHolder.log(LogLevel.WARNING, LogType.MISC, "Malformed URL Excpetion: ", e);
+						return null;
+					}
 				}
 			}
+			return helpURL;
 		}
-		return helpURL;
 	}
 	
 	public URL getHelpURL()
@@ -1324,17 +1331,20 @@ public final class JAPModel extends Observable
 	
 	void initHelpPath(String helpPath)
 	{
-		String initPathValidity = (helpPathValidityCheck(helpPath));
-		
-		if( initPathValidity.equals(HelpFileStorageManager.HELP_VALID) || 
-			initPathValidity.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) ||
-			initPathValidity.equals(NO_HELP_STORAGE_MANAGER))
+		synchronized (HELP_PATH_SYNC)
 		{
-			m_helpPath = helpPath;
-		}
-		else
-		{
-			m_helpPath = null;
+			String initPathValidity = (helpPathValidityCheck(helpPath));
+			
+			if( initPathValidity.equals(HelpFileStorageManager.HELP_VALID) || 
+				initPathValidity.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) ||
+				initPathValidity.equals(NO_HELP_STORAGE_MANAGER))
+			{
+				m_helpPath = helpPath;
+			}
+			else
+			{
+				m_helpPath = null;
+			}
 		}
 	}
 	
@@ -1352,33 +1362,36 @@ public final class JAPModel extends Observable
 	
 	public void setHelpPath(String newHelpPath)
 	{
-		if(newHelpPath == null)
+		synchronized(HELP_PATH_SYNC)
 		{
-			resetHelpPath();
-			return;
-		}
-		if(newHelpPath.equals(""))
-		{
-			resetHelpPath();
-			return;
-		}
-		if(helpPathValidityCheck(newHelpPath).equals(HelpFileStorageManager.HELP_VALID) ||
-				helpPathValidityCheck(newHelpPath).equals(HelpFileStorageManager.HELP_JONDO_EXISTS))
-		{
-			String oldHelpPath = m_helpPath;
-			boolean helpPathChanged =
-						isHelpPathDefined() ? !m_helpPath.equals(newHelpPath) : true;
-			
-			if(helpPathChanged)
+			if(newHelpPath == null)
 			{
-				boolean storageLayerChanged = true;
-				if(m_helpFileStorageManager != null)
+				resetHelpPath();
+				return;
+			}
+			if(newHelpPath.equals(""))
+			{
+				resetHelpPath();
+				return;
+			}
+			if(helpPathValidityCheck(newHelpPath).equals(HelpFileStorageManager.HELP_VALID) ||
+				helpPathValidityCheck(newHelpPath).equals(HelpFileStorageManager.HELP_JONDO_EXISTS))
+			{
+				String oldHelpPath = m_helpPath;
+				boolean helpPathChanged =
+							isHelpPathDefined() ? !m_helpPath.equals(newHelpPath) : true;
+				
+				if(helpPathChanged)
 				{
-						storageLayerChanged = m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, newHelpPath);
-				}
-				if(storageLayerChanged)
-				{
-					m_helpPath = newHelpPath;
+					boolean storageLayerChanged = true;
+					if(m_helpFileStorageManager != null)
+					{
+							storageLayerChanged = m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, newHelpPath);
+					}
+					if(storageLayerChanged)
+					{
+						m_helpPath = newHelpPath;
+					}
 				}
 			}
 		}
@@ -1386,15 +1399,17 @@ public final class JAPModel extends Observable
 	
 	private void resetHelpPath()
 	{
-		String oldHelpPath = m_helpPath;
-		if(oldHelpPath != null)
+		synchronized (HELP_PATH_SYNC)
 		{
-			System.out.println("resetting help path");
-			if(m_helpFileStorageManager != null)
+			String oldHelpPath = m_helpPath;
+			if(oldHelpPath != null)
 			{
-				m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, null);
+				if(m_helpFileStorageManager != null)
+				{
+					m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, null);
+				}
+				m_helpPath = null;
 			}
-			m_helpPath = null;
 		}
 	}
 	
@@ -1406,8 +1421,11 @@ public final class JAPModel extends Observable
 	 */
 	public String helpPathValidityCheck(String helpPath)
 	{
-		return (m_helpFileStorageManager != null) ?
-				m_helpFileStorageManager.helpPathValidityCheck(helpPath) : NO_HELP_STORAGE_MANAGER;
+		synchronized (HELP_PATH_SYNC)
+		{
+			return (m_helpFileStorageManager != null) ?
+					m_helpFileStorageManager.helpPathValidityCheck(helpPath) : NO_HELP_STORAGE_MANAGER;
+		}
 	}
 	
 	/**
@@ -1418,11 +1436,14 @@ public final class JAPModel extends Observable
 	 */
 	public String helpPathValidityCheck(File hpFile)
 	{
-		if(hpFile == null)
+		synchronized (HELP_PATH_SYNC)
 		{
-			return JAPMessages.getString(HelpFileStorageManager.HELP_INVALID_NULL);
+			if(hpFile == null)
+			{
+				return JAPMessages.getString(HelpFileStorageManager.HELP_INVALID_NULL);
+			}
+			return helpPathValidityCheck(hpFile.getPath());
 		}
-		return helpPathValidityCheck(hpFile.getPath());
 	}
 	
 	public boolean isExternalHelpInstallationPossible()
@@ -1438,24 +1459,30 @@ public final class JAPModel extends Observable
 	 */
 	public boolean isHelpPathDefined()
 	{
-		boolean helpPathExists = m_helpPath != null;
-		
-		/* if no storageManager is defined: don't check if installation exists */
-		boolean helpInstallationExists = m_helpFileStorageManager != null ?
-											m_helpFileStorageManager.helpInstallationExists(m_helpPath) : helpPathExists;
-		
-		if(helpPathExists && !helpInstallationExists)
+		synchronized (HELP_PATH_SYNC)
 		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path "+m_helpPath+" configured but no valid help could be found!");
-			m_helpPath = null;
+			boolean helpPathExists = m_helpPath != null;
+			
+			/* if no storageManager is defined: don't check if installation exists */
+			boolean helpInstallationExists = m_helpFileStorageManager != null ?
+												m_helpFileStorageManager.helpInstallationExists(m_helpPath) : helpPathExists;
+			
+			if(helpPathExists && !helpInstallationExists)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path "+m_helpPath+" configured but no valid help could be found!");
+				m_helpPath = null;
+			}
+			return helpInstallationExists;
 		}
-		return helpInstallationExists;
 	}
 	
 	public Observable getHelpFileStorageObservable()
 	{
-		return (m_helpFileStorageManager != null) ? 
-				m_helpFileStorageManager.getStorageObservable() : null;
+		synchronized (HELP_PATH_SYNC)
+		{
+			return (m_helpFileStorageManager != null) ? 
+					m_helpFileStorageManager.getStorageObservable() : null;
+		}
 	}
 	
 	public void setDLLupdate(boolean a_update) {

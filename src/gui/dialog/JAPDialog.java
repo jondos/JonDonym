@@ -492,7 +492,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			this(a_strMessage, a_bDefault, new JAPHelpContext.IHelpContext()
 			{
 				public String getHelpContext(){ return a_strHelpContext;}
-				public RootPaneContainer getDisplayContext(){ return null;}
+				public Container getHelpExtractionDisplayContext(){ return null;}
 				
 			});
 		}
@@ -513,10 +513,10 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			m_bState = m_bDefault;
 		}
 		
-		private LinkedCheckBox(final LinkedCheckBox a_box, final RootPaneContainer a_container)
+		private LinkedCheckBox(final LinkedCheckBox a_box)
 		{
 			this(a_box.m_strMessage, a_box.m_bDefault, 
-					JAPHelpContext.createHelpContext(a_box.getHelpContext(), a_container));		
+					JAPHelpContext.createHelpContext(a_box.getHelpContext()));		
 		}
 		
 		/**
@@ -683,7 +683,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			m_helpContext = a_helpContext;
 		}
 
-		public LinkedHelpContext(final String a_strHelpContext , final RootPaneContainer a_rootPaneContainer )
+		public LinkedHelpContext(final String a_strHelpContext)
 		{
 			m_helpContext = new JAPHelpContext.IHelpContext()
 			{
@@ -692,9 +692,9 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 					return a_strHelpContext;
 				}
 				
-				public RootPaneContainer getDisplayContext()
+				public Container getHelpExtractionDisplayContext()
 				{
-					return a_rootPaneContainer;
+					return null;
 				}
 			};
 		}
@@ -708,13 +708,13 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			return m_helpContext.getHelpContext();
 		}
 		
-		public RootPaneContainer getDisplayContext() 
+		public Container getHelpExtractionDisplayContext() 
 		{
 			if (m_helpContext == null)
 			{
 				return null;
 			}
-			return m_helpContext.getDisplayContext();
+			return m_helpContext.getHelpExtractionDisplayContext();
 		}
 
 		/**
@@ -1503,7 +1503,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			if(a_linkedInformation instanceof LinkedCheckBox)
 			{
 				LinkedCheckBox box = (LinkedCheckBox) a_linkedInformation;
-				a_linkedInformation = new LinkedCheckBox(box, dialog);
+				a_linkedInformation = new LinkedCheckBox(box);
 				helpContext = (JAPHelpContext.IHelpContext) a_linkedInformation;
 			}
 		}
@@ -2582,316 +2582,6 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, JAPMessages.getString(MSG_ERROR_UNDISPLAYABLE));
 			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
 		}
-	}
-	
-	public static File showFileChooseDialog(RootPaneContainer a_container, String a_title, String a_message, String a_defaultValue, int a_fileSelectionMode)
-	{
-		if(a_container instanceof JAPDialog)
-		{
-			return showFileChooseDialog((JAPDialog) a_container, a_title, a_message, 
-					a_defaultValue, a_fileSelectionMode);
-		}
-		else if(a_container instanceof Component)
-		{
-			return showFileChooseDialog((Component) a_container, a_title, a_message, 
-					a_defaultValue, a_fileSelectionMode);
-		}
-		else 
-		{
-			return null;
-		}
-	}
-	
-	public static File showFileChooseDialog(JAPDialog a_parent, String a_title, String a_message, String a_defaultValue, int a_fileSelectionMode)
-	{
-		return showFileChooseDialog(getInternalDialog(a_parent), a_title, a_message, a_defaultValue, a_fileSelectionMode);
-	}
-	
-	/**
-	 * a provisoric file chooser dialog 
-	 * @todo: make it look better
-	 */
-	public static File showFileChooseDialog(Component a_parent, String a_title, String a_message, String a_defaultValue, int a_fileSelectionMode)
-	{
-		final Component parent = a_parent;
-		final int fileSelectionMode = a_fileSelectionMode;
-		
-		JPanel textPanel = new JPanel();
-		JPanel pathChooserPanel = new JPanel();
-		JPanel buttonPanel = new JPanel();
-		
-		textPanel.setLayout(new FlowLayout());
-		pathChooserPanel.setLayout(new FlowLayout());
-		buttonPanel.setLayout(new FlowLayout());
-		
-		final JAPDialog dialog = new JAPDialog(parent, a_title, true);
-		final StringBuffer returnField = new StringBuffer("");
-		
-		dialog.getContentPane().setLayout(new BorderLayout());
-		
-		JButton pathChooseButton = new JButton(JAPMessages.getString("bttnChoose"));
-		JButton okButton = new JButton(JAPMessages.getString("bttnOk"));
-		JButton cancelButton = new JButton(JAPMessages.getString("bttnCancel"));
-		
-		final JTextField pathField = new JTextField(15);
-		pathField.setText(a_defaultValue);
-		JLabel askForPathLabel = new JLabel(a_message); 
-		
-		textPanel.add(askForPathLabel);
-		
-		pathChooserPanel.add(pathField);
-		pathChooserPanel.add(pathChooseButton);
-		
-		buttonPanel.add(okButton);
-		buttonPanel.add(cancelButton);
-		
-		dialog.getContentPane().add(textPanel, BorderLayout.NORTH);
-		dialog.getContentPane().add(pathChooserPanel, BorderLayout.CENTER);
-		dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		
-		ActionListener chooseListener = 
-			new ActionListener()
-			{
-				public void actionPerformed(ActionEvent aev)
-				{
-					JFileChooser chooser = new JFileChooser();
-					chooser.setFileSelectionMode(fileSelectionMode);
-					if(chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
-					{
-						File f = chooser.getSelectedFile();
-						if(f != null)
-						{
-							pathField.setText(f.getPath());
-						}
-					}
-				}
-			};
-		ActionListener okListener = 
-			new ActionListener()
-			{
-				public void actionPerformed(ActionEvent aev)
-				{
-					returnField.append(pathField.getText());
-					dialog.dispose();
-				}
-			};
-		ActionListener cancelListener = 
-			new ActionListener()
-			{
-				public void actionPerformed(ActionEvent aev)
-				{
-					dialog.dispose();
-				}
-			};
-		pathChooseButton.addActionListener(chooseListener);
-		okButton.addActionListener(okListener);
-		cancelButton.addActionListener(cancelListener);
-		
-		dialog.pack();
-		dialog.setVisible(true);
-		
-		String helpPathStr = returnField.toString();
-		if(helpPathStr != null)
-		{
-			if(!helpPathStr.equals(""))
-			{
-				return new File(helpPathStr.trim());
-			}
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * @todo: a lot!
-	 */
-	public static JAPDialog showProgressDialog(RootPaneContainer a_container, String a_title, String a_message, 
-			String a_progressFinishedMessage, String a_progressCancelledMessage,
-			Observable a_progressSource)
-	{
-		if(a_container instanceof JAPDialog)
-		{
-			return showProgressDialog((JAPDialog) a_container, a_title, a_message,
-					a_progressFinishedMessage, a_progressCancelledMessage, a_progressSource);
-		}
-		else if(a_container instanceof Component)
-		{
-			return showProgressDialog((Component) a_container, a_title, a_message,
-					a_progressFinishedMessage, a_progressCancelledMessage, a_progressSource);
-		}
-		else 
-		{
-			return null;
-		}
-	}
-	
-	/**
-	 * @todo: a lot!
-	 */
-	public static JAPDialog showProgressDialog(JAPDialog parent, String a_title, String a_message, 
-			String a_progressFinishedMessage, String a_progressCancelledMessage,
-			Observable a_progressSource)
-	{
-		return showProgressDialog(getInternalDialog(parent), a_title, a_message,
-				a_progressFinishedMessage, a_progressCancelledMessage, a_progressSource);
-	}
-	
-	/**
-	 * @todo:  a lot!
-	 */
-	public static JAPDialog showProgressDialog(Component a_parent, String a_title, String a_message, 
-									String a_progressFinishedMessage, String a_progressCancelledMessage,
-									Observable a_progressSource)
-	{
-		final JAPDialog dialog = new JAPDialog(a_parent, a_title, true);
-		final String progressFinishedMessage = a_progressFinishedMessage;
-		final String progressCancelledMessage = a_progressCancelledMessage;
-		final Observable progressSource = a_progressSource;
-		
-		JPanel textPanel = new JPanel();
-		JPanel progressPanel = new JPanel();
-		JPanel buttonPanel = new JPanel();
-		
-		textPanel.setLayout(new FlowLayout());
-		progressPanel.setLayout(new FlowLayout());
-		buttonPanel.setLayout(new FlowLayout());
-		
-		JLabel progressLabel = new JLabel(a_message);
-		final JProgressBar progressBar = new JProgressBar();
-		JButton cancelButton = new JButton(JAPMessages.getString("bttnCancel"));
-		
-		progressBar.setBorderPainted(true);
-		progressBar.setStringPainted(true);
-		
-		final Vector cancelProcessSig = new Vector();
-		
-		final Observer progressObserver = 
-			new Observer()
-			{
-				public void update(Observable o, Object arg)
-				{
-					if((arg != null) && (arg instanceof ProgressCapsule))
-					{
-						ProgressCapsule pc = (ProgressCapsule) arg;
-						
-						int value = pc.getValue();
-						int maximum = pc.getMaximum();
-						int minimum = pc.getMinimum();
-						int progressStatus = pc.getStatus();
-						
-						if(progressStatus == ProgressCapsule.PROGRESS_ONGOING)
-						{
-							synchronized(progressBar)
-							{
-								if(progressBar.getMaximum() != maximum)
-								{
-									progressBar.setMaximum(maximum);
-								}
-								if(progressBar.getMinimum() != minimum)
-								{
-									progressBar.setMinimum(minimum);
-								}
-								progressBar.setValue(value);
-								
-								Window dia = getInternalDialog(dialog);
-								dia.update(dia.getGraphics());
-							}
-						}
-						else if(progressStatus == ProgressCapsule.PROGRESS_FINISHED)
-						{
-							if(progressFinishedMessage != null)
-							{
-								//TODO: show finishedDialog
-							}
-							progressSource.deleteObserver(this);
-							/* In this case we expect progress percentage to reach 100% so dispose dialog via 
-							 * ChangeListener
-							 */
-						}
-						else if(progressStatus == ProgressCapsule.PROGRESS_ABORTED)
-						{
-							if(progressCancelledMessage != null)
-							{
-								//TODO: show error dialog
-							}
-							progressSource.deleteObserver(this);
-							dialog.dispose();
-						}
-							
-					}
-					synchronized(cancelProcessSig)
-					{
-						if(!cancelProcessSig.isEmpty())
-						{
-							cancelProcessSig.removeAllElements();
-							/* 
-							 * This is a generic way of interrupting the progress source.
-							 * If the progress source does not want to be interrupted it may ignore 
-							 * this interrupt.
-							 */
-							Thread.currentThread().interrupt();
-						}
-					}
-				}
-			};
-
-		if(a_progressSource != null)
-		{
-			a_progressSource.addObserver(progressObserver);
-		}
-		
-		
-		/* this changeListener that disposes the dialog is added in every case */
-			ChangeListener changeListener = 
-				new ChangeListener()
-				{
-					public void stateChanged(ChangeEvent e) 
-					{
-						synchronized(progressBar)
-						{
-							if(progressBar.getPercentComplete() == 1.0)
-							{
-								dialog.dispose();
-							}
-						}
-					}
-				};
-		progressBar.addChangeListener(changeListener);
-		
-		ActionListener cancelListener = 
-			new ActionListener()
-			{
-				public void actionPerformed(ActionEvent aev)
-				{
-					synchronized(cancelProcessSig)
-					{
-						cancelProcessSig.add(new Object());
-					}
-				}
-			};
-		cancelButton.addActionListener(cancelListener);
-		cancelButton.setEnabled(false);	
-		textPanel.add(progressLabel);
-		progressPanel.add(progressBar);
-		buttonPanel.add(cancelButton);
-			
-		dialog.getContentPane().setLayout(new BorderLayout());
-		dialog.getContentPane().add(textPanel, BorderLayout.NORTH);
-		dialog.getContentPane().add(progressPanel, BorderLayout.CENTER);
-		dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		dialog.pack();
-		Thread displayThread = 
-			new Thread(
-				new Runnable()
-				{
-					public void run()
-					{
-						dialog.setVisible(true);
-					}
-				}
-			); 
-		displayThread.start();
-		return dialog;
 	}
 	
 	/**

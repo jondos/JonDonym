@@ -27,7 +27,7 @@
  */
 package gui;
 
-import javax.swing.RootPaneContainer;
+import java.awt.Container;
 
 /**
  * This class represents the help context of JAP.
@@ -81,14 +81,14 @@ public final class JAPHelpContext
 		return createHelpContext(a_context, null);
 	}
 	
-	public static IHelpContext createHelpContext(String a_context, RootPaneContainer a_container)
+	public static IHelpContext createHelpContext(String a_context, Container a_container)
 	{
-		final RootPaneContainer container = a_container;
+		final Container container = a_container;
 		final String context = a_context;
 		
 		return new IHelpContext()
 		{
-			public RootPaneContainer getDisplayContext() 
+			public Container getHelpExtractionDisplayContext() 
 			{
 				return container;
 			}
@@ -103,6 +103,6 @@ public final class JAPHelpContext
 	public interface IHelpContext
 	{
 		String getHelpContext();
-		RootPaneContainer getDisplayContext();
+		Container getHelpExtractionDisplayContext();
 	}
 }

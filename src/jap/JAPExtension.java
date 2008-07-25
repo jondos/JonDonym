@@ -9,6 +9,7 @@ import gui.dialog.JAPDialog;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Container;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -227,9 +228,9 @@ public class JAPExtension extends AbstractJAPConfModule
 			return HELP_CONTEXT;
 		}
 		
-		public RootPaneContainer getDisplayContext() 
+		public Container getHelpExtractionDisplayContext() 
 		{
-			return JAPConf.getInstance();
+			return JAPConf.getInstance().getContentPane();
 		}
 		
 		public boolean isCloseWindowActive()

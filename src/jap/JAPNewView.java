@@ -2222,7 +2222,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 							{
 								JAPDialog.showMessageDialog(JAPNewView.this,
 									JAPMessages.getString(JAPConfNetwork.MSG_SLOW_ANTI_CENSORSHIP),
-									new JAPDialog.LinkedHelpContext("forwarding_client", JAPNewView.this));
+									new JAPDialog.LinkedHelpContext("forwarding_client"));
 							}
 						});
 					}

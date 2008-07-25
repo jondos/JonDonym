@@ -38,11 +38,18 @@ import logging.LogType;
  */
 public class ConsoleSplash implements ISplashResponse
 {
+	private String m_lastMessage;
 	public void setText(String a_message)
 	{
 		if (a_message != null && a_message.trim().length() > 0)
 		{
+			m_lastMessage = a_message;
 			LogHolder.log(LogLevel.ALERT, LogType.MISC, a_message + "...");
 		}
+	}
+	
+	public String getText()
+	{
+		return m_lastMessage;
 	}
 }

@@ -23,43 +23,24 @@
 */
 package jap;
 
-import gui.JAPMessages;
-import gui.dialog.JAPDialog;
-import gui.dialog.JAPDialog.ProgressObservableAdapter;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Locale;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.zip.ZipFile;
 
-import javax.swing.JProgressBar;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import platform.AbstractOS;
-
 import anon.util.ClassUtil;
-import anon.util.ProgressCapsule;
 import anon.util.RecursiveCopyTool;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import anon.util.ZLibTools;
 import anon.util.ZipArchiver;
-import anon.util.ZipArchiver.ZipEvent;
-
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
 /**
  * Handling of the JonDo help files
@@ -72,15 +53,12 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 	public final static String HELP_VERSION_NODE = "jondohelp";
 	public final static String HELP_VERSION_ATTRIBUTE = "version";
 	
-	private static JARHelpFileStorageManager helpController = null;
-	
 	
 	public static final String HELP_VERSION_FILE = "jondohelp.xml";
 	
 	
-	private static Thread asynchHelpFileInstallThread = null;
-	private String helpPath;
-	private ZipArchiver archiver;
+	private String m_helpPath;
+	private ZipArchiver m_archiver;
 	
 	public JARHelpFileStorageManager()
 	{
@@ -90,7 +68,7 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 			//TODO: Throw something
 			//throw new
 		}
-		archiver = new ZipArchiver(japArchive);
+		m_archiver = new ZipArchiver(japArchive);
 	}
 	/**
 	 * sets the specified path for external installation of the help files
@@ -100,17 +78,22 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 	 */
 	private void setHelpPath(String helpPath)
 	{
-		this.helpPath = helpPath;
+		this.m_helpPath = helpPath;
 	}
 	
 	/**
 	 * checks whether the help version number matches the JonDo version number
-	 * @return true if and only if the stored help version number is exactly the same 
-	 * 			as the JonDo version number
+	 * @return true if the stored help version number is exactly the same 
+	 * 		as the JonDo version number of if the number could not be retrieved
+	 *         (if no help is available)
 	 */
 	public boolean helpVersionMismatch()
 	{
 		String versionString = getHelpVersion();
+		if (versionString == null)
+		{
+			return true;
+		}
 		return !JAPConstants.aktVersion.equals(versionString);
 	}
 	
@@ -139,46 +122,52 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 			{
 				if(hpFile.isDirectory())
 				{
-					if(hpFile.canWrite())
+					File anotherFileWithSameName = new File(hpFile.getPath() + File.separator +
+							JAPConstants.HELP_FOLDER + File.separator);
+																
+					if(!anotherFileWithSameName.exists())
 					{
-						File anotherFileWithSameName =
-							new File(hpFile.getPath()+
-									File.separator+
-									JAPConstants.HELP_FOLDER);
-						
-						if(!anotherFileWithSameName.exists())
+						try
 						{
-							return HELP_VALID;
-						}
-						else
-						{
-							//help directory already exists in specified folder
-							File jondoHelpFileVersion =
-								new File(hpFile.getPath()+
-										File.separator+
-										JAPConstants.HELP_FOLDER+
-										File.separator+
-										HELP_VERSION_FILE);
-							if(jondoHelpFileVersion.exists())
+							if (anotherFileWithSameName.createNewFile())
 							{
-								return HELP_JONDO_EXISTS;
+								anotherFileWithSameName.delete();
 							}
 							else
 							{
-								return HELP_DIR_EXISTS;
+								return HELP_INVALID_NOWRITE;
 							}
 						}
+						catch (IOException a_e)
+						{
+							return HELP_INVALID_NOWRITE;
+						}
+						return HELP_VALID;
 					}
 					else
 					{
-						//we have no write access to that file
-						return HELP_INVALID_NOWRITE;
+						//help directory already exists in specified folder
+						File jondoHelpFileVersion =
+							new File(hpFile.getPath()+
+									File.separator+
+									JAPConstants.HELP_FOLDER+
+									File.separator+
+									HELP_VERSION_FILE);
+						if(jondoHelpFileVersion.exists())
+						{
+							return HELP_JONDO_EXISTS;
+						}
+						else
+						{
+							return HELP_DIR_EXISTS;
+						}
 					}
+					
 				}
 				else
 				{
 					//path is not a directory
-					return "TODO: Error message key";
+					return HELP_NO_DIR;
 				}
 			}
 			else
@@ -196,7 +185,7 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 	
 	public Observable getStorageObservable()
 	{
-		return archiver;
+		return m_archiver;
 	}
 	
 	/**
@@ -211,7 +200,7 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Fatal: Destination folder is null: Aborting help installation");
 			return false;
 		}
-		if(archiver == null)
+		if(m_archiver == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Fatal: JARStorageManager does only work when started from a Jar file");
 			return false;
@@ -219,14 +208,22 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 		//override old help
 		if(helpFolder.exists())
 		{	
-			removeOldHelp(helpPath);
-			if(helpFolder.exists())
+			if (helpVersionMismatch())
 			{
-				return false;
+				removeOldHelp(m_helpPath);
+				if(helpFolder.exists())
+				{
+					return false;
+				}
+			}
+			else
+			{
+				LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Previous help installation restored.");
+				return true;
 			}
 		}
 			
-		boolean installationSuccessful = archiver.extractArchive(JAPConstants.HELP_FOLDER, helpPath);
+		boolean installationSuccessful = m_archiver.extractArchive(JAPConstants.HELP_FOLDER + "/", m_helpPath);
 		if(installationSuccessful)
 		{
 			createHelpVersionDoc();
@@ -252,8 +249,8 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 		helpVersionDoc.appendChild(helpVersionNode);
 		
 		File versionInfoFile = 
-			new File(helpPath+File.separator+
-					JAPConstants.HELP_FOLDER+HELP_VERSION_FILE);
+			new File(m_helpPath+File.separator+
+					JAPConstants.HELP_FOLDER + File.separator +HELP_VERSION_FILE);
 		try
 		{
 			XMLUtil.write(helpVersionDoc, versionInfoFile);
@@ -270,8 +267,9 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 		{
 			return;
 		}
-		File helpFolder = new File(parentPath+File.separator+JAPConstants.HELP_FOLDER);
-		File helpVersionFile = new File(parentPath+File.separator+JAPConstants.HELP_FOLDER+HELP_VERSION_FILE);
+		File helpFolder = new File(parentPath+File.separator+JAPConstants.HELP_FOLDER + File.separator);
+		File helpVersionFile = 
+			new File(parentPath+File.separator+JAPConstants.HELP_FOLDER+File.separator+HELP_VERSION_FILE);
 		
 		if(!helpFolder.exists() || !helpVersionFile.exists())
 		{
@@ -310,8 +308,8 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 	{
 		try 
 		{
-			File versionInfoFile = new File(helpPath+File.separator+
-					JAPConstants.HELP_FOLDER+HELP_VERSION_FILE);
+			File versionInfoFile = new File(m_helpPath +  File.separator +
+					JAPConstants.HELP_FOLDER +  File.separator + HELP_VERSION_FILE);
 			Document doc = XMLUtil.readXMLDocument(versionInfoFile);
 			Node versionNode = XMLUtil.getFirstChildByName(doc, HELP_VERSION_NODE);
 			String versionString = XMLUtil.parseAttribute(versionNode, HELP_VERSION_ATTRIBUTE, null);
@@ -334,11 +332,11 @@ public final class JARHelpFileStorageManager implements HelpFileStorageManager  
 	 */ 
 	private File getHelpFolder()
 	{
-		if(helpPath == null)
+		if(m_helpPath == null)
 		{
 			return null;
 		}
-		return new File(helpPath+File.separator+JAPConstants.HELP_FOLDER);
+		return new File(m_helpPath+File.separator+JAPConstants.HELP_FOLDER + File.separator);
 	}
 	
 	public void ensureMostRecentVersion(String helpPath) 

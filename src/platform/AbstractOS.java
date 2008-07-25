@@ -174,7 +174,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			return null;
 		}
 
-		JAPDialog.ILinkedInformation link = new JAPDialog.LinkedHelpContext(a_helpContext, null)
+		JAPDialog.ILinkedInformation link = new JAPDialog.LinkedHelpContext(a_helpContext)
 		{
 			public int getType()
 			{
