@@ -168,6 +168,8 @@ public class RecursiveCopyTool {
 	
 	static void copySingleFile(InputStream src, File dest) throws IOException
 	{
+		IOException ex = null;
+		
 		if(src == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Abort copy process: InputStream is null");
@@ -188,17 +190,23 @@ public class RecursiveCopyTool {
 		}
 		catch(IOException ioe)
 		{
-			/* Catch this Exception just to close the streams */ 
-			try 
+			ex = ioe;
+			/* Catch this Exception just to close the streams */ 			
+		}
+		try 
+		{
+			if(toDestFile != null)
 			{
-				if(toDestFile != null)
-				{
-					toDestFile.close();
-				}
-				src.close();
+				toDestFile.close();
 			}
-			catch (IOException ioe1) {}
-			throw new IOException(ioe.getMessage());
+			src.close();
+		}
+		catch (IOException ioe1) 
+		{
+		}
+		if (ex != null)
+		{
+			throw ex;
 		}
 	}
 }

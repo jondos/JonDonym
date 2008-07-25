@@ -811,7 +811,7 @@ public class ConfigAssistant extends JAPDialog
 				if (a_bHelpContext)
 				{
 					JAPHelp.getInstance().setContext(
-							JAPHelpContext.createHelpContext(a_context,ConfigAssistant.this));
+							JAPHelpContext.createHelpContext(a_context,ConfigAssistant.this.getContentPane()));
 					JAPHelp.getInstance().setVisible(true);
 				}
 				else

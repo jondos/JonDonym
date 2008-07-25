@@ -390,9 +390,7 @@ final public class JAPDll {
 										JAPMessages.getString(MSG_DLL_UPDATE_FAILED, args),
 										JAPMessages.getString(JAPDialog.MSG_TITLE_ERROR),
 										JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR,
-										new JAPDialog.LinkedHelpContext(JAPDll.class.getName(),
-												(JAPController.getInstance().getViewWindow() instanceof JFrame ? 
-														(JFrame) JAPController.getInstance().getViewWindow() : null )));
+										new JAPDialog.LinkedHelpContext(JAPDll.class.getName()));
 
 		if ( answer == JAPDialog.RETURN_VALUE_YES )
 		{

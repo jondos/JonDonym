@@ -35,4 +35,5 @@ package jap;
 public interface ISplashResponse
 {
 	public void setText(String a_message);
+	public String getText();
 }

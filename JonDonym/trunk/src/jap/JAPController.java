@@ -190,6 +190,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		JAPController.class.getName() + "_cascadeNotParsable";
 	public static final String MSG_PAYMENT_DAMAGED = JAPController.class.getName() + "_paymentDamaged";
 	public static final String MSG_ACCOUNT_NOT_SAVED = JAPController.class.getName() + "_accountNotSaved";
+	private static final String MSG_UPDATING_HELP = JAPController.class.getName() + "_updatingHelp";
 
 
 	private static final String XML_ELEM_LOOK_AND_FEEL = "LookAndFeel";
@@ -622,8 +623,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 									  {
 									  JAPMessages.getString("confButton"),
 									  JAPMessages.getString("confListenerTab")}), LogType.NET,
-				new JAPDialog.LinkedHelpContext("portlistener", 
-						(getViewWindow() instanceof JFrame ? (JFrame) getViewWindow() : null ))
+				new JAPDialog.LinkedHelpContext("portlistener")
 			{
 				public boolean isOnTop()
 				{
@@ -641,8 +641,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			JAPDialog.showWarningDialog(
 				getViewWindow(),
 				JAPMessages.getString(JAPConfCert.MSG_NO_CHECK_WARNING),
-				new JAPDialog.LinkedHelpContext("cert",
-						(getViewWindow() instanceof JFrame ? (JFrame) getViewWindow() : null ))
+				new JAPDialog.LinkedHelpContext("cert")
 			{
 				public boolean isOnTop()
 				{
@@ -668,8 +667,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			if (m_bAskAutoConnect)
 			{
 				if (JAPDialog.showYesNoDialog(getViewWindow(), JAPMessages.getString(MSG_ASK_AUTO_CONNECT),
-					new JAPDialog.LinkedHelpContext("services_general",
-							(getViewWindow() instanceof JFrame ? (JFrame) getViewWindow() : null ))))
+					new JAPDialog.LinkedHelpContext("services_general")))
 				{
 					JAPModel.getInstance().setAutoConnect(true);
 				}
@@ -1029,6 +1027,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 				
 				JAPModel.getInstance().initHelpPath(
 								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
+				String messageText = a_splash.getText();
+				a_splash.setText(JAPMessages.getString(MSG_UPDATING_HELP));
+				JAPModel.getInstance().getHelpURL();
+				a_splash.setText(messageText);
 						
 
 	            m_Model.setHttpListenerPortNumber(XMLUtil.parseAttribute(root,
@@ -3084,8 +3086,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 												  {
 												  JAPMessages.getString("confButton"),
 												  JAPMessages.getString("confListenerTab")})
-							, LogType.NET, new JAPDialog.LinkedHelpContext("portlistener",
-													(getViewWindow() instanceof JFrame ? (JFrame) getViewWindow() : null ))
+							, LogType.NET, new JAPDialog.LinkedHelpContext("portlistener")
 							  {
 								  public boolean isOnTop()
 								  {

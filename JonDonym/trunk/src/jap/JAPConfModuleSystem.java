@@ -32,6 +32,7 @@ import java.util.Hashtable;
 
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -277,9 +278,9 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 						return a_helpContext;
 					}
 					
-					public RootPaneContainer getDisplayContext()
+					public Container getHelpExtractionDisplayContext()
 					{
-						return JAPConf.getInstance();
+						return JAPConf.getInstance().getContentPane();
 					}
 				});
 			}
@@ -317,9 +318,9 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 		return m_currentHelpContext.getHelpContext();
 	}
 
-	public RootPaneContainer getDisplayContext() 
+	public Container getHelpExtractionDisplayContext() 
 	{
-		return JAPConf.getInstance();
+		return JAPConf.getInstance().getContentPane();
 	}
 	
 	public AbstractJAPConfModule getCurrentModule()

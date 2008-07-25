@@ -801,7 +801,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 					IJAPMainView mv = JAPController.getInstance().getView();
 					JAPModel model = JAPModel.getInstance();
 					File hpFile = null;
-					JFileChooser chooser = new JFileChooser();
+					
+					JFileChooser chooser = new JFileChooser(model.getHelpPath());
 					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 					if(chooser.showOpenDialog((JAPNewView)mv) == JFileChooser.APPROVE_OPTION)
 					{
@@ -843,21 +844,32 @@ final class JAPConfUI extends AbstractJAPConfModule
 	
 	private void submitHelpPathChange()
 	{
-		JAPModel model = JAPModel.getInstance();
-		Observable storageObservable = model.getHelpFileStorageObservable();
+		final JAPModel model = JAPModel.getInstance();
+		String strCheck = JAPModel.getInstance().helpPathValidityCheck(m_helpPathField.getText());
 		
-		if(storageObservable != null)
-		{
-			if(model.getHelpPath() != null && m_helpPathField.getText() != null)
+		if ((strCheck.equals(HelpFileStorageManager.HELP_VALID) ||
+			strCheck.equals(HelpFileStorageManager.HELP_JONDO_EXISTS)) &&
+			(model.getHelpPath() == null || !model.getHelpPath().equals(m_helpPathField.getText())))
+		{			
+			final JAPDialog dialog = 
+				new JAPDialog(this.getRootPanel(), 
+						JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL));
+			Runnable run = new Runnable()
 			{
-				if(!model.getHelpPath().equals(m_helpPathField.getText()) && !m_helpPathField.getText().equals(""))
+				public void run()
 				{
-					JAPDialog.showProgressDialog(JAPConf.getInstance(), JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL), 
-							JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS), null, null, storageObservable);
+	//				When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
+					model.setHelpPath(m_helpPathField.getText());
 				}
-			}
+			};
+						
+			final WorkerContentPane workerPane = 
+				new WorkerContentPane(dialog, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS),
+						run, model.getHelpFileStorageObservable());
+			workerPane.updateDialog();
+			dialog.setResizable(false);
+			dialog.setVisible(true);
 		}
-		model.setHelpPath(m_helpPathField.getText());
 	}
 
 	private void resetHelpPath()

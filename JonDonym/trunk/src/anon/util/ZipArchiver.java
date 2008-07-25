@@ -27,8 +27,8 @@ package anon.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Observable;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
@@ -102,6 +102,7 @@ public class ZipArchiver extends Observable
 				entry = (ZipEntry) allZipEntries.nextElement();
 				
 				entryName = entry.getName();
+
 				if( (pathName == null) || (entryName.startsWith(pathName)) )
 				{
 					totalSize += entry.getSize();
@@ -124,7 +125,8 @@ public class ZipArchiver extends Observable
 			}
 			if( (matchedFileEntries.size() == 0) && (matchedDirEntries.size() == 0) )
 			{
-				LogHolder.log(LogLevel.ERR, LogType.MISC, "No matching files for "+pathName+"found in archive "+m_archive.getName());
+				LogHolder.log(LogLevel.ERR, LogType.MISC, "No matching files for "+pathName+" found in archive "+m_archive.getName());
+				notifyAboutChanges(0, 0, ProgressCapsule.PROGRESS_FAILED);
 				return false;
 			}
 			
@@ -175,22 +177,28 @@ public class ZipArchiver extends Observable
 		catch(IllegalStateException ise)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+m_archive.getName()+": file already closed");
-			notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ABORTED);
+			notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_FAILED);
 			return false;
 		} 
-		catch (IOException ioe) 
+		catch (InterruptedIOException ioe) 
 		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+m_archive.getName()+": I/O error occured: ", ioe);
+			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Process of extracting "+m_archive.getName()+" cancelled");
 			extractErrorRollback(extractedFiles, destination);
 			notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ABORTED);
 			return false;
-		}
-		 
+		}		 
 		catch (InterruptedException e) 
 		{
 			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Process of extracting "+m_archive.getName()+" cancelled");
 			extractErrorRollback(extractedFiles, destination);
 			notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ABORTED);
+			return false;
+		}
+		catch (Exception a_e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Cannot extract archive "+m_archive.getName()+": error occured: ", a_e);
+			extractErrorRollback(extractedFiles, destination);
+			notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_FAILED);
 			return false;
 		}
 		notifyAboutChanges(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_FINISHED);
@@ -207,7 +215,7 @@ public class ZipArchiver extends Observable
 	private void notifyAboutChangesInterruptable(long sizeOfCopied, long totalSize, int progressStatus) throws InterruptedException
 	{
 		notifyAboutChanges(sizeOfCopied, totalSize, progressStatus);
-		if(Thread.currentThread().interrupted())
+		if(Thread.interrupted())
 		{
 			throw new InterruptedException();
 		}
@@ -217,10 +225,12 @@ public class ZipArchiver extends Observable
 	{	
 		for(int i = entries.size(); i > 0; i--)
 		{
-			File f = new File(destination+File.separator+
-								entries.elementAt(i-1));
+			File f = new File(destination+File.separator+ entries.elementAt(i-1));
+
 			String was = f.delete() ? " " : " not ";
-			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Rollback: file "+f.getName()+was+"successfully deleted");
+
+			LogHolder.log((was.trim().length() == 0 ? LogLevel.DEBUG : LogLevel.ERR), 
+					LogType.MISC, "Rollback: file "+f+was+"successfully deleted");
 		}
 	}
 

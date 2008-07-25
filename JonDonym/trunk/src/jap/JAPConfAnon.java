@@ -761,7 +761,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							JAPDialog.showMessageDialog(m_payLabel,
 								JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 								TrustModel.getCurrentTrustModel().getName()),
-								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName(), JAPConf.getInstance())); //,
+								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName())); //,
 						}
 
 					}
@@ -1267,7 +1267,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					JAPDialog.showMessageDialog(m_payLabel,
 							JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 							TrustModel.getCurrentTrustModel().getName()),
-							new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName(), JAPConf.getInstance()));
+							new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName()));
 				} else {
 					JAPController.getInstance().setCurrentMixCascade(newCascade);
 					m_selectCascadeButton.setEnabled(false);
@@ -1618,7 +1618,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						JAPDialog.showMessageDialog(m_payLabel,
 								JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 								TrustModel.getCurrentTrustModel().getName()),
-								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName(), JAPConf.getInstance()));
+								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName()));
 					} 
 					else 
 					{
@@ -3127,7 +3127,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					if (m_ExplainCertLabel.isVisible())
 					{
 						JAPHelp.getInstance().setContext(
-								JAPHelpContext.createHelpContext("certificates",JAPConf.getInstance()));
+								JAPHelpContext.createHelpContext("certificates"));
 						JAPHelp.getInstance().setVisible(true);
 					}
 
