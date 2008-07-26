@@ -27,36 +27,27 @@
  */
 package gui.dialog;
 
-import jap.JAPNewView;
-
 import java.util.EventListener;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.net.URL;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import javax.accessibility.Accessible;
 import javax.accessibility.AccessibleContext;
 
 import java.awt.AWTEvent;
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.MenuComponent;
 import java.awt.MenuContainer;
 import java.awt.Point;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -74,24 +65,16 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JRootPane;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JCheckBox;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import anon.util.ProgressCapsule;
 
 import platform.AbstractOS;
 import gui.GUIUtils;
@@ -392,8 +375,6 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * @return the information message
 		 */
 		public String getMessage();
-		
-		//public String bal();
 		/**
 		 * Performs an action when the link is clicked, for example opening a browser
 		 * window, an E-Mail client or a help page.
@@ -750,28 +731,6 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 	}
 
-
-	public static abstract class ProgressObservableAdapter implements Observer
-	{
-		private JProgressBar m_progressBar = null;
-		
-		
-		private void setProgressBar(JProgressBar progressBar)
-		{
-			this.m_progressBar = progressBar;
-		}
-		
-		public void update(Observable observable, Object arg)
-		{
-			if(m_progressBar != null)
-			{
-				updateProgress(observable, arg, m_progressBar);
-			}
-		}
-		
-		public abstract void updateProgress(Observable observable, Object arg, JProgressBar progressBar);
-	}
-	
 	public static class Options
 	{
 		private int m_optionType;
@@ -1422,7 +1381,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		String cancelText = null;
 		String noText = null;
 		Vector vecOptions = new Vector();
-				
+
 		if (ms_bConsoleOnly)
 		{
 			LogHolder.log(LogLevel.ALERT, LogType.GUI, a_message);
@@ -1497,17 +1456,6 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * Set the dialog parameters and get its label and content pane.
 		 */
 		dialog = new JAPDialog(a_parentComponent, a_title, true, bForceApplicationModality);
-		
-		if(a_linkedInformation != null)
-		{
-			if(a_linkedInformation instanceof LinkedCheckBox)
-			{
-				LinkedCheckBox box = (LinkedCheckBox) a_linkedInformation;
-				a_linkedInformation = new LinkedCheckBox(box);
-				helpContext = (JAPHelpContext.IHelpContext) a_linkedInformation;
-			}
-		}
-		
 		dialogContentPane = new DialogContentPane(dialog,
 												  new DialogContentPane.Layout(null, a_messageType, a_icon),
 												  new DialogContentPaneOptions(a_options.getOptionType(),
@@ -1882,8 +1830,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		return dialogContentPane.getButtonValue();
 	}
 
-	
-	
+
 	/**
 	 * Displays a message dialog that asks the user for a confirmation.
 	 * Words are wrapped automatically if a message line is too long.
@@ -2258,18 +2205,6 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		return showConfirmDialog(a_parentComponent, a_message, a_title, a_optionType, a_messageType,
 									null, a_linkedInformation);
 	}
-	
-	public static void showErrorDialog(RootPaneContainer a_container, String a_message, int a_logType)
-	{
-		if(a_container instanceof JAPDialog)
-		{
-			showErrorDialog((JAPDialog) a_container, a_message, a_logType);
-		}
-		else if(a_container instanceof Component)
-		{
-			showErrorDialog((Component) a_container, a_message, a_logType);
-		}
-	}
 
 	/**
 	 * Displays a dialog showing an error message to the user and logs the error message
@@ -2583,7 +2518,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
 		}
 	}
-	
+
 	/**
 	 * Retrieves an error message from a Throwable and a message String that may be shown to the
 	 * user. By default, this is the given message. If no message is given, it is tried to get the error
