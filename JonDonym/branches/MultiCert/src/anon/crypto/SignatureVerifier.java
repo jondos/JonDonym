@@ -388,8 +388,6 @@ public class SignatureVerifier implements IXMLEncodable
 				try
 				{
 					signature = XMLSignature.getVerified(a_rootNode, rootCertificates, additionalCertPaths, false);
-					if(!signature.isVerified())
-						System.out.println("Error");
 					if (!isCheckSignatures() || !isCheckSignatures(a_documentClass))
 					{
 						signature.setVerified(true);

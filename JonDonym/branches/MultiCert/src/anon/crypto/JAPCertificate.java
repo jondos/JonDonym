@@ -542,14 +542,14 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		}
 		if(id.equals(IDENTIFIER_MD2_WITH_RSA_ENCRYPTION))
 		{
-				return MD2_WITH_RSA_ENCRYPTION;
+			return MD2_WITH_RSA_ENCRYPTION;
 		}
 		if(id.equals(IDENTIFIER_ECDSA_WITH_SHA1))
 		{
 			return ECDSA_WITH_SHA1;
 		}
 		
-		return m_bcCertificate.getSignatureAlgorithm().getObjectId().getId();		
+		return id;		
 	}
 	
 	public BigInteger getSerialNumber()

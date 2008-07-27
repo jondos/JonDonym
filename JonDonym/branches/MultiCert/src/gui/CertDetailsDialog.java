@@ -27,10 +27,7 @@
  */
 package gui;
 
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Locale;
+import gui.dialog.JAPDialog;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -38,9 +35,17 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Vector;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -49,8 +54,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 import anon.crypto.CertPath;
 import anon.crypto.CertificateInfoStructure;
 import anon.crypto.IMyPublicKey;
@@ -59,17 +70,6 @@ import anon.crypto.Validity;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509Extensions;
 import anon.crypto.X509UnknownExtension;
-import anon.crypto.MyRSAPublicKey;
-import gui.dialog.JAPDialog;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import java.text.SimpleDateFormat;
-import javax.swing.ListCellRenderer;
 
 /**
  * <p>CertDetails Dialog </p>
@@ -838,13 +838,9 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 
 		Vector keyValues = new Vector();
 		keyValues.addElement(new String(a_cert.getPublicKey().getAlgorithm()));
-		if (a_cert.getPublicKey() instanceof MyRSAPublicKey)
-				{
-					/** @todo Calculate correct keysize for DSA keys */
-					int kLength = ( (IMyPublicKey) a_cert.getPublicKey()).getKeyLength();
-					keyKeys.addElement(JAPMessages.getString(TITLE_KEYS_KEYLENGTH));
-					keyValues.addElement(new Integer(kLength).toString());
-		}
+		int kLength = ( (IMyPublicKey) a_cert.getPublicKey()).getKeyLength();
+		keyKeys.addElement(JAPMessages.getString(TITLE_KEYS_KEYLENGTH));
+		keyValues.addElement(new Integer(kLength).toString());
 		keyKeys.addElement(JAPMessages.getString(TITLE_KEYS_SIGNALGORITHM));
 		//keyValues.addElement(a_cert.getPublicKey().getSignatureAlgorithm().getXMLSignatureAlgorithmReference());
 		keyValues.addElement(a_cert.getSignatureAlgorithmName());
