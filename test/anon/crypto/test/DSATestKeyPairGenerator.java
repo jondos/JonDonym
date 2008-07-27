@@ -45,7 +45,7 @@ public class DSATestKeyPairGenerator extends AbstractTestKeyPairGenerator
 	}
 
 	public AsymmetricCryptoKeyPair createKeyPair()
-	{
+	{	
 		return DSAKeyPair.getInstance(getRandom(), 256, 10);
 	}
 }

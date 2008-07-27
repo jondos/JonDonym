@@ -312,7 +312,7 @@ public final class MyDSASignature implements IMySignature
 	}
 
 	/// From BouncyCasatle....
-	private byte[] derEncode(BigInteger r, BigInteger s) throws IOException
+	static byte[] derEncode(BigInteger r, BigInteger s) throws IOException
 	{
 		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 		DEROutputStream dOut = new DEROutputStream(bOut);
@@ -326,7 +326,7 @@ public final class MyDSASignature implements IMySignature
 		return bOut.toByteArray();
 	}
 
-	private BigInteger[] derDecode(byte[] encoding,int off,int len) throws IOException
+	static BigInteger[] derDecode(byte[] encoding,int off,int len) throws IOException
 	{
 		ByteArrayInputStream bIn = new ByteArrayInputStream(encoding,off,len);
 		ASN1InputStream aIn = new ASN1InputStream(bIn);

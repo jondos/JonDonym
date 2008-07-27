@@ -38,6 +38,7 @@ import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -366,7 +367,6 @@ public final class XMLSignature implements IXMLEncodable
 				return null;
 			}
 			xmlSignature.m_signatureValue = new String(Base64.encode(signatureValue, false));
-
 			/* create the SignatureValue node and build the Signature tree */
 			Element signatureValueNode = doc.createElement(ELEM_SIGNATURE_VALUE);
 			signatureValueNode.appendChild(doc.createTextNode(xmlSignature.m_signatureValue));
@@ -1508,7 +1508,7 @@ public final class XMLSignature implements IXMLEncodable
 		}
 
 		if (!checkSignature(a_signature, a_publicKey))
-		{
+		{	
 			return false;
 		}
 
@@ -1541,35 +1541,30 @@ public final class XMLSignature implements IXMLEncodable
 
 		return true;
 	}
-
+	/**
+	 * 
+	 * @param a_node
+	 * @param a_signature
+	 * @return
+	 * @throws XMLParseException
+	 */
 	private static boolean checkMessageDigest(Node a_node, XMLSignature a_signature) throws XMLParseException
 	{
-		MessageDigest sha1;
+		SHA1Digest sha1;
 		byte[] digest;
 
-		try
+		if (a_signature.getDigestMethod() == null)
 		{
-			if (a_signature.getDigestMethod() == null)
-			{
-				// no digest was used; message is verified directly
-				return true;
-			}
-			else
-			{
-				sha1 = MessageDigest.getInstance("SHA-1");
-			}
+			// no digest was used; message is verified directly
+			return true;
 		}
-		catch (NoSuchAlgorithmException a_e)
-		{
-			return false;
-		}
+		
+		sha1 = new SHA1Digest();
+		digest = new byte[sha1.getDigestSize()];
 		byte[] buff = toCanonical(a_node, a_signature.getSignatureElement());
-		digest = sha1.digest(buff);
-		if (!MessageDigest.isEqual(Base64.decode(a_signature.getDigestValue()), digest))
-		{
-			return false;
-		}
-
-		return true;
+		sha1.update(buff, 0, buff.length);
+		sha1.doFinal(digest, 0);
+		
+		return Util.arraysEqual(Base64.decode(a_signature.getDigestValue()), digest);
 	}
 }

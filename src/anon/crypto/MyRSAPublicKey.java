@@ -159,6 +159,7 @@ final public class MyRSAPublicKey extends AbstractPublicKey implements IMyPublic
 	{
 		return getModulus().bitLength();
 	}
+	
 	public SubjectPublicKeyInfo getAsSubjectPublicKeyInfo()
 	{
 		AlgorithmIdentifier algID = new AlgorithmIdentifier(new DERObjectIdentifier("1.2.840.113549.1.1.1")); //RSA

@@ -189,7 +189,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public long getAverageSpeed()
 	{
-		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK);
+		int dayOfWeek = m_cal.get(Calendar.DAY_OF_WEEK)-1;
 		int hour = m_cal.get(Calendar.HOUR_OF_DAY);
 		
 		if(m_speed[dayOfWeek][hour] == null)

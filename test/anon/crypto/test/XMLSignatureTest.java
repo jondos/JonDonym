@@ -27,6 +27,7 @@
  */
 package anon.crypto.test;
 
+import java.io.FileOutputStream;
 import java.security.SecureRandom;
 import java.util.GregorianCalendar;
 import java.util.Vector;
@@ -62,17 +63,20 @@ public class XMLSignatureTest extends XtendedPrivateTestCase
 		testSignAndVerify(new DSATestKeyPairGenerator(m_random));
 	}
 
-
 	/**
 	 * Tests if XML nodes can successfully be signed and verified with the RSA algorithm.
 	 * @throws Exception if an error occurs
-	 * @todo Signing and verifying with RSA does not work yet; {@link anon.crypto.MyRSASignature}
-	 * encoding and decoding methods!
 	 */
 	public void testSignAndVerifyRSA() throws Exception
 	{
 		m_random.setSeed(85922773);
 		testSignAndVerify(new RSATestKeyPairGenerator(m_random));
+	}
+	
+	public void testSignAndVerifyECDSA() throws Exception
+	{
+		m_random.setSeed(546965454);
+		testSignAndVerify(new ECTestKeyPairGenerator(m_random));
 	}
 
 	/**
@@ -101,7 +105,7 @@ public class XMLSignatureTest extends XtendedPrivateTestCase
 	 * @todo Signing and verifying with RSA does not work yet; {@link anon.crypto.MyRSASignature}
 	 * encoding and decoding methods!
 	 */
-	public void _testManageCertificatesRSA() throws Exception
+	public void testManageCertificatesRSA() throws Exception
 	{
 		m_random.setSeed(726619);
 		testManageCertificates(new RSATestKeyPairGenerator(m_random));
@@ -133,7 +137,7 @@ public class XMLSignatureTest extends XtendedPrivateTestCase
 	 * @todo Signing and verifying with RSA does not work yet; {@link anon.crypto.MyRSASignature}
 	 * encoding and decoding methods!
 	 */
-	public void _testAppendRemoveRSA() throws Exception
+	public void testAppendRemoveRSA() throws Exception
 	{
 		m_random.setSeed(8928933);
 		testAppendRemove(new RSATestKeyPairGenerator(m_random));
@@ -467,6 +471,10 @@ public class XMLSignatureTest extends XtendedPrivateTestCase
 			pkcs12Certificate = new PKCS12(new X509DistinguishedName("CN=ImportantOwner:" + i),
 										   a_keyPairGenerator.createKeyPair(),
 										   new Validity(new GregorianCalendar(), 0));
+			
+			FileOutputStream out = new FileOutputStream("ECDSAPrivate.pfx");
+			out.write(pkcs12Certificate.toByteArray());
+			out.close();
 
 			// remove any previous signature
 			XMLSignature.removeSignatureFrom(doc);
