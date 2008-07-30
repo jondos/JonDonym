@@ -1900,10 +1900,20 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							long value = entry.getXMLAverage(PerformanceEntry.SPEED);
 							double deviation = (entry.getXMLStdDeviation(PerformanceEntry.SPEED) / value) * 100;
 							
+							if(deviation > 100)
+							{
+								deviation = 100;
+							}
+							
 							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value) + " \u00B1 " + df.format(deviation) + " %");
 							
 							value = entry.getXMLAverage(PerformanceEntry.DELAY);
 							deviation = (entry.getXMLStdDeviation(PerformanceEntry.DELAY) / value) * 100;
+							
+							if(deviation > 100)
+							{
+								deviation = 100;
+							}
 							
 							m_lblDelay.setText(value + " ms \u00B1 " + df.format(deviation) + " %");
 						}
