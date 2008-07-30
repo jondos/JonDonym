@@ -483,12 +483,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 			
 			// TODO: make it configurable
-			if(entry == null || entry.isInvalid()) 
+			if(entry == null || entry.isXMLInvalid()) 
 			{
 				return;
 			}
 			
-			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || entry.isInvalid() || entry.getXMLAverage(PerformanceEntry.SPEED) < minSpeed))
+			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || entry.isXMLInvalid() || entry.getXMLAverage(PerformanceEntry.SPEED) < minSpeed))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_SPEED)));
 			}
@@ -514,12 +514,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 			
 			// TODO: make it configurable
-			if(entry == null || entry.isInvalid())
+			if(entry == null || entry.isXMLInvalid())
 			{
 				return;
 			}
 			
-			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || entry.isInvalid() || entry.getXMLAverage(PerformanceEntry.DELAY) > maxDelay))
+			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || entry.isXMLInvalid() || entry.getXMLAverage(PerformanceEntry.DELAY) > maxDelay))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH)));
 			}

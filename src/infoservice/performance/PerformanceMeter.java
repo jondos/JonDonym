@@ -85,9 +85,7 @@ import infoservice.HttpResponseStructure;
  * The delay (the time between sending the first byte and receiving the first byte of the response)
  * and the throughput (the data rate of the response in bytes
  * per millisecond) are measured and set to the corresponding cascade.
- *  
- * @see anon.infoservice.MixCascade#setDelay(long)
- * @see anon.infoservice.MixCascade#setThroughput(double)
+ * 
  *
  * @author cbanse, oliver
  */

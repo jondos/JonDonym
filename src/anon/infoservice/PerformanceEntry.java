@@ -282,9 +282,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_currentEntries[a_attribute].getXMLStdDeviation();
 	}
 	
-	public boolean isInvalid()
+	public boolean isXMLInvalid()
 	{
-		return (getAverage(SPEED) == -1 || getAverage(DELAY) == -1);
+		return (getXMLAverage(SPEED) == -1 || getXMLAverage(DELAY) == -1);
 	}
 	
 	public String delayToHTML(int day)
