@@ -1894,8 +1894,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else
 						{
-							m_lblSpeed.setText(/*entry.getAverageSpeed() + " kbit/sec"*/JAPUtil.formatKbitPerSecValueWithUnit(entry.getAverage(PerformanceEntry.SPEED)));
-							m_lblDelay.setText(entry.getAverage(PerformanceEntry.DELAY) + " ms");
+							m_lblSpeed.setText(/*entry.getAverageSpeed() + " kbit/sec"*/JAPUtil.formatKbitPerSecValueWithUnit(entry.getXMLAverage(PerformanceEntry.SPEED)));
+							m_lblDelay.setText(entry.getXMLAverage(PerformanceEntry.DELAY) + " ms");
 						}
 					}
 					

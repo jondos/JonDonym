@@ -54,8 +54,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
-	public boolean bCreatedFromXML = false;
-	
 	public PerformanceEntry(String a_strCascadeId)
 	{	
 		super(Long.MAX_VALUE);
@@ -69,7 +67,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public PerformanceEntry(Element a_entry) throws XMLParseException
 	{
 		super(System.currentTimeMillis() + PERFORMANCE_ENTRY_TTL);
-		bCreatedFromXML = true;
+		
 		
 		XMLUtil.assertNodeName(a_entry, XML_ELEMENT_NAME);
 		
@@ -263,7 +261,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_entries[DELAY][dayOfWeek][hour];
 	}
 	
-	public void overrideCurrentAverage(int a_attribute, long a_lValue)
+	public void overrideXMLAverage(int a_attribute, long a_lValue)
 	{
 		m_currentEntries[a_attribute].overrideXMLAverage(a_lValue);
 	}
@@ -271,6 +269,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public long getAverage(int a_attribute)
 	{
 		return m_currentEntries[a_attribute].getAverage();
+	}
+	
+	public long getXMLAverage(int a_attribute)
+	{
+		return m_currentEntries[a_attribute].getXMLAverage();
 	}
 	
 	public boolean isInvalid()
@@ -491,7 +494,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		private Hashtable m_Values = new Hashtable();
 		
-		boolean m_bCreatedFromXML = false;
 		public long m_lXMLAverageValue = 0;
 		
 		public PerformanceAttributeCurrentEntry(int a_attribute)
@@ -508,7 +510,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public PerformanceAttributeCurrentEntry(int a_attribute, Node a_node)
 		{
-			m_bCreatedFromXML = true;
 			m_timeFrame = DEFAULT_TIMEFRAME;
 			m_attribute = a_attribute;
 			
@@ -543,13 +544,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_lXMLAverageValue = a_lValue;
 		}
 		
+		public long getXMLAverage()
+		{
+			return m_lXMLAverageValue;
+		}
+		
 		public long getAverage()
 		{
-			if(m_bCreatedFromXML)
-			{
-				return m_lXMLAverageValue;
-			}
-			
 			long values = 0;
 			long value = 0;
 			long lAverageValue = 0;
