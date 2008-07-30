@@ -235,10 +235,10 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 			value = ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY);
 			if(value != 0)
 			{
-				avgSpeed += value;
+				avgDelay += value;
 			}
 			
-			dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.SPEED);
+			dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.DELAY);
 			if(dvalue != 0)
 			{
 				stdDelay += dvalue;

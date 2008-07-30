@@ -132,7 +132,7 @@ public final class JAPUtil
 	
 	public static String formatKbitPerSecValueOnlyUnit(long c)
 	{
-		return formatKbitPerSecValueOnlyUnit(MAX_FORMAT_ALL);
+		return formatKbitPerSecValueOnlyUnit(c, MAX_FORMAT_ALL);
 	}
 	
 	public static String formatKbitPerSecValueOnlyUnit(long c, int a_maxFormat)
