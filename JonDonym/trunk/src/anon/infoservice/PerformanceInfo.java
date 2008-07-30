@@ -226,8 +226,8 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		avgSpeed /= vResult.size();
 		avgDelay /= vResult.size();
 		
-		avgEntry.overrideDailyAverage(PerformanceEntry.SPEED, avgSpeed);
-		avgEntry.overrideDailyAverage(PerformanceEntry.DELAY, avgDelay);
+		avgEntry.overrideCurrentAverage(PerformanceEntry.SPEED, avgSpeed);
+		avgEntry.overrideCurrentAverage(PerformanceEntry.DELAY, avgDelay);
 		
 		return avgEntry;
 	}
