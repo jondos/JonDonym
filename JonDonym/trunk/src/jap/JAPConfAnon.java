@@ -1888,7 +1888,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
 					if(entry != null)
 					{
-						if(entry.isInvalid())
+						if(entry.isXMLInvalid())
 						{
 							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
 							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
