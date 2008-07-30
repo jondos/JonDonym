@@ -97,16 +97,14 @@ public class JAPInternalHelpViewer extends JAPDialog
 	private JAPInternalHelpDelegator m_delegator;
 	//private JAPHelpContext m_helpContext;
 	
-	JAPInternalHelpViewer(Frame parent, 
-			IExternalURLCaller a_urlCaller, 
-			IExternalEMailCaller a_emailCaller)
+	JAPInternalHelpViewer(Frame parent)
 	{
 		super(parent, JAPMessages.getString(JAPHelp.MSG_HELP_WINDOW), false);
 		setDefaultCloseOperation(HIDE_ON_CLOSE);
 
 		m_initializing = true;
 		//m_helpContext = new JAPHelpContext();
-		m_htmlpaneTheHelpPane = new HtmlPane(a_urlCaller, a_emailCaller);
+		m_htmlpaneTheHelpPane = new HtmlPane();
 		m_htmlpaneTheHelpPane.addPropertyChangeListener(new HelpListener());
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -338,31 +336,10 @@ public class JAPInternalHelpViewer extends JAPDialog
 		private Vector m_historyViewports;
 		private int m_historyPosition;
 
-		public HtmlPane(IExternalURLCaller a_urlCaller, IExternalEMailCaller a_emailCaller)
+		public HtmlPane()
 		{
-			if (a_urlCaller == null)
-			{
-				a_urlCaller = new IExternalURLCaller()
-				{
-					public boolean openURL(URL a_url)
-					{
-						return false;
-					}
-				};
-			}
-			m_urlCaller = a_urlCaller;
-
-			if (a_emailCaller == null)
-			{
-				a_emailCaller = new IExternalEMailCaller()
-				{
-					public boolean openEMail(String a_email)
-					{
-						return false;
-					}
-				};
-			}
-			m_emailCaller = a_emailCaller;
+			m_urlCaller = AbstractOS.getInstance();
+			m_emailCaller = AbstractOS.getInstance();
 			html = new JEditorPane("text/html", "<html><body></body></html>");
 			/*
 			StyleSheet style = ((HTMLEditorKit)html.getEditorKit()).getStyleSheet();

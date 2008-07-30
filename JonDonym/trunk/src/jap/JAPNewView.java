@@ -1322,8 +1322,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		JAPModel.getInstance().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().addObserver(this);
 
-		JAPHelp.init(this, AbstractOS.getInstance(), AbstractOS.getInstance(),
-				JAPModel.getInstance());
+		JAPHelp.init(this, JAPModel.getInstance());
 		if(JAPHelp.getHelpDialog() != null)
 		{
 			JAPHelp.getHelpDialog().setLocationCenteredOnOwner();

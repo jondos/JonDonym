@@ -69,34 +69,18 @@ public abstract class JAPHelp
 	private IHelpContext m_helpContext;
 
 	protected static JAPHelp ms_theJAPHelp = null;
-
-	/**
-	 * Creates and initialises a new global help object with the given frame as parent frame.
-	 * @param a_parent the parent frame of the help object
-	 * @param a_urlCaller the caller that is used to open external URLs (may be null)
-	 * @param m_emailCaller the caller that is used to open E-Mail applications with a given address
-	 * @param a_helpModel a help model; if set to null, only the internal help will be presented
-	 */
-	public static void init(Frame a_parent, IExternalURLCaller a_urlCaller, 
-			IExternalEMailCaller a_emailCaller)	
-	{
-		init(a_parent, a_urlCaller, a_emailCaller, null);
-	}
 	
 	/**
 	 * Creates and initialises a new global help object with the given frame as parent frame.
 	 * @param a_parent the parent frame of the help object
-	 * @param a_urlCaller the caller that is used to open external URLs (may be null)
-	 * @param m_emailCaller the caller that is used to open E-Mail applications with a given address
 	 * @param a_helpModel a help model; if set to null, only the internal help will be presented
 	 */
-	public static void init(Frame a_parent, IExternalURLCaller a_urlCaller, 
-			IExternalEMailCaller a_emailCaller, IHelpModel a_helpModel)
+	public static void init(Frame a_parent, IHelpModel a_helpModel)
 	{
 		if (ms_theJAPHelp == null)
 		{
 			ms_theJAPHelp = 
-				JAPHelpFactory.createJAPhelp(a_parent, a_urlCaller, a_emailCaller, a_helpModel);
+				JAPHelpFactory.createJAPhelp(a_parent, a_helpModel);
 		}
 	}
 
@@ -216,20 +200,18 @@ public abstract class JAPHelp
 
 	private static class JAPHelpFactory
 	{
-		private static JAPHelp createJAPhelp(Frame a_parent, IExternalURLCaller a_urlCaller, 
-				IExternalEMailCaller a_emailCaller, IHelpModel a_helpModel)
+		private static JAPHelp createJAPhelp(Frame a_parent, IHelpModel a_helpModel)
 		{
 			if(a_helpModel != null && a_helpModel.isExternalHelpInstallationPossible())
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Creating external help viewer.");
-				return new JAPExternalHelpViewer(a_parent, a_urlCaller, a_emailCaller, 
-						a_helpModel);
+				return new JAPExternalHelpViewer(a_parent, a_helpModel);
 			}
 			else
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Creating internal help viewer.");
 				JAPInternalHelpViewer internalViewer = 
-					new JAPInternalHelpViewer(a_parent, a_urlCaller, a_emailCaller);
+					new JAPInternalHelpViewer(a_parent);
 				return internalViewer.getHelp();
 			}
 		}
