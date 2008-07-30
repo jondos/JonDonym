@@ -505,7 +505,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_attribute = a_attribute;
 			
 			m_lXMLAverageValue = XMLUtil.parseAttribute(a_node, XML_ATTR_AVERAGE, 0);
-			m_lXMLStdDeviation = XMLUtil.parseAttribute(a_node, XML_ATTR_STD_DEVIATION, 0);
+			m_lXMLStdDeviation = XMLUtil.parseAttribute(a_node, XML_ATTR_STD_DEVIATION, 0.0d);
 		}
 		
 		public void addValue(long a_lTimeStamp, long a_lValue)

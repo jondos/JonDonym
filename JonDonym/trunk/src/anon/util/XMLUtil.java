@@ -333,6 +333,29 @@ public class XMLUtil
 
 		return i;
 	}
+	
+	/**
+	 * Returns the value of the specified attribute of an XML element as double.
+	 * @param a_node an XML node
+	 * @param a_attribute an attribute`s name
+	 * @param a_default the default value
+	 * @return the value of the specified attribute as int if the element has this attribute;
+	 *         otherwise, the default value is returned
+	 */
+	public static double parseAttribute(Node a_node, String a_attribute, double a_default)
+	{
+		double d = a_default;
+
+		try
+		{
+			d = Util.parseFloat(parseAttribute(a_node, a_attribute, null));
+		}
+		catch (Exception ex)
+		{
+		}
+
+		return d;
+	}
 
 	/**
 	 * Returns the value of the specified attribute of an XML element as long.
