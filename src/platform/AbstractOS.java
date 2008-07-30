@@ -41,6 +41,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.util.ClassUtil;
+import anon.util.ResourceLoader;
 
 /**
  * This abstract class provides access to OS-specific implementations of certain
@@ -70,7 +71,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	private static AbstractOS ms_operatingSystem;
 
 	private IURLErrorNotifier m_notifier;
-	private IURLOpener m_URLOpener;
+	private AbstractURLOpener m_URLOpener;
 
 	private static File ms_tmpDir;
 	
@@ -89,7 +90,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		ms_tmpDir = new File(tmpDir);
 	}
 
-	public static abstract class IURLOpener
+	public static abstract class AbstractURLOpener
 	{	
 		private Process m_portableFirefoxProcess = null;
 		private boolean m_bOneSessionOnly = false;
@@ -197,7 +198,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		return ms_operatingSystem;
 	}
 
-	public void init(IURLErrorNotifier a_notifier, IURLOpener a_URLOpener)
+	public void init(IURLErrorNotifier a_notifier, AbstractURLOpener a_URLOpener)
 	{
 		if (a_notifier != null)
 		{
@@ -268,7 +269,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	{
 		if (m_URLOpener != null)
 		{
-			return (m_URLOpener.getDefaultURL() != null);
+			return (m_URLOpener.getDefaultURL() != null && m_URLOpener.getBrowserCommand() != null);
 		}
 		return false;
 	}
@@ -358,12 +359,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	public String getDefaultHelpPath()
 	{
 		File classParentFile = ClassUtil.getClassDirectory(this.getClass());
-		if(classParentFile!= null)
-		{
-			String path = classParentFile.getPath();
-			int p_index = path.indexOf("JAP.jar");
-			return (p_index == -1) ? path : path.substring(0, p_index);
+		if(classParentFile != null && classParentFile.getPath().endsWith(".jar"))
+		{						
+			return classParentFile.getParent();
 		}
+
 		return System.getProperty("user.dir");
 	}
 	

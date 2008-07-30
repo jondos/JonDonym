@@ -141,7 +141,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 		{
 			public void update(Observable a_notifier, Object a_message)
 			{
-				updateHelpPath();
+				if (JAPModel.getInstance().isHelpInstalled())
+				{
+					updateHelpPath();
+				}
 			}
 		};
 		JAPModel.getInstance().addObserver(m_modelObserver);
@@ -800,10 +803,14 @@ final class JAPConfUI extends AbstractJAPConfModule
 			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
 		}
 		else
-		{
+		{				
 			m_helpPathField.setText("");
 		}
 		m_helpPathField.setEditable(false);
+		if (!JAPModel.getInstance().isHelpInstalled())
+		{
+			m_helpPathButton.setEnabled(false);
+		}
 		
 		ActionListener helpInstallButtonActionListener = 
 			new ActionListener()
@@ -824,7 +831,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 					{
 						String hpFileValidation = model.helpPathValidityCheck(hpFile);
 						if(hpFileValidation.equals(HelpFileStorageManager.HELP_VALID) ||
-							hpFileValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) )
+							hpFileValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) &&
+							JAPModel.getInstance().isHelpInstalled())
 						{
 							m_helpPathField.setText(hpFile.getPath());
 							m_helpPathField.setEditable(false);
@@ -855,7 +863,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 	}
 	
 	private void submitHelpPathChange()
-	{
+	{	
 		final JAPModel model = JAPModel.getInstance();
 		String strCheck = JAPModel.getInstance().helpPathValidityCheck(m_helpPathField.getText());
 		
@@ -893,7 +901,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 	
 	private void updateHelpPath()
 	{
-		if(JAPModel.getInstance().isHelpPathDefined())
+		if(JAPModel.getInstance().isHelpPathDefined() && JAPModel.getInstance().isHelpInstalled())
 		{
 			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
 		}

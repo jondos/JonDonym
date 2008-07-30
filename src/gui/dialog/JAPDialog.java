@@ -494,12 +494,6 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			m_bState = m_bDefault;
 		}
 		
-		private LinkedCheckBox(final LinkedCheckBox a_box)
-		{
-			this(a_box.m_strMessage, a_box.m_bDefault, 
-					JAPHelpContext.createHelpContext(a_box.getHelpContext()));		
-		}
-		
 		/**
 		 * Returns the information message of the checkbox.
 		 * @return the information message of the checkbox
@@ -1324,6 +1318,27 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	 * Displays a confirm dialog. Words are wrapped automatically if a message line is too long.
 	 * @param a_parentComponent The parent component for this dialog. If it is null or the parent
 	 *                          component is not within a frame, the dialog's parent frame is the
+	 *                          default frame. 
+	 * @param a_message The message to be displayed. It is interpreted as HTML. You do not need to put in
+	 * formatting tags, as the text will be auto-formatted in a way that the dialog's size is very close
+	 * to the golden ratio.
+	 * @param a_messageType use the message types from JOptionPane
+	 * @param a_options use the option types from JOptionPane
+	 * @return The value the user has selected. RETURN_VALUE_UNINITIALIZED implies
+	 * the user has not yet made a choice or that the current thread has been interrupted
+	 * @see javax.swing.JOptionPane
+	 */
+	public static int showConfirmDialog(Component a_parentComponent, String a_message, 
+										Options a_options, int a_messageType)
+	{
+		return showConfirmDialog(a_parentComponent, a_message, (String)null, 
+				a_options, a_messageType, (Icon)null, (ILinkedInformation)null);
+	}
+	
+	/**
+	 * Displays a confirm dialog. Words are wrapped automatically if a message line is too long.
+	 * @param a_parentComponent The parent component for this dialog. If it is null or the parent
+	 *                          component is not within a frame, the dialog's parent frame is the
 	 *                          default frame.
 	 * @param a_title The title of the message dialog
 	 * @param a_message The message to be displayed. It is interpreted as HTML. You do not need to put in
@@ -1337,11 +1352,12 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	 * @see javax.swing.JOptionPane
 	 */
 	public static int showConfirmDialog(Component a_parentComponent, String a_message, 
-										Options a_options, int a_messageType)
+										Options a_options, int a_messageType, 
+										ILinkedInformation a_linkedInformation)
 	{
 		return showConfirmDialog(a_parentComponent, a_message, (String)null, 
-				a_options, a_messageType, (Icon)null, (ILinkedInformation)null);
-	}
+				a_options, a_messageType, (Icon)null, a_linkedInformation);
+	}	
 
 	/**
 	 * Displays a confirm dialog. Words are wrapped automatically if a message line is too long.
@@ -1847,7 +1863,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 		dialog.addWindowListener(new SimpleDialogButtonFocusWindowAdapter(dialogContentPane));
 		dialog.m_bOnTop = bOnTop;
-		dialog.setVisible(true);
+		dialog.setVisible(true);		
 		dialog = null;
 
 		return dialogContentPane.getButtonValue();

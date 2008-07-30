@@ -291,35 +291,15 @@ public class JAP
 					}
 					else
 					{
-						JAPDialog.ILinkedInformation test = new JAPDialog.ILinkedInformation() {
+						JAPDialog.ILinkedInformation test = new JAPDialog.LinkedInformationAdapter() {
 							public boolean isOnTop() 
 							{
 								return true;
 							}
 							
-							public String getMessage()
-							{
-								return null;
-							}
-							
 							public boolean isApplicationModalityForced() 
 							{
 								return true;
-							}
-							
-							public int getType()
-							{
-								return JAPDialog.ILinkedInformation.TYPE_DEFAULT;
-							}
-							
-							public boolean isCloseWindowActive()
-							{
-								return true;
-							}
-							
-							public void clicked(boolean a_bState)
-							{
-								
 							}
 						};
 						JAPDialog.showErrorDialog(null, errorString, LogType.MISC, test);
@@ -598,7 +578,7 @@ public class JAP
 					JAPModel.getInstance().denyNonAnonymousSurfing(false);
 				}
 			}
-		},new AbstractOS.IURLOpener()
+		},new AbstractOS.AbstractURLOpener()
 		{			
 			private String m_browserCMD = buildPortableFFCommand();
 			
@@ -613,7 +593,20 @@ public class JAP
 				
 				if (!super.openURL(a_url) && view instanceof AbstractJAPMainView)
 				{
-					if(JAPDialog.showConfirmDialog((AbstractJAPMainView)view,
+					JAPDialog.LinkedInformationAdapter adapter = 
+						new JAPDialog.LinkedInformationAdapter()
+					{
+						public boolean isApplicationModalityForced()
+						{
+							return true;
+						}
+
+						public boolean isOnTop()
+						{
+							return true;
+						}
+					};
+					if(JAPDialog.showConfirmDialog(((AbstractJAPMainView)view).getCurrentView(),
 							JAPMessages.getString(MSG_EXPLAIN_NO_FIREFOX_FOUND), 
 							new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL)
 					{
@@ -622,7 +615,7 @@ public class JAP
 							return JAPMessages.getString(MSG_USE_DEFAULT_BROWSER);
 						}
 					},					
-							JAPDialog.MESSAGE_TYPE_WARNING) == JAPDialog.RETURN_VALUE_OK)
+							JAPDialog.MESSAGE_TYPE_WARNING, adapter) == JAPDialog.RETURN_VALUE_OK)
 					{
 						return false; // try to open with system default browser												
 					}					
@@ -877,7 +870,7 @@ public class JAP
 			if(pFFHelpPath != null)
 			{
 				File helpPath = new File(pFFHelpPath);
-				/** @todo precheck path */
+				/** @todo integrate creation of portable help path here */
 				JAPModel.getInstance().setHelpPath(helpPath);
 			}
 		}			
