@@ -86,10 +86,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		m_current.setTimeInMillis(System.currentTimeMillis());
 		
-		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
-		int hour = m_current.get(Calendar.HOUR_OF_DAY);
-		
-		// TODO:
 		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[DELAY]);
 		if(elemDelay == null)
 		{
@@ -326,21 +322,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				(cascade != null ? cascade.getName() : "") +
 				"<h2>" + m_strCascadeId + "</h2>";
 		
-		// TODO: improve
-		String e = "";
-		if(a_attribute == SPEED)
-		{
-			e = "speed";
-		}
-		else if(a_attribute == DELAY)
-		{
-			e = "delay";
-		}
-		else if(a_attribute == USERS)
-		{
-			e = "users";
-		}
-		
 		m_current.setTimeInMillis(System.currentTimeMillis());
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
 		
@@ -358,7 +339,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			else
 			{
-				htmlData += "<a href=\"/values/" + e + "/" + m_strCascadeId + "/" + cal.get(Calendar.DAY_OF_WEEK) + "\">" + 
+				htmlData += "<a href=\"/values/" + ATTRIBUTES[a_attribute].toLowerCase() + "/" + m_strCascadeId + "/" + cal.get(Calendar.DAY_OF_WEEK) + "\">" + 
 				(cal.get(Calendar.DAY_OF_WEEK) == dayOfWeek ? "Today</a> " : date +"</a> | ");
 			}
 			
@@ -457,7 +438,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
 		
-		// TODO: no available data for this hour -> use another hour?
 		if(getCurrentDelayEntry() != null)
 		{
 			Element elemDelay = m_currentEntries[DELAY].toXmlElement(a_doc);
@@ -600,10 +580,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			Element elem = a_doc.createElement(ATTRIBUTES[m_attribute]);
 			
-			/*XMLUtil.setAttribute(elem, XML_ATTR_MIN, m_lMinValue);
-			XMLUtil.setAttribute(elem, XML_ATTR_MAX, m_lMaxValue);*/
 			XMLUtil.setAttribute(elem, XML_ATTR_AVERAGE, getAverage());
-			//XMLUtil.setAttribute(elem, XML_ATTR_STD_DEVIATION, m_lStdDeviation);
 			
 			return elem;
 		}
@@ -707,11 +684,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public int getValueSize()
 		{
 			return m_Values.size() + m_iErrors;
-		}
-		
-		public void overrideAverageValue(long a_lValue)
-		{
-			m_lAverageValue = a_lValue;
 		}
 		
 		public long getDayTimestamp()
