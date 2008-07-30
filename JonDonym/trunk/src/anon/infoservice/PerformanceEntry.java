@@ -616,6 +616,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					continue;
 				}
 				
+				value = ((Long) m_Values.get(timestamp)).longValue();
+				
 				if(value < 0)
 				{
 					errors++;
