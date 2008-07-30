@@ -53,11 +53,6 @@ public class ConsoleJAPMainView implements IJAPMainView
 	{
 	}
 	
-	public String[] getBrowserCommand()
-	{
-		return null;
-	}
-	
 	public void updateValues(boolean bSync)
 	{
 	}

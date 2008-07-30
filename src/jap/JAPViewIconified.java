@@ -270,15 +270,6 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 							switchBackToMainView();
 						}
 
-						public boolean isBrowserAvailable()
-						{
-							return m_mainView.getBrowserCommand() != null;
-						}
-
-						public void onOpenBrowser()
-						{
-							m_Controller.startPortableFirefox(m_mainView.getBrowserCommand());
-						}
 
 						public void onShowSettings(String card, Object a_value)
 						{

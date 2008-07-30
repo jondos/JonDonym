@@ -692,16 +692,6 @@ final public class JAPDll {
 				{
 					showWindowFromTaskbar();
 				}
-				public boolean isBrowserAvailable()
-				{
-					return JAPController.getInstance().getView().getBrowserCommand() != null;
-				}
-				public void onOpenBrowser()
-				{
-					String[] pFFCommand = JAPController.getInstance().getView().getBrowserCommand();
-					JAPController.getInstance().startPortableFirefox(pFFCommand);
-					
-				}
 
 				public void onShowHelp()
 				{

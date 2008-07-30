@@ -34,6 +34,7 @@
  *
  */
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Hashtable;
@@ -91,14 +92,18 @@ public class JAP
 	private static final String MSG_INIT_ICON_VIEW = JAP.class.getName() + "_initIconView";
 	private static final String MSG_INIT_RANDOM = JAP.class.getName() + "_initRandom";
 	private static final String MSG_FINISH_RANDOM = JAP.class.getName() + "_finishRandom";
-	private static final String MSG_START_LISTENER = JAP.class.getName() + "_startListener";
+	private static final String MSG_START_LISTENER = JAP.class.getName() + "_startListener";	
+	private static final String MSG_EXPLAIN_NO_FIREFOX_FOUND = 
+		JAP.class.getName() + "_explainNoFirefoxFound";
+	private static final String MSG_USE_DEFAULT_BROWSER = 
+		JAP.class.getName() + "_useDefaultBrowser";
+	
 	private final static String WHITESPACE_ENCODED = "%20";
 	
 	private JAPController m_controller;
 	
 	Hashtable m_arstrCmdnLnArgs = null;
 	String[] m_temp = null;
-	String[] m_firefoxCommand; //holds command to re-open firefox, to be parsed from args and passed to JAPNewView
 
 	public JAP()
 	{
@@ -328,8 +333,6 @@ public class JAP
 		m_controller = JAPController.getInstance();
 		
 		// Set path to Firefox for portable JAP
-		//String firepath="";
-		String profilepath = "";
 		boolean bPortable = isArgumentSet("--portable");
 		m_controller.setPortableMode(bPortable);
 		
@@ -580,6 +583,65 @@ public class JAP
 			forwardingStateVisible = true;
 		}
 
+		
+		AbstractOS.getInstance().init(new AbstractOS.IURLErrorNotifier()
+		{
+			public void checkNotify(URL a_url)
+			{
+				/**
+				 * Allow non-anonymous surfing for https payment pages.
+				 */
+				if (a_url != null && !m_controller.getAnonMode() &&
+					JAPModel.getInstance().isNonAnonymousSurfingDenied() &&
+					a_url.toString().startsWith("https"))
+				{
+					JAPModel.getInstance().denyNonAnonymousSurfing(false);
+				}
+			}
+		},new AbstractOS.IURLOpener()
+		{			
+			private String m_browserCMD = buildPortableFFCommand();
+			
+			public boolean openURL(URL a_url)
+			{			
+				if (a_url == null)
+				{
+					return false;
+				}
+				
+				IJAPMainView view = JAPController.getInstance().getView();
+				
+				if (!super.openURL(a_url) && view instanceof AbstractJAPMainView)
+				{
+					if(JAPDialog.showConfirmDialog((AbstractJAPMainView)view,
+							JAPMessages.getString(MSG_EXPLAIN_NO_FIREFOX_FOUND), 
+							new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL)
+					{
+						public String getYesOKText()
+						{
+							return JAPMessages.getString(MSG_USE_DEFAULT_BROWSER);
+						}
+					},					
+							JAPDialog.MESSAGE_TYPE_WARNING) == JAPDialog.RETURN_VALUE_OK)
+					{
+						return false; // try to open with system default browser												
+					}					
+				}
+				return true;
+			}
+			
+			public URL getDefaultURL()
+			{
+				return JAPModel.getInstance().getHelpURL();
+			}
+			
+			public String getBrowserCommand()
+			{
+				return m_browserCMD;
+			}
+		});		
+		
+		
 		JAPModel.getInstance().setForwardingStateModuleVisible(forwardingStateVisible);
 		// load settings from config file
 		splash.setText(JAPMessages.getString(MSG_LOADING_SETTINGS));
@@ -603,47 +665,7 @@ public class JAP
 			}
 		}
 		
-		if(bPortable)
-		{
-			m_firefoxCommand = buildPortableFFCommand();
-		}
-		// keep this string unchangeable from "outside"
-		final String[] firefoxCommand = m_firefoxCommand;
-		AbstractOS.getInstance().init(new AbstractOS.IURLErrorNotifier()
-		{
-			boolean m_bReset = false;
-			public void checkNotify(URL a_url)
-			{
-				if (a_url != null && !m_controller.getAnonMode() &&
-					JAPModel.getInstance().isNonAnonymousSurfingDenied() &&
-					a_url.toString().startsWith("https"))
-				{
-					m_bReset = true;
-					JAPModel.getInstance().denyNonAnonymousSurfing(false);
-				}
-			}
-		},new AbstractOS.IURLOpener()
-		{
-			public boolean openURL(URL a_url)
-			{
-				if (firefoxCommand == null || a_url == null)
-				{
-					// no path to portable browser was given; use default
-					return false;
-				}
-				try
-				{
-					firefoxCommand[firefoxCommand.length-1] = a_url.toString();
-					LogHolder.log(LogLevel.WARNING, LogType.GUI, firefoxCommand[0] + " " + a_url.toString());
-					return m_controller.startPortableFirefox(firefoxCommand);
-				}
-				catch (Exception ex)
-				{
-					LogHolder.log(LogLevel.WARNING, LogType.GUI, "Error running applescript: ", ex);
-				}
-				return false;
-			}
-		});
+		
 
 		splash.setText(JAPMessages.getString(MSG_INIT_DLL));
 		JAPDll.init();
@@ -669,7 +691,7 @@ public class JAP
 		IJAPMainView view;
 		if (!bConsoleOnly)
 		{
-			view = new JAPNewView(JAPConstants.TITLE, m_controller, m_firefoxCommand);
+			view = new JAPNewView(JAPConstants.TITLE, m_controller);
 
 			// Create the main frame
 			view.create(loadPay);
@@ -818,22 +840,19 @@ public class JAP
 		return m_arstrCmdnLnArgs.containsKey(a_argument);
 	}
 	
-	public String[] buildPortableFFCommand()
+	public String buildPortableFFCommand()
 	{
-		String[] pFFCommand = null;
 		String pFFExecutable = null;
-		String pFFprofile = null;
 		String pFFHelpPath = null;
-		int args_len = 0;
-		int argC = 0;
+
 		
 		if (!isArgumentSet("--portable") )
 		{
 			return null;
 		}
-		//--portable is set
+		
+		//check if portable is set
 		pFFExecutable = getArgumentValue("--portable");
-		args_len++;
 		if (pFFExecutable != null)
 		{
 			/*replace any white space encodings with white spaces */
@@ -849,44 +868,21 @@ public class JAP
 			}
 			pFFExecutableBuf.append(pFFExecutable.substring(lastIx));
 			pFFExecutable = toAbsolutePath(pFFExecutableBuf.toString());
-		}
-		else
-		{
-			pFFExecutable = "";
-		}
-			
-		if (isArgumentSet("--portable-help-path"))
-		{
-			pFFHelpPath = getArgumentValue("--portable-help-path");
-		}
-		// One argument is reserved for the URL
-		args_len++;
-		pFFCommand = new String[args_len];
-		pFFCommand[argC] = pFFExecutable;
-		argC++;
-		/*if(pFFprofile != null)
-		{
-			pFFCommand[argC] = "-profile";
-			pFFCommand[argC+1] = toAbsolutePath(pFFprofile);
-			argC += 2;
-		}*/
-		Locale loc = JAPMessages.getLocale();
-		if(pFFHelpPath != null)
-		{
-			pFFCommand[argC] = pFFHelpPath;
-		}
-		else
-		{
-			pFFCommand[argC] = "file://"+toAbsolutePath("help/en/help/index.html");
-			if(loc != null)
+					
+			if (isArgumentSet("--portable-help-path"))
 			{
-				if(loc.toString().equalsIgnoreCase("de"))
-				{
-					pFFCommand[argC] = "file://"+toAbsolutePath("help/de/help/index.html");
-				}
+				pFFHelpPath = getArgumentValue("--portable-help-path");
+			}	
+			
+			if(pFFHelpPath != null)
+			{
+				File helpPath = new File(pFFHelpPath);
+				/** @todo precheck path */
+				JAPModel.getInstance().setHelpPath(helpPath);
 			}
-		}
-		return pFFCommand;
+		}			
+		
+		return pFFExecutable;
 	}
 	
 	public static String toAbsolutePath(String path)
