@@ -211,23 +211,51 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		
 		avgSpeed = 0;
 		avgDelay = 0;
+		
+		double stdSpeed = 0;
+		double stdDelay = 0;
+		
+		long value = 0;
+		double dvalue = 0;
+		
 		for(int j = 0; j < vResult.size(); j++)
 		{
-			if(((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.SPEED) != 0)
+			value = ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.SPEED);
+			if(value != 0)
 			{
-				avgSpeed += ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.SPEED);
+				avgSpeed += value;
 			}
 			
-			if(((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY) != 0)
+			dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.SPEED);
+			if(dvalue != 0)
 			{
-				avgDelay += ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY);
+				stdSpeed += dvalue;
 			}
+			
+			value = ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY);
+			if(value != 0)
+			{
+				avgSpeed += value;
+			}
+			
+			dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.SPEED);
+			if(dvalue != 0)
+			{
+				stdDelay += dvalue;
+			}
+
 		}
 		avgSpeed /= vResult.size();
 		avgDelay /= vResult.size();
 		
+		stdSpeed /= vResult.size();
+		stdDelay /= vResult.size();
+		
 		avgEntry.overrideXMLAverage(PerformanceEntry.SPEED, avgSpeed);
 		avgEntry.overrideXMLAverage(PerformanceEntry.DELAY, avgDelay);
+		
+		avgEntry.overrideXMLStdDeviation(PerformanceEntry.SPEED, stdSpeed);
+		avgEntry.overrideXMLStdDeviation(PerformanceEntry.DELAY, stdDelay);
 		
 		return avgEntry;
 	}
