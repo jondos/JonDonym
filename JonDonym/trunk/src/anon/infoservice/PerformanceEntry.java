@@ -627,8 +627,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 			}
 			
-			mseValue /= m_Values.size();
-			
 			if(errors > 0 && values == 0)
 			{
 				return -1;
@@ -640,6 +638,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			else
 			{
+				mseValue /= m_Values.size();
 				// standard deviation
 				return Math.sqrt(mseValue);
 			}
