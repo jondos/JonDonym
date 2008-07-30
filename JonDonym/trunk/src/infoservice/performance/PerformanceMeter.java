@@ -100,6 +100,7 @@ public class PerformanceMeter implements Runnable
 	private int m_majorInterval;
 	private int m_requestsPerInterval;
 	private int m_maxWaitForTest;
+	private int m_minPackets;
 	
 	private AnonProxy m_proxy;
 	private char[] m_recvBuff;
@@ -149,13 +150,14 @@ public class PerformanceMeter implements Runnable
 		}
 		
 		Object[] a_config = m_infoServiceConfig.getPerformanceMeterConfig();
-				
+		
 		m_proxyHost = (String) a_config[0];
 		m_proxyPort = ((Integer) a_config[1]).intValue();
 		m_dataSize = ((Integer) a_config[2]).intValue();
 		m_majorInterval = ((Integer) a_config[3]).intValue();
 		m_requestsPerInterval = ((Integer) a_config[4]).intValue();
 		m_maxWaitForTest = ((Integer) a_config[5]).intValue();
+		m_minPackets = ((Integer) a_config[6]).intValue();
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
 		
 		m_cal.setTimeInMillis(System.currentTimeMillis());
@@ -556,6 +558,12 @@ public class PerformanceMeter implements Runnable
 		
 		// skip cascades on the same host as the infoservice
 		if (a_cascade == null || !isPerftestAllowed(a_cascade))
+		{
+			return false;
+		}
+		
+		a_cascade.fetchCurrentStatus();
+		if(a_cascade.getCurrentStatus() == null || a_cascade.getCurrentStatus().getMixedPackets() < m_minPackets)
 		{
 			return false;
 		}

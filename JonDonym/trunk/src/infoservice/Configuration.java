@@ -206,16 +206,18 @@ final public class Configuration
 	 */
 	private boolean m_bPerfEnabled;
 
-	/** Stores 5 configuration values for cascade performance monitoring.
+	/** Stores 7 configuration values for cascade performance monitoring.
 	 * <ul>
 	 *  <li>The local proxy host</li>
 	 * 	<li>The local proxy port</li>
 	 * 	<li>The size of the random test data block in bytes;</li>
 	 * 	<li>The interval between measurement blocks in milliseconds</li>
 	 *  <li>Requests per interval</li>
+	 *  <li>Test timeout</li>
+	 *  <li>Min amount of packets a cascade needs to be tested</li>
 	 * </ul>
 	 */
-	private final Object[] m_aPerfMeterConf = new Object[6];
+	private final Object[] m_aPerfMeterConf = new Object[7];
 	
 	private boolean m_bPerfServerEnabled;
 	
@@ -785,6 +787,12 @@ final public class Configuration
 				if(value != null)
 				{
 					m_aPerfMeterConf[5] = new Integer(Math.max(5*1000, Integer.parseInt(value)));
+				}
+				
+				value = a_properties.getProperty("perf.minPackets", "1000000");
+				if(value != null)
+				{
+					m_aPerfMeterConf[6] = new Integer(Integer.parseInt(value));
 				}
 				
 				m_strPerfAccountDirectory = 
