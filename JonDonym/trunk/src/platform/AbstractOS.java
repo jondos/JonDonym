@@ -27,35 +27,20 @@
  */
 package platform;
 
-import jap.JAPConstants;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Locale;
-import java.util.Vector;
-import java.util.jar.JarFile;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
-import anon.util.ClassUtil;
-import anon.util.RecursiveCopyTool;
-import anon.util.XMLParseException;
-import anon.util.XMLUtil;
-import anon.util.ZLibTools;
-
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp.IExternalEMailCaller;
 import gui.help.JAPHelp.IExternalURLCaller;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Vector;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+import anon.util.ClassUtil;
 
 /**
  * This abstract class provides access to OS-specific implementations of certain
