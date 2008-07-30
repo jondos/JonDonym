@@ -31,6 +31,7 @@ import java.io.File;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.Vector;
 
 import java.awt.Container;
@@ -69,6 +70,8 @@ import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
+import gui.help.HelpFileStorageManager;
+import gui.help.JAPExternalHelpViewer;
 import gui.help.JAPHelp;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -129,10 +132,19 @@ final class JAPConfUI extends AbstractJAPConfModule
 	private File m_currentDirectory;
 	private JTextField m_helpPathField;
 	private JButton m_helpPathButton;
+	private Observer m_modelObserver;
 
 	public JAPConfUI()
 	{
 		super(null);
+		m_modelObserver = new Observer()
+		{
+			public void update(Observable a_notifier, Object a_message)
+			{
+				updateHelpPath();
+			}
+		};
+		JAPModel.getInstance().addObserver(m_modelObserver);
 	}
 
 	public void recreateRootPanel()
@@ -853,18 +865,19 @@ final class JAPConfUI extends AbstractJAPConfModule
 		{			
 			final JAPDialog dialog = 
 				new JAPDialog(this.getRootPanel(), 
-						JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL));
+						JAPMessages.getString(JAPExternalHelpViewer.MSG_HELP_INSTALL));
 			Runnable run = new Runnable()
 			{
 				public void run()
 				{
-	//				When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
-					model.setHelpPath(m_helpPathField.getText());
+	//				When we set the path: the file storage manager does the rest (if the path is valid) */
+					model.setHelpPath(new File(m_helpPathField.getText()));
 				}
 			};
 						
 			final WorkerContentPane workerPane = 
-				new WorkerContentPane(dialog, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS),
+				new WorkerContentPane(dialog, JAPMessages.getString(
+						JAPExternalHelpViewer.MSG_HELP_INSTALL_PROGRESS),
 						run, model.getHelpFileStorageObservable());
 			workerPane.updateDialog();
 			dialog.setResizable(false);

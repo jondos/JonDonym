@@ -83,7 +83,6 @@ import anon.util.ResourceLoader;
  */
 public class JAPInternalHelpViewer extends JAPDialog 
 {
-	
 	private String m_helpPath = " ";
 	private LanguageMapper m_language = new LanguageMapper();
 	private JComboBox m_comBoxLanguage;

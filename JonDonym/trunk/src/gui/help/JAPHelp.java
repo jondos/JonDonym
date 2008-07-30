@@ -28,8 +28,6 @@
 
 package gui.help;
 
-import jap.JAPModel;
-
 import java.net.URL;
 
 import java.awt.Frame;
@@ -41,8 +39,8 @@ import javax.swing.JMenuItem;
 
 import gui.JAPMessages;
 import gui.JAPHelpContext.IHelpContext;
-
 import gui.dialog.JAPDialog;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -76,14 +74,29 @@ public abstract class JAPHelp
 	 * Creates and initialises a new global help object with the given frame as parent frame.
 	 * @param a_parent the parent frame of the help object
 	 * @param a_urlCaller the caller that is used to open external URLs (may be null)
-	 * @param m_emailCaller the caller that is used to open E_Mail applications with a given address
+	 * @param m_emailCaller the caller that is used to open E-Mail applications with a given address
+	 * @param a_helpModel a help model; if set to null, only the internal help will be presented
 	 */
-	public static void init(Frame a_parent,
-							IExternalURLCaller a_urlCaller, IExternalEMailCaller a_emailCaller)
+	public static void init(Frame a_parent, IExternalURLCaller a_urlCaller, 
+			IExternalEMailCaller a_emailCaller)	
+	{
+		init(a_parent, a_urlCaller, a_emailCaller, null);
+	}
+	
+	/**
+	 * Creates and initialises a new global help object with the given frame as parent frame.
+	 * @param a_parent the parent frame of the help object
+	 * @param a_urlCaller the caller that is used to open external URLs (may be null)
+	 * @param m_emailCaller the caller that is used to open E-Mail applications with a given address
+	 * @param a_helpModel a help model; if set to null, only the internal help will be presented
+	 */
+	public static void init(Frame a_parent, IExternalURLCaller a_urlCaller, 
+			IExternalEMailCaller a_emailCaller, IHelpModel a_helpModel)
 	{
 		if (ms_theJAPHelp == null)
 		{
-			ms_theJAPHelp = JAPHelpFactory.createJAPhelp(a_parent, a_urlCaller, a_emailCaller);
+			ms_theJAPHelp = 
+				JAPHelpFactory.createJAPhelp(a_parent, a_urlCaller, a_emailCaller, a_helpModel);
 		}
 	}
 
@@ -203,13 +216,14 @@ public abstract class JAPHelp
 
 	private static class JAPHelpFactory
 	{
-		private static JAPHelp createJAPhelp(Frame a_parent,
-											IExternalURLCaller a_urlCaller, IExternalEMailCaller a_emailCaller)
+		private static JAPHelp createJAPhelp(Frame a_parent, IExternalURLCaller a_urlCaller, 
+				IExternalEMailCaller a_emailCaller, IHelpModel a_helpModel)
 		{
-			if(JAPModel.getInstance().isExternalHelpInstallationPossible())
+			if(a_helpModel != null && a_helpModel.isExternalHelpInstallationPossible())
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Creating external help viewer.");
-				return new JAPExternalHelpViewer(a_parent, a_urlCaller, a_emailCaller);
+				return new JAPExternalHelpViewer(a_parent, a_urlCaller, a_emailCaller, 
+						a_helpModel);
 			}
 			else
 			{

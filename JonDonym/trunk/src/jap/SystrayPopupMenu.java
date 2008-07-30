@@ -47,6 +47,8 @@ import javax.swing.JPanel;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import platform.AbstractOS;
+
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.StatusInfo;
@@ -187,7 +189,7 @@ public class SystrayPopupMenu extends PopupMenu
 		});
 		add(menuItem);
 
-		if (m_mainWindowListener.isBrowserAvailable())
+		if (AbstractOS.getInstance().isDefaultURLAvailable())
 		{
 			menuItem = new JMenuItem(JAPMessages.getString(MSG_OPEN_BROWSER));
 			GUIUtils.setFontStyle(menuItem, Font.PLAIN);
@@ -195,7 +197,7 @@ public class SystrayPopupMenu extends PopupMenu
 			{
 				public void actionPerformed(ActionEvent a_event)
 				{
-					m_mainWindowListener.onOpenBrowser();
+					AbstractOS.getInstance().openBrowser();
 				}
 			});
 			add(menuItem);
@@ -302,8 +304,6 @@ public class SystrayPopupMenu extends PopupMenu
 
 	public static interface MainWindowListener
 	{
-		public boolean isBrowserAvailable();
-		public void onOpenBrowser();
 		public void onShowMainWindow();
 		public void onShowSettings(String card, Object a_value);
 		public void onShowHelp();

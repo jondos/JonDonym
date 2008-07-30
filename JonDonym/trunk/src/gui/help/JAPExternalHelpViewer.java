@@ -27,26 +27,15 @@ import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPHelpContext.IHelpContext;
 import gui.dialog.FileChooserContentPane;
-import gui.dialog.FinishedContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
-import gui.dialog.DialogContentPane;
 
-import jap.HelpFileStorageManager;
-import jap.JAPConf;
-import jap.JAPModel;
-import jap.JAPNewView;
-
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Frame;
-import java.io.File;
 import java.net.URL;
-import java.util.Observable;
 
 import javax.swing.JFileChooser;
-import javax.swing.RootPaneContainer;
 
 import anon.util.ProgressCapsule;
 
@@ -54,28 +43,35 @@ import anon.util.ProgressCapsule;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-import platform.AbstractOS;
 
 public final class JAPExternalHelpViewer extends JAPHelp
 {
-	private Component m_parent = null;
+	public static final String MSG_HELP_INSTALL = 
+		JAPExternalHelpViewer.class.getName()+ "_helpInstall";
+	public final static String MSG_HELP_INSTALL_PROGRESS = "helpInstallProgress";
+	private static final String MSG_HELP_PATH_CHOICE = 
+		JAPExternalHelpViewer.class.getName() + "_helpPathChoice";	
+	private static final String MSG_HELP_INSTALL_FAILED = 
+		JAPExternalHelpViewer.class.getName() + "_helpInstallFailed";	
+	private static final String MSG_HELP_INSTALL_SUCCESS = 
+		JAPExternalHelpViewer.class.getName() + "_helpInstallSucceded";	
+
+	
 	private IExternalURLCaller m_urlCaller = null;
-	private IExternalEMailCaller m_emailCaller = null;
 	
 	private JAPHelp m_alternativeHelp = null;
+	private IHelpModel m_helpModel;
 	
-	JAPExternalHelpViewer(Frame a_parent, IExternalURLCaller a_urlCaller, IExternalEMailCaller a_emailCaller)
+	JAPExternalHelpViewer(Frame a_parent, IExternalURLCaller a_urlCaller, 
+			IExternalEMailCaller a_emailCaller, IHelpModel a_helpModel)
 	{
-		m_parent = a_parent;
 		m_urlCaller = a_urlCaller;
-		m_emailCaller = a_emailCaller;
-		m_alternativeHelp = 
-			new JAPInternalHelpViewer(a_parent, a_urlCaller, a_emailCaller).getHelp();
+		m_helpModel = a_helpModel;
+		m_alternativeHelp = new JAPInternalHelpViewer(a_parent, a_urlCaller, a_emailCaller).getHelp();
 	}
 	
 	public void setVisible(boolean a_bVisible)
 	{
-		final JAPModel model = JAPModel.getInstance();
 		IHelpContext context = getHelpContext();
 		if(getHelpContext() == null)
 		{
@@ -86,23 +82,25 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		}
 		Container container = context.getHelpExtractionDisplayContext();
 		
-		if(container == null)
-		{
-			LogHolder.log(LogLevel.ERR, LogType.GUI, "Cannot show help externally: No display context specified");
-			m_alternativeHelp.setContext(getHelpContext());
-			m_alternativeHelp.setVisible(a_bVisible);
-			return;
-		}
 		/* If no external help path is specified and no help is installed: 
 		 * open dialog to ask the user
 		 */
-		if(!model.isHelpPathDefined() )
+		if(!m_helpModel.isHelpPathDefined() )
 		{
+			if(container == null)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.GUI, 
+						"Cannot show help externally: No display context specified");
+				m_alternativeHelp.setContext(getHelpContext());
+				m_alternativeHelp.setVisible(a_bVisible);
+				return;
+			}
+			
 			final JAPDialog dialog = 
-				new JAPDialog(container, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL));
+				new JAPDialog(container, JAPMessages.getString(MSG_HELP_INSTALL));
 			final FileChooserContentPane fileChooser = 
-				new FileChooserContentPane(dialog, JAPMessages.getString(JAPNewView.MSG_HELP_PATH_CHOICE),
-						model.getHelpPath(), JFileChooser.DIRECTORIES_ONLY)
+				new FileChooserContentPane(dialog, JAPMessages.getString(MSG_HELP_PATH_CHOICE),
+						m_helpModel.getHelpPath(), JFileChooser.DIRECTORIES_ONLY)
 			{
 				public CheckError[] checkYesOK()
 				{
@@ -113,7 +111,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 						return errors;
 					}
 					
-					String pathValidation = JAPModel.getInstance().helpPathValidityCheck(getFile());
+					String pathValidation = m_helpModel.helpPathValidityCheck(getFile());
 					
 					if (!pathValidation.equals(HelpFileStorageManager.HELP_VALID) &&
 						!pathValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS))
@@ -136,33 +134,33 @@ public final class JAPExternalHelpViewer extends JAPHelp
 				public void run()
 				{
 //					When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
-					model.setHelpPath(fileChooser.getFile());
-					//Not really happy about that:
-					JAPConf.getInstance().updateValues();
+					m_helpModel.setHelpPath(fileChooser.getFile());
 				}
 			};
 						
 			final WorkerContentPane workerPane = 
-				new WorkerContentPane(dialog, JAPMessages.getString(JAPNewView.MSG_HELP_INSTALL_PROGRESS),
-						fileChooser, run, model.getHelpFileStorageObservable())
+				new WorkerContentPane(dialog, JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS),
+						fileChooser, run, m_helpModel.getHelpFileStorageObservable())
 			{
 				public boolean isSkippedAsNextContentPane()
 				{
-					return model.isHelpPathDefined() && fileChooser.getFile().getPath().equals(model.getHelpPath());
+					return m_helpModel.isHelpPathDefined() && 
+						fileChooser.getFile().getPath().equals(m_helpModel.getHelpPath());
 				}
 			};
 			//workerPane.setInterruptThreadSafe(true);
 						
 			SimpleWizardContentPane finish = 
 				new SimpleWizardContentPane(dialog, 
-						"Die Hilfetexte wurden erfolgreich installiert", workerPane)
+						JAPMessages.getString(MSG_HELP_INSTALL_SUCCESS), workerPane)
 			{
 				public CheckError[] checkUpdate()
 				{
 					if (workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
 					{					
 						dialog.setTitle(JAPMessages.getString(JAPDialog.MSG_ERROR_UNKNOWN));
-						setText("<font color='red'>Die Hilfetexte konnten leider nicht installiert werden! Es wird nun ein internes Hilfefenster geöffnet, das allerdings keine optimale Darstellung ermöglicht.</font>");
+						setText("<font color='red'>" + 
+								JAPMessages.getString(MSG_HELP_INSTALL_FAILED) + "</font>");
 					}
 					return null;
 				}
@@ -183,7 +181,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			}
 		}		
 		
-		URL helpURL = model.getHelpURL(context.getHelpContext()+".html");
+		URL helpURL = m_helpModel.getHelpURL(context.getHelpContext()+".html");
 		if(helpURL != null)
 		{
 			m_urlCaller.openURL(helpURL);	

@@ -104,9 +104,72 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		ms_tmpDir = new File(tmpDir);
 	}
 
-	public static interface IURLOpener
-	{
-		boolean openURL(URL a_url);
+	public static abstract class IURLOpener
+	{	
+		private Process m_portableFirefoxProcess = null;
+		private boolean m_bOneSessionOnly = false;
+		
+		public synchronized boolean openURL(URL a_url)
+		{
+			String cmd;
+			
+			if (getBrowserCommand() == null || a_url == null)
+			{
+				// no path to portable browser was given; use default
+				return false;
+			}
+				
+			if(m_portableFirefoxProcess != null && m_bOneSessionOnly)
+			{
+				try
+				{
+					int ffExitValue = m_portableFirefoxProcess.exitValue();
+					LogHolder.log(LogLevel.INFO, LogType.MISC,
+						"previous portable firefox process exited "+
+						((ffExitValue == 0) ? "normally " : "anormally ")+
+						"(exit value "+ffExitValue+").");
+				}
+				catch(IllegalThreadStateException itse)
+				{
+					LogHolder.log(LogLevel.WARNING, LogType.MISC,
+						"Portable Firefox process is still running!");
+					return true; // do not start a second process or another browser
+				}
+			}
+			
+			cmd = getBrowserCommand() + " " + a_url.toString();
+			try
+			{
+				m_portableFirefoxProcess = Runtime.getRuntime().exec(cmd);
+				return true;
+			} 
+			catch (SecurityException se)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC,
+						"You are not allowed to lauch portable firefox: ", se);
+			}
+			catch (IOException ioe3) 
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC,
+						"Error occured while launching portable browser with command '" + 
+						cmd + "'",ioe3);	
+			}
+			
+			return false;
+		}
+		
+		public abstract String getBrowserCommand();
+		
+		public abstract URL getDefaultURL();
+		
+		public final synchronized boolean openBrowser()
+		{
+			boolean bReturn;
+			m_bOneSessionOnly = true;
+			bReturn = openURL(getDefaultURL());
+			m_bOneSessionOnly = false;
+			return bReturn;			
+		}
 	}
 
 	public static interface IURLErrorNotifier
@@ -216,6 +279,29 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		}
 	}
 
+	public final boolean isDefaultURLAvailable()
+	{
+		if (m_URLOpener != null)
+		{
+			return (m_URLOpener.getDefaultURL() != null);
+		}
+		return false;
+	}
+	
+	/**
+	 * Just opens the browser with the default URL. Does not work
+	 * if no default URL is available.
+	 * @return if the browser could be opened with the default URL
+	 */
+	public final boolean openBrowser()
+	{
+		if (m_URLOpener != null)
+		{
+			return m_URLOpener.openBrowser();
+		}
+		return false;
+	}
+	
 	public final boolean openURL(URL a_url)
 	{
 		boolean success = false;

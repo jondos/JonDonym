@@ -62,7 +62,7 @@ final public class JAPiPAQ
 		m_controller.loadConfigFile(strJapConfFile, false, null);
 		// Output some information about the system
 		// Create the view object
-		view = new JAPNewView(JAPConstants.TITLE, m_controller, null);
+		view = new JAPNewView(JAPConstants.TITLE, m_controller);
 		// Create the main frame
 		view.create(false);
 		// Switch Debug Console Parent to MainView

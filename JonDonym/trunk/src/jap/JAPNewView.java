@@ -168,16 +168,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_ANTI_CENSORSHIP = JAPNewView.class.getName() + "_antiCensorship";
 
 	private static final String MSG_OBSERVABLE_EXPLAIN = JAPNewView.class.getName() + "_observableExplain";
-	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";
-	private static final String MSG_EXPLAIN_NO_FIREFOX_FOUND = JAPNewView.class.getName() + "_explainNoFirefoxFound";
+	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";	
 
 	//private static final String MSG_STD_HELP_PATH_INSTALLATION =  + "_stdHelpPathInstallation";
-	public static final String MSG_HELP_PATH_CHOICE = JAPNewView.class.getName() + "_helpPathChoice";
-	public static final String MSG_HELP_INSTALL = JAPNewView.class.getName()+ "_helpInstall";
-	public static final String MSG_HELP_INSTALL_FAILED = JAPNewView.class.getName() + "_helpInstallFailed";
-	
-	public final static String MSG_HELP_INSTALL_PROGRESS = "helpInstallProgress";
-	public final static String MSG_HELP_INSTALL_EXTRACTING = "helpInstallExtracting";
 	
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
@@ -313,9 +306,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private int m_msgIDInsecure;
 
-	private String[] m_firefoxCommand; //the CLI command for re-opening firefox, usually just the path to the executable
-
-	public JAPNewView(String s, JAPController a_controller, String[] a_firefoxCommand)
+	public JAPNewView(String s, JAPController a_controller)
 	{
 		super(s, a_controller);
 		m_bIsSimpleView = (JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED);
@@ -326,7 +317,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_packetMixedJobs = new JobQueue("packet mixed update job queue");
 		m_lTrafficWWW = 0;
 		m_lTrafficOther = 0;
-		m_firefoxCommand = a_firefoxCommand;
 	}
 
 	public void create(boolean loadPay)
@@ -345,16 +335,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		// important to initialise for TinyL&F!!!
 		new SystrayPopupMenu(new SystrayPopupMenu.MainWindowListener()
 		{
-			public void onOpenBrowser()
-			{
-				m_Controller.startPortableFirefox(m_firefoxCommand);
-			}
-
-			public boolean isBrowserAvailable()
-			{
-				return (getBrowserCommand() != null);
-			}
-
 			public void onShowMainWindow()
 			{
 			}
@@ -384,16 +364,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					final SystrayPopupMenu popup = new SystrayPopupMenu(
 						new SystrayPopupMenu.MainWindowListener()
 					{
-						public void onOpenBrowser()
-						{
-							m_Controller.startPortableFirefox(m_firefoxCommand);
-						}
-
-						public boolean isBrowserAvailable()
-						{
-							return (getBrowserCommand() != null);
-						}
-
 						public void onShowMainWindow()
 						{
 							// do nothing
@@ -608,7 +578,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				public void actionPerformed(ActionEvent e)
 				{
-					m_Controller.startPortableFirefox(m_firefoxCommand);
+					AbstractOS.getInstance().openBrowser();	
 				}
 			});
 
@@ -1337,7 +1307,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		updateValues(true);
 		setOptimalSize();
 		GUIUtils.centerOnScreen(this);
-		GUIUtils.restoreLocation(this, JAPModel.getInstance().getMainWindowLocation());
+		GUIUtils.restoreLocation(this, JAPModel.getMainWindowLocation());
 
 		Database.getInstance(StatusInfo.class).addObserver(this);
 		Database.getInstance(JAPVersionInfo.class).addObserver(this);
@@ -1352,7 +1322,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		JAPModel.getInstance().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().addObserver(this);
 
-		JAPHelp.init(this, AbstractOS.getInstance(), AbstractOS.getInstance());
+		JAPHelp.init(this, AbstractOS.getInstance(), AbstractOS.getInstance(),
+				JAPModel.getInstance());
 		if(JAPHelp.getHelpDialog() != null)
 		{
 			JAPHelp.getHelpDialog().setLocationCenteredOnOwner();
@@ -2636,11 +2607,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_comboAnonServices.showPopup();
 	}
 
-	public String[] getBrowserCommand()
-	{
-		return m_firefoxCommand;
-	}
-
 	public void onUpdateValues()
 	{
 		synchronized (SYNC_ICONIFIED_VIEW)
@@ -3353,28 +3319,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		else
 		{
 			m_StatusPanel.removeStatusMsg(messageId.intValue());
-		}
-	}
-
-	public void showChooseFirefoxPathDialog()
-	{
-		if(JAPDialog.showYesNoDialog(this, JAPMessages.getString(MSG_EXPLAIN_NO_FIREFOX_FOUND)))
-		{
-			JFileChooser chooser = new JFileChooser();
-			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			{
-				File f = chooser.getSelectedFile();
-				if(m_firefoxCommand == null)
-				{
-					m_firefoxCommand = new String[1];
-				}
-				m_firefoxCommand[0] = f.getAbsolutePath();
-				if(f != null)
-				{
-					m_Controller.startPortableFirefox(m_firefoxCommand);
-				}
-
-			}
 		}
 	}
 

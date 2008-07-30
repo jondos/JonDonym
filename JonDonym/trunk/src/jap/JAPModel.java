@@ -31,6 +31,8 @@ import gui.GUIUtils;
 import gui.JAPDll;
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
+import gui.help.HelpFileStorageManager;
+import gui.help.IHelpModel;
 import jap.forward.JAPRoutingSettings;
 
 import java.awt.Dimension;
@@ -60,7 +62,7 @@ import anon.util.ClassUtil;
 import anon.util.ResourceLoader;
 
 /* This is the Model of All. It's a Singelton!*/
-public final class JAPModel extends Observable
+public final class JAPModel extends Observable implements IHelpModel
 {
 	public static final String DLL_VERSION_UPDATE = "dllVersionUpdate";
 	public static final String XML_REMIND_OPTIONAL_UPDATE = "remindOptionalUpdate";
@@ -96,6 +98,7 @@ public final class JAPModel extends Observable
 	public static final Integer CHANGED_AUTO_RECONNECT = new Integer(6);
 	public static final Integer CHANGED_CASCADE_AUTO_CHANGE = new Integer(7);
 	public static final Integer CHANGED_DENY_NON_ANONYMOUS = new Integer(8);
+	public static final Integer CHANGED_HELP_PATH = new Integer(9);
 
 	private static final int DIRECT_CONNECTION_INFOSERVICE = 0;
 	private static final int DIRECT_CONNECTION_PAYMENT = 1;
@@ -911,17 +914,10 @@ public final class JAPModel extends Observable
 		buff.append("Config path: ");
 		buff.append(getConfigFile());
 		buff.append("\n");
-		String[] pFFCommand = JAPController.getInstance().getView().getBrowserCommand();
-		//s = JAPController.getInstance().getView().getBrowserCommand();
-		if (pFFCommand != null)
-		{
-			buff.append("Portable browser commandline: ");
-			for (int i = 0; i < pFFCommand.length; i++) {
-				buff.append(pFFCommand[i]+
-						((i != (pFFCommand.length-1)) ? " ":""));
-			}
-			buff.append("\n");
-		}
+		buff.append("Command line arguments: ");
+		buff.append("'" + JAPController.getInstance().getCommandlineArgs() + "'");
+		buff.append("\n");
+		
 		buff.append("HttpListenerPortNumber: ");
 		buff.append(m_HttpListenerPortNumber);
 		buff.append("\n");
@@ -1299,23 +1295,23 @@ public final class JAPModel extends Observable
 					m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath);
 					Locale loc = JAPMessages.getLocale();
 					String startPath = JAPConstants.HELP_EN_FOLDER;
+					
 					if(loc != null)
 					{
-						startPath = (loc.toString().equalsIgnoreCase("de") ? JAPConstants.HELP_DE_FOLDER : startPath);
+						startPath = (loc.getLanguage().equalsIgnoreCase("de") ? JAPConstants.HELP_DE_FOLDER : startPath);
 					}
 					
 					try 
 					{
 						helpURL = 
 							new URL("file://"+m_helpPath+ "/" +
-									//File.separator+
 									JAPConstants.HELP_FOLDER+ "/" +
 									startPath+
 									a_startDoc);
 					} 
 					catch (MalformedURLException e) 
 					{
-						LogHolder.log(LogLevel.WARNING, LogType.MISC, "Malformed URL Excpetion: ", e);
+						LogHolder.log(LogLevel.WARNING, LogType.MISC, e);
 						return null;
 					}
 				}
@@ -1350,17 +1346,24 @@ public final class JAPModel extends Observable
 	
 	public void setHelpPath(File hpFile)
 	{
-		if(hpFile == null)
+		synchronized(HELP_PATH_SYNC)
 		{
-			resetHelpPath();
+			if(hpFile == null)
+			{
+				resetHelpPath();
+			}
+			else
+			{
+				setHelpPath(hpFile.getPath());
+			}
 		}
-		else
+		synchronized(this)
 		{
-			setHelpPath(hpFile.getPath());
+			notifyObservers(CHANGED_HELP_PATH);
 		}
 	}
 	
-	public void setHelpPath(String newHelpPath)
+	private void setHelpPath(String newHelpPath)
 	{
 		synchronized(HELP_PATH_SYNC)
 		{
