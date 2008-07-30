@@ -27,6 +27,8 @@
  */
 package jap;
 
+import java.awt.Component;
+
 import javax.swing.JFrame;
 
 import gui.AWTUpdateQueue;
@@ -59,6 +61,11 @@ public abstract class AbstractJAPMainView extends JFrame implements IJAPMainView
 	}
 
 	public abstract void saveWindowPositions();
+	
+	public Component getCurrentView()
+	{
+		return this.getContentPane();
+	}
 
 	public void setTitle(String a_title)
 	{

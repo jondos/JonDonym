@@ -40,6 +40,7 @@ import java.util.Vector;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -567,7 +568,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		constrVersion.insets = new Insets(0, 0, 0, 0);
 		m_pnlVersion.add(m_labelVersion, constrVersion);
 
-		if (m_Controller.isPortableMode())
+		if (m_Controller.isPortableMode() && AbstractOS.getInstance().isDefaultURLAvailable())
 		{
 			m_firefox = new JButton(GUIUtils.loadImageIcon("firefox.png", true, false));
 			m_firefox.setOpaque(false);
@@ -2581,6 +2582,18 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_dlgConfig.setVisible(true);
 		}
 	}
+	
+	public Component getCurrentView()
+	{
+		synchronized (LOCK_CONFIG)
+		{
+			if (m_dlgConfig != null && m_dlgConfig.isVisible())
+			{
+				return m_dlgConfig.getContentPane();
+			}
+			return this.getContentPane();
+		}
+	}
 
 	private void setOptimalSize()
 	{
@@ -3381,29 +3394,4 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_operator = a_operator;
 		}
 	}
-
-	/*public File askForHelpInstallationPath(boolean withDialog) 
-	{
-		return null;
-	}*/
-	
-	/*public JAPDialog displayInstallProgress(Observable observable, ActionListener cancelListener)
-	{
-		ActionListener[] cListenerParam = new ActionListener[]{cancelListener};
-		//Component parent = m_dlgConfig.isVisible() ? m_dlgConfig : this;
-				
-		return hd;
-		
-		JAPHelpProgressDialog hpd = null;
-		if(m_dlgConfig != null)
-		{
-			if(m_dlgConfig.isVisible())
-			{
-				hpd = new JAPHelpProgressDialog(m_dlgConfig);
-				return hpd;
-			}
-		}
-		hpd = new JAPHelpProgressDialog(this);
-		return hpd;
-	}*/
 }

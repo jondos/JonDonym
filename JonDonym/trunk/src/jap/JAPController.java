@@ -2329,7 +2329,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT,
 								 InfoServiceDBEntry.getConnectionTimeout());
 			
-			if(JAPModel.getInstance().isHelpPathDefined())
+			if(JAPModel.getInstance().isHelpPathDefined() && JAPModel.getInstance().isHelpInstalled())
 			{
 				XMLUtil.setAttribute(e, XML_ATTR_HELP_PATH, 
 									 JAPModel.getInstance().getHelpPath());
@@ -4639,7 +4639,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		
 		if(isPortableMode() && m_Model.getStartPortableFirefox())
 		{
-			if(!m_firstPortableFFStart)
+			if(!m_firstPortableFFStart && AbstractOS.getInstance().isDefaultURLAvailable())
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "First browser start");
 				m_firstPortableFFStart = true;
