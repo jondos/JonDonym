@@ -650,6 +650,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			Element elem = a_doc.createElement(ATTRIBUTES[m_attribute]);
 			
 			XMLUtil.setAttribute(elem, XML_ATTR_AVERAGE, getAverage());
+			XMLUtil.setAttribute(elem, XML_ATTR_STD_DEVIATION, getStdDeviation());
 			
 			return elem;
 		}
