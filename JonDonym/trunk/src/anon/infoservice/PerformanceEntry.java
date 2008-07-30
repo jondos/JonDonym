@@ -262,6 +262,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_currentEntries[a_attribute].overrideXMLAverage(a_lValue);
 	}
 	
+	public void overrideXMLStdDeviation(int a_attribute, double a_dValue)
+	{
+		m_currentEntries[a_attribute].overrideXMLStdDeviation(a_dValue);
+	}
+	
 	public long getAverage(int a_attribute)
 	{
 		return m_currentEntries[a_attribute].getAverage();
@@ -270,6 +275,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public long getXMLAverage(int a_attribute)
 	{
 		return m_currentEntries[a_attribute].getXMLAverage();
+	}
+	
+	public double getXMLStdDeviation(int a_attribute)
+	{
+		return m_currentEntries[a_attribute].getXMLStdDeviation();
 	}
 	
 	public boolean isInvalid()
@@ -475,6 +485,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		private Hashtable m_Values = new Hashtable();
 		
 		public long m_lXMLAverageValue = 0;
+		public double m_lXMLStdDeviation = 0;
 		
 		public PerformanceAttributeCurrentEntry(int a_attribute)
 		{
@@ -494,6 +505,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_attribute = a_attribute;
 			
 			m_lXMLAverageValue = XMLUtil.parseAttribute(a_node, XML_ATTR_AVERAGE, 0);
+			m_lXMLStdDeviation = XMLUtil.parseAttribute(a_node, XML_ATTR_STD_DEVIATION, 0);
 		}
 		
 		public void addValue(long a_lTimeStamp, long a_lValue)
@@ -524,9 +536,19 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_lXMLAverageValue = a_lValue;
 		}
 		
+		public void overrideXMLStdDeviation(double a_dValue)
+		{
+			m_lXMLStdDeviation = a_dValue;
+		}
+		
 		public long getXMLAverage()
 		{
 			return m_lXMLAverageValue;
+		}
+		
+		public double getXMLStdDeviation()
+		{
+			return m_lXMLStdDeviation;
 		}
 		
 		public long getAverage()
@@ -573,6 +595,53 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			else
 			{
 				return lAverageValue / values;
+			}
+		}
+		
+		public double getStdDeviation()
+		{
+			long values = 0;
+			long value = 0;
+			long errors = 0;
+			long mseValue = 0;
+			Long timestamp;
+			
+			Enumeration e = m_Values.keys();
+			
+			while(e.hasMoreElements())
+			{
+				timestamp = (Long) e.nextElement();
+				if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
+				{
+					continue;
+				}
+				
+				if(value < 0)
+				{
+					errors++;
+				}
+				else
+				{
+					values++;
+					mseValue += Math.pow(value - getAverage(), 2);
+				}
+			}
+			
+			mseValue /= m_Values.size();
+			
+			if(errors > 0 && values == 0)
+			{
+				return -1;
+			}
+			
+			if(values == 0)
+			{
+				return 0;
+			}
+			else
+			{
+				// standard deviation
+				return Math.sqrt(mseValue);
 			}
 		}
 		
