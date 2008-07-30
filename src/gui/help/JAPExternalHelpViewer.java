@@ -37,6 +37,8 @@ import java.net.URL;
 
 import javax.swing.JFileChooser;
 
+import platform.AbstractOS;
+
 import anon.util.ProgressCapsule;
 
 
@@ -57,17 +59,14 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		JAPExternalHelpViewer.class.getName() + "_helpInstallSucceded";	
 
 	
-	private IExternalURLCaller m_urlCaller = null;
 	
 	private JAPHelp m_alternativeHelp = null;
 	private IHelpModel m_helpModel;
 	
-	JAPExternalHelpViewer(Frame a_parent, IExternalURLCaller a_urlCaller, 
-			IExternalEMailCaller a_emailCaller, IHelpModel a_helpModel)
+	JAPExternalHelpViewer(Frame a_parent, IHelpModel a_helpModel)
 	{
-		m_urlCaller = a_urlCaller;
 		m_helpModel = a_helpModel;
-		m_alternativeHelp = new JAPInternalHelpViewer(a_parent, a_urlCaller, a_emailCaller).getHelp();
+		m_alternativeHelp = new JAPInternalHelpViewer(a_parent).getHelp();
 	}
 	
 	public void setVisible(boolean a_bVisible)
@@ -184,7 +183,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		URL helpURL = m_helpModel.getHelpURL(context.getHelpContext()+".html");
 		if(helpURL != null)
 		{
-			m_urlCaller.openURL(helpURL);	
+			AbstractOS.getInstance().openURL(helpURL);	
 		}
 	}	
 
