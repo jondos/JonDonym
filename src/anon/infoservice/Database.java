@@ -30,6 +30,7 @@
  */
 package anon.infoservice;
 
+import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -40,6 +41,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.crypto.MyRandom;
+import anon.crypto.SignatureVerifier;
 import anon.util.Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -526,6 +528,21 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	 */
 	public int loadFromXml(Element a_dbNode)
 	{
+		return loadFromXml(a_dbNode, false);
+	}
+	
+	/**
+	 * Adds all database entries that are subnodes of the given element to the database.
+	 * The class must have a constructor with a single argument, a org.w3c.dom.Element, so that this
+	 * is successful.
+	 *
+	 * @param a_dbNode The xml node that contains db entries.
+	 * @param a_signatureDocumentClass if set to a value greater -1, the document is verified
+	 * against certificates of the given class before getting loaded
+	 * @return number of updated entries
+	 */
+	public int loadFromXml(Element a_dbNode, boolean a_bVerify)
+	{
 		int updatedEntries = 0;
 		String xmlElementName = XMLUtil.getXmlElementName(m_DatabaseEntryClass);
 		if (a_dbNode == null || xmlElementName == null)
@@ -536,11 +553,20 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		NodeList dbNodes = a_dbNode.getElementsByTagName(xmlElementName);
 		for (int i = 0; i < dbNodes.getLength(); i++)
 		{
-			/* add all children to the database */
+			/* add all children to the database */			
 			try
 			{
 				AbstractDatabaseEntry instance = (AbstractDatabaseEntry)m_DatabaseEntryClass.getConstructor(
 								new Class[]{Element.class}).newInstance(new Object[]{dbNodes.item(i)});
+				if (a_bVerify && instance instanceof ICertifiedDatabaseEntry &&
+					!((ICertifiedDatabaseEntry) instance).isVerified())
+				{
+					// not verified
+					LogHolder.log(LogLevel.WARNING, LogType.MISC, 
+							"XML entry " + dbNodes.item(i).getNodeName() + " for ID " +
+							instance.getId() + " could not be verified while being loaded!");
+					continue;
+				}
 				update(instance);
 				updatedEntries++;
 			}

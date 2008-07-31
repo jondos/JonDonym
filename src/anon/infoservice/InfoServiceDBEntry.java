@@ -1518,14 +1518,16 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest("/performanceinfo"),
 				  HTTPConnectionFactory.HTTP_ENCODING_PLAIN);
 		
-		if (!SignatureVerifier.getInstance().verifyXml(doc, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+		Element nodePerf = (Element) XMLUtil.getFirstChildByName(doc, PerformanceInfo.XML_ELEMENT_NAME);
+		PerformanceInfo info = new PerformanceInfo(nodePerf);
+		
+		if (!info.isVerified())
 		{
 			// signature could not be verified
 			throw new SignatureException("Document could not be verified!");
 		}
 		
-		Element nodePerf = (Element) XMLUtil.getFirstChildByName(doc, PerformanceInfo.XML_ELEMENT_NAME);
-		PerformanceInfo info = new PerformanceInfo(nodePerf);
+		
 		
 		return info;
 	}
