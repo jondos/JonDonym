@@ -40,6 +40,7 @@ public interface HelpFileStorageManager
 	public static final String HELP_NO_DIR = "helpNoDir";
 	public static final String HELP_DIR_EXISTS = "helpDirExists";
 	public static final String HELP_JONDO_EXISTS = "helpJonDoExists";
+	public static final String HELP_NESTED = "helpNested";
 	public static final String HELP_VALID = "HELP_IS_VALID";
 	
 	/**
@@ -47,13 +48,16 @@ public interface HelpFileStorageManager
 	 * when the help path changes
 	 * @param oldHelpPath the path of the help files before the change.
 	 * @param newHelpPath the path where the help files shall be installed
+	 * @param a_bIgnoreExistingHelpDir true if any existing directory named help
+	 * will be removed in the installation folder
 	 * @return true if the storage layer could be maintained consistent, false otherwise.
 	 * 			In the latter case the file storage layer must be in the same state as if 
 	 * 			there has not been a change at all.
 	 */
-	public boolean handleHelpPathChanged(String oldHelpPath, String newHelpPath);
+	public boolean handleHelpPathChanged(String oldHelpPath, 
+			String newHelpPath, boolean a_bIgnoreExistingHelpDir);
 	
-	public String helpPathValidityCheck(String absolutePath);
+	public String helpPathValidityCheck(String absolutePath, boolean a_bIgnoreExistingHelpDir);
 	
 	/**
 	 * returns an observable object which allows ViewObjects to display storage processes, i.e.
