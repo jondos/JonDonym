@@ -131,7 +131,7 @@ public class JAP
 				{
 					// this option has an argument
 					m_arstrCmdnLnArgs.put(argv[i], argv[i + 1]);
-					System.out.println(argv[i]+": "+argv[i + 1]);
+					//System.out.println(argv[i]+": "+argv[i + 1]);
 				}
 				else
 				{
@@ -618,7 +618,7 @@ public class JAP
 							JAPDialog.MESSAGE_TYPE_WARNING, adapter) == JAPDialog.RETURN_VALUE_OK)
 					{
 						return false; // try to open with system default browser												
-					}					
+					}
 				}
 				return true;
 			}
@@ -869,9 +869,7 @@ public class JAP
 			
 			if(pFFHelpPath != null)
 			{
-				File helpPath = new File(pFFHelpPath);
-				/** @todo integrate creation of portable help path here */
-				JAPModel.getInstance().setHelpPath(helpPath);
+				JAPModel.getInstance().setHelpPath(new File(pFFHelpPath));
 			}
 		}			
 		

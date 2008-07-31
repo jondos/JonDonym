@@ -145,6 +145,12 @@ final class JAPConfUI extends AbstractJAPConfModule
 				{
 					updateHelpPath();
 				}
+				
+				if(JAPModel.getInstance().isExternalHelpInstallationPossible() &&
+					!JAPModel.getInstance().hasPortableHelp())
+				{
+					m_helpPathButton.setEnabled(true);
+				}
 			}
 		};
 		JAPModel.getInstance().addObserver(m_modelObserver);
@@ -807,10 +813,11 @@ final class JAPConfUI extends AbstractJAPConfModule
 			m_helpPathField.setText("");
 		}
 		m_helpPathField.setEditable(false);
+		/*
 		if (!JAPModel.getInstance().isHelpInstalled())
 		{
 			m_helpPathButton.setEnabled(false);
-		}
+		}*/
 		
 		ActionListener helpInstallButtonActionListener = 
 			new ActionListener()
@@ -847,10 +854,12 @@ final class JAPConfUI extends AbstractJAPConfModule
 				}
 			};
 		m_helpPathButton.addActionListener(helpInstallButtonActionListener);
-		if(!JAPModel.getInstance().isExternalHelpInstallationPossible())
+		if(!JAPModel.getInstance().isExternalHelpInstallationPossible() ||
+			JAPModel.getInstance().hasPortableHelp())
 		{
 			m_helpPathButton.setEnabled(false);
 		}
+			
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.gridy = 0;
 		c.gridx = 0;
