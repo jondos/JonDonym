@@ -216,7 +216,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private FilterPanel m_filterPanel;
 
 	private JLabel m_lblSpeed;
+	private JLabel m_lblStdSpeed;
 	private JLabel m_lblDelay;
+	private JLabel m_lblStdDelay;
 	
 	private JLabel m_numOfUsersLabel;
 	
@@ -674,7 +676,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridx = 0;
 		c.gridy = 7;
 		c.gridheight = 1;
-		c.gridwidth = 4;
+		c.gridwidth = 5;
 		c.weightx = 1.0;
 		c.weighty = 0;
 		c.anchor = GridBagConstraints.NORTHWEST;
@@ -710,13 +712,22 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(l, c);
 
-		c.insets = new Insets(5, 5, 0, 5);
+		c.insets = new Insets(5, 5, 0, 0);
 		m_lblSpeed = new JLabel("");
 		c.gridx = 3;
 		c.gridy = 2;
-		c.weightx = 0;
+		c.weightx = 0;		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_lblSpeed, c);
+		
+		c.insets = new Insets(5, 0, 0, 5);
+		m_lblStdSpeed = new JLabel("");
+		c.gridx = 4;
+		c.gridy = 2;
+		c.weightx = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		m_cascadesPanel.add(m_lblStdSpeed, c);
+		
 
 		c.insets = new Insets(5, 20, 0, 5);
 		l = new JLabel(JAPMessages.getString(MSG_FILTER_LATENCY) + ":");
@@ -726,17 +737,25 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(l, c);
 
-		c.insets = new Insets(5, 5, 0, 5);
+		c.insets = new Insets(5, 5, 0, 0);
 		m_lblDelay = new JLabel("");
 		c.gridx = 3;
 		c.gridy = 3;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_lblDelay, c);
+		
+		c.insets = new Insets(5, 0, 0, 5);
+		m_lblStdDelay = new JLabel("");
+		c.gridx = 4;
+		c.gridy = 3;
+		c.weightx = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		m_cascadesPanel.add(m_lblStdDelay, c);
 
 		c.insets = new Insets(5, 20, 0, 5);
-		c.gridy = 4;
 		c.gridx = 2;
+		c.gridy = 4;		
 		c.gridwidth = 2;
 		m_payLabel = new JLabel("");
 		m_payLabel.addMouseListener(new MouseAdapter()
@@ -780,13 +799,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.insets = new Insets(5, 20, 0, 5);
 		c.gridy = 5;
 		c.gridx = 2;
-		c.gridwidth = 2;
+		c.gridwidth = 3;
 		m_lblSocks = new JLabel(JAPMessages.getString(MSG_SUPPORTS_SOCKS));
 		m_lblSocks.setIcon(GUIUtils.loadImageIcon("socks_icon.gif", true));
 		m_cascadesPanel.add(m_lblSocks, c);
 
 		c.insets = new Insets(5, 5, 0, 5);
-		c.gridwidth = 1;
+		c.gridwidth = 2;
 		c.gridx = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridy = 6;
@@ -1897,19 +1916,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						if (value < 0)
 						{
 							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
+							m_lblStdSpeed.setText("");
 						}
 						else
 						{
 							deviation = (entry.getXMLStdDeviation(PerformanceEntry.SPEED) / value) * 100;														
 							
 							// values greater than 100% would confuse users...
+							/*
 							if(deviation > 100)
 							{
 								deviation = 100;
-							}
+							}*/
 							
-							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value) + 
-									(deviation > 0 ? " \u00B1" + df.format(deviation) + "%" : ""));
+							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+							m_lblStdSpeed.setText((deviation > 0 ? " \u00B1" + df.format(deviation) + "%" : ""));
 						}
 						
 													
@@ -1917,24 +1938,29 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						if (value < 0)
 						{
 							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
+							m_lblStdDelay.setText("");
 						}
 						else
 						{
 							deviation = (entry.getXMLStdDeviation(PerformanceEntry.DELAY) / value) * 100;
 							
+//							 values greater than 100% would confuse users...
+							/*
 							if(deviation > 100)
 							{
 								deviation = 100;
-							}
+							}*/
 							
-							m_lblDelay.setText(value + " ms" +
-									(deviation > 0 ? " \u00B1" + df.format(deviation) + "%" : ""));
+							m_lblDelay.setText(value + " ms");
+							m_lblStdDelay.setText((deviation > 0 ? "\u00B1" + df.format(deviation) + "%" : ""));
 						}							
 					}
 					else
 					{
 						m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
+						m_lblStdSpeed.setText("");
 						m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
+						m_lblStdDelay.setText("");
 					}
 					
 					

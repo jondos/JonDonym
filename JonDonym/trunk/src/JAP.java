@@ -580,11 +580,11 @@ public class JAP
 			}
 		},new AbstractOS.AbstractURLOpener()
 		{			
-			private String m_browserCMD = buildPortableFFCommand();
+			private final String BROWSER_CMD = buildPortableFFCommand();
 			
 			public boolean openURL(URL a_url)
 			{			
-				if (a_url == null)
+				if (a_url == null || BROWSER_CMD == null)
 				{
 					return false;
 				}
@@ -630,7 +630,7 @@ public class JAP
 			
 			public String getBrowserCommand()
 			{
-				return m_browserCMD;
+				return BROWSER_CMD;
 			}
 		});		
 		
