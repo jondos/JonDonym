@@ -80,8 +80,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	private static final String SYNCH_AI_LOGIN_MIXVERSION = "00.07.20";
 	
 	private static int m_loginTimeout = DEFAULT_LOGIN_TIMEOUT;
-	private static int m_loginTimeoutFastAvailable = 
-		DEFAULT_LOGIN_TIMEOUT / FAST_LOGIN_TIMEOUT;
+	private static int m_loginTimeoutFastAvailable;
 
 	private Multiplexer m_multiplexer;
 
@@ -120,6 +119,11 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		new IMutableProxyInterface.DummyMutableProxyInterface();
 
 	private boolean m_connected;
+	
+	static 
+	{
+		resetInternalLoginTimeout();				
+	}
 
 	public AnonClient()
 	{
@@ -273,8 +277,16 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	}
 	
 	private static void resetInternalLoginTimeout()
-	{
-		m_loginTimeoutFastAvailable = m_loginTimeout / FAST_LOGIN_TIMEOUT;
+	{			
+		int maxLoginTimeoutFastAvailable = DEFAULT_LOGIN_TIMEOUT / 1000;
+		
+		m_loginTimeoutFastAvailable = 
+			Math.max(m_loginTimeout / 1000, m_loginTimeout / FAST_LOGIN_TIMEOUT);
+				
+		if (m_loginTimeoutFastAvailable > maxLoginTimeoutFastAvailable)
+		{
+			m_loginTimeoutFastAvailable = maxLoginTimeoutFastAvailable;
+		}
 	}
 	
 	private static int getInternalLoginTimeout(IServiceContainer a_serviceContainer)
