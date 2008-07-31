@@ -477,18 +477,20 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
 			
-			if(minSpeed == 0)
+			if(minSpeed == TRUST_ALWAYS)
 			{
 				return;
 			}
 			
 			// TODO: make it configurable
-			if(entry == null || entry.isXMLInvalid()) 
+			if(entry == null || entry.getXMLAverage(PerformanceEntry.SPEED) < 0) 
 			{
 				return;
 			}
 			
-			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || entry.isXMLInvalid() || entry.getXMLAverage(PerformanceEntry.SPEED) < minSpeed))
+			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || 
+					entry.getXMLAverage(PerformanceEntry.SPEED) < 0 || 
+					entry.getXMLAverage(PerformanceEntry.SPEED) < minSpeed))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_SPEED)));
 			}
@@ -514,12 +516,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 			
 			// TODO: make it configurable
-			if(entry == null || entry.isXMLInvalid())
+			if(entry == null || entry.getXMLAverage(PerformanceEntry.DELAY) < 0)
 			{
 				return;
 			}
 			
-			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || entry.isXMLInvalid() || entry.getXMLAverage(PerformanceEntry.DELAY) > maxDelay))
+			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || 
+					entry.getXMLAverage(PerformanceEntry.DELAY) < 0 || 
+					entry.getXMLAverage(PerformanceEntry.DELAY) > maxDelay))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH)));
 			}

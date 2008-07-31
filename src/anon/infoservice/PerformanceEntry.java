@@ -282,11 +282,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_currentEntries[a_attribute].getXMLStdDeviation();
 	}
 	
-	public boolean isXMLInvalid()
-	{
-		return (getXMLAverage(SPEED) == -1 || getXMLAverage(DELAY) == -1);
-	}
-	
 	public String delayToHTML(int day)
 	{
 		return toHTML(DELAY, "ms", day);
@@ -484,7 +479,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		private Hashtable m_Values = new Hashtable();
 		
-		public long m_lXMLAverageValue = 0;
+		public long m_lXMLAverageValue = -1;
 		public double m_lXMLStdDeviation = 0;
 		
 		public PerformanceAttributeCurrentEntry(int a_attribute)
@@ -504,7 +499,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_timeFrame = DEFAULT_TIMEFRAME;
 			m_attribute = a_attribute;
 			
-			m_lXMLAverageValue = XMLUtil.parseAttribute(a_node, XML_ATTR_AVERAGE, 0);
+			m_lXMLAverageValue = XMLUtil.parseAttribute(a_node, XML_ATTR_AVERAGE, -1);
 			m_lXMLStdDeviation = XMLUtil.parseAttribute(a_node, XML_ATTR_STD_DEVIATION, 0.0d);
 		}
 		
@@ -659,10 +654,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 
 	class PerformanceAttributeEntry
 	{
-		private long m_lMaxValue = 0;
-		private long m_lMinValue = 0;
-		private long m_lAverageValue = 0;
-		private double m_lStdDeviation = 0;
+		private long m_lMaxValue = -1;
+		private long m_lMinValue = -1;
+		private long m_lAverageValue = -1;
+		private double m_lStdDeviation = 0.0;
 		
 		private long m_lastUpdate = -1;
 		
