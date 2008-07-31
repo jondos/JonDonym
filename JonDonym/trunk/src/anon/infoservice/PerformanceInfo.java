@@ -171,15 +171,45 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 			return avgEntry;
 		}
 		
+		long speed = 0;
+		long delay = 0;
 		long avgSpeed = 0;
 		long avgDelay = 0;
+		int countSpeed = 0;
+		int countDelay = 0;
 		for(int j = 0; j < v.size(); j++)
 		{
-			avgSpeed += ((PerformanceEntry) v.elementAt(j)).getXMLAverage(PerformanceEntry.SPEED);
-			avgDelay += ((PerformanceEntry) v.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY);
+			speed = ((PerformanceEntry) v.elementAt(j)).getXMLAverage(PerformanceEntry.SPEED);
+			if (speed >= 0)
+			{				
+				avgSpeed += speed;
+				countSpeed++;
+			}
+			
+			delay = ((PerformanceEntry) v.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY);
+			if (delay >= 0)
+			{
+				avgDelay += delay;
+				countDelay++;
+			}
 		}
-		avgSpeed /= v.size();
-		avgDelay /= v.size();
+		if (countSpeed > 0)
+		{
+			avgSpeed /= countSpeed;
+		}
+		else
+		{
+			avgSpeed = -1;
+		}
+		
+		if (countDelay > 0)
+		{
+			avgDelay /= countDelay;
+		}
+		else
+		{
+			avgDelay = -1;
+		}
 		
 		Vector vToCheck = (Vector) v.clone();
 		Vector vResult = new Vector();
@@ -211,9 +241,13 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		
 		avgSpeed = 0;
 		avgDelay = 0;
+		countSpeed = 0;
+		countDelay = 0;
 		
 		double stdSpeed = 0;
 		double stdDelay = 0;
+		int countStdSpeed = 0;
+		int countStdDelay = 0;
 		
 		long value = 0;
 		double dvalue = 0;
@@ -221,35 +255,66 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		for(int j = 0; j < vResult.size(); j++)
 		{
 			value = ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.SPEED);
-			if(value != 0)
+			if(value >= 0)
 			{
 				avgSpeed += value;
-			}
-			
-			dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.SPEED);
-			if(dvalue != 0)
-			{
-				stdSpeed += dvalue;
-			}
+				countSpeed++;
+				
+				dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.SPEED);
+				if(dvalue >= 0)
+				{
+					stdSpeed += dvalue;
+					countStdSpeed++;
+				}
+			}						
 			
 			value = ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY);
-			if(value != 0)
+			if(value >= 0)
 			{
 				avgDelay += value;
+				countDelay++;
+				
+				dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.DELAY);
+				if(dvalue >= 0)
+				{
+					stdDelay += dvalue;
+					countStdDelay++;
+				}
 			}
-			
-			dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.DELAY);
-			if(dvalue != 0)
-			{
-				stdDelay += dvalue;
-			}
-
 		}
-		avgSpeed /= vResult.size();
-		avgDelay /= vResult.size();
+		if (countSpeed > 0)
+		{
+			avgSpeed /= countSpeed;
+			if (countStdSpeed > 0)
+			{
+				stdSpeed /= countStdSpeed;
+			}
+			else
+			{
+				stdSpeed = 0.0;
+			}
+		}
+		else
+		{
+			avgSpeed = -1;
+		}
 		
-		stdSpeed /= vResult.size();
-		stdDelay /= vResult.size();
+		if (countDelay > 0)
+		{
+			avgDelay /= countDelay;		
+			if (countStdDelay > 0)
+			{
+				stdDelay /= countStdDelay;
+			}
+			else
+			{
+				stdDelay = 0.0;
+			}			
+		}
+		else
+		{
+			avgDelay = -1;
+		}
 		
 		avgEntry.overrideXMLAverage(PerformanceEntry.SPEED, avgSpeed);
 		avgEntry.overrideXMLAverage(PerformanceEntry.DELAY, avgDelay);
@@ -302,7 +367,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 			
 			double straySpeed = (double) Math.abs(a_avgSpeed - entry.getXMLAverage(PerformanceEntry.SPEED)) / (double) a_avgSpeed;
 			double strayDelay = (double) Math.abs(a_avgDelay - entry.getXMLAverage(PerformanceEntry.DELAY)) / (double) a_avgDelay;
-			if(straySpeed > a_maxStray)
+			if(entry.getXMLAverage(PerformanceEntry.SPEED) >= 0 && straySpeed > a_maxStray)
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with speed " + entry.getAverage(PerformanceEntry.SPEED));
 				
@@ -319,7 +384,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 				continue;
 			}
 			
-			if(strayDelay > a_maxStray)
+			if(entry.getXMLAverage(PerformanceEntry.DELAY) >= 0 && strayDelay > a_maxStray)
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with delay " + entry.getAverage(PerformanceEntry.DELAY));
 				

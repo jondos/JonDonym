@@ -576,7 +576,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					if (!m_InfoServiceUpdater.isFirstUpdateDone())
 					{
-						m_InfoServiceUpdater.update();
+						m_InfoServiceUpdater.updateAsync();
 					}
 					if (!m_paymentInstanceUpdater.isFirstUpdateDone())
 					{
@@ -584,23 +584,23 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 					if (!m_MixCascadeUpdater.isFirstUpdateDone())
 					{
-						m_MixCascadeUpdater.update();
+						m_MixCascadeUpdater.updateAsync();
 					}
 					if (!m_minVersionUpdater.isFirstUpdateDone())
 					{
-						m_minVersionUpdater.update();
+						m_minVersionUpdater.updateAsync();
 					}
 					if (!m_javaVersionUpdater.isFirstUpdateDone())
 					{
-						m_javaVersionUpdater.update();
+						m_javaVersionUpdater.updateAsync();
 					}
 					if (!m_messageUpdater.isFirstUpdateDone())
 					{
-						m_messageUpdater.update();
+						m_messageUpdater.updateAsync();
 					}
 					if (!m_perfInfoUpdater.isFirstUpdateDone())
 					{
-						m_perfInfoUpdater.update();
+						m_perfInfoUpdater.updateAsync();
 					}
 				}
 

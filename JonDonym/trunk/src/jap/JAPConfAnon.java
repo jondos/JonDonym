@@ -1886,28 +1886,40 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					}
 
 					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
+					long value;
+					double deviation;
+					DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
+					df.applyPattern("#,####0.00");
+					
 					if(entry != null)
 					{
-						if(entry.isXMLInvalid())
+						value = entry.getXMLAverage(PerformanceEntry.SPEED);						
+						if (value < 0)
 						{
 							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
-							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
 						}
 						else
 						{
-							DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
-							df.applyPattern("#,####0.00");
-							long value = entry.getXMLAverage(PerformanceEntry.SPEED);
-							double deviation = (entry.getXMLStdDeviation(PerformanceEntry.SPEED) / value) * 100;
+							deviation = (entry.getXMLStdDeviation(PerformanceEntry.SPEED) / value) * 100;														
 							
+							// values greater than 100% would confuse users...
 							if(deviation > 100)
 							{
 								deviation = 100;
 							}
 							
-							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value) + " \u00B1 " + df.format(deviation) + " %");
-							
-							value = entry.getXMLAverage(PerformanceEntry.DELAY);
+							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value) + 
+									(deviation > 0 ? " \u00B1" + df.format(deviation) + "%" : ""));
+						}
+						
+													
+						value = entry.getXMLAverage(PerformanceEntry.DELAY);
+						if (value < 0)
+						{
+							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
+						}
+						else
+						{
 							deviation = (entry.getXMLStdDeviation(PerformanceEntry.DELAY) / value) * 100;
 							
 							if(deviation > 100)
@@ -1915,8 +1927,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 								deviation = 100;
 							}
 							
-							m_lblDelay.setText(value + " ms \u00B1 " + df.format(deviation) + " %");
-						}
+							m_lblDelay.setText(value + " ms" +
+									(deviation > 0 ? " \u00B1" + df.format(deviation) + "%" : ""));
+						}							
+					}
+					else
+					{
+						m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
+						m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
 					}
 					
 					
