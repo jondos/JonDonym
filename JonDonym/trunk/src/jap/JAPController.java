@@ -1276,10 +1276,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 				// load the stored statusinfos
 				Database.getInstance(StatusInfo.class).loadFromXml(
 						(Element) XMLUtil.getFirstChildByName(root, StatusInfo.XML_ELEMENT_CONTAINER_NAME));
-				
+								
 				// load stored performanceinfo
 				Database.getInstance(PerformanceInfo.class).loadFromXml(
-						(Element) XMLUtil.getFirstChildByName(root, PerformanceInfo.XML_ELEMENT_CONTAINER_NAME));
+						(Element) XMLUtil.getFirstChildByName(root, 
+								PerformanceInfo.XML_ELEMENT_CONTAINER_NAME), true);
 				
 				// load deleted messages
 				Database.getInstance(DeletedMessageIDDBEntry.class).loadFromXml(

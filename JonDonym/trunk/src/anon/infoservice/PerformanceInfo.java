@@ -2,16 +2,19 @@ package anon.infoservice;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.Enumeration;
 
+import anon.crypto.CertPath;
+import anon.crypto.JAPCertificate;
+import anon.crypto.SignatureVerifier;
+import anon.crypto.XMLSignature;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
-import anon.util.XMLParseException;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -30,7 +33,7 @@ import logging.LogType;
  * 
  * @author Christian Banse
  */
-public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncodable
+public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements IXMLEncodable
 {
 	private static final double PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES = 2.0/3.0;
 	private static final double PERFORMANCE_INFO_MAX_STRAY = 0.55;
@@ -54,6 +57,8 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	 * Stored XML data for toXmlElement()
 	 */
 	private Element m_xmlData;
+	
+	private JAPCertificate m_isCertificate;
 	
 	/**
 	 * All PerformanceEntry objects measured by the info service
@@ -90,9 +95,30 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		
 		NodeList list = a_info.getElementsByTagName("PerformanceEntry");
 		
+		
+		/* try to get the certificate from the Signature node */
+		try
+		{
+			XMLSignature signature = SignatureVerifier.getInstance().getVerifiedXml(a_info,
+				SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+			if (signature != null && signature.isVerified())
+			{
+				CertPath certPath = signature.getCertPath();
+				if (certPath != null && certPath.getFirstCertificate() != null)
+				{
+					m_isCertificate = certPath.getFirstCertificate();
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
+		}
+		
+		
 		m_id = XMLUtil.parseAttribute(a_info, XML_ATTR_ID, "");
 		
-		if(m_id == "")
+		if(!checkId())
 		{
 			throw new XMLParseException(XML_ELEMENT_NAME + ": invalid id");
 		}
@@ -106,6 +132,16 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
 		m_xmlData = a_info;
+	}
+	
+	public JAPCertificate getCertificate()
+	{
+		return m_isCertificate;
+	}
+	
+	public boolean isVerified()
+	{
+		return m_isCertificate != null;
 	}
 	
 	public String getId()

@@ -39,6 +39,7 @@ import logging.LogType;
  * @author Rolf Wendolsky
  */
 public abstract class AbstractDistributableCertifiedDatabaseEntry extends AbstractDistributableDatabaseEntry
+	implements ICertifiedDatabaseEntry
 {
 	public AbstractDistributableCertifiedDatabaseEntry(long a_expireTime)
 	{
@@ -65,7 +66,7 @@ public abstract class AbstractDistributableCertifiedDatabaseEntry extends Abstra
 			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- cert is NULL!");
 			return false;
 		}
-		return  getId().equals(new X509SubjectKeyIdentifier(
+		return  (getId() != null) && getId().equals(new X509SubjectKeyIdentifier(
 				 getCertificate().getPublicKey()).getValueWithoutColon());
 	}
 
