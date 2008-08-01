@@ -112,8 +112,8 @@ public final class JAPExternalHelpViewer extends JAPHelp
 					
 					String pathValidation = m_helpModel.helpPathValidityCheck(getFile());
 					
-					if (!pathValidation.equals(HelpFileStorageManager.HELP_VALID) &&
-						!pathValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS))
+					if (!pathValidation.equals(AbstractHelpFileStorageManager.HELP_VALID) &&
+						!pathValidation.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 					{
 						errors = new CheckError[]{
 								new CheckError(JAPMessages.getString(pathValidation), LogType.GUI)};

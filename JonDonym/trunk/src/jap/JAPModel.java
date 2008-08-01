@@ -31,7 +31,7 @@ import gui.GUIUtils;
 import gui.JAPDll;
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
-import gui.help.HelpFileStorageManager;
+import gui.help.AbstractHelpFileStorageManager;
 import gui.help.IHelpModel;
 import gui.help.LocalHelpFileStorageManager;
 import jap.forward.JAPRoutingSettings;
@@ -230,7 +230,7 @@ public final class JAPModel extends Observable implements IHelpModel
 
 	private BigInteger m_iDialogVersion=new BigInteger("-1");
 
-	private HelpFileStorageManager m_helpFileStorageManager;
+	private AbstractHelpFileStorageManager m_helpFileStorageManager;
 	
 	private JAPModel()
 	{
@@ -1300,21 +1300,11 @@ public final class JAPModel extends Observable implements IHelpModel
 			if(isHelpPathDefined())
 			{
 				m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath);
-				Locale loc = JAPMessages.getLocale();
-				String startPath = JAPConstants.HELP_EN_FOLDER;
-				
-				if(loc != null)
-				{
-					startPath = (loc.getLanguage().equalsIgnoreCase("de") ? JAPConstants.HELP_DE_FOLDER : startPath);
-				}
 				
 				try 
 				{
-					helpURL = 
-						new URL("file://"+m_helpPath+ "/" +
-								JAPConstants.HELP_FOLDER+ "/" +
-								startPath+
-								a_startDoc);
+					helpURL = new URL("file://" + m_helpPath + "/" +
+								m_helpFileStorageManager.getLocalisedHelpDir() + "/" + a_startDoc);
 				} 
 				catch (MalformedURLException e) 
 				{
@@ -1328,7 +1318,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	public URL getHelpURL()
 	{
-		return getHelpURL(JAPConstants.HELP_START);
+		return getHelpURL("index.html");
 	}
 	
 	synchronized void initHelpPath(String helpPath)
@@ -1340,8 +1330,8 @@ public final class JAPModel extends Observable implements IHelpModel
 		
 		String initPathValidity = (helpPathValidityCheck(helpPath));
 		
-		if( initPathValidity.equals(HelpFileStorageManager.HELP_VALID) || 
-			initPathValidity.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) ||
+		if( initPathValidity.equals(AbstractHelpFileStorageManager.HELP_VALID) || 
+			initPathValidity.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS) ||
 			initPathValidity.equals(NO_HELP_STORAGE_MANAGER))
 		{
 			m_helpPath = helpPath;
@@ -1382,16 +1372,14 @@ public final class JAPModel extends Observable implements IHelpModel
 				/* This is for backwards compatibility with old portable
 				 * launchers for Windows. The xml file check is disabled for this
 				 * kind of installation. 
-				 */
-				
+				 */				
 				int index;
-				// Convert this path set from outside, e.g. as portable help path
 				if ((index = hpFile.getPath().toUpperCase().indexOf((
-						JAPConstants.HELP_FOLDER + File.pathSeparator + 
-						JAPConstants.HELP_DE_FOLDER).toUpperCase())) >= 0 ||
-						(index = hpFile.getPath().indexOf((
-								JAPConstants.HELP_FOLDER + File.pathSeparator + 
-								JAPConstants.HELP_EN_FOLDER).toUpperCase())) >= 0)
+						AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "de" + 
+						File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0 ||
+						(index = hpFile.getPath().toUpperCase().indexOf((
+								AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "en" +
+								File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0)
 				{
 					if (index > 0)
 					{
@@ -1412,8 +1400,8 @@ public final class JAPModel extends Observable implements IHelpModel
 				if (hpFile != null && hpFile.isDirectory() && m_helpFileStorageManager != null)										
 				{								
 					strCheck = m_helpFileStorageManager.helpPathValidityCheck(hpFile.getPath(), true);
-					if (strCheck.equals(HelpFileStorageManager.HELP_VALID) ||
-						strCheck.equals(HelpFileStorageManager.HELP_JONDO_EXISTS))
+					if (strCheck.equals(AbstractHelpFileStorageManager.HELP_VALID) ||
+						strCheck.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 					{						
 						//deletes old help directory if it exists and create a new one
 						if (m_helpFileStorageManager.handleHelpPathChanged(
@@ -1442,6 +1430,15 @@ public final class JAPModel extends Observable implements IHelpModel
 			}
 			else
 			{
+				if (hpFile.getPath().toUpperCase().endsWith(AbstractHelpFileStorageManager.HELP_FOLDER.toUpperCase()) &&
+					hpFile.getParent() != null)
+				{					
+					File file = new File(hpFile.getParent()); 
+					if (file.isDirectory())
+					{
+						hpFile = file;
+					}
+				}
 				setHelpPath(hpFile.getPath());
 			}
 		}
@@ -1469,8 +1466,8 @@ public final class JAPModel extends Observable implements IHelpModel
 		}
 		
 		strCheck = helpPathValidityCheck(newHelpPath);
-		if (strCheck.equals(HelpFileStorageManager.HELP_VALID) ||
-			strCheck.equals(HelpFileStorageManager.HELP_JONDO_EXISTS))
+		if (strCheck.equals(AbstractHelpFileStorageManager.HELP_VALID) ||
+			strCheck.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 		{
 			String oldHelpPath = m_helpPath;
 			boolean helpPathChanged =
@@ -1535,12 +1532,12 @@ public final class JAPModel extends Observable implements IHelpModel
 	{
 		if(hpFile == null)
 		{
-			return JAPMessages.getString(HelpFileStorageManager.HELP_INVALID_NULL);
+			return JAPMessages.getString(AbstractHelpFileStorageManager.HELP_INVALID_NULL);
 		}
 		return helpPathValidityCheck(hpFile.getPath());
 	}
 	
-	public boolean isExternalHelpInstallationPossible()
+	public boolean isHelpChangeable()
 	{
 		return m_helpFileStorageManager != null &&
 			!(m_helpFileStorageManager instanceof LocalHelpFileStorageManager);
@@ -1559,7 +1556,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		/* if no storageManager is defined: don't check if installation exists */
 		boolean helpInstallationExists = m_helpFileStorageManager != null ?
 			(m_helpFileStorageManager.helpInstallationExists(m_helpPath) &&
-			helpPathValidityCheck(m_helpPath).equals(HelpFileStorageManager.HELP_JONDO_EXISTS)) : 
+			helpPathValidityCheck(m_helpPath).equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS)) : 
 				helpPathExists;
 		
 		if(helpPathExists && !helpInstallationExists)
@@ -1582,7 +1579,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		if (m_helpPath == null && m_helpFileStorageManager.helpInstallationExists(
 				AbstractOS.getInstance().getDefaultHelpPath()) &&
 				helpPathValidityCheck(AbstractOS.getInstance().getDefaultHelpPath()).equals(
-						HelpFileStorageManager.HELP_JONDO_EXISTS))
+						AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 		{
 			m_helpPath = AbstractOS.getInstance().getDefaultHelpPath();
 			helpInstallationExists = true;

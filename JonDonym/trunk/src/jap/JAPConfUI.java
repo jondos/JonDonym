@@ -70,7 +70,7 @@ import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
-import gui.help.HelpFileStorageManager;
+import gui.help.AbstractHelpFileStorageManager;
 import gui.help.JAPExternalHelpViewer;
 import gui.help.JAPHelp;
 import logging.LogHolder;
@@ -146,7 +146,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 					updateHelpPath();
 				}
 				
-				if(JAPModel.getInstance().isExternalHelpInstallationPossible() &&
+				if(JAPModel.getInstance().isHelpChangeable() &&
 					!JAPModel.getInstance().hasPortableHelp())
 				{
 					m_helpPathButton.setEnabled(true);
@@ -841,8 +841,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 					if(hpFile != null)
 					{
 						String hpFileValidation = model.helpPathValidityCheck(hpFile);
-						if(hpFileValidation.equals(HelpFileStorageManager.HELP_VALID) ||
-							hpFileValidation.equals(HelpFileStorageManager.HELP_JONDO_EXISTS) &&
+						if(hpFileValidation.equals(AbstractHelpFileStorageManager.HELP_VALID) ||
+							hpFileValidation.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS) &&
 							JAPModel.getInstance().isHelpInstalled())
 						{
 							m_helpPathField.setText(hpFile.getPath());
@@ -858,7 +858,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 				}
 			};
 		m_helpPathButton.addActionListener(helpInstallButtonActionListener);
-		if(!JAPModel.getInstance().isExternalHelpInstallationPossible() ||
+		if(!JAPModel.getInstance().isHelpChangeable() ||
 			JAPModel.getInstance().hasPortableHelp())
 		{
 			m_helpPathButton.setEnabled(false);
@@ -880,8 +880,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 		final JAPModel model = JAPModel.getInstance();
 		String strCheck = JAPModel.getInstance().helpPathValidityCheck(m_helpPathField.getText());
 		
-		if ((strCheck.equals(HelpFileStorageManager.HELP_VALID) ||
-			strCheck.equals(HelpFileStorageManager.HELP_JONDO_EXISTS)) &&
+		if ((strCheck.equals(AbstractHelpFileStorageManager.HELP_VALID) ||
+			strCheck.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS)) &&
 			(model.getHelpPath() == null || !model.getHelpPath().equals(m_helpPathField.getText())))
 		{			
 			final JAPDialog dialog = 
