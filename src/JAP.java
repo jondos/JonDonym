@@ -563,7 +563,7 @@ public class JAP
 			forwardingStateVisible = true;
 		}
 
-		
+		final String BROWSER_CMD = buildPortableFFCommand(splash);
 		AbstractOS.getInstance().init(new AbstractOS.IURLErrorNotifier()
 		{
 			public void checkNotify(URL a_url)
@@ -579,9 +579,7 @@ public class JAP
 				}
 			}
 		},new AbstractOS.AbstractURLOpener()
-		{			
-			private final String BROWSER_CMD = buildPortableFFCommand();
-			
+		{									
 			public boolean openURL(URL a_url)
 			{			
 				if (a_url == null || BROWSER_CMD == null)
@@ -833,7 +831,7 @@ public class JAP
 		return m_arstrCmdnLnArgs.containsKey(a_argument);
 	}
 	
-	public String buildPortableFFCommand()
+	public String buildPortableFFCommand(ISplashResponse a_splash)
 	{
 		String pFFExecutable = null;
 		String pFFHelpPath = null;
@@ -869,7 +867,11 @@ public class JAP
 			
 			if(pFFHelpPath != null)
 			{
-				JAPModel.getInstance().setHelpPath(new File(pFFHelpPath));
+				String messageText = a_splash.getText();
+				a_splash.setText(JAPMessages.getString(JAPController.MSG_UPDATING_HELP));
+				JAPModel.getInstance().setHelpPath(new File(pFFHelpPath), true);
+				a_splash.setText(messageText);
+				
 			}
 		}			
 		

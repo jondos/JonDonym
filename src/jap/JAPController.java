@@ -191,7 +191,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		JAPController.class.getName() + "_cascadeNotParsable";
 	public static final String MSG_PAYMENT_DAMAGED = JAPController.class.getName() + "_paymentDamaged";
 	public static final String MSG_ACCOUNT_NOT_SAVED = JAPController.class.getName() + "_accountNotSaved";
-	private static final String MSG_UPDATING_HELP = JAPController.class.getName() + "_updatingHelp";
+	public static final String MSG_UPDATING_HELP = JAPController.class.getName() + "_updatingHelp";
 
 
 	private static final String XML_ELEM_LOOK_AND_FEEL = "LookAndFeel";

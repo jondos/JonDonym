@@ -1362,6 +1362,11 @@ public final class JAPModel extends Observable implements IHelpModel
 	}
 	
 	public synchronized void setHelpPath(File hpFile)
+	{
+		setHelpPath(hpFile, false);
+	}
+	
+	public synchronized void setHelpPath(File hpFile, boolean a_bPortable)
 	{	
 		String strCheck;
 		
@@ -1374,6 +1379,11 @@ public final class JAPModel extends Observable implements IHelpModel
 			hpFile = new File(hpFile.getAbsolutePath());
 			if (hpFile.isFile())
 			{
+				/* This is for backwards compatibility with old portable
+				 * launchers for Windows. The xml file check is disabled for this
+				 * kind of installation. 
+				 */
+				
 				int index;
 				// Convert this path set from outside, e.g. as portable help path
 				if ((index = hpFile.getPath().toUpperCase().indexOf((
@@ -1409,9 +1419,11 @@ public final class JAPModel extends Observable implements IHelpModel
 						if (m_helpFileStorageManager.handleHelpPathChanged(
 								m_helpPath, hpFile.getPath(), true))
 						{
-							m_helpPath = hpFile.getPath();
-							m_bPortableHelp = true;
-							setChanged();
+							if (m_helpPath == null || !m_helpPath.equals(hpFile.getPath()))
+							{
+								m_helpPath = hpFile.getPath();
+								setChanged();
+							}							
 						}
 						else
 						{
@@ -1433,7 +1445,11 @@ public final class JAPModel extends Observable implements IHelpModel
 				setHelpPath(hpFile.getPath());
 			}
 		}
-				
+		
+		if (a_bPortable && m_helpPath != null)
+		{
+			m_bPortableHelp = true;
+		}
 		notifyObservers(CHANGED_HELP_PATH);		
 	}
 	
@@ -1539,12 +1555,6 @@ public final class JAPModel extends Observable implements IHelpModel
 	public synchronized boolean isHelpPathDefined()
 	{			
 		boolean helpPathExists = m_helpPath != null;
-		/*
-		String strDefaultPath = AbstractOS.getInstance().getDefaultHelpPath();
-		if (m_bPortableHelp)
-		{
-			strDefaultPath = m_helpPath;
-		}*/
 		
 		/* if no storageManager is defined: don't check if installation exists */
 		boolean helpInstallationExists = m_helpFileStorageManager != null ?
@@ -1555,9 +1565,18 @@ public final class JAPModel extends Observable implements IHelpModel
 		if(helpPathExists && !helpInstallationExists)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path "+m_helpPath+" configured but no valid help could be found!");
-			m_helpPath = null;
-			//m_bPortableHelp = false;
-			setChanged();
+			if (m_bPortableHelp)
+			{
+				m_bPortableHelp = false;
+				JAPModel.getInstance().setHelpPath(new File(m_helpPath), true);
+				helpInstallationExists = m_helpPath != null;
+			}
+			else
+			{
+				m_helpPath = null;
+				m_bPortableHelp = false;
+				setChanged();
+			}
 		}
 		
 		if (m_helpPath == null && m_helpFileStorageManager.helpInstallationExists(
