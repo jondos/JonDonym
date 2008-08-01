@@ -312,16 +312,7 @@ public final class JAPConstants
 	 */
 	public static final long TIME_RESTART_AFTER_SOCKET_ERROR = 1000 * 60;
 
-	/** Paysafecard: Payment confirmation timeout in minutes (older open psc payments should not be shown as usable)
-	 *  Correct value depends on the contract with the paysafecard company */
-	public final static int PAYSAFECARD_TIMEOUT = 60;
-
 	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr", "ru"}; // "zh", "ca", "es", "ru"}; //pt
-	
-	public static final String HELP_FOLDER = "help"; //+File.separator;
-	public static final String HELP_DE_FOLDER = "de/help/";
-	public static final String HELP_EN_FOLDER = "en/help/";
-	public static final String HELP_START = "index.html";
 
 	public static String[] getSupportedLanguages()
 	{

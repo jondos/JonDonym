@@ -23,6 +23,11 @@
 */
 package gui.help;
 
+import gui.JAPMessages;
+import gui.LanguageMapper;
+
+import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Observable;
 
 /**
@@ -32,7 +37,7 @@ import java.util.Observable;
  * @author Simon Pecher
  *
  */
-public interface HelpFileStorageManager 
+public abstract class AbstractHelpFileStorageManager 
 {
 	public static final String HELP_INVALID_NULL = "invalidHelpPathNull";
 	public static final String HELP_INVALID_PATH_NOT_EXISTS = "invalidHelpPathNotExists";
@@ -42,6 +47,44 @@ public interface HelpFileStorageManager
 	public static final String HELP_JONDO_EXISTS = "helpJonDoExists";
 	public static final String HELP_NESTED = "helpNested";
 	public static final String HELP_VALID = "HELP_IS_VALID";
+	
+	private Hashtable m_hashLocalisedHelpDirs = new Hashtable();	
+	public static final String HELP_FOLDER = "help";
+	
+	
+	public final String getLocalisedHelpDir()
+	{
+		synchronized (m_hashLocalisedHelpDirs)
+		{
+			if (m_hashLocalisedHelpDirs.size() == 0)
+			{
+				for (int i = 1; true; i++)
+				{
+					try
+					{
+						String langCode = JAPMessages.getString(JAPHelp.MSG_LANGUAGE_CODE + String.valueOf(i));
+						LanguageMapper lang = new LanguageMapper(langCode, new Locale(langCode, ""));
+		
+						m_hashLocalisedHelpDirs.put(lang.getISOCode(), 
+								HELP_FOLDER + "/" + lang.getISOCode() + "/" + HELP_FOLDER);
+						
+					}
+					catch (Exception e)
+					{
+						// no more languages supported
+						break;
+					}
+				}
+			}
+			
+			String localisedDir = (String)m_hashLocalisedHelpDirs.get(JAPMessages.getLocale().getLanguage());
+			if (localisedDir == null)
+			{
+				localisedDir = (String)m_hashLocalisedHelpDirs.get(new LanguageMapper("EN").getISOCode());
+			}
+			return localisedDir;
+		}
+	}
 	
 	/**
 	 * Performs the specific file storage operation to maintain a consistent file storage state
@@ -54,10 +97,10 @@ public interface HelpFileStorageManager
 	 * 			In the latter case the file storage layer must be in the same state as if 
 	 * 			there has not been a change at all.
 	 */
-	public boolean handleHelpPathChanged(String oldHelpPath, 
+	public abstract boolean handleHelpPathChanged(String oldHelpPath, 
 			String newHelpPath, boolean a_bIgnoreExistingHelpDir);
 	
-	public String helpPathValidityCheck(String absolutePath, boolean a_bIgnoreExistingHelpDir);
+	public abstract String helpPathValidityCheck(String absolutePath, boolean a_bIgnoreExistingHelpDir);
 	
 	/**
 	 * returns an observable object which allows ViewObjects to display storage processes, i.e.
@@ -65,9 +108,9 @@ public interface HelpFileStorageManager
 	 * @return an observable object from which to obtain storage process informations or null
 	 * 			if the manager has no such object associated with it.
 	 */
-	public Observable getStorageObservable();
+	public abstract Observable getStorageObservable();
 	
-	public void ensureMostRecentVersion(String helpPath);
+	public abstract void ensureMostRecentVersion(String helpPath);
 	
-	public boolean helpInstallationExists(String helpPath);
+	public abstract boolean helpInstallationExists(String helpPath);
 }

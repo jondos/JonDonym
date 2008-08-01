@@ -20,26 +20,56 @@
 	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 package gui.help;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Observable;
 
-public interface IHelpModel
+import platform.AbstractOS;
+
+public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 {
-	void setHelpPath(File hpFile);
+	private final Observable DUMMY = new Observable();
+
+	public void ensureMostRecentVersion(String helpPath)
+	{
+		// do nothing
+	}
+
+	public Observable getStorageObservable()
+	{
+		return DUMMY;
+	}
+
+	public boolean handleHelpPathChanged(String oldHelpPath, 
+			String newHelpPath, boolean a_bIgnoreExistingHelpDir)
+	{
+		if (newHelpPath != null && newHelpPath.equals(
+				AbstractOS.getInstance().getDefaultHelpPath()) &&
+				(oldHelpPath == null || !oldHelpPath.equals(newHelpPath)))
+		{
+			return true;
+		}
 	
-	boolean isHelpPathDefined();
-	
-	String getHelpPath();
-	
-	Observable getHelpFileStorageObservable();
-	
-	boolean isHelpChangeable();
-	
-	String helpPathValidityCheck(File a_file);
-	
-	URL getHelpURL(String a_helpFile);
+		return false;
+	}
+
+	public boolean helpInstallationExists(String helpPath)
+	{
+		if (helpPath == null || !helpPath.equals(AbstractOS.getInstance().getDefaultHelpPath()))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public String helpPathValidityCheck(String absolutePath, boolean a_bIgnoreExistingHelpDir)
+	{	
+		if (absolutePath == null || 
+				!absolutePath.equals(AbstractOS.getInstance().getDefaultHelpPath()))
+		{
+			return AbstractHelpFileStorageManager.HELP_INVALID_NOWRITE;
+		}
+		return AbstractHelpFileStorageManager.HELP_JONDO_EXISTS;
+	}
 }

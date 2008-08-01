@@ -55,8 +55,7 @@ public abstract class JAPHelp
 	public static final String MSG_HELP_BUTTON = JAPHelp.class.getName() + ("_helpButton");
 	public static final String MSG_HELP_MENU_ITEM = JAPHelp.class.getName() + ("_helpMenuItem");
 	public static final String MSG_CLOSE_BUTTON = JAPHelp.class.getName() + ("_closeButton");
-	public static final String MSG_HELP_WINDOW = JAPHelp.class.getName() + ("_helpWindow");
-	public static final String MSG_HELP_PATH = JAPHelp.class.getName() + ("_helpPath");
+	public static final String MSG_HELP_WINDOW = JAPHelp.class.getName() + ("_helpWindow");	
 	public static final String MSG_LANGUAGE_CODE = JAPHelp.class.getName() + ("_languageCode");
 	public static final String MSG_ERROR_EXT_URL = JAPHelp.class.getName() + ("_errorExtURL");
 
@@ -65,7 +64,6 @@ public abstract class JAPHelp
 	public static final String IMG_PREVIOUS = JAPHelp.class.getName() + ("_previous.gif");
 	public static final String IMG_NEXT = JAPHelp.class.getName() + ("_next.gif");
 
-	
 	private IHelpContext m_helpContext;
 
 	protected static JAPHelp ms_theJAPHelp = null;
@@ -202,7 +200,7 @@ public abstract class JAPHelp
 	{
 		private static JAPHelp createJAPhelp(Frame a_parent, IHelpModel a_helpModel)
 		{
-			if(a_helpModel != null && a_helpModel.isExternalHelpInstallationPossible())
+			if(a_helpModel != null)
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Creating external help viewer.");
 				return new JAPExternalHelpViewer(a_parent, a_helpModel);

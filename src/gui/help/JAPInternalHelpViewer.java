@@ -157,10 +157,10 @@ public class JAPInternalHelpViewer extends JAPDialog
 				LanguageMapper lang = new LanguageMapper(langCode, new Locale(langCode, ""));
 				m_comBoxLanguage.addItem(lang);
 
-				if ( (m_helpPath.equals(" ") && m_language.getISOCode().length() == 0) ||
+				if ((m_helpPath.equals(" ") && m_language.getISOCode().length() == 0) ||
 					lang.getISOCode().equals(JAPMessages.getLocale().getLanguage()))
 				{
-					m_helpPath = getHelpPath(i);
+					m_helpPath = AbstractHelpFileStorageManager.HELP_FOLDER + "/";
 					m_language = lang;
 					m_comBoxLanguage.setSelectedIndex(i - 1);
 				}
@@ -284,7 +284,7 @@ public class JAPInternalHelpViewer extends JAPDialog
 		{
 			if (e.getSource() == m_comBoxLanguage && !m_initializing)
 			{
-				m_helpPath = getHelpPath(m_comBoxLanguage.getSelectedIndex() + 1);
+				m_helpPath = AbstractHelpFileStorageManager.HELP_FOLDER + "/";
 				m_language = new LanguageMapper(JAPMessages.getString(JAPHelp.MSG_LANGUAGE_CODE +
 					String.valueOf(m_comBoxLanguage.getSelectedIndex() + 1)));
 				m_htmlpaneTheHelpPane.loadContext(m_helpPath, m_delegator.getHelpContext().getHelpContext(), m_language);
@@ -651,19 +651,6 @@ public class JAPInternalHelpViewer extends JAPDialog
 				}
 			}
 		}
-	}
-
-	private static String getHelpPath(int a_languageIndex)
-	{
-		String strMessage = JAPHelp.MSG_HELP_PATH + String.valueOf(a_languageIndex);
-		String strHelpPath = JAPMessages.getString(strMessage);
-
-		if (strHelpPath.equals(strMessage) || strHelpPath.trim().length() == 0)
-		{
-			return JAPMessages.getString(JAPHelp.MSG_HELP_PATH);
-		}
-
-		return strHelpPath;
 	}
 	
 	/**
