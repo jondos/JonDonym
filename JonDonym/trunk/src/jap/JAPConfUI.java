@@ -151,6 +151,10 @@ final class JAPConfUI extends AbstractJAPConfModule
 				{
 					m_helpPathButton.setEnabled(true);
 				}
+				else
+				{
+					m_helpPathButton.setEnabled(false);
+				}
 			}
 		};
 		JAPModel.getInstance().addObserver(m_modelObserver);
