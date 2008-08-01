@@ -225,6 +225,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	//private Icon[] meterIcons;
 	public JAPConf m_dlgConfig;
 	private Object LOCK_CONFIG = new Object();
+	private boolean m_bConfigActive = false;
 	private JAPViewIconified m_ViewIconified;
 	private Object SYNC_ICONIFIED_VIEW = new Object();
 	private boolean m_bIsIconified;
@@ -1341,7 +1342,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 		//new GUIUtils.WindowDocker(this);
 
-
+		
 		new Thread(new Runnable()
 		{
 			public void run()
@@ -2565,22 +2566,35 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 	}
 
-	public void showConfigDialog(String card, Object a_value)
+	public void showConfigDialog(final String card, final Object a_value)
 	{
-		synchronized (LOCK_CONFIG)
+		if (m_bConfigActive)
 		{
-			if (m_dlgConfig == null)
-			{
-				Cursor c = getCursor();
-				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				m_dlgConfig = new JAPConf(this, m_bWithPayment);
-				m_dlgConfig.addComponentListener(m_configMovedAdapter);
-				setCursor(c);
-			}
-			m_dlgConfig.updateValues();
-			m_dlgConfig.selectCard(card, a_value);
-			m_dlgConfig.setVisible(true);
+			return;
 		}
+		m_bConfigActive = true;
+		
+		new Thread(new Runnable()
+		{
+			public void run()
+			{				
+				synchronized (LOCK_CONFIG)
+				{
+					if (m_dlgConfig == null)
+					{
+						Cursor c = getCursor();
+						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
+						m_dlgConfig.addComponentListener(m_configMovedAdapter);
+						setCursor(c);
+					}
+					m_dlgConfig.updateValues();
+					m_dlgConfig.selectCard(card, a_value);
+					m_dlgConfig.setVisible(true);
+					m_bConfigActive = false;
+				}				
+			}
+		}).start();		
 	}
 	
 	public Component getCurrentView()
