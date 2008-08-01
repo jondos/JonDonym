@@ -30,7 +30,17 @@ import platform.AbstractOS;
 public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 {
 	private final Observable DUMMY = new Observable();
+	private String m_applicationName;
 
+	public LocalHelpFileStorageManager(String a_applicationName)
+	{
+		if (a_applicationName == null)
+		{
+			throw new IllegalArgumentException("Application name is null!");
+		}
+		m_applicationName = a_applicationName;
+	}
+	
 	public void ensureMostRecentVersion(String helpPath)
 	{
 		// do nothing
@@ -45,7 +55,7 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 			String newHelpPath, boolean a_bIgnoreExistingHelpDir)
 	{
 		if (newHelpPath != null && newHelpPath.equals(
-				AbstractOS.getInstance().getDefaultHelpPath()) &&
+				AbstractOS.getInstance().getDefaultHelpPath(m_applicationName)) &&
 				(oldHelpPath == null || !oldHelpPath.equals(newHelpPath)))
 		{
 			return true;
@@ -56,7 +66,8 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 
 	public boolean helpInstallationExists(String helpPath)
 	{
-		if (helpPath == null || !helpPath.equals(AbstractOS.getInstance().getDefaultHelpPath()))
+		if (helpPath == null || !helpPath.equals(
+				AbstractOS.getInstance().getDefaultHelpPath(m_applicationName)))
 		{
 			return false;
 		}
@@ -66,7 +77,8 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 	public String helpPathValidityCheck(String absolutePath, boolean a_bIgnoreExistingHelpDir)
 	{	
 		if (absolutePath == null || 
-				!absolutePath.equals(AbstractOS.getInstance().getDefaultHelpPath()))
+				!absolutePath.equals(
+						AbstractOS.getInstance().getDefaultHelpPath(m_applicationName)))
 		{
 			return AbstractHelpFileStorageManager.HELP_INVALID_NOWRITE;
 		}

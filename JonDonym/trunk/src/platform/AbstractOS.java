@@ -335,7 +335,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	/**
 	 * Implementations must return a valid path to the config file.
 	 */
-	public abstract String getConfigPath();
+	public abstract String getConfigPath(String a_applicationName);
 
 	protected abstract boolean openLink(String a_link);
 
@@ -356,7 +356,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	 * @return the path to the folder which contains the Jarfile or the users working directory 
 	 * 			if JonDo is not executed from a Jar file
 	 */
-	public String getDefaultHelpPath()
+	public String getDefaultHelpPath(String a_applicationName)
 	{
 		File classParentFile = ClassUtil.getClassDirectory(this.getClass());
 		if(classParentFile != null && classParentFile.getPath().endsWith(".jar"))

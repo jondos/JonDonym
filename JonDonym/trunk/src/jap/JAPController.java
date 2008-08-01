@@ -904,8 +904,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				/* no config file was specified on the command line and the default config files don't
 				 * exist -> store the configuration in the OS-specific directory
 				 */
-				JAPModel.getInstance().setConfigFile(AbstractOS.getInstance().getConfigPath() +
-						JAPConstants.XMLCONFFN);
+				JAPModel.getInstance().setConfigFile(AbstractOS.getInstance().getConfigPath(
+						JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN);
 			}
 		}
 		Document doc = null;
@@ -1938,8 +1938,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 		if (!success)
 		{
 			/* no config file at any position->use OS-specific path for storing a new one*/
-			m_Model.setConfigFile(AbstractOS.getInstance().getConfigPath() +
-												 JAPConstants.XMLCONFFN);
+			m_Model.setConfigFile(AbstractOS.getInstance().getConfigPath(
+					JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN);
 
 			/* As this is the first JAP start, show the config assistant */
 			m_bShowConfigAssistant = true;
@@ -2040,7 +2040,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 */
 	private boolean loadConfigFileOSdependent()
 	{
-		String japConfFile = AbstractOS.getInstance().getConfigPath() + JAPConstants.XMLCONFFN;
+		String japConfFile = AbstractOS.getInstance().getConfigPath(
+				JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN;
 		LogHolder.log(LogLevel.INFO, LogType.MISC,
 					  "Trying to load configuration from: " + japConfFile);
 		try
