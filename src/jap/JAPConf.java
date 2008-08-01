@@ -690,6 +690,13 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 
 	private void onOkPressed()
 	{
+		/*
+		System.out.println(m_moduleSystem.getConfigurationTree().getComponentCount());
+		System.out.println(m_moduleSystem.getConfigurationTreeRootNode().getChildCount());		
+		m_moduleSystem.getConfigurationTree().repaint();*/
+		
+		
+		
 		// Misc settings
 		int[] availableLogTypes = LogType.getAvailableLogTypes();
 		int logType = LogType.NUL;

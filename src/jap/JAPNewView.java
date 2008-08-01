@@ -1342,21 +1342,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 		//new GUIUtils.WindowDocker(this);
 
-		
-		new Thread(new Runnable()
+		synchronized (LOCK_CONFIG)
 		{
-			public void run()
+			if (m_dlgConfig == null)
 			{
-				synchronized (LOCK_CONFIG)
-				{
-					if (m_dlgConfig == null)
-					{
-						m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
-						m_dlgConfig.addComponentListener(m_configMovedAdapter);
-					}
-				}
+				m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
+				m_dlgConfig.addComponentListener(m_configMovedAdapter);
 			}
-		}).start();
+		}
 	}
 
 	private FlippingPanel buildForwarderPanel()
@@ -2574,27 +2567,26 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 		m_bConfigActive = true;
 		
-		new Thread(new Runnable()
+		synchronized (LOCK_CONFIG)
 		{
-			public void run()
-			{				
-				synchronized (LOCK_CONFIG)
-				{
-					if (m_dlgConfig == null)
-					{
-						Cursor c = getCursor();
-						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
-						m_dlgConfig.addComponentListener(m_configMovedAdapter);
-						setCursor(c);
-					}
-					m_dlgConfig.updateValues();
-					m_dlgConfig.selectCard(card, a_value);
-					m_dlgConfig.setVisible(true);
-					m_bConfigActive = false;
-				}				
+			if (!m_bConfigActive)
+			{
+				return;
 			}
-		}).start();		
+			
+			if (m_dlgConfig == null)
+			{
+				Cursor c = getCursor();
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
+				m_dlgConfig.addComponentListener(m_configMovedAdapter);
+				setCursor(c);
+			}
+			m_dlgConfig.updateValues();
+			m_dlgConfig.selectCard(card, a_value);
+			m_dlgConfig.setVisible(true);
+			m_bConfigActive = false;
+		}
 	}
 	
 	public Component getCurrentView()
