@@ -34,14 +34,11 @@ import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Hashtable;
-import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.StringTokenizer;
 import java.net.URL;
 import java.lang.reflect.*;
-import java.io.*;
-import java.net.*;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -437,7 +434,7 @@ public final class ClassUtil
 			if(classParentFile.getPath().endsWith(".jar"))
 				try
 				{
-					return new JarFile(classParentFile);
+					return new ZipFile(classParentFile);
 				} 
 				catch (IOException ioe)
 				{

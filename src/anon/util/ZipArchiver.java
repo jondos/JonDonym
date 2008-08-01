@@ -115,11 +115,11 @@ public class ZipArchiver extends Observable
 								break;		
 							}
 						}
-						matchedDirEntries.add(index, entryName);
+						matchedDirEntries.insertElementAt(entryName, index);
 					}
 					else
 					{
-						matchedFileEntries.add(entry);
+						matchedFileEntries.addElement(entry);
 					}
 				}
 			}
@@ -148,7 +148,7 @@ public class ZipArchiver extends Observable
 					}
 					else
 					{
-						extractedFiles.add(dirName);
+						extractedFiles.addElement(dirName);
 					}
 				}
 			}
@@ -162,7 +162,7 @@ public class ZipArchiver extends Observable
 				File destFile = new File(dest+File.separator+zEntry.getName());
 				InputStream zEntryInputStream = m_archive.getInputStream(zEntry);
 				RecursiveCopyTool.copySingleFile(zEntryInputStream, destFile);
-				extractedFiles.add(zEntry.getName());
+				extractedFiles.addElement(zEntry.getName());
 				sizeOfCopied += zEntry.getSize();
 				notifyAboutChangesInterruptable(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ONGOING);
 				

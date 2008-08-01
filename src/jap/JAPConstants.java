@@ -28,7 +28,6 @@
 package jap;
 
 import java.awt.Font;
-import java.io.File;
 
 import anon.tor.Circuit;
 import anon.tor.Tor;
@@ -142,7 +141,8 @@ public final class JAPConstants
 	public static final String DOWNLOADFN = "install.gif";
 	static final String IICON16FN = "icon16.gif";
 	static final String ICONFN = "icon.gif";
-	
+
+
 	//static final String   CONFIGICONFN                 = "icoc.gif";
 	static final String ENLARGEYICONFN = "enlarge.gif";
 	static final String METERICONFN = "icom.gif";

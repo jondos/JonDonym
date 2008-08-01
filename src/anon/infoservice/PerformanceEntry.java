@@ -2,6 +2,7 @@ package anon.infoservice;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Calendar;
@@ -84,7 +85,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + XML_ELEMENT_CURRENT_HOURLY_DATA);
 		}
 		
-		m_current.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTime(new Date(System.currentTimeMillis()));
 		
 		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[DELAY]);
 		if(elemDelay == null)
@@ -135,7 +136,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		PerformanceAttributeEntry entry = null;
 		
 		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(a_timestamp);
+		cal.setTime(new Date(a_timestamp));
 		
 		int day = cal.get(Calendar.DAY_OF_WEEK);
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
@@ -190,7 +191,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			
 			Calendar cal = Calendar.getInstance();
-			cal.setTimeInMillis(timestamp.longValue());
+			cal.setTime(new Date(timestamp.longValue()));
 			
 			int day = cal.get(Calendar.DAY_OF_WEEK);
 			int hour = cal.get(Calendar.HOUR_OF_DAY);
@@ -241,7 +242,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public PerformanceAttributeEntry getCurrentSpeedEntry()
 	{
-		m_current.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTime(new Date(System.currentTimeMillis()));
 		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
 		
@@ -250,7 +251,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public PerformanceAttributeEntry getCurrentDelayEntry()
 	{
-		m_current.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTime(new Date(System.currentTimeMillis()));
 		int hour = m_current.get(Calendar.HOUR_OF_DAY);
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
 		
@@ -327,7 +328,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				(cascade != null ? cascade.getName() : "") +
 				"<h2>" + m_strCascadeId + "</h2>";
 		
-		m_current.setTimeInMillis(System.currentTimeMillis());
+		m_current.setTime(new Date(System.currentTimeMillis()));
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
 		
 		Calendar cal = Calendar.getInstance();
@@ -372,7 +373,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			PerformanceAttributeEntry entry = m_entries[a_attribute][a_selectedDay][hour];
 			
 			Calendar calLastTest = Calendar.getInstance();
-			calLastTest.setTimeInMillis(m_lastTestTime);
+			calLastTest.setTime(new Date(m_lastTestTime));
 			
 			if(entry == null || System.currentTimeMillis() - dayTimestamp > 7 * 24 * 60 * 60 * 1000 )
 			{
@@ -755,7 +756,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public long getDayTimestamp()
 		{
 			Calendar cal = Calendar.getInstance();
-			cal.setTimeInMillis(m_lastUpdate);
+			cal.setTime(new Date(m_lastUpdate));
 			
 			return m_lastUpdate - cal.get(Calendar.HOUR_OF_DAY) * 60 * 60 * 1000 -
 				cal.get(Calendar.MINUTE) * 60 * 1000 - cal.get(Calendar.SECOND) * 1000 -

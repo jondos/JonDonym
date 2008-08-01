@@ -1393,8 +1393,15 @@ public final class JAPModel extends Observable implements IHelpModel
 				else
 				{
 //					get the parent directory as help path
-
-					hpFile = hpFile.getParentFile();	
+					String tmp = hpFile.getParent();
+					if (tmp != null)
+					{
+						hpFile = new File(tmp);
+					}
+					else
+					{
+						hpFile = null;
+					}
 				}			
 				
 				if (hpFile != null && hpFile.isDirectory() && m_helpFileStorageManager != null)										

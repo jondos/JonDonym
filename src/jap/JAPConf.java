@@ -220,7 +220,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 			//m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfTrust(), ANON_TRUST_TAB);
 		}
 		
-		JAPExtension.addOptOut(m_moduleSystem);
+		//JAPExtension.addOptOut(m_moduleSystem);
 
 		m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeAnon.getPath()));
 
@@ -664,7 +664,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		setVisible(false);
 	}
 
-	/** Checks if all Input in all Files make sense. Displays InfoBoxes about what is wrong.
+	/** Checks if all input in all files make sense. Displays InfoBoxes about what is wrong.
 	 * @return true if all is ok
 	 *					false otherwise
 	 */
