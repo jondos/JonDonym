@@ -268,7 +268,8 @@ public final class JAPModel extends Observable implements IHelpModel
 		if (ClassUtil.getJarFile() == null)
 		{
 //			build environment; use the browser to open the local help files
-			m_helpFileStorageManager =	new LocalHelpFileStorageManager();
+			m_helpFileStorageManager =	
+				new LocalHelpFileStorageManager(JAPConstants.APPLICATION_NAME);
 		}
 		else
 		{			
@@ -1288,7 +1289,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	public synchronized String getHelpPath()
 	{
 		return m_helpPath != null ?
-				m_helpPath : AbstractOS.getInstance().getDefaultHelpPath();
+				m_helpPath : AbstractOS.getInstance().getDefaultHelpPath(
+						JAPConstants.APPLICATION_NAME);
 		
 	}
 	
@@ -1584,11 +1586,11 @@ public final class JAPModel extends Observable implements IHelpModel
 		}
 		
 		if (m_helpPath == null && m_helpFileStorageManager.helpInstallationExists(
-				AbstractOS.getInstance().getDefaultHelpPath()) &&
-				helpPathValidityCheck(AbstractOS.getInstance().getDefaultHelpPath()).equals(
+				AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME)) &&
+				helpPathValidityCheck(AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME)).equals(
 						AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 		{
-			m_helpPath = AbstractOS.getInstance().getDefaultHelpPath();
+			m_helpPath = AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME);
 			helpInstallationExists = true;
 			setChanged();
 		}

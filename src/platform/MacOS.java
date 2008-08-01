@@ -89,7 +89,7 @@ public class MacOS extends AbstractOS
 		return false;
 	}
 
-	public String getConfigPath()
+	public String getConfigPath(String a_applicationName)
 	{
 		//Return path in users's home/Library/Preferences
 		if (System.getProperty("os.name").equalsIgnoreCase(OS_NAME))

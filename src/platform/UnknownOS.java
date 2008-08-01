@@ -47,7 +47,7 @@ public class UnknownOS extends AbstractOS
 		return false;
 	}
 
-	public String getConfigPath()
+	public String getConfigPath(String a_applicationName)
 	{
 		return System.getProperty("user.home", "") + "/";
 	}

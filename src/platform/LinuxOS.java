@@ -103,7 +103,7 @@ public class LinuxOS extends AbstractOS
 		return false;
 	}
 
-	public String getConfigPath()
+	public String getConfigPath(String a_applicationName)
 	{
 		//Return path in user's home directory with hidden file (preceded by ".")
 		return System.getProperty("user.home", "") + "/.";
