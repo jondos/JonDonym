@@ -492,10 +492,12 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		String htmlTableLine = "<TR><TD CLASS=\"name\">";
 		MixCascade ownMixCascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(getId());
 		PerformanceEntry perfEntry = null;
+		int maxUsers = 0;
 		if (ownMixCascade != null)
 		{
 			htmlTableLine = htmlTableLine + ownMixCascade.getName();
 			perfEntry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(getId());
+			maxUsers = ownMixCascade.getMaxUsers();
 		}
 		/* generate a String, which describes the traffic situation */
 		String trafficString = " (n/a)";
@@ -513,7 +515,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		}
 		htmlTableLine = htmlTableLine + "</TD><TD CLASS=\"name\">" + getId() +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\"><a href=\"/values/users/" + getId() + "\">" + 
-			Integer.toString(getNrOfActiveUsers()) + (ownMixCascade.getMaxUsers() > 0 ? " / " + ownMixCascade.getMaxUsers() : "") +
+			Integer.toString(getNrOfActiveUsers()) + (maxUsers > 0 ? " / " + maxUsers : "") +
 			//"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + Integer.toString(getCurrentRisk()) +
 			"</a></TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
 			trafficString +

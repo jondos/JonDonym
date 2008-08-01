@@ -171,8 +171,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_OBSERVABLE_EXPLAIN = JAPNewView.class.getName() + "_observableExplain";
 	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";	
 
-	//private static final String MSG_STD_HELP_PATH_INSTALLATION =  + "_stdHelpPathInstallation";
-	
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
 	private static final String MSG_LBL_HTTP_DATA =
@@ -223,7 +221,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	JLabel m_buttonDeleteMessage;
 
 	//private Icon[] meterIcons;
-	public JAPConf m_dlgConfig;
+	private JAPConf m_dlgConfig;
 	private Object LOCK_CONFIG = new Object();
 	private boolean m_bConfigActive = false;
 	private JAPViewIconified m_ViewIconified;

@@ -58,7 +58,8 @@ public final class JAPExternalHelpViewer extends JAPHelp
 	private static final String MSG_HELP_INSTALL_SUCCESS = 
 		JAPExternalHelpViewer.class.getName() + "_helpInstallSucceded";	
 
-	
+	private Object SYNC_INSTALL = new Object();
+	private boolean m_bInstallationDialogShown = false;
 	
 	private JAPHelp m_alternativeHelp = null;
 	private IHelpModel m_helpModel;
@@ -95,88 +96,30 @@ public final class JAPExternalHelpViewer extends JAPHelp
 				return;
 			}
 			
-			final JAPDialog dialog = 
-				new JAPDialog(container, JAPMessages.getString(MSG_HELP_INSTALL));
-			final FileChooserContentPane fileChooser = 
-				new FileChooserContentPane(dialog, JAPMessages.getString(MSG_HELP_PATH_CHOICE),
-						m_helpModel.getHelpPath(), JFileChooser.DIRECTORIES_ONLY)
+			if (m_bInstallationDialogShown)
 			{
-				public CheckError[] checkYesOK()
-				{
-					CheckError[] errors = super.checkYesOK();
-					
-					if (errors != null && errors.length > 0)
-					{
-						return errors;
-					}
-					
-					String pathValidation = m_helpModel.helpPathValidityCheck(getFile());
-					
-					if (!pathValidation.equals(AbstractHelpFileStorageManager.HELP_VALID) &&
-						!pathValidation.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
-					{
-						errors = new CheckError[]{
-								new CheckError(JAPMessages.getString(pathValidation), LogType.GUI)};
-					}
-					
-					return errors;
-				}
-				
-				public boolean isSkippedAsPreviousContentPane()
-				{
-					return true;
-				}
-			};					
-				
-			Runnable run = new Runnable()
-			{
-				public void run()
-				{
-//					When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
-					m_helpModel.setHelpPath(fileChooser.getFile());
-				}
-			};
-						
-			final WorkerContentPane workerPane = 
-				new WorkerContentPane(dialog, JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS),
-						fileChooser, run, m_helpModel.getHelpFileStorageObservable())
-			{
-				public boolean isSkippedAsNextContentPane()
-				{
-					return m_helpModel.isHelpPathDefined() && 
-						fileChooser.getFile().getPath().equals(m_helpModel.getHelpPath());
-				}
-			};
-			//workerPane.setInterruptThreadSafe(true);
-						
-			SimpleWizardContentPane finish = 
-				new SimpleWizardContentPane(dialog, 
-						JAPMessages.getString(MSG_HELP_INSTALL_SUCCESS), workerPane)
-			{
-				public CheckError[] checkUpdate()
-				{
-					if (workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
-					{					
-						dialog.setTitle(JAPMessages.getString(JAPDialog.MSG_ERROR_UNKNOWN));
-						setText("<font color='red'>" + 
-								JAPMessages.getString(MSG_HELP_INSTALL_FAILED) + "</font>");
-					}
-					return null;
-				}
-			};
-			finish.getButtonCancel().setVisible(false);
-			
-			fileChooser.updateDialogOptimalSized();
-			dialog.setResizable(false);
-			dialog.setVisible(true);		
-			
-			if(workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
-			{
-				LogHolder.log(LogLevel.ERR, LogType.GUI, 
-						"Cannot show help externally: Help installation failed");
-				m_alternativeHelp.setContext(getHelpContext());
-				m_alternativeHelp.setVisible(a_bVisible);
+				LogHolder.log(LogLevel.WARNING, LogType.GUI, 
+						"Help installation dialog is already being shown. " +
+						"Cannot display help files!");
 				return;
+			}
+			
+			synchronized (SYNC_INSTALL)
+			{
+				m_bInstallationDialogShown = true;		
+				
+				if (!m_helpModel.isHelpPathDefined() && !showInstallDialog(container))
+				{			
+					m_bInstallationDialogShown = false;
+					
+					LogHolder.log(LogLevel.ERR, LogType.GUI, 
+					"Cannot show help externally: Help installation failed");
+					m_alternativeHelp.setContext(getHelpContext());
+					m_alternativeHelp.setVisible(a_bVisible);
+					return;
+				}
+				
+				m_bInstallationDialogShown = false;	
 			}
 		}		
 		
@@ -186,6 +129,90 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			AbstractOS.getInstance().openURL(helpURL);	
 		}
 	}	
+	
+	private boolean showInstallDialog(Container a_container)
+	{
+		final JAPDialog dialog = 
+			new JAPDialog(a_container, JAPMessages.getString(MSG_HELP_INSTALL));
+		final FileChooserContentPane fileChooser = 
+			new FileChooserContentPane(dialog, JAPMessages.getString(MSG_HELP_PATH_CHOICE),
+					m_helpModel.getHelpPath(), JFileChooser.DIRECTORIES_ONLY)
+		{
+			public CheckError[] checkYesOK()
+			{
+				CheckError[] errors = super.checkYesOK();
+				
+				if (errors != null && errors.length > 0)
+				{
+					return errors;
+				}
+				
+				String pathValidation = m_helpModel.helpPathValidityCheck(getFile());
+				
+				if (!pathValidation.equals(AbstractHelpFileStorageManager.HELP_VALID) &&
+					!pathValidation.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
+				{
+					errors = new CheckError[]{
+							new CheckError(JAPMessages.getString(pathValidation), LogType.GUI)};
+				}
+				
+				return errors;
+			}
+			
+			public boolean isSkippedAsPreviousContentPane()
+			{
+				return true;
+			}
+		};					
+			
+		Runnable run = new Runnable()
+		{
+			public void run()
+			{
+//					When we set the path: the file storage manager of the JAPModel does the rest (if the path is valid) */
+				m_helpModel.setHelpPath(fileChooser.getFile());
+			}
+		};
+					
+		final WorkerContentPane workerPane = 
+			new WorkerContentPane(dialog, JAPMessages.getString(MSG_HELP_INSTALL_PROGRESS),
+					fileChooser, run, m_helpModel.getHelpFileStorageObservable())
+		{
+			public boolean isSkippedAsNextContentPane()
+			{
+				return m_helpModel.isHelpPathDefined() && 
+					fileChooser.getFile().getPath().equals(m_helpModel.getHelpPath());
+			}
+		};
+		//workerPane.setInterruptThreadSafe(true);
+					
+		SimpleWizardContentPane finish = 
+			new SimpleWizardContentPane(dialog, 
+					JAPMessages.getString(MSG_HELP_INSTALL_SUCCESS), workerPane)
+		{
+			public CheckError[] checkUpdate()
+			{
+				if (workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
+				{					
+					dialog.setTitle(JAPMessages.getString(JAPDialog.MSG_ERROR_UNKNOWN));
+					setText("<font color='red'>" + 
+							JAPMessages.getString(MSG_HELP_INSTALL_FAILED) + "</font>");
+				}
+				return null;
+			}
+		};
+		finish.getButtonCancel().setVisible(false);
+		
+		fileChooser.updateDialogOptimalSized();
+		dialog.setResizable(false);
+		dialog.setVisible(true);		
+		
+		if(workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
+		{			
+			return false;
+		}
+		return true;
+	}
 
 	protected JAPDialog getOwnDialog()
 	{

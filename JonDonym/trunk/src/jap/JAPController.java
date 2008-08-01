@@ -1837,14 +1837,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 								  "Error loading Mixminion configuration.", ex);
 				}
 
-				try
-				{
-					JAPExtension.loadDialogFromConfig(root);
-				}
-				catch(Exception e)
-				{
 				
-				}
+				//JAPExtension.loadDialogFromConfig(root);
+			
 				
 				/* read the settings of the JAP forwarding system */
 				Element japForwardingSettingsNode = (Element) (XMLUtil.getFirstChildByName(root,
@@ -2999,7 +2994,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to start AN.ON service...");
 					}
-					JAPExtension.doIt();
+					//JAPExtension.doIt();
 					ret = m_proxyAnon.start(cascadeContainer);
 
 

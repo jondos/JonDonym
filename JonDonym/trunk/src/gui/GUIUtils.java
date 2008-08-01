@@ -395,7 +395,7 @@ public final class GUIUtils
 			if (img == null || (img.getImageLoadStatus() & statusBits) != 0)
 			{
 				LogHolder.log(LogLevel.INFO, LogType.GUI,
-							  "Could not load requested image '" + a_strRelativeImagePath + "'");
+							  "Could not load requested image '" + a_strRelativeImagePath + "'!");
 			}
 		}
 

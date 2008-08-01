@@ -484,29 +484,6 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		return m_extensions;
 	}
 
-	/**
-	 * Determine this certificates SubjectKeyIdentifier from
-	 * the X509Extensions and return its string representation.
-	 * @return this certificate's SubjectKeyIdentifier as a string
-	 */
-	public String getSubjectKeyIdentifier()
-	{
-		// FIXME: Do this only once and store the SKI as a member of this class?
-		// Get the extensions and determine the identifier
-		X509Extensions extensions = this.getExtensions();
-		AbstractX509Extension ski = extensions.getExtension(X509SubjectKeyIdentifier.IDENTIFIER);
-		// Return it as a string
-		if (ski != null && ski instanceof X509SubjectKeyIdentifier)
-		{
-			return ((X509SubjectKeyIdentifier)ski).getValue();
-		} 
-		else
-		{
-			// TODO: Rather throw an exception
-			return null;	
-		}
-	}
-	
 	public BigInteger getSerialNumber()
 	{
 		return m_bcCertificate.getSerialNumber().getPositiveValue();

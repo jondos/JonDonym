@@ -156,8 +156,8 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 					if(!anotherFileWithSameName.exists())
 					{
 						try
-						{
-							if (anotherFileWithSameName.createNewFile())
+						{							
+							if (anotherFileWithSameName.mkdir())
 							{
 								anotherFileWithSameName.delete();
 							}
@@ -166,7 +166,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 								return HELP_INVALID_NOWRITE;
 							}
 						}
-						catch (IOException a_e)
+						catch (SecurityException a_e)
 						{
 							return HELP_INVALID_NOWRITE;
 						}
