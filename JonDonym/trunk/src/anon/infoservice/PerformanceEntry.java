@@ -53,7 +53,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public static final String[] ATTRIBUTES = new String[]{ "Speed", "Delay", "Users" };
 	
-	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
+	private static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
 	public PerformanceEntry(String a_strCascadeId)
 	{	
@@ -82,23 +82,27 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		Node elemCurrentData = XMLUtil.getFirstChildByName(a_entry, XML_ELEMENT_CURRENT_HOURLY_DATA);
 		if(elemCurrentData == null)
 		{
+			System.out.println(XMLUtil.toString(a_entry));
 			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + XML_ELEMENT_CURRENT_HOURLY_DATA);
 		}
 		
 		m_current.setTime(new Date(System.currentTimeMillis()));
 		
 		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[DELAY]);
+		/*
 		if(elemDelay == null)
 		{
+			System.out.println(XMLUtil.toString(a_entry));
 			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + ATTRIBUTES[DELAY]);
-		}
+		}*/
 		m_currentEntries[DELAY] = new PerformanceAttributeCurrentEntry(DELAY, elemDelay);
 		
 		Node elemSpeed = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[SPEED]);
+		/*
 		if(elemSpeed == null)
 		{
 			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + ATTRIBUTES[SPEED]);
-		}
+		}*/
 		m_currentEntries[SPEED] = new PerformanceAttributeCurrentEntry(SPEED, elemSpeed);
 		
 		m_lastUpdate = System.currentTimeMillis();
@@ -360,7 +364,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				"<th>Min</th>" +
 				"<th>Max</th>" +
 				"<th>Std. Deviation</th>" +
-				(a_selectedDay == dayOfWeek ? "<th>Last Test</th>" : "")+
+				//(a_selectedDay == dayOfWeek ? "<th>Last Test</th>" : "")+
+				"<th>% Std. Deviation</th>" +
 				"<th>Errors</th></tr>";
 
 		long dayTimestamp = getDayTimestamp(a_attribute, a_selectedDay);
@@ -381,11 +386,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			else
 			{
+				NumberFormat format = NumberFormat.getInstance(Constants.LOCAL_FORMAT);
+				format.setMaximumFractionDigits(2);
+				format.setMinimumFractionDigits(2);
+				
 				htmlData += "<td>" + entry.getAverageValue() + " " + a_unit + "</td>" +
 					"<td>" + entry.getMinValue() + " " + a_unit + "</td>" +
 					"<td>" + entry.getMaxValue() + " " + a_unit + "</td>" +
-					"<td>" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(entry.getStdDeviation()) + " " + a_unit + "</td>";
+					"<td>" + format.format(entry.getStdDeviation()) + " " + a_unit + "</td>";
 				
+				/*
 				if(a_selectedDay == dayOfWeek)
 				{
 					if(hour == calLastTest.get(Calendar.HOUR_OF_DAY) && a_attribute == SPEED)
@@ -408,7 +418,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					{
 						htmlData += "<td></td>";
 					}
-				}
+				}*/
+				
+				htmlData += "<td>" + format.format(100.0 * entry.getStdDeviation() / (double)entry.getAverageValue()) + "%</td>";
 				
 				double errorPercentage = 0;
 				
@@ -472,7 +484,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public static final String XML_ELEMENT_VALUES = "Values";
 		public static final String XML_ELEMENT_VALUE = "Value";
 		
-		public static final long DEFAULT_TIMEFRAME = 2 * 60 * 60 * 1000; // 2h
+		public static final long DEFAULT_TIMEFRAME = 30 * 60 * 1000; // 30 minutes
 		
 		public long m_timeFrame;
 		public int m_attribute;

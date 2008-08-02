@@ -354,7 +354,7 @@ public abstract class Updater implements Observer
 
 	protected abstract boolean wasUpdateSuccessful();
 
-	protected static class ConstantUpdateInterval implements IUpdateInterval
+	protected static final class ConstantUpdateInterval implements IUpdateInterval
 	{
 		private long m_updateInterval;
 		public ConstantUpdateInterval(long a_updateInterval)

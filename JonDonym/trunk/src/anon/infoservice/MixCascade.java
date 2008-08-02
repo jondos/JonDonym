@@ -1127,6 +1127,13 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				mixIDs.put(getMixInfo(i).getId(), getMixInfo(i).getId());
 				m_nrOperators++;
 			}
+			else
+			{
+				// This Cascade has at least two operators which are the same. Assume one one operator!
+				m_nrOperators = 1;
+				m_nrCountries = 1;
+				break;
+			}
 		}
 		if (m_nrCountries == 0)
 		{

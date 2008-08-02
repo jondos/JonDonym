@@ -57,7 +57,14 @@ public abstract class AbstractDatabaseUpdater extends Updater
 	private boolean m_successfulUpdate = false;
 	private boolean m_bFirstUpdateDone = false;
 
-
+	/**
+	 * Initialises and starts the database update thread.
+	 */
+	public AbstractDatabaseUpdater(long a_updateInterval)
+	{
+		this (new ConstantUpdateInterval(a_updateInterval));
+	}
+	
 	/**
 	 * Initialises and starts the database update thread.
 	 */

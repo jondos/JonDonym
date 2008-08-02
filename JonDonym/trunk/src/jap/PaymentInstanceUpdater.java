@@ -44,10 +44,11 @@ import logging.*;
 public class PaymentInstanceUpdater extends AbstractDatabaseUpdater
 {
 	private static final long UPDATE_INTERVAL_MS = 15 * 60000l; //every 15 minutes
+	private static final long MIN_UPDATE_INTERVAL_MS = 60000l;
 
 	public PaymentInstanceUpdater()
 	{
-		super(new ConstantUpdateInterval(UPDATE_INTERVAL_MS));
+		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
 	}
 
 	public Class getUpdatedClass()
@@ -69,7 +70,12 @@ public class PaymentInstanceUpdater extends AbstractDatabaseUpdater
 		if (pis == null)
 		{
 			// no entries where found
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
 			pis = new Hashtable();
+		}
+		else
+		{
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
 		}
 
 

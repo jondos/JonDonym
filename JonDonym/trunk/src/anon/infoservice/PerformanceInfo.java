@@ -70,10 +70,10 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfoList";
 	
 	/*
-	 * Timeout set to 6 hours because it's better to have out-dated 
+	 * Timeout set to 6 days because it's better to have out-dated 
 	 * performance information than no performance information at all ;-)
 	 */
-	public static final int PERFORMANCE_INFO_TTL = 1000*60*60*6;
+	public static final int PERFORMANCE_INFO_TTL = 1000*60*60*24*6;
 	
 	/**
 	 * Creates a new PerformanceInfo object from an XML element which is usually
