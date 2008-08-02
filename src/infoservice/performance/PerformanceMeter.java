@@ -979,6 +979,14 @@ public class PerformanceMeter implements Runnable
 	
 	public InfoServiceDBEntry chooseRandomInfoService(Hashtable a_badInfoServices)
 	{
+		if (!a_badInfoServices.contains(Configuration.getInstance().getID()))
+		{
+			// always return this InfoService if connection to it is possible
+			return (InfoServiceDBEntry)Database.getInstance(
+					InfoServiceDBEntry.class).getEntryById(
+							Configuration.getInstance().getID());
+		}
+		
 		Vector knownIS = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
 		
 		while(!knownIS.isEmpty())

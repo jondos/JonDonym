@@ -491,12 +491,12 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	{
 		String htmlTableLine = "<TR><TD CLASS=\"name\">";
 		MixCascade ownMixCascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(getId());
-		PerformanceEntry perfEntry = null;
+		PerformanceEntry perfEntry = 
+			(PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(getId());
 		int maxUsers = 0;
 		if (ownMixCascade != null)
 		{
-			htmlTableLine = htmlTableLine + ownMixCascade.getName();
-			perfEntry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(getId());
+			htmlTableLine = htmlTableLine + ownMixCascade.getName();			
 			maxUsers = ownMixCascade.getMaxUsers();
 		}
 		/* generate a String, which describes the traffic situation */

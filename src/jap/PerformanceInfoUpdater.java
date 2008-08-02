@@ -1,20 +1,15 @@
 package jap;
 
-import java.util.Enumeration;
 import java.util.Hashtable;
 
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 import anon.infoservice.PerformanceInfo;
-import anon.infoservice.AbstractDatabaseEntry;
-import anon.infoservice.Database;
 import anon.infoservice.InfoServiceHolder;
-import anon.infoservice.MixCascade;
 
 public class PerformanceInfoUpdater extends AbstractDatabaseUpdater 
 {
 	private static final long UPDATE_INTERVAL = 1000 * 60 * 5; // 5 minutes
+	private static final long MIN_UPDATE_INTERVAL_MS = 20000l;
+	
 	
 	public PerformanceInfoUpdater()
 	{
@@ -31,7 +26,12 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 		Hashtable hashtable = InfoServiceHolder.getInstance().getPerformanceInfos();
 		if (hashtable == null)
 		{
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
 			return new Hashtable();
+		}
+		else
+		{
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL);
 		}
 
 		return hashtable;
