@@ -91,6 +91,8 @@ import infoservice.HttpResponseStructure;
  */
 public class PerformanceMeter implements Runnable 
 {	
+	private static final int LOGIN_TIMEOUT = 15000;
+	
 	private Object SYNC_METER = new Object();
 	private String m_proxyHost;
 	private int m_proxyPort;
@@ -157,6 +159,8 @@ public class PerformanceMeter implements Runnable
 		m_maxWaitForTest = ((Integer) a_config[5]).intValue();
 		m_minPackets = ((Integer) a_config[6]).intValue();
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
+		//AnonClient.setLoginTimeout(LOGIN_TIMEOUT);
+		
 		
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
@@ -575,7 +579,7 @@ public class PerformanceMeter implements Runnable
 		
 		m_recvBuff = new char[m_dataSize];				
 		
-		for (int i = 0; i < m_requestsPerInterval * 2 && !Thread.currentThread().isInterrupted(); i++)
+		while(!Thread.currentThread().isInterrupted())
 		{			
 		    errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
 		    if (errorCode == ErrorCodes.E_CONNECT || errorCode == ErrorCodes.E_UNKNOWN)
