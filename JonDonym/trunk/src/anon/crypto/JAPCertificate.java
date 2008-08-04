@@ -498,7 +498,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		// Return it as a string
 		if (ski != null && ski instanceof X509SubjectKeyIdentifier)
 		{
-			return ((X509SubjectKeyIdentifier)ski).getValueWithoutColons();
+			return ((X509SubjectKeyIdentifier)ski).getValueWithoutColon();
 		} 
 		else
 		{
