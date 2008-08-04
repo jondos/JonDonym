@@ -221,50 +221,35 @@ public class MapBox extends JAPDialog implements ChangeListener
 	 */
 	private void refresh() throws IOException
 	{
-		//BufferedReader reader;
-		//String Title = "";
-
+		// Set the icon to null at first
 		m_lblMap.setIcon(null);
 		m_lblMap.setText(JAPMessages.getString(MSG_PLEASE_WAIT) + "...");
 		m_lblMap.repaint();
-
 		// Create the URL
 		m_sImageURL = "http://www.maps.google.com/staticmap?markers=" + m_sLatitude + "," + m_sLongitude +
-		                  "&zoom=" + (m_sldZoom.getValue()+2) + "&size=" + m_sImageSize + "&key=" + KEY;
+		              "&zoom=" + (m_sldZoom.getValue()+2) + "&size=" + m_sImageSize + "&key=" + KEY;
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Getting image: " + m_sImageURL);
-		
-		// The previously used URL (TODO: Remove)
-		//String site = "http://maps.yahoo.com/print?ard=1&clat=" + m_latitude +
-		//	"&clon=" + m_longitude + "&mag=" + s.getValue() + 
-		//	"&q1=" + m_latitude + "%2C" + m_longitude;
-		
-		// The more previously used URL (TODO: Remove)
-		//String site = "http://www.mapquest.com/maps/map.adp?latlongtype=" +
-		//	"decimal&latitude=" + m_latitude + "&longitude=" + m_longitude +
-		//	"&zoom=" + s.getValue();
-		
 		// Set the title
-		String Title = JAPMessages.getString(MSG_TITLE, new String[]{m_sLatitude, m_sLongitude});
-		setTitle(Title);
+		String sTitle = JAPMessages.getString(MSG_TITLE, new String[]{m_sLatitude, m_sLongitude});
+		setTitle(sTitle);
+		// Set the image as the icon
+		m_lblMap.setText("");
+		m_lblMap.setIcon(new ImageIcon(new URL(m_sImageURL)));
 		
-		// XXX: No need for parsing the site for the image URL anymore (remove)
+		// TODO: Remove this, no need for parsing the site for the image URL anymore
 		// Request the site and parse for the image-URL
 		//URL url = new URL(site);
-		//reader = new BufferedReader(new InputStreamReader(url.openStream()), 1024);
+		//BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()), 1024);
 		//SiteParser sp = new SiteParser();
 		//DocumentParser dp = new DocumentParser(DTD.getDTD("-//W3C//DTD HTML 4.01//EN"));
 		//m_urlString = null;
-		
 		// m_urlString is set from outside
 		//dp.parse(reader, sp, true);
 		//if (m_urlString == null)
 		//{
 		//	throw new IOException("Image reference not found on site " + site);
 		//}
-		
-		m_lblMap.setText("");
 		//map.setIcon(new ImageIcon(new URL(m_urlString)));
-		m_lblMap.setIcon(new ImageIcon(new URL(m_sImageURL)));
 	}
 
     /** A subclass of <CODE>javax.swing.text.html.HTMLEditorKit.ParserCallback</CODE>
