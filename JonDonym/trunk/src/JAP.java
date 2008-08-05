@@ -870,8 +870,7 @@ public class JAP
 				String messageText = a_splash.getText();
 				a_splash.setText(JAPMessages.getString(JAPController.MSG_UPDATING_HELP));
 				JAPModel.getInstance().setHelpPath(new File(pFFHelpPath), true);
-				a_splash.setText(messageText);
-				
+				a_splash.setText(messageText);				
 			}
 		}			
 		

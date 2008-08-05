@@ -97,7 +97,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		public synchronized boolean openURL(URL a_url)
 		{
-			String cmd;
+			String[] cmd;
 			
 			if (getBrowserCommand() == null || a_url == null)
 			{
@@ -123,7 +123,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 				}
 			}
 			
-			cmd = getBrowserCommand() + " " + a_url.toString();
+			cmd = new String[]{getBrowserCommand(), a_url.toString()};
 			try
 			{
 				m_portableFirefoxProcess = Runtime.getRuntime().exec(cmd);
@@ -137,8 +137,8 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			catch (IOException ioe3) 
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.MISC,
-						"Error occured while launching portable browser with command '" + 
-						cmd + "'",ioe3);	
+						"Error occured while launching portable browser with command '" + cmd[0] + " " + 
+						cmd[1] + "'",ioe3);	
 			}
 			
 			return false;
