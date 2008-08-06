@@ -49,6 +49,15 @@ public class WindowsOS extends AbstractOS
 		{
 			throw new Exception("Operating system is not Windows");
 		}
+		
+		if (osName.indexOf("windows 9") > -1) 
+		{
+			initEnv("command.com /c set");
+		}
+		else  
+		{
+			initEnv("cmd.exe /c set");
+		} 
 	}
 
 	protected boolean openLink(String a_link)
@@ -146,43 +155,29 @@ public class WindowsOS extends AbstractOS
 			throw new IllegalArgumentException("Application name is null!");
 		}
 		
-		String dirAllUsers = null;
-		File applicationDir;
-		
-		
-		try
-		{
-			dirAllUsers = System.getenv(a_envPath);
-		}
-		catch (SecurityException a_e)
-		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
-		}
-		catch (Error a_e)
-		{
-			// not supported in older Java versions
-			dirAllUsers = System.getProperty(a_envPath);
-			System.out.println(dirAllUsers);
-		}
-		
-		if (dirAllUsers != null && dirAllUsers.trim().length() > 0 &&
-			new File(dirAllUsers).exists())
+		String path = null;
+		File directory;
+	
+		path = getenv(a_envPath);
+	
+		if (path != null && path.trim().length() > 0 &&
+			new File(path).exists())
 		{
 			//dirAllUsers += "\\Application Data\\" + a_applicationName;
-			dirAllUsers += File.separator + a_applicationName;
-			applicationDir = new File(dirAllUsers + File.separator);
-			if (!applicationDir.exists() && !applicationDir.mkdir())
+			path += File.separator + a_applicationName;
+			directory = new File(path + File.separator);
+			if (!directory.exists() && !directory.mkdir())
 			{
 				LogHolder.log(LogLevel.ERR, LogType.MISC,
-						"Could not create storage directory: " + dirAllUsers);
-				dirAllUsers = null;
+						"Could not create storage directory: " + path);
+				path = null;
 			}
 		}
 		else
 		{
-			dirAllUsers = null;
+			path = null;
 		}
 		
-		return dirAllUsers;
+		return path;
 	}
 }

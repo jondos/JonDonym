@@ -82,7 +82,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		Node elemCurrentData = XMLUtil.getFirstChildByName(a_entry, XML_ELEMENT_CURRENT_HOURLY_DATA);
 		if(elemCurrentData == null)
 		{
-			System.out.println(XMLUtil.toString(a_entry));
 			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + XML_ELEMENT_CURRENT_HOURLY_DATA);
 		}
 		
