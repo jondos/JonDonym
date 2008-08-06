@@ -31,17 +31,19 @@ import gui.dialog.JAPDialog;
 import gui.help.JAPHelp.IExternalEMailCaller;
 import gui.help.JAPHelp.IExternalURLCaller;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Properties;
 import java.util.Vector;
 
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.util.ClassUtil;
-import anon.util.ResourceLoader;
 
 /**
  * This abstract class provides access to OS-specific implementations of certain
@@ -72,6 +74,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 
 	private IURLErrorNotifier m_notifier;
 	private AbstractURLOpener m_URLOpener;
+	private Properties m_envVars;
 
 	private static File ms_tmpDir;
 	
@@ -89,7 +92,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 
 		ms_tmpDir = new File(tmpDir);
 	}
-
+	
 	public static abstract class AbstractURLOpener
 	{	
 		private Process m_portableFirefoxProcess = null;
@@ -417,5 +420,62 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		}
 
 		return r_vms;
+	}
+	
+	public String getenv(String a_environmentVariable)
+	{
+		String env = null;
+		
+		try
+		{
+			env = System.getenv(a_environmentVariable);
+		}
+		catch (SecurityException a_e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
+		}
+		catch (Error a_e)
+		{
+			// not supported in Java versions from 1.2 to 1.4			
+		}
+		
+		if (env == null && m_envVars != null)
+		{
+			env = m_envVars.getProperty(a_environmentVariable);
+		}
+		
+		if (env == null)
+		{
+			env = System.getProperty(a_environmentVariable);
+		}
+		
+		return env;
+	}
+	
+	protected void initEnv(String a_envCommand)
+	{
+		Process a_envProcess;
+		Runtime r = Runtime.getRuntime();
+
+		try
+		{
+			a_envProcess = r.exec(a_envCommand);
+			m_envVars = new Properties();
+
+			BufferedReader br = new BufferedReader(new InputStreamReader(a_envProcess.getInputStream()));
+			String line;
+			while ((line = br.readLine()) != null)
+			{
+				int idx = line.indexOf('=');
+				String key = line.substring(0, idx);
+				String value = line.substring(idx + 1);
+				m_envVars.setProperty(key, value);
+			}
+		}
+		catch (IOException a_e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
+					"Could not parse environment variables.", a_e);
+		}	
 	}
 }

@@ -64,7 +64,8 @@ public class LinuxOS extends AbstractOS
 		{
 		}
 		m_bGnome = properties.getProperty("GNOME_DESKTOP_SESSION_ID") != null;
-
+		
+		initEnv("env");
 	}
 
 	protected boolean openLink(String a_link)
