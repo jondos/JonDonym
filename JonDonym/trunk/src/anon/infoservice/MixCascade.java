@@ -1098,7 +1098,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				continue;
 			}
 			currentCertificate = getMixInfo(i).getOperatorCertificate();
-			if (currentCertificate != null && !operatorCertificates.contains(currentCertificate.getId())					
+			if (currentCertificate != null && 
+					!operatorCertificates.contains(currentCertificate.getSubjectKeyIdentifier())					
 				&& !mixIDs.contains(getMixInfo(i).getId()))
 			{
 				// this Mix seems to be operated by an organisation independent from others in the cascade
@@ -1123,7 +1124,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				}
 
 				// operator bonus
-				operatorCertificates.put(currentCertificate.getId(), currentCertificate.getId());
+				operatorCertificates.put(currentCertificate.getSubjectKeyIdentifier(), 
+						currentCertificate.getSubjectKeyIdentifier());
 				mixIDs.put(getMixInfo(i).getId(), getMixInfo(i).getId());
 				m_nrOperators++;
 			}
