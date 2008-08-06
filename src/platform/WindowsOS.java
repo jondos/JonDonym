@@ -158,6 +158,12 @@ public class WindowsOS extends AbstractOS
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
 		}
+		catch (Error a_e)
+		{
+			// not supported in older Java versions
+			dirAllUsers = System.getProperty(a_envPath);
+			System.out.println(dirAllUsers);
+		}
 		
 		if (dirAllUsers != null && dirAllUsers.trim().length() > 0 &&
 			new File(dirAllUsers).exists())
