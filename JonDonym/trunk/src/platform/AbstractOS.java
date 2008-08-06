@@ -470,7 +470,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		{
 			envProcess = Runtime.getRuntime().exec(a_envCommand);
 			m_envVars = new Properties();
-
+			
 			BufferedReader br = new BufferedReader(new InputStreamReader(envProcess.getInputStream()));
 			String line;
 			while ((line = br.readLine()) != null)
@@ -478,7 +478,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 				int idx = line.indexOf('=');
 				String key = line.substring(0, idx);
 				String value = line.substring(idx + 1);
-				m_envVars.setProperty(key, value);
+				m_envVars.put(key, value);
 			}
 		}
 		catch (IOException a_e)
