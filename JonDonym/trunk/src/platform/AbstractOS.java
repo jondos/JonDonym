@@ -454,15 +454,14 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	
 	protected void initEnv(String a_envCommand)
 	{
-		Process a_envProcess;
-		Runtime r = Runtime.getRuntime();
+		Process envProcess;
 
 		try
 		{
-			a_envProcess = r.exec(a_envCommand);
+			envProcess = Runtime.getRuntime().exec(a_envCommand);
 			m_envVars = new Properties();
 
-			BufferedReader br = new BufferedReader(new InputStreamReader(a_envProcess.getInputStream()));
+			BufferedReader br = new BufferedReader(new InputStreamReader(envProcess.getInputStream()));
 			String line;
 			while ((line = br.readLine()) != null)
 			{
