@@ -322,6 +322,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 					success = true;
 					break;
 				}
+				catch (SecurityException a_e)
+				{					
+					LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
+					break;
+				}
 				catch (Exception ex)
 				{
 				}
@@ -425,6 +430,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	public String getenv(String a_environmentVariable)
 	{
 		String env = null;
+	
+		if (a_environmentVariable == null || a_environmentVariable.trim().length() == 0)
+		{
+			return null;
+		}		
 		
 		try
 		{
@@ -453,7 +463,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	}
 	
 	protected void initEnv(String a_envCommand)
-	{
+	{		
 		Process envProcess;
 
 		try
@@ -475,6 +485,10 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
 					"Could not parse environment variables.", a_e);
+		}	
+		catch (SecurityException a_e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
 		}	
 	}
 }
