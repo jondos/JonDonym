@@ -1,4 +1,4 @@
-#define VER_MINOR 6
+#define VER_MINOR 7
 #define VER_MAJOR 4
 
 // Usually you do not change things below this line...
