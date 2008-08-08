@@ -2767,7 +2767,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_progressAnonLevel.setFilledBarColor(color);
 			m_progressAnonLevel.setValue(anonLevel + 1);
 
-			String strSystrayTooltip = "JAP";
+			String strSystrayTooltip = "JonDo";
 			if (m_Controller.isAnonConnected())
 			{
 				strSystrayTooltip += " (" + JAPMessages.getString(MSG_CONNECTED) + ")";
@@ -2902,11 +2902,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				m_labelMixFlags[i].setIcon(null);
 				m_labelOperatorFlags[i].setIcon(null);
-			}
-						
-			if (m_Controller.isAnonConnected())
-			{
-				JAPDll.setSystrayTooltip("JAP (connected)\n" + currentMixCascade.getName());
 			}
 
 			JAPDll.setSystrayTooltip(strSystrayTooltip);

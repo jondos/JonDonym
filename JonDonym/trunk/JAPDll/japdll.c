@@ -38,7 +38,18 @@
 #include "resource.h"
 #include "dllversion.h"
 #define WM_TASKBAREVENT WM_USER+100
+#define WM_TASKBARCREATED (UINT)RegisterWindowMessage(TEXT("TaskbarCreated"))
 #define BLINK_RATE 500
+
+typedef BOOL (CALLBACK* LPChangeWindowMessageFilter)(UINT,DWORD);
+#ifndef MSGFLT_ADD
+	#define MSGFLT_ADD 1
+#endif
+#ifndef MSGFLT_REMOVE
+	#define MSGFLT_REMOVE 2
+#endif
+UINT msgIconReset = 0;
+
 
 struct t_find_window_by_name
 	{
@@ -74,6 +85,7 @@ BOOL bPopupClosed = TRUE;
 VOID ShowWindowFromTaskbar(BOOL) ;
 VOID showPopupMenu();
 VOID closePopupMenu();
+VOID doJavaCall(char* a_method);
 BOOL setTooltipText(const char*, BOOL);
 
 //Stores the Filename of the DLL
@@ -108,7 +120,12 @@ DWORD WINAPI MsgProcThread( LPVOID lpParam )
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 #pragma warning(default:4100)
 	{
-		if(msg==WM_TASKBAREVENT)
+		if (msg == WM_TASKBARCREATED && g_hWnd != NULL)
+		{
+			// explorer has recovered from a crash; reinstantiate the icon
+			setTooltipText("JonDo", TRUE);
+		}
+		else if (msg == WM_TASKBAREVENT)
 		{
 			if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP || lParam == WM_MBUTTONUP)
 			{
@@ -124,8 +141,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
  			}
 			return 0;
 		}  
-//  return CallWindowProc(g_lpPrevWndFunc,hwnd, msg, wParam, lParam);
-			return DefWindowProc(hwnd,msg,wParam,lParam);
+
+		return DefWindowProc(hwnd,msg,wParam,lParam);
 	}
 
 
@@ -146,6 +163,8 @@ BOOL createMsgWindowClass()
 		wndclass.hIconSm=NULL;
 		wndclass.lpszClassName="JAPDllWndClass";
 		wndclass.style=0;
+		// register task bar restore event after crash
+		MyChangeWindowMessageFilter(WM_TASKBARCREATED, MSGFLT_ADD); 
 		return (RegisterClassEx(&wndclass)!=0);
 	}
 
@@ -297,6 +316,7 @@ BOOL HideWindowInTaskbar(HWND hWnd,JNIEnv * env)
 	{
 		return FALSE;
 	}
+
 	//Warten falls g_hWnd noch von letzten Aufruf "blockiert"
 	while(g_hWnd!=NULL&&i>0)
 		{
@@ -328,7 +348,7 @@ BOOL HideWindowInTaskbar(HWND hWnd,JNIEnv * env)
 	//else
 	//	ShowWindow(hWnd, SW_HIDE);
 	//Icon im Taskbar setzen
-	if(setTooltipText("JAP", TRUE)!=TRUE)
+	if(setTooltipText("JonDo", TRUE)!=TRUE)
 		{
 			DestroyWindow(g_hMsgWnd);
 			g_hMsgWnd=NULL;
@@ -406,6 +426,37 @@ BOOL CALLBACK FindWindowByCaption(HWND hWnd, LPARAM lParam)
 		} 
 	return TRUE;
 }
+
+/**
+ * This function is only available - and needed - under Windows Vista.
+ * Older Windows versions just ignore it.
+ */
+BOOL MyChangeWindowMessageFilter(UINT message, DWORD dwFlag)
+{
+	HINSTANCE hDLL;               // Handle to DLL
+	LPChangeWindowMessageFilter fChangeWindowMessageFilter;    // Function pointer
+	BOOL retVal = FALSE;
+
+	hDLL = LoadLibrary("user32");
+	if (hDLL != NULL)
+	{
+	   fChangeWindowMessageFilter = 
+		   (LPChangeWindowMessageFilter)GetProcAddress(hDLL, "ChangeWindowMessageFilter");
+	   if (!fChangeWindowMessageFilter)
+	   {
+		  // handle the error
+		  FreeLibrary(hDLL);
+	   }
+	   else
+	   {		 		   
+		  // call the function
+		  retVal = fChangeWindowMessageFilter(message, dwFlag);
+	   }
+	}
+
+	return retVal;
+}
+
 
 #pragma warning(disable:4100) //unref parameters
 DWORD WINAPI BlinkThread( LPVOID lpParam ) 
@@ -565,7 +616,7 @@ JNIEXPORT void JNICALL Java_gui_JAPDll_showWindowFromTaskbar_1dll
 #pragma warning(disable:4100) //unref parameters
 JNIEXPORT jstring JNICALL Java_gui_JAPDll_getDllVersion_1dll
   (JNIEnv * env, jclass c)
-	{
+	{		
 		return (*env)->NewStringUTF(env,JAPDLL_VERSION);
 	}
 #pragma warning(default:4100)
