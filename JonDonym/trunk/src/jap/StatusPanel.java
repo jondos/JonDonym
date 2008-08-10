@@ -373,11 +373,14 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 
 	public void run()
 	{
+		MessagesListNode msg;
+		
 		try
 		{
-			//boolean bInterrupted = false;
 			while (m_bRun)
 			{
+				msg = null;
+				
 				try
 				{
 					Thread.sleep(10000);
@@ -404,6 +407,7 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 					}
 					if (m_firstMessage.m_DisplayCount > 0)
 					{
+						msg = m_firstMessage;
 						m_firstMessage.m_DisplayCount--;
 					}
 
@@ -441,6 +445,11 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 						{
 							if (m_firstMessage != null)
 							{
+								if (m_firstMessage.m_DisplayCount >= 0 && m_firstMessage == msg)
+								{
+									// this message should get another chance to be displayed
+									m_firstMessage.m_DisplayCount++;
+								}
 								m_aktY = ICON_HEIGHT;
 								i = -1;
 								m_firstMessage = m_firstMessage.m_Next;
