@@ -106,7 +106,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		+ "_dialogFormatGoldenRatio";
 	
 	private static final String MSG_HELP_PATH = JAPConfUI.class.getName() + "_helpPath";
-	public static final String MSG_HELP_PATH_CHOOSE = JAPConfUI.class.getName() + "_helpPathChoose";
+	private static final String MSG_HELP_PATH_CHOOSE = JAPConfUI.class.getName() + "_helpPathChange";
 	
 	private static final String MSG_NO_NATIVE_LIBRARY = JAPConfUI.class.getName() + "_noNativeLibrary";
 	private static final String MSG_NO_NATIVE_WINDOWS_LIBRARY = JAPConfUI.class.getName() +
@@ -141,13 +141,9 @@ final class JAPConfUI extends AbstractJAPConfModule
 		{
 			public void update(Observable a_notifier, Object a_message)
 			{
-				if (JAPModel.getInstance().isHelpInstalled())
-				{
-					updateHelpPath();
-				}
+				updateHelpPath();
 				
-				if(JAPModel.getInstance().isHelpChangeable() &&
-					!JAPModel.getInstance().hasPortableHelp())
+				if (JAPModel.getInstance().isHelpPathChangeable())
 				{
 					m_helpPathButton.setEnabled(true);
 				}
@@ -806,7 +802,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 		
 		c.weightx = 1;
 		
-		m_helpPathField = new JTextField(15);
+		m_helpPathField = new JTextField();
+		m_helpPathField.setEditable(false);
 		m_helpPathButton = new JButton(JAPMessages.getString(MSG_HELP_PATH_CHOOSE));
 		if(JAPModel.getInstance().isHelpPathDefined())
 		{
@@ -816,12 +813,6 @@ final class JAPConfUI extends AbstractJAPConfModule
 		{				
 			m_helpPathField.setText("");
 		}
-		m_helpPathField.setEditable(false);
-		/*
-		if (!JAPModel.getInstance().isHelpInstalled())
-		{
-			m_helpPathButton.setEnabled(false);
-		}*/
 		
 		ActionListener helpInstallButtonActionListener = 
 			new ActionListener()
@@ -842,11 +833,9 @@ final class JAPConfUI extends AbstractJAPConfModule
 					{
 						String hpFileValidation = model.helpPathValidityCheck(hpFile);
 						if(hpFileValidation.equals(AbstractHelpFileStorageManager.HELP_VALID) ||
-							hpFileValidation.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS) &&
-							JAPModel.getInstance().isHelpInstalled())
+							hpFileValidation.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 						{
 							m_helpPathField.setText(hpFile.getPath());
-							m_helpPathField.setEditable(false);
 							m_helpPathField.repaint();
 						}
 						else
@@ -858,8 +847,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 				}
 			};
 		m_helpPathButton.addActionListener(helpInstallButtonActionListener);
-		if(!JAPModel.getInstance().isHelpChangeable() ||
-			JAPModel.getInstance().hasPortableHelp())
+		if(!JAPModel.getInstance().isHelpPathChangeable())
 		{
 			m_helpPathButton.setEnabled(false);
 		}
@@ -868,8 +856,11 @@ final class JAPConfUI extends AbstractJAPConfModule
 		c.gridy = 0;
 		c.gridx = 0;
 		c.insets = new Insets(0, 10, 0, 10);
+		c.weightx = 1.0;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		p.add(m_helpPathField, c);
 		c.gridx++;
+		c.weightx = 0.0;
 		p.add(m_helpPathButton, c);
 		
 		return p;
@@ -909,12 +900,12 @@ final class JAPConfUI extends AbstractJAPConfModule
 	private void resetHelpPath()
 	{
 		m_helpPathField.setText("");
-		m_helpPathField.setEditable(false);
 	}
 	
 	private void updateHelpPath()
 	{
-		if(JAPModel.getInstance().isHelpPathDefined() && JAPModel.getInstance().isHelpInstalled())
+		if(JAPModel.getInstance().isHelpPathDefined() && 
+			JAPModel.getInstance().isHelpPathChangeable())
 		{
 			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
 		}
@@ -922,7 +913,6 @@ final class JAPConfUI extends AbstractJAPConfModule
 		{
 			m_helpPathField.setText("");
 		}
-		m_helpPathField.setEditable(false);
 	}
 	
 	public String getTabTitle()
