@@ -120,20 +120,27 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 		return installationSuccessful;
 	}
 	
-	public String helpPathValidityCheck(String absolutePath, boolean a_bIgnoreExistingHelpDir) 
+	public String helpPathValidityCheck(String a_absolutePath, boolean a_bIgnoreExistingHelpDir) 
 	{
 		String strPath;
 		int index;
 		File fileTmp;
 		
-		if(absolutePath != null)
+		if(a_absolutePath != null)
 		{
-			File hpFile = new File(absolutePath);
+			File hpFile = new File(a_absolutePath);
+			
+			if (a_absolutePath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
+			{
+				// this is definitely a JonDo application folder
+				a_bIgnoreExistingHelpDir = true;
+			}
+			
 			if(hpFile.exists())
 			{
 				if(hpFile.isDirectory())
 				{
-					strPath = absolutePath;
+					strPath = a_absolutePath;
 					while ((index = strPath.indexOf(HELP_FOLDER)) > 0)
 					{
 						fileTmp = new File(strPath.substring(0, index) + HELP_FOLDER);
@@ -150,16 +157,16 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 						strPath = strPath.substring(index, strPath.length());
 					}
 					
-					File anotherFileWithSameName = new File(hpFile.getPath() + File.separator +
+					File helpDir = new File(hpFile.getPath() + File.separator +
 							HELP_FOLDER + File.separator);
 					
-					if(!anotherFileWithSameName.exists())
+					if(!helpDir.exists())
 					{
 						try
 						{							
-							if (anotherFileWithSameName.mkdir())
+							if (helpDir.mkdir())
 							{
-								anotherFileWithSameName.delete();
+								helpDir.delete();
 							}
 							else
 							{
@@ -287,11 +294,11 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 		}
 	}
 	
-	private void removeOldHelp(String parentPath, boolean a_bIgnoreExistingHelpDir)
+	private boolean removeOldHelp(String parentPath, boolean a_bIgnoreExistingHelpDir)
 	{
 		if(parentPath == null)
 		{
-			return;
+			return true;
 		}
 		File helpFolder = new File(parentPath+File.separator+HELP_FOLDER + File.separator);
 		File helpVersionFile = 
@@ -301,12 +308,25 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 			(!a_bIgnoreExistingHelpDir && !helpVersionFile.exists()))
 		{
 			LogHolder.log(LogLevel.INFO, LogType.MISC, "No old help found in "+helpFolder.getPath());
-			return;
+			return true;
 		}
 		
 		/* Make sure that there will be never the wrong directory as parameter!!! */
-		RecursiveCopyTool.deleteRecursion(helpFolder);
-		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "removed old help from "+parentPath);
+		if (!RecursiveCopyTool.deleteRecursion(helpFolder))
+		{
+			// try again
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, 
+					"Failed to delete old help at first try - try again!");
+			RecursiveCopyTool.deleteRecursion(helpFolder);
+		}
+		
+		if (!helpFolder.exists())
+		{
+			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "removed old help from "+parentPath);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**

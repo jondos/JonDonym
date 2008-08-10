@@ -37,7 +37,7 @@ public interface IHelpModel
 	
 	Observable getHelpFileStorageObservable();
 	
-	boolean isHelpChangeable();
+	boolean isHelpPathChangeable();
 	
 	String helpPathValidityCheck(File a_file);
 	

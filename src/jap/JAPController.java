@@ -354,7 +354,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (JAPModel.getInstance().isNonAnonymousSurfingDenied() ||
 						JAPController.getInstance().getView() == null)
 					{
-						return new Answer(false, false);
+						return new Answer(false, false, true);
 					}
 
 					boolean bShowHtmlWarning;
@@ -371,14 +371,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 									   JAPController.getInstance().getViewWindow(),
 									   JAPMessages.getString(MSG_ALLOWUNPROTECTED), a_requestInfo.getURI()
 									   + (a_requestInfo.getPort() != 80 ? ":" + a_requestInfo.getPort() : ""), cb));
-					if (bShowHtmlWarning && cb.getState())
+					/*if (bShowHtmlWarning && cb.getState())
 					{
 						// user has chosen to never allow non anonymous websurfing
 						JAPModel.getInstance().denyNonAnonymousSurfing(true);
 						// do not remember as this may be switched in the control panel
 						return new Answer(!bShowHtmlWarning, false);
-					}
-					return new Answer(!bShowHtmlWarning, cb.getState());
+					}*/
+					return new Answer(!bShowHtmlWarning, cb.getState(), false);
 				}
 			};
 
@@ -2326,7 +2326,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT,
 								 InfoServiceDBEntry.getConnectionTimeout());
 			
-			if(JAPModel.getInstance().isHelpPathDefined() && JAPModel.getInstance().isHelpInstalled())
+			if(JAPModel.getInstance().isHelpPathDefined() && 
+					JAPModel.getInstance().isHelpPathChangeable())
 			{
 				XMLUtil.setAttribute(e, XML_ATTR_HELP_PATH, 
 									 JAPModel.getInstance().getHelpPath());

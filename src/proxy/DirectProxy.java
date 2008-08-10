@@ -46,6 +46,7 @@ import java.util.Hashtable;
 import anon.infoservice.ProxyInterface;
 import anon.AnonService;
 import gui.JAPMessages;
+import gui.help.JAPExternalHelpViewer;
 import jap.JAPModel;
 import jap.JAPUtil;
 import logging.LogHolder;
@@ -66,11 +67,6 @@ import anon.infoservice.IMutableProxyInterface;
 
 final public class DirectProxy implements Runnable, AnonService
 {
-	private static final int REMEMBER_NOTHING = 0;
-	private static final int REMEMBER_WARNING = 1;
-	private static final int REMEMBER_NO_WARNING = 2;
-	private static final int TEMPORARY_REMEMBER_TIME = 5000;
-
 	private static AllowUnprotectedConnectionCallback ms_callback;
 
 	private AnonService m_tor;
@@ -124,11 +120,13 @@ final public class DirectProxy implements Runnable, AnonService
 		{
 			private boolean m_bRemembered;
 			private boolean m_bAllow;
+			private boolean m_bResetMemory;
 
-			public Answer(boolean a_bAllow, boolean a_bRemembered)
+			public Answer(boolean a_bAllow, boolean a_bRemembered, boolean a_bResetMemory)
 			{
 				m_bAllow = a_bAllow;
 				m_bRemembered = a_bRemembered;
+				m_bResetMemory = a_bResetMemory;
 			}
 
 			public boolean isRemembered()
@@ -139,6 +137,11 @@ final public class DirectProxy implements Runnable, AnonService
 			public boolean isAllowed()
 			{
 				return m_bAllow;
+			}
+			
+			public boolean isMemoryReset()
+			{
+				return m_bResetMemory;
 			}
 		}
 
@@ -233,11 +236,10 @@ final public class DirectProxy implements Runnable, AnonService
 
 	public void run()
 	{
-		int remember = REMEMBER_NOTHING;
 		Hashtable rememberedDomains = new Hashtable();
-		boolean bShowHtmlWarning = true;
 		Runnable doIt;
 		RequestInfo requestInfo;
+		RememberedRequestRight requestRight;
 
 		try
 		{
@@ -293,48 +295,39 @@ final public class DirectProxy implements Runnable, AnonService
 			{
 			}
 
-			if (remember == REMEMBER_NOTHING)
+			requestInfo = DirectProxyConnection.getURI(clientInputStream, 200);
+			requestRight = (RememberedRequestRight)rememberedDomains.get(requestInfo.getURI());
+			if (requestRight != null && requestRight.isTimedOut())
 			{
-				requestInfo = DirectProxyConnection.getURI(clientInputStream, 200);
-				if (rememberedDomains.containsKey(requestInfo.getURI()))
+				rememberedDomains.remove(requestInfo.getURI());
+				requestRight = null;
+			}
+			if (requestRight == null)
+			{
+				AllowUnprotectedConnectionCallback.Answer answer;
+				AllowUnprotectedConnectionCallback callback = ms_callback;
+				if (callback != null)
 				{
-					bShowHtmlWarning = false;
+					answer = callback.callback(requestInfo);
 				}
 				else
 				{
-					AllowUnprotectedConnectionCallback.Answer answer;
-					AllowUnprotectedConnectionCallback callback = ms_callback;
-					if (callback != null)
-					{
-						answer = callback.callback(requestInfo);
-					}
-					else
-					{
-						answer = new AllowUnprotectedConnectionCallback.Answer(false, false);
-					}
-					bShowHtmlWarning = !answer.isAllowed();
-
-					if (answer.isRemembered())
-					{
-						if (bShowHtmlWarning)
-						{
-							remember = REMEMBER_WARNING;
-						}
-						else
-						{
-							remember = REMEMBER_NO_WARNING;
-						}
-						rememberedDomains.clear();
-					}
-					else if (answer.isAllowed())
-					{
-						rememberedDomains.put(requestInfo.getURI(), requestInfo);
-					}
+					answer = new AllowUnprotectedConnectionCallback.Answer(false, false, true);
+				}
+				
+				requestRight = new RememberedRequestRight(requestInfo.getURI(), 
+						!answer.isAllowed(), !answer.isRemembered());
+				if (answer.isMemoryReset())
+				{
+					rememberedDomains.clear();
+				}
+				else
+				{
+					rememberedDomains.put(requestInfo.getURI(), requestRight);
 				}
 			}
 
-
-			if (!bShowHtmlWarning && !JAPModel.isSmallDisplay())
+			if (!requestRight.isWarningShown() && !JAPModel.isSmallDisplay())
 			{
 				if (getProxyInterface() != null && getProxyInterface().isValid() &&
 					getProxyInterface().getProtocol() == ProxyInterface.PROTOCOL_TYPE_HTTP)
@@ -350,7 +343,8 @@ final public class DirectProxy implements Runnable, AnonService
 			}
 			else
 			{
-				Thread thread = new Thread(new SendAnonWarning(socket, clientInputStream));
+				Thread thread = new Thread(new SendAnonWarning(socket, clientInputStream, 
+						(rememberedDomains.size() > 0) ? requestRight: null));
 				thread.start();
 			}
 
@@ -412,15 +406,30 @@ final public class DirectProxy implements Runnable, AnonService
 	 *  This class is used to inform the user that he tries to
 	 *  send requests although anonymity mode is off.
 	 */
-	private final class SendAnonWarning implements Runnable
+	private static final class SendAnonWarning implements Runnable
 	{
+		private static final String MSG_BLOCKED = 
+			SendAnonWarning.class.getName() + "_blocked";
+		private static final String MSG_COUNTDOWN = 
+			SendAnonWarning.class.getName() + "_countdown";	
+		private static final String MSG_RELOAD = 
+			SendAnonWarning.class.getName() + "_reload";	
+		private static final String MSG_BLOCKED_PERMANENTLY = 
+			SendAnonWarning.class.getName() + "_blockedPermanently";	
+		private static final String MSG_ANON_MODE_OFF = 
+			SendAnonWarning.class.getName() + "_htmlAnonModeOff";
+		
+		
 		private Socket s;
 		private SimpleDateFormat dateFormatHTTP;
 		private InputStream m_clientInputStream;
+		private RememberedRequestRight m_requestRight;
 
-		public SendAnonWarning(Socket s, InputStream a_clientInputStream)
+		public SendAnonWarning(Socket s, InputStream a_clientInputStream, 
+				RememberedRequestRight a_requestRight)
 		{
 			this.s = s;
+			m_requestRight = a_requestRight;
 			m_clientInputStream = a_clientInputStream;
 			dateFormatHTTP = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
 			dateFormatHTTP.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -428,6 +437,8 @@ final public class DirectProxy implements Runnable, AnonService
 
 		public void run()
 		{
+			long countDown;
+			String[] addedMessage;
 			try
 			{
 				// read something so that the browser realises everything is OK
@@ -457,7 +468,35 @@ final public class DirectProxy implements Runnable, AnonService
 				toClient.write("Cache-Control: no-cache\r\n\r\n");
 				toClient.write("<HTML><TITLE>JAP</TITLE>\n");
 				toClient.write("<PRE>" + date + "</PRE>\n");
-				toClient.write(JAPMessages.getString("htmlAnonModeOff"));
+				if (m_requestRight == null)
+				{
+					toClient.write(JAPMessages.getString(MSG_ANON_MODE_OFF,
+							JAPMessages.getString(
+									jap.JAPConfAnonGeneral.MSG_DENY_NON_ANONYMOUS_SURFING)));
+				}
+				else
+				{
+					countDown = m_requestRight.getCountDown();
+					
+					if (countDown == Long.MAX_VALUE)
+					{
+						addedMessage = new String[]{m_requestRight.getURI(), 
+								JAPMessages.getString(MSG_BLOCKED_PERMANENTLY)};
+					}
+					else if (countDown / 1000 == 0)
+					{
+						addedMessage = new String[]{m_requestRight.getURI(), 
+								JAPMessages.getString(MSG_RELOAD)};
+					}
+					else 
+					{
+						addedMessage = new String[]{m_requestRight.getURI(), 
+								JAPMessages.getString(MSG_COUNTDOWN, 
+										new String[]{"" + (countDown / 1000),
+											JAPMessages.getString(MSG_RELOAD)})};
+					}
+					toClient.write(JAPMessages.getString(MSG_BLOCKED, addedMessage));
+				}
 				toClient.write("</HTML>\n");
 				toClient.flush();
 				toClient.close();
@@ -465,11 +504,70 @@ final public class DirectProxy implements Runnable, AnonService
 			}
 			catch (Exception e)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.NET, "JAPFeedbackConnection: Exception: " + e);
+				LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
 			}
 		}
 	}
 
+	private final class RememberedRequestRight
+	{		
+		public static final boolean REMEMBER_WARNING = true;
+		public static final boolean REMEMBER_NO_WARNING = false;		
+		public static final boolean SET_TIMEOUT = true;
+		public static final boolean SET_UNLIMITED = false;
+	
+		private static final long TEMPORARY_REMEMBER_TIME = 60000l;
+		
+		private long m_timeRemembered;
+		private boolean m_bWarn;
+		private String m_URI;
+		
+		public RememberedRequestRight(String a_URI, boolean a_bWarn, boolean a_bTimeout)
+		{
+			m_URI = a_URI;
+			if (a_bTimeout)
+			{
+				m_timeRemembered = System.currentTimeMillis() + TEMPORARY_REMEMBER_TIME;
+			}
+			else
+			{
+				m_timeRemembered = Long.MAX_VALUE;
+			}
+			
+			m_bWarn = a_bWarn;
+		}
+		
+		public String getURI()
+		{
+			return m_URI;
+		}
+		
+		public boolean isWarningShown()
+		{
+			return m_bWarn;
+		}
+		
+		public long getCountDown()
+		{
+			if (m_timeRemembered == Long.MAX_VALUE)
+			{
+				return Long.MAX_VALUE;
+			}
+			
+			long countDown = m_timeRemembered - System.currentTimeMillis();
+			if (countDown < 0)
+			{
+				countDown = 0;
+			}
+			return countDown;
+		}
+		
+		public boolean isTimedOut()
+		{
+			return m_timeRemembered < System.currentTimeMillis();
+		}
+	}
+	
 	/**
 	 *  This class is used to transfer requests via the selected proxy
 	 */

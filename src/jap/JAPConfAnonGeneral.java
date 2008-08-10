@@ -58,7 +58,7 @@ import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.client.DummyTrafficControlChannel;
 import java.util.Observer;
 
-final class JAPConfAnonGeneral extends AbstractJAPConfModule implements Observer
+public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements Observer
 {
 	public static final String MSG_CONNECTION_TIMEOUT =
 		JAPConfAnonGeneral.class.getName() + "_loginTimeout";

@@ -1344,15 +1344,6 @@ public final class JAPModel extends Observable implements IHelpModel
 		}
 	}
 	
-	public boolean isHelpInstalled()
-	{
-		if (m_helpFileStorageManager == null ||	m_helpFileStorageManager instanceof LocalHelpFileStorageManager)
-		{
-			return false;
-		}
-		return true;
-	}
-	
 	public synchronized void setHelpPath(File hpFile)
 	{
 		setHelpPath(hpFile, false);
@@ -1514,11 +1505,6 @@ public final class JAPModel extends Observable implements IHelpModel
 		}	
 	}
 	
-	public boolean hasPortableHelp()
-	{
-		return m_bPortableHelp;
-	}
-	
 	/**
 	 * performs a validity check whether the specified path is a valid 
 	 * path for external installation of the help files.
@@ -1546,10 +1532,17 @@ public final class JAPModel extends Observable implements IHelpModel
 		return helpPathValidityCheck(hpFile.getPath());
 	}
 	
-	public boolean isHelpChangeable()
+	public boolean isHelpPathChangeable()
 	{
-		return m_helpFileStorageManager != null &&
-			!(m_helpFileStorageManager instanceof LocalHelpFileStorageManager);
+		if (m_helpFileStorageManager == null ||	m_helpFileStorageManager instanceof LocalHelpFileStorageManager)
+		{
+			return false;
+		}
+		if (!isHelpPathDefined() || m_bPortableHelp)
+		{
+			return false;
+		}
+		return true;
 	}
 	
 	/**
