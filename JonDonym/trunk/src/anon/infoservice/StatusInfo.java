@@ -28,7 +28,7 @@
 package anon.infoservice;
 
 import java.text.NumberFormat;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.security.SignatureException;
 
@@ -563,7 +563,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + 
-			DateFormat.getTimeInstance(DateFormat.LONG).format(new Date(getLastUpdate())) +
+			new SimpleDateFormat("HH:mm:ss").format(new Date(getLastUpdate())) +
 			"</TD></TR>";
 		return htmlTableLine;
 	}
