@@ -58,6 +58,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{ 0, 100, 250, 500, 750, 1000, 1500, 2000 },
 		{ 500, 750, 1000, 2000, 3000, 4000, Long.MAX_VALUE} };
 	
+	public static final int[] BOUNDARY_SIZE = { BOUNDARIES[SPEED].length,
+		BOUNDARIES[DELAY].length};
+	
 	private static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
 	public PerformanceEntry(String a_strCascadeId)
