@@ -263,24 +263,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_lastTestAverage[a_attribute];
 	}
 	
-	public PerformanceAttributeEntry getCurrentSpeedEntry()
-	{
-		m_current.setTime(new Date(System.currentTimeMillis()));
-		int hour = m_current.get(Calendar.HOUR_OF_DAY);
-		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
-		
-		return m_entries[SPEED][dayOfWeek][hour];
-	}
-	
-	public PerformanceAttributeEntry getCurrentDelayEntry()
-	{
-		m_current.setTime(new Date(System.currentTimeMillis()));
-		int hour = m_current.get(Calendar.HOUR_OF_DAY);
-		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);
-		
-		return m_entries[DELAY][dayOfWeek][hour];
-	}
-	
 	public void overrideXMLBound(int a_attribute, long a_lValue)
 	{
 		m_currentEntries[a_attribute].overrideXMLBound(a_lValue);
@@ -472,17 +454,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
 		
-		if(getCurrentDelayEntry() != null)
-		{
-			Element elemDelay = m_currentEntries[DELAY].toXmlElement(a_doc);
-			elemCurrent.appendChild(elemDelay);
-		}
+		Element elemDelay = m_currentEntries[DELAY].toXmlElement(a_doc);
+		elemCurrent.appendChild(elemDelay);
 		
-		if(getCurrentSpeedEntry() != null)
-		{
-			Element elemSpeed = m_currentEntries[SPEED].toXmlElement(a_doc);
-			elemCurrent.appendChild(elemSpeed);
-		}
+		Element elemSpeed = m_currentEntries[SPEED].toXmlElement(a_doc);
+		elemCurrent.appendChild(elemSpeed);
 		
 		elem.appendChild(elemCurrent);
 		
@@ -565,6 +541,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			long values = 0;
 			long errors = 0;
+			Long timestamp;
 			
 			Vector vec = new Vector();
 			synchronized (m_Values)
@@ -572,7 +549,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				Enumeration e = m_Values.elements();
 				while (e.hasMoreElements())
 				{
+					timestamp = (Long) e.nextElement();
+					if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
+					{
+						continue;
+					}
+					
 					Long value = (Long) e.nextElement();
+					
 					if(value.longValue() < 0)
 					{
 						errors++;
@@ -625,6 +609,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			long values = 0;
 			long errors = 0;
+			Long timestamp;
 			
 			Vector vec = new Vector();
 			synchronized (m_Values)
@@ -632,6 +617,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				Enumeration e = m_Values.elements();
 				while (e.hasMoreElements())
 				{
+					timestamp = (Long) e.nextElement();
+					if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
+					{
+						continue;
+					}
+					
 					Long value = (Long) e.nextElement();
 					if(value.longValue() < 0)
 					{
@@ -784,8 +775,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			{
 				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getLowerBound());
 			}
-			
-			if(this.m_attribute == DELAY)
+			else if(this.m_attribute == DELAY)
 			{
 				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getUpperBound());
 			}
