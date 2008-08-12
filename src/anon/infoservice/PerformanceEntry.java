@@ -144,6 +144,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int day = cal.get(Calendar.DAY_OF_WEEK);
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 		
+		entry = m_entries[a_attribute][day][hour];
+		if(entry == null)
+		{
+			m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry();
+		}
+		
+		entry.addValue(a_timestamp, a_value);
+		m_currentEntries[a_attribute].addValue(a_timestamp, a_value);
+		
+		m_lastUpdate = a_timestamp;
+		
 		// check if entries are obsolete
 		for(int i = 0; i < 24; i++)
 		{
@@ -158,17 +169,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				m_entries[a_attribute][day][i] = null;
 			}
 		}
-		
-		entry = m_entries[a_attribute][day][hour];
-		if(entry == null)
-		{
-			m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry();
-		}
-		
-		entry.addValue(a_timestamp, a_value);
-		m_currentEntries[a_attribute].addValue(a_timestamp, a_value);
-		
-		m_lastUpdate = a_timestamp;
 	}
 	
 	public long addData(int a_attribute, Hashtable a_data) 
