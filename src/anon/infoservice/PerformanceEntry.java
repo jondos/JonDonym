@@ -546,8 +546,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			Vector vec = new Vector();
 			synchronized (m_Values)
 			{
-				Enumeration e = m_Values.elements();
-				while (e.hasMoreElements())
+				Enumeration e = m_Values.keys();
+				
+				while(e.hasMoreElements())
 				{
 					timestamp = (Long) e.nextElement();
 					if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
@@ -555,7 +556,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 						continue;
 					}
 					
-					Long value = (Long) e.nextElement();
+					Long value = ((Long) m_Values.get(timestamp));
 					
 					if(value.longValue() < 0)
 					{
@@ -614,8 +615,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			Vector vec = new Vector();
 			synchronized (m_Values)
 			{
-				Enumeration e = m_Values.elements();
-				while (e.hasMoreElements())
+				Enumeration e = m_Values.keys();
+				
+				while(e.hasMoreElements())
 				{
 					timestamp = (Long) e.nextElement();
 					if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
@@ -623,7 +625,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 						continue;
 					}
 					
-					Long value = (Long) e.nextElement();
+					Long value = ((Long) m_Values.get(timestamp));
+					
 					if(value.longValue() < 0)
 					{
 						errors++;
