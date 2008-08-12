@@ -429,7 +429,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					}
 				}*/
 				
-				htmlData += "<td>" + format.format(100.0 * entry.getStdDeviation() / (double)entry.getAverageValue()) + "%</td>";
+				htmlData += "<td>" + format.format(100.0 * entry.getStdDeviation() / (double)entry.getAverageValue()) + " %</td>";
 				
 				double errorPercentage = 0;
 				
@@ -437,6 +437,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				{
 					errorPercentage = (double) entry.getErrors() / entry.getValueSize() * 100.0;
 				}
+				
+				htmlData += "<td>" + entry.getErrors() + " / " + entry.getValueSize() + " (" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(errorPercentage) +" %)</td>";				
 			}
 			
 			htmlData += "</tr>";
