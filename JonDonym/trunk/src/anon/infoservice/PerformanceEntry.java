@@ -55,8 +55,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public static final String[] ATTRIBUTES = new String[]{ "Speed", "Delay", "Users" };
 	
 	public static final long[][] BOUNDARIES = new long[][] { 
-		{ 100, 250, 500, 750, 1000, 1500, 2000 },
-		{ 500, 1000, 2000, 3000, 4000, 8000 } };
+		{ 0, 100, 250, 500, 750, 1000, 1500, 2000 },
+		{ 500, 750, 1000, 2000, 3000, 4000, Long.MAX_VALUE} };
 	
 	private static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
@@ -281,9 +281,20 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_currentEntries[a_attribute].overrideXMLBound(a_lValue);
 	}
 	
-	public long getLowerBound(int a_attribute)
+	public long getBound(int a_attribute)
 	{
-		return m_currentEntries[a_attribute].getLowerBound();
+		if(a_attribute == SPEED)
+		{
+			return m_currentEntries[a_attribute].getLowerBound();
+		}
+		else if(a_attribute == DELAY)
+		{
+			return m_currentEntries[a_attribute].getUpperBound();
+		}
+		else
+		{
+			return 0;
+		}
 	}
 	
 	public long getAverage(int a_attribute)
