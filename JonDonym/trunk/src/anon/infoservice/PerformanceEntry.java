@@ -272,11 +272,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		if(a_attribute == SPEED)
 		{
-			return m_currentEntries[a_attribute].getLowerBound();
+			return m_currentEntries[a_attribute].getBound(true);
 		}
 		else if(a_attribute == DELAY)
 		{
-			return m_currentEntries[a_attribute].getUpperBound();
+			return m_currentEntries[a_attribute].getBound(false);
 		}
 		else
 		{
@@ -427,7 +427,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					}
 				}*/
 				
-				htmlData += "<td>" + format.format(100.0 * entry.getStdDeviation() / (double)entry.getAverageValue()) + " %</td>";
+				if(entry.getStdDeviation() == -1)
+				{
+					htmlData += "<td>0 %</td>";
+				}
+				else
+				{
+					htmlData += "<td>" + format.format(100.0 * entry.getStdDeviation() / (double)entry.getAverageValue()) + " %</td>";
+				}
 				
 				double errorPercentage = 0;
 				
@@ -537,7 +544,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			return m_lXMLBoundValue;
 		}
 		
-		public long getLowerBound()
+		public long getBound(boolean a_bLow)
 		{
 			long values = 0;
 			long errors = 0;
@@ -579,7 +586,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				return 0;
 			}
 			
-			Util.sort(vec, new LongSortLow());
+			if(a_bLow)
+			{
+				Util.sort(vec, new LongSortLow());
+			}
+			else
+			{
+				Util.sort(vec, new LongSortHigh());
+			}
 			
 			int limit = (int) Math.floor(vec.size() / 10);
 			
@@ -591,85 +605,31 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			if(vec.elementAt(0) != null)
 			{
 				long value = ((Long) vec.elementAt(0)).longValue();
-				
-				for(int i = BOUNDARIES[m_attribute].length -1 ; i >= 0; i--)
+			
+				if(a_bLow)
 				{
-					if(value >= BOUNDARIES[m_attribute][i])
+					for(int i = BOUNDARIES[m_attribute].length -1 ; i >= 0; i--)
 					{
-						return BOUNDARIES[m_attribute][i];
+						if(value >= BOUNDARIES[m_attribute][i])
+						{
+							return BOUNDARIES[m_attribute][i];
+						}
 					}
+				}
+				else
+				{
+					for(int i = 0; i < BOUNDARIES[m_attribute].length; i++)
+					{
+						if(value <= BOUNDARIES[m_attribute][i])
+						{
+							return BOUNDARIES[m_attribute][i];
+						}
+					}
+					
+					return BOUNDARIES[m_attribute][BOUNDARIES[m_attribute].length - 1];
 				}
 				
 				return BOUNDARIES[m_attribute][0];
-			}
-			
-			return -1;
-		}
-	
-		public long getUpperBound()
-		{
-			long values = 0;
-			long errors = 0;
-			Long timestamp;
-			
-			Vector vec = new Vector();
-			synchronized (m_Values)
-			{
-				Enumeration e = m_Values.keys();
-				
-				while(e.hasMoreElements())
-				{
-					timestamp = (Long) e.nextElement();
-					if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
-					{
-						continue;
-					}
-					
-					Long value = ((Long) m_Values.get(timestamp));
-					
-					if(value.longValue() < 0)
-					{
-						errors++;
-					}
-					else
-					{
-						values++;
-						vec.addElement(value);
-					}
-				}
-			}
-			
-			if(values == 0 && errors > 0)
-			{
-				return -1;
-			}
-			else if(values == 0)
-			{
-				return 0;
-			}
-			
-			Util.sort(vec, new LongSortHigh());
-			
-			int limit = (int) Math.floor(vec.size() / 10);
-			
-			for(int i = 0; i < limit; i++)
-			{
-				vec.remove(i);
-			}
-			
-			if(vec.elementAt(0) != null)
-			{
-				long value = ((Long) vec.elementAt(0)).longValue();
-				
-				for(int i = 0; i < BOUNDARIES[m_attribute].length; i++)
-				{
-					if(value <= BOUNDARIES[m_attribute][i])
-					{
-						return BOUNDARIES[m_attribute][i];
-					}
-				}
-				
-				return BOUNDARIES[m_attribute][BOUNDARIES[m_attribute].length - 1];
 			}
 			
 			return -1;
@@ -776,11 +736,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			if(this.m_attribute == SPEED)
 			{
-				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getLowerBound());
+				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getBound(true));
 			}
 			else if(this.m_attribute == DELAY)
 			{
-				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getUpperBound());
+				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getBound(false));
 			}
 			
 			return elem;
