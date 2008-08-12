@@ -525,14 +525,40 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
 					perfEntry.getLastTestAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getLastTestAverage(PerformanceEntry.DELAY)) : "?") +
 			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.DELAY)) : "?") + ") " +
-			"[" + perfEntry.getBound(PerformanceEntry.DELAY) + "] ms</a>" +
+			"[";
+		
+			long delayBound = perfEntry.getBound(PerformanceEntry.DELAY);
+		
+			if(delayBound == 0)
+			{
+				htmlTableLine += "< " + PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][1];
+			}
+			else
+			{
+				htmlTableLine += delayBound;
+			}
+		
+			htmlTableLine += "] ms</a>" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			"<a href=\"/values/speed/" + getId() + "\">" + 
 			((perfEntry != null  &&
 					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
 					perfEntry.getLastTestAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getLastTestAverage(PerformanceEntry.SPEED)) : "?") + 
 			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.SPEED)): "?") + ") " +
-					"[" + perfEntry.getBound(PerformanceEntry.SPEED) + "] kbit/s</a>" +
+					"[";
+		
+			long speedBound = perfEntry.getBound(PerformanceEntry.SPEED);
+			
+			if(speedBound == Long.MAX_VALUE)
+			{
+				htmlTableLine += "> " + PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 2];
+			}
+			else
+			{
+				htmlTableLine += speedBound;
+			}
+
+			htmlTableLine += "] kbit/s</a>" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + new Date(getLastUpdate()) +
