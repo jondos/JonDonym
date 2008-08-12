@@ -189,9 +189,11 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		// and calculate the average
 		
 		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
-		PerformanceEntry avgEntry = new PerformanceEntry(a_cascadeId);
+		PerformanceEntry clientEntry = new PerformanceEntry(a_cascadeId);
+		clientEntry.overrideXMLBound(PerformanceEntry.SPEED, 0);
+		clientEntry.overrideXMLBound(PerformanceEntry.DELAY, Long.MAX_VALUE);
 		
-		/*Vector v = new Vector();
+		Vector v = new Vector();
 		
 		for (int i = 0; i < vec.size(); i++)
 		{
@@ -204,10 +206,32 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		
 		if(v.size() == 0)
 		{
-			return avgEntry;
+			return clientEntry;
 		}
 		
-		long speed = 0;
+		int agreeing = 0;
+		long value = 0;
+		for(int i = PerformanceEntry.BOUNDARY_SIZE[PerformanceEntry.SPEED]; i >= 0; i--)
+		{
+			for(int j = 0; j < v.size(); j++)
+			{
+				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
+				if(entry.getXMLBound(PerformanceEntry.SPEED) == PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][i])
+				{
+					agreeing++;
+				}
+			}
+			
+			if((double) (agreeing / v.size()) >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			{
+				value = PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][i];
+				break;
+			}
+		}
+		
+		clientEntry.overrideXMLBound(PerformanceEntry.SPEED, value);
+		
+		/*long speed = 0;
 		long delay = 0;
 		long avgSpeed = 0;
 		long avgDelay = 0;
@@ -358,7 +382,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		avgEntry.overrideXMLStdDeviation(PerformanceEntry.SPEED, stdSpeed);
 		avgEntry.overrideXMLStdDeviation(PerformanceEntry.DELAY, stdDelay);*/
 		
-		return avgEntry;
+		return clientEntry;
 	}
 
 	/**

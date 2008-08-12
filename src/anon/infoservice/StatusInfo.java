@@ -28,6 +28,7 @@
 package anon.infoservice;
 
 import java.text.NumberFormat;
+import java.text.DateFormat;
 import java.util.Date;
 import java.security.SignatureException;
 
@@ -546,7 +547,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 					perfEntry.getLastTestAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getLastTestAverage(PerformanceEntry.SPEED)) : "?") + 
 			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.SPEED)): "?") + ") " +
 					"[";
-		
+			
 			long speedBound = perfEntry.getBound(PerformanceEntry.SPEED);
 			
 			if(speedBound == 0)
@@ -561,7 +562,8 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			htmlTableLine += "] kbit/s</a>" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
-			"</TD><TD CLASS=\"status\">" + new Date(getLastUpdate()) +
+			"</TD><TD CLASS=\"status\">" + 
+			DateFormat.getDateInstance(DateFormat.LONG).format(new Date(getLastUpdate())) +
 			"</TD></TR>";
 		return htmlTableLine;
 	}
