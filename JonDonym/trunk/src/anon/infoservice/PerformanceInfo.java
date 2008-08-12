@@ -227,18 +227,19 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			return clientEntry;
 		}
 		
-		int agreeing = 0;
+		int agreeing;
 		long value = 0;
 		
 		for(int i = vSpeedBoundaries.size() - 1; i >= 0; i--)
 		{
+			agreeing = 0;
 			long bound = ((Long) vSpeedBoundaries.elementAt(i)).longValue();
 			value = bound;
 			
 			for(int j = 0; j < v.size(); j++)
 			{
 				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
-				if(entry.getXMLBound(PerformanceEntry.SPEED) == bound)
+				if(entry.getXMLBound(PerformanceEntry.SPEED) <= bound)
 				{
 					agreeing++;
 				}
@@ -253,13 +254,14 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		
 		for(int i = 0; i< vDelayBoundaries.size(); i++)
 		{
+			agreeing = 0;
 			long bound = ((Long) vDelayBoundaries.elementAt(i)).longValue();
 			value = bound;
 			
 			for(int j = 0; j < v.size(); j++)
 			{
 				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
-				if(entry.getXMLBound(PerformanceEntry.DELAY) == bound)
+				if(entry.getXMLBound(PerformanceEntry.DELAY) >= bound)
 				{
 					agreeing++;
 				}
