@@ -439,7 +439,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 				
 				htmlData += "<td>" + entry.getErrors() + " / " + entry.getValueSize() + " (" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(errorPercentage) +" %)</td>";				
-				htmlData += "<td>" + entry.getDayTimestamp() + "</td>";
+				htmlData += "<td>" + entry.getDayTimestamp() + "(" + (System.currentTimeMillis() - entry.getDayTimestamp()) + ")" + "</td>";
 			}
 			
 			htmlData += "</tr>";
@@ -741,8 +741,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			
 			m_lMaxValue = Math.max(m_lMaxValue, a_lValue);
-			
-			m_lastUpdate = System.currentTimeMillis();			
 		}
 		
 		public long getAverageValue()
