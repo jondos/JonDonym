@@ -439,6 +439,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 				
 				htmlData += "<td>" + entry.getErrors() + " / " + entry.getValueSize() + " (" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(errorPercentage) +" %)</td>";				
+				htmlData += "<td>" + entry.getDayTimestamp() + "</td>";
 			}
 			
 			htmlData += "</tr>";
