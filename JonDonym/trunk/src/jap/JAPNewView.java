@@ -86,6 +86,8 @@ import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.JavaVersionDBEntry;
+import anon.infoservice.PerformanceInfo;
+import anon.infoservice.PerformanceEntry;
 import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
@@ -235,7 +237,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JLabel m_labelAnonService, m_labelAnonymity, m_labelAnonymitySmall, m_labelAnonymityOnOff;
 	private JLabel m_labelAnonMeter, m_labelAnonymityLow, m_labelAnonymityHigh;
 
-	private JLabel m_labelAnonymityUser, m_labelAnonymityUserLabel, m_labelMixCountries, m_labelOperatorCountries;
+	private JLabel m_labelSpeed, m_labelDelay, m_labelSpeedLabel, m_labelDelayLabel, m_labelMixCountries, m_labelOperatorCountries;
 	
 	private JLabel m_labelMixFlags[], m_labelOperatorFlags[];
 	private MixMouseAdapter m_adapterMix[];
@@ -772,29 +774,43 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.insets = new Insets(0, 5, 0, 0);
 		p.add(m_labelAnonymity, c1);
 		
-		m_labelAnonymityUserLabel = new JLabel(JAPMessages.getString("ngNrOfUsers") + ":");
+		m_labelSpeedLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_speed") + ":");
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(5, 15, 0, 10);
-		p.add(m_labelAnonymityUserLabel, c1);
+		p.add(m_labelSpeedLabel, c1);
+		
+		m_labelDelayLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_latency") + ":");
+		c1.gridy = 2;
+		p.add(m_labelDelayLabel, c1);
 		
 		m_labelMixCountries = new JLabel(JAPMessages.getString("ngMixCountries"));
-		c1.gridy = 2;
+		c1.gridy = 3;
 		p.add(m_labelMixCountries, c1);
 		
 		m_labelOperatorCountries = new JLabel(JAPMessages.getString("ngOperatorCountries"));
-		c1.gridy = 3;
+		c1.gridy = 4;
 		p.add(m_labelOperatorCountries, c1);
 		
-		m_labelAnonymityUser = new JLabel("", SwingConstants.LEFT);
-		c1.insets = new Insets(0, 0, 0, 0);
+		m_labelSpeed = new JLabel("", SwingConstants.LEFT);
+		c1.insets = new Insets(5, 0, 0, 10);
 		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
 		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.gridy = 1;
 		c1.gridx = 1;
 		c1.gridwidth = 3;
-		p.add(m_labelAnonymityUser, c1);
+		p.add(m_labelSpeed, c1);
+		
+		m_labelDelay = new JLabel("", SwingConstants.LEFT);
+		c1.insets = new Insets(5, 0, 0, 10);
+		c1.anchor = GridBagConstraints.WEST;
+		c1.weightx = 0;
+		c1.fill = GridBagConstraints.HORIZONTAL;
+		c1.gridy = 2;
+		c1.gridx = 1;
+		c1.gridwidth = 3;
+		p.add(m_labelDelay, c1);
 
 		m_labelMixFlags = new JLabel[3];
 		m_labelOperatorFlags = new JLabel[3];
@@ -808,14 +824,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			c1.gridx = i + 1;
 			
 			m_labelMixFlags[i] = new JLabel("");
-			c1.gridy = 2;
+			c1.gridy = 3;
 			p.add(m_labelMixFlags[i], c1);
 			
 			m_labelMixFlags[i].addMouseListener(m_adapterMix[i] = 
 				new MixMouseAdapter(null, i));
 			m_labelMixFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			
-			c1.gridy = 3;
+			c1.gridy = 4;
 			m_labelOperatorFlags[i] = new JLabel("");
 			p.add(m_labelOperatorFlags[i], c1);
 			
@@ -838,7 +854,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		});
 		c1.gridx = 4;
 		c1.gridy = 0;
-		c1.gridheight = 4;
+		c1.gridheight = 5;
 		c1.anchor = GridBagConstraints.EAST;
 		c1.weightx = 1;
 		c1.fill = GridBagConstraints.NONE;
@@ -2784,8 +2800,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					//{
 					//	userProgressBar.setMaximum(currentStatus.getNrOfActiveUsers());
 					//}
-					m_labelAnonymityUser.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
-							(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : ""));
+					//m_labelAnonymityUser.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
+					//		(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : ""));
 					//strSystrayTooltip += "\n" + JAPMessages.getString("ngNrOfUsers") + ": " +
 					//currentStatus.getNrOfActiveUsers();
 					if (anonLevel >= StatusInfo.ANON_LEVEL_MIN)
@@ -2820,7 +2836,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						}
 					}
 				}
-				else
+				/*else
 				{
 					strTemp = JAPMessages.getString("meterNA");
 					if (m_labelAnonymityUser.getText() == null ||
@@ -2829,7 +2845,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						// optimized change...
 						m_labelAnonymityUser.setText(strTemp);
 					}
-				}
+				}*/
 				/*int t = currentStatus.getTrafficSituation();
 				if (t > -1)
 				{
@@ -2854,7 +2870,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				/* we are not in anonymity mode */
 				//m_progressAnonTraffic.setValue(0);
-				m_labelAnonymityUser.setText("");
+				//m_labelAnonymityUser.setText("");
 				m_progressAnonLevel.setValue(0);
 			}
 			
@@ -2903,7 +2919,48 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_labelMixFlags[i].setIcon(null);
 				m_labelOperatorFlags[i].setIcon(null);
 			}
+			
+			PerformanceEntry entry = PerformanceInfo.getAverageEntry(currentMixCascade.getId());
 
+			String perfString = "";
+			long value = 0;
+			
+			if(entry != null)
+			{
+				value = entry.getXMLBound(PerformanceEntry.SPEED);						
+				if (value < 0)
+				{
+					m_labelSpeed.setText(JAPMessages.getString("statusUnknown"));
+				}
+				else if(value == 0)
+				{
+					m_labelSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1]));
+				}
+				else
+				{
+					m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+				}
+				
+				value = entry.getXMLBound(PerformanceEntry.DELAY);
+				if (value < 0)
+				{
+					m_labelDelay.setText(JAPMessages.getString("statusUnknown"));
+				}
+				else if(value == Long.MAX_VALUE)
+				{
+					m_labelDelay.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARY_SIZE[PerformanceEntry.DELAY] - 2]));
+				}
+				else
+				{
+					m_labelDelay.setText(value + " ms");
+				}
+			}
+			else
+			{
+				m_labelSpeed.setText(JAPMessages.getString("statusUnknown"));
+				m_labelDelay.setText(JAPMessages.getString("statusUnknown"));
+			}
+			
 			JAPDll.setSystrayTooltip(strSystrayTooltip);
 
 			LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Finished updateValues");

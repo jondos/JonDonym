@@ -508,7 +508,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_timeFrame = DEFAULT_TIMEFRAME;
 			m_attribute = a_attribute;
 			
-			m_lXMLBoundValue = XMLUtil.parseAttribute(a_node, XML_ATTR_BOUND, -1);
+			m_lXMLBoundValue = XMLUtil.parseAttribute(a_node, XML_ATTR_BOUND, -1l);
 		}
 		
 		public void addValue(long a_lTimeStamp, long a_lValue)
