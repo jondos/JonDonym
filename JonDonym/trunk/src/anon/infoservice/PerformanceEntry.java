@@ -145,7 +145,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 		
 		// check if entries are obsolete
-		for(int i = hour; i < 24; i++)
+		for(int i = 0; i < 24; i++)
 		{
 			if(m_entries[a_attribute][day][i] == null)
 			{
@@ -155,7 +155,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			if(System.currentTimeMillis() - 
 					m_entries[a_attribute][day][i].getDayTimestamp() >= 7 * 24 * 60 * 60 * 1000)
 			{
-				m_entries[a_attribute][day][i] = entry = new PerformanceAttributeEntry();
+				m_entries[a_attribute][day][i] = null;
 			}
 		}
 		
@@ -215,7 +215,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				if(System.currentTimeMillis() - 
 						m_entries[a_attribute][day][i].getDayTimestamp() > 7 * 24 * 60 * 60 * 1000)
 				{
-					m_entries[a_attribute][day][i] = entry = new PerformanceAttributeEntry();
+					m_entries[a_attribute][day][i] = null;
 				}
 			}
 			
