@@ -563,7 +563,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + 
-			DateFormat.getDateInstance(DateFormat.LONG).format(new Date(getLastUpdate())) +
+			DateFormat.getTimeInstance(DateFormat.LONG).format(new Date(getLastUpdate())) +
 			"</TD></TR>";
 		return htmlTableLine;
 	}
