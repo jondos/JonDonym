@@ -191,7 +191,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
 		PerformanceEntry avgEntry = new PerformanceEntry(a_cascadeId);
 		
-		Vector v = new Vector();
+		/*Vector v = new Vector();
 		
 		for (int i = 0; i < vec.size(); i++)
 		{
@@ -356,7 +356,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		avgEntry.overrideXMLAverage(PerformanceEntry.DELAY, avgDelay);
 		
 		avgEntry.overrideXMLStdDeviation(PerformanceEntry.SPEED, stdSpeed);
-		avgEntry.overrideXMLStdDeviation(PerformanceEntry.DELAY, stdDelay);
+		avgEntry.overrideXMLStdDeviation(PerformanceEntry.DELAY, stdDelay);*/
 		
 		return avgEntry;
 	}
@@ -392,7 +392,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	 * 
 	 * @return The minimum stray of the deleted entries
 	 */
-	public static double eliminateStrayEntries(Vector a_vec, Vector r_vecDeleted, long a_avgSpeed, long a_avgDelay, double a_maxStray)
+	/*public static double eliminateStrayEntries(Vector a_vec, Vector r_vecDeleted, long a_avgSpeed, long a_avgDelay, double a_maxStray)
 	{
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Looking for entries with stray >" + a_maxStray);
 		double nextStray = Double.MAX_VALUE;
@@ -439,5 +439,5 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		}
 		
 		return nextStray;
-	}
+	}*/
 }

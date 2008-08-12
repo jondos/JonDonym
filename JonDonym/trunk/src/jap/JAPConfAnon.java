@@ -1912,7 +1912,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					
 					if(entry != null)
 					{
-						value = entry.getXMLAverage(PerformanceEntry.SPEED);						
+						/*value = entry.getXMLAverage(PerformanceEntry.SPEED);						
 						if (value < 0)
 						{
 							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
@@ -1929,7 +1929,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 								deviation = 100;
 							}*/
 							
-							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+							/*m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
 							m_lblStdSpeed.setText((deviation > 0 ? " \u00B1" + df.format(deviation) + "%" : ""));
 						}
 						
@@ -1951,9 +1951,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 								deviation = 100;
 							}*/
 							
-							m_lblDelay.setText(value + " ms");
+							/*m_lblDelay.setText(value + " ms");
 							m_lblStdDelay.setText((deviation > 0 ? "\u00B1" + df.format(deviation) + "%" : ""));
-						}							
+						}		*/					
 					}
 					else
 					{
