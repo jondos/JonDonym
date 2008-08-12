@@ -144,20 +144,25 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int day = cal.get(Calendar.DAY_OF_WEEK);
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 		
+		// check if entries are obsolete
+		for(int i = hour; i < 24; i++)
+		{
+			if(m_entries[a_attribute][day][i] == null)
+			{
+				continue;
+			}
+			
+			if(System.currentTimeMillis() - 
+					m_entries[a_attribute][day][i].getDayTimestamp() >= 7 * 24 * 60 * 60 * 1000)
+			{
+				m_entries[a_attribute][day][i] = entry = new PerformanceAttributeEntry();
+			}
+		}
+		
 		entry = m_entries[a_attribute][day][hour];
 		if(entry == null)
 		{
 			m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry();
-		}
-		else
-		{
-			// check if entry is obsolete
-			if(System.currentTimeMillis() - 
-				getDayTimestamp(a_attribute, day) > 7 * 24 * 60 * 60 * 1000)
-			{
-				m_entries[a_attribute][day] = new PerformanceAttributeEntry[24];
-				m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry();
-			}
 		}
 		
 		entry.addValue(a_timestamp, a_value);
@@ -188,7 +193,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			timestamp = (Long) e.nextElement();
 			long value = ((Long) a_data.get(timestamp)).longValue();
 			
-			if(System.currentTimeMillis() - timestamp.longValue() > 7 * 24 * 60 * 60 * 1000)
+			if(System.currentTimeMillis() - timestamp.longValue() >= 7 * 24 * 60 * 60 * 1000)
 			{
 				continue;
 			}
@@ -198,22 +203,27 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			int day = cal.get(Calendar.DAY_OF_WEEK);
 			int hour = cal.get(Calendar.HOUR_OF_DAY);
+
+			// check if entries are obsolete
+			for(int i = hour; i < 24; i++)
+			{
+				if(m_entries[a_attribute][day][i] == null)
+				{
+					continue;
+				}
+				
+				if(System.currentTimeMillis() - 
+						m_entries[a_attribute][day][i].getDayTimestamp() > 7 * 24 * 60 * 60 * 1000)
+				{
+					m_entries[a_attribute][day][i] = entry = new PerformanceAttributeEntry();
+				}
+			}
 			
 			entry = m_entries[a_attribute][day][hour];
 			if(entry == null)
 			{
 				m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry();
 			}
-			else
-			{
-				// check if entry is obsolete
-				if(System.currentTimeMillis() - 
-					getDayTimestamp(a_attribute, day) > 7 * 24 * 60 * 60 * 1000)
-				{
-					m_entries[a_attribute][day] = new PerformanceAttributeEntry[24];
-					m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry();
-				}
-			}	
 			
 			entry.addValue(timestamp.longValue(), value);
 			
