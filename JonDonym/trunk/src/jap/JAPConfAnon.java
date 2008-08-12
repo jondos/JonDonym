@@ -216,9 +216,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private FilterPanel m_filterPanel;
 
 	private JLabel m_lblSpeed;
-	private JLabel m_lblStdSpeed;
 	private JLabel m_lblDelay;
-	private JLabel m_lblStdDelay;
 	
 	private JLabel m_numOfUsersLabel;
 	
@@ -720,14 +718,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_lblSpeed, c);
 		
-		c.insets = new Insets(5, 0, 0, 5);
-		m_lblStdSpeed = new JLabel("");
-		c.gridx = 4;
-		c.gridy = 2;
-		c.weightx = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		m_cascadesPanel.add(m_lblStdSpeed, c);
-		
 
 		c.insets = new Insets(5, 20, 0, 5);
 		l = new JLabel(JAPMessages.getString(MSG_FILTER_LATENCY) + ":");
@@ -745,14 +735,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_lblDelay, c);
 		
-		c.insets = new Insets(5, 0, 0, 5);
-		m_lblStdDelay = new JLabel("");
-		c.gridx = 4;
-		c.gridy = 3;
-		c.weightx = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		m_cascadesPanel.add(m_lblStdDelay, c);
-
 		c.insets = new Insets(5, 20, 0, 5);
 		c.gridx = 2;
 		c.gridy = 4;		
@@ -1912,57 +1894,40 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					
 					if(entry != null)
 					{
-						/*value = entry.getXMLAverage(PerformanceEntry.SPEED);						
+						value = entry.getXMLBound(PerformanceEntry.SPEED);						
 						if (value < 0)
 						{
 							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
-							m_lblStdSpeed.setText("");
+						}
+						else if(value == 0)
+						{
+							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1]));
 						}
 						else
 						{
-							deviation = (entry.getXMLStdDeviation(PerformanceEntry.SPEED) / value) * 100;														
-							
-							// values greater than 100% would confuse users...
-							/*
-							if(deviation > 100)
-							{
-								deviation = 100;
-							}*/
-							
-							/*m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
-							m_lblStdSpeed.setText((deviation > 0 ? " \u00B1" + df.format(deviation) + "%" : ""));
+							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
 						}
 						
 													
-						value = entry.getXMLAverage(PerformanceEntry.DELAY);
+						value = entry.getXMLBound(PerformanceEntry.DELAY);
 						if (value < 0)
 						{
 							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
-							m_lblStdDelay.setText("");
+						}
+						else if(value == Long.MAX_VALUE)
+						{
+							m_lblDelay.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARY_SIZE[PerformanceEntry.DELAY] - 2]));
 						}
 						else
 						{
-							deviation = (entry.getXMLStdDeviation(PerformanceEntry.DELAY) / value) * 100;
-							
-//							 values greater than 100% would confuse users...
-							/*
-							if(deviation > 100)
-							{
-								deviation = 100;
-							}*/
-							
-							/*m_lblDelay.setText(value + " ms");
-							m_lblStdDelay.setText((deviation > 0 ? "\u00B1" + df.format(deviation) + "%" : ""));
-						}		*/					
+							m_lblDelay.setText(value + " ms");
+						}
 					}
 					else
 					{
 						m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
-						m_lblStdSpeed.setText("");
 						m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
-						m_lblStdDelay.setText("");
 					}
-					
 					
 					m_numOfUsersLabel.setText(m_infoService.getAnonLevel(cascadeId));
 					//System.out.println(m_numOfUsersLabel.getText());
