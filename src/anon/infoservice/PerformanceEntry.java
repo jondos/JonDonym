@@ -13,6 +13,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
 import anon.util.Util.Comparable;
+import anon.util.Util.LongSortLow;
+import anon.util.Util.LongSortHigh;
 import anon.util.Util;
 import anon.util.XMLUtil;
 import anon.util.XMLParseException;
@@ -56,7 +58,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	
 	public static final long[][] BOUNDARIES = new long[][] { 
 		{ 0, 100, 250, 500, 750, 1000, 1500, 2000 },
-		{ 500, 750, 1000, 2000, 3000, 4000, Long.MAX_VALUE} };
+		{ 500, 750, 1000, 2000, 2500, 3000, 4000, Long.MAX_VALUE} };
 	
 	public static final int[] BOUNDARY_SIZE = { BOUNDARIES[SPEED].length,
 		BOUNDARIES[DELAY].length};
@@ -592,15 +594,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				return 0;
 			}
 			
-			Util.sort(vec, new Comparable() {
-				public int compare(Object a_obj1, Object a_obj2)
-				{
-					if(a_obj1 == null && a_obj2 == null) return 0;
-					else if(a_obj1 == null) return 1;
-					
-					return (int) (((Long) a_obj1).longValue() - ((Long) a_obj2).longValue());
-				}
-			});
+			Util.sort(vec, new LongSortLow());
 			
 			int limit = (int) Math.floor(vec.size() / 10);
 			
@@ -660,15 +654,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				return 0;
 			}
 			
-			Util.sort(vec, new Comparable() {
-				public int compare(Object a_obj1, Object a_obj2)
-				{
-					if(a_obj1 == null && a_obj2 == null) return 0;
-					else if(a_obj1 == null) return -1;
-					
-					return (int) (((Long) a_obj2).longValue() - ((Long) a_obj1).longValue());
-				}
-			});
+			Util.sort(vec, new LongSortHigh());
 			
 			int limit = (int) Math.floor(vec.size() / 10);
 			

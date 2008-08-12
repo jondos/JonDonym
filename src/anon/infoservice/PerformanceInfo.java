@@ -6,12 +6,14 @@ import org.w3c.dom.NodeList;
 
 import java.util.Hashtable;
 import java.util.Vector;
-import java.util.Enumeration;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.util.Util;
+import anon.util.Util.LongSortLow;
+import anon.util.Util.LongSortHigh;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
@@ -190,10 +192,10 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		
 		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
 		PerformanceEntry clientEntry = new PerformanceEntry(a_cascadeId);
-		clientEntry.overrideXMLBound(PerformanceEntry.SPEED, 0);
-		clientEntry.overrideXMLBound(PerformanceEntry.DELAY, Long.MAX_VALUE);
 		
 		Vector v = new Vector();
+		Vector vSpeedBoundaries = new Vector();
+		Vector vDelayBoundaries = new Vector();
 		
 		for (int i = 0; i < vec.size(); i++)
 		{
@@ -201,8 +203,24 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			if (entry != null)
 			{
 				v.addElement(entry);
+				Long value = new Long(entry.getXMLBound(PerformanceEntry.SPEED));
+				
+				if(!vSpeedBoundaries.contains(value))
+				{
+					vSpeedBoundaries.add(value);
+				}
+				
+				value = new Long(entry.getXMLBound(PerformanceEntry.DELAY));
+				
+				if(!vDelayBoundaries.contains(value))
+				{
+					vDelayBoundaries.add(value);
+				}
 			}
 		}
+		
+		Util.sort(vSpeedBoundaries, new LongSortLow());
+		Util.sort(vSpeedBoundaries, new LongSortHigh());
 		
 		if(v.size() == 0)
 		{
@@ -211,12 +229,16 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		
 		int agreeing = 0;
 		long value = 0;
-		for(int i = PerformanceEntry.BOUNDARY_SIZE[PerformanceEntry.SPEED]; i >= 0; i--)
+		
+		for(int i = vSpeedBoundaries.size() - 1; i >= 0; i--)
 		{
+			long bound = ((Long) vSpeedBoundaries.elementAt(i)).longValue();
+			value = bound;
+			
 			for(int j = 0; j < v.size(); j++)
 			{
 				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
-				if(entry.getXMLBound(PerformanceEntry.SPEED) == PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][i])
+				if(entry.getXMLBound(PerformanceEntry.SPEED) == bound)
 				{
 					agreeing++;
 				}
@@ -224,12 +246,32 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			
 			if((double) (agreeing / v.size()) >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
 			{
-				value = PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][i];
+				break;
+			}
+		}
+		clientEntry.overrideXMLBound(PerformanceEntry.SPEED, value);
+		
+		for(int i = 0; i< vDelayBoundaries.size(); i++)
+		{
+			long bound = ((Long) vDelayBoundaries.elementAt(i)).longValue();
+			value = bound;
+			
+			for(int j = 0; j < v.size(); j++)
+			{
+				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
+				if(entry.getXMLBound(PerformanceEntry.DELAY) == bound)
+				{
+					agreeing++;
+				}
+			}
+			
+			if((double) (agreeing / v.size()) >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			{
 				break;
 			}
 		}
 		
-		clientEntry.overrideXMLBound(PerformanceEntry.SPEED, value);
+		clientEntry.overrideXMLBound(PerformanceEntry.DELAY, value);
 		
 		/*long speed = 0;
 		long delay = 0;
