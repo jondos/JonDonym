@@ -117,7 +117,6 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 		}
 		
-		
 		m_id = XMLUtil.parseAttribute(a_info, XML_ATTR_ID, "");
 		
 		if(!checkId())

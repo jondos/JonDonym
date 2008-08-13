@@ -1787,7 +1787,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
             m_opPopupMenu.show(e.getComponent(), e.getX(), e.getY());
         }
     }
-
+	
 	public void mouseEntered(MouseEvent e)
 	{
 		if ( (e.getSource() == m_operatorLabel && getUrlFromLabel(m_operatorLabel) != null) ||
