@@ -266,8 +266,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	private JSlider m_filterSpeedSlider;
 	private JSlider m_filterLatencySlider;
+	private JRadioButton m_filterAllCountries;
 	private JRadioButton m_filterAtLeast2Countries;
 	private JRadioButton m_filterAtLeast3Countries;
+	private JRadioButton m_filterAllMixes;
 	private JRadioButton m_filterAtLeast2Mixes;
 	private JRadioButton m_filterAtLeast3Mixes;
 	private JTextField m_filterNameField;
@@ -1363,9 +1365,24 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 				hideEditFilter();
 			}
+		}	
+		else if(e.getSource() == m_filterAllCountries)
+		{
+			m_filterAllMixes.setEnabled(true);
+			m_filterAtLeast2Mixes.setEnabled(true);
+		}
+		else if(e.getSource() == m_filterAtLeast2Countries)
+		{
+			m_filterAllMixes.setEnabled(false);
+			m_filterAtLeast2Mixes.setEnabled(true);
+		}
+		else if(e.getSource() == m_filterAtLeast3Countries)
+		{
+			m_filterAllMixes.setEnabled(false);
+			m_filterAtLeast2Mixes.setEnabled(false);
 		}
 	}
-
+	
 	private void hideEditFilter() 
 	{
 		m_showEditFilterButton.setText(JAPMessages.getString(MSG_EDIT_FILTER));
@@ -1719,19 +1736,19 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 	}
 
-	private int convertDelayValue(int a_delay, boolean bFromUtilToReal)
+	private int convertDelayValue(int a_delay, boolean a_bFromUtilToReal)
 	{
-		if(bFromUtilToReal && a_delay == m_filterLatencySlider.getMinimum())
+		if(a_bFromUtilToReal && a_delay == m_filterLatencySlider.getMinimum())
 		{
 			return TrustModel.TRUST_ALWAYS;
 		}
 		
-		if(!bFromUtilToReal && a_delay == TrustModel.TRUST_ALWAYS)
+		if(!a_bFromUtilToReal && a_delay == TrustModel.TRUST_ALWAYS)
 		{
 			return m_filterLatencySlider.getMinimum();
 		}
 		
-		if (bFromUtilToReal)
+		if (a_bFromUtilToReal)
 		{
 			a_delay = (FILTER_LATENCY_STEPS - a_delay) * FILTER_LATENCY_MAJOR_TICK;
 		}
@@ -3281,21 +3298,24 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			p = new JPanel(new GridLayout(0, 1));
 			p.setBorder(title);
 			
-			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
-			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
-			r.setSelected(true);
-			p.add(r, c);
+			m_filterAllMixes = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
+			m_filterAllMixes.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
+			m_filterAllMixes.setSelected(true);
+			m_filterAllMixes.addActionListener(a_listener);
+			p.add(m_filterAllMixes, c);
 			
 			m_filterAtLeast2Mixes = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_2_MIXES));
 			m_filterAtLeast2Mixes.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			m_filterAtLeast2Mixes.addActionListener(a_listener);
 			p.add(m_filterAtLeast2Mixes, c);			
 			
 			m_filterAtLeast3Mixes = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_3_MIXES));
 			m_filterAtLeast3Mixes.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
+			m_filterAtLeast3Mixes.addActionListener(a_listener);
 			p.add(m_filterAtLeast3Mixes, c);
 			
 			m_filterCascadeGroup = new ButtonGroup();
-			m_filterCascadeGroup.add(r);
+			m_filterCascadeGroup.add(m_filterAllMixes);
 			m_filterCascadeGroup.add(m_filterAtLeast2Mixes);
 			m_filterCascadeGroup.add(m_filterAtLeast3Mixes);
 			
@@ -3312,21 +3332,24 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			p = new JPanel(new GridLayout(0, 1));
 			p.setBorder(title);
 			
-			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
-			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
-			r.setSelected(true);
-			p.add(r, c);
+			m_filterAllCountries = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
+			m_filterAllCountries.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
+			m_filterAllCountries.setSelected(true);
+			m_filterAllCountries.addActionListener(a_listener);
+			p.add(m_filterAllCountries, c);
 			
 			m_filterAtLeast2Countries = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_2_COUNTRIES));
 			m_filterAtLeast2Countries.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
+			m_filterAtLeast2Countries.addActionListener(a_listener);
 			p.add(m_filterAtLeast2Countries);
 			
 			m_filterAtLeast3Countries = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_3_COUNTRIES));
 			m_filterAtLeast3Countries.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
+			m_filterAtLeast3Countries.addActionListener(a_listener);
 			p.add(m_filterAtLeast3Countries);
 			
 			m_filterInternationalGroup = new ButtonGroup();
-			m_filterInternationalGroup.add(r);
+			m_filterInternationalGroup.add(m_filterAllCountries);
 			m_filterInternationalGroup.add(m_filterAtLeast2Countries);
 			m_filterInternationalGroup.add(m_filterAtLeast3Countries);
 			

@@ -167,14 +167,14 @@ public class PopupMenu
 					setVisible(false);
 				}
 			}
-			public void mouseExited(MouseEvent a_event)
+			/*public void mouseExited(MouseEvent a_event)
 			{
 				Component component = m_popup.getComponentAt(a_event.getPoint());
 				if (component == null || component.getParent() != m_popup)
 				{
 					m_exitHandler.exited();
 				}
-			}
+			}*/
 		};
 
 
@@ -322,7 +322,7 @@ public class PopupMenu
 	public final synchronized void show(Component a_parent, Point a_pointOnScreen)
 	{
 		show(a_parent, null, a_pointOnScreen);
-}
+	}
 
 	public final synchronized void show(Component a_parent, Window a_hiddenParent, Point a_pointOnScreen)
 	{
@@ -353,9 +353,10 @@ public class PopupMenu
 
 		/** @todo Find a better way to distinguish JDK version compatibility!  */
 		if (!m_bCompatibilityMode &&
-			(JavaVersionDBEntry.CURRENT_JAVA_VENDOR.toLowerCase().indexOf("sun") >= 0 &&
+			(JavaVersionDBEntry.CURRENT_JAVA_VENDOR.toLowerCase().indexOf("sun") >= 0 ||
+			JavaVersionDBEntry.CURRENT_JAVA_VENDOR.toLowerCase().indexOf("apple") >= 0 /*&&
 			 (JavaVersionDBEntry.CURRENT_JAVA_VERSION.compareTo("1.6") < 0 ||
-			(JavaVersionDBEntry.CURRENT_JAVA_VERSION.compareTo("1.6.0_02") >= 0))))
+			(JavaVersionDBEntry.CURRENT_JAVA_VERSION.compareTo("1.6.0_02") >= 0))*/))
 		{
 			( (JPopupMenu) m_popup).setInvoker(parentWindow);
 		}
