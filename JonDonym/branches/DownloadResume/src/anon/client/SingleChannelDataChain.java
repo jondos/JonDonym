@@ -273,6 +273,7 @@ public class SingleChannelDataChain extends AbstractDataChain
 					}
 					case InternalChannelMessage.CODE_CHANNEL_CLOSED:
 					{
+						System.out.println("End of Stream");
 						addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(
 							DataChainInputStreamQueueEntry.TYPE_STREAM_END, null));
 						

@@ -268,7 +268,14 @@ public abstract class AbstractDataChain implements AnonChannel, Observer, Runnab
       if (!m_closed) {
         synchronized (m_queueEntries) {
           m_closed = true;
+          //System.out.println("Closing stream with "+m_queueEntries.size()+" elements");
+          //Exception e = new Exception();
+          //e.printStackTrace();
           /* clear all entries in the queue */
+          /*if(m_queueEntries.size()>0)
+          {
+        	  System.out.println("Queue:" +((DataChainInputStreamQueueEntry)m_queueEntries.firstElement()).getType());
+          }*/
           m_queueEntries.removeAllElements();
           /* wake up waiting threads (normally there should be no one) */
           m_queueEntries.notifyAll();

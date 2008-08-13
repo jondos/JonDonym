@@ -109,7 +109,8 @@ public class UnlimitedDataChannel extends AbstractDataChannel {
 
   protected void handleReceivedPacket(MixPacket a_mixPacket) {
     if ((a_mixPacket.getChannelFlags() & FLAG_CHANNEL_CLOSE) == FLAG_CHANNEL_CLOSE) {
-      /* send a close-channel message via the message-queue */
+    System.out.println("Getting channel close for channel "+a_mixPacket.getChannelId());  
+    /* send a close-channel message via the message-queue */
       getChannelMessageQueue().addChannelMessage(new InternalChannelMessage(InternalChannelMessage.CODE_CHANNEL_CLOSED, a_mixPacket.getPayloadData()));
       /* if close bit is set -> close the channel */
       deleteChannel();

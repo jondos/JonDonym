@@ -109,6 +109,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	private final Object SHUTDOWN_SYNC = new Object();
 	private boolean bShuttingDown = false;
 
+	private ProxyCallbackHandler m_callbackHandler = null;
+		//new ProxyCallbackHandler();
+	
 	/**
 	 * Stores the MixCascade we are connected to.
 	 */
@@ -194,6 +197,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
 		// SOCKS\uFFFD
+		/*DownloadSwitch dswitch = new DownloadSwitch(); 
+		m_callbackHandler.registerProxyCallback(dswitch);
+		addEventListener(dswitch);*/
 	}
 
 	/**
@@ -229,6 +235,8 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_anonServiceListener = new Vector();
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
+		
+		//m_callbackHandler.registerProxyCallback(new DownloadSwitch());
 	}
 
 	/**
@@ -480,7 +488,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 				{
 					try
 					{
-						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject);
+						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject, m_callbackHandler);
 					}
 					catch (Exception e)
 					{
