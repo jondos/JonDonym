@@ -832,6 +832,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		return ms_currentTrustModel;
 	}
 
+	public static TrustModel getCustomFilter()
+	{
+		return TRUST_MODEL_CUSTOM_FILTER;
+	}
+	
 	public static void fromXmlElement(Element a_container)
 	{
 		int trustModelsAdded = 0;

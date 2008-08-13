@@ -291,6 +291,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private MixInfo m_serverInfo;
 	
 	private Vector m_locationCoordinates;
+	private TrustModel m_previousTrustModel;
 	
 	/**
 	 * A copy of the trust model we're currently editing
@@ -590,7 +591,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						!TrustModel.getCurrentTrustModel().equals(m_cmbCascadeFilter.getSelectedItem()))
 				{
 					TrustModel.setCurrentTrustModel((TrustModel)m_cmbCascadeFilter.getSelectedItem());
-					m_showEditFilterButton.setEnabled(((TrustModel)m_cmbCascadeFilter.getSelectedItem()).isEditable());
+					//m_showEditFilterButton.setEnabled(((TrustModel)m_cmbCascadeFilter.getSelectedItem()).isEditable());
 					updateValues(false);
 					
 					if(m_filterPanel != null && m_filterPanel.isVisible())
@@ -604,7 +605,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		
 		m_showEditFilterButton = new JButton(JAPMessages.getString(MSG_EDIT_FILTER));
 		m_showEditFilterButton.addActionListener(this);
-		m_showEditFilterButton.setEnabled(TrustModel.getCurrentTrustModel().isEditable());
+		//m_showEditFilterButton.setEnabled(TrustModel.getCurrentTrustModel().isEditable());
 		c.gridx = 2;
 		c.gridy = 0;
 		c.gridheight = 1;
@@ -1349,9 +1350,17 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		else if (e.getSource() == m_showEditFilterButton)
 		{
 			if(m_filterPanel == null || !m_filterPanel.isVisible())
+			{
+				m_previousTrustModel = (TrustModel) m_cmbCascadeFilter.getSelectedItem();
+				m_cmbCascadeFilter.setSelectedItem(TrustModel.getCustomFilter());
 				drawFilterPanel();
+			}
 			else if(m_filterPanel != null && m_filterPanel.isVisible())
 			{
+				if(m_previousTrustModel != TrustModel.getCustomFilter())
+				{
+					m_cmbCascadeFilter.setSelectedItem(m_previousTrustModel);
+				}
 				hideEditFilter();
 			}
 		}
@@ -3268,38 +3277,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			add(m_filterNameField, c);
 			
 			c.weightx = 0;
-			TitledBorder title = new TitledBorder(JAPMessages.getString(MSG_FILTER_PAYMENT));
-			p = new JPanel(new GridLayout(0, 1));
-			p.setBorder(title);
-			
-			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
-			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
-			r.setSelected(true);
-			p.add(r);
-			
-			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_NO_PAYMENT_ONLY));
-			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
-			p.add(s);
-			
-			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_PAYMENT_ONLY));
-			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
-			p.add(t);			
-			
-			m_filterPaymentGroup = new ButtonGroup();
-			m_filterPaymentGroup.add(r);
-			m_filterPaymentGroup.add(s);
-			m_filterPaymentGroup.add(t);
-			
-			c.anchor = GridBagConstraints.NORTHWEST;
-			c.fill = GridBagConstraints.BOTH;
-
-			c.gridwidth = 2;
-			c.gridx = 0;
-			c.gridy++;
-			c.weightx = 0.4;
-			add(p, c);
-			
-			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_CASCADES));
+			TitledBorder title = new TitledBorder(JAPMessages.getString(MSG_FILTER_CASCADES));
 			p = new JPanel(new GridLayout(0, 1));
 			p.setBorder(title);
 			
@@ -3320,6 +3298,37 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterCascadeGroup.add(r);
 			m_filterCascadeGroup.add(m_filterAtLeast2Mixes);
 			m_filterCascadeGroup.add(m_filterAtLeast3Mixes);
+			
+			c.anchor = GridBagConstraints.NORTHWEST;
+			c.fill = GridBagConstraints.BOTH;
+			
+			c.gridwidth = 2;
+			c.gridx = 0;
+			c.gridy++;
+			c.weightx = 0.4;
+			add(p, c);
+			
+			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_INTERNATIONALITY));
+			p = new JPanel(new GridLayout(0, 1));
+			p.setBorder(title);
+			
+			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
+			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
+			r.setSelected(true);
+			p.add(r, c);
+			
+			m_filterAtLeast2Countries = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_2_COUNTRIES));
+			m_filterAtLeast2Countries.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
+			p.add(m_filterAtLeast2Countries);
+			
+			m_filterAtLeast3Countries = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_3_COUNTRIES));
+			m_filterAtLeast3Countries.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
+			p.add(m_filterAtLeast3Countries);
+			
+			m_filterInternationalGroup = new ButtonGroup();
+			m_filterInternationalGroup.add(r);
+			m_filterInternationalGroup.add(m_filterAtLeast2Countries);
+			m_filterInternationalGroup.add(m_filterAtLeast3Countries);
 			
 			c.gridx += 2;
 			c.gridwidth = 1;
@@ -3459,34 +3468,32 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.weighty = 0.7;
 			add(p, c);
 			
-			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_INTERNATIONALITY));
+			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_PAYMENT));
 			p = new JPanel(new GridLayout(0, 1));
 			p.setBorder(title);
 			
 			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
 			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
 			r.setSelected(true);
-			p.add(r, c);
+			p.add(r);
 			
-			m_filterAtLeast2Countries = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_2_COUNTRIES));
-			m_filterAtLeast2Countries.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
-			p.add(m_filterAtLeast2Countries);
+			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_NO_PAYMENT_ONLY));
+			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
+			p.add(s);
 			
-			m_filterAtLeast3Countries = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_3_COUNTRIES));
-			m_filterAtLeast3Countries.setActionCommand(String.valueOf(TrustModel.TRUST_IF_AT_LEAST));
-			p.add(m_filterAtLeast3Countries);
+			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_PAYMENT_ONLY));
+			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			p.add(t);			
 			
-			m_filterInternationalGroup = new ButtonGroup();
-			m_filterInternationalGroup.add(r);
-			m_filterInternationalGroup.add(m_filterAtLeast2Countries);
-			m_filterInternationalGroup.add(m_filterAtLeast3Countries);
+			m_filterPaymentGroup = new ButtonGroup();
+			m_filterPaymentGroup.add(r);
+			m_filterPaymentGroup.add(s);
+			m_filterPaymentGroup.add(t);
 			
 			c.gridx += 2;
 			c.gridwidth = 1;
 			c.weightx = 0.15;
 			add(p, c);
-			
-			
 		}
 		
 		private void selectRadioButton(ButtonGroup a_group, String a_trustCondition)
