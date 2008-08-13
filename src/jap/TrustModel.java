@@ -126,8 +126,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	
 	private static final String MSG_EXCEPTION_PAY_CASCADE = TrustModel.class.getName() + "_exceptionPayCascade";
 	private static final String MSG_EXCEPTION_FREE_CASCADE = TrustModel.class.getName() + "_exceptionFreeCascade";
-	private static final String MSG_EXCEPTION_MORE_THAN_1_OPERATOR = TrustModel.class.getName() + "_exceptionMoreThan1Op";
-	private static final String MSG_EXCEPTION_SINGLE_MIX = TrustModel.class.getName() + "_exceptionSingleMix";
+	private static final String MSG_EXCEPTION_NOT_ENOUGH_MIXES = TrustModel.class.getName() + "_exceptionNotEnoughMixes";
 	private static final String MSG_EXCEPTION_EXPIRED_CERT = TrustModel.class.getName() + "_exceptionExpiredCert";
 	private static final String MSG_EXCEPTION_NOT_USER_DEFINED = TrustModel.class.getName() + "_exceptionNotUserDefined";
 	private static final String MSG_EXCEPTION_TOO_FEW_COUNTRIES = TrustModel.class.getName() + "_exceptionTooFewCountries";
@@ -295,22 +294,22 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 	};
 
-	public static class SingleMixAttribute extends TrustAttribute
+	public static class NumberOfMixesAttribute extends TrustAttribute
 	{
-		public SingleMixAttribute(int a_trustCondition, Object a_conditionValue)
+		public NumberOfMixesAttribute(int a_trustCondition, Object a_conditionValue)
 		{
-			super(a_trustCondition, a_conditionValue);
+			// MUST always be TRUST_IF_AT_LEAST
+			super(TRUST_IF_AT_LEAST, a_conditionValue);
 		}
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			if (m_trustCondition == TRUST_IF_TRUE && a_cascade.getNumberOfOperators() > 1)
+			int minMixes = ((Integer) m_conditionValue).intValue();
+			
+			if(m_trustCondition == TRUST_IF_AT_LEAST && (a_cascade == null ||  
+					a_cascade.getNumberOfOperators() < minMixes))
 			{
-				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_MORE_THAN_1_OPERATOR)));
-			}
-			else if (m_trustCondition == TRUST_IF_NOT_TRUE && a_cascade.getNumberOfOperators() <= 1)
-			{
-				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_SINGLE_MIX)));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_MIXES)));
 			}
 		}
 	};

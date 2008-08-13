@@ -363,6 +363,24 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	{
 		return m_nrOfActiveUsers;
 	}
+	
+	/**
+	 * Returns the number of users allowed in the mix cascade
+	 * 
+	 * @return The number of users allowed in the mix cascade
+	 */
+	public int getMaxUsers()
+	{
+		MixCascade cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(getId());
+		
+		int maxUsers = 0;
+		if (cascade != null)
+		{		
+			maxUsers = cascade.getMaxUsers();
+		}
+		
+		return maxUsers;
+	}
 
 	/**
 	 * Returns the current risk for using this mix cascade. This is a value between 0 an 100 and it

@@ -171,8 +171,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_ALL = JAPConfAnon.class.getName() + "_all";
 	private static final String MSG_FILTER_PAYMENT_ONLY = JAPConfAnon.class.getName() + "_paymentOnly";
 	private static final String MSG_FILTER_NO_PAYMENT_ONLY = JAPConfAnon.class.getName() + "_noPaymentOnly";
-	private static final String MSG_FILTER_MIXCASCADES_ONLY = JAPConfAnon.class.getName() + "_mixCascadesOnly";
-	private static final String MSG_FILTER_SINGLECASCADES_ONLY = JAPConfAnon.class.getName() + "_singleCascadesOnly";
+	private static final String MSG_FILTER_AT_LEAST_3_MIXES = JAPConfAnon.class.getName() + "_atLeast3Mixes";
+	private static final String MSG_FILTER_AT_LEAST_2_MIXES = JAPConfAnon.class.getName() + "_atLeast2Mixes";
 	private static final String MSG_FILTER_AT_LEAST_2_COUNTRIES = JAPConfAnon.class.getName() + "_atLeast2Countries";
 	private static final String MSG_FILTER_AT_LEAST_3_COUNTRIES = JAPConfAnon.class.getName() + "_atLeast3Countries";
 	private static final String MSG_FILTER_AT_LEAST = JAPConfAnon.class.getName() + "_atLeast";
@@ -218,6 +218,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JLabel m_lblSpeed;
 	private JLabel m_lblDelay;
 	
+	private JLabel m_anonLevelLabel;
 	private JLabel m_numOfUsersLabel;
 	
 	/*private GridBagConstraints m_constrHosts, m_constrPorts;
@@ -267,6 +268,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JSlider m_filterLatencySlider;
 	private JRadioButton m_filterAtLeast2Countries;
 	private JRadioButton m_filterAtLeast3Countries;
+	private JRadioButton m_filterAtLeast2Mixes;
+	private JRadioButton m_filterAtLeast3Mixes;
 	private JTextField m_filterNameField;
 	private ButtonGroup m_filterPaymentGroup;
 	private ButtonGroup m_filterCascadeGroup;
@@ -449,11 +452,26 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterPanel.selectRadioButton(m_filterPaymentGroup, 
 					String.valueOf(m_trustModelCopy.getAttribute(TrustModel.PaymentAttribute.class).getTrustCondition()));
 		
+			int trustCondition = m_trustModelCopy.getAttribute(TrustModel.NumberOfMixesAttribute.class).getTrustCondition();
+			Integer conditionValue = ((Integer) m_trustModelCopy.getAttribute(TrustModel.NumberOfMixesAttribute.class).getConditionValue());
+			
 			m_filterPanel.selectRadioButton(m_filterCascadeGroup, 
-					String.valueOf(m_trustModelCopy.getAttribute(TrustModel.SingleMixAttribute.class).getTrustCondition()));
-		
-			int trustCondition = m_trustModelCopy.getAttribute(TrustModel.InternationalAttribute.class).getTrustCondition();
-			Integer conditionValue = ((Integer) m_trustModelCopy.getAttribute(TrustModel.InternationalAttribute.class).getConditionValue());
+					String.valueOf(trustCondition));
+			
+			if(conditionValue != null)
+			{
+				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
+				{
+					m_filterCascadeGroup.setSelected(m_filterAtLeast2Mixes.getModel(), true);
+				}
+				else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 3)
+				{
+					m_filterCascadeGroup.setSelected(m_filterAtLeast3Mixes.getModel(), true);
+				}
+			}
+			
+			trustCondition = m_trustModelCopy.getAttribute(TrustModel.InternationalAttribute.class).getTrustCondition();
+			conditionValue = ((Integer) m_trustModelCopy.getAttribute(TrustModel.InternationalAttribute.class).getConditionValue());
 			
 			m_filterPanel.selectRadioButton(m_filterInternationalGroup, 
 					String.valueOf(trustCondition));
@@ -684,8 +702,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_cascadesPanel.add(panelBttns, c);
 
 		c.insets = new Insets(5, 20, 0, 5);
-		
-		//l = new JLabel(JAPMessages.getString("numOfUsersOnCascade") + ":");
 		l = new JLabel(JAPMessages.getString(MSG_ANON_LEVEL) + ":");
 		c.gridx = 2;
 		c.gridy = 1;
@@ -695,9 +711,25 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_cascadesPanel.add(l, c);
 
 		c.insets = new Insets(5, 5, 0, 5);
-		m_numOfUsersLabel = new JLabel("");
+		m_anonLevelLabel = new JLabel("");
 		c.gridx = 3;
 		c.gridy = 1;
+		c.weightx = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		m_cascadesPanel.add(m_anonLevelLabel, c);
+		
+		c.insets = new Insets(5, 20, 0, 5);
+		l = new JLabel(JAPMessages.getString("numOfUsersOnCascade") + ":");
+		c.gridx = 2;
+		c.gridy = 2;
+		c.weightx = 0;
+		c.fill = GridBagConstraints.NONE;
+		m_cascadesPanel.add(l, c);
+		
+		c.insets = new Insets(5, 5, 0, 5);
+		m_numOfUsersLabel = new JLabel("");
+		c.gridx = 3;
+		c.gridy = 2;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_numOfUsersLabel, c);
@@ -705,7 +737,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.insets = new Insets(5, 20, 0, 5);
 		l = new JLabel(JAPMessages.getString(MSG_FILTER_SPEED) + ":");
 		c.gridx = 2;
-		c.gridy = 2;
+		c.gridy = 3;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(l, c);
@@ -713,7 +745,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.insets = new Insets(5, 5, 0, 0);
 		m_lblSpeed = new JLabel("");
 		c.gridx = 3;
-		c.gridy = 2;
+		c.gridy = 3;
 		c.weightx = 0;		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_lblSpeed, c);
@@ -722,7 +754,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.insets = new Insets(5, 20, 0, 5);
 		l = new JLabel(JAPMessages.getString(MSG_FILTER_LATENCY) + ":");
 		c.gridx = 2;
-		c.gridy = 3;
+		c.gridy = 4;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(l, c);
@@ -730,14 +762,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.insets = new Insets(5, 5, 0, 0);
 		m_lblDelay = new JLabel("");
 		c.gridx = 3;
-		c.gridy = 3;
+		c.gridy = 4;
 		c.weightx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_lblDelay, c);
 		
 		c.insets = new Insets(5, 20, 0, 5);
 		c.gridx = 2;
-		c.gridy = 4;		
+		c.gridy = 5;		
 		c.gridwidth = 2;
 		m_payLabel = new JLabel("");
 		m_payLabel.addMouseListener(new MouseAdapter()
@@ -779,7 +811,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_cascadesPanel.add(m_payLabel, c);
 
 		c.insets = new Insets(5, 20, 0, 5);
-		c.gridy = 5;
+		c.gridy = 6;
 		c.gridx = 2;
 		c.gridwidth = 3;
 		m_lblSocks = new JLabel(JAPMessages.getString(MSG_SUPPORTS_SOCKS));
@@ -790,7 +822,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridwidth = 2;
 		c.gridx = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridy = 6;
+		c.gridy = 7;
 		m_cascadesPanel.add(new JLabel("                                               "), c);
 		
 		m_rootPanelConstraints.gridx = 0;
@@ -872,7 +904,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		else if (m_infoService.isPay(cascade.getId()))
 		{
 			m_payLabel.setCursor(Cursor.getDefaultCursor());
-			m_payLabel.setForeground(m_numOfUsersLabel.getForeground());
+			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
 			m_payLabel.setText(JAPMessages.getString(MSG_PAYCASCADE));
 			//m_payLabel.setToolTipText(JAPMessages.getString(JAPNewView.MSG_NO_REAL_PAYMENT));
 			m_payLabel.setToolTipText(null);
@@ -1531,12 +1563,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_trustModelCopy.setAttribute(TrustModel.PaymentAttribute.class, Integer.parseInt(cmd));
 			
 			cmd = m_filterCascadeGroup.getSelection().getActionCommand();
-			m_trustModelCopy.setAttribute(TrustModel.SingleMixAttribute.class, Integer.parseInt(cmd));
+			if(m_filterAtLeast2Mixes.isSelected()) value = 2;
+			else if(m_filterAtLeast3Mixes.isSelected()) value = 3;
+			m_trustModelCopy.setAttribute(TrustModel.NumberOfMixesAttribute.class, Integer.parseInt(cmd), value);
 			
+			value = 0;
 			cmd = m_filterInternationalGroup.getSelection().getActionCommand();
 			if(m_filterAtLeast2Countries.isSelected()) value = 2;
 			else if(m_filterAtLeast3Countries.isSelected()) value = 3;
 			m_trustModelCopy.setAttribute(TrustModel.InternationalAttribute.class, Integer.parseInt(cmd), value);
+			
 			m_trustModelCopy.setAttribute(TrustModel.OperatorBlacklistAttribute.class, TrustModel.TRUST_IF_NOT_IN_LIST, ((OperatorsTableModel) m_listOperators.getModel()).getBlacklist());
 			
 			m_trustModelCopy.setAttribute(TrustModel.SpeedAttribute.class, TrustModel.TRUST_IF_AT_LEAST, m_filterSpeedSlider.getValue() * FILTER_SPEED_MAJOR_TICK);
@@ -1929,7 +1965,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
 					}
 					
-					m_numOfUsersLabel.setText(m_infoService.getAnonLevel(cascadeId));
+					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));
+					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
+					
 					//System.out.println(m_numOfUsersLabel.getText());
 					//m_reachableLabel.setFont(m_numOfUsersLabel.getFont());
 					//m_lblHosts.setFont(m_numOfUsersLabel.getFont());
@@ -2437,7 +2475,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
 			if (statusInfo != null)
 			{
-				return "" + statusInfo.getNrOfActiveUsers();
+				int maxUsers = statusInfo.getMaxUsers();
+				
+				return "" + statusInfo.getNrOfActiveUsers() + (maxUsers != 0 ? " / " + maxUsers : "");
 			}
 			return "N/A";
 		}
@@ -3268,18 +3308,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			r.setSelected(true);
 			p.add(r, c);
 			
-			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_SINGLECASCADES_ONLY));
-			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
-			p.add(s, c);			
+			m_filterAtLeast2Mixes = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_2_MIXES));
+			m_filterAtLeast2Mixes.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			p.add(m_filterAtLeast2Mixes, c);			
 			
-			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_MIXCASCADES_ONLY));
-			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
-			p.add(t, c);
+			m_filterAtLeast3Mixes = new JRadioButton(JAPMessages.getString(MSG_FILTER_AT_LEAST_3_MIXES));
+			m_filterAtLeast3Mixes.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
+			p.add(m_filterAtLeast3Mixes, c);
 			
 			m_filterCascadeGroup = new ButtonGroup();
 			m_filterCascadeGroup.add(r);
-			m_filterCascadeGroup.add(s);
-			m_filterCascadeGroup.add(t);
+			m_filterCascadeGroup.add(m_filterAtLeast2Mixes);
+			m_filterCascadeGroup.add(m_filterAtLeast3Mixes);
 			
 			c.gridx += 2;
 			c.gridwidth = 1;
