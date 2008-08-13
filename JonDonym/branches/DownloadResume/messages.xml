@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Messages>
+    <Message id="1" serial="1">
+        <!-- Text is Base64 encoded -->
+        <MessageText lang="de">QmVzdWNoZW4gU2llIHVuc2VyZSBJbnRlcm5ldHNlaXRlbiE=</MessageText>
+        <MessageText lang="en">VmlzaXQgb3VyIGludGVybmV0IHBhZ2VzIQ==</MessageText>
+	 <MessageURL lang="de">http://anon.inf.tu-dresden.de</MessageURL>
+	 <MessageURL lang="en">http://anon.inf.tu-dresden.de/index_en.html</MessageURL>
+    </Message>
+    <Message id="070316" serial="1">
+        <!-- Text is Base64 encoded -->
+        <MessageText lang="de">VW1zdGVsbHVuZyBCZXphaGxzeXN0ZW0gLSBad2FuZ3N1cGRhdGUgbvZ0aWc=</MessageText>
+        <MessageText lang="en">Q2FzY2FkZXMgd2l0aCBjb3N0cyByZXN0cnVjdHVyZWQgLSB1cGRhdGUgbmVlZGVk</MessageText>
+	 <MessageURL lang="de">http://sourceforge.net/forum/forum.php?thread_id=1694912&amp;forum_id=42121</MessageURL>
+	 <MessageURL lang="en">http://sourceforge.net/forum/forum.php?thread_id=1694917&amp;forum_id=333031</MessageURL>
+    </Message>
+</Messages>

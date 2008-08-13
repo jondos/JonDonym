@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><!--JBuilder QuickDoc-->
+<HEAD>
+<TITLE>Class JAPSignature</TITLE><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+</HEAD>
+<BODY>
+
+<H2>
+<FONT SIZE="-1"></FONT>
+<BR>Klasse JAPSignature</H2>
+<DL>
+<DT>public class <B>JAPSignature</B>
+</DL>
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF"><TD COLSPAN=1><FONT SIZE="+2">
+<B>Feld-Detail</B>
+</FONT></TD></TR></TABLE>
+
+<H3>signingInstance</H3>
+<PRE>
+private static JAPSignature <B>signingInstance</B></PRE>
+<DL><DD>Stores the instance of JAPSignature, which we use for signing of our own messages (Singleton).<DL><DD></DD></DL></DD>
+</DL>
+<DL></DL>
+<HR>
+
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF"><TD COLSPAN=1><FONT SIZE="+2">
+<B>Methoden-Detail</B>
+</FONT></TD></TR></TABLE>
+
+<H3>getSigningInstance</H3>
+<PRE>
+public static JAPSignature <B>getSigningInstance</B>()</PRE>
+<DL><DD>Returns the instance of the JAPSignature, which we use for signing of own messages (Singleton). If there is no instance, there is a new one created (for the first use, it must be initialized with initSignAlgorithm()).<DL><DD></DD></DL></DD>
+</DL>
+<DL><DT><B>Returns:</B><DD>The signing instance of JAPSignature.</DD>
+</DL>
+<HR>
+
+<H3>initSign</H3>
+<PRE>
+public void <B>initSign</B>(PrivateKey&nbsp;ownPrivateKey)</PRE>
+<DL><DD>Initializes a JAPSignature instance for signing messages. This method needs only to be called once (before the first use of the signing methods). If you have called initVerify() before calling this method, the JAPSignature instance is switched from verifying to signing. Verifying will not work until you call initVerify() on this instance.<DL><DD></DD></DL></DD>
+</DL>
+<DL><DT><B>Parameters:</B><DD><CODE>ownPrivateKey</CODE> - The private key of a asymmetric algorithm (DSA at the moment) for signing the messages.</DD>
+</DL>
+<HR>
+
+<H3>signXmlDoc</H3>
+<PRE>
+public void <B>signXmlDoc</B>(Document&nbsp;toSign)</PRE>
+<DL><DD>Signs an XML document with the own private key. The signature is directly inserted as a child of the root node of the document, so there is nothing returned. If there is already a signature in the document, it is removed.<DL><DD></DD></DL></DD>
+</DL>
+<DL><DT><B>Parameters:</B><DD><CODE>toSign</CODE> - The document you want to sign.</DD>
+</DL>
+<HR>
+
+<H3>signXmlNode</H3>
+<PRE>
+public void <B>signXmlNode</B>(Element&nbsp;toSign)</PRE>
+<DL><DD>Signs an XML node with the own private key. The signature is directly inserted as a child of the node, so there is nothing returned. If there is already a signature in the tree under the node, it is removed.<DL><DD></DD></DL></DD>
+</DL>
+<DL><DT><B>Parameters:</B><DD><CODE>toSign</CODE> - The document you want to sign.</DD>
+</DL>
+<HR>
+
+<H3>nodeToCanonical</H3>
+<PRE>
+private ByteArrayOutputStream <B>nodeToCanonical</B>(Node&nbsp;inputNode)</PRE>
+<DL><DD>Creates a bytestream out of the abstract tree of the node.<DL><DD></DD></DL></DD>
+</DL>
+<DL><DT><B>Parameters:</B><DD><CODE>inputNode</CODE> - The node (incl. the whole tree) which is flattened to a bytestream.</DD>
+<DT><B>Returns:</B><DD>The bytestream of the node (incl. the whole tree).</DD>
+</DL>
+<HR>
+
+</BODY>
+</HTML>
