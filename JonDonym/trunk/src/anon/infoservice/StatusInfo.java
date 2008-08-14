@@ -546,7 +546,15 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.DELAY)) : "?") + ") " +
 			"[";
 		
-			long delayBound = perfEntry.getBound(PerformanceEntry.DELAY);
+			long delayBound;
+			if (perfEntry == null)
+			{
+				delayBound = -1;
+			}
+			else
+			{
+				delayBound = perfEntry.getBound(PerformanceEntry.DELAY);
+			}
 		
 			if(delayBound == Long.MAX_VALUE)
 			{
@@ -566,7 +574,16 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.SPEED)): "?") + ") " +
 					"[";
 			
-			long speedBound = perfEntry.getBound(PerformanceEntry.SPEED);
+			long speedBound;
+			if (perfEntry == null)
+			{
+				speedBound = -1;
+			}
+			else
+			{
+				speedBound = perfEntry.getBound(PerformanceEntry.SPEED);
+			}
+			
 			
 			if(speedBound == 0)
 			{
