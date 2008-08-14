@@ -29,8 +29,6 @@ package jap;
 
 import java.util.Locale;
 
-import javax.swing.JPanel;
-
 import gui.JAPMessages;
 import logging.LogHolder;
 import logging.LogLevel;

@@ -30,7 +30,6 @@
  */
 package anon.infoservice;
 
-import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -41,7 +40,6 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.crypto.MyRandom;
-import anon.crypto.SignatureVerifier;
 import anon.util.Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

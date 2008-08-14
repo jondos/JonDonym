@@ -78,16 +78,21 @@ final class JAPConfMixminion extends AbstractJAPConfModule implements ActionList
 	long m_lastUpdate;
 
 	private class MyJTable extends JTable
+	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+		
+		public MyJTable(DefaultTableModel m)
 		{
-			public MyJTable(DefaultTableModel m)
-			{
-				super(m);
-			}
-			public boolean isCellEditable(int i, int j)
-			{
-				return false;
-			}
-		};
+			super(m);
+		}
+		public boolean isCellEditable(int i, int j)
+		{
+			return false;
+		}
+	};
 
 
 	public JAPConfMixminion()

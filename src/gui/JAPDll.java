@@ -62,17 +62,17 @@ final public class JAPDll {
 	private static final String DLL_LIBRARY_NAME_32bit = "japdll";
 	private static final String DLL_LIBRARY_NAME_64bit = "japdll_x64";
 	private static final String JAP_DLL_32bit = DLL_LIBRARY_NAME_32bit + ".dll";
-	private static final String JAP_DLL_64bit = DLL_LIBRARY_NAME_32bit + ".dll";
+	//private static final String JAP_DLL_64bit = DLL_LIBRARY_NAME_32bit + ".dll";
 	private static final String JAP_DLL_NEW_32bit  = JAP_DLL_32bit + "." + JAP_DLL_REQUIRED_VERSION;
-	private static final String JAP_DLL_NEW_64bit  = JAP_DLL_64bit + "." + JAP_DLL_REQUIRED_VERSION;
+	//private static final String JAP_DLL_NEW_64bit  = JAP_DLL_64bit + "." + JAP_DLL_REQUIRED_VERSION;
 	private static final String JAP_DLL_OLD_32bit = DLL_LIBRARY_NAME_32bit + ".old";
-	private static final String JAP_DLL_OLD_64bit = DLL_LIBRARY_NAME_64bit + ".old";
+	//private static final String JAP_DLL_OLD_64bit = DLL_LIBRARY_NAME_64bit + ".old";
 
 	/** Messages */
 	private static final String MSG_DLL_UPDATE = JAPDll.class.getName() + "_updateRestartMessage";
 	private static final String MSG_DLL_UPDATE_FAILED = JAPDll.class.getName() + "_updateFailed";
 	private static final String MSG_CONFIRM_OVERWRITE = JAPDll.class.getName() + "_confirmOverwrite";
-	private static final String MSG_PERMISSION_PROBLEM = JAPDll.class.getName() + "_permissionProblem";
+	//private static final String MSG_PERMISSION_PROBLEM = JAPDll.class.getName() + "_permissionProblem";
 	private static final String MSG_COULD_NOT_SAVE = JAPDll.class.getName() + "_couldNotSave";
 
 
@@ -474,7 +474,7 @@ final public class JAPDll {
 		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
 									JAPMessages.getString(MSG_DLL_UPDATE, "'" + JAP_DLL_32bit + "'"));
 		//close JAP
-		JAPController.getInstance().goodBye(false);
+		JAPController.goodBye(false);
 	}
 
 	/**

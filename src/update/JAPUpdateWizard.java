@@ -100,7 +100,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 	private File m_fileNewJapJar;
 	private File updJapJar;
 
-	private int countPackages = 0;
+	//private int countPackages = 0;
 
 	//private int countBytes = 0;
 	//private int value = 0;

@@ -111,12 +111,12 @@ public final class HttpResponseStructure
 	private final static String HTTP_HEADER_CACHE_CONTROL_STRINGS=HTTP_HEADER_CACHE_CONTROL_STRING+
 			"no-cache"+HTTP_CRLF_STRING+HTTP_HEADER_PRAGMA_STRING+"no-cache"+HTTP_CRLF_STRING;
 
-	private static final String HTTP_ENCODING_PLAIN_STRING = "plain";
+	//private static final String HTTP_ENCODING_PLAIN_STRING = "plain";
 	private static final String HTTP_ENCODING_ZLIB_STRING = HTTPConnectionFactory.HTTP_ENCODING_ZLIB_STRING;
 	private static final String HTTP_ENCODING_GZIP_STRING = HTTPConnectionFactory.HTTP_ENCODING_GZIP_STRING;
 
 	private static final String HTTP_TYPE_APPLICATION_JNLP_STRING = "application/x-java-jnlp-file";
-	private static final String HTTP_TYPE_APPLICATION_ZLIB_STRING = "application/x-compress";
+	//private static final String HTTP_TYPE_APPLICATION_ZLIB_STRING = "application/x-compress";
 	private static final String HTTP_TYPE_TEXT_PLAIN_STRING = "text/plain";
 	private static final String HTTP_TYPE_TEXT_HTML_STRING = "text/html";
 	private static final String HTTP_TYPE_TEXT_XML_STRING = "text/xml";

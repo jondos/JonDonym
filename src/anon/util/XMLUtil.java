@@ -44,10 +44,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.StringTokenizer;
 import java.lang.reflect.Method;
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -62,7 +60,6 @@ import org.xml.sax.InputSource;
 
 import anon.util.Util;
 import anon.crypto.SignatureCreator;
-import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import logging.LogHolder;
 import logging.LogLevel;

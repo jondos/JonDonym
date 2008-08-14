@@ -6,8 +6,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
 import anon.infoservice.AbstractDatabaseEntry;
-import anon.infoservice.Database;
-import anon.infoservice.InfoServiceDBEntry;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;

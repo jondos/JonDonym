@@ -27,10 +27,7 @@
  */
 package jap;
 
-import java.io.File;
-
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -75,7 +72,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.JFileChooser;
 
 import anon.AnonServerDescription;
 import anon.infoservice.BlacklistedCascadeIDEntry;
@@ -98,7 +94,6 @@ import anon.pay.IMessageListener;
 import anon.pay.PayAccountsFile;
 import anon.pay.PayMessage;
 import anon.proxy.IProxyListener;
-import anon.util.ClassUtil;
 import anon.util.JobQueue;
 import anon.util.Util;
 import gui.CountryMapper;
@@ -130,6 +125,11 @@ import update.JAPUpdateWizard;
 final public class JAPNewView extends AbstractJAPMainView implements IJAPMainView, ActionListener,
 	JAPObserver, Observer, IMessageListener
 {
+	/**
+	 * serial version UID 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	public static final String MSG_UPDATE = JAPNewView.class.getName() + "_update";
 	public static final String MSG_NO_REAL_PAYMENT = JAPNewView.class.getName() + "_noRealPayment";
 
@@ -141,8 +141,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_OLD_JAVA = JAPNewView.class.getName() + "_oldJava";
 	private static final String MSG_OLD_JAVA_HINT = JAPNewView.class.getName() + "_oldJavaHint";
 	private static final String MSG_LBL_NEW_SERVICES_FOUND = JAPNewView.class.getName() + "_newServicesFound";
-	private static final String MSG_TOOLTIP_NEW_SERVICES_FOUND = JAPNewView.class.getName() +
-		"_tooltipNewServicesFound";
+	/*private static final String MSG_TOOLTIP_NEW_SERVICES_FOUND = JAPNewView.class.getName() +
+		"_tooltipNewServicesFound";*/
 	private static final String MSG_NEW_SERVICES_FOUND_EXPLAIN =
 		JAPNewView.class.getName() + "_newServicesFoundExplanation";
 	private static final String MSG_NO_COSTS = JAPNewView.class.getName() + "_noCosts";
@@ -152,21 +152,21 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_MN_DETAILS = JAPNewView.class.getName() + "_mnDetails";
 	private static final String MSG_IS_DISABLED_EXPLAIN = JAPNewView.class.getName() + "_isDisabledExplain";
 	private static final String MSG_IS_DEACTIVATED = JAPNewView.class.getName() + "_isDisabled";
-	private static final String MSG_IS_TOOLTIP = JAPNewView.class.getName() + "_isDisabledTooltip";
+	//private static final String MSG_IS_TOOLTIP = JAPNewView.class.getName() + "_isDisabledTooltip";
 
-	private static final String MSG_IS_TRUST_PARANOID = JAPNewView.class.getName() + "_trustParanoid";
+	/*private static final String MSG_IS_TRUST_PARANOID = JAPNewView.class.getName() + "_trustParanoid";
 	private static final String MSG_IS_TRUST_SUSPICIOUS = JAPNewView.class.getName() + "_trustSuspicious";
 	private static final String MSG_IS_TRUST_HIGH = JAPNewView.class.getName() + "_trustHigh";
 	private static final String MSG_IS_TRUST_ALL = JAPNewView.class.getName() + "_trustAll";
-	private static final String MSG_IS_EDIT_TRUST = JAPNewView.class.getName() + "_editTrust";
+	private static final String MSG_IS_EDIT_TRUST = JAPNewView.class.getName() + "_editTrust";*/
 
-	private static final String MSG_TRUST_FILTER = JAPNewView.class.getName() + "_trustFilter";
+	//private static final String MSG_TRUST_FILTER = JAPNewView.class.getName() + "_trustFilter";
 	private static final String MSG_CONNECTED = JAPNewView.class.getName() + "_connected";
 
 	private static final String MSG_DELETE_MESSAGE = JAPNewView.class.getName() + "_deleteMessage";
 	private static final String MSG_HIDE_MESSAGE_SHORT = JAPNewView.class.getName() + "_hideMessageShort";
 	private static final String MSG_DELETE_MESSAGE_EXPLAIN = JAPNewView.class.getName() + "_deleteMessageExplain";
-	private static final String MSG_DELETE_MESSAGE_SHORT = JAPNewView.class.getName() + "_deleteMessageShort";
+	//private static final String MSG_DELETE_MESSAGE_SHORT = JAPNewView.class.getName() + "_deleteMessageShort";
 	private static final String MSG_VIEW_MESSAGE = JAPNewView.class.getName() + "_viewMessage";
 	private static final String MSG_ANTI_CENSORSHIP = JAPNewView.class.getName() + "_antiCensorship";
 
@@ -270,7 +270,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private FlippingPanel m_flippingpanelAnon, m_flippingpanelOwnTraffic, m_flippingpanelForward;
 	private StatusPanel m_StatusPanel;
 	private JPanel m_panelAnonService;
-	private int m_iPreferredWidth;
+	//private int m_iPreferredWidth;
 	private Object SYNC_DISCONNECTED_ERROR = new Object();
 	private boolean m_bDisconnectedErrorShown = false;
 	private boolean m_bIgnoreAnonComboEvents = false;
@@ -468,7 +468,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
-				if (JAPModel.getInstance().isInfoServiceDisabled())
+				if (JAPModel.isInfoServiceDisabled())
 				{
 					if (JAPDialog.showConfirmDialog(JAPNewView.this,
 						JAPMessages.getString(MSG_IS_DISABLED_EXPLAIN),
@@ -719,7 +719,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(5, 0, 0, 0);
-		JLabel lblTrust = new JLabel(JAPMessages.getString(MSG_TRUST_FILTER) + ":");
+		//JLabel lblTrust = new JLabel(JAPMessages.getString(MSG_TRUST_FILTER) + ":");
 		//m_panelAnonService.add(lblTrust, c1);
 
 		c1.gridx = 1;
@@ -1306,13 +1306,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 		update(null, new JAPModel.FontResize(0, JAPModel.getInstance().getFontSize()));
 
-		Dimension d = super.getPreferredSize();
+		/*Dimension d = super.getPreferredSize();
 		m_iPreferredWidth = Math.max(d.width, Math.max(m_flippingpanelOwnTraffic.getPreferredSize().width,
 			Math.max(
 				Math.max(m_panelAnonService.getPreferredSize().width,
 						 m_flippingpanelForward.getPreferredSize().width),
-				m_flippingpanelAnon.getPreferredSize().width)));
-		if (!JAPModel.getInstance().isInfoServiceDisabled())
+				m_flippingpanelAnon.getPreferredSize().width)));*/
+		if (!JAPModel.isInfoServiceDisabled())
 		{
 			fetchMixCascadesAsync(false);
 		}
@@ -1373,7 +1373,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.insets = new Insets(0, 5, 0, 0);
 		c1.anchor = GridBagConstraints.WEST;
 		JPanel p = new JPanel(new GridBagLayout());
-		GridBagLayout gbl = new GridBagLayout();
+		//GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints c2 = new GridBagConstraints();
 		JPanel p2 = new JPanel(new GridBagLayout());
 		m_labelForwarding = new JLabel(JAPMessages.getString("ngForwarding"));
@@ -1926,7 +1926,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				public void run()
 				{
 					if (!JAPController.getInstance().isShuttingDown()
-						&& (JAPModel.getInstance().isInfoServiceDisabled() ||
+						&& (JAPModel.isInfoServiceDisabled() ||
 							(!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
 							 !JAPController.getInstance().isAnonConnected())))
 					{
@@ -2449,7 +2449,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				boolean bShowError = false;
 				synchronized (m_connectionEstablishedSync)
 				{
-					if (!a_bOnError || JAPModel.getInstance().isAutomaticallyReconnected())
+					if (!a_bOnError || JAPModel.isAutomaticallyReconnected())
 					{
 						if (m_Controller.getAnonMode() && !m_Controller.isAnonConnected())
 						{
@@ -2653,7 +2653,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		 */
 		Enumeration entries =
 			Database.getInstance(JAPVersionInfo.class).getEntrySnapshotAsEnumeration();
-		String strTemp;
+		//String strTemp;
 		JAPVersionInfo vi = null;
 		while (entries.hasMoreElements())
 		{
@@ -2695,7 +2695,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 
 		if (!JAPController.getInstance().isShuttingDown()
-			&& (JAPModel.getInstance().isInfoServiceDisabled() ||
+			&& (JAPModel.isInfoServiceDisabled() ||
 				(!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
 				 !JAPController.getInstance().isAnonConnected())))
 		{

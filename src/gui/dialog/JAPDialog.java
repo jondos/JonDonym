@@ -3499,6 +3499,11 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 
 	private static class PreferredWidthBoxPanel extends JPanel
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+		
 		private int m_preferredWidth;
 		private int m_preferredHeigth;
 
