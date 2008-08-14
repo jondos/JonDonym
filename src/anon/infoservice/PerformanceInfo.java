@@ -31,7 +31,7 @@ import logging.LogType;
  * rather accessing the database directly! This way it is ensured that the entry
  * is derived from all available Info Services.
  * 
- * @see PerformanceInfo#getAverageEntry(String)
+ * @see PerformanceInfo#getLowestCommonBoundEntry(String)
  * 
  * @author Christian Banse
  */
@@ -163,7 +163,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	 * Returns a performance entry for the giving Cascade. This method
 	 * should ONLY be used inside getAverageEntry!
 	 * 
-	 * @see PerformanceInfo#getAverageEntry(String)
+	 * @see PerformanceInfo#getLowestCommonBoundEntry(String)
 	 * 
 	 * @param a_id The cascade id
 	 * 
@@ -176,31 +176,29 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	
 	/**
 	 * Loops through all PerformanceInfo objects from the different 
-	 * Info Services and returns a new average PerformanceEntry for the
-	 * given cascade.
+	 * Info Services and returns a new PerformanceEntry for the
+	 * given cascade with the lowest common boundary
 	 * 
 	 * @param a_cascadeId Id of the cascade
 	 * 
-	 * @return PerformanceEntry with average values for the given cascade
+	 * @return PerformanceEntry with lowest common boundary values for the given cascade
 	 */
-	public static PerformanceEntry getAverageEntry(String a_cascadeId)
+	public static PerformanceEntry getLowestCommonBoundEntry(String a_cascadeId)
 	{
 		// loop through all PerformanceInfo objects (from the different Info Services)
-		// and calculate the average
+		PerformanceEntry perfEntry = new PerformanceEntry(a_cascadeId);
 		
-		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
-		PerformanceEntry clientEntry = new PerformanceEntry(a_cascadeId);
-		
-		Vector v = new Vector();
+		Vector vPerfEntries = new Vector();
 		Vector vSpeedBoundaries = new Vector();
 		Vector vDelayBoundaries = new Vector();
 		
-		for (int i = 0; i < vec.size(); i++)
+		Vector vInfoServices = Database.getInstance(PerformanceInfo.class).getEntryList();
+		for (int i = 0; i < vInfoServices.size(); i++)
 		{
-			PerformanceEntry entry = ((PerformanceInfo) vec.elementAt(i)).getEntry(a_cascadeId);
+			PerformanceEntry entry = ((PerformanceInfo) vInfoServices.elementAt(i)).getEntry(a_cascadeId);
 			if (entry != null)
 			{
-				v.addElement(entry);
+				vPerfEntries.addElement(entry);
 				Long value = new Long(entry.getXMLBound(PerformanceEntry.SPEED));
 				
 				if(!vSpeedBoundaries.contains(value))
@@ -220,9 +218,9 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		Util.sort(vSpeedBoundaries, new LongSortDesc());
 		Util.sort(vDelayBoundaries, new LongSortAsc());
 		
-		if(v.size() == 0)
+		if(vPerfEntries.size() == 0)
 		{
-			return clientEntry;
+			return perfEntry;
 		}
 		
 		int agreeing;
@@ -234,21 +232,21 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			long bound = ((Long) vSpeedBoundaries.elementAt(i)).longValue();
 			value = bound;
 			
-			for(int j = 0; j < v.size(); j++)
+			for(int j = 0; j < vPerfEntries.size(); j++)
 			{
-				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
+				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
 				if(entry.getXMLBound(PerformanceEntry.SPEED) >= bound)
 				{
 					agreeing++;
 				}
 			}
 			
-			if((double) agreeing / v.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			if((double) agreeing / vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
 			{
 				break;
 			}
 		}
-		clientEntry.overrideXMLBound(PerformanceEntry.SPEED, value);
+		perfEntry.overrideXMLBound(PerformanceEntry.SPEED, value);
 		
 		for(int i = 0; i< vDelayBoundaries.size(); i++)
 		{
@@ -256,175 +254,23 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			long bound = ((Long) vDelayBoundaries.elementAt(i)).longValue();
 			value = bound;
 			
-			for(int j = 0; j < v.size(); j++)
+			for(int j = 0; j < vPerfEntries.size(); j++)
 			{
-				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
+				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
 				if(entry.getXMLBound(PerformanceEntry.DELAY) <= bound)
 				{
 					agreeing++;
 				}
 			}
 			
-			if((double) agreeing / v.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			if((double) agreeing / vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
 			{
 				break;
 			}
 		}
+		perfEntry.overrideXMLBound(PerformanceEntry.DELAY, value);
 		
-		clientEntry.overrideXMLBound(PerformanceEntry.DELAY, value);
-		
-		/*long speed = 0;
-		long delay = 0;
-		long avgSpeed = 0;
-		long avgDelay = 0;
-		int countSpeed = 0;
-		int countDelay = 0;
-		for(int j = 0; j < v.size(); j++)
-		{
-			speed = ((PerformanceEntry) v.elementAt(j)).getXMLAverage(PerformanceEntry.SPEED);
-			if (speed >= 0)
-			{				
-				avgSpeed += speed;
-				countSpeed++;
-			}
-			
-			delay = ((PerformanceEntry) v.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY);
-			if (delay >= 0)
-			{
-				avgDelay += delay;
-				countDelay++;
-			}
-		}
-		if (countSpeed > 0)
-		{
-			avgSpeed /= countSpeed;
-		}
-		else
-		{
-			avgSpeed = -1;
-		}
-		
-		if (countDelay > 0)
-		{
-			avgDelay /= countDelay;
-		}
-		else
-		{
-			avgDelay = -1;
-		}
-		
-		Vector vToCheck = (Vector) v.clone();
-		Vector vResult = new Vector();
-		Vector vDeleted = new Vector();
-		double stray = PERFORMANCE_INFO_MAX_STRAY;
-		
-		// loop through all entries to eliminate stray entries
-		// if we deleted too many entries, re-add deleted entries
-		do
-		{
-			stray = eliminateStrayEntries(vToCheck, vDeleted, avgSpeed, avgDelay, stray);
-			// add the entries that passed the test to the result vector
-			for (Enumeration e = vToCheck.elements(); e.hasMoreElements(); )
-			{
-				vResult.addElement(e.nextElement() ); //.addAll would be faster, but is post-JDK 1.1.8
-			}
-			//vResult.addAll(vToCheck);
-			// only check the deleted entries next round
-			vToCheck = vDeleted;
-			// reset the deleted entries vector
-			vDeleted = new Vector();
-		}
-		while ((double)vResult.size() / v.size() < PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES);
-		
-		if (vResult.size() == 0)
-		{
-			return avgEntry;
-		}
-		
-		avgSpeed = 0;
-		avgDelay = 0;
-		countSpeed = 0;
-		countDelay = 0;
-		
-		double stdSpeed = 0;
-		double stdDelay = 0;
-		int countStdSpeed = 0;
-		int countStdDelay = 0;
-		
-		long value = 0;
-		double dvalue = 0;
-		
-		for(int j = 0; j < vResult.size(); j++)
-		{
-			value = ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.SPEED);
-			if(value >= 0)
-			{
-				avgSpeed += value;
-				countSpeed++;
-				
-				dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.SPEED);
-				if(dvalue >= 0)
-				{
-					stdSpeed += dvalue;
-					countStdSpeed++;
-				}
-			}						
-			
-			value = ((PerformanceEntry) vResult.elementAt(j)).getXMLAverage(PerformanceEntry.DELAY);
-			if(value >= 0)
-			{
-				avgDelay += value;
-				countDelay++;
-				
-				dvalue = ((PerformanceEntry) vResult.elementAt(j)).getXMLStdDeviation(PerformanceEntry.DELAY);
-				if(dvalue >= 0)
-				{
-					stdDelay += dvalue;
-					countStdDelay++;
-				}
-			}
-		}
-		if (countSpeed > 0)
-		{
-			avgSpeed /= countSpeed;
-			if (countStdSpeed > 0)
-			{
-				stdSpeed /= countStdSpeed;
-			}
-			else
-			{
-				stdSpeed = 0.0;
-			}
-		}
-		else
-		{
-			avgSpeed = -1;
-		}
-		
-		if (countDelay > 0)
-		{
-			avgDelay /= countDelay;		
-			if (countStdDelay > 0)
-			{
-				stdDelay /= countStdDelay;
-			}
-			else
-			{
-				stdDelay = 0.0;
-			}			
-		}
-		else
-		{
-			avgDelay = -1;
-		}
-		
-		avgEntry.overrideXMLAverage(PerformanceEntry.SPEED, avgSpeed);
-		avgEntry.overrideXMLAverage(PerformanceEntry.DELAY, avgDelay);
-		
-		avgEntry.overrideXMLStdDeviation(PerformanceEntry.SPEED, stdSpeed);
-		avgEntry.overrideXMLStdDeviation(PerformanceEntry.DELAY, stdDelay);*/
-		
-		return clientEntry;
+		return perfEntry;
 	}
 
 	/**

@@ -2918,7 +2918,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_labelOperatorFlags[i].setIcon(null);
 			}
 			
-			PerformanceEntry entry = PerformanceInfo.getAverageEntry(currentMixCascade.getId());
+			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(currentMixCascade.getId());
 			
 			long value = 0;
 			

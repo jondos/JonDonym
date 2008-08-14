@@ -2853,7 +2853,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		
 		private PerformanceEntry getPerformanceEntry(String a_cascadeId)
 		{
-			return PerformanceInfo.getAverageEntry(a_cascadeId);
+			return PerformanceInfo.getLowestCommonBoundEntry(a_cascadeId);
 		}
 	}
 

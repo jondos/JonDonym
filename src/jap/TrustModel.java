@@ -473,7 +473,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
+			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
 			
 			if(minSpeed == TRUST_ALWAYS)
@@ -506,7 +506,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
+			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int maxDelay = ((Integer) m_conditionValue).intValue();
 			
 			if(maxDelay == TRUST_ALWAYS)
