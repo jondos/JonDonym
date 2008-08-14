@@ -35,7 +35,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
-import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -49,7 +48,6 @@ import java.awt.event.WindowListener;
 import java.awt.event.WindowEvent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -58,18 +56,13 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import anon.infoservice.ImmutableListenerInterface;
-import anon.infoservice.ListenerInterface;
-import anon.infoservice.ProxyInterface;
 import anon.infoservice.MixCascade;
-import gui.JAPJIntField;
 import gui.JAPMessages;
 import gui.JAPMultilineLabel;
 import gui.dialog.JAPDialog;
@@ -82,7 +75,6 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import java.awt.Dimension;
-import gui.GUIUtils;
 import anon.pay.PayAccount;
 
 final public class JAPConf extends JAPDialog implements ActionListener, Observer, WindowListener

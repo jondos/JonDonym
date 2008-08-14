@@ -12,7 +12,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
-import anon.util.Util.Comparable;
 import anon.util.Util.LongSortAsc;
 import anon.util.Util.LongSortDesc;
 import anon.util.Util;
@@ -22,14 +21,23 @@ import anon.util.IXMLEncodable;
 
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
-	private static final String XML_ATTR_ID = "id";
-	
-	private static final String XML_ELEMENT_CURRENT_HOURLY_DATA = "Data";
-
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
 	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
 	
 	public static final long LAST_TEST_DATA_TTL = 20 * 60 * 1000;
+	
+	public static final int SPEED = 0;
+	public static final int DELAY = 1;
+	public static final int USERS = 2;
+	
+	public static final long[][] BOUNDARIES = new long[][] { 
+		{ 0, 100, 250, 500, 750, 1000, 1500, 2000 },
+		{ 500, 750, 1000, 2000, 2500, 3000, 4000, Long.MAX_VALUE} };
+
+	private static final String XML_ATTR_ID = "id";
+	private static final String XML_ELEMENT_CURRENT_HOURLY_DATA = "Data";
+
+	private static final String[] ATTRIBUTES = new String[]{ "Speed", "Delay", "Users" };
 	
 	private String m_strCascadeId;
 	private Calendar m_current = Calendar.getInstance();
@@ -45,19 +53,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private PerformanceAttributeFloatingTimeEntry[] m_floatingTimeEntries;
 	
 	private long m_lastTestAverage[] = new long[3];
-	
-	public static final int SPEED = 0;
-	public static final int DELAY = 1;
-	public static final int USERS = 2;
-	
-	public static final String[] ATTRIBUTES = new String[]{ "Speed", "Delay", "Users" };
-	
-	public static final long[][] BOUNDARIES = new long[][] { 
-		{ 0, 100, 250, 500, 750, 1000, 1500, 2000 },
-		{ 500, 750, 1000, 2000, 2500, 3000, 4000, Long.MAX_VALUE} };
-	
-	public static final int[] BOUNDARY_SIZE = { BOUNDARIES[SPEED].length,
-		BOUNDARIES[DELAY].length};
 	
 	private static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	

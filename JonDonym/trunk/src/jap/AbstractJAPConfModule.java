@@ -31,8 +31,6 @@ package jap;
 import java.awt.Container;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
-import javax.swing.JRootPane;
-import javax.swing.RootPaneContainer;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import java.awt.GridBagConstraints;

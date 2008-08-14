@@ -843,7 +843,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			}
 			try
 			{
-				TimestampUpdater updater = new TimestampUpdater(mixesWithReplayDetection,
+				/*TimestampUpdater updater =*/ new TimestampUpdater(mixesWithReplayDetection,
 					new ReplayControlChannel(a_multiplexer, a_serviceContainer));
 			}
 			catch (Exception e)

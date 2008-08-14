@@ -28,7 +28,6 @@
 package jap;
 
 import java.util.Enumeration;
-import java.util.Observable;
 import java.util.Hashtable;
 
 import anon.util.Updater;
@@ -79,7 +78,7 @@ public abstract class AbstractDatabaseUpdater extends Updater
 			}
 			public boolean isUpdateDisabled()
 			{
-				return JAPModel.getInstance().isInfoServiceDisabled();
+				return JAPModel.isInfoServiceDisabled();
 			}
 		});
 	}

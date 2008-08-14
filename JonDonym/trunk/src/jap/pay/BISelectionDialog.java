@@ -42,14 +42,11 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import anon.crypto.JAPCertificate;
 import anon.pay.PaymentInstanceDBEntry;
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import java.util.Vector;
 import java.util.Enumeration;
-import anon.infoservice.InfoServiceHolder;
-import anon.pay.PaymentInstanceDBEntry;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

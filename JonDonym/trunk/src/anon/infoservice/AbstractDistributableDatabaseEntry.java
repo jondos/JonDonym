@@ -37,9 +37,6 @@ import anon.crypto.IVerifyable;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import logging.LogHolder;
-import logging.LogType;
-import logging.LogLevel;
 import anon.util.Util;
 
 /**

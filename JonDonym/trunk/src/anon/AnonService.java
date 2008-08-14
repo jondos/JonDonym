@@ -29,7 +29,6 @@ package anon;
 
 import java.net.ConnectException;
 
-import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.IMutableProxyInterface;
 
 /** This class is used for accessing the AnonService. An instance is created

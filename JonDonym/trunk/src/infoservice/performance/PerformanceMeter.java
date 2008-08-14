@@ -27,8 +27,6 @@
  */
 package infoservice.performance;
 
-import jap.pay.AccountUpdater;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -52,10 +50,9 @@ import java.util.Calendar;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 import HTTPClient.HTTPConnection;
+
+import jap.pay.AccountUpdater;
 import anon.ErrorCodes;
 import anon.client.AnonClient;
 import anon.client.DummyTrafficControlChannel;
@@ -74,7 +71,9 @@ import anon.util.IMiscPasswordReader;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import infoservice.Configuration;
-import infoservice.HttpResponseStructure;
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 /**
  * A simple performance meter for Mix cascades.<br>
@@ -87,13 +86,13 @@ import infoservice.HttpResponseStructure;
  * per millisecond) are measured and set to the corresponding cascade.
  * 
  *
- * @author cbanse, oliver
+ * @author Christian Banse
  */
 public class PerformanceMeter implements Runnable 
 {	
-	private static final int LOGIN_TIMEOUT = 15000;
-	
 	private Object SYNC_METER = new Object();
+	private Object SYNC_SOCKET = new Object();
+	
 	private String m_proxyHost;
 	private int m_proxyPort;
 	private int m_dataSize;
@@ -120,7 +119,6 @@ public class PerformanceMeter implements Runnable
 	
 	private PayAccountsFile m_payAccountsFile;
 	
-	private Object SYNC_SOCKET = new Object();
 	private Socket m_meterSocket;
 
 	private Hashtable m_usedAccountFiles = new Hashtable();
@@ -160,7 +158,6 @@ public class PerformanceMeter implements Runnable
 		m_minPackets = ((Integer) a_config[6]).intValue();
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
 		//AnonClient.setLoginTimeout(LOGIN_TIMEOUT);
-		
 		
 		m_cal.setTimeInMillis(System.currentTimeMillis());
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
@@ -351,7 +348,6 @@ public class PerformanceMeter implements Runnable
 							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
 								"Using deprecated stop method to finish meter thread!");
 							performTestThread.stop();
-							
 						}
 						else if (iWait > 5)
 						{
