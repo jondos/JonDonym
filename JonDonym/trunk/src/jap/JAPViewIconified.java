@@ -61,10 +61,14 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.JavaVersionDBEntry;
-import java.io.IOException;
 
 final public class JAPViewIconified extends JWindow implements ActionListener
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static final String XML_LOCATION = "IconifiedLocation";
 
 	public static final String MSG_ANON_LOW = JAPViewIconified.class.getName() + "_anonLow";

@@ -34,7 +34,6 @@ import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;

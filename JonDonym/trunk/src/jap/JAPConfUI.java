@@ -34,7 +34,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
-import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -999,7 +998,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 			newDefaultView = JAPConstants.VIEW_SIMPLIFIED;
 		}
 
-		if (JAPModel.getInstance().getDefaultView() != newDefaultView)
+		if (JAPModel.getDefaultView() != newDefaultView)
 		{
 			final int defaultViewRestart = newDefaultView;
 			JAPConf.getInstance().addNeedRestart(

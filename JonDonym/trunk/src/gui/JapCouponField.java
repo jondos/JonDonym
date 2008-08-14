@@ -44,7 +44,7 @@ import java.awt.datatransfer.Transferable;
 
 /**
  * specialized version of a JTextField, similar to JAPJIntField
- * differences to regulat text field:
+ * differences to regular text field:
  * - accepts only hexadecimal values (0-9, A-F)
  * - accepts only 4 characters, transfers focus once full
  * - displays characters as uppercase regardless of whether they were entered upper- or lowercase
@@ -54,6 +54,11 @@ import java.awt.datatransfer.Transferable;
  */
 public class JapCouponField extends JTextField
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private static final int NR_OF_CHARACTERS = 4;
 	private static final char[] ACCEPTED_CHARS = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}; //assumes text has already been made uppercase
 	private JapCouponField m_nextCouponField;
@@ -116,6 +121,11 @@ public class JapCouponField extends JTextField
 
 	private final class CouponDocument extends PlainDocument
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public void insertString(int offset, String string, AttributeSet attributeSet) throws BadLocationException
 		{
 			//make everything uppercase

@@ -71,7 +71,7 @@ public class JAPConfInfoServiceSavePoint implements IJAPConfSavePoint
 	{
 		m_knownInfoServices = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
 		m_preferredInfoService = InfoServiceHolder.getInstance().getPreferredInfoService();
-		m_automaticInfoServiceRequestsDisabled = JAPModel.getInstance().isInfoServiceDisabled();
+		m_automaticInfoServiceRequestsDisabled = JAPModel.isInfoServiceDisabled();
 		m_automaticInfoServiceChanges = InfoServiceHolder.getInstance().isChangeInfoServices();
 	}
 

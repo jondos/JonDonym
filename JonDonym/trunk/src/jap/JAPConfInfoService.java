@@ -1394,7 +1394,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 			index = m_cmbAskedInfoServices.getItemCount() - 1;
 		}
 		m_cmbAskedInfoServices.setSelectedIndex(index);
-		m_allowAutomaticIS.setSelected(!JAPModel.getInstance().isInfoServiceDisabled());
+		m_allowAutomaticIS.setSelected(!JAPModel.isInfoServiceDisabled());
 		m_cbxAllowNonAnonymousConnection.setSelected(
 			  JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed());
 		//Select the preferred InfoService

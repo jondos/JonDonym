@@ -42,7 +42,6 @@ import java.io.File;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Locale;
 import java.util.Observable;
 import java.util.Vector;
 

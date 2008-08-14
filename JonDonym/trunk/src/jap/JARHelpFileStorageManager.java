@@ -23,14 +23,10 @@
 */
 package jap;
 
-import gui.JAPMessages;
-import gui.LanguageMapper;
 import gui.help.AbstractHelpFileStorageManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Locale;
 import java.util.Observable;
 import java.util.zip.ZipFile;
 

@@ -10,7 +10,6 @@ import anon.infoservice.InfoServiceDBEntry;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import anon.util.XMLParseException;
 
 public class PerformanceTokenRequest implements IXMLEncodable 
 {

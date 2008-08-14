@@ -88,6 +88,11 @@ final class JAPConfTor extends AbstractJAPConfModule implements ActionListener
 		DateFormat.SHORT);
 	private class MyJTable extends JTable
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public MyJTable(DefaultTableModel m)
 		{
 			super(m);

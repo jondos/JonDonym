@@ -33,13 +33,11 @@ import java.util.Hashtable;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.JTree;
-import javax.swing.RootPaneContainer;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -58,8 +56,6 @@ import javax.swing.tree.TreeSelectionModel;
 import gui.GUIUtils;
 import gui.JAPMessages;
 import gui.JAPHelpContext;
-import gui.dialog.JAPDialog;
-import gui.help.JAPHelp;
 
 /**
  * This is the implementation for the configuration module system. It manages the configuration
@@ -135,6 +131,11 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 
 		TreeSelectionModel configurationTreeSelectionModel = new DefaultTreeSelectionModel()
 		{
+			/**
+			 * serial version UID
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void setSelectionPath(TreePath a_treePath)
 			{
 				String symbolicName = (String) (m_treeNodesToSymbolicNames.get(a_treePath.

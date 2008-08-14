@@ -43,17 +43,9 @@ import javax.swing.JSeparator;
 import java.util.Random;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import javax.swing.BorderFactory;
-import java.awt.Window;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Vector;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import javax.swing.JMenuItem;
-import javax.swing.JMenu;
 import anon.infoservice.JavaVersionDBEntry;
 import java.awt.event.MouseMotionAdapter;
 

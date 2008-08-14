@@ -30,11 +30,8 @@ package jap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.URL;
 import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -54,8 +51,6 @@ import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -71,7 +66,6 @@ import anon.AnonServiceEventAdapter;
 import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.client.AnonClient;
-import anon.client.ITrustModel;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.AbstractMixCascadeContainer;
@@ -116,7 +110,6 @@ import gui.GUIUtils;
 import gui.JAPMessages;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
-import gui.dialog.JAPDialog.LinkedCheckBox;
 import gui.dialog.PasswordContentPane;
 import jap.forward.JAPRoutingEstablishForwardedConnectionDialog;
 import jap.forward.JAPRoutingMessage;
@@ -127,7 +120,6 @@ import logging.LogType;
 import platform.AbstractOS;
 import platform.MacOS;
 import proxy.DirectProxy;
-import proxy.DirectProxy.AllowUnprotectedConnectionCallback;
 import update.JAPUpdateWizard;
 import jap.pay.AccountUpdater;
 import anon.infoservice.ClickedMessageIDDBEntry;
@@ -140,7 +132,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	/** Messages */
 	public static final String MSG_ERROR_SAVING_CONFIG = JAPController.class.getName() +
 		"_errorSavingConfig";
-	private static final String MSG_DIALOG_ACCOUNT_PASSWORD = JAPController.class.
+	/*private static final String MSG_DIALOG_ACCOUNT_PASSWORD = JAPController.class.
 		getName() + "_dialog_account_password";
 	private static final String MSG_ACCOUNT_PASSWORD = JAPController.class.
 		getName() + "_account_password";
@@ -151,15 +143,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static final String MSG_ACCPASSWORDTITLE = JAPController.class.
 		getName() + "_accpasswordtitle";
 	private static final String MSG_ACCPASSWORD = JAPController.class.
-		getName() + "_accpassword";
+		getName() + "_accpassword";*/
 	private static final String MSG_ACCPASSWORDENTERTITLE = JAPController.class.
 		getName() + "_accpasswordentertitle";
 	private static final String MSG_ACCPASSWORDENTER = JAPController.class.
 		getName() + "_accpasswordenter";
 	private static final String MSG_LOSEACCOUNTDATA = JAPController.class.
 		getName() + "_loseaccountdata";
-	private static final String MSG_REPEAT_ENTER_ACCOUNT_PASSWORD = JAPController.class.getName() +
-		"_repeatEnterAccountPassword";
+	/*private static final String MSG_REPEAT_ENTER_ACCOUNT_PASSWORD = JAPController.class.getName() +
+		"_repeatEnterAccountPassword";*/
 	private static final String MSG_DISABLE_GOODBYE = JAPController.class.getName() +
 		"_disableGoodByMessage";
 	private static final String MSG_NEW_OPTIONAL_VERSION = JAPController.class.getName() +
@@ -562,7 +554,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			public void run()
 			{
 				m_feedback.start(false);
-				if (JAPModel.getInstance().isInfoServiceDisabled())
+				if (JAPModel.isInfoServiceDisabled())
 				{
 					m_InfoServiceUpdater.start(false);
 					m_paymentInstanceUpdater.start(false);
@@ -996,7 +988,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 
 				String strVersion = XMLUtil.parseAttribute(root, JAPConstants.CONFIG_VERSION, null);
-	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, m_Model.DLL_VERSION_UPDATE, false));
+	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_UPDATE, false));
 
 
 
@@ -1139,7 +1131,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					JAPModel.getInstance().setAutoConnect(
 									   XMLUtil.parseAttribute(root, "autoConnect", true));
 					// if auto-connect is not chosen, ask the user what to do
-					m_bAskAutoConnect =  !JAPModel.getInstance().isAutoConnect();
+					m_bAskAutoConnect =  !JAPModel.isAutoConnect();
 				}
 				else
 				{
@@ -2519,7 +2511,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 			Element elemMainWindow = doc.createElement(JAPConstants.CONFIG_MAIN_WINDOW);
 			elemGUI.appendChild(elemMainWindow);
-			addWindowLocationToConf(elemMainWindow, JAPModel.getInstance().getMainWindowLocation());
+			addWindowLocationToConf(elemMainWindow, JAPModel.getMainWindowLocation());
 
 			if (JAPModel.getMoveToSystrayOnStartup())
 			{
@@ -3210,7 +3202,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						catch (NullPointerException a_e)
 						{
 						}
-						if (!JAPModel.getInstance().isInfoServiceDisabled() &&
+						if (!JAPModel.isInfoServiceDisabled() &&
 							cascade != null && !cascade.isUserDefined())
 						{
 							if (cascade.isFromCascade() ||
@@ -3245,7 +3237,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						m_proxyDirect = new DirectProxy(m_socketHTTPListener);
 						// ignore all connections to terminate all remaining connections from JAP threads
-						m_proxyDirect.setAllowUnprotectedConnectionCallback(null);
+						DirectProxy.setAllowUnprotectedConnectionCallback(null);
 						m_proxyDirect.startService();
 						try
 						{
@@ -3256,7 +3248,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							// ignore
 						}
 						// reactivate the callback (now all remaining JAP connections should be dead)
-						m_proxyDirect.setAllowUnprotectedConnectionCallback(m_proxyCallback);
+						DirectProxy.setAllowUnprotectedConnectionCallback(m_proxyCallback);
 					}
 					/* notify the forwarding system after! m_proxyAnon is set to null */
 					JAPModel.getInstance().getRoutingSettings().anonConnectionClosed();
@@ -3693,7 +3685,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 										  "Stopping InfoService auto-update threads...");
 							getInstance().m_finishSplash.setText(
 								JAPMessages.getString(MSG_FINISHING_IS_UPDATES));
-							m_Controller.m_feedback.stop();
+							JAPController.m_feedback.stop();
 							m_Controller.m_AccountUpdater.stop();
 							m_Controller.m_MixCascadeUpdater.stop();
 							m_Controller.m_InfoServiceUpdater.stop();
@@ -4692,7 +4684,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	public void connectionError()
 	{
 		LogHolder.log(LogLevel.ERR, LogType.NET, "JAPController received connectionError");
-		if (!m_Model.isAutomaticallyReconnected())
+		if (!JAPModel.isAutomaticallyReconnected())
 		{
 			this.setAnonMode(false);
 		}

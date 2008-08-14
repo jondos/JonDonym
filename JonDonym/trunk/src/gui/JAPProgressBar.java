@@ -30,12 +30,10 @@ package gui;
 import javax.swing.JProgressBar;
 import javax.swing.plaf.ProgressBarUI;
 import java.awt.Color;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
 import javax.swing.JComponent;
-import javax.swing.JProgressBar;
 import javax.swing.plaf.basic.BasicProgressBarUI;
 
 /**
@@ -45,6 +43,11 @@ import javax.swing.plaf.basic.BasicProgressBarUI;
  */
 public class JAPProgressBar extends JProgressBar
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private final MyProgressBarUI m_ui;
 
 	public JAPProgressBar()

@@ -54,6 +54,11 @@ import java.awt.image.ColorModel;
  */
 final public class JAPSplash extends Window implements ISplashResponse
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private static final String IMGPATHHICOLOR = "images/";
 	private static final String IMGPATHLOWCOLOR = "images/lowcolor/";
 	private static final String SPLASH_FILE = "splash.jpg";
