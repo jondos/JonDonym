@@ -98,8 +98,8 @@ public class MethodSelectionPane extends DialogContentPane implements IWizardSui
 		m_c.weightx = 0;
 		m_c.weightx = 0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.NONE;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.NONE;
 
 		//Add some dummy options for dialog sizing
 		for (int i = 0; i < 6; i++)
@@ -159,8 +159,8 @@ public class MethodSelectionPane extends DialogContentPane implements IWizardSui
 		m_c.weightx = 0;
 		m_c.weightx = 0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.NONE;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.NONE;
 
 		m_paymentOptions = options;
 		String language = JAPMessages.getLocale().getLanguage();

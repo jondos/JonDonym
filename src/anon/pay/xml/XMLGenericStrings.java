@@ -121,7 +121,7 @@ public class XMLGenericStrings implements IXMLEncodable
 
 	private Element internal_toXmlElement(Document a_doc)
 	{
-		Element elemRoot = a_doc.createElement(this.ms_strElemName);
+		Element elemRoot = a_doc.createElement(ms_strElemName);
 		Element elem;
 
 	    for (Enumeration allKeys = m_strings.keys(); allKeys.hasMoreElements(); )
@@ -142,7 +142,7 @@ public class XMLGenericStrings implements IXMLEncodable
 	private void setValues(Element xml) throws Exception
 	{
 		String rootTagName = xml.getTagName();
-		if (!rootTagName.equals(this.ms_strElemName))
+		if (!rootTagName.equals(ms_strElemName))
 		{
 			throw new Exception("XMLGenericStrings: cannot parse, wrong xml format!");
 		}

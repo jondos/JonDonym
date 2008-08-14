@@ -294,7 +294,7 @@ public class SystrayPopupMenu extends PopupMenu
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
-				JAPController.getInstance().goodBye(true);
+				JAPController.goodBye(true);
 			}
 		});
 		addSeparator();

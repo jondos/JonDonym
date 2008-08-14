@@ -32,7 +32,6 @@ package anon.tor;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;

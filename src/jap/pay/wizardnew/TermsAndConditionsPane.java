@@ -96,8 +96,8 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		m_c.weightx = 1.0;
 		m_c.weighty = 1.0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.BOTH;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.BOTH;
 
 		String termsHtml = JAPMessages.getString(MSG_NO_TERMS_FOUND);
 		m_termsPane = new JEditorPane("text/html",termsHtml);
@@ -113,7 +113,7 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		m_c.weightx = 0.0;
 		m_c.weighty = 0.0;
 		m_c.gridy++;
-		m_c.fill = m_c.BOTH;
+		m_c.fill = GridBagConstraints.BOTH;
 		if (m_bCheckAccept)
 		{
 			m_rootPanel.add(m_accepted, m_c);

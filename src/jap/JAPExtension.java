@@ -24,7 +24,6 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.RootPaneContainer;
 
 import logging.LogHolder;
 import logging.LogLevel;

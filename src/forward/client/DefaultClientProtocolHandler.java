@@ -32,7 +32,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -42,7 +41,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import anon.crypto.SignatureVerifier;
 import anon.infoservice.MixCascade;
 import anon.shared.ProxyConnection;
 import anon.util.XMLParseException;

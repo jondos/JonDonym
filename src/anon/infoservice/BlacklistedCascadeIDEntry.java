@@ -36,7 +36,6 @@ import java.util.Observable;
 import org.w3c.dom.Element;
 
 import anon.util.ClassUtil;
-import anon.util.XMLUtil;
 import anon.util.XMLParseException;
 
 /**
