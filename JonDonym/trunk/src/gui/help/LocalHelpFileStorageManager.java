@@ -23,7 +23,11 @@
 */
 package gui.help;
 
+import jap.JAPConstants;
+
 import java.util.Observable;
+
+import anon.util.ClassUtil;
 
 import platform.AbstractOS;
 
@@ -31,6 +35,7 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 {
 	private final Observable DUMMY = new Observable();
 	private String m_applicationName;
+	private final String LOCAL_HELP_PATH = ClassUtil.getClassDirectory(this.getClass()).getParent(); 
 
 	public LocalHelpFileStorageManager(String a_applicationName)
 	{
@@ -54,8 +59,7 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 	public boolean handleHelpPathChanged(String oldHelpPath, 
 			String newHelpPath, boolean a_bIgnoreExistingHelpDir)
 	{
-		if (newHelpPath != null && newHelpPath.equals(
-				AbstractOS.getInstance().getDefaultHelpPath(m_applicationName)) &&
+		if (newHelpPath != null && newHelpPath.equals(LOCAL_HELP_PATH) &&
 				(oldHelpPath == null || !oldHelpPath.equals(newHelpPath)))
 		{
 			return true;
@@ -66,8 +70,7 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 
 	public boolean helpInstallationExists(String helpPath)
 	{
-		if (helpPath == null || !helpPath.equals(
-				AbstractOS.getInstance().getDefaultHelpPath(m_applicationName)))
+		if (helpPath == null || !helpPath.equals(LOCAL_HELP_PATH))
 		{
 			return false;
 		}
@@ -77,11 +80,15 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 	public String helpPathValidityCheck(String absolutePath, boolean a_bIgnoreExistingHelpDir)
 	{	
 		if (absolutePath == null || 
-				!absolutePath.equals(
-						AbstractOS.getInstance().getDefaultHelpPath(m_applicationName)))
+				!absolutePath.equals(LOCAL_HELP_PATH))
 		{
 			return AbstractHelpFileStorageManager.HELP_INVALID_NOWRITE;
 		}
 		return AbstractHelpFileStorageManager.HELP_JONDO_EXISTS;
+	}
+	
+	public String getInitPath()
+	{
+		return LOCAL_HELP_PATH;
 	}
 }

@@ -63,6 +63,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 	
 	private JAPHelp m_alternativeHelp = null;
 	private IHelpModel m_helpModel;
+	private long m_timeLastSetVisible = 0;
 	
 	JAPExternalHelpViewer(Frame a_parent, IHelpModel a_helpModel)
 	{
@@ -72,6 +73,15 @@ public final class JAPExternalHelpViewer extends JAPHelp
 	
 	public void setVisible(boolean a_bVisible)
 	{
+		if (System.currentTimeMillis() - m_timeLastSetVisible < 1000l)
+		{
+			// maybe opening the browser does not work... show the internal help instead
+			m_alternativeHelp.setContext(JAPHelpContext.INDEX_CONTEXT);
+			m_alternativeHelp.setVisible(a_bVisible);
+			return;
+		}
+		m_timeLastSetVisible = System.currentTimeMillis();
+		
 		IHelpContext context = getHelpContext();
 		if(getHelpContext() == null)
 		{

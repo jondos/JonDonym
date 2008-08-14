@@ -64,13 +64,16 @@ public class WindowsOS extends AbstractOS
 	{
 		try
 		{
+			//java.awt.Desktop.getDesktop().browse(new java.net.URI(a_link));			
 			Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + a_link);
+			//Runtime.getRuntime().exec(
+				//	new String[]{"C:\\Program Files\\Mozilla Firefox\\firefox.exe", a_link});
 			return true;
 		}
 		catch (Exception ex)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC,
-						  "Cannot open '" + a_link + "' in Windows default program.");
+						  "Cannot open '" + a_link + "' in Windows default program.", ex);
 		}
 
 		return false;
@@ -89,6 +92,11 @@ public class WindowsOS extends AbstractOS
 		}
 	}
 
+	public boolean isHelpAutoInstalled()
+	{
+		return true;
+	}
+	
 	public String getDefaultHelpPath(String a_applicationName)
 	{
 		String dir = getEnvPath(a_applicationName, "ALLUSERSPROFILE");

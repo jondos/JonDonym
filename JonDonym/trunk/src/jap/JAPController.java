@@ -1025,10 +1025,21 @@ public final class JAPController extends Observable implements IProxyListener, O
 				
 				JAPModel.getInstance().initHelpPath(
 								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
-				String messageText = a_splash.getText();
-				a_splash.setText(JAPMessages.getString(MSG_UPDATING_HELP));
-				JAPModel.getInstance().getHelpURL();
-				a_splash.setText(messageText);
+				if (!JAPDialog.isConsoleOnly())
+				{
+					String messageText = a_splash.getText();
+					a_splash.setText(JAPMessages.getString(MSG_UPDATING_HELP));
+					JAPModel.getInstance().getHelpURL();
+					if (!JAPModel.getInstance().isHelpPathDefined() &&
+						AbstractOS.getInstance().isHelpAutoInstalled())
+					{
+						System.out.println("test");
+						JAPModel.getInstance().setHelpPath(new File(
+								AbstractOS.getInstance().getDefaultHelpPath(
+										JAPConstants.APPLICATION_NAME)), false);
+					}
+					a_splash.setText(messageText);
+				}
 						
 
 	            m_Model.setHttpListenerPortNumber(XMLUtil.parseAttribute(root,

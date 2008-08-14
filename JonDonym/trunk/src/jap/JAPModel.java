@@ -268,7 +268,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		{
 //			build environment; use the browser to open the local help files
 			m_helpFileStorageManager =	
-				new LocalHelpFileStorageManager(JAPConstants.APPLICATION_NAME);
+				new LocalHelpFileStorageManager(JAPConstants.APPLICATION_NAME);			
 		}
 		else
 		{			
@@ -1296,22 +1296,19 @@ public final class JAPModel extends Observable implements IHelpModel
 	public synchronized URL getHelpURL(String a_startDoc)
 	{
 		URL helpURL = null;
-		if(m_helpFileStorageManager != null)
+		if(isHelpPathDefined())
 		{
-			if(isHelpPathDefined())
+			m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath);
+			
+			try 
 			{
-				m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath);
-				
-				try 
-				{
-					helpURL = new URL("file://" + m_helpPath + "/" +
-								m_helpFileStorageManager.getLocalisedHelpDir() + "/" + a_startDoc);
-				} 
-				catch (MalformedURLException e) 
-				{
-					LogHolder.log(LogLevel.WARNING, LogType.MISC, e);
-					return null;
-				}
+				helpURL = new URL("file://" + m_helpPath + "/" +
+							m_helpFileStorageManager.getLocalisedHelpDir() + "/" + a_startDoc);
+			} 
+			catch (MalformedURLException e) 
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, e);
+				return null;
 			}
 		}
 		return helpURL;
@@ -1339,7 +1336,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		}
 		else
 		{		
-			m_helpPath = null;
+			m_helpPath = m_helpFileStorageManager.getInitPath();
 		}
 	}
 	
@@ -1396,8 +1393,8 @@ public final class JAPModel extends Observable implements IHelpModel
 					}
 				}			
 				
-				if (hpFile != null && hpFile.isDirectory() && m_helpFileStorageManager != null)										
-				{								
+				if (hpFile != null && hpFile.isDirectory())										
+				{			LogHolder.log(LogLevel.EMERG, LogType.MISC, hpFile.getPath());					
 					strCheck = m_helpFileStorageManager.helpPathValidityCheck(hpFile.getPath(), true);
 					if (strCheck.equals(AbstractHelpFileStorageManager.HELP_VALID) ||
 						strCheck.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
@@ -1414,11 +1411,13 @@ public final class JAPModel extends Observable implements IHelpModel
 						}
 						else
 						{
+							LogHolder.log(LogLevel.EMERG, LogType.MISC, "reset1");
 							resetHelpPath();
 						}
 					}
 					else
 					{
+						LogHolder.log(LogLevel.EMERG, LogType.MISC, "reset2");		
 						resetHelpPath();
 					}
 				}
@@ -1437,7 +1436,7 @@ public final class JAPModel extends Observable implements IHelpModel
 					{
 						hpFile = file;
 					}
-				}
+				}				
 				setHelpPath(hpFile.getPath());
 			}
 		}
@@ -1475,11 +1474,9 @@ public final class JAPModel extends Observable implements IHelpModel
 			if(helpPathChanged)
 			{
 				boolean storageLayerChanged = true;
-				if(m_helpFileStorageManager != null)
-				{
-						storageLayerChanged = m_helpFileStorageManager.handleHelpPathChanged(
-								oldHelpPath, newHelpPath, false);
-				}
+				storageLayerChanged = m_helpFileStorageManager.handleHelpPathChanged(
+						oldHelpPath, newHelpPath, false);
+				
 				if(storageLayerChanged)
 				{					
 					m_helpPath = newHelpPath;
@@ -1495,10 +1492,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		
 		if(oldHelpPath != null && !m_bPortableHelp)
 		{
-			if(m_helpFileStorageManager != null)
-			{
-				m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, null, false);
-			}
+			m_helpFileStorageManager.handleHelpPathChanged(oldHelpPath, null, false);
 			setChanged();
 			m_helpPath = null;
 		}	
@@ -1512,8 +1506,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	 */
 	public synchronized String helpPathValidityCheck(String helpPath)
 	{
-		return (m_helpFileStorageManager != null) ?
-				m_helpFileStorageManager.helpPathValidityCheck(helpPath, false) : NO_HELP_STORAGE_MANAGER;		
+		return m_helpFileStorageManager.helpPathValidityCheck(helpPath, false);		
 	}
 	
 	/**
@@ -1533,7 +1526,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	public boolean isHelpPathChangeable()
 	{
-		if (m_helpFileStorageManager == null ||	m_helpFileStorageManager instanceof LocalHelpFileStorageManager)
+		if (m_helpFileStorageManager instanceof LocalHelpFileStorageManager)
 		{
 			return false;
 		}
@@ -1555,10 +1548,9 @@ public final class JAPModel extends Observable implements IHelpModel
 		boolean helpPathExists = m_helpPath != null;
 		
 		/* if no storageManager is defined: don't check if installation exists */
-		boolean helpInstallationExists = m_helpFileStorageManager != null ?
+		boolean helpInstallationExists = 
 			(m_helpFileStorageManager.helpInstallationExists(m_helpPath) &&
-			helpPathValidityCheck(m_helpPath).equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS)) : 
-				helpPathExists;
+			helpPathValidityCheck(m_helpPath).equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS));
 		
 		if(helpPathExists && !helpInstallationExists)
 		{
@@ -1594,8 +1586,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	public Observable getHelpFileStorageObservable()
 	{
-		return (m_helpFileStorageManager != null) ? 
-				m_helpFileStorageManager.getStorageObservable() : null;
+		return m_helpFileStorageManager.getStorageObservable();
 	}
 	
 	public void setDLLupdate(boolean a_update) {

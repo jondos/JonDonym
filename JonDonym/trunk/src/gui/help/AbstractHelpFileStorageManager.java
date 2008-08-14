@@ -113,4 +113,9 @@ public abstract class AbstractHelpFileStorageManager
 	public abstract void ensureMostRecentVersion(String helpPath);
 	
 	public abstract boolean helpInstallationExists(String helpPath);
+	
+	public String getInitPath()
+	{
+		return null;
+	}
 }
