@@ -1956,7 +1956,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					
 					if(entry != null)
 					{
-						value = entry.getXMLBound(PerformanceEntry.SPEED);						
+						value = entry.getBound(PerformanceEntry.SPEED);						
 						if (value < 0)
 						{
 							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
@@ -1971,7 +1971,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						
 													
-						value = entry.getXMLBound(PerformanceEntry.DELAY);
+						value = entry.getBound(PerformanceEntry.DELAY);
 						if (value < 0)
 						{
 							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));

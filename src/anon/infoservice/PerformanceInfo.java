@@ -186,7 +186,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	public static PerformanceEntry getLowestCommonBoundEntry(String a_cascadeId)
 	{
 		// loop through all PerformanceInfo objects (from the different Info Services)
-		PerformanceEntry perfEntry = new PerformanceEntry(a_cascadeId);
+		PerformanceEntry perfEntry = new PerformanceEntry(a_cascadeId, false);
 		
 		Vector vPerfEntries = new Vector();
 		Vector vSpeedBoundaries = new Vector();
@@ -199,14 +199,14 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			if (entry != null)
 			{
 				vPerfEntries.addElement(entry);
-				Long value = new Long(entry.getXMLBound(PerformanceEntry.SPEED));
+				Long value = new Long(entry.getBound(PerformanceEntry.SPEED));
 				
 				if(!vSpeedBoundaries.contains(value))
 				{
 					vSpeedBoundaries.add(value);
 				}
 				
-				value = new Long(entry.getXMLBound(PerformanceEntry.DELAY));
+				value = new Long(entry.getBound(PerformanceEntry.DELAY));
 				
 				if(!vDelayBoundaries.contains(value))
 				{
@@ -235,7 +235,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			for(int j = 0; j < vPerfEntries.size(); j++)
 			{
 				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
-				if(entry.getXMLBound(PerformanceEntry.SPEED) >= bound)
+				if(entry.getBound(PerformanceEntry.SPEED) >= bound)
 				{
 					agreeing++;
 				}
@@ -246,7 +246,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				break;
 			}
 		}
-		perfEntry.overrideXMLBound(PerformanceEntry.SPEED, value);
+		perfEntry.setBound(PerformanceEntry.SPEED, value);
 		
 		for(int i = 0; i< vDelayBoundaries.size(); i++)
 		{
@@ -257,7 +257,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			for(int j = 0; j < vPerfEntries.size(); j++)
 			{
 				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
-				if(entry.getXMLBound(PerformanceEntry.DELAY) <= bound)
+				if(entry.getBound(PerformanceEntry.DELAY) <= bound)
 				{
 					agreeing++;
 				}
@@ -268,7 +268,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				break;
 			}
 		}
-		perfEntry.overrideXMLBound(PerformanceEntry.DELAY, value);
+		perfEntry.setBound(PerformanceEntry.DELAY, value);
 		
 		return perfEntry;
 	}

@@ -2924,7 +2924,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			
 			if(entry != null)
 			{
-				value = entry.getXMLBound(PerformanceEntry.SPEED);						
+				value = entry.getBound(PerformanceEntry.SPEED);						
 				if (value < 0)
 				{
 					m_labelSpeed.setText(JAPMessages.getString("statusUnknown"));
@@ -2938,7 +2938,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
 				}
 				
-				value = entry.getXMLBound(PerformanceEntry.DELAY);
+				value = entry.getBound(PerformanceEntry.DELAY);
 				if (value < 0)
 				{
 					m_labelDelay.setText(JAPMessages.getString("statusUnknown"));

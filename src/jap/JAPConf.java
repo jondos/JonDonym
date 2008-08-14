@@ -207,7 +207,9 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 			m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfForwardingServer(),
 												  FORWARDING_SERVER_TAB);
 			m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfCert(), CERT_TAB);
-			m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfHTTPFilter(), HTTP_FILTER_TAB);
+			
+			// will be added later, just a template for now
+			//m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfHTTPFilter(), HTTP_FILTER_TAB);
 			DefaultMutableTreeNode debugNode =
 				m_moduleSystem.addComponent(rootNode, m_pMisc, "ngTreeDebugging", DEBUG_TAB, "debugging");
 			if (JAPModel.getInstance().isForwardingStateModuleVisible())
