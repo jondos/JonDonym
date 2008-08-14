@@ -33,7 +33,6 @@ import java.util.Vector;
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import anon.infoservice.Database;

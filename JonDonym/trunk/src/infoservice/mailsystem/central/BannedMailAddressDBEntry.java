@@ -27,8 +27,6 @@
  */
 package infoservice.mailsystem.central;
 
-import java.util.Vector;
-
 import javax.mail.Address;
 
 import anon.infoservice.AbstractDatabaseEntry;

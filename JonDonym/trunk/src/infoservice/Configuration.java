@@ -40,7 +40,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
-import java.util.Vector;
 
 import anon.crypto.JAPCertificate;
 import anon.crypto.PKCS12;
@@ -50,8 +49,6 @@ import anon.crypto.SignatureVerifier;
 import anon.infoservice.Constants;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.Database;
-import anon.util.ResourceLoader;
-import anon.util.Util;
 import infoservice.tor.TorDirectoryAgent;
 import infoservice.tor.TorDirectoryServer;
 import infoservice.tor.TorDirectoryServerUrl;

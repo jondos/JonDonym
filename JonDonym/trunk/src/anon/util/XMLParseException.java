@@ -34,6 +34,11 @@ package anon.util;
 public class XMLParseException extends Exception
 {
 	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * A constant that means that the document to parse has a wrong root tag.
 	 */
 	public static final String ROOT_TAG = "##__root__##";

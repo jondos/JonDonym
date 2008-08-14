@@ -255,7 +255,7 @@ public class ConfigAssistant extends JAPDialog
 			{
 				for (int i = 0; i < m_lblPorts.length; i++)
 				{
-					m_lblPorts[i].setText("" + JAPModel.getInstance().getHttpListenerPortNumber());
+					m_lblPorts[i].setText("" + JAPModel.getHttpListenerPortNumber());
 				}
 
 				return super.checkUpdate();
@@ -712,7 +712,7 @@ public class ConfigAssistant extends JAPDialog
 				if (paneSetLang.getButtonValue() == DialogContentPane.RETURN_VALUE_OK)
 				{
 					JAPMessages.setLocale(((LanguageMapper)comboLang.getSelectedItem()).getLocale());
-					JAPController.getInstance().goodBye(false);
+					JAPController.goodBye(false);
 				}
 				else
 				{
@@ -724,13 +724,13 @@ public class ConfigAssistant extends JAPDialog
 							JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
 						{
 							JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_SIMPLIFIED);
-							JAPController.getInstance().goodBye(false);
+							JAPController.goodBye(false);
 						}
 						else if (m_radioAdvancedView.isSelected() &&
 								 JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED)
 						{
 							JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_NORMAL);
-							JAPController.getInstance().goodBye(false);
+							JAPController.goodBye(false);
 						}
 					}
 				}

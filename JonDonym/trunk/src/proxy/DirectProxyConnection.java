@@ -27,8 +27,6 @@
  */
 package proxy;
 
-import jap.JAPUtil;
-
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -57,7 +55,6 @@ import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.ProxyInterface;
 import anon.shared.ProxyConnection;
-import java.io.*;
 
 final class DirectProxyConnection implements Runnable
 {
