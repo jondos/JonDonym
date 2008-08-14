@@ -30,7 +30,6 @@ package infoservice;
 import jap.JAPUtil;
 
 import java.net.InetAddress;
-import java.text.NumberFormat;
 import java.io.File;
 import java.util.Date;
 import java.util.Enumeration;

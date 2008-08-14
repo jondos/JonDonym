@@ -27,8 +27,6 @@
  */
 package gui;
 
-import jap.JAPUtil;
-
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -39,7 +37,6 @@ import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.Cursor;
@@ -60,6 +57,11 @@ import java.awt.Cursor;
  */
 public class FlippingPanel extends JPanel
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private static final String MSG_CLICK_TO_SHOW = FlippingPanel.class.getName() + "_clickToShow";
 
 	private JPanel m_panelContainer;

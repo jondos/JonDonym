@@ -36,19 +36,12 @@ import javax.swing.JCheckBox;
 import javax.swing.border.TitledBorder;
 import javax.swing.JPanel;
 import javax.swing.JComboBox;
-import javax.swing.JButton;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
 import gui.JAPMessages;
-import gui.GUIUtils;
 import gui.JAPMultilineLabel;
-import javax.swing.JList;
-import javax.swing.DefaultListModel;
-import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 import java.util.Dictionary;
 import java.util.Observable;
 import java.util.Hashtable;
@@ -67,22 +60,22 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		"_denyNonAnonymousSurfing";
 	private static final String MSG_AUTO_CHOOSE_CASCADES = JAPConfAnonGeneral.class.getName() +
 		"_autoChooseCascades";
-	private static final String MSG_RESTRICT_AUTO_CHOOSE = JAPConfAnonGeneral.class.getName() +
+	/*private static final String MSG_RESTRICT_AUTO_CHOOSE = JAPConfAnonGeneral.class.getName() +
 		"_RestrictAutoChoosing";
 	private static final String MSG_DO_NOT_RESTRICT_AUTO_CHOOSE = JAPConfAnonGeneral.class.getName() +
 		"_doNotRestrictAutoChoosing";
 	private static final String MSG_RESTRICT_AUTO_CHOOSE_PAY = JAPConfAnonGeneral.class.getName() +
-		"_restrictAutoChoosingPay";
-	private static final String MSG_KNOWN_CASCADES = JAPConfAnonGeneral.class.getName() +
+		"_restrictAutoChoosingPay";*/
+	/*private static final String MSG_KNOWN_CASCADES = JAPConfAnonGeneral.class.getName() +
 		"_knownCascades";
 	private static final String MSG_ALLOWED_CASCADES = JAPConfAnonGeneral.class.getName() +
-		"_allowedCascades";
-	private static final String MSG_AUTO_CHOOSE_ON_START = JAPConfAnonGeneral.class.getName() +
-		"_autoChooseOnStart";
+		"_allowedCascades";*/
+	/*private static final String MSG_AUTO_CHOOSE_ON_START = JAPConfAnonGeneral.class.getName() +
+		"_autoChooseOnStart";*/
 	private static final String MSG_TITLE_ASSIGN_SERVICES = JAPConfAnonGeneral.class.getName() +
 		"_titleAssignServices";
-	private static final String MSG_EXPLAIN_ASSIGN_SERVICES = JAPConfAnonGeneral.class.getName() +
-		"_explainAssignServices";
+	/*private static final String MSG_EXPLAIN_ASSIGN_SERVICES = JAPConfAnonGeneral.class.getName() +
+		"_explainAssignServices";*/
 	private static final String MSG_EXPLAIN_ASSIGN_SERVICES_BETA = JAPConfAnonGeneral.class.getName() +
 		"_explainAssignServicesBeta";
 	private static final String MSG_SERVICE_HTTP = JAPConfAnonGeneral.class.getName() + "_serviceHttp";
@@ -92,14 +85,14 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 	private static final String MSG_PASSIVE_FTP = JAPConfAnonGeneral.class.getName() + "_passiveFTP";
 	private static final String MSG_TOOLTIP_SERVICE_DEACTIVATED = JAPConfAnonGeneral.class.getName() +
 		"_tooltipServiceDeactivated";
-	private static final String MSG_EVERY_SECONDS = JAPConfAnonGeneral.class.getName() + "_everySeconds";
+	//private static final String MSG_EVERY_SECONDS = JAPConfAnonGeneral.class.getName() + "_everySeconds";
 	private static final String MSG_LBL_WHITELIST = JAPConfAnonGeneral.class.getName() + "_autoBlacklist";
 	private static final String MSG_AUTO_CHOOSE_ON_STARTUP =
 		JAPConfAnonGeneral.class.getName() + "_autoChooseOnStartup";
 
 
-	private static final String IMG_ARROW_RIGHT = JAPConfAnonGeneral.class.getName() + "_arrowRight.gif";
-	private static final String IMG_ARROW_LEFT = JAPConfAnonGeneral.class.getName() + "_arrowLeft.gif";
+	//private static final String IMG_ARROW_RIGHT = JAPConfAnonGeneral.class.getName() + "_arrowRight.gif";
+	//private static final String IMG_ARROW_LEFT = JAPConfAnonGeneral.class.getName() + "_arrowLeft.gif";
 
 	private static final int DT_INTERVAL_STEPLENGTH = 2;
 	private static final int DT_INTERVAL_STEPS =
@@ -127,7 +120,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 	private JComboBox m_comboTimeout;
 
 
-	private JList m_knownCascadesList;
+	//private JList m_knownCascadesList;
 
 	protected JAPConfAnonGeneral(IJAPConfSavePoint savePoint)
 	{
@@ -460,7 +453,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		}
 	}
 
-	private JPanel createRestrictedCacadesPanel()
+	/*private JPanel createRestrictedCacadesPanel()
 	{
 		GridBagConstraints c = new GridBagConstraints();
 
@@ -482,7 +475,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		final JScrollPane knownCascadesScrollPane = new JScrollPane(m_knownCascadesList);
 		//knownCascadesScrollPane.setFont(getFontSetting());
 		/* set the preferred size of the scrollpane to a 4x20 textarea */
-		knownCascadesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
+		/*knownCascadesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
 
 		DefaultListModel m_allowedCascadesListModel = new DefaultListModel();
 		final JList allowedCascadesList = new JList(m_allowedCascadesListModel);
@@ -490,10 +483,10 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		final JScrollPane allowedCascadesScrollPane = new JScrollPane(allowedCascadesList);
 		//allowedCascadesScrollPane.setFont(getFontSetting());
 		/* set the preferred size of the scrollpane to a 4x20 textarea */
-			allowedCascadesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
+			/*allowedCascadesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
 
 
-		final JButton m_btnAddCascades = new JButton(GUIUtils.loadImageIcon(IMG_ARROW_RIGHT, true));
+		/*final JButton m_btnAddCascades = new JButton(GUIUtils.loadImageIcon(IMG_ARROW_RIGHT, true));
 		final JButton m_btnRemoveCascades = new JButton(GUIUtils.loadImageIcon(IMG_ARROW_LEFT, true));
 
 
@@ -538,7 +531,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		panel.add(allowedCascadesScrollPane, c);
 
 		return panel;
-	}
+	}*/
 
 	private void setLoginTimeout(int a_timeoutMS)
 	{

@@ -105,12 +105,10 @@ import anon.infoservice.PerformanceInfo;
 import anon.util.Util;
 import anon.util.Util.Comparable;
 import gui.CertDetailsDialog;
-import gui.CountryMapper;
 import gui.GUIUtils;
 import gui.JAPHelpContext;
 import gui.JAPJIntField;
 import gui.JAPMessages;
-import gui.JAPMultilineLabel;
 import gui.MapBox;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp;
@@ -1950,7 +1948,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
 					long value;
-					double deviation;
+					
 					DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
 					df.applyPattern("#,####0.00");
 					
@@ -2601,7 +2599,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public String getOperator(MixCascade a_cascade, String a_mixId)
 		{
 			ServiceOperator operator = getServiceOperator(a_cascade, a_mixId);
-			String country = null;
 			String strOperator = null;
 			if (operator != null)
 			{
@@ -2894,6 +2891,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	private class ManualPanel extends JPanel
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public ManualPanel(JAPConfAnon a_listener)
 		{
 			GridBagLayout layout = new GridBagLayout();
@@ -2953,6 +2955,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	private class ServerPanel extends JPanel
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+		
 		private JLabel m_lblCascadeName;
 		private JAPConfAnon m_listener;
 		GridBagConstraints m_constraints;
@@ -3017,6 +3024,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	private class ServerInfoPanel extends JPanel
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public ServerInfoPanel(JAPConfAnon a_listener)
 		{
 			GridBagLayout layout = new GridBagLayout();
@@ -3262,6 +3274,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	private class FilterPanel extends JPanel
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public FilterPanel(JAPConfAnon a_listener)
 		{
 			GridBagLayout layout = new GridBagLayout();
@@ -3538,6 +3555,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	class MixCascadeCellRenderer extends DefaultTableCellRenderer
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public MixCascadeCellRenderer()
 		{
 			super();
@@ -3625,6 +3647,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	private class MixCascadeTableModel extends AbstractTableModel
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public final Object SYNC_UPDATE_SERVER_PANEL = new Object();
 
 		private Vector m_vecCascades;
@@ -3822,6 +3849,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private class OperatorsTableModel extends AbstractTableModel
 	{
 		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Vector containing all the operators in the list
 		 */
 		private Vector m_vecOperators = new Vector();
@@ -3946,6 +3978,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	class OperatorsCellRenderer extends DefaultTableCellRenderer
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public void setValue(Object value)
 		{
 			if(value == null)

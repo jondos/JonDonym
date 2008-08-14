@@ -35,7 +35,6 @@ import anon.infoservice.InfoServiceHolder;
 import anon.util.XMLUtil;
 import infoservice.mailsystem.central.MailMessages;
 import infoservice.mailsystem.central.AbstractMailSystemCommand;
-import logging.LogHolder;
 
 /**
  * This is the implementation for generating a reply message for the GetForwarder command.

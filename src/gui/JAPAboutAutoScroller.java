@@ -45,6 +45,11 @@ import javax.swing.JEditorPane;
 
 public final class JAPAboutAutoScroller extends Canvas implements Runnable
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private Image m_imgOffScreen;
 	private Image m_imgBackground;
 	private Image m_imgDoubleBuffer;
