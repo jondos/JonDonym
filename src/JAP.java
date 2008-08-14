@@ -582,6 +582,7 @@ public class JAP
 			{			
 				if (a_url == null || BROWSER_CMD == null)
 				{
+					// no valid url or no portable installation
 					return false;
 				}
 				

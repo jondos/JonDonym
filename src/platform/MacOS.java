@@ -89,6 +89,11 @@ public class MacOS extends AbstractOS
 		return false;
 	}
 
+	public boolean isHelpAutoInstalled()
+	{
+		return true;
+	}
+	
 	public String getConfigPath(String a_applicationName)
 	{
 		//Return path in users's home/Library/Preferences

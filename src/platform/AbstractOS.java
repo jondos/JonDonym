@@ -356,6 +356,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		return a_url.toString();
 	}
 
+	public boolean isHelpAutoInstalled()
+	{
+		return false;
+	}
+	
 	/**
 	 * returns the default destination path for an external installtion of the help files. May be os specific.
 	 * This method returns the path to the folder which contains the Jarfile or users working directory
@@ -367,7 +372,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	public String getDefaultHelpPath(String a_applicationName)
 	{
 		File classParentFile = ClassUtil.getClassDirectory(this.getClass());
-		if(classParentFile != null && classParentFile.getPath().endsWith(".jar"))
+		if(classParentFile != null) // && classParentFile.getPath().endsWith(".jar"))
 		{						
 			return classParentFile.getParent();
 		}
