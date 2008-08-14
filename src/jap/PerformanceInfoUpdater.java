@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.InfoServiceHolder;
 
-public class PerformanceInfoUpdater extends AbstractDatabaseUpdater 
+public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 {
 	private static final long UPDATE_INTERVAL = 1000 * 60 * 5; // 5 minutes
 	private static final long MIN_UPDATE_INTERVAL_MS = 20000l;

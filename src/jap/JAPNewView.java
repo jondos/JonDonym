@@ -2919,8 +2919,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			
 			PerformanceEntry entry = PerformanceInfo.getAverageEntry(currentMixCascade.getId());
-
-			String perfString = "";
+			
 			long value = 0;
 			
 			if(entry != null)

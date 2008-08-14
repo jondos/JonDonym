@@ -38,7 +38,6 @@ import logging.LogType;
 public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements IXMLEncodable
 {
 	private static final double PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES = 2.0/3.0;
-	private static final double PERFORMANCE_INFO_MAX_STRAY = 0.55;
 
 	/**
 	 * Last Update time of the database entry
@@ -229,7 +228,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		int agreeing;
 		long value = 0;
 		
-		for(int i = vSpeedBoundaries.size() - 1; i >= 0; i--)
+		for(int i = 0; i < vSpeedBoundaries.size(); i++)
 		{
 			agreeing = 0;
 			long bound = ((Long) vSpeedBoundaries.elementAt(i)).longValue();
@@ -238,7 +237,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			for(int j = 0; j < v.size(); j++)
 			{
 				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
-				if(entry.getXMLBound(PerformanceEntry.SPEED) <= bound)
+				if(entry.getXMLBound(PerformanceEntry.SPEED) >= bound)
 				{
 					agreeing++;
 				}
@@ -260,7 +259,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			for(int j = 0; j < v.size(); j++)
 			{
 				PerformanceEntry entry = (PerformanceEntry) v.elementAt(j);
-				if(entry.getXMLBound(PerformanceEntry.DELAY) >= bound)
+				if(entry.getXMLBound(PerformanceEntry.DELAY) <= bound)
 				{
 					agreeing++;
 				}
