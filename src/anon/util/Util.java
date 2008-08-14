@@ -393,23 +393,31 @@ public final class Util
 		public int compare(Object a_obj1, Object a_obj2);
 	}
 	
-	public static class LongSortLow implements Comparable
-	{
-		public int compare(Object a_obj1, Object a_obj2)
-		{
-			if(a_obj1 == null && a_obj2 == null) return 0;
-			else if(a_obj1 == null) return 1;
-			
-			return (int) (((Long) a_obj1).longValue() - ((Long) a_obj2).longValue());
-		}
-	}
-	
-	public static class LongSortHigh implements Comparable
+	public static class LongSortAsc implements Comparable
 	{
 		public int compare(Object a_obj1, Object a_obj2)
 		{
 			if(a_obj1 == null && a_obj2 == null) return 0;
 			else if(a_obj1 == null) return -1;
+			else if(a_obj2 == null) return 1;
+			
+			if(((Long) a_obj1).longValue() == Long.MAX_VALUE) return 1;
+			if(((Long) a_obj2).longValue() == Long.MAX_VALUE) return -1;
+			
+			return (int) (((Long) a_obj1).longValue() - ((Long) a_obj2).longValue());
+		}
+	}
+	
+	public static class LongSortDesc implements Comparable
+	{
+		public int compare(Object a_obj1, Object a_obj2)
+		{
+			if(a_obj1 == null && a_obj2 == null) return 0;
+			else if(a_obj1 == null) return 1;
+			else if(a_obj2 == null) return -1;
+
+			if(((Long) a_obj1).longValue() == Long.MAX_VALUE) return -1;
+			if(((Long) a_obj2).longValue() == Long.MAX_VALUE) return 1;			
 			
 			return (int) (((Long) a_obj2).longValue() - ((Long) a_obj1).longValue());
 		}
