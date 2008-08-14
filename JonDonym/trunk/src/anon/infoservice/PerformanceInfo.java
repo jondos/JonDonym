@@ -12,8 +12,8 @@ import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.Util;
-import anon.util.Util.LongSortLow;
-import anon.util.Util.LongSortHigh;
+import anon.util.Util.LongSortAsc;
+import anon.util.Util.LongSortDesc;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
@@ -217,8 +217,8 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			}
 		}
 		
-		Util.sort(vSpeedBoundaries, new LongSortLow());
-		Util.sort(vSpeedBoundaries, new LongSortHigh());
+		Util.sort(vSpeedBoundaries, new LongSortDesc());
+		Util.sort(vDelayBoundaries, new LongSortAsc());
 		
 		if(v.size() == 0)
 		{
@@ -243,7 +243,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				}
 			}
 			
-			if((double) (agreeing / v.size()) >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			if((double) agreeing / v.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
 			{
 				break;
 			}
@@ -265,7 +265,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				}
 			}
 			
-			if((double) (agreeing / v.size()) >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			if((double) agreeing / v.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
 			{
 				break;
 			}

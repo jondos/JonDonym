@@ -13,8 +13,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
 import anon.util.Util.Comparable;
-import anon.util.Util.LongSortLow;
-import anon.util.Util.LongSortHigh;
+import anon.util.Util.LongSortAsc;
+import anon.util.Util.LongSortDesc;
 import anon.util.Util;
 import anon.util.XMLUtil;
 import anon.util.XMLParseException;
@@ -588,11 +588,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			if(a_bLow)
 			{
-				Util.sort(vec, new LongSortLow());
+				Util.sort(vec, new LongSortAsc());
 			}
 			else
 			{
-				Util.sort(vec, new LongSortHigh());
+				Util.sort(vec, new LongSortDesc());
 			}
 			
 			int limit = (int) Math.floor(vec.size() / 10);
