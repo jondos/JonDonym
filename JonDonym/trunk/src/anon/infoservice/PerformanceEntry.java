@@ -42,11 +42,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private PerformanceAttributeEntry[][][] m_entries =
 		new PerformanceAttributeEntry[ATTRIBUTES.length][8][24];
 	
-	private PerformanceAttributeFloatingTimeEntry[] m_currentEntries = 
-		new PerformanceAttributeFloatingTimeEntry[] { 
-			new PerformanceAttributeFloatingTimeEntry(SPEED),
-			new PerformanceAttributeFloatingTimeEntry(DELAY),
-			new PerformanceAttributeFloatingTimeEntry(USERS) };
+	private PerformanceAttributeFloatingTimeEntry[] m_floatingTimeEntries;
 	
 	private long m_lastTestAverage[] = new long[3];
 	
@@ -66,6 +62,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private static final int PERFORMANCE_ENTRY_TTL = 1000*60*60; // 1 hour
 	
 	public PerformanceEntry(String a_strCascadeId)
+	{
+		this(a_strCascadeId, true);
+	}
+	
+	public PerformanceEntry(String a_strCascadeId, boolean a_bInfoService)
 	{	
 		super(Long.MAX_VALUE);
 		
@@ -73,12 +74,19 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
+		
+		m_floatingTimeEntries = 
+			new PerformanceAttributeFloatingTimeEntry[] { 
+				new PerformanceAttributeFloatingTimeEntry(SPEED, a_bInfoService),
+				new PerformanceAttributeFloatingTimeEntry(DELAY, a_bInfoService),
+				new PerformanceAttributeFloatingTimeEntry(USERS, a_bInfoService) };
 	}
 	
 	public PerformanceEntry(Element a_entry) throws XMLParseException
 	{
 		super(System.currentTimeMillis() + PERFORMANCE_ENTRY_TTL);
 		
+		m_floatingTimeEntries = new PerformanceAttributeFloatingTimeEntry[ATTRIBUTES.length];
 		
 		XMLUtil.assertNodeName(a_entry, XML_ELEMENT_NAME);
 		
@@ -98,21 +106,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		m_current.setTime(new Date(System.currentTimeMillis()));
 		
 		Node elemDelay = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[DELAY]);
-		/*
-		if(elemDelay == null)
-		{
-			System.out.println(XMLUtil.toString(a_entry));
-			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + ATTRIBUTES[DELAY]);
-		}*/
-		m_currentEntries[DELAY] = new PerformanceAttributeFloatingTimeEntry(DELAY, elemDelay);
+		m_floatingTimeEntries[DELAY] = new PerformanceAttributeFloatingTimeEntry(DELAY, elemDelay);
 		
 		Node elemSpeed = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[SPEED]);
-		/*
-		if(elemSpeed == null)
-		{
-			throw new XMLParseException(XML_ELEMENT_NAME + ": Could not find node " + ATTRIBUTES[SPEED]);
-		}*/
-		m_currentEntries[SPEED] = new PerformanceAttributeFloatingTimeEntry(SPEED, elemSpeed);
+		m_floatingTimeEntries[SPEED] = new PerformanceAttributeFloatingTimeEntry(SPEED, elemSpeed);
 		
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
@@ -138,6 +135,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_lastTestTime;
 	}
 	
+	/**
+	 * Imports a value into the entry array.
+	 * 
+	 * @param a_attribute The performance attribute (speed/delay, etc.)
+	 * @param a_timestamp The time stamp of the value
+	 * @param a_value The value itself
+	 */
 	public void importValue(int a_attribute, long a_timestamp, long a_value)
 	{
 		if(System.currentTimeMillis() - a_timestamp > 7 * 24 * 60 * 60 * 1000 ||
@@ -161,7 +165,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		entry.addValue(a_timestamp, a_value);
-		m_currentEntries[a_attribute].addValue(a_timestamp, a_value);
+		m_floatingTimeEntries[a_attribute].addValue(a_timestamp, a_value);
 		
 		m_lastUpdate = a_timestamp;
 		
@@ -181,6 +185,13 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 	}
 	
+	/**
+	 * Adds a hashtable of values into the entry array.
+	 * 
+	 * @param a_attribute The performance attribute
+	 * @param a_data The data hashtable
+	 * @return The average value of the hashtable
+	 */
 	public long addData(int a_attribute, Hashtable a_data) 
 	{
 		PerformanceAttributeEntry entry = null;
@@ -237,7 +248,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			entry.addValue(timestamp.longValue(), value);
 			
-			m_currentEntries[a_attribute].addValue(timestamp.longValue(), value);
+			m_floatingTimeEntries[a_attribute].addValue(timestamp.longValue(), value);
 			
 			if(value > 0)
 			{
@@ -258,25 +269,47 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return lAverageFromLastTest;
 	}
 
+	/**
+	 * Returns the average value from the last performed test.
+	 * 
+	 * @param a_attribute The performance attribute
+	 * @return The average value from the last performed test
+	 */
 	public long getLastTestAverage(int a_attribute)
 	{
 		return m_lastTestAverage[a_attribute];
 	}
 	
-	public void overrideXMLBound(int a_attribute, long a_lValue)
+	/**
+	 * Sets the bound value. This should only be used by 
+	 * the PerformanceInfo class in the JAP client.
+	 * 
+	 * @see anon.infoservice.PerformanceInfo#getLowestCommonBoundEntry(String)
+	 * 
+	 * @param a_attribute The performance attribute
+	 * @param a_lValue The bound value
+	 */
+	public void setBound(int a_attribute, long a_lValue)
 	{
-		m_currentEntries[a_attribute].overrideXMLBound(a_lValue);
+		m_floatingTimeEntries[a_attribute].setBound(a_lValue);
 	}
 	
+	/**
+	 * Calculates (if used by the info service) and returns the
+	 * bound value of the given attribute.
+	 * 
+	 * @param a_attribute The performance attribute
+	 * @return The bound value of the given attribute
+	 */
 	public long getBound(int a_attribute)
 	{
 		if(a_attribute == SPEED)
 		{
-			return m_currentEntries[a_attribute].getBound(true);
+			return m_floatingTimeEntries[a_attribute].getBound(true);
 		}
 		else if(a_attribute == DELAY)
 		{
-			return m_currentEntries[a_attribute].getBound(false);
+			return m_floatingTimeEntries[a_attribute].getBound(false);
 		}
 		else
 		{
@@ -284,14 +317,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 	}
 	
+	/**
+	 * Returns the average value of the give attribute.
+	 * 
+	 * @param a_attribute The performance attribute
+	 * @return The average value of given attribute
+	 */
 	public long getAverage(int a_attribute)
 	{
-		return m_currentEntries[a_attribute].getAverage();
-	}
-	
-	public long getXMLBound(int a_attribute)
-	{
-		return m_currentEntries[a_attribute].getXMLBound();
+		return m_floatingTimeEntries[a_attribute].getAverage();
 	}
 	
 	public String delayToHTML(int day)
@@ -461,10 +495,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		Element elemCurrent = a_doc.createElement(XML_ELEMENT_CURRENT_HOURLY_DATA);
 		
-		Element elemDelay = m_currentEntries[DELAY].toXmlElement(a_doc);
+		Element elemDelay = m_floatingTimeEntries[DELAY].toXmlElement(a_doc);
 		elemCurrent.appendChild(elemDelay);
 		
-		Element elemSpeed = m_currentEntries[SPEED].toXmlElement(a_doc);
+		Element elemSpeed = m_floatingTimeEntries[SPEED].toXmlElement(a_doc);
 		elemCurrent.appendChild(elemSpeed);
 		
 		elem.appendChild(elemCurrent);
@@ -488,27 +522,24 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public long m_lastUpdate;
 		
 		private Hashtable m_Values = new Hashtable();
+		private long m_lBoundValue = -1;
 		
-		public long m_lXMLBoundValue = -1;
+		private boolean m_bInfoService; 
 		
-		public PerformanceAttributeFloatingTimeEntry(int a_attribute)
+		public PerformanceAttributeFloatingTimeEntry(int a_attribute, boolean a_bInfoService)
 		{
 			m_timeFrame = DEFAULT_TIMEFRAME;
 			m_attribute = a_attribute;
-		}
-		
-		public PerformanceAttributeFloatingTimeEntry(int a_attribute, long a_timeFrame)
-		{
-			m_timeFrame = a_timeFrame;
-			m_attribute = a_attribute;
+			m_bInfoService = a_bInfoService;
 		}
 		
 		public PerformanceAttributeFloatingTimeEntry(int a_attribute, Node a_node)
 		{
 			m_timeFrame = DEFAULT_TIMEFRAME;
 			m_attribute = a_attribute;
+			m_bInfoService = false;
 			
-			m_lXMLBoundValue = XMLUtil.parseAttribute(a_node, XML_ATTR_BOUND, -1l);
+			m_lBoundValue = XMLUtil.parseAttribute(a_node, XML_ATTR_BOUND, -1l);
 		}
 		
 		public void addValue(long a_lTimeStamp, long a_lValue)
@@ -534,18 +565,23 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 		}
 		
-		public void overrideXMLBound(long a_lValue)
+		public void setBound(long a_lValue)
 		{
-			m_lXMLBoundValue = a_lValue;
-		}
-		
-		public long getXMLBound()
-		{
-			return m_lXMLBoundValue;
+			// only allowed by the client
+			if(!m_bInfoService)
+			{
+				m_lBoundValue = a_lValue;
+			}
 		}
 		
 		public long getBound(boolean a_bLow)
 		{
+			// if it is invoked by the client, just return the stored bound value
+			if(!m_bInfoService)
+			{
+				return m_lBoundValue;
+			}
+			
 			long values = 0;
 			long errors = 0;
 			Long timestamp;
@@ -637,6 +673,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public long getAverage()
 		{
+			// this method should only be invoked by the InfoService
+			if(!m_bInfoService)
+			{
+				return -1;
+			}
+			
 			long values = 0;
 			long value = 0;
 			long lAverageValue = 0;
@@ -684,6 +726,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public double getStdDeviation()
 		{
+			// this method should only be invoked by the InfoService
+			if(!m_bInfoService)
+			{
+				return -1;
+			}
+			
 			long values = 0;
 			long value = 0;
 			long errors = 0;
