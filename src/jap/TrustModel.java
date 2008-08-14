@@ -55,7 +55,6 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.BlacklistedCascadeIDEntry;
-import anon.infoservice.NewCascadeIDEntry;
 import anon.pay.PayAccountsFile;
 import anon.client.TrustException;
 

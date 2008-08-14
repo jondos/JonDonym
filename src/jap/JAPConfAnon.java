@@ -1978,7 +1978,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else if(value == Long.MAX_VALUE)
 						{
-							m_lblDelay.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARY_SIZE[PerformanceEntry.DELAY] - 2]));
+							m_lblDelay.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(
+									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
+									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2]));
 						}
 						else
 						{

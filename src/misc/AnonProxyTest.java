@@ -10,8 +10,6 @@ import logging.LogType;
 import logging.LogLevel;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.IProxyInterfaceGetter;
-import anon.infoservice.InfoServiceHolder;
-import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.ProxyInterface;
 import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.ImmutableProxyInterface;

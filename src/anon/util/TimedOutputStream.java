@@ -92,9 +92,9 @@ final public class TimedOutputStream extends OutputStream
 
 	}
 
-	private TimedOutputStream()
+	/*private TimedOutputStream()
 	{
-	}
+	}*/
 
 	public static void init()
 	{

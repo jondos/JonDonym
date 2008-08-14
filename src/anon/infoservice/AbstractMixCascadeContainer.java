@@ -33,8 +33,6 @@ package anon.infoservice;
 
 import anon.AnonServerDescription;
 import anon.IServiceContainer;
-import java.security.SignatureException;
-import anon.client.ITrustModel;
 import anon.client.BasicTrustModel;
 
 /**
