@@ -204,7 +204,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 			}
 			else if (a_message.equals(JAPModel.CHANGED_INFOSERVICE_AUTO_UPDATE))
 			{
-				m_allowAutomaticIS.setSelected(!JAPModel.getInstance().isInfoServiceDisabled());
+				m_allowAutomaticIS.setSelected(!JAPModel.isInfoServiceDisabled());
 			}
 		}
 	}

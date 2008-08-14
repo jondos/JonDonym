@@ -28,25 +28,19 @@
 package anon.pay;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Document;
 
 import anon.pay.xml.XMLDescription;
-import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import anon.util.XMLUtil;
 
 final public class HttpClient
 {
-	private final static int MAX_LINE_LENGTH = 100;
+	//private final static int MAX_LINE_LENGTH = 100;
 	private BufferedReader m_reader;
 	private BufferedOutputStream m_OS;
 	private Socket m_socket;

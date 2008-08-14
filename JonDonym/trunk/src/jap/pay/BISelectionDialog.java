@@ -81,8 +81,8 @@ public class BISelectionDialog extends JAPDialog implements ActionListener, List
 		JPanel panel1 = new JPanel(new GridBagLayout());
 		JPanel bttnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		GridBagConstraints c = new GridBagConstraints();
-		c.anchor = c.NORTHWEST;
-		c.fill = c.NONE;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.fill = GridBagConstraints.NONE;
 		c.insets = new Insets(5, 5, 5, 5);
 
 		//The BI list
@@ -94,13 +94,13 @@ public class BISelectionDialog extends JAPDialog implements ActionListener, List
 		c.gridwidth = 3;
 		c.gridheight = 5;
 		c.weighty = 1;
-		c.fill = c.BOTH;
+		c.fill = GridBagConstraints.BOTH;
 		panel1.add(m_biList, c);
 		c.weightx = 0;
 		c.weighty = 0;
 		c.gridwidth = 1;
 		c.gridheight = 1;
-		c.fill = c.NONE;
+		c.fill = GridBagConstraints.NONE;
 
 		//The information about the selected BI
 		c.gridx = 3;
@@ -136,7 +136,7 @@ public class BISelectionDialog extends JAPDialog implements ActionListener, List
 		c.gridx = 0;
 		c.weightx = 1;
 		c.gridwidth = 5;
-		c.anchor = c.SOUTHEAST;
+		c.anchor = GridBagConstraints.SOUTHEAST;
 		panel1.add(bttnPanel, c);
 
 		getContentPane().add(panel1);

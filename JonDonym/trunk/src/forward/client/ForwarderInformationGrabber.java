@@ -27,8 +27,6 @@
  */
 package forward.client;
 
-import java.io.ByteArrayInputStream;
-
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

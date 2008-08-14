@@ -30,7 +30,6 @@ package captcha.graphics;
 import java.awt.Image;
 import java.awt.image.ImageProducer;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import logging.LogHolder;
 import logging.LogLevel;

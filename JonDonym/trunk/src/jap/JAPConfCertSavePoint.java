@@ -31,9 +31,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import anon.crypto.CertificateInfoStructure;
-import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
-import anon.util.ResourceLoader;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
