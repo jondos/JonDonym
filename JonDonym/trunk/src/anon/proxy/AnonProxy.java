@@ -229,7 +229,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_Anon.addEventListener(this);
 	}
 
-	/*
 	/**
 	 * Sets a new MixCascade.
 	 *

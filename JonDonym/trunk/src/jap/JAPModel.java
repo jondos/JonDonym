@@ -268,7 +268,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		{
 //			build environment; use the browser to open the local help files
 			m_helpFileStorageManager =	
-				new LocalHelpFileStorageManager(JAPConstants.APPLICATION_NAME);			
+				new LocalHelpFileStorageManager(JAPConstants.APPLICATION_NAME);
 		}
 		else
 		{			

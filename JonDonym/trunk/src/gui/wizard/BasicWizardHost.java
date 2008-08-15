@@ -29,6 +29,8 @@ package gui.wizard;
 
 import java.awt.CardLayout;
 import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;

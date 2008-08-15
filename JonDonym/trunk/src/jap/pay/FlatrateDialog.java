@@ -77,7 +77,7 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 	private static final String MSG_BUY = "buy";
 	private static final String MSG_CANCEL = "cancel";
 	private static final String MSG_ERROR_CONNECTION = "error_connection";
-	//private static final String MSG_ERROR_INSUFFICIENT_FUNDS = "error_insufficient_funds";
+	private static final String MSG_ERROR_INSUFFICIENT_FUNDS = "error_insufficient_funds";
 	private static final String MSG_ERROR_FLATRATE_REFUSED = "error_flatrate_refused";
 	private static final String MSG_ERROR_ALREADY_ACTIVE = "error_already_active";
 	private static final String MSG_ERROR_NO_SETTINGS = "error_no_settings";
@@ -101,11 +101,6 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 
 	private JPanel buttonPanel;
 	private JPanel flatPanel;
-
-	/*private String m_strBalance;
-	private String m_strPrice;
-	private String m_strDuration;
-	private String m_strUnit;*/
 
 	private XMLPaymentSettings paymentSettings;
 	private boolean isFlatAffordable = true;

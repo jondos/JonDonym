@@ -132,7 +132,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	/** Messages */
 	public static final String MSG_ERROR_SAVING_CONFIG = JAPController.class.getName() +
 		"_errorSavingConfig";
-	/*private static final String MSG_DIALOG_ACCOUNT_PASSWORD = JAPController.class.
+	private static final String MSG_DIALOG_ACCOUNT_PASSWORD = JAPController.class.
 		getName() + "_dialog_account_password";
 	private static final String MSG_ACCOUNT_PASSWORD = JAPController.class.
 		getName() + "_account_password";
@@ -143,15 +143,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static final String MSG_ACCPASSWORDTITLE = JAPController.class.
 		getName() + "_accpasswordtitle";
 	private static final String MSG_ACCPASSWORD = JAPController.class.
-		getName() + "_accpassword";*/
+		getName() + "_accpassword";
 	private static final String MSG_ACCPASSWORDENTERTITLE = JAPController.class.
 		getName() + "_accpasswordentertitle";
 	private static final String MSG_ACCPASSWORDENTER = JAPController.class.
 		getName() + "_accpasswordenter";
 	private static final String MSG_LOSEACCOUNTDATA = JAPController.class.
 		getName() + "_loseaccountdata";
-	/*private static final String MSG_REPEAT_ENTER_ACCOUNT_PASSWORD = JAPController.class.getName() +
-		"_repeatEnterAccountPassword";*/
+	private static final String MSG_REPEAT_ENTER_ACCOUNT_PASSWORD = JAPController.class.getName() +
+		"_repeatEnterAccountPassword";
 	private static final String MSG_DISABLE_GOODBYE = JAPController.class.getName() +
 		"_disableGoodByMessage";
 	private static final String MSG_NEW_OPTIONAL_VERSION = JAPController.class.getName() +
@@ -1033,7 +1033,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (!JAPModel.getInstance().isHelpPathDefined() &&
 						AbstractOS.getInstance().isHelpAutoInstalled())
 					{
-						System.out.println("test");
 						JAPModel.getInstance().setHelpPath(new File(
 								AbstractOS.getInstance().getDefaultHelpPath(
 										JAPConstants.APPLICATION_NAME)), false);

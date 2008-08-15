@@ -293,21 +293,6 @@ public final class LogHolder
 		}
 	}
 
-	/*/**
-	 * Returns the instance of LogHolder (Singleton). If there is no instance,
-	 * there is a new one created.
-	 *
-	 * @return The LogHolder instance.
-	 */
-	/*private static synchronized LogHolder getInstance()
-	{
-		if (ms_logHolderInstance == null)
-		{
-			ms_logHolderInstance = new LogHolder();
-		}
-		return ms_logHolderInstance;
-	}*/
-
 	/**
 	 * Returns the logInstance. If the logInstance is not set, there is a new DummyLog instance
 	 * returned.
