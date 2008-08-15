@@ -1221,8 +1221,6 @@ public final class GUIUtils
 		Screen[] screens;
 		Object graphicsConfiguration;
 		Frame screenFrame;
-		/*Rectangle screenBounds;
-		Point screenLocation;*/
 
 		try
 		{

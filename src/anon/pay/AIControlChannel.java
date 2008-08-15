@@ -142,7 +142,6 @@ public class AIControlChannel extends XmlControlChannel
 			  /*LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
 						"Thread "+ Thread.currentThread().getName()+" getting AI Login Confirmation with code "
 						+loginConfirm.getCode()+" and message "+loginConfirm.getMessage());*/
-			  //int code = loginConfirm.getCode();
 
 			  synchronized(m_aiLoginSyncObject)
 			  {

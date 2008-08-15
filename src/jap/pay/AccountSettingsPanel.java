@@ -176,26 +176,26 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		getName() + "_account_spent";
 	private static final String MSG_ACCOUNT_DEPOSIT = AccountSettingsPanel.class.
 		getName() + "_account_deposit";
-	/*private static final String MSG_ACCOUNT_BALANCE = AccountSettingsPanel.class.
+	private static final String MSG_ACCOUNT_BALANCE = AccountSettingsPanel.class.
 		getName() + "_account_balance";
 	private static final String MSG_ACCOUNT_FLAT_ENDDATE = AccountSettingsPanel.class.
 		getName() + "_account_flat_enddate";
 	private static final String MSG_ACCOUNT_NOFLAT = AccountSettingsPanel.class.
-		getName() + "_account_noflat";*/
+		getName() + "_account_noflat";
 	private static final String MSG_ACCOUNT_DETAILS = AccountSettingsPanel.class.
 		getName() + "_account_details";
 	private static final String MSG_ACCOUNT_CREATION_DATE = AccountSettingsPanel.class.
 		getName() + "_account_creation_date";
-	/*private static final String MSG_ACCOUNT_STATEMENT_DATE = AccountSettingsPanel.class.
-		getName() + "_account_statement_date";*/
+	private static final String MSG_ACCOUNT_STATEMENT_DATE = AccountSettingsPanel.class.
+		getName() + "_account_statement_date";
 	private static final String MSG_BUTTON_CHARGE = AccountSettingsPanel.class.
 		getName() + "_button_charge";
-	/*private static final String MSG_BUTTON_BUYFLAT = AccountSettingsPanel.class.
+	private static final String MSG_BUTTON_BUYFLAT = AccountSettingsPanel.class.
 		getName() + "_button_buyflat";
 	private static final String MSG_FLATTITLE = AccountSettingsPanel.class.
 		getName() + "_flat_title";
 	private static final String MSG_BUTTON_SELECT = AccountSettingsPanel.class.
-		getName() + "_button_select";*/
+		getName() + "_button_select";
 	private static final String MSG_BUTTON_CHANGE_PASSWORD = AccountSettingsPanel.class.
 		getName() + "_button_change_password";
 	private static final String MSG_ACCOUNT_INVALID = AccountSettingsPanel.class.
@@ -230,8 +230,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		"_encryptAccounts";
 	private static final String MSG_NOTEXPORTED = AccountSettingsPanel.class.
 		getName() + "_notexported";
-	/*private static final String MSG_CONNECTIONACTIVE = AccountSettingsPanel.class.
-		getName() + "_connectionactive";*/
+	private static final String MSG_CONNECTIONACTIVE = AccountSettingsPanel.class.
+		getName() + "_connectionactive";
 	private static final String MSG_CONNECTIONACTIVE_QUESTION = AccountSettingsPanel.class.
 		getName() + "_connectionActiveQuestion";
 	private static final String MSG_FETCHINGOPTIONS = AccountSettingsPanel.class.
@@ -244,8 +244,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		getName() + "_fetchingpolicy";
 	private static final String MSG_FETCHINGTAN = AccountSettingsPanel.class.
 		getName() + "_fetchingtan";
-	/*private static final String MSG_CHARGEWELCOME = AccountSettingsPanel.class.
-		getName() + "_chargewelcome";*/
+	private static final String MSG_CHARGEWELCOME = AccountSettingsPanel.class.
+		getName() + "_chargewelcome";
 	private static final String MSG_CHARGETITLE = AccountSettingsPanel.class.
 		getName() + "_chargetitle";
 	private static final String MSG_SENDINGPASSIVE = AccountSettingsPanel.class.
@@ -266,8 +266,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		"_creatingKeyPair";
 	private static final String MSG_KEY_PAIR_CREATE_ERROR = AccountSettingsPanel.class.getName() +
 		"_keyPairCreateError";
-	/*private static final String MSG_FETCHING_BIS = AccountSettingsPanel.class.getName() +
-		"_fetchingBIs";*/
+	private static final String MSG_FETCHING_BIS = AccountSettingsPanel.class.getName() +
+		"_fetchingBIs";
 	private static final String MSG_SAVE_CONFIG = AccountSettingsPanel.class.getName() +
 		"_savingConfig";
 	private static final String MSG_CREATED_ACCOUNT_NOT_SAVED = AccountSettingsPanel.class.getName() +
@@ -284,8 +284,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		"_unlockAccount";
 	private static final String MSG_BUTTON_ACTIVATE = AccountSettingsPanel.class.getName() +
 		"_activateAccount";
-	/*private static final String MSG_BUTTON_DEACTIVATE = AccountSettingsPanel.class.getName() +
-		"_deactivateAccount";*/
+	private static final String MSG_BUTTON_DEACTIVATE = AccountSettingsPanel.class.getName() +
+		"_deactivateAccount";
 	private static final String MSG_ERROR_DELETING = AccountSettingsPanel.class.getName() +
 		"_errorDeletingAccount";
 	private static final String MSG_ACCOUNT_DISABLED = AccountSettingsPanel.class.getName() +
@@ -305,8 +305,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		AccountSettingsPanel.class.getName() + "_toolTipNoBackup";
 	private static final String MSG_TOOL_TIP_ACTIVATE =
 		AccountSettingsPanel.class.getName() + "_toolTipActivate";
-	/*private static final String MSG_TOOL_TIP_EXPIRED =
-		AccountSettingsPanel.class.getName() + "_toolTipExpired";*/
+	private static final String MSG_TOOL_TIP_EXPIRED =
+		AccountSettingsPanel.class.getName() + "_toolTipExpired";
 	private static final String MSG_PASSWORD_EXPORT =
 		AccountSettingsPanel.class.getName() + "_passwordExport";
 	private static final String MSG_ASK_IF_NOT_SAVED =
@@ -323,8 +323,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		AccountSettingsPanel.class.getName() + "_expired";
 	public static final String MSG_NO_CREDIT =
 		AccountSettingsPanel.class.getName() + "_noCredit";
-	/*private static final String MSG_TERMS_AND_COND_DESC =
-		AccountSettingsPanel.class.getName() + "_termsAndConditionsDescription";*/
+	private static final String MSG_TERMS_AND_COND_DESC =
+		AccountSettingsPanel.class.getName() + "_termsAndConditionsDescription";
 	private static final String MSG_TERMS_AND_COND =
 		AccountSettingsPanel.class.getName() + "_termsAndConditions";
 	private static final String MSG_TERMS_AND_COND_HINT =

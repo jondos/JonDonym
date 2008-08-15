@@ -80,8 +80,8 @@ public class JAP
 	private static final String MSG_ERROR_JONDO_ALREADY_RUNNING = "errorAlreadyRunning";
 	private static final String MSG_ERROR_JONDO_ALREADY_RUNNING_WIN = "errorAlreadyRunningWin";
 	private static final String MSG_GNU_NOT_COMPATIBLE = JAP.class.getName() + "_gnuNotCompatible";
-	/*private static final String MSG_LOADING_INTERNATIONALISATION = JAP.class.getName() +
-		"_loadingInternationalisation";*/
+	private static final String MSG_LOADING_INTERNATIONALISATION = JAP.class.getName() +
+		"_loadingInternationalisation";
 	private static final String MSG_LOADING_SETTINGS = JAP.class.getName() +
 		"_loadingSettings";
 	private static final String MSG_STARTING_CONTROLLER = JAP.class.getName() +
@@ -90,7 +90,7 @@ public class JAP
 	private static final String MSG_INIT_VIEW = JAP.class.getName() + "_initView";
 	private static final String MSG_INIT_ICON_VIEW = JAP.class.getName() + "_initIconView";
 	private static final String MSG_INIT_RANDOM = JAP.class.getName() + "_initRandom";
-	//private static final String MSG_FINISH_RANDOM = JAP.class.getName() + "_finishRandom";
+	private static final String MSG_FINISH_RANDOM = JAP.class.getName() + "_finishRandom";
 	private static final String MSG_START_LISTENER = JAP.class.getName() + "_startListener";	
 	private static final String MSG_EXPLAIN_NO_FIREFOX_FOUND = 
 		JAP.class.getName() + "_explainNoFirefoxFound";
@@ -398,7 +398,8 @@ public class JAP
 			// Test for Swing
 			try
 			{
-				new javax.swing.JLabel();
+				Object o = new javax.swing.JLabel();
+				o = null;
 			}
 			catch (NoClassDefFoundError e)
 			{

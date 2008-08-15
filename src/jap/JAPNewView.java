@@ -141,8 +141,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_OLD_JAVA = JAPNewView.class.getName() + "_oldJava";
 	private static final String MSG_OLD_JAVA_HINT = JAPNewView.class.getName() + "_oldJavaHint";
 	private static final String MSG_LBL_NEW_SERVICES_FOUND = JAPNewView.class.getName() + "_newServicesFound";
-	/*private static final String MSG_TOOLTIP_NEW_SERVICES_FOUND = JAPNewView.class.getName() +
-		"_tooltipNewServicesFound";*/
+	private static final String MSG_TOOLTIP_NEW_SERVICES_FOUND = JAPNewView.class.getName() +
+		"_tooltipNewServicesFound";
 	private static final String MSG_NEW_SERVICES_FOUND_EXPLAIN =
 		JAPNewView.class.getName() + "_newServicesFoundExplanation";
 	private static final String MSG_NO_COSTS = JAPNewView.class.getName() + "_noCosts";
@@ -152,21 +152,21 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_MN_DETAILS = JAPNewView.class.getName() + "_mnDetails";
 	private static final String MSG_IS_DISABLED_EXPLAIN = JAPNewView.class.getName() + "_isDisabledExplain";
 	private static final String MSG_IS_DEACTIVATED = JAPNewView.class.getName() + "_isDisabled";
-	//private static final String MSG_IS_TOOLTIP = JAPNewView.class.getName() + "_isDisabledTooltip";
+	private static final String MSG_IS_TOOLTIP = JAPNewView.class.getName() + "_isDisabledTooltip";
 
-	/*private static final String MSG_IS_TRUST_PARANOID = JAPNewView.class.getName() + "_trustParanoid";
+	private static final String MSG_IS_TRUST_PARANOID = JAPNewView.class.getName() + "_trustParanoid";
 	private static final String MSG_IS_TRUST_SUSPICIOUS = JAPNewView.class.getName() + "_trustSuspicious";
 	private static final String MSG_IS_TRUST_HIGH = JAPNewView.class.getName() + "_trustHigh";
 	private static final String MSG_IS_TRUST_ALL = JAPNewView.class.getName() + "_trustAll";
-	private static final String MSG_IS_EDIT_TRUST = JAPNewView.class.getName() + "_editTrust";*/
+	private static final String MSG_IS_EDIT_TRUST = JAPNewView.class.getName() + "_editTrust";
 
-	//private static final String MSG_TRUST_FILTER = JAPNewView.class.getName() + "_trustFilter";
+	private static final String MSG_TRUST_FILTER = JAPNewView.class.getName() + "_trustFilter";
 	private static final String MSG_CONNECTED = JAPNewView.class.getName() + "_connected";
 
 	private static final String MSG_DELETE_MESSAGE = JAPNewView.class.getName() + "_deleteMessage";
 	private static final String MSG_HIDE_MESSAGE_SHORT = JAPNewView.class.getName() + "_hideMessageShort";
 	private static final String MSG_DELETE_MESSAGE_EXPLAIN = JAPNewView.class.getName() + "_deleteMessageExplain";
-	//private static final String MSG_DELETE_MESSAGE_SHORT = JAPNewView.class.getName() + "_deleteMessageShort";
+	private static final String MSG_DELETE_MESSAGE_SHORT = JAPNewView.class.getName() + "_deleteMessageShort";
 	private static final String MSG_VIEW_MESSAGE = JAPNewView.class.getName() + "_viewMessage";
 	private static final String MSG_ANTI_CENSORSHIP = JAPNewView.class.getName() + "_antiCensorship";
 
@@ -270,7 +270,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private FlippingPanel m_flippingpanelAnon, m_flippingpanelOwnTraffic, m_flippingpanelForward;
 	private StatusPanel m_StatusPanel;
 	private JPanel m_panelAnonService;
-	//private int m_iPreferredWidth;
 	private Object SYNC_DISCONNECTED_ERROR = new Object();
 	private boolean m_bDisconnectedErrorShown = false;
 	private boolean m_bIgnoreAnonComboEvents = false;
@@ -714,13 +713,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.weightx = 0;
 		c1.fill = GridBagConstraints.NONE;
 		m_panelAnonService.add(m_bttnAnonDetails, c1);
-
-		c1.gridx = 0;
-		c1.gridy = 1;
-		c1.anchor = GridBagConstraints.WEST;
-		c1.insets = new Insets(5, 0, 0, 0);
-		//JLabel lblTrust = new JLabel(JAPMessages.getString(MSG_TRUST_FILTER) + ":");
-		//m_panelAnonService.add(lblTrust, c1);
 
 		c1.gridx = 1;
 		c1.gridy = 1;
@@ -1373,7 +1365,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.insets = new Insets(0, 5, 0, 0);
 		c1.anchor = GridBagConstraints.WEST;
 		JPanel p = new JPanel(new GridBagLayout());
-		//GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints c2 = new GridBagConstraints();
 		JPanel p2 = new JPanel(new GridBagLayout());
 		m_labelForwarding = new JLabel(JAPMessages.getString("ngForwarding"));
@@ -2653,7 +2644,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		 */
 		Enumeration entries =
 			Database.getInstance(JAPVersionInfo.class).getEntrySnapshotAsEnumeration();
-		//String strTemp;
 		JAPVersionInfo vi = null;
 		while (entries.hasMoreElements())
 		{
@@ -2798,8 +2788,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					//{
 					//	userProgressBar.setMaximum(currentStatus.getNrOfActiveUsers());
 					//}
-					//m_labelAnonymityUser.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
-					//		(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : ""));
 					//strSystrayTooltip += "\n" + JAPMessages.getString("ngNrOfUsers") + ": " +
 					//currentStatus.getNrOfActiveUsers();
 					if (anonLevel >= StatusInfo.ANON_LEVEL_MIN)
@@ -2834,16 +2822,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						}
 					}
 				}
-				/*else
-				{
-					strTemp = JAPMessages.getString("meterNA");
-					if (m_labelAnonymityUser.getText() == null ||
-						!m_labelAnonymityUser.getText().equals(strTemp))
-					{
-						// optimized change...
-						m_labelAnonymityUser.setText(strTemp);
-					}
-				}*/
 				/*int t = currentStatus.getTrafficSituation();
 				if (t > -1)
 				{
@@ -2868,7 +2846,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				/* we are not in anonymity mode */
 				//m_progressAnonTraffic.setValue(0);
-				//m_labelAnonymityUser.setText("");
 				m_progressAnonLevel.setValue(0);
 			}
 			

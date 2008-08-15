@@ -1605,9 +1605,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				m_trustModelCopy.setName(m_filterNameField.getText());
 			
 			// Display a warning if the new model won't have any trusted cascades
-			if(m_trustModelCopy.hasTrustedCascades() || JAPDialog.showYesNoDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_NO_CASCADES)))
+			if(m_trustModelCopy.hasTrustedCascades())
 			{
 				TrustModel.getCurrentTrustModel().copyFrom(m_trustModelCopy);
+			}
+			else
+			{
+				JAPDialog.showWarningDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_NO_CASCADES));
 			}
 			
 		}
@@ -2412,7 +2416,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 			}
 
-			m_Cascades.put(id, new TempCascade(id, interfaces, ports));
+			m_Cascades.put(id, new TempCascade(id, interfaces, ports, a_cascade.getMaxUsers()));
 		}
 
 		private void fill(boolean a_bCheckInfoServiceUpdateStatus)
@@ -2498,9 +2502,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public String getNumOfUsers(String a_cascadeId)
 		{
 			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
+			TempCascade cascade = (TempCascade) m_Cascades.get(a_cascadeId);
 			if (statusInfo != null)
 			{
-				int maxUsers = statusInfo.getMaxUsers();
+				int maxUsers = 0;
+				if (cascade != null)
+				{
+					maxUsers = cascade.getMaxUsers();
+				}
 				
 				return "" + statusInfo.getNrOfActiveUsers() + (maxUsers != 0 ? " / " + maxUsers : "");
 			}
@@ -2864,14 +2873,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		private String m_id;
 		private String m_ports;
 		private String m_hosts;
+		private int m_maxUsers;
 
-		public TempCascade(String a_id, String a_hosts, String a_ports)
+		public TempCascade(String a_id, String a_hosts, String a_ports, int a_maxUsers)
 		{
 			m_id = a_id;
 			m_hosts = a_hosts;
 			m_ports = a_ports;
+			m_maxUsers = a_maxUsers;
 		}
 
+		public int getMaxUsers()
+		{
+			return m_maxUsers;
+		}
+		
 		public String getId()
 		{
 			return m_id;

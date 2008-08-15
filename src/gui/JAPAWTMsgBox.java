@@ -106,7 +106,7 @@ final public class JAPAWTMsgBox extends WindowAdapter implements ActionListener
 	{
 		try
 		{
-			/*JAPAWTMsgBox msgbox =*/ new JAPAWTMsgBox(parent, msg, title);
+			JAPAWTMsgBox msgbox = new JAPAWTMsgBox(parent, msg, title);
 		}
 		catch (Exception e)
 		{

@@ -164,7 +164,7 @@ public class ActivePaymentDetails extends JAPDialog implements ActionListener
 				//check if it's a link or text
 				try
 				{
-					/*URL urlToOpen =*/ new URL(extraInfoString);
+					new URL(extraInfoString);
 					//url is never used, just to see if it works, if yes the String is a link
 				} catch ( MalformedURLException e)
 				{

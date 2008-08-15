@@ -1084,8 +1084,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	{
 		// check the certificates of the Mixes
 		Hashtable operatorCertificates = new Hashtable();
-		Hashtable operatorCountries = new Hashtable();
-		Hashtable mixCountries = new Hashtable();
+		//Hashtable operatorCountries = new Hashtable();
+		Hashtable countries = new Hashtable();
+		//Hashtable mixCountries = new Hashtable();
 		Hashtable mixIDs = new Hashtable();
 		JAPCertificate currentCertificate;
 		m_nrOperators = 0;
@@ -1108,19 +1109,23 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				operatorCountryCode = currentCertificate.getSubject().getCountryCode();
 				mixCountryCode = getMixInfo(i).getCertificate().getSubject().getCountryCode();
 				if (operatorCountryCode != null && mixCountryCode != null &&
-					!operatorCountries.containsKey(operatorCountryCode) &&
-					!mixCountries.containsKey(mixCountryCode))
+					//!operatorCountries.containsKey(operatorCountryCode) &&
+					//!mixCountries.containsKey(mixCountryCode))
+					!countries.contains(mixCountryCode) &&
+					!countries.contains(operatorCountryCode))
 				{
 					// operator and Mix are located in different countries than the others in the cascade
 					m_nrCountries++;
 				}
 				if (operatorCountryCode != null)
 				{
-					operatorCountries.put(operatorCountryCode, operatorCountryCode);
+					//operatorCountries.put(operatorCountryCode, operatorCountryCode);
+					countries.put(operatorCountryCode, operatorCountryCode);
 				}
 				if (mixCountryCode != null)
 				{
-					mixCountries.put(mixCountryCode, mixCountryCode);
+					//mixCountries.put(mixCountryCode, mixCountryCode);
+					countries.put(mixCountryCode, mixCountryCode);
 				}
 
 				// operator bonus
@@ -1131,7 +1136,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			}
 			else
 			{
-				// This Cascade has at least two operators which are the same. Assume one one operator!
+				// This Cascade has at least two operators which are the same. Assume only one operator!
 				m_nrOperators = 1;
 				m_nrCountries = 1;
 				break;
