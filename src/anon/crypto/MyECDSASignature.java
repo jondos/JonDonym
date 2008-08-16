@@ -46,8 +46,6 @@ public final class MyECDSASignature implements IMySignature
 		System.arraycopy(a_signature, 4 , rsBuff, l - rLength, rLength);
 		
 		System.arraycopy(a_signature, 4 + rLength + 2 , rsBuff, 2*l - sLength, sLength);
-		
-		System.out.println("ECDSA-Signature size: " + rsBuff.length);
 
 		return rsBuff;
 	}

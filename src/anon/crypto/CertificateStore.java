@@ -120,8 +120,13 @@ public class CertificateStore extends Observable implements IXMLEncodable
 	public CertificateInfoStructure getCertificateInfoStructure(JAPCertificate a_certificate,
 		int a_certificateType)
 	{
-		return (CertificateInfoStructure)m_trustedCertificates.get(
-			  getCertificateId(a_certificate, a_certificateType));
+		CertificateContainer container = (CertificateContainer) m_trustedCertificates.get(
+				  getCertificateId(a_certificate, a_certificateType));
+		if(container != null)
+		{
+			return container.getInfoStructure();
+		}
+		return null;
 	}
 
 

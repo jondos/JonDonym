@@ -781,7 +781,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 						{
 							addInfoServicePanel.setVisible(false);
 							descriptionPanel.setVisible(true);
-							viewCertButton.setEnabled(selectedInfoService.getCertificate() != null);
+							//viewCertButton.setEnabled(selectedInfoService.getCertificate() != null);
 						}
 					}
 
@@ -798,8 +798,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 								getPreferredInfoService();
 							settingsInfoServiceConfigBasicSettingsRemoveButton.setEnabled(selectedInfoService.
 								isUserDefined() && (!selectedInfoService.equals(preferredInfoService)));
-							m_selectedISCert = selectedInfoService.getCertificate();
-							m_selectedISCertPath = selectedInfoService.getCertPath();
+							//m_selectedISCert = selectedInfoService.getCertificate();
+							//m_selectedISCertPath = selectedInfoService.getCertPath();
 						}
 						else
 						{

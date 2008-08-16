@@ -37,9 +37,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import anon.AnonServerDescription;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
+import anon.crypto.X509DistinguishedName;
 import anon.crypto.XMLSignature;
 import anon.crypto.CertPath;
+import anon.crypto.XMLSignatureElement;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.ZLibTools;
@@ -122,7 +125,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private byte[] m_compressedXmlStructure;
 
 	private XMLSignature m_signature;
-	private CertPath m_certPath;
+	private MultiCertPath m_certPath;
 
 	private int m_nrCountries = 0;
 	private int m_nrOperators = 0;
@@ -242,16 +245,16 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				SignatureVerifier.DOCUMENT_CLASS_MIX);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertificationPath();
-				if (m_certPath != null && m_certPath.getFirstCertificate() != null)
+				m_certPath = m_signature.getMultiCertPath();
+				/*if (m_certPath != null && m_certPath.getEndEntity() != null)
 				{
-					m_mixCascadeCertificate = m_certPath.getFirstCertificate();
+					m_mixCascadeCertificate = m_certPath.getEndEntity();
 				}
 				else
 				{
 					LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 								  "No appended certificates in the MixCascade structure.");
-				}
+				}*/
 			}
 			else
 			{
@@ -891,14 +894,14 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	{
 		synchronized (this)
 		{
-			int certificateLock = -1;
-			if (m_certPath != null && m_certPath.getFirstCertificate() != null && m_certPath.verify())
+			/* TODO int certificateLock = -1;
+			if (m_certPath != null && m_certPath.getEndEntity() != null && m_certPath.verify())
 			{
 				/* add the cascade certificate temporary to the certificate store */
-				certificateLock = SignatureVerifier.getInstance().getVerificationCertificateStore().
+				/*certificateLock = SignatureVerifier.getInstance().getVerificationCertificateStore().
 					addCertificateWithoutVerification(m_certPath,
 					JAPCertificate.CERTIFICATE_TYPE_MIX, false, false);
-			}
+			}*/
 			String id = getMixId(0);
 			if (id == null)
 			{
@@ -914,12 +917,12 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			{
 				statusInfo = InfoServiceHolder.getInstance().getStatusInfo(this, a_timeout);
 			}
-			if (certificateLock != -1)
+			/*if (certificateLock != -1)
 			{
 				/* remove the lock on the certificate */
-				SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificateLock(
+				/*SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificateLock(
 					certificateLock);
-			}
+			}*/
 			return statusInfo;
 		}
 	}
@@ -990,11 +993,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 *
 	 * @return The certificate of this mixcascade or null, if there is no appended certificate.
 	 */
-	public JAPCertificate getCertificate()
+	/*public JAPCertificate getCertificate()
 	{
 		return m_mixCascadeCertificate;
-	}
-
+	}*/
+	
 	public Hashtable getPriceCertificateHashes()
 	{
 		return (Hashtable)m_priceCertificateHashes.clone();
@@ -1016,7 +1019,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return m_nrPriceCerts;
 	}
 
-	public CertPath getCertPath()
+	public MultiCertPath getCertPath()
 	{
 		return m_certPath;
 	}
@@ -1032,9 +1035,12 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 
 	public boolean isValid()
 	{
-		if (m_certPath != null)
-		{
-			return m_certPath.checkValidity(new Date());
+		if (m_signature != null)
+		{	
+			//TODO
+			return true;
+			
+			//return m_certPath.checkValidity(new Date());
 		}
 		return false;
 	}
@@ -1066,11 +1072,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private void calculateOperatorsAndCountries()
 	{
 		// check the certificates of the Mixes
-		Hashtable operatorCertificates = new Hashtable();
+		Hashtable operatorNames = new Hashtable();
 		Hashtable operatorCountries = new Hashtable();
 		Hashtable mixCountries = new Hashtable();
 		Hashtable operatorIDs = new Hashtable();
-		JAPCertificate currentCertificate;
+		X509DistinguishedName currentName;
 		m_nrOperators = 0;
 		m_nrCountries = 0;
 		String mixCountryCode, operatorCountryCode;
@@ -1080,15 +1086,15 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			{
 				continue;
 			}
-			currentCertificate = getMixInfo(i).getOperatorCertificate();
-			if (currentCertificate != null && !operatorCertificates.contains(currentCertificate) &&
+			currentName = getMixInfo(i).getCertPath().getIssuer();
+			if (currentName != null && !operatorNames.contains(currentName) &&
 				!operatorIDs.contains(getMixInfo(i).getId()))
 			{
 				// this Mix seems to be operated by an organisation independent from others in the cascade
 
 				// country bonus
-				operatorCountryCode = currentCertificate.getSubject().getCountryCode();
-				mixCountryCode = getMixInfo(i).getCertificate().getSubject().getCountryCode();
+				operatorCountryCode = currentName.getCountryCode();
+				mixCountryCode = getMixInfo(i).getCertPath().getSubject().getCountryCode();
 				if (operatorCountryCode != null && mixCountryCode != null &&
 					!operatorCountries.containsKey(operatorCountryCode) &&
 					!mixCountries.containsKey(mixCountryCode))
@@ -1106,7 +1112,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				}
 
 				// operator bonus
-				operatorCertificates.put(currentCertificate.getId(), currentCertificate);
+				//operatorNames.put(currentCertificate.getId(), currentCertificate);
+				operatorNames.put(currentName.toString(), currentName);
 				operatorIDs.put(getMixInfo(i).getId(), getMixInfo(i).getId());
 				m_nrOperators++;
 			}
@@ -1185,7 +1192,13 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			XMLUtil.setAttribute(mixCascadeNode, XML_ATTR_USER_DEFINED, true);
 			if (m_signature != null)
 			{
-				mixCascadeNode.appendChild(m_signature.toXmlElement(doc));
+				Element[] signatureElements = m_signature.getXMLElements(doc);
+								
+				for(int i=0; i < signatureElements.length; i++)
+				{
+					mixCascadeNode.appendChild(signatureElements[i]);
+				}
+				
 			}
 		}
 

@@ -166,7 +166,7 @@ public abstract class AbstractDistributableDatabaseEntry extends AbstractDatabas
 					XMLUtil.setAttribute(nodeASerial, XML_ATTR_VALID,((IVerifyable)currentEntry).isValid());
 					XMLUtil.setAttribute(nodeASerial, XML_ATTR_VERIFIED,
 										 ((IVerifyable)currentEntry).isVerified() &&
-						((IVerifyable)currentEntry).getCertPath().verify());
+						((IVerifyable)currentEntry).getCertPath().isVerified());
 				}
 			}
 			return nodeSerials;

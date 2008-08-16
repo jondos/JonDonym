@@ -193,8 +193,9 @@ public class EchoMulticastMessageFactory
             XMLSignature t = XMLSignature.getUnverified(a_node);
             if (t != null)
             {
-                JAPCertificate cert = (JAPCertificate) t.getCertificates().firstElement();
-                ski = new X509SubjectKeyIdentifier(cert.getPublicKey()).getValueWithoutColon();
+                //JAPCertificate cert = (JAPCertificate) t.getCertificates().firstElement();
+                //ski = new X509SubjectKeyIdentifier(cert.getPublicKey()).getValueWithoutColon();
+                ski = t.getMultiCertPath().getXORofSKIs();
             }
         }
         catch (Exception e)

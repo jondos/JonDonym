@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
 
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.crypto.CertPath;
@@ -120,12 +121,12 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	/**
 	 * The certificate path
 	 */
-	private CertPath m_certPath;
+	private MultiCertPath m_certPath;
 	
 	/**
 	 * The associated certificate
 	 */
-	private JAPCertificate m_certificate;
+	//private JAPCertificate m_certificate;
 
 	/**
 	 * Returns a new StatusInfo with dummy values (everything is set to -1). The LastUpdate time is
@@ -204,13 +205,13 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		{
 			a_cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(m_mixCascadeId);
 			
-			if (a_cascade != null && a_cascade.getCertPath() != null && a_cascade.getCertPath().getFirstCertificate() != null && a_cascade.getCertPath().verify())
+			/*if (a_cascade != null && a_cascade.getCertPath() != null && a_cascade.getCertPath().getFirstCertificate() != null && a_cascade.getCertPath().verify())
 			{
 				/* add the cascade certificate to the certificate store */
-				certificateLock = SignatureVerifier.getInstance().getVerificationCertificateStore().
+				/*certificateLock = SignatureVerifier.getInstance().getVerificationCertificateStore().
 					addCertificateWithoutVerification(a_cascade.getCertPath(),
 					JAPCertificate.CERTIFICATE_TYPE_MIX, false, false);
-			}
+			}*/
 		}		
 
 		// verify the signature
@@ -220,11 +221,11 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 				SignatureVerifier.DOCUMENT_CLASS_MIX);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertificationPath();
-				if (m_certPath != null)
+				m_certPath = m_signature.getMultiCertPath();
+				/*if (m_certPath != null)
 				{
 					m_certificate = m_certPath.getFirstCertificate();
-				}
+				}*/
 			}
 		}
 		catch (Exception e)
@@ -237,12 +238,12 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		if(SignatureVerifier.getInstance().isCheckSignatures()&&
 			SignatureVerifier.getInstance().isCheckSignatures(SignatureVerifier.DOCUMENT_CLASS_MIX))
 			{
-				if (m_certificate == null)
+				/*if (m_certificate == null)
 				{
 					throw new SignatureException(
 						 "There is no known certificate to verify the StatusInfo signature of Mix with ID: " +
 						 m_mixCascadeId);
-				}
+				}*/
 				if (!checkId())
 				{
 					throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Status-Entry for Mix ID: " + m_mixCascadeId);
@@ -250,11 +251,11 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			}
 		
 		/* remove the lock on the certificate (if there is any) */
-		if (certificateLock != -1)
+		/*if (certificateLock != -1)
 		{
 			SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificateLock(
 				certificateLock);
-		}
+		}*/
 		
 		/* get the values */
 		m_currentRisk = Integer.parseInt(a_statusNode.getAttribute("currentRisk"));
@@ -420,26 +421,33 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	{
 		if (m_certPath != null)
 		{
-			return m_certPath.checkValidity(new Date());
+			return m_certPath.isValid(new Date());
 		}
 		return false;
 	}
 
-	public JAPCertificate getCertificate()
+	/*public JAPCertificate getCertificate()
 	{
 		return m_certificate;
+	}*/
+	
+	public XMLSignature getSignature()
+	{
+		return m_signature;
 	}
 
-	public CertPath getCertPath()
+	public MultiCertPath getCertPath()
 	{
 		return m_certPath;
 	}
 
 	public boolean checkId()
 	{
-		return getCertificate() != null &&
+		return m_signature.getMultiCertPath().getXORofSKIs().equals(getId());
+		/*return getCertificate() != null &&
 			 getId().equals(new X509SubjectKeyIdentifier(
 				 getCertificate().getPublicKey()).getValueWithoutColon());
+				 */
 	}
 
 	/**

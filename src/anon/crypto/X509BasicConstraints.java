@@ -50,7 +50,7 @@ public class X509BasicConstraints extends AbstractX509Extension
 	/** <code>true</code> if the certificate belongs to a CA */
 	private boolean m_cA;
 	/** the maximal length of a certification path build from this cert to an end entity */
-	private Integer m_pathLenConstraint;
+	private int m_pathLenConstraint = -1;
 	
 	/**
 	 * Creates a new X509BasicConstrains objects with the specified value for cA.
@@ -145,9 +145,9 @@ public class X509BasicConstraints extends AbstractX509Extension
 	 * @return the maximal length of a certificate that is build from this certificate
 	 * 		   to an end entity
 	 */
-	public int getPathLenConstraint()
+	public int getPathLengthConstraint()
 	{
-		return m_pathLenConstraint.intValue();
+		return m_pathLenConstraint;
 	}
 	
 	/**
@@ -167,7 +167,7 @@ public class X509BasicConstraints extends AbstractX509Extension
 		Vector v = new Vector();;
 		
 		v.add(new String("cA="+m_cA));
-		if(m_pathLenConstraint != null)
+		if(m_pathLenConstraint != -1)
 		{
 			v.add(new String("pathLenConstraint="+m_pathLenConstraint));
 		}

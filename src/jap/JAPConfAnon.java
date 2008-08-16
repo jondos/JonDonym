@@ -27,16 +27,14 @@
  */
 package jap;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Vector;
+import gui.CertDetailsDialog;
+import gui.GUIUtils;
+import gui.JAPHelp;
+import gui.JAPJIntField;
+import gui.JAPMessages;
+import gui.MapBox;
+import gui.dialog.JAPDialog;
+import jap.forward.JAPRoutingMessage;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -56,36 +54,53 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Vector;
+
+import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
-import javax.swing.ButtonGroup;
-import javax.swing.AbstractButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.JComboBox;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+import platform.AbstractOS;
 import anon.crypto.AbstractX509AlternativeName;
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.X509SubjectAlternativeName;
 import anon.infoservice.BlacklistedCascadeIDEntry;
@@ -96,31 +111,15 @@ import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceEntry;
+import anon.infoservice.PerformanceInfo;
+import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.infoservice.ServiceLocation;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.ServiceSoftware;
 import anon.infoservice.StatusInfo;
-import anon.infoservice.PerformanceInfo;
+import anon.pay.PayAccountsFile;
 import anon.util.Util;
 import anon.util.Util.Comparable;
-import gui.JAPHelp;
-import gui.CertDetailsDialog;
-import gui.CountryMapper;
-import gui.GUIUtils;
-import gui.JAPJIntField;
-import gui.JAPMessages;
-import gui.JAPMultilineLabel;
-import gui.MapBox;
-import gui.dialog.JAPDialog;
-import jap.forward.JAPRoutingMessage;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-import platform.AbstractOS;
-import anon.infoservice.PreviouslyKnownCascadeIDEntry;
-import anon.pay.PayAccountsFile;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ListCellRenderer;
 
 class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, ActionListener,
 	ListSelectionListener, ItemListener, KeyListener, Observer
@@ -282,7 +281,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private final Object LOCK_OBSERVABLE = new Object();
 
 	/** the Certificate of the selected Mix-Server */
-	private CertPath m_serverCert;
+	private MultiCertPath m_serverCert;
 	private MixInfo m_serverInfo;
 	
 	private Vector m_locationCoordinates;
@@ -1053,7 +1052,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		if (m_serverCert != null && m_serverInfo != null)
 		{
 			boolean bVerified = isServerCertVerified();
-			boolean bValid = m_serverCert.checkValidity(new Date());
+			boolean bValid = m_serverCert.isValid(new Date());
 
 			m_viewCertLabel.setText((bVerified ? JAPMessages.getString(CertDetailsDialog.MSG_CERT_VERIFIED) + "," :
 				JAPMessages.getString(CertDetailsDialog.MSG_CERT_NOT_VERIFIED) + ","));
@@ -1335,7 +1334,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if(m_serverInfo != null)
 		{
-			return m_serverInfo.getCertPath().verify();
+			return m_serverInfo.getCertPath().isVerified();
 		}
 		return false;
 	}
@@ -1633,14 +1632,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 		else if (e.getSource() == m_viewCertLabel || e.getSource() == m_viewCertLabelValidity)
 		{
-			if (m_serverCert != null && m_serverInfo != null)
+			/*if (m_serverCert != null && m_serverInfo != null)
 			{
 				CertDetailsDialog dialog = new CertDetailsDialog(getRootPanel().getParent(),
 					m_serverCert.getFirstCertificate(), isServerCertVerified(),
-					JAPMessages.getLocale(), m_serverInfo.getCertPath());
+					JAPMessages.getLocale(), m_serverInfo.getCertPath().getFirstVerifiedPath());
 				dialog.pack();
 				dialog.setVisible(true);
-			}
+			}*/
 		}
 		else if (e.getSource() == m_locationLabel)
 		{
@@ -2457,10 +2456,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return null;
 		}
 
-		public CertPath getMixCertPath(MixCascade a_cascade, String a_mixID)
+		public MultiCertPath getMixCertPath(MixCascade a_cascade, String a_mixID)
 		{
 			MixInfo mixinfo = getMixInfo(a_cascade, a_mixID);
-			CertPath certificate = null;
+			MultiCertPath certificate = null;
 			if (mixinfo != null)
 			{
 				certificate = mixinfo.getCertPath();
@@ -2676,7 +2675,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				if (cascade != null)
 				{
 					// this is a first mix
-					CertPath certPath = cascade.getCertPath();
+					CertPath certPath = cascade.getCertPath().getFirstVerifiedPath();
 					if (certPath != null)
 					{
 						mixCertificate = certPath.getSecondCertificate();
@@ -2705,7 +2704,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				if (cascade != null)
 				{
 					// this is a first mix
-					CertPath certPath = cascade.getCertPath();
+					CertPath certPath = cascade.getCertPath().getFirstVerifiedPath();
 					if (certPath != null)
 					{
 						mixCertificate = certPath.getSecondCertificate();
@@ -2742,14 +2741,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 			}
 
-			if (info == null || info.getCertificate() == null)
+			/*if (info == null || info.getCertificate() == null)
 			{
 				if (a_cascade.getCertPath() != null &&
 					a_cascade.getCertPath().getFirstCertificate() != null)
 				{
 					info = new MixInfo(MixInfo.DEFAULT_NAME, a_cascade.getCertPath());
 				}
-			}
+			}*/
 
 
 			return info;

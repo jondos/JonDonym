@@ -2944,10 +2944,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				MixInfo mixInfo = currentMixCascade.getMixInfo(i);
 				
-				if(mixInfo != null && mixInfo.getCertificate() != null && 
-						mixInfo.getCertificate().getSubject() != null) 
+				if(mixInfo != null && mixInfo.getCertPath() != null && 
+						mixInfo.getCertPath().getSubject() != null) 
 				{
-					String mixCountry = mixInfo.getCertificate().getSubject().getCountryCode();
+					String mixCountry = mixInfo.getCertPath().getSubject().getCountryCode();
 					CountryMapper country = new CountryMapper(mixCountry, JAPMessages.getLocale());
 					m_labelMixFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + mixCountry + ".png"));
 					m_labelMixFlags[i].setToolTipText(country.toString());
@@ -2958,10 +2958,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					m_labelMixFlags[i].setIcon(null);
 				}
 				
-				if(mixInfo != null && mixInfo.getOperatorCertificate() != null && 
-						mixInfo.getOperatorCertificate().getSubject() != null) 
+				if(mixInfo != null && mixInfo.getCertPath() != null && 
+						mixInfo.getCertPath().getIssuer() != null) 
 				{
-					String operatorCountry = mixInfo.getOperatorCertificate().getSubject().getCountryCode();
+					String operatorCountry = mixInfo.getCertPath().getIssuer().getCountryCode();
 					CountryMapper country = new CountryMapper(operatorCountry, JAPMessages.getLocale());
 					m_labelOperatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + operatorCountry + ".png"));
 					m_labelOperatorFlags[i].setToolTipText(country.toString());

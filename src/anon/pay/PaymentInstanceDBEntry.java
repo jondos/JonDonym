@@ -43,6 +43,7 @@ import anon.infoservice.ListenerInterface;
 import anon.infoservice.ServiceSoftware;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
+import anon.crypto.MultiCertPath;
 import anon.crypto.X509SubjectKeyIdentifier;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
@@ -78,7 +79,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	private Element m_xmlDescription;
 
 	private XMLSignature m_signature;
-	private CertPath m_certPath;
+	private MultiCertPath m_certPath;
 
 	/**
 	 * Stores the time when this payment instance entry was created by the origin payment instance.
@@ -92,7 +93,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	private Vector m_listenerInterfaces;
 	private String m_name;
 
-	private JAPCertificate m_cert; //= JAPCertificate.getInstance("certificates/bi.cer");
+	//private JAPCertificate m_cert; //= JAPCertificate.getInstance("certificates/bi.cer");
 
 	public PaymentInstanceDBEntry(Element elemRoot) throws XMLParseException
 	{
@@ -120,11 +121,11 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 			SignatureVerifier.DOCUMENT_CLASS_PAYMENT);
 		if (m_signature != null)
 		{
-			m_certPath = m_signature.getCertificationPath();
-			if (m_certPath != null)
+			m_certPath = m_signature.getMultiCertPath();
+			/*if (m_certPath != null)
 			{
 				m_cert = m_certPath.getFirstCertificate();
-			}
+			}*/
 		}
 
 		/* get the ID */
@@ -165,9 +166,9 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	}
 
 
-	public PaymentInstanceDBEntry(String a_id, String a_name,
+	/*public PaymentInstanceDBEntry(String a_id, String a_name,
 								  JAPCertificate a_cert, /** @todo remove this when new JAP available */
-								  Enumeration a_listeners,
+	/*							  Enumeration a_listeners,
 								  String software_version, long creationTime, long a_serialNumber)
 	{
 		super(System.currentTimeMillis() + Constants.TIMEOUT_PAYMENT_INSTANCE);
@@ -211,7 +212,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 				SignatureVerifier.DOCUMENT_CLASS_PAYMENT, elemRoot);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertificationPath();
+				m_certPath = m_signature.getCertPath();
 			}
 
 			if (m_certPath == null || m_certPath.getFirstCertificate() == null)
@@ -229,7 +230,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		}
 
 		m_xmlDescription = elemRoot;
-	}
+	}*/
 
 	public boolean isVerified()
 	{
@@ -244,12 +245,12 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	{
 		if (m_certPath != null)
 		{
-			return m_certPath.checkValidity(new Date());
+			return m_certPath.isValid(new Date());
 		}
 		return false;
 	}
-
-	public CertPath getCertPath()
+	
+	public MultiCertPath getCertPath()
 	{
 		return m_certPath;
 	}
@@ -289,10 +290,10 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		return interfacesReturned.elements();
 	}
 
-	public JAPCertificate getCertificate()
+	/*public JAPCertificate getCertificate()
 	{
 		return m_cert;
-	}
+	}*/
 
 	/**
 	 * Returns the time when this payment instance entry was created by the origin payment instance.

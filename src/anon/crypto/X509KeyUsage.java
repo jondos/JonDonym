@@ -190,4 +190,53 @@ public class X509KeyUsage extends AbstractX509Extension
 		}
 		return false;
 	}
+	
+	/*
+	 * Convinience methods checking for all possible usages
+	 */
+	
+	public boolean allowsDigitalSignature()
+	{
+		return isAllowedUsage(KeyUsage.digitalSignature);
+	}
+	
+	public boolean allowsNonRepudiation()
+	{
+		return isAllowedUsage(KeyUsage.nonRepudiation);
+	}
+	
+	public boolean allowsKeyEncipherment()
+	{
+		return isAllowedUsage(KeyUsage.keyEncipherment);
+	}
+	
+	public boolean allowsDataEncipherment()
+	{
+		return isAllowedUsage(KeyUsage.dataEncipherment);
+	}
+	
+	public boolean allowsKeyAgreement()
+	{
+		return isAllowedUsage(KeyUsage.keyAgreement);
+	}
+	
+	public boolean allowsKeyCertSign()
+	{
+		return isAllowedUsage(KeyUsage.keyCertSign);
+	}
+	
+	public boolean allowsCRLSign()
+	{
+		return isAllowedUsage(KeyUsage.cRLSign);
+	}
+	
+	public boolean allowsEncipherOnly()
+	{
+		return isAllowedUsage(KeyUsage.encipherOnly);
+	}
+	
+	public boolean allowsDecipherOnly()
+	{
+		return isAllowedUsage(KeyUsage.decipherOnly);
+	}
 }
