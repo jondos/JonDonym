@@ -76,6 +76,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.digests.GeneralDigest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.util.encoders.Hex;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -516,6 +517,15 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	public String getSubjectKeyIdentifier()
 	{
 		return m_subjectKeyIdentifier.getValue();
+	}
+	
+	/**
+	 * Returns the byte representation of the X509SubjectKeyIdentifier
+	 * @return this certificate's SubjectKeyIdentifier as a raw byte-array
+	 */
+	public byte[] getRawSubjectKeyIdentifier()
+	{
+		return Hex.decode(m_subjectKeyIdentifier.getValueWithoutColon());
 	}
 	
 	/**
@@ -1289,5 +1299,10 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	public String getCertIdentifier()
 	{
 		return m_subject.toString()+", "+ m_subjectKeyIdentifier.getValueWithoutColon();
+	}
+	
+	public boolean isSelfSigned()
+	{
+		return this.verify(this.getPublicKey());
 	}
 }

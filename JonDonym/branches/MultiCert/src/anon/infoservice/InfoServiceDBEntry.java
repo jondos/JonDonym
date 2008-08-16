@@ -47,6 +47,7 @@ import HTTPClient.HTTPResponse;
 import anon.crypto.CertPath;
 import anon.crypto.IVerifyable;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
@@ -152,7 +153,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	/**
 	 *
 	 */
-	private CertPath m_certPath;
+	private MultiCertPath m_certPath;
 
 	private long m_serial;
 	
@@ -231,11 +232,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		if (m_signature != null)
 		{
-			m_certPath = m_signature.getCertificationPath();
-			if (m_certPath != null)
+			m_certPath = m_signature.getMultiCertPath();
+			/*if (m_certPath != null)
 			{
-				m_certificate = m_certPath.getFirstCertificate();
-			}
+				m_certificate = m_certPath.getEndEntity();
+			}*/
 		}
 
 		/* get the information, whether this infoservice was user-defined within the JAP client */
@@ -531,7 +532,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, infoServiceNode);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertificationPath();
+				m_certPath = m_signature.getMultiCertPath();
 			}
 		}
 		catch (Exception a_e)
@@ -577,9 +578,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 
 	public boolean isValid()
 	{
-		if (m_certPath != null)
-		{
-			return m_certPath.checkValidity(new Date());
+		if (m_signature != null)
+		{	
+			return true;
+			//TODO implement me!
+			//return m_certPath.checkValidity(new Date());
 		}
 		return false;
 	}
@@ -594,12 +597,12 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return m_userDefined || super.checkId();
 	}
 
-	public JAPCertificate getCertificate()
+	/*public JAPCertificate getCertificate()
 	{
 		return m_certificate;
-	}
-
-	public CertPath getCertPath()
+	}*/
+	
+	public MultiCertPath getCertPath()
 	{
 		return m_certPath;
 	}

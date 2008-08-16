@@ -324,7 +324,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			if (a_cascade.getCertPath() != null && !a_cascade.getCertPath().checkValidity(new Date()))
+			if (a_cascade.getCertPath() != null && !a_cascade.getCertPath().isValid(new Date()))
 			{
 				if (m_trustCondition == TRUST_IF_NOT_TRUE)
 				{

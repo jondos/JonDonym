@@ -117,7 +117,7 @@ public class CertificateManager implements Observer
 	{
 		synchronized (m_certificateLocks)
 		{
-			CertPath newCertificate = a_newEntry.getCertPath();
+			CertPath newCertificate = a_newEntry.getCertPath().getFirstVerifiedPath();
 			Integer oldEntryCertificateLock = null;
 			boolean removeCertificateLock = false;
 			if (newCertificate != null)

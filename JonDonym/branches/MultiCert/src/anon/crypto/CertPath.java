@@ -30,6 +30,8 @@ package anon.crypto;
 
 import org.w3c.dom.*;
 
+import sun.security.x509.X509Key;
+
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Date;
@@ -40,18 +42,15 @@ import anon.util.XMLUtil;
 
 /**
  * Stores a certification path with all included certificates.
- * Keep in mind, that this CertPath adds a new Certificate to the BEGINNING
- * of the Vector. That means the first Certificate is at the end of the Vector.
  * @see also gui.CertDetailsDialog, anon.crypto.XMLSignature
  * @author Robert Hirschberger
+ * @todo change structure
  */
 public class CertPath implements IXMLEncodable
 {
 	public static final String XML_ELEMENT_NAME = "CertPath";
 	public static final String XML_ATTR_CLASS = "rootCertificateClass";
 
-	/** the number of certificates included in this CertPath */
-	private int m_certCount;
 	/** the certificate class of the rootCerts that may verify this  CertPath */
 	private int m_rootCertificateClass;
 	/** the included certificates */
@@ -62,17 +61,16 @@ public class CertPath implements IXMLEncodable
 	 * @param firstCert The first certifiacte of the path
 	 *                  (it will be on the lowest Level of the cert hierarchy)
 	 */
-	protected CertPath(JAPCertificate firstCert)
+	protected CertPath(JAPCertificate a_firstCert)
 	{
 		m_certificates = new Vector();
 
-		if (firstCert == null)
+		if (a_firstCert == null)
 		{
-			m_certCount = -1;
 			return;
 		}
 
-		add(firstCert);
+		add(a_firstCert);
 	}
 
 	protected CertPath(Element a_elemCertPath) throws XMLParseException
@@ -94,6 +92,181 @@ public class CertPath implements IXMLEncodable
 		{
 			m_certificates.addElement(JAPCertificate.getInstance(listCerts.item(i)));
 		}
+	}
+	
+	public static CertPath getInstance(JAPCertificate a_firstCert, int a_documentType, Vector a_pathCertificates)
+	{
+		//check cached CertPaths here!
+		try {
+		CertificateInfoStructure cachedPath = SignatureVerifier.getInstance().getVerificationCertificateStore()
+												.getCertificateInfoStructure(a_firstCert, getCertType(a_documentType));
+		if(cachedPath != null)
+		{
+			//cachedPath.getCertificate();
+			return cachedPath.getCertPath();
+		}
+		}catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		//build and validate a new CertPath
+		CertPath certPath = new CertPath(a_firstCert);
+		certPath.setRootCertType(getRootCertType(a_documentType));
+		if(a_pathCertificates != null)
+		{
+			certPath.build(a_pathCertificates);
+			if(!certPath.validateCertPath())
+			{
+				//TODO do what? return null?
+			}
+		}
+		else
+		{
+			// ???
+		}
+		
+		//store new Path
+		SignatureVerifier.getInstance().getVerificationCertificateStore().addCertificateWithVerification(certPath, getCertType(a_documentType), false);
+		
+		return certPath; 
+	}
+	
+	private int build(Vector a_pathCertificates)
+	{
+		JAPCertificate endEntity = this.getFirstCertificate();		
+		JAPCertificate pathCertificate = doNameAndKeyChaining(endEntity, a_pathCertificates);
+		
+		while(pathCertificate != null)
+		{
+			this.add(pathCertificate);
+			pathCertificate = doNameAndKeyChaining(pathCertificate, a_pathCertificates);
+		}
+		
+		/* we do not add a root certificate into the path... TODO or should we?
+		 * 
+		pathCertificate = doNameAndKeyChaining(getLastCertificate(), a_rootCertificates);
+		if(pathCertificate != null)
+		{
+			
+		}*/
+		
+		return this.length();
+	}
+	
+	private static JAPCertificate doNameAndKeyChaining(JAPCertificate a_cert, Vector a_possibleIssuers)
+	{
+		JAPCertificate issuer;
+		Enumeration issuers = a_possibleIssuers.elements();
+		
+		while(issuers.hasMoreElements())
+		{
+			Object obj = issuers.nextElement();
+			
+			if(obj instanceof JAPCertificate)
+			{
+				issuer = (JAPCertificate) obj;
+			}
+			else
+			{
+				issuer = ((CertificateInfoStructure) obj).getCertificate();
+			}
+			
+			if(a_cert.getIssuer().equals(issuer.getSubject()) && !a_cert.equals(issuer))
+			{
+				//TODO implement KeyChaining here like a_cert.getAKI.equals(issuer.getSKI())
+				return issuer;
+			}
+		}
+		return null;
+	}
+	
+	private boolean validateCertPath()
+	{
+		Enumeration certificates = m_certificates.elements();
+		JAPCertificate current = null, issuer;
+		int pathPosition = 0;
+		
+		if(certificates.hasMoreElements())
+		{
+			current = (JAPCertificate) certificates.nextElement();
+		}
+		while(certificates.hasMoreElements())
+		{
+			pathPosition++;
+			issuer = (JAPCertificate) certificates.nextElement();
+				
+			if(!current.verify(issuer))
+			{
+				return false;
+			}
+			if(!current.getValidity().isValid(new Date()))
+			{
+				return false;
+			}
+			//TODO implement me
+			/*if(!current.isRevoked())
+			{
+				return false;
+			}*/
+			if(current.getExtensions().hasUnknownCriticalExtensions())
+			{
+				return false;
+			}
+			if(!checkExtensions(current, pathPosition))
+			{
+				return false;
+			}
+			current = issuer;
+		}
+		return true;
+	}
+
+	private boolean checkExtensions(JAPCertificate a_cert, int a_position)
+	{
+		//check BasicConstraints
+		X509BasicConstraints basicConstraints = 
+			(X509BasicConstraints) a_cert.getExtensions().getExtension(X509BasicConstraints.IDENTIFIER);
+		if(basicConstraints != null)
+		{
+			if(basicConstraints.isCA())
+			{
+				if(a_position == 1)
+				{	//end entity certificates are not issued by a CA!
+					//TODO return false;
+				}
+				int maxPathLength = basicConstraints.getPathLengthConstraint();
+				if(maxPathLength != -1 && maxPathLength < a_position)
+				{	//path length is too short for current position in path
+					return false;
+				}
+			}
+		}
+		
+		//check KeyUsage
+		X509KeyUsage keyUsage = 
+			(X509KeyUsage) a_cert.getExtensions().getExtension(X509KeyUsage.IDENTIFIER);
+		if(keyUsage != null)
+		{
+			//TODO usages ok like this?
+			if(a_position == 1)
+			{
+				if(!keyUsage.allowsKeyEncipherment()
+						|| 	!keyUsage.allowsNonRepudiation())
+				{
+					//TODO return false;
+				}
+			}
+			else
+			{
+				if(!keyUsage.allowsKeyCertSign())
+				{
+					return false;
+				}
+			}
+		}
+	
+		return true;
 	}
 
 	public Element toXmlElement(Document a_doc)
@@ -128,44 +301,8 @@ public class CertPath implements IXMLEncodable
 		{
 			if (!m_certificates.contains(a_certificate))
 			{
-				m_certificates.insertElementAt(a_certificate, 0);
-				m_certCount++;
+				m_certificates.addElement(a_certificate);
 			}
-		}
-	}
-
-	/**
-	 * Removes the specified certificate from this CertPath
-	 * @param a_certificate the certificate to remove
-	 */
-	protected void remove(JAPCertificate a_certificate)
-	{
-		synchronized (m_certificates)
-		{
-			m_certificates.removeElement(a_certificate);
-			m_certCount--;
-		}
-	}
-
-	/**
-	 * Removes all certificates except the one on the lowest level
-	 * of this certPath
-	 */
-	protected void removeAllButLast()
-	{
-		synchronized (m_certificates)
-		{
-			JAPCertificate firstCertificate = this.getFirstCertificate();
-			m_certificates.removeAllElements();
-			if (firstCertificate != null)
-			{
-				m_certCount = 0;
-			}
-			else
-			{
-				m_certCount = -1;
-			}
-			this.add(firstCertificate);
 		}
 	}
 
@@ -173,13 +310,13 @@ public class CertPath implements IXMLEncodable
 	 * Returns the top level certificate (it is the one that was last added)
 	 * @return the last added certificate
 	 */
-	protected JAPCertificate getLatestAddedCertificate()
+	protected JAPCertificate getLastCertificate()
 	{
 		synchronized (m_certificates)
 		{
 			if (m_certificates.size() > 0)
 			{
-				return (JAPCertificate) m_certificates.firstElement();
+				return (JAPCertificate) m_certificates.lastElement();
 			}
 			return null;
 		}
@@ -197,7 +334,7 @@ public class CertPath implements IXMLEncodable
 		{
 			if (m_certificates.size() > 0)
 			{
-				return (JAPCertificate) m_certificates.lastElement();
+				return (JAPCertificate) m_certificates.firstElement();
 			}
 			return null;
 		}
@@ -217,8 +354,7 @@ public class CertPath implements IXMLEncodable
 			{
 				return null;
 			}
-			//return the Certificate at Index size-2 (size-1 would be the last one)
-			return (JAPCertificate) m_certificates.elementAt(m_certificates.size() - 2);
+			return (JAPCertificate) m_certificates.elementAt(1);
 		}
 	}
 
@@ -231,20 +367,43 @@ public class CertPath implements IXMLEncodable
 	 * @see also anon.crypto.SignatureVerifier.getVerifiedXml()
 	 * @param a_documentClass a document class from the SignatureVerifier
 	 */
-	protected void setDocType(int a_documentClass)
+	private static int getRootCertType(int a_documentClass)
 	{
 		switch (a_documentClass)
 		{
 			case SignatureVerifier.DOCUMENT_CLASS_MIX:
-				m_rootCertificateClass = JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX;
-				break;
+				return JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX;
 			case SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE:
-				m_rootCertificateClass = JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE;
-				break;
+				return JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE;
 			case SignatureVerifier.DOCUMENT_CLASS_UPDATE:
-				m_rootCertificateClass = JAPCertificate.CERTIFICATE_TYPE_UPDATE;
-				break;
+				return JAPCertificate.CERTIFICATE_TYPE_ROOT_UPDATE;
+			case SignatureVerifier.DOCUMENT_CLASS_PAYMENT:
+				return JAPCertificate.CERTIFICATE_TYPE_ROOT_PAYMENT;
+			default:
+				return -1;
 		}
+	}
+	
+	private static int getCertType(int a_documentClass)
+	{
+		switch (a_documentClass)
+		{
+			case SignatureVerifier.DOCUMENT_CLASS_MIX:
+				return JAPCertificate.CERTIFICATE_TYPE_MIX;
+			case SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE:
+				return JAPCertificate.CERTIFICATE_TYPE_INFOSERVICE;
+			case SignatureVerifier.DOCUMENT_CLASS_UPDATE:
+				return JAPCertificate.CERTIFICATE_TYPE_UPDATE;
+			case SignatureVerifier.DOCUMENT_CLASS_PAYMENT:
+				return JAPCertificate.CERTIFICATE_TYPE_PAYMENT;
+			default:
+				return -1;
+		}
+	}
+	
+	private void setRootCertType(int a_certType)
+	{
+		m_rootCertificateClass = a_certType;
 	}
 
 	/**
@@ -260,7 +419,7 @@ public class CertPath implements IXMLEncodable
 	{
 		Vector rootCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
 			getAvailableCertificatesByType(m_rootCertificateClass);
-		JAPCertificate lastCertificate = (JAPCertificate)this.getLatestAddedCertificate();
+		JAPCertificate lastCertificate = (JAPCertificate)this.getLastCertificate();
 		if (lastCertificate == null)
 		{
 			return null;
@@ -316,7 +475,7 @@ public class CertPath implements IXMLEncodable
 		{
 			return false;
 		}
-		return getLatestAddedCertificate().verify(a_certificate);
+		return getLastCertificate().verify(a_certificate);
 	}
 
 	/**
@@ -327,18 +486,17 @@ public class CertPath implements IXMLEncodable
 	 */
 	public boolean verify()
 	{
-		Enumeration rootCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
-			getAvailableCertificatesByType(m_rootCertificateClass).elements();
-		JAPCertificate verifier = getLatestAddedCertificate();
-		if (verifier != null)
+		JAPCertificate lastCert, verifier;
+		Vector rootCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
+			getAvailableCertificatesByType(m_rootCertificateClass);
+		
+		lastCert = this.getLastCertificate();
+		if (lastCert != null)
 		{
-			while (rootCertificates.hasMoreElements())
+			verifier = doNameAndKeyChaining(lastCert, rootCertificates);
+			if(lastCert.verify(verifier))
 			{
-				if (verifier.verify(
-					( (CertificateInfoStructure) rootCertificates.nextElement()).getCertificate()))
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		return false;
@@ -348,9 +506,9 @@ public class CertPath implements IXMLEncodable
 	 * Returns the number of certificates in this CertPath
 	 * @return the number of certificates in this CertPath
 	 */
-	public int getCertCount()
+	public int length()
 	{
-		return m_certCount;
+		return m_certificates.size();
 	}
 
 	/**
@@ -366,8 +524,9 @@ public class CertPath implements IXMLEncodable
 		synchronized (m_certificates)
 		{
 			boolean verifierFound = false;
-			Enumeration certificates = m_certificates.elements();
 			Vector certificateIS = new Vector();
+			JAPCertificate cert;
+			
 			//try to find a verifier
 			CertificateInfoStructure verifier = this.getVerifier(false);
 
@@ -380,18 +539,17 @@ public class CertPath implements IXMLEncodable
 					certificateIS.addElement(verifier);
 				}
 			}
-			if (certificates.hasMoreElements())
+			cert = this.getLastCertificate();
+			//Mark the top level CIS, if there is no verifier for the CertPath
+			certificateIS.addElement(new CertificateInfoStructure(cert,  null, 1,
+				verifierFound, false, false, false));
+			//if there is more than one cert in the path add those, too
+			for(int i = m_certificates.size()-2; i >= 0; i--)
 			{
-				//Mark the first CIS, if there is no verifier for the CertsPath
-				JAPCertificate cert = (JAPCertificate) certificates.nextElement();
-				certificateIS.addElement(new CertificateInfoStructure(cert,  null, 1,
-					verifierFound, false, false, false));
-				while (certificates.hasMoreElements())
-				{
-					cert = (JAPCertificate) certificates.nextElement();
-					certificateIS.addElement(new CertificateInfoStructure(cert, null, 1, true, false, false, false));
-				}
+				cert = (JAPCertificate)m_certificates.get(i);
+				certificateIS.addElement(new CertificateInfoStructure(cert, null, 1, true, false, false, false));
 			}
+
 			return certificateIS.elements();
 		}
 	}
@@ -406,7 +564,7 @@ public class CertPath implements IXMLEncodable
 	{
 		synchronized (m_certificates)
 		{
-			String certPath = new String("Certification Path (" + getCertCount() + "):");
+			String certPath = new String("Certification Path (" + length() + "):");
 			String tabs = new String();
 			Enumeration certificates = m_certificates.elements();
 

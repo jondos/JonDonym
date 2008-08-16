@@ -33,6 +33,7 @@ import org.w3c.dom.NodeList;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.XMLParseException;
@@ -123,15 +124,15 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    * Stores the certificate for this mix.
    * The certificate is not set (null) if the MixInfo-Object is in the InfoService
    */
-  private JAPCertificate m_mixCertificate;
+  //private JAPCertificate m_mixCertificate;
 
-  private JAPCertificate m_operatorCertificate;
+  //private JAPCertificate m_operatorCertificate;
 
   /**
    * Stores the certPath for this mix.
    * The CertPath is not set (null) if the MixInfo-Object is in the InfoService
    */
-  private CertPath m_mixCertPath;
+  private MultiCertPath m_mixCertPath;
 
   /**
    *  The price certificate for the Mix
@@ -192,7 +193,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   }
 
 
-  public MixInfo(String a_mixID, CertPath a_certPath)
+  public MixInfo(String a_mixID, MultiCertPath a_certPath)
   {
 	  super(Long.MAX_VALUE);
 	  if (a_mixID == null)
@@ -204,12 +205,13 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_type = -1;
 	  m_bFromCascade = true;
 	  m_mixCertPath = a_certPath;
-	  m_mixCertificate = a_certPath.getFirstCertificate();
-	  m_operatorCertificate = a_certPath.getSecondCertificate();
+	  //m_mixCertificate = a_certPath.getEndEntity();
+	  //m_operatorCertificate = a_certPath.getSecondCertificate();
 	  m_lastUpdate = 0;
 	  m_serial = 0;
-	  m_mixLocation = new ServiceLocation(null, m_mixCertificate);
-	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate(), 0);
+	  CertPath path = a_certPath.getFirstVerifiedPath();
+	  m_mixLocation = new ServiceLocation(null, path.getFirstCertificate());
+	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
 	  m_freeMix = false;
 	  m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
 	  m_bPerformanceServer = false;
@@ -217,7 +219,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_iPerformanceServerPort = -1;
   }
 
-  public MixInfo(String a_mixID, CertPath a_certPath, XMLPriceCertificate a_priceCert, long a_prepaidInterval)
+  public MixInfo(String a_mixID, MultiCertPath a_certPath, XMLPriceCertificate a_priceCert, long a_prepaidInterval)
   {
 	  super(Long.MAX_VALUE);
 	  m_mixId = a_mixID;
@@ -225,12 +227,13 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_type = -1;
 	  m_bFromCascade = true;
 	  m_mixCertPath = a_certPath;
-	  m_mixCertificate = a_certPath.getFirstCertificate();
-	  m_operatorCertificate = a_certPath.getSecondCertificate();
+	  //m_mixCertificate = a_certPath.getFirstCertificate();
+	  //m_operatorCertificate = a_certPath.getSecondCertificate();
 	  m_lastUpdate = 0;
 	  m_serial = 0;
-	  m_mixLocation = new ServiceLocation(null, m_mixCertificate);
-	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate(), 0);
+	  CertPath path = a_certPath.getFirstVerifiedPath();
+	  m_mixLocation = new ServiceLocation(null, path.getFirstCertificate());
+	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
 	  m_freeMix = false;
 	  //
 	  m_priceCert = a_priceCert;
@@ -272,8 +275,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 
 		  if (m_mixSignature != null)
 		  {
-			  m_mixCertPath = m_mixSignature.getCertificationPath();
-			  if (m_mixCertPath != null && m_mixCertPath.getFirstCertificate() != null)
+			  m_mixCertPath = m_mixSignature.getMultiCertPath();
+			  /*if (m_mixCertPath != null && m_mixCertPath.getFirstCertificate() != null)
 			  {
 				  m_mixCertificate = m_mixCertPath.getFirstCertificate();
 				  m_operatorCertificate = m_mixCertPath.getSecondCertificate();
@@ -282,7 +285,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 			  {
 				  LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 								"No appended certificates in the MixCascade structure.");
-			  }
+			  }*/
 		  }
 		  else
 		  {
@@ -368,12 +371,12 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  {
 		  m_mixSoftware = new ServiceSoftware(softwareNode);
 	  }
-
-	  m_mixLocation = new ServiceLocation(locationNode, m_mixCertificate);
+	  CertPath path = m_mixCertPath.getFirstVerifiedPath();
+	  
 	  //get the Operator Certificate from the CertPath
-	  if (m_mixCertPath != null)
+	  if (path != null)
 	  {
-		  m_mixOperator = new ServiceOperator(operatorNode, m_mixCertPath.getSecondCertificate(), m_lastUpdate);
+		  m_mixOperator = new ServiceOperator(operatorNode, path.getSecondCertificate(), m_lastUpdate);
 	  }
 	  else
 	  {
@@ -512,7 +515,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   {
 	  if (m_mixCertPath != null)
 	  {
-		  return m_mixCertPath.checkValidity(new Date());
+		  return m_mixCertPath.isValid(new Date());
 	  }
 	  return false;
   }
@@ -522,16 +525,16 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    * For MixInfo-Objects in the InfoService the certificate is null
    * @return the certificate of the mix
    */
-  public JAPCertificate getCertificate()
+  /*public JAPCertificate getCertificate()
   {
 	  return m_mixCertificate;
-  }
+  }*/
 
-  public JAPCertificate getOperatorCertificate()
+  /*public JAPCertificate getOperatorCertificate()
   {
 	  return m_operatorCertificate;
-  }
-
+  }*/
+  
   public XMLPriceCertificate getPriceCertificate()
   {
       return m_priceCert;
@@ -552,7 +555,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    * For MixInfo-Objects in the InfoService the CertPath is null
    * @return the CertPath of the mix
    */
-  public CertPath getCertPath()
+  public MultiCertPath getCertPath()
   {
 	  return m_mixCertPath;
   }

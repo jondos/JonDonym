@@ -219,7 +219,7 @@ public class KeyExchangeManager {
 		   * certificate store (needed for verification of the MixCascadeStatus
 		   * messages)
 		   */
-		  if (m_cascade.getCertificate() != null)
+		  /*if (m_cascade.getCertPath().g != null)
 		  {
 			  m_mixCascadeCertificateLock = SignatureVerifier.getInstance().
 				  getVerificationCertificateStore().addCertificateWithoutVerification(
@@ -232,7 +232,7 @@ public class KeyExchangeManager {
 		  {
 			  LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 								"No appended certificates in the MixCascade structure.");
-		  }
+		  }*/
 
 		  /* get the used channel protocol version */
 		  if (m_cascade.getMixProtocolVersion() == null)
@@ -303,14 +303,14 @@ public class KeyExchangeManager {
 
 
 
-			  MixInfo oldMixinfo = (MixInfo) Database.getInstance(MixInfo.class).getEntryById(mixinfo.getId());
+			  /*MixInfo oldMixinfo = (MixInfo) Database.getInstance(MixInfo.class).getEntryById(mixinfo.getId());
 			  if (mixinfo.getCertificate() != null &&
 				  (oldMixinfo == null || oldMixinfo.getCertificate() == null ||
 				   !oldMixinfo.getCertificate().equals(mixinfo.getCertificate())))
 			  {
 				  // update the database so the the (new) certificate gets available
 				  Database.getInstance(MixInfo.class).update(mixinfo);
-			  }
+			  }*/
 			  Element currentMixNode = mixinfo.getXmlStructure();
 			  m_mixParameters[i] = new MixParameters(mixinfo.getId(), new ASymCipher());
 			  if (m_mixParameters[i].getMixCipher().setPublicKey(currentMixNode) != ErrorCodes.E_SUCCESS)
@@ -559,7 +559,7 @@ public class KeyExchangeManager {
 
 			  keyDoc.getDocumentElement().appendChild(XMLUtil.importNode(keyDoc, keySignatureNode, true));
 
-			  if (XMLSignature.verify(keyDoc, m_cascade.getCertificate()) == null)
+			  if (!XMLSignature.verifyFast(keyDoc, m_cascade.getCertPath().getEndEntityKeys()))
 			  {
 				  throw (new SignatureException("Invalid symmetric keys signature received."));
 			  }
