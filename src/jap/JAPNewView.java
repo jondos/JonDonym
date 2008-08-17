@@ -2922,9 +2922,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				else if(value == Long.MAX_VALUE)
 				{
-					m_labelDelay.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(
+					m_labelDelay.setText("> " + 
 							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
-							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2]));
+							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
 				}
 				else
 				{
