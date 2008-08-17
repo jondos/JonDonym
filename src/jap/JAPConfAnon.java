@@ -2675,7 +2675,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				if (cascade != null)
 				{
 					// this is a first mix
-					CertPath certPath = cascade.getCertPath().getFirstVerifiedPath();
+					CertPath certPath = cascade.getCertPath().getPath();
 					if (certPath != null)
 					{
 						mixCertificate = certPath.getSecondCertificate();
@@ -2704,7 +2704,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				if (cascade != null)
 				{
 					// this is a first mix
-					CertPath certPath = cascade.getCertPath().getFirstVerifiedPath();
+					CertPath certPath = cascade.getCertPath().getPath();
 					if (certPath != null)
 					{
 						mixCertificate = certPath.getSecondCertificate();

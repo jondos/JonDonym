@@ -245,7 +245,7 @@ public class XMLSignatureElement implements IXMLEncodable
 		{
 			try
 			{
-				currentCertificate = JAPCertificate.getInstance( (Element) nodeCertificate);
+				currentCertificate = JAPCertificate.getInstance(nodeCertificate);
 				if (currentCertificate != null)
 				{
 					m_appendedCerts.addElement(currentCertificate);
@@ -274,9 +274,9 @@ public class XMLSignatureElement implements IXMLEncodable
 			JAPCertificate currentCertificate = (JAPCertificate) certificates.nextElement();
 			if(verify(a_node, currentCertificate.getPublicKey()))
 			{
-				Vector appendedCertificates = this.getCertificates();
+				Vector appendedCertificates = (Vector)this.getCertificates().clone();
 				appendedCertificates.remove(currentCertificate);
-				m_certPath = CertPath.getInstance(currentCertificate, a_documentType, this.getCertificates());
+				m_certPath = CertPath.getInstance(currentCertificate, a_documentType, appendedCertificates);
 				return true;
 			}
 		}
@@ -286,10 +286,11 @@ public class XMLSignatureElement implements IXMLEncodable
 		certificates = a_directCertPaths.elements();
 		while(certificates.hasMoreElements())
 		{
-			JAPCertificate currentCertificate = ((CertPath) certificates.nextElement()).getFirstCertificate();
-			if(verify(a_node, currentCertificate.getPublicKey()))
+			CertPath currentPath = (CertPath) certificates.nextElement();
+			
+			if(verify(a_node, currentPath.getFirstCertificate().getPublicKey()))
 			{
-				m_certPath = CertPath.getInstance(currentCertificate, a_documentType, this.getCertificates());
+				m_certPath = currentPath;
 				return true;
 			}
 		}
@@ -316,7 +317,7 @@ public class XMLSignatureElement implements IXMLEncodable
 
 		if (!checkMessageDigest(a_node))
 		{
-			m_certPath = new CertPath((JAPCertificate)null);
+			//m_certPath = new CertPath((JAPCertificate)null);
 			return false;
 		}
 

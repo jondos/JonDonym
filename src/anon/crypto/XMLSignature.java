@@ -86,7 +86,6 @@ public final class XMLSignature
 	private static final String DIGEST_METHOD_ALGORITHM = "http://www.w3.org/2000/09/xmldsig#sha1";
 
 	private Vector m_signatureElements;
-	private int m_verifiedSignatureCount;
 	private MultiCertPath m_multiCertPath;
 	
 	/**
@@ -95,7 +94,6 @@ public final class XMLSignature
 	private XMLSignature()
 	{	
 		m_signatureElements = new Vector();
-		m_verifiedSignatureCount = 0;
 	}
 	
 	public int getNumberOfSignatures()
@@ -128,7 +126,7 @@ public final class XMLSignature
 		
 		for(int i=0; i < m_signatureElements.size(); i++)
 		{
-			paths[i] = ((XMLSignatureElement) m_signatureElements.get(i)).getCertPath();
+			paths[i] = ((XMLSignatureElement) m_signatureElements.elementAt(i)).getCertPath();
 		}
 		
 		return paths;
@@ -136,12 +134,7 @@ public final class XMLSignature
 	
 	public boolean isVerified()
 	{
-		//TODO change me?
-		if(m_verifiedSignatureCount > 0)
-		{
-			return true;
-		}
-		return false;
+		return m_multiCertPath.isVerified();
 	}
 
 	/**
@@ -402,26 +395,19 @@ public final class XMLSignature
 		while(signatures.hasMoreElements())
 		{
 			currentSignature = (XMLSignatureElement)signatures.nextElement();
-			if(currentSignature.verify(a_node, a_documentType, a_directCertificatePaths))
-			{
-				if(currentSignature.getCertPath().verify());
-				{
-					signature.m_verifiedSignatureCount++;
-				}
-				
-				//get incomplete CertPath form SigElement and give it with appendedCerts from sig
-				//root Certs to CertPathBuilder which does name-chaining to build a path or looks
-				//if there is a valid path for the verifying cert
-				//if there is not yet a verified path, but certpathbuilder found one, give CertPath
-				//to CertPathVerifier... maybe use some inner classes in CertPath?
-			}
+			currentSignature.verify(a_node, a_documentType, a_directCertificatePaths);
+			//get incomplete CertPath form SigElement and give it with appendedCerts from sig
+			//root Certs to CertPathBuilder which does name-chaining to build a path or looks
+			//if there is a valid path for the verifying cert
+			//if there is not yet a verified path, but certpathbuilder found one, give CertPath
+			//to CertPathVerifier... maybe use some inner classes in CertPath?
 		}
 		
 		signature.m_multiCertPath = new MultiCertPath(signature.getCertPaths());
 		
 		return signature;
 			
-			/*
+		/*
 		try
 		{
 			//get the included certificates
@@ -1140,7 +1126,7 @@ public final class XMLSignature
 		
 		for(int i=0; i< m_signatureElements.size(); i++)
 		{
-			elements[i] = ((XMLSignatureElement) m_signatureElements.get(i)).toXmlElement(a_doc);
+			elements[i] = ((XMLSignatureElement) m_signatureElements.elementAt(i)).toXmlElement(a_doc);
 		}
 		
 		return elements;

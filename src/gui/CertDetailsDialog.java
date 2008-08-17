@@ -918,7 +918,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 		});
 
 		//fill the list with the certificates from the certPath
-		if (a_certPath != null)
+		/*if (a_certPath != null)
 		{
 			Enumeration certificates = a_certPath.getCertificates();
 			{  //if the certPath is already verified we just ceck the validity
@@ -928,7 +928,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 					m_certListModel.add(m_certListModel.getSize(), cis);
 				}
 			}
-		}
+		}*/
 		//add scrollbars to the List
 		JScrollPane scrpaneList = new JScrollPane();
 		scrpaneList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);

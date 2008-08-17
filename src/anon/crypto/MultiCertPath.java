@@ -34,6 +34,13 @@ public class MultiCertPath
 		m_certPaths = a_certPaths;
 	}
 	
+	/**
+	 * Returns true if one verifyable path is valid
+	 * @todo verification needs to be done, this costs performance, 
+	 * because when validity is checked you normally check if path is verifyable
+	 * @param a_date
+	 * @return
+	 */
 	public boolean isValid(Date a_date)
 	{
 		CertPath path = getFirstVerifiedPath();
@@ -49,16 +56,38 @@ public class MultiCertPath
 		return getFirstVerifiedPath() != null;
 	}
 	
+	/**
+	 * Trys to return the first verified CertPath. If there is
+	 * none the first (unverified) Path is returned.
+	 * @return
+	 */
+	public CertPath getPath()
+	{
+		CertPath path = getFirstVerifiedPath();
+		if(path == null)
+		{
+			path = m_certPaths[0];
+		}
+		return path;
+	}
+	
+	/**
+	 * Gets the first verified CertPath of this MultiCertPath.
+	 * @return the first veriefied CertPath or null if there is none
+	 */
 	public CertPath getFirstVerifiedPath()
 	{
-		for(int i=0; i<m_certPaths.length; i++)
+		synchronized (m_certPaths)
 		{
-			if(m_certPaths[i].verify())
+			for(int i=0; i<m_certPaths.length; i++)
 			{
-				return m_certPaths[i];
+				if(m_certPaths[i] != null && m_certPaths[i].verify())
+				{
+					return m_certPaths[i];
+				}
 			}
+			return null;
 		}
-		return null;
 	}
 	
 	/*public JAPCertificate getFirstCertificate()
@@ -74,38 +103,44 @@ public class MultiCertPath
 
 	public String getXORofSKIs()
 	{
-		byte[] raw = new byte[20];
-		JAPCertificate cert;
-		
-		for(int i=0; i<m_certPaths.length; i++)
+		synchronized (m_certPaths)
 		{
-			cert = m_certPaths[i].getFirstCertificate();
-			byte[] ski = cert.getRawSubjectKeyIdentifier();
+			byte[] raw = new byte[20];
+			JAPCertificate cert;
 			
-			for(int j=0; j<raw.length; j++)
+			for(int i=0; i<m_certPaths.length; i++)
 			{
-				raw[j] = (byte) (raw[j] ^ ski[j]);
+				cert = m_certPaths[i].getFirstCertificate();
+				byte[] ski = cert.getRawSubjectKeyIdentifier();
+				
+				for(int j=0; j<raw.length; j++)
+				{
+					raw[j] = (byte) (raw[j] ^ ski[j]);
+				}
 			}
+			return new String(Hex.encode(raw));
 		}
-		return new String(Hex.encode(raw));
 	}
 	
 	public Vector getEndEntityKeys()
 	{
-		Vector keys = new Vector();
-		
-		for(int i=0; i<m_certPaths.length; i++)
+		synchronized (m_certPaths)
 		{
-			if(m_certPaths[i].verify())
+			Vector keys = new Vector();
+			
+			for(int i=0; i<m_certPaths.length; i++)
 			{
-				keys.addElement(m_certPaths[i].getFirstCertificate().getPublicKey());
+				if(m_certPaths[i].verify())
+				{
+					keys.addElement(m_certPaths[i].getFirstCertificate().getPublicKey());
+				}
 			}
+			if(keys.size() != 0)
+			{
+				return keys;
+			}
+			return null;
 		}
-		if(keys.size() != 0)
-		{
-			return keys;
-		}
-		return null;
 	}
 
 	public X509DistinguishedName getSubject()
