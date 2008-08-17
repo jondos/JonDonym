@@ -1638,7 +1638,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		}
 		else if (version != null)
 		{
-			newValue = Util.convertVersionStringToNumber(JAPDll.JAP_DLL_REQUIRED_VERSION);
+			newValue = Util.convertVersionStringToNumber(version);
 		}
 		
 		if (m_noWarningForDllVersionBelow != newValue)
@@ -1666,7 +1666,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	public boolean isDLLWarningActive()
 	{
-		long currentVersion = Util.convertVersionStringToNumber(JAPDll.getDllVersion());
+		long currentVersion = Util.convertVersionStringToNumber(JAPDll.JAP_DLL_REQUIRED_VERSION);
+
 		if (m_noWarningForDllVersionBelow >= currentVersion)
 		{
 			return false;
