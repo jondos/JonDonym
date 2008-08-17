@@ -125,7 +125,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 	private JCheckBox m_cbSaveWindowLocationMain, m_cbSaveWindowLocationIcon, m_cbSaveWindowLocationConfig,
 		m_cbSaveWindowLocationHelp, m_cbSaveWindowSizeConfig, m_cbSaveWindowSizeHelp, m_cbAfterStart, m_cbShowSplash, m_cbStartPortableFirefox;
 	private JRadioButton m_rbViewSimplified, m_rbViewNormal, m_rbViewMini, m_rbViewSystray;
-	private JCheckBox m_cbWarnOnClose, m_cbMiniOnTop;
+	private JCheckBox m_cbWarnOnClose, m_cbMiniOnTop, m_cbIgnoreDLLUpdate;
 	private JSlider m_slidFontSize;
 	private JButton m_btnAddUI, m_btnDeleteUI;
 	private File m_currentDirectory;
@@ -139,16 +139,24 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_modelObserver = new Observer()
 		{
 			public void update(Observable a_notifier, Object a_message)
-			{
-				updateHelpPath();
-				
-				if (JAPModel.getInstance().isHelpPathChangeable())
+			{	
+				if (a_message == JAPModel.CHANGED_HELP_PATH)
 				{
-					m_helpPathButton.setEnabled(true);
+					updateHelpPath();
+					
+					if (JAPModel.getInstance().isHelpPathChangeable())
+					{
+						m_helpPathButton.setEnabled(true);
+					}
+					else
+					{
+						m_helpPathButton.setEnabled(false);
+					}
 				}
-				else
+				else if (a_message == JAPModel.CHANGED_DLL_UPDATE)
 				{
-					m_helpPathButton.setEnabled(false);
+					m_cbIgnoreDLLUpdate.setSelected(!JAPModel.getInstance().isDLLWarningActive());
+					m_cbIgnoreDLLUpdate.setEnabled(JAPModel.getInstance().isDLLupdated());
 				}
 			}
 		};
@@ -662,7 +670,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 		m_cbSaveWindowSizeHelp = new JCheckBox(JAPMessages.getString(MSG_WINDOW_HELP));
 		c.gridy++;
-		p.add(m_cbSaveWindowSizeHelp, c);
+		//p.add(m_cbSaveWindowSizeHelp, c);
 
 		return p;
 	}
@@ -691,7 +699,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 		m_cbSaveWindowLocationHelp = new JCheckBox(JAPMessages.getString(MSG_WINDOW_HELP));
 		c.gridy++;
-		p.add(m_cbSaveWindowLocationHelp, c);
+		//p.add(m_cbSaveWindowLocationHelp, c);
 
 		return p;
 	}
@@ -724,7 +732,14 @@ final class JAPConfUI extends AbstractJAPConfModule
 		}
 		p.add(m_cbMiniOnTop, c);
 		c.gridy++;
-
+		
+		m_cbIgnoreDLLUpdate = new JCheckBox(JAPMessages.getString(gui.JAPDll.MSG_IGNORE_UPDATE));
+		if (JAPDll.getDllVersion() == null || !JAPModel.getInstance().isDLLupdated())
+		{
+			m_cbIgnoreDLLUpdate.setEnabled(false);			
+		}
+		p.add(m_cbIgnoreDLLUpdate, c);
+		
 		return p;
 	}
 
@@ -801,7 +816,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		
 		c.weightx = 1;
 		
-		m_helpPathField = new JTextField();
+		m_helpPathField = new JTextField(10);
 		m_helpPathField.setEditable(false);
 		m_helpPathButton = new JButton(JAPMessages.getString(MSG_HELP_PATH_CHOOSE));
 		if(JAPModel.getInstance().isHelpPathDefined())
@@ -965,6 +980,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		JAPModel.getInstance().setStartPortableFirefox(m_cbStartPortableFirefox.isSelected());
 		JAPModel.getInstance().setNeverRemindGoodbye(!m_cbWarnOnClose.isSelected());
 		JAPModel.getInstance().setMiniViewOnTop(m_cbMiniOnTop.isSelected());
+		JAPModel.getInstance().setDllWarning(!m_cbIgnoreDLLUpdate.isSelected());
 
 		Locale newLocale;
 		if (m_comboLanguage.getSelectedIndex() >= 0)
@@ -1108,6 +1124,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		m_rbViewSystray.setSelected(JAPModel.getMoveToSystrayOnStartup());
 		m_rbViewMini.setSelected(JAPModel.getMinimizeOnStartup());
 		m_cbMiniOnTop.setSelected(JAPModel.getInstance().isMiniViewOnTop());
+		m_cbIgnoreDLLUpdate.setSelected(!JAPModel.getInstance().isDLLWarningActive());
 		m_cbWarnOnClose.setSelected(!JAPModel.getInstance().isNeverRemindGoodbye());
 		m_cbShowSplash.setSelected(JAPModel.getInstance().getShowSplashScreen());
 		m_cbStartPortableFirefox.setSelected(JAPModel.getInstance().getStartPortableFirefox());
@@ -1128,7 +1145,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 	public void onResetToDefaultsPressed()
 	{
-		setLanguageComboIndex(Locale.getDefault());
+		setLanguageComboIndex(JAPMessages.getSystemLocale());
 		LookAndFeelInfo lookandfeels[] = UIManager.getInstalledLookAndFeels();
 		for (int i = 0; i < lookandfeels.length; i++)
 		{
@@ -1138,17 +1155,18 @@ final class JAPConfUI extends AbstractJAPConfModule
 				break;
 			}
 		}
-		m_cbSaveWindowLocationConfig.setSelected(JAPConstants.DEFAULT_SAVE_MAIN_WINDOW_POSITION);
-		m_cbSaveWindowLocationIcon.setSelected(JAPConstants.DEFAULT_SAVE_MAIN_WINDOW_POSITION);
+		m_cbSaveWindowLocationConfig.setSelected(JAPConstants.DEFAULT_SAVE_CONFIG_WINDOW_POSITION);
+		m_cbSaveWindowLocationIcon.setSelected(JAPConstants.DEFAULT_SAVE_MINI_WINDOW_POSITION);
 		m_cbSaveWindowLocationMain.setSelected(JAPConstants.DEFAULT_SAVE_MAIN_WINDOW_POSITION);
-		m_cbSaveWindowLocationHelp.setSelected(JAPConstants.DEFAULT_SAVE_MAIN_WINDOW_POSITION);
+		m_cbSaveWindowLocationHelp.setSelected(JAPConstants.DEFAULT_SAVE_HELP_WINDOW_POSITION);
 		m_cbSaveWindowSizeHelp.setSelected(JAPConstants.DEFAULT_SAVE_HELP_WINDOW_SIZE);
 		m_cbSaveWindowSizeConfig.setSelected(JAPConstants.DEFAULT_SAVE_CONFIG_WINDOW_SIZE);
 		m_rbViewNormal.setSelected(JAPConstants.DEFAULT_VIEW == JAPConstants.VIEW_NORMAL);
 		m_rbViewSimplified.setSelected(JAPConstants.DEFAULT_VIEW == JAPConstants.VIEW_SIMPLIFIED);
 		m_rbViewSystray.setSelected(JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP);
-		m_rbViewMini.setSelected(true);
 		m_rbViewMini.setSelected(JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP);
+		m_cbMiniOnTop.setSelected(true);
+		m_cbIgnoreDLLUpdate.setSelected(false);
 		m_cbShowSplash.setSelected(true);
 		m_cbStartPortableFirefox.setSelected(true);
 		m_cbWarnOnClose.setSelected(JAPConstants.DEFAULT_WARN_ON_CLOSE);

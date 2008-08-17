@@ -27,6 +27,11 @@
  */
 package anon.util;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -580,6 +585,29 @@ public final class Util
 		}
 		encodeBuffer.append(stringWithWhitespaces.substring(lastIx));
 		return encodeBuffer.toString();
+	}
+	
+	public static void copyStream(InputStream a_input, OutputStream a_output)
+		throws IOException
+	{
+		if (a_input == null)
+		{
+			throw new IOException("Input stream is null!");
+		}
+		if (a_output == null)
+		{
+			throw new IOException("Output stream is null!");
+		}
+		
+		byte buffer[] = new byte[2048];
+		int len = -1;
+		while ( (len = a_input.read(buffer)) != -1)
+		{
+			a_output.write(buffer, 0, len);
+		}
+		a_input.close();
+		a_output.flush();
+		a_output.close();
 	}
 	
 	/**

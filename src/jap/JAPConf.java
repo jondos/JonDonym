@@ -311,6 +311,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		setContentPane(pContainer);
 		updateValues();
 		// largest tab to front
+		m_moduleSystem.selectNode(NETWORK_TAB); // Temp solution: UI is the largest!!!
 		if (JAPModel.isSmallDisplay())
 		{
 			setSize(240, 300);
@@ -329,6 +330,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 			}
 		}
 		confUI.afterPack();
+		m_moduleSystem.selectNode(UI_TAB);
 		restoreLocation(JAPModel.getInstance().getConfigWindowLocation());
 		//setDockable(true);
 		this.addWindowListener(this);

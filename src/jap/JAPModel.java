@@ -59,12 +59,16 @@ import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.ProxyInterface;
 import anon.mixminion.mmrdescription.MMRList;
 import anon.util.ClassUtil;
+import anon.util.RecursiveCopyTool;
 import anon.util.ResourceLoader;
+import anon.util.Util;
 
 /* This is the Model of All. It's a Singelton!*/
 public final class JAPModel extends Observable implements IHelpModel
 {
 	public static final String DLL_VERSION_UPDATE = "dllVersionUpdate";
+	public static final String DLL_VERSION_WARNING_BELOW = "dllWarningVersion";
+
 	public static final String XML_REMIND_OPTIONAL_UPDATE = "remindOptionalUpdate";
 	public static final String XML_REMIND_JAVA_UPDATE = "remindJavaUpdate";
 	public static final String XML_RESTRICT_CASCADE_AUTO_CHANGE = "restrictCascadeAutoChange";
@@ -99,6 +103,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final Integer CHANGED_CASCADE_AUTO_CHANGE = new Integer(7);
 	public static final Integer CHANGED_DENY_NON_ANONYMOUS = new Integer(8);
 	public static final Integer CHANGED_HELP_PATH = new Integer(9);
+	public static final Integer CHANGED_DLL_UPDATE = new Integer(10);
 
 	private static final int DIRECT_CONNECTION_INFOSERVICE = 0;
 	private static final int DIRECT_CONNECTION_PAYMENT = 1;
@@ -226,6 +231,7 @@ public final class JAPModel extends Observable implements IHelpModel
 
 	/** Boolen value which describes if a dll update is necessary */
 	private boolean m_bUpdateDll = false;
+	private long m_noWarningForDllVersionBelow = 0;
 
 	private BigInteger m_iDialogVersion=new BigInteger("-1");
 
@@ -925,6 +931,9 @@ public final class JAPModel extends Observable implements IHelpModel
 		buff.append("Help path: ");
 		buff.append(getHelpPath());
 		buff.append("\n");
+		buff.append("DLL update status: ");
+		buff.append(m_bUpdateDll);
+		buff.append("\n");
 		buff.append("Command line arguments: ");
 		buff.append("'" + JAPController.getInstance().getCommandlineArgs() + "'");
 		buff.append("\n");
@@ -1321,9 +1330,23 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	synchronized void initHelpPath(String helpPath)
 	{
+		String blockedPath;
+		
 		if (m_bPortableHelp)
 		{
 			return;
+		}
+		
+		/** @todo remove after some months; created on 2008-08-17 */
+		blockedPath = AbstractOS.getInstance().getenv("ALLUSERSPROFILE");
+		if (blockedPath != null && helpPath != null && helpPath.startsWith(blockedPath))
+		{
+			if (helpPath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
+			{
+				RecursiveCopyTool.deleteRecursion(new File(helpPath));
+			}
+			
+			helpPath = null;
 		}
 		
 		String initPathValidity = (helpPathValidityCheck(helpPath));
@@ -1589,12 +1612,67 @@ public final class JAPModel extends Observable implements IHelpModel
 		return m_helpFileStorageManager.getStorageObservable();
 	}
 	
-	public void setDLLupdate(boolean a_update) {
-		m_bUpdateDll = a_update;
+	public synchronized void setDLLupdate(boolean a_update)
+	{
+		if (m_bUpdateDll != a_update)
+		{
+			m_bUpdateDll = a_update;
+			setChanged();
+		}
+		notifyObservers(CHANGED_DLL_UPDATE);
     }
 
-	public boolean getDLLupdate() {
+	public boolean isDLLupdated() {
 		return m_bUpdateDll;
+	}
+	
+	
+	
+	public synchronized void setDllWarning(boolean a_bWarn)
+	{
+		String version = JAPDll.getDllVersion();
+		long newValue = m_noWarningForDllVersionBelow;
+		if (a_bWarn)
+		{
+			newValue = 0;
+		}
+		else if (version != null)
+		{
+			newValue = Util.convertVersionStringToNumber(JAPDll.JAP_DLL_REQUIRED_VERSION);
+		}
+		
+		if (m_noWarningForDllVersionBelow != newValue)
+		{
+			m_noWarningForDllVersionBelow = newValue;
+			setChanged();
+		}
+		notifyObservers(CHANGED_DLL_UPDATE);
+	}
+	
+	protected synchronized void setDllWarningVersion(long a_noWarningForDllVersionBelow)
+	{
+		if (m_noWarningForDllVersionBelow != a_noWarningForDllVersionBelow)
+		{
+			m_noWarningForDllVersionBelow = a_noWarningForDllVersionBelow;
+			setChanged();
+		}
+		notifyObservers(CHANGED_DLL_UPDATE);
+	}
+	
+	protected long getDLLWarningVersion()
+	{
+		return m_noWarningForDllVersionBelow;
+	}
+	
+	public boolean isDLLWarningActive()
+	{
+		long currentVersion = Util.convertVersionStringToNumber(JAPDll.getDllVersion());
+		if (m_noWarningForDllVersionBelow >= currentVersion)
+		{
+			return false;
+		}		
+		
+		return true;
 	}
 
 	public void setShowSplashScreen(boolean a_bHide)

@@ -46,6 +46,7 @@ public abstract class AbstractHelpFileStorageManager
 	public static final String HELP_DIR_EXISTS = "helpDirExists";
 	public static final String HELP_JONDO_EXISTS = "helpJonDoExists";
 	public static final String HELP_NESTED = "helpNested";
+	public static final String HELP_VIRTUAL = "helpVirtual";
 	public static final String HELP_VALID = "HELP_IS_VALID";
 	
 	private Hashtable m_hashLocalisedHelpDirs = new Hashtable();	

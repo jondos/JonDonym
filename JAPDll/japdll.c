@@ -32,13 +32,15 @@
 
 // Fügen Sie hier Ihre Header-Dateien ein
 #include <windows.h>
+#include <shellapi.h>
 #define NOTIFYICONDATA_SIZE NOTIFYICONDATA_V1_SIZE 
 
 #include "japdll_jni.h"
 #include "resource.h"
 #include "dllversion.h"
 #define WM_TASKBAREVENT WM_USER+100
-#define WM_TASKBARCREATED (UINT)RegisterWindowMessage(TEXT("TaskbarCreated"))
+static UINT WM_TASKBARCREATED; // sent from the system (shell) if the task bar was (re)created
+
 #define BLINK_RATE 500
 
 typedef BOOL (CALLBACK* LPChangeWindowMessageFilter)(UINT,DWORD);
@@ -123,7 +125,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		if (msg == WM_TASKBARCREATED && g_hWnd != NULL)
 		{
 			// explorer has recovered from a crash; reinstantiate the icon
-			setTooltipText("JonDo", TRUE);
+			setTooltipText("JAP/JonDo", TRUE);
 		}
 		else if (msg == WM_TASKBAREVENT)
 		{
@@ -145,8 +147,30 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hwnd,msg,wParam,lParam);
 	}
 
+/**
+ * This function is only available - and needed - under Windows Vista.
+ * Older Windows versions just ignore it.
+ */
+BOOL MyChangeWindowMessageFilter(UINT message, DWORD dwFlag)
+{
+	HINSTANCE hDLL=NULL;               // Handle to DLL
+	LPChangeWindowMessageFilter fChangeWindowMessageFilter=NULL;    // Function pointer
+	BOOL retVal = FALSE;
 
-
+	hDLL = LoadLibrary("user32");
+	if (hDLL != NULL)
+	{
+	   fChangeWindowMessageFilter = 
+		   (LPChangeWindowMessageFilter)GetProcAddress(hDLL, "ChangeWindowMessageFilter");
+	   if (fChangeWindowMessageFilter!=NULL)
+		{
+			retVal = fChangeWindowMessageFilter(message, dwFlag);
+		}
+		  // handle the error
+		  FreeLibrary(hDLL);
+	}
+	return retVal;
+}
 
 BOOL createMsgWindowClass()
 	{
@@ -164,6 +188,7 @@ BOOL createMsgWindowClass()
 		wndclass.lpszClassName="JAPDllWndClass";
 		wndclass.style=0;
 		// register task bar restore event after crash
+		WM_TASKBARCREATED=RegisterWindowMessage(TEXT("TaskbarCreated"));
 		MyChangeWindowMessageFilter(WM_TASKBARCREATED, MSGFLT_ADD); 
 		return (RegisterClassEx(&wndclass)!=0);
 	}
@@ -348,7 +373,7 @@ BOOL HideWindowInTaskbar(HWND hWnd,JNIEnv * env)
 	//else
 	//	ShowWindow(hWnd, SW_HIDE);
 	//Icon im Taskbar setzen
-	if(setTooltipText("JonDo", TRUE)!=TRUE)
+	if(setTooltipText("JAP/JonDo", TRUE)!=TRUE)
 		{
 			DestroyWindow(g_hMsgWnd);
 			g_hMsgWnd=NULL;
@@ -426,37 +451,6 @@ BOOL CALLBACK FindWindowByCaption(HWND hWnd, LPARAM lParam)
 		} 
 	return TRUE;
 }
-
-/**
- * This function is only available - and needed - under Windows Vista.
- * Older Windows versions just ignore it.
- */
-BOOL MyChangeWindowMessageFilter(UINT message, DWORD dwFlag)
-{
-	HINSTANCE hDLL;               // Handle to DLL
-	LPChangeWindowMessageFilter fChangeWindowMessageFilter;    // Function pointer
-	BOOL retVal = FALSE;
-
-	hDLL = LoadLibrary("user32");
-	if (hDLL != NULL)
-	{
-	   fChangeWindowMessageFilter = 
-		   (LPChangeWindowMessageFilter)GetProcAddress(hDLL, "ChangeWindowMessageFilter");
-	   if (!fChangeWindowMessageFilter)
-	   {
-		  // handle the error
-		  FreeLibrary(hDLL);
-	   }
-	   else
-	   {		 		   
-		  // call the function
-		  retVal = fChangeWindowMessageFilter(message, dwFlag);
-	   }
-	}
-
-	return retVal;
-}
-
 
 #pragma warning(disable:4100) //unref parameters
 DWORD WINAPI BlinkThread( LPVOID lpParam ) 
@@ -610,6 +604,42 @@ JNIEXPORT void JNICALL Java_gui_JAPDll_showWindowFromTaskbar_1dll
   (JNIEnv * env, jclass c) 
 {
 	ShowWindowFromTaskbar(FALSE);
+}
+#pragma warning(default:4100)
+
+#pragma warning(disable:4100) //unref parameters
+ JNIEXPORT jboolean JNICALL Java_gui_JAPDll_shellExecute_1dll( 
+	 JNIEnv *env, jclass c, jstring command, jstring parameters , jboolean a_bAsAdmin)
+
+{
+	const char *cmd = (*env)->GetStringUTFChars( env, command, NULL ) ;
+	const char *param = (*env)->GetStringUTFChars( env, parameters, NULL ) ;
+
+	SHELLEXECUTEINFO shExecInfo;
+	BOOL result;
+
+    shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+    shExecInfo.fMask = 0;
+    shExecInfo.hwnd = NULL;
+	if (a_bAsAdmin)
+	{
+		shExecInfo.lpVerb = "runas";
+	}
+	else
+	{
+		shExecInfo.lpVerb = NULL;
+	}
+    shExecInfo.lpFile = (*env)->GetStringUTFChars(env, command, NULL );
+    shExecInfo.lpParameters = (*env)->GetStringUTFChars(env, parameters, NULL );
+    shExecInfo.lpDirectory = NULL;
+    shExecInfo.nShow = SW_NORMAL;
+
+	result = ShellExecuteEx(&shExecInfo);
+
+	(*env)->ReleaseStringUTFChars(env, command, cmd);
+	(*env)->ReleaseStringUTFChars(env, parameters, param);
+
+     return (jboolean)result;
 }
 #pragma warning(default:4100)
 
