@@ -244,7 +244,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 	public int addCertificateWithoutVerification(JAPCertificate a_certificate, int a_certificateType,
 												 boolean a_onlyHardRemovable, boolean a_bNotRemovable)
 	{
-		return addCertificateWithoutVerification(new CertPath(a_certificate), a_certificateType,
+		return addCertificateWithoutVerification(CertPath.getRootInstance(a_certificate), a_certificateType,
 												 a_onlyHardRemovable, a_bNotRemovable);
 	}
 

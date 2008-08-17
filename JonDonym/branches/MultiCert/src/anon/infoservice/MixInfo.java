@@ -209,7 +209,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  //m_operatorCertificate = a_certPath.getSecondCertificate();
 	  m_lastUpdate = 0;
 	  m_serial = 0;
-	  CertPath path = a_certPath.getFirstVerifiedPath();
+	  CertPath path = a_certPath.getPath();
 	  m_mixLocation = new ServiceLocation(null, path.getFirstCertificate());
 	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
 	  m_freeMix = false;
@@ -231,7 +231,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  //m_operatorCertificate = a_certPath.getSecondCertificate();
 	  m_lastUpdate = 0;
 	  m_serial = 0;
-	  CertPath path = a_certPath.getFirstVerifiedPath();
+	  CertPath path = a_certPath.getPath();
 	  m_mixLocation = new ServiceLocation(null, path.getFirstCertificate());
 	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
 	  m_freeMix = false;
@@ -371,15 +371,17 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  {
 		  m_mixSoftware = new ServiceSoftware(softwareNode);
 	  }
-	  CertPath path = m_mixCertPath.getFirstVerifiedPath();
+	  CertPath path = m_mixCertPath.getPath();
 	  
-	  //get the Operator Certificate from the CertPath
+	  //get the Mix and Operator Certificate from the CertPath
 	  if (path != null)
 	  {
-		  m_mixOperator = new ServiceOperator(operatorNode, path.getSecondCertificate(), m_lastUpdate);
+		  m_mixLocation = new ServiceLocation(locationNode, path.getFirstCertificate());
+		  m_mixOperator = new ServiceOperator(operatorNode, path.getSecondCertificate(), m_lastUpdate);	
 	  }
 	  else
 	  {
+		  m_mixLocation = new ServiceLocation(locationNode, null);
 		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 	  

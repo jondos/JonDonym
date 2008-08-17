@@ -443,7 +443,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 
 	public boolean checkId()
 	{
-		return m_signature.getMultiCertPath().getXORofSKIs().equals(getId());
+		return m_signature.getMultiCertPath().getXORofSKIs().equalsIgnoreCase(getId());
 		/*return getCertificate() != null &&
 			 getId().equals(new X509SubjectKeyIdentifier(
 				 getCertificate().getPublicKey()).getValueWithoutColon());
