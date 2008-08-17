@@ -64,7 +64,7 @@ final public class JAPDll {
 	public static final String MSG_IGNORE_UPDATE = JAPDll.class.getName() + "_ignoreUpdate";
 	
 	//required japdll.dll version for this JAP-version
-	public static final String JAP_DLL_REQUIRED_VERSION = "00.04.008";
+	public static final String JAP_DLL_REQUIRED_VERSION = "00.04.009";
 	public static final String START_PARAMETER_ADMIN = "--dllAdminUpdate";
 	
 	private static final String UPDATE_PATH;
