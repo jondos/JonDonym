@@ -27,40 +27,51 @@
  */
 package gui;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Window;
-import javax.swing.JFileChooser;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.SwingUtilities;
 
 import anon.util.ClassUtil;
+import anon.util.RecursiveCopyTool;
 import anon.util.ResourceLoader;
+import anon.util.Util;
 import gui.dialog.JAPDialog;
 import jap.JAPController;
 import jap.JAPModel;
+import jap.JAPConstants;
 import jap.SystrayPopupMenu;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import javax.swing.JDialog;
-
+import platform.AbstractOS;
 
 final public class JAPDll {
 
+	public static final String MSG_IGNORE_UPDATE = JAPDll.class.getName() + "_ignoreUpdate";
+	
 	//required japdll.dll version for this JAP-version
-	private static final String JAP_DLL_REQUIRED_VERSION = "00.03.003";
+	public static final String JAP_DLL_REQUIRED_VERSION = "00.04.008";
+	public static final String START_PARAMETER_ADMIN = "--dllAdminUpdate";
+	
 	private static final String UPDATE_PATH;
 
-	private static final String DLL_LIBRARY_NAME_32bit = "japdll";
-	private static final String DLL_LIBRARY_NAME_64bit = "japdll_x64";
+	private static final String DLL_LIBRARY_NAME = "japdll";
+	private static final String DLL_LIBRARY_NAME_32bit = DLL_LIBRARY_NAME;
+	private static final String DLL_LIBRARY_NAME_64bit = DLL_LIBRARY_NAME + "_x64";
 	private static final String JAP_DLL_32bit = DLL_LIBRARY_NAME_32bit + ".dll";
 	private static final String JAP_DLL_64bit = DLL_LIBRARY_NAME_32bit + ".dll";
 	private static final String JAP_DLL_NEW_32bit  = JAP_DLL_32bit + "." + JAP_DLL_REQUIRED_VERSION;
@@ -70,11 +81,13 @@ final public class JAPDll {
 
 	/** Messages */
 	private static final String MSG_DLL_UPDATE = JAPDll.class.getName() + "_updateRestartMessage";
+	private static final String MSG_DLL_UPDATE_SUCCESS_ADMIN = JAPDll.class.getName() + "_dllUpdateSuccessAdmin";
 	private static final String MSG_DLL_UPDATE_FAILED = JAPDll.class.getName() + "_updateFailed";
 	private static final String MSG_CONFIRM_OVERWRITE = JAPDll.class.getName() + "_confirmOverwrite";
 	private static final String MSG_PERMISSION_PROBLEM = JAPDll.class.getName() + "_permissionProblem";
 	private static final String MSG_COULD_NOT_SAVE = JAPDll.class.getName() + "_couldNotSave";
-
+	
+	
 
 	private static Hashtable ms_hashOnTop = new Hashtable();
 	private static boolean ms_bInTaskbar = false;
@@ -84,6 +97,7 @@ final public class JAPDll {
 	private static Window ms_popupWindow;
 
 	private static boolean m_sbHasOnTraffic = true;
+	private static boolean m_bStartedAsAdmin = false;
 
 	private static void loadDll()
 	{
@@ -110,19 +124,29 @@ final public class JAPDll {
 		File japdir = ClassUtil.getClassDirectory(JAPDll.class);
 		if (japdir == null)
 		{
-			// the update method will not work; maybe this is Java Webstart?
-			UPDATE_PATH = null;
+			String strUpdatePath = null;
+			// the update method might not work; maybe this is Java Webstart?
+			try
+			{
+				strUpdatePath = System.getProperty("user.dir", (String)null);
+			}
+			catch (Throwable a_e)
+			{
+				a_e.printStackTrace();
+			}
+			UPDATE_PATH = strUpdatePath;
 		}
 		else
 		{
-			UPDATE_PATH = japdir.getParent() + File.separator;
+			UPDATE_PATH = japdir.getParent();
 		}
 	}
 
-	public static void init()
+	public static void init(boolean a_bStartedAsAdmin, String a_username, Window a_window)
 	{
 		String strOSName = System.getProperty("os.name", "");
-
+		
+		m_bStartedAsAdmin = a_bStartedAsAdmin;
 		try
 		{
 			if (strOSName == null // may be null in Java Webstart since version 1.6.0
@@ -140,26 +164,47 @@ final public class JAPDll {
 						return isWindowOnTop(a_window);
 					}
 				});
-
-				boolean bUpdateDone = false;
-				if (UPDATE_PATH != null)
+				
+				
+//				 delete any temporary dll that might remain somewhere from an earlier manual update attempt
+				try
 				{
-					if (JAPModel.getInstance().getDLLupdate())
+					String tempDir = AbstractOS.getInstance().getTempPath();
+					File tempFile;
+					if (tempDir != null)
 					{
-						update();
-						bUpdateDone = true;
+						tempFile = new File(tempDir + DLL_LIBRARY_NAME);
+						if (tempFile.exists())
+						{
+							if (!RecursiveCopyTool.deleteRecursion(tempFile))
+							{
+								throw new Exception("Delete recursive");
+							}
+						}
 					}
 				}
+				catch (Throwable a_e)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Could not delete temporary DLL!", a_e);
+				}
+				
+				boolean bUpdateDone = false;
+				if (getUpdatePath() != null && JAPModel.getInstance().isDLLupdated())
+				{
+					update(a_window);
+					bUpdateDone = true;
+					
+				}
 
-				loadDll();
+				loadDll();								
 
-				if (UPDATE_PATH == null)
+				if (getUpdatePath() == null)
 				{
 					// ignore the update methods
 					LogHolder.log(LogLevel.ERR, LogType.GUI,
 								  "Could not get DLL update path. Maybe Java Webstart?");
 					return;
-				}
+				}																
 
 				String version = JAPDll.getDllVersion();
 				if (bUpdateDone && (version == null || // == null means there were problems...
@@ -168,7 +213,8 @@ final public class JAPDll {
 					// update was not successful
 					 JAPModel.getInstance().setDLLupdate(true);
 					 JAPController.getInstance().saveConfigFile();
-				}
+				}				
+				
 				JAPController.getInstance().addProgramExitListener(new JAPController.ProgramExitListener()
 				{
 					public void programExiting()
@@ -183,6 +229,67 @@ final public class JAPDll {
 						}
 					}
 				});
+				
+				
+				if (m_bStartedAsAdmin && a_username != null)
+				{
+					// copy the current jar file to the program directory
+					File filePhysical = ClassUtil.getClassDirectory(JAPDll.class);
+					File fileVirtual;
+					
+					if (filePhysical != null && filePhysical.getPath().endsWith(".jar"))
+					{
+						fileVirtual = new File (a_username + "\\AppData\\Local\\VirtualStore" +
+								filePhysical.getPath().substring(2, filePhysical.getPath().length()));
+			
+						if (fileVirtual.exists() && !fileVirtual.equals(filePhysical))
+						{										
+							String pathToJava = AbstractOS.getInstance().getProperty("java.home") + 
+								File.separator + "bin" + File.separator + "javaw -jar ";
+							String line1, line2;
+							BufferedReader reader = 
+								new BufferedReader(new InputStreamReader(
+										Runtime.getRuntime().exec(pathToJava + "\"" + fileVirtual.getPath() + "\" --version").getInputStream()));
+							line1 = reader.readLine();
+						
+							reader = 
+								new BufferedReader(new InputStreamReader(
+										Runtime.getRuntime().exec(pathToJava + "\"" + filePhysical.getPath() + "\" --version").getInputStream()));
+							line2 = reader.readLine();
+							
+						
+							if (line1 != null && line2 != null && !line1.equals(line2))
+							{
+								/*
+								 *  Copy the file from the virtual store to the 
+								 *  execution directory and restart.
+								 */
+								Util.copyStream(new FileInputStream(fileVirtual), 
+									new FileOutputStream(filePhysical));
+								final JAPController.IRestarter origRestarter = 
+									JAPController.getInstance().getRestarter();
+								JAPController.getInstance().setRestarter(
+										new JAPController.IRestarter()
+										{
+											public void exec(String[] a_args) throws IOException
+											{
+												origRestarter.exec(a_args);
+											}
+											public boolean isConfigFileSaved()
+											{
+												// prevent an older version from distroying the config file
+												return false;
+											}
+											public boolean hideWarnings()
+											{
+												return true;
+											}
+										});
+								JAPController.goodBye(false); // restart and try to update DLL
+							}
+						}
+					}					
+				}				
 			}
 		}
 		catch (Throwable a_t)
@@ -212,16 +319,14 @@ final public class JAPDll {
 		LogHolder.log(LogLevel.INFO, LogType.GUI, "Existing " + JAP_DLL_32bit + " version: " + JAPDll.getDllVersion());
 		LogHolder.log(LogLevel.INFO, LogType.GUI, "Required " + JAP_DLL_32bit + " version: " + JAP_DLL_REQUIRED_VERSION);
 
-
 		// checks, if the japdll.dll must (and can) be extracted from jar-file.
 		if (JAPDll.getDllVersion() != null && // != null means that there is a loaded dll
 			JAPDll.getDllVersion().compareTo(JAP_DLL_REQUIRED_VERSION) < 0 &&
 			ResourceLoader.getResourceURL(JAP_DLL_NEW_32bit) != null &&
-			UPDATE_PATH != null) // null means there is no new dll available
+			getUpdatePath() != null) // null means there is no new dll available
 		{
-
 			// check, if NO japdll.dll exists in jar-path
-			File file = new File(UPDATE_PATH + JAP_DLL_32bit);
+			File file = new File(getDllFileName());
 			if (!file.exists())
 			{
 				askUserWhatToDo();
@@ -229,7 +334,7 @@ final public class JAPDll {
 			}
 
 			// tried to updated AND there is still a problem
-			if (JAPModel.getInstance().getDLLupdate())
+			if (JAPModel.getInstance().isDLLupdated())
 			{
 				if (a_bShowDialogAndCloseOnUpdate)
 				{
@@ -239,7 +344,8 @@ final public class JAPDll {
 			}
 
 			// try to update, perhaps it even works right now when the dll is loaded
-			if (update() && JAPDll.getDllVersion() != null && // == null means that there were problems...
+			if (update(JAPController.getInstance().getViewWindow()) && 
+					JAPDll.getDllVersion() != null && // == null means that there were problems...
 				JAPDll.getDllVersion().compareTo(JAP_DLL_REQUIRED_VERSION) < 0)
 			{
 				// update was successful
@@ -272,7 +378,7 @@ final public class JAPDll {
 			// version status OK
 			// OR no dll loaded
 			// OR no new-dll in jar-file
-			if (JAPModel.getInstance().getDLLupdate())
+			if (JAPModel.getInstance().isDLLupdated())
 			{
 				JAPModel.getInstance().setDLLupdate(false);
 				JAPController.getInstance().saveConfigFile();
@@ -280,13 +386,42 @@ final public class JAPDll {
 		}
 	}
 
-	private static boolean update()
+	private static boolean update(Window a_window)
 	{
-		if (renameDLL(JAP_DLL_32bit, JAP_DLL_OLD_32bit) &&
-			extractDLL(new File(UPDATE_PATH + JAP_DLL_32bit )))
+		if (renameDLL(JAP_DLL_32bit, JAP_DLL_OLD_32bit) && extractDLL(new File(getDllFileName())))
 		{
 			JAPModel.getInstance().setDLLupdate(false);
 			JAPController.getInstance().saveConfigFile();
+			
+			if (m_bStartedAsAdmin)
+			{
+				// we should switch back to user mode; therefore, close the program now
+				if (a_window != null)
+				{					
+					JAPDialog.showMessageDialog(a_window,
+							JAPMessages.getString(MSG_DLL_UPDATE_SUCCESS_ADMIN));
+				}
+				final JAPController.IRestarter origRestarter = JAPController.getInstance().getRestarter(); 
+				JAPController.getInstance().setRestarter(
+					new JAPController.IRestarter()
+					{
+						public void exec(String[] a_args) throws IOException
+						{
+							origRestarter.exec(a_args);
+						}
+						public boolean isConfigFileSaved()
+						{
+							return true;
+						}
+						public boolean hideWarnings()
+						{
+							return true;
+						}
+					});
+				
+				JAPController.goodBye(true);
+			}
+			
 			return true;
 		}
 		else
@@ -305,21 +440,26 @@ final public class JAPDll {
 	{
 		try
 		{
-			File file = new File(UPDATE_PATH + a_oldName);
+			File file = new File(getUpdatePath() + File.separator + a_oldName);
 			if(file.exists())
 			{
-				file.renameTo(new File(UPDATE_PATH + a_newName));
+				file.renameTo(new File(getUpdatePath() + File.separator + a_newName));
+				//Util.copyStream(new FileInputStream(file), 
+						//new FileOutputStream(new File(getUpdatePath() + File.separator + a_newName)));
+								
 				return true;
 			}
-			else {
-				//if the file dose not exist, but a dll was loaded
+			else 
+			{
+				//if the file does not exist, but a dll was loaded
 				return false;
 			}
 
 		}
 		catch (Exception e)
 		{
-			LogHolder.log(LogLevel.NOTICE, LogType.GUI, "Unable to rename " + UPDATE_PATH + a_oldName + ".");
+			LogHolder.log(LogLevel.ERR, LogType.GUI, "Unable to copy " + getUpdatePath() + 
+					File.separator + a_oldName + ".", e);
 		}
 		return false;
    }
@@ -331,33 +471,16 @@ final public class JAPDll {
 	*/
    private static boolean extractDLL(File a_file)
    {
-		LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Extracting " + JAP_DLL_NEW_32bit + " from jar-file: ");
-		FileOutputStream fos;
+		LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Extracting " + JAP_DLL_NEW_32bit + 
+				" from jar-file to: " + a_file);
 
 		try
 		{
-			InputStream is = ResourceLoader.loadResourceAsStream(JAP_DLL_NEW_32bit);
-			if (is == null)
-			{
-				return false;
-			}
-			fos = new FileOutputStream(a_file);
-
-			int b;
-			while (true)
-			{
-				b = is.read();
-				if (b == -1)
-				{
-					break;
-				}
-				fos.write(b);
-			}
-			fos.flush();
-			fos.close();
-			is.close();
+			Util.copyStream(
+					ResourceLoader.loadResourceAsStream(JAP_DLL_NEW_32bit),
+					new FileOutputStream(a_file));
+		
 			return true;
-
 		}
 		catch (Exception e)
 		{
@@ -379,90 +502,127 @@ final public class JAPDll {
 	 */
 	private static void askUserWhatToDo()
 	{
-		String[] args = new String[2];
-		args[0] = "'" + JAP_DLL_32bit + "'";
-		args[1] = "'" + UPDATE_PATH + "'";
-		int answer =
-			JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(),
-										JAPMessages.getString(MSG_DLL_UPDATE_FAILED, args),
-										JAPMessages.getString(JAPDialog.MSG_TITLE_ERROR),
-										JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR,
-										new JAPDialog.LinkedHelpContext(JAPDll.class.getName()));
-
-		if ( answer == JAPDialog.RETURN_VALUE_YES )
+		if (!JAPModel.getInstance().isDLLWarningActive())
 		{
-			chooseAndSave();
-		}
-	}
-
-	/**
-	 * Choose where to save the file and save it
-	 */
-	private static void chooseAndSave()
-	{
-		boolean b_extractOK = false;
-		final JFileChooser chooser = new JFileChooser();
-		chooser.setSelectedFile(new File(UPDATE_PATH + JAP_DLL_32bit));
-		MyFileFilter filter = new MyFileFilter();
-		chooser.setFileFilter(filter);
-		int returnVal = chooser.showSaveDialog(JAPController.getInstance().getViewWindow());
-
-		// "OK" is pressed at the file chooser
-		if (returnVal == JFileChooser.APPROVE_OPTION)
-		{
-			try
-			{
-				File f = chooser.getSelectedFile();
-				if (!f.getName().toLowerCase().endsWith(MyFileFilter.DLL_EXTENSION))
-				{
-					f = new File(f.getParent(), f.getName() + MyFileFilter.DLL_EXTENSION);
-				}
-
-				//confirm overwrite if file exists
-				if (f.exists())
-				{
-					int answer = JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(),
-						JAPMessages.getString(MSG_CONFIRM_OVERWRITE, "'" + f + "'"),
-						JAPDialog.MSG_TITLE_CONFIRMATION,
-						JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_WARNING);
-					if (answer == JAPDialog.RETURN_VALUE_OK)
-					{
-						b_extractOK = extractDLL(f);
-					}
-					else
-					{
-						b_extractOK = false;
-					}
-				}
-				//if file dose not exist -> extract
-				else
-				{
-					b_extractOK = extractDLL(f);
-				}
-
-			}
-			catch (Exception e)
-			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
-			}
-		}
-
-		// "Cancel" is pressed at the file chooser
-		else if (returnVal == JFileChooser.CANCEL_OPTION)
-		{
-			askUserWhatToDo();
 			return;
 		}
-
-		if (!b_extractOK)
+		
+		
+		JAPDialog.LinkedCheckBox checkbox = new JAPDialog.LinkedCheckBox(
+				JAPMessages.getString(MSG_IGNORE_UPDATE), false);
+		
+		String[] args = new String[2];
+		args[0] = JAP_DLL_32bit;
+		args[1] = getUpdatePath();
+		int answer =
+			JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(),
+										JAPMessages.getString(MSG_DLL_UPDATE_FAILED, args) + "<br>&nbsp;",
+										JAPMessages.getString(JAPDialog.MSG_TITLE_ERROR),
+										JAPDialog.OPTION_TYPE_OK_CANCEL, JAPDialog.MESSAGE_TYPE_WARNING,
+										checkbox);
+		
+		JAPModel.getInstance().setDllWarning(!checkbox.getState());
+		
+		if (answer == JAPDialog.RETURN_VALUE_OK)
 		{
-			JAPDialog.showErrorDialog(JAPController.getInstance().getViewWindow(),
-									  JAPMessages.getString(MSG_COULD_NOT_SAVE),
-									  LogType.MISC);
-			chooseAndSave();
-		}
-   }
+			JAPController.getInstance().setRestarter(new JAPController.IRestarter()
+			{
+				public boolean isConfigFileSaved()
+				{
+					/*
+					if (JAPModel.getInstance().isDLLupdated())
+					{
+						JAPModel.getInstance().setDLLupdate(false);
+					}*/
+					return true;
+				}
+				
+				public boolean hideWarnings()
+				{
+					return false;
+				}
+				
+				public void exec(String[] a_args) throws IOException
+				{
+					String command = null;
+					String parameters = "";
+					String userhome = AbstractOS.getInstance().getProperty("user.home");
+					
+					if (a_args != null && a_args.length > 1)
+					{
+						command = "\"" + a_args[0] + "\"";
+						for (int i = 1; i < a_args.length; i++)
+						{
+							parameters += a_args[i];
+						}
+						if (!m_bStartedAsAdmin)
+						{
+							parameters += " " + START_PARAMETER_ADMIN;
+							if (userhome != null)
+							{
+								parameters += " " + userhome;
+							}
+						}
+					}
+					
+					if (command == null || !shellExecute(command, parameters, true))
+					{
+						showExplorerFiles();
+					}
+				}
+				
+				private void showExplorerFiles()
+				{
+					boolean bTmpDirCreated = false;
+					String tempDir;
+					File tempDirFile;
+					tempDir = AbstractOS.getInstance().getTempPath();
+					if (tempDir == null)
+					{
+						tempDir = AbstractOS.getInstance().getConfigPath(JAPConstants.APPLICATION_NAME);
+					}
+					tempDir += DLL_LIBRARY_NAME + File.separator;
 
+					try
+					{
+						tempDirFile = new File(tempDir);
+						if (tempDirFile.exists() && !tempDirFile.isDirectory())
+						{
+							tempDirFile.delete();
+						}
+						if (!tempDirFile.exists())
+						{
+							bTmpDirCreated = new File(tempDir).mkdir();
+						}
+						else
+						{
+							bTmpDirCreated = true;
+						}
+					}
+					catch (SecurityException a_e)
+					{
+						LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
+								"Could not create temporary directory!", a_e);
+					}
+					
+					if (bTmpDirCreated && extractDLL(new File(tempDir + JAP_DLL_32bit)))
+					{
+						try
+						{
+							Runtime.getRuntime().exec(new String[]{"CMD", "/C", "EXPLORER.EXE", tempDir});				
+							Runtime.getRuntime().exec(new String[]{"CMD", "/C", "EXPLORER.EXE", getUpdatePath()});
+						}
+						catch (IOException e)
+						{
+							LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
+						}				
+					}
+				}
+			});			
+			
+			JAPController.goodBye(false);
+		}
+	}
 
 
 	/**
@@ -595,23 +755,81 @@ final public class JAPDll {
 		return false;
 	}
 
+	public static boolean xcopy(File a_file, File a_directory, boolean a_asAdmin)
+	{
+		if (a_file == null || a_directory == null || !a_directory.isDirectory())
+		{
+			return false;
+		}
+		//return shellExecute("xcopy", "/Y /R /q /i /s C:\\Users\\jondos\\Coding\\JonDo\\JAPDll\\Release\\japdll.dll \"C:\\Program Files\\JAP\\\"", a_asAdmin);
+		return shellExecute("xcopy", "/Y /R /q /i /s \"" + a_file + 
+				"\" \"" + a_directory + "\"", a_asAdmin);
+	}
+	
 	public static String getDllVersion()
 	{
+		String version = null;
+		int number;
 		try
 		{
-			return getDllVersion_dll();
+			version = getDllVersion_dll();
+			StringTokenizer tokenizer = new StringTokenizer(version,",");
+			
+			
+			if (tokenizer.countTokens() > 1)
+			{
+				version = "";
+		
+				number = Integer.parseInt(tokenizer.nextToken());
+				if (number < 10)
+				{
+					version += "0";
+				}
+				version += number + ".";
+				
+				number = Integer.parseInt(tokenizer.nextToken());
+				if (number < 10)
+				{
+					version += "0";
+				}
+				version += number + ".";
+				
+				number = Integer.parseInt(tokenizer.nextToken());
+				if (number < 10)
+				{
+					version += "0";
+				}
+				if (number < 100)
+				{
+					version += "0";
+				}
+				version += number;
+			}
 		}
 		catch (Throwable t)
 		{
 		}
-		return null;
+		return version;
 	}
 
+	/**
+	 * Returns the path where the dll should be stored into.
+	 * @return
+	 */
+	private static String getUpdatePath()
+	{
+		String fileDLL = getDllFileName();
+		if (fileDLL != null)
+		{
+			fileDLL = (new File(fileDLL)).getParent();
+		}
+		return fileDLL;
+	}
+	
 	/** Returns the Filename of the JAPDll.
 	 * @ret filename pf the JAP dll
 	 * @ret null if getting the file name fails
-	 */
-
+	 */	
 	static public String getDllFileName()
 	{
 		try
@@ -623,6 +841,17 @@ final public class JAPDll {
 		}
 		catch (Throwable t)
 		{
+		}
+		if (UPDATE_PATH != null)
+		{
+			if (!UPDATE_PATH.endsWith(File.separator))
+			{
+				return UPDATE_PATH + File.separator + JAP_DLL_32bit;
+			}
+			else
+			{
+				return UPDATE_PATH + JAP_DLL_32bit;
+			}			
 		}
 		return null;
 	}
@@ -761,6 +990,21 @@ final public class JAPDll {
 			// ignore
 		}
 	}
+	
+	public static boolean shellExecute(String a_command, String a_parameters, boolean a_bAsAdmin)
+	{
+		boolean result;
+		
+		try
+		{
+			result = shellExecute_dll(a_command, a_parameters, a_bAsAdmin);
+		}
+		catch (Throwable a_e)
+		{a_e.printStackTrace();
+			result = false;
+		}
+		return result;		
+	}
 
 	native static private void setWindowOnTop_dll(String caption, boolean onTop);
 
@@ -781,8 +1025,13 @@ final public class JAPDll {
 	native static private String getDllVersion_dll();
 
 	native static private String getDllFileName_dll();
+	
+	native static private boolean shellExecute_dll(String a_command, String a_parameters, boolean a_bAsAdmin);
 
 
+	// http://www.heimetli.ch/shellexec.html
+	// http://blogs.msdn.com/vistacompatteam/archive/2006/09/25/771232.aspx
+	
 	private static class MyFileFilter extends FileFilter
 	{
 		public static final String DLL_EXTENSION = ".dll";

@@ -55,10 +55,21 @@ public final class JAPMessages
 	private static ResourceBundle ms_resourceBundle = null;
 	private static ResourceBundle ms_defaultResourceBundle = null;
 	private static Locale ms_locale;
+	private final static Locale SYSTEM_LOCALE;
 	private static Hashtable ms_cachedMessages;
 
+	static
+	{
+		SYSTEM_LOCALE = Locale.getDefault();
+	}
+	
 	private JAPMessages()
 	{
+	}
+
+	public static Locale getSystemLocale()
+	{
+		return SYSTEM_LOCALE;
 	}
 
 	/**
@@ -111,7 +122,7 @@ public final class JAPMessages
 	{
 		if (ms_locale != null)
 		{
-			// the first bundle has been loaded; set Englisch as safe default
+			// the first bundle has been loaded; set English as safe default
 			Locale.setDefault(Locale.ENGLISH);
 		}
 

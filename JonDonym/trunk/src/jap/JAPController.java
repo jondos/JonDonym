@@ -30,6 +30,7 @@ package jap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.security.SignatureException;
@@ -266,7 +267,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private boolean m_bPresentationMode = false;
 	private boolean m_bPortableJava = false;
 	private boolean m_bPortable = false;
-
+	
 	private long m_nrOfBytesWWW = 0;
 	private long m_nrOfBytesOther = 0;
 
@@ -281,6 +282,41 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private IPasswordReader m_passwordReader;
 	private Object m_finishSync = new Object();
 	private ISplashResponse m_finishSplash;
+	private IRestarter m_restarter = new IRestarter()
+	{
+		public boolean hideWarnings()
+		{
+			return false;
+		}
+		
+		public boolean isConfigFileSaved()
+		{
+			return true;
+		}
+		
+		public void exec(String[] a_args) throws IOException
+		{
+			String command = "";
+			if (a_args == null)
+			{
+				return;
+			}
+			
+			if (a_args.length > 2)
+			{
+				Runtime.getRuntime().exec(a_args);
+				return;
+			}
+			
+			for (int i = 0; i < a_args.length; i++)
+			{
+				command += a_args[i] + " ";
+			}
+			command.trim();
+			
+			Runtime.getRuntime().exec(command);
+		}
+	};
 
 	private DirectProxy.AllowUnprotectedConnectionCallback m_proxyCallback;
 
@@ -461,7 +497,26 @@ public final class JAPController extends Observable implements IProxyListener, O
 		public void programExiting();
 	}
 
+	public IRestarter getRestarter()
+	{
+		return m_restarter;
+	}
+	
+	public void setRestarter(IRestarter a_restarter)
+	{
+		if (a_restarter != null)
+		{
+			m_restarter = a_restarter;
+		}
+	}
 
+	public static interface IRestarter
+	{
+		void exec(String[] a_args) throws IOException;
+		boolean isConfigFileSaved();
+		boolean hideWarnings();
+	}
+	
 	public class AnonConnectionChecker
 	{
 		public boolean checkAnonConnected()
@@ -989,8 +1044,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 				String strVersion = XMLUtil.parseAttribute(root, JAPConstants.CONFIG_VERSION, null);
 	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_UPDATE, false));
-
-
+	            m_Model.setDllWarningVersion(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_WARNING_BELOW, 0));	        
 
 
 				JAPModel.getInstance().allowUpdateViaDirectConnection(
@@ -2152,20 +2206,23 @@ public final class JAPController extends Observable implements IProxyListener, O
 		LogHolder.log(LogLevel.INFO, LogType.ALL, "Java vendor: " + strJavaVendor);
 
 		String javaExe = null;
+		String javaOptions = null;
 		String pathToJava = null;
 		if (strJavaVendor.toLowerCase().indexOf("microsoft") != -1)
 		{
-			System.out.println("Java vendor :"+strJavaVendor.toLowerCase());
+			//System.out.println("Java vendor :"+strJavaVendor.toLowerCase());
 			pathToJava = System.getProperty("com.ms.sysdir") + File.separator;
-			javaExe = "jview /cp";
+			javaExe = "jview";
+			javaOptions = "/cp";
 		}
 		else
 		{
-			pathToJava = System.getProperty("java.home") + File.separator + "bin" + File.separator;
-			javaExe = "javaw -cp"; // for windows
+			pathToJava = AbstractOS.getInstance().getProperty("java.home") + 
+			File.separator + "bin" + File.separator;
+			javaExe = "javaw"; // for windows
+			javaOptions = "-cp";
 		}
-		strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" " 
-		+ JapMainClass + m_commandLineArgs;
+		strRestartCommand = " \"" + CLASS_PATH + "\" " +  JapMainClass + m_commandLineArgs;
 		
 		boolean isMacOSBundle = (macOS != null) ? macOS.isBundle() : false;
 		
@@ -2173,33 +2230,35 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 	    	if(!isMacOSBundle)
 	    	{
-	    		Runtime.getRuntime().exec(strRestartCommand);	
+	    		m_restarter.exec(new String[]{pathToJava + javaExe, javaOptions + strRestartCommand});	
+	    		LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + 
+	    				pathToJava + javaExe + " " + javaOptions + strRestartCommand);
 	    	}
 	    	else
 	    	{
 	    		String[] cmdArray = {"open", "-n", macOS.getBundlePath()};
-	    		Runtime.getRuntime().exec(cmdArray);
+	    		m_restarter.exec(cmdArray);
 	    	}
-	    	LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);	
+	    		
 		}
 		catch (Exception ex)
 		{
-			javaExe = "java -cp"; // Linux/UNIX
+			javaExe = "java"; // Linux/UNIX
+			javaOptions = "-cp";
 			
-			strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" "+ JapMainClass + 
-				m_commandLineArgs;
+			strRestartCommand = " \"" + CLASS_PATH + "\" "+ JapMainClass + m_commandLineArgs;
 
-			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);
+			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + 
+					pathToJava + javaExe + " " + javaOptions + strRestartCommand);
 			try
 			{
-				Runtime.getRuntime().exec(strRestartCommand);
+				m_restarter.exec(new String[]{pathToJava + javaExe, javaOptions + strRestartCommand});
 			}
 			catch (Exception a_e)
 			{
 				LogHolder.log(LogLevel.EXCEPTION, LogType.ALL, "Error auto-restart JAP: " + ex);
 			}
 		}
-    	
 	}
 
 	/**
@@ -2253,6 +2312,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 		catch (Throwable e)
 		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 			error = true;
 		}
 		return error;
@@ -2307,7 +2367,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			doc.appendChild(e);
 			
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_VERSION, JAPConstants.CURRENT_CONFIG_VERSION);
-			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.getDLLupdate());
+			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.isDLLupdated());
+			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_WARNING_BELOW, m_Model.getDLLWarningVersion());
 
 			XMLUtil.setAttribute(e, XML_ALLOW_NON_ANONYMOUS_UPDATE,
 								 JAPModel.getInstance().isUpdateViaDirectConnectionAllowed());
@@ -2512,11 +2573,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 			addWindowLocationToConf(elemWindow, JAPModel.getInstance().getIconifiedWindowLocation());
 			elemGUI.appendChild(elemWindow);
 
+			/*
 			elemWindow = doc.createElement(JAPModel.XML_HELP_WINDOW);
 			addWindowLocationToConf(elemWindow, JAPModel.getInstance().getHelpWindowLocation());
 			addWindowSizeToConf(elemWindow, JAPModel.getInstance().getHelpWindowSize(),
 								JAPModel.getInstance().isHelpWindowSizeSaved());
-			elemGUI.appendChild(elemWindow);
+			elemGUI.appendChild(elemWindow);*/
 
 
 			Element elemMainWindow = doc.createElement(JAPConstants.CONFIG_MAIN_WINDOW);
@@ -3547,7 +3609,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 }
 	 */
 	//---------------------------------------------------------------------
-
+	
 	/** This (and only this) is the final exit procedure of JAP!
 	 * It shows a reminder to reset the proxy configurations and saves the current configuration.
 	 *	@param bDoNotRestart false if JAP should be restarted; true otherwise
@@ -3561,7 +3623,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				int returnValue;
 				JAPDialog.LinkedCheckBox checkBox;
 				if (!JAPModel.getInstance().isNeverRemindGoodbye() && bDoNotRestart &&
-					!getInstance().isPortableMode())
+					!getInstance().isPortableMode() && !getInstance().m_restarter.hideWarnings())
 				{
 					// show a Reminder message that active contents should be disabled
 					checkBox = new JAPDialog.LinkedCheckBox(false)
@@ -3585,7 +3647,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				}
 
 				if (returnValue == JAPDialog.RETURN_VALUE_OK &&
-					getInstance().getViewWindow() != null && getInstance().m_bAskSavePayment && bDoNotRestart)
+					getInstance().getViewWindow() != null && getInstance().m_bAskSavePayment && 
+					bDoNotRestart && !getInstance().m_restarter.hideWarnings())
 				{
 					// we are in GUI mode
 					Enumeration enumAccounts = PayAccountsFile.getInstance().getAccounts();
@@ -3666,8 +3729,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 						((ProgramExitListener)exitListeners.elementAt(i)).programExiting();
 					}
 
-					boolean error = m_Controller.saveConfigFile();
-					if (error && bDoNotRestart)
+					boolean error = m_Controller.m_restarter.isConfigFileSaved() ? 
+							m_Controller.saveConfigFile() : false;
+					if (error && bDoNotRestart && !getInstance().m_restarter.hideWarnings())
 					{
 						JAPDialog.showErrorDialog(parent, JAPMessages.getString(MSG_ERROR_SAVING_CONFIG,
 							JAPModel.getInstance().getConfigFile() ), LogType.MISC);
@@ -4126,19 +4190,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 	}
 
 	//---------------------------------------------------------------------
-	public void setView(IJAPMainView v, boolean a_bAllowSplash)
+	public void setView(IJAPMainView v, ISplashResponse a_splash)
 	{
 		synchronized (SYNC_VIEW)
 		{
 			m_View = v;
-			if (m_View instanceof Frame && a_bAllowSplash)
-			{
-				m_finishSplash = new JAPSplash((Frame)m_View, JAPMessages.getString(MSG_FINISHING));
-			}
-			else
-			{
-				m_finishSplash = new ConsoleSplash();
-			}
+			m_finishSplash = a_splash;
 		}
 	}
 

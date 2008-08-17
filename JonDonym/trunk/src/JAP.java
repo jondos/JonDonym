@@ -41,6 +41,7 @@ import java.util.Locale;
 import java.util.Vector;
 
 import java.awt.Frame;
+import java.awt.Window;
 
 import anon.client.crypto.KeyPool;
 import anon.infoservice.ListenerInterface;
@@ -659,7 +660,16 @@ public class JAP
 		
 
 		splash.setText(JAPMessages.getString(MSG_INIT_DLL));
-		JAPDll.init();
+		// set the current splash temporarily in case the controller shuts down during dll update
+		m_controller.setView(null, splash);		
+		Window window = null;
+		if (splash instanceof Window)
+		{
+			window = (Window)splash;
+		}
+		JAPDll.init(isArgumentSet(JAPDll.START_PARAMETER_ADMIN),
+				getArgumentValue(JAPDll.START_PARAMETER_ADMIN), window);		
+		
 		/*
 		   if (splash instanceof JAPSplash)
 		   {
@@ -698,7 +708,16 @@ public class JAP
 		m_controller.addJAPObserver(view);
 		m_controller.addEventListener(view);
 		// Register the Main view where they are needed
-		m_controller.setView(view, splash instanceof JAPSplash);
+		if (splash instanceof JAPSplash)
+		{			
+			m_controller.setView(view, new JAPSplash((Frame)view, 
+					JAPMessages.getString(JAPController.MSG_FINISHING)));
+		}
+		else
+		{
+			m_controller.setView(view, new ConsoleSplash());
+		}
+		
 
 		// Create the iconified view
 		if (!bConsoleOnly)

@@ -35,7 +35,7 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.10.018"; //Never change the layout of this line!
+	public static final String aktVersion = "00.10.019"; //Never change the layout of this line!
 	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-04-11 13:04:12 $";
 
 	//Warning: This is a little bit tricky,
@@ -127,8 +127,8 @@ public final class JAPConstants
 	static final boolean DEFAULT_SAVE_MAIN_WINDOW_POSITION = true;
 	static final boolean DEFAULT_SAVE_MINI_WINDOW_POSITION = true;
 	static final boolean DEFAULT_SAVE_CONFIG_WINDOW_POSITION = false;
-	static final boolean DEFAULT_SAVE_HELP_WINDOW_POSITION = true;
-	static final boolean DEFAULT_SAVE_HELP_WINDOW_SIZE = true;
+	static final boolean DEFAULT_SAVE_HELP_WINDOW_POSITION = false;
+	static final boolean DEFAULT_SAVE_HELP_WINDOW_SIZE = false;
 	static final boolean DEFAULT_SAVE_CONFIG_WINDOW_SIZE = false;
 	static final boolean DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP = false;
 	static final boolean DEFAULT_MINIMIZE_ON_STARTUP = false;

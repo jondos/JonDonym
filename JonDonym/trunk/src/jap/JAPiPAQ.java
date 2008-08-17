@@ -68,7 +68,7 @@ final public class JAPiPAQ
 		// Add observer
 		m_controller.addJAPObserver(view);
 		// Register the views where they are needed
-		m_controller.setView(view, false);
+		m_controller.setView(view, new ConsoleSplash());
 		// initially start services
 		m_controller.initialRun(null, 0);
 

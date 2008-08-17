@@ -55,6 +55,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.util.ClassUtil;
+import anon.util.Util;
 import jap.AbstractJAPMainView;
 import gui.GUIUtils;
 import anon.infoservice.IMutableProxyInterface;
@@ -381,7 +382,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 	private int renameJapJar()
 	{
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Start to make a copy of old JAP.jar!");
-		byte[] buffer = new byte[2048];
+		
 		//just copy the File and then rename the copy
 		downloadPage.m_labelIconStep1.setIcon(downloadPage.arrow);
 		try
@@ -390,18 +391,8 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 			m_fileJapJarCopy = new File(m_strAktJapJarPath + m_strAktJapJarFileName +
 										JAPConstants.aktVersion + EXTENSION_BACKUP +
 										m_strAktJapJarExtension);
-			FileInputStream fis = new FileInputStream(m_fileAktJapJar);
-			FileOutputStream fos = new FileOutputStream(m_fileJapJarCopy);
-			int len=-1;
-			int totalLength = (int) m_fileAktJapJar.length();
-			while ( (len = fis.read(buffer)) != -1)
-			{
-				fos.write(buffer, 0, len);
-				totalLength -= len;
-			}
-			fis.close();
-			fos.flush();
-			fos.close();
+			Util.copyStream(new FileInputStream(m_fileAktJapJar), 
+					new FileOutputStream(m_fileJapJarCopy));
 			//TODO
 			//if totalLength!=0 ...
 			// the first step has the Zone from 0 to 5 in the ProgressBar
@@ -737,17 +728,10 @@ private boolean checkSignature()
 				GUIUtils.setLoadImages(false);
 			}
 			downloadPage.m_labelIconStep5.setIcon(downloadPage.arrow);
-			FileInputStream fis = new FileInputStream(m_fileNewJapJar);
-			FileOutputStream fos = new FileOutputStream(m_fileAktJapJar);
-			byte buffer[] = new byte[2048];
-			int n=-1;
-			while ( (n = fis.read(buffer)) != -1)
-			{
-				fos.write(buffer, 0, n);
-			}
-			fis.close();
-			fos.flush();
-			fos.close();
+	
+			Util.copyStream(new FileInputStream(m_fileNewJapJar),
+					new FileOutputStream(m_fileAktJapJar));
+			
 			// the 5th step has the Zone from 490 to 500 in the ProgressBar
 			downloadPage.progressBar.setValue(500);
 			downloadPage.progressBar.repaint();

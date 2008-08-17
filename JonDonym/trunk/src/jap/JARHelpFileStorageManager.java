@@ -38,6 +38,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import platform.AbstractOS;
+
 import anon.util.ClassUtil;
 import anon.util.RecursiveCopyTool;
 import anon.util.XMLParseException;
@@ -153,8 +155,32 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 						strPath = strPath.substring(index, strPath.length());
 					}
 					
+					// check for virtual directories					
+					strPath = AbstractOS.getInstance().getenv("ALLUSERSPROFILE");
+					if (strPath != null && hpFile.getPath().indexOf(strPath) >= 0)
+					{
+						return HELP_VIRTUAL;
+					}					
+					strPath = AbstractOS.getInstance().getenv("PROGRAMFILES");
+					if (strPath != null && hpFile.getPath().indexOf(strPath) >= 0)
+					{
+						return HELP_VIRTUAL;
+					}
+					strPath = AbstractOS.getInstance().getenv("SYSTEMROOT");
+					if (strPath != null && hpFile.getPath().indexOf(strPath) >= 0)
+					{
+						return HELP_VIRTUAL;
+					}
+					strPath = AbstractOS.getInstance().getenv("PROGRAMDATA");
+					if (strPath != null && hpFile.getPath().indexOf(strPath) >= 0)
+					{
+						return HELP_VIRTUAL;
+					}
+					
+						
 					File helpDir = new File(hpFile.getPath() + File.separator +
 							HELP_FOLDER + File.separator);
+					
 					
 					if(!helpDir.exists())
 					{

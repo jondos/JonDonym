@@ -378,6 +378,6 @@ final class JAPConfMixminion extends AbstractJAPConfModule implements ActionList
 		m_bttnResetKeyring.setEnabled(false);
 		m_sliderPathLen.setValue(JAPConstants.DEFAULT_MIXMINION_ROUTE_LEN);
 		m_email.setText(JAPConstants.DEFAULT_MIXMINION_EMAIL);
-		m_cbxActive.setSelected(!JAPConstants.m_bReleasedVersion);
+		m_cbxActive.setSelected(false);
 	}
 }

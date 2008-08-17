@@ -99,7 +99,9 @@ public class WindowsOS extends AbstractOS
 	
 	public String getDefaultHelpPath(String a_applicationName)
 	{
-		String dir = getEnvPath(a_applicationName, "ALLUSERSPROFILE");
+		//String dir = getEnvPath(a_applicationName, "ALLUSERSPROFILE"); 
+//		 ALLUSERSPROFILE has become virtual in Vista
+		String dir = getEnvPath(a_applicationName, "APPDATA");
 		
 		if (dir == null)
 		{
@@ -141,7 +143,7 @@ public class WindowsOS extends AbstractOS
 			}
 			if (dir == null)
 			{
-				dir = System.getProperty("user.dir", ".");
+				dir = System.getProperty("user.dir");
 			}
 		}
 		else
@@ -149,11 +151,33 @@ public class WindowsOS extends AbstractOS
 			dir = getEnvPath(a_applicationName, "APPDATA");
 			if (dir == null)
 			{
-				dir = System.getProperty("user.home", ".");
+				dir = System.getProperty("user.home");
 			}
 		}
 
 		return dir + File.separator;
+	}
+	
+	public String getTempPath()
+	{
+		String tempDir = super.getTempPath();
+		
+		if (tempDir == null)
+		{
+			tempDir = getenv("TEMP");
+		}
+		
+		if (tempDir == null)
+		{
+			tempDir = getenv("TMP");
+		}
+		
+		if (tempDir != null && !tempDir.endsWith(File.separator))
+		{
+			tempDir += File.separator;
+		}
+		
+		return tempDir;
 	}
 	
 	private String getEnvPath(String a_applicationName, String a_envPath)

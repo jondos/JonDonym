@@ -432,6 +432,47 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		return r_vms;
 	}
 	
+	public String getTempPath()
+	{
+		String tempDir = null;
+		
+		try
+		{
+			tempDir = System.getProperty("java.io.tmpdir", null);
+			if (tempDir != null && !tempDir.endsWith(File.separator))
+			{
+				tempDir += File.separator;
+			}
+		}
+		catch (Throwable a_e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
+		}
+		
+		return tempDir;
+	}
+	
+	public String getProperty(String a_systemProperty)
+	{
+		String property = null;
+		
+		if (a_systemProperty == null || a_systemProperty.trim().length() == 0)
+		{
+			return null;
+		}
+		
+		try
+		{
+			property = System.getProperty(a_systemProperty, null);
+		}
+		catch (Throwable a_e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Could not get system property " + a_systemProperty);
+		}
+		
+		return property;
+	}
+	
 	public String getenv(String a_environmentVariable)
 	{
 		String env = null;
@@ -451,7 +492,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		}
 		catch (Error a_e)
 		{
-			// not supported in Java versions from 1.2 to 1.4			
+			// not supported in Java versions from 1.2 to 1.4; ignore		
 		}
 		
 		if (env == null && m_envVars != null)
@@ -461,7 +502,14 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		if (env == null)
 		{
-			env = System.getProperty(a_environmentVariable);
+			try
+			{
+				env = System.getProperty(a_environmentVariable);
+			}
+			catch (Throwable a_e)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
+			}
 		}
 		
 		return env;
