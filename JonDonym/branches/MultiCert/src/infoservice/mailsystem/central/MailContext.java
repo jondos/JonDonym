@@ -30,8 +30,6 @@ package infoservice.mailsystem.central;
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.Vector;
-
 import javax.mail.Session;
 
 import anon.infoservice.Database;

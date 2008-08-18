@@ -42,7 +42,6 @@ import anon.ErrorCodes;
 import anon.NotConnectedToMixException;
 import anon.client.AnonClient;
 import anon.client.DummyTrafficControlChannel;
-import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.AbstractMixCascadeContainer;
 import anon.mixminion.MixminionServiceDescription;
@@ -54,7 +53,6 @@ import logging.LogType;
 import anon.AnonServerDescription;
 import anon.pay.IAIEventListener;
 import anon.infoservice.IMutableProxyInterface;
-import anon.client.ITrustModel;
 import anon.util.Queue;
 import java.security.SignatureException;
 import anon.client.TrustException;
@@ -237,7 +235,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	 * @param newMixCascade
 	 *          The new MixCascade we are connected to.
 	 */
-	private void setMixCascade(AbstractMixCascadeContainer newMixCascade)
+	/*private void setMixCascade(AbstractMixCascadeContainer newMixCascade)
 	{
 		if (newMixCascade == null)
 		{
@@ -249,6 +247,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		}
 		// m_AICom.setAnonServer(newMixCascade);
 	}
+	*/
 
 	/** Returns the current Mix cascade */
 	public MixCascade getMixCascade()

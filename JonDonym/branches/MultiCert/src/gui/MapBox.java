@@ -30,15 +30,12 @@ package gui;
 import gui.dialog.JAPDialog;
 
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -51,8 +48,6 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML.Attribute;
 import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.HTMLEditorKit.ParserCallback;
-import javax.swing.text.html.parser.DTD;
-import javax.swing.text.html.parser.DocumentParser;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -64,51 +59,58 @@ import logging.LogType;
 public class MapBox extends JAPDialog implements ChangeListener
 {
 	public static final String MSG_ERROR_WHILE_LOADING = MapBox.class.getName() + "_errorLoading";
-
-	//private static final String IMG_MAPQUEST = MapBox.class.getName() + "_mapquest-logo.gif";
-	private static final String IMG_YAHOO = MapBox.class.getName() + "_yahoo-logo.gif";
-
 	private static final String MSG_PLEASE_WAIT = MapBox.class.getName() + "_pleaseWait";
 	private static final String MSG_CLOSE = MapBox.class.getName() + "_close";
 	private static final String MSG_TITLE = MapBox.class.getName() + "_title";
 	private static final String MSG_ZOOM = MapBox.class.getName() + "_zoom";
-
-	/** The URL pointing to the real map image */
-	private String m_urlString;
+	
+	// Previously used images
+	//private static final String IMG_MAPQUEST = MapBox.class.getName() + "_mapquest-logo.gif";
+	//private static final String IMG_YAHOO = MapBox.class.getName() + "_yahoo-logo.gif";
+	
 	/** The label containing the map in form of an <CODE>ImageIcon</CODE> */
-	private JLabel map;
-	private JSlider s;
+	private JLabel m_lblMap;
+	/** The slider for adjusting zoom level */
+	private JSlider m_sldZoom;
+	/** Close button */
 	private JButton m_btnClose;
-	/** The longitude of the center of the map */
-	private String m_longitude;
+
+	/** The URL pointing to the map image */
+	private String m_sImageURL;
+	/** Key that is needed for querying maps */
+	private static final String KEY = "ABQIAAAAvDhPn6b_F550GDisnEZpIxQrda7TSvuNFYSGo_31R-LaV_0iCRRJ7r3yduvtz_ZgBJjj2VOFap_JoQ";
 	/** The latitude of the center of the map */
-	private String m_latitude;
+	private String m_sLatitude;
+	/** The longitude of the center of the map */
+	private String m_sLongitude;
+	/** Desired size of the map image */
+	private String m_sImageSize = "550x550";
 
 	/** Constructs a new <CODE>MapBox</CODE> instance.
 	 * @param parent The parent of the dialog window
 	 * @param lat The latitude of the point to show on the map
 	 * @param lon The longitude of the point to show on the map
-	 * @param level The zoom level to be set (0 - 9)
+	 * @param level The zoom level to be set (0 - 19)
 	 * @throws Exception If an error occurs
 	 */
 	public MapBox(Component parent, String lat, String lon, int level) throws IOException
 	{
 		super(parent, "");
-		m_longitude = lon;
-		m_latitude = lat;
+		m_sLongitude = lon;
+		m_sLatitude = lat;
 
 		GridBagLayout layout = new GridBagLayout();
 		GridBagConstraints c = new GridBagConstraints();
 		getContentPane().setLayout(layout);
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.insets = new Insets(10, 10, 10, 10);
-		map = new JLabel();
+		m_lblMap = new JLabel();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 2;
 		c.gridheight = 2;
-		layout.setConstraints(map, c);
-		getContentPane().add(map);
+		layout.setConstraints(m_lblMap, c);
+		getContentPane().add(m_lblMap);
 
 		c.gridx = 2;
 		c.gridy = 0;
@@ -119,22 +121,23 @@ public class MapBox extends JAPDialog implements ChangeListener
 		layout.setConstraints(l, c);
 		getContentPane().add(l);
 
-		//s = new JSlider(JSlider.VERTICAL, 0, 9, level);
-		s = new JSlider(JSlider.VERTICAL, 0, 16, level);
-		s.setPaintTicks(true);
-		s.setMajorTickSpacing(1);
-		s.setMinorTickSpacing(1);
-		s.setSnapToTicks(true);
-		s.setPaintLabels(true);
-		s.setRequestFocusEnabled(false);
-		s.addChangeListener(this);
+		// The zoom
+		m_sldZoom = new JSlider(JSlider.VERTICAL, 0, 15, level);
+		m_sldZoom.setPaintTicks(true);
+		m_sldZoom.setMajorTickSpacing(1);
+		m_sldZoom.setMinorTickSpacing(1);
+		m_sldZoom.setSnapToTicks(true);
+		m_sldZoom.setPaintLabels(true);
+		m_sldZoom.setRequestFocusEnabled(false);
+		m_sldZoom.addChangeListener(this);
 		c.insets = new Insets(5, 10, 20, 10);
 		c.gridx = 2;
 		c.gridy = 1;
 		c.fill = GridBagConstraints.VERTICAL;
-		layout.setConstraints(s, c);
-		getContentPane().add(s);
+		layout.setConstraints(m_sldZoom, c);
+		getContentPane().add(m_sldZoom);
 
+		/*
 		Font font = new Font("Dialog", Font.BOLD, 20);
 		JLabel site = new JLabel("PROCESSED BY:");
 		site.setFont(font);
@@ -151,13 +154,14 @@ public class MapBox extends JAPDialog implements ChangeListener
 		//String logo = "http://art.mapquest.com/mqsite_english/logo";
 		//URL MapLogo = new URL(logo);
 		
-		ImageIcon maplogo = GUIUtils.loadImageIcon(IMG_YAHOO);
+		ImageIcon maplogo = GUIUtils.loadImageIcon(IMG_GOOGLE);
 		JLabel logolabel = new JLabel(maplogo);
 		c.gridx = 1;
 		c.gridy = 2;
 		layout.setConstraints(logolabel, c);
 		getContentPane().add(logolabel);
-
+		*/
+		
 		m_btnClose = new JButton(JAPMessages.getString(MSG_CLOSE));
 		m_btnClose.addActionListener(new ActionListener(){
 		public void actionPerformed(ActionEvent a_event)
@@ -183,8 +187,8 @@ public class MapBox extends JAPDialog implements ChangeListener
 	 */
 	public void setGeo(String a_latitude, String a_longitude) throws IOException
 	{
-		m_longitude = a_longitude;
-		m_latitude = a_latitude;
+		m_sLongitude = a_longitude;
+		m_sLatitude = a_latitude;
 		refresh();
 	}
 
@@ -217,40 +221,35 @@ public class MapBox extends JAPDialog implements ChangeListener
 	 */
 	private void refresh() throws IOException
 	{
-		BufferedReader reader;
-		String Title = "";
-
-		map.setIcon(null);
-		map.setText(JAPMessages.getString(MSG_PLEASE_WAIT) + "...");
-		map.repaint();
-
+		// Set the icon to null at first
+		m_lblMap.setIcon(null);
+		m_lblMap.setText(JAPMessages.getString(MSG_PLEASE_WAIT) + "...");
+		m_lblMap.repaint();
 		// Create the URL
-		String site = "http://maps.yahoo.com/print?ard=1&clat=" + m_latitude +
-			"&clon=" + m_longitude + "&mag=" + s.getValue() + 
-			"&q1=" + m_latitude + "%2C" + m_longitude;
-		
-		// The previously used URL (TODO: Remove)
-		//String site = "http://www.mapquest.com/maps/map.adp?latlongtype=" +
-		//	"decimal&latitude=" + m_latitude + "&longitude=" + m_longitude +
-		//	"&zoom=" + s.getValue();
-		
+		m_sImageURL = "http://www.maps.google.com/staticmap?markers=" + m_sLatitude + "," + m_sLongitude +
+		              "&zoom=" + (m_sldZoom.getValue()+2) + "&size=" + m_sImageSize + "&key=" + KEY;
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Getting image: " + m_sImageURL);
 		// Set the title
-		Title = JAPMessages.getString(MSG_TITLE, new String[]{m_latitude, m_longitude});
-		setTitle(Title);
+		String sTitle = JAPMessages.getString(MSG_TITLE, new String[]{m_sLatitude, m_sLongitude});
+		setTitle(sTitle);
+		// Set the image as the icon
+		m_lblMap.setText("");
+		m_lblMap.setIcon(new ImageIcon(new URL(m_sImageURL)));
+		
+		// TODO: Remove this, no need for parsing the site for the image URL anymore
 		// Request the site and parse for the image-URL
-		URL url = new URL(site);
-		reader = new BufferedReader(new InputStreamReader(url.openStream()), 1024);
-		SiteParser sp = new SiteParser();
-		DocumentParser dp = new DocumentParser(DTD.getDTD("-//W3C//DTD HTML 4.01//EN"));
-		m_urlString = null;
+		//URL url = new URL(site);
+		//BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()), 1024);
+		//SiteParser sp = new SiteParser();
+		//DocumentParser dp = new DocumentParser(DTD.getDTD("-//W3C//DTD HTML 4.01//EN"));
+		//m_urlString = null;
 		// m_urlString is set from outside
-		dp.parse(reader, sp, true);
-		if (m_urlString == null)
-		{
-			throw new IOException("Image reference not found on site " + site);
-		}
-		map.setText("");
-		map.setIcon(new ImageIcon(new URL(m_urlString)));
+		//dp.parse(reader, sp, true);
+		//if (m_urlString == null)
+		//{
+		//	throw new IOException("Image reference not found on site " + site);
+		//}
+		//map.setIcon(new ImageIcon(new URL(m_urlString)));
 	}
 
     /** A subclass of <CODE>javax.swing.text.html.HTMLEditorKit.ParserCallback</CODE>
@@ -279,7 +278,7 @@ public class MapBox extends JAPDialog implements ChangeListener
 					if (a.getAttribute(Attribute.ID).toString().equals("map"))
 					{
 						LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Map image found: "+a.getAttribute(Attribute.SRC).toString());
-						MapBox.this.m_urlString = a.getAttribute(Attribute.SRC).toString();
+						MapBox.this.m_sImageURL = a.getAttribute(Attribute.SRC).toString();
 					}
 				}
 				catch (NullPointerException npe)

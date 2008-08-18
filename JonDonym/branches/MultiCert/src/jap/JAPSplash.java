@@ -54,6 +54,11 @@ import java.awt.image.ColorModel;
  */
 final public class JAPSplash extends Window implements ISplashResponse
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private static final String IMGPATHHICOLOR = "images/";
 	private static final String IMGPATHLOWCOLOR = "images/lowcolor/";
 	private static final String SPLASH_FILE = "splash.jpg";
@@ -81,6 +86,7 @@ final public class JAPSplash extends Window implements ISplashResponse
 	private Image m_imgOffScreen = null;
 	private Font m_fntFont;
 	private String m_strLoading;
+	private String m_currentText;
 	private String m_strVersion;
 	private int m_iXVersion;
 	private int m_iYVersion;
@@ -221,8 +227,14 @@ final public class JAPSplash extends Window implements ISplashResponse
 	{
 		if (a_text != null && a_text.trim().length() > 0)
 		{
+			m_currentText = a_text;
 			m_strLoading = a_text + "...";
 		}
+	}
+	
+	public String getText()
+	{
+		return m_currentText;
 	}
 
 	public void update(Graphics g)

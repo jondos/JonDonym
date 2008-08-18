@@ -85,7 +85,7 @@ public class ActivePaymentDetails extends JAPDialog implements ActionListener
 	private void buildDialog(Vector optionsToShow, String transferNumber, long amount, String planName)
 	{
 		m_c = new GridBagConstraints();
-		m_c.anchor = m_c.NORTH;
+		m_c.anchor = GridBagConstraints.NORTH;
 		m_c.insets = new Insets(10, 30, 10, 30);
 		m_c.gridx = 0;
 		m_c.gridy = 0;
@@ -164,7 +164,7 @@ public class ActivePaymentDetails extends JAPDialog implements ActionListener
 				//check if it's a link or text
 				try
 				{
-					URL urlToOpen = new URL(extraInfoString);
+					new URL(extraInfoString);
 					//url is never used, just to see if it works, if yes the String is a link
 				} catch ( MalformedURLException e)
 				{

@@ -34,9 +34,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import anon.pay.xml.XMLPaymentSettings;
-import javax.swing.BoxLayout;
 import java.awt.event.ActionListener;
-import java.awt.Event;
 import java.awt.event.ActionEvent;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -47,7 +45,6 @@ import logging.LogLevel;
 import logging.LogHolder;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.pay.BIConnection;
-import anon.pay.PayAccountsFile;
 import jap.JAPModel;
 import logging.LogType;
 import anon.pay.xml.XMLErrorMessage;
@@ -104,11 +101,6 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 
 	private JPanel buttonPanel;
 	private JPanel flatPanel;
-
-	private String m_strBalance;
-	private String m_strPrice;
-	private String m_strDuration;
-	private String m_strUnit;
 
 	private XMLPaymentSettings paymentSettings;
 	private boolean isFlatAffordable = true;

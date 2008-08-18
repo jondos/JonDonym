@@ -27,16 +27,11 @@
  */
 package jap;
 
-import java.io.File;
-
 import gui.IStatusLine;
 import anon.AnonServiceEventListener;
 
 public interface IJAPMainView extends JAPObserver, IStatusLine, AnonServiceEventListener
 {
-	public final static boolean WITH_DIALOG = true;
-	public final static boolean WITHOUT_DIALOG = false;
-	
 	public void create(boolean bWithPay);
 
 	public void setVisible(boolean a_bVisible);
@@ -48,14 +43,10 @@ public interface IJAPMainView extends JAPObserver, IStatusLine, AnonServiceEvent
 	public void showConfigDialog();
 
 	public void showConfigDialog(String card, Object a_value);
-
-	public String[] getBrowserCommand();
 	
 	public void doClickOnCascadeChooser();
 
 	public void disableSetAnonMode();
-	
-	public File askForHelpInstallationPath(boolean withDialog);
 
 	/**
 	 * Performs GUI update operations. Should not be called directly!!

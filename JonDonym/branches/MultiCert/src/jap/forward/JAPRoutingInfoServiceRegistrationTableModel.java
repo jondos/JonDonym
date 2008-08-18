@@ -35,8 +35,7 @@ import java.util.Vector;
 import javax.swing.table.AbstractTableModel;
 
 import forward.server.ServerSocketPropagandist;
-import jap.*;
-import gui.*;
+import gui.JAPMessages;
 
 /**
  * This is the implementation of the infoservice registration table data, showed in the server
@@ -46,6 +45,10 @@ import gui.*;
 public class JAPRoutingInfoServiceRegistrationTableModel extends AbstractTableModel implements Observer
 {
 
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
 	/**
 	 * This is the list of all known propaganda instances, displayed in the table.
 	 */

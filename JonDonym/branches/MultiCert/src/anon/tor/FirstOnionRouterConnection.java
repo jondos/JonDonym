@@ -42,7 +42,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import anon.crypto.AsymmetricCryptoKeyPair;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.Validity;
 import anon.crypto.JAPCertificate;

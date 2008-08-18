@@ -68,7 +68,6 @@ import anon.util.captcha.ZipBinaryImageCaptchaClient;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-import anon.infoservice.IMutableProxyInterface;
 import anon.pay.xml.XMLPaymentSettings;
 import anon.pay.xml.XMLVolumePlans;
 import anon.util.IXMLEncodable;

@@ -5,10 +5,7 @@ import java.io.InputStream;
 import anon.crypto.tinytls.TinyTLS;
 import logging.LogHolder;
 import logging.SystemErrLog;
-import anon.crypto.JAPCertificate;
-import java.io.OutputStream;
-import java.net.Socket;
-import anon.util.*;
+
 public class tlsclienttest
 {
 

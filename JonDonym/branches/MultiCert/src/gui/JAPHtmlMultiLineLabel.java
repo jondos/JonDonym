@@ -475,6 +475,11 @@ public class JAPHtmlMultiLineLabel extends JLabel
 	 */
 	public static String removeHTMLHEADAndBODYTags(String a_HTMLtext)
 	{
+		if (a_HTMLtext == null || a_HTMLtext.trim().length() == 0)
+		{
+			return a_HTMLtext;
+		}
+		
 		int headStart, headEnd;
 		int remainderStart;
 		String HTMLText = a_HTMLtext.toLowerCase();

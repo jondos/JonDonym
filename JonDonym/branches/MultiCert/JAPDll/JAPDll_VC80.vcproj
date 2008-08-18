@@ -128,7 +128,7 @@
 				InlineFunctionExpansion="1"
 				FavorSizeOrSpeed="2"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="&quot;$(DevEnvDir)\..\..\VC\lib\PlatformSDK\Include&quot;;L:\Programme\Java\jdk1.5.0_09\include\win32;L:\Programme\Java\jdk1.5.0_09\include;g:\jdk1.1.8\include\;g:\jdk1.1.8\include\win32;C:\Programme\java\jdk1.1.8\include\;C:\Programme\java\jdk1.1.8\include\win32"
+				AdditionalIncludeDirectories="&quot;$(DevEnvDir)\..\..\VC\lib\PlatformSDK\Include&quot;;L:\Programme\Java\jdk1.5.0_09\include\win32;L:\Programme\Java\jdk1.5.0_09\include;g:\jdk1.1.8\include\;g:\jdk1.1.8\include\win32;C:\Programme\java\jdk1.1.8\include\;C:\Programme\java\jdk1.1.8\include\win32;C:\Program Files\Java\jdk1.3.1_20\include;C:\Program Files\Java\jdk1.3.1_20\include\win32"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;JAPDLL_EXPORTS"
 				StringPooling="true"
 				ExceptionHandling="0"

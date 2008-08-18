@@ -39,6 +39,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -46,13 +47,16 @@ import javax.swing.JPanel;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import platform.AbstractOS;
+
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.StatusInfo;
 import gui.GUIUtils;
-import gui.JAPHelp;
+import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.PopupMenu;
+import gui.help.JAPHelp;
 
 /**
  *
@@ -185,7 +189,7 @@ public class SystrayPopupMenu extends PopupMenu
 		});
 		add(menuItem);
 
-		if (m_mainWindowListener.isBrowserAvailable())
+		if (AbstractOS.getInstance().isDefaultURLAvailable())
 		{
 			menuItem = new JMenuItem(JAPMessages.getString(MSG_OPEN_BROWSER));
 			GUIUtils.setFontStyle(menuItem, Font.PLAIN);
@@ -193,7 +197,7 @@ public class SystrayPopupMenu extends PopupMenu
 			{
 				public void actionPerformed(ActionEvent a_event)
 				{
-					m_mainWindowListener.onOpenBrowser();
+					AbstractOS.getInstance().openBrowser();
 				}
 			});
 			add(menuItem);
@@ -220,10 +224,16 @@ public class SystrayPopupMenu extends PopupMenu
 			public void actionPerformed(ActionEvent a_event)
 			{
 				m_mainWindowListener.onShowHelp();
-				JAPHelp.getInstance().getContextObj().setContext("index");
-				JAPHelp.getInstance().setAlwaysOnTop(true);
-				JAPHelp.getInstance().setVisible(true);
-				JAPHelp.getInstance().setAlwaysOnTop(false);
+				JAPHelp.getInstance().setContext(
+						JAPHelpContext.createHelpContext("index", 
+								 (JAPController.getInstance().getViewWindow() instanceof JFrame) ?
+									(JFrame) JAPController.getInstance().getViewWindow() : null));
+				if(JAPHelp.getHelpDialog() != null)
+				{
+					JAPHelp.getHelpDialog().setAlwaysOnTop(true);
+					JAPHelp.getHelpDialog().setVisible(true);
+					JAPHelp.getHelpDialog().setAlwaysOnTop(false);
+				}
 			}
 		});
 
@@ -284,7 +294,7 @@ public class SystrayPopupMenu extends PopupMenu
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
-				JAPController.getInstance().goodBye(true);
+				JAPController.goodBye(true);
 			}
 		});
 		addSeparator();
@@ -294,8 +304,6 @@ public class SystrayPopupMenu extends PopupMenu
 
 	public static interface MainWindowListener
 	{
-		public boolean isBrowserAvailable();
-		public void onOpenBrowser();
 		public void onShowMainWindow();
 		public void onShowSettings(String card, Object a_value);
 		public void onShowHelp();

@@ -29,8 +29,6 @@ package jap;
 
 import java.util.Locale;
 
-import javax.swing.JPanel;
-
 import gui.JAPMessages;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -62,7 +60,7 @@ final public class JAPiPAQ
 		m_controller.loadConfigFile(strJapConfFile, false, null);
 		// Output some information about the system
 		// Create the view object
-		view = new JAPNewView(JAPConstants.TITLE, m_controller, null);
+		view = new JAPNewView(JAPConstants.TITLE, m_controller);
 		// Create the main frame
 		view.create(false);
 		// Switch Debug Console Parent to MainView
@@ -70,7 +68,7 @@ final public class JAPiPAQ
 		// Add observer
 		m_controller.addJAPObserver(view);
 		// Register the views where they are needed
-		m_controller.setView(view, false);
+		m_controller.setView(view, new ConsoleSplash());
 		// initially start services
 		m_controller.initialRun(null, 0);
 

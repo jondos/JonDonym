@@ -134,39 +134,28 @@ public class RecursiveCopyTool {
 	{
 		FileInputStream fromSrcFile = new FileInputStream(src);
 		copySingleFile(fromSrcFile, dest);
-		/*FileOutputStream toDestFile = new FileOutputStream(dest);
-		byte[] copyBuffer = new byte[COPY_BUFFER_SIZE];
-		int bytesReadFromSrcFile = 0;
-		
-		while(fromSrcFile.available()>0)
-		{
-			bytesReadFromSrcFile = fromSrcFile.read(copyBuffer);
-			toDestFile.write(copyBuffer);
-			if(bytesReadFromSrcFile == EOF) break;
-		}
-		fromSrcFile.close();
-		toDestFile.close();*/
 	}
 	
 	/* WARNING False usage of this method is dangerous! */
-	public static void deleteRecursion(File src)
+	public static boolean deleteRecursion(File src)
 	{
 		if(src == null)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
 					"Source file is null: This should never happen");
-			return;
+			return true;
 		}
 		if(!src.exists())
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, 
 					"There is no such file or directory: "+src.getName());
-			return;
+			return true;
 		}
 		if(src.isDirectory())
 		{
 			String[] filesInCurrentDirectory = src.list();
-			for (int i = 0; i < filesInCurrentDirectory.length; i++) 
+			for (int i = 0; filesInCurrentDirectory != null &&
+				i < filesInCurrentDirectory.length; i++) 
 			{
 				String currentFileName = filesInCurrentDirectory[i];
 				deleteRecursion(new File(src.getAbsolutePath()+File.separator+currentFileName));
@@ -176,11 +165,13 @@ public class RecursiveCopyTool {
 						(src.delete() ? " was successfully deleted." : 
 										" was not successfully deleted.");
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC, lstr);
+		return !src.exists();
 	}
 	
 	static void copySingleFile(InputStream src, File dest) throws IOException
 	{
-		//FileInputStream fromSrcFile = new FileInputStream(src);
+		IOException ex = null;
+		
 		if(src == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, "Abort copy process: InputStream is null");
@@ -201,17 +192,23 @@ public class RecursiveCopyTool {
 		}
 		catch(IOException ioe)
 		{
-			/* Catch this Exception just to close the streams */ 
-			try 
+			ex = ioe;
+			/* Catch this Exception just to close the streams */ 			
+		}
+		try 
+		{
+			if(toDestFile != null)
 			{
-				if(toDestFile != null)
-				{
-					toDestFile.close();
-				}
-				src.close();
+				toDestFile.close();
 			}
-			catch (IOException ioe1) {}
-			throw new IOException(ioe.getMessage());
+			src.close();
+		}
+		catch (IOException ioe1) 
+		{
+		}
+		if (ex != null)
+		{
+			throw ex;
 		}
 	}
 }

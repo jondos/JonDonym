@@ -59,10 +59,10 @@ import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import gui.GUIUtils;
-import gui.JAPHelp;
 import gui.JAPHelpContext;
 import gui.JAPHtmlMultiLineLabel;
 import gui.JAPMessages;
+import gui.help.JAPHelp;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -483,7 +483,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	 */
 	private void init(RootPaneContainer a_parentDialog, String a_strTitle, String a_strText, int a_alignment,
 					  int a_optionType, int a_messageType, Icon a_icon, boolean a_bCentered,
-					  JAPHelpContext.IHelpContext a_helpContext, DialogContentPane a_previousContentPane)
+					  final JAPHelpContext.IHelpContext a_helpContext, DialogContentPane a_previousContentPane)
 	{
 		if (a_parentDialog == null)
 		{
@@ -529,7 +529,26 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 			m_icon = getMessageIcon(m_messageType);
 		}
 
-		m_helpContext = a_helpContext;
+		if (a_helpContext != null)
+		{
+			m_helpContext = new JAPHelpContext.IHelpContext()
+			{
+				public Container getHelpExtractionDisplayContext() 
+				{
+					return DialogContentPane.this.getContentPane();
+				}
+
+				public String getHelpContext() 
+				{
+					return a_helpContext.getHelpContext();
+				}
+			};
+		}
+		else
+		{
+			m_helpContext = null;
+		}
+		
 		m_rootPane = new JPanel(new BorderLayout());
 		m_titlePane = new JPanel(new GridBagLayout());
 		m_rootPane.add(m_titlePane, BorderLayout.CENTER);
@@ -807,6 +826,17 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		 * @param a_messageType The content pane's message type,
 		 * e.g. MESSAGE_TYPE_PLAIN, MESSAGE_TYPE_ERROR, ...
 		 */
+		public Layout()
+		{
+			this("", MESSAGE_TYPE_PLAIN, null);
+		}
+		
+		/**
+		 * Creates a new Layout for the dialog content pane. The title is empty, therefore a status bar
+		 * will be shown in the content pane.
+		 * @param a_messageType The content pane's message type,
+		 * e.g. MESSAGE_TYPE_PLAIN, MESSAGE_TYPE_ERROR, ...
+		 */
 		public Layout(int a_messageType)
 		{
 			this("", a_messageType, null);
@@ -928,6 +958,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		}
 	}
 
+	public void updateDialogOptimalSized()
+	{
+		updateDialogOptimalSized(this);
+	}
+	
 	/**
 	 * Calculates the optimal dialog size for a chain of content panes. The optimal size is defined
 	 * as the size that is needed to the contents pane with the maximum width or the maximum size in
@@ -1341,6 +1376,16 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		return m_helpContext.getHelpContext();
 	}
 
+	public Container getHelpExtractionDisplayContext() 
+	{
+		if (m_helpContext == null)
+		{
+			return null;
+		}
+
+		return m_helpContext.getHelpExtractionDisplayContext();
+	}
+	
 	public final void clearStatusMessage(int a_messageID)
 	{
 		if (m_idStatusMessage == a_messageID)
@@ -1892,8 +1937,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		{
 			if (isVisible())
 			{
+				// text gets updated, but does not influence the size of the dialog or of the text line				
+				m_lblText.setText(JAPHtmlMultiLineLabel.removeHTMLHEADAndBODYTags(a_strText));
 				getDialog().notifyAll();
-				throw new IllegalStateException("You may not change the text in a visible content pane!");
+				return;
+				// throw new IllegalStateException("You may not change the text in a visible content pane!");				
 			}
 
 			JAPDialog dialog = new JAPDialog( (JAPDialog)null, "");

@@ -61,10 +61,14 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.JavaVersionDBEntry;
-import java.io.IOException;
 
 final public class JAPViewIconified extends JWindow implements ActionListener
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static final String XML_LOCATION = "IconifiedLocation";
 
 	public static final String MSG_ANON_LOW = JAPViewIconified.class.getName() + "_anonLow";
@@ -270,15 +274,6 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 							switchBackToMainView();
 						}
 
-						public boolean isBrowserAvailable()
-						{
-							return m_mainView.getBrowserCommand() != null;
-						}
-
-						public void onOpenBrowser()
-						{
-							m_Controller.startPortableFirefox(m_mainView.getBrowserCommand());
-						}
 
 						public void onShowSettings(String card, Object a_value)
 						{

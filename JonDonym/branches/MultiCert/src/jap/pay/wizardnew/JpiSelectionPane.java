@@ -60,9 +60,9 @@ public class JpiSelectionPane extends DialogContentPane implements ActionListene
 {
 	private static final String MSG_CHOOSEAJPI = JpiSelectionPane.class.getName() + "_chooseajpi";
 	private static final String MSG_CHOOSEAJPI_TITLE = JpiSelectionPane.class.getName() + "_titleChooseajpi";
-	private static final String MSG_JPIS_FOUND = JpiSelectionPane.class.getName() + "_jpis_found";
+	/*private static final String MSG_JPIS_FOUND = JpiSelectionPane.class.getName() + "_jpis_found";
 	private static final String MSG_NAME = JpiSelectionPane.class.getName() + "_name";
-	private static final String MSG_ADDRESS = JpiSelectionPane.class.getName() + "_address";
+	private static final String MSG_ADDRESS = JpiSelectionPane.class.getName() + "_address";*/
 	private static final String MSG_HAVE_TO_CHOOSE = JpiSelectionPane.class.getName() + "_havetochoose";
 
 	private WorkerContentPane m_fetchJPIPane;
@@ -153,8 +153,8 @@ public class JpiSelectionPane extends DialogContentPane implements ActionListene
 		 m_c.weightx = 0;
 		 m_c.weightx = 0;
 		 m_c.insets = new Insets(5, 5, 5, 5);
-		 m_c.anchor = m_c.NORTHWEST;
-		 m_c.fill = m_c.NONE;
+		 m_c.anchor = GridBagConstraints.NORTHWEST;
+		 m_c.fill = GridBagConstraints.NONE;
 
 		m_allJpis = (Vector) m_fetchJPIPane.getValue();
 		showPaymentInstances();
@@ -186,8 +186,8 @@ public class JpiSelectionPane extends DialogContentPane implements ActionListene
 		m_c.weightx = 0;
 		m_c.weightx = 0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.NONE;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.NONE;
 
 
 		//show plans

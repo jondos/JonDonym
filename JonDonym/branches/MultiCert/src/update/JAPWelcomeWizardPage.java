@@ -61,6 +61,11 @@ import platform.AbstractOS;
 
 public class JAPWelcomeWizardPage extends BasicWizardPage implements ActionListener
 {
+	/**
+	 * serial version UID
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private static final String MSG_CHANGELOG_URL = JAPWelcomeWizardPage.class.getName() + "_changelogURL";
 	private static final String MSG_CHANGELOG_URL_BETA = JAPWelcomeWizardPage.class.getName() + "_changelogURLBeta";
 	private static final String MSG_CHANGELOG = JAPWelcomeWizardPage.class.getName() + "_changelog";

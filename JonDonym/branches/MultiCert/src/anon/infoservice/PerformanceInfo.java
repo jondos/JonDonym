@@ -2,16 +2,22 @@ package anon.infoservice;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import java.util.Hashtable;
 import java.util.Vector;
-import java.util.Enumeration;
 
+import anon.crypto.CertPath;
+import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
+import anon.crypto.SignatureVerifier;
+import anon.crypto.XMLSignature;
+import anon.util.Util;
+import anon.util.Util.LongSortAsc;
+import anon.util.Util.LongSortDesc;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
-import anon.util.XMLParseException;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -26,14 +32,13 @@ import logging.LogType;
  * rather accessing the database directly! This way it is ensured that the entry
  * is derived from all available Info Services.
  * 
- * @see PerformanceInfo#getAverageEntry(String)
+ * @see PerformanceInfo#getLowestCommonBoundEntry(String)
  * 
  * @author Christian Banse
  */
-public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncodable
+public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements IXMLEncodable
 {
 	private static final double PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES = 2.0/3.0;
-	private static final double PERFORMANCE_INFO_MAX_STRAY = 0.55;
 
 	/**
 	 * Last Update time of the database entry
@@ -55,6 +60,9 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	 */
 	private Element m_xmlData;
 	
+	//private JAPCertificate m_isCertificate;
+	private MultiCertPath m_certPath;	
+	
 	/**
 	 * All PerformanceEntry objects measured by the info service
 	 */
@@ -65,10 +73,10 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfoList";
 	
 	/*
-	 * Timeout set to 6 hours because it's better to have out-dated 
+	 * Timeout set to 6 days because it's better to have out-dated 
 	 * performance information than no performance information at all ;-)
 	 */
-	public static final int PERFORMANCE_INFO_TTL = 1000*60*60*6;
+	public static final int PERFORMANCE_INFO_TTL = 1000*60*60*24*6;
 	
 	/**
 	 * Creates a new PerformanceInfo object from an XML element which is usually
@@ -90,9 +98,30 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		
 		NodeList list = a_info.getElementsByTagName("PerformanceEntry");
 		
+		
+		/* try to get the certificate from the Signature node */
+		try
+		{
+			XMLSignature signature = SignatureVerifier.getInstance().getVerifiedXml(a_info,
+				SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+			if (signature != null && signature.isVerified())
+			{
+				m_certPath = signature.getMultiCertPath();
+				/*CertPath certPath = signature.getCertPath();
+				if (certPath != null && certPath.getFirstCertificate() != null)
+				{
+					m_isCertificate = certPath.getFirstCertificate();
+				}*/
+			}
+		}
+		catch (Exception e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
+		}
+		
 		m_id = XMLUtil.parseAttribute(a_info, XML_ATTR_ID, "");
 		
-		if(m_id == "")
+		if(!checkId())
 		{
 			throw new XMLParseException(XML_ELEMENT_NAME + ": invalid id");
 		}
@@ -106,6 +135,21 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
 		m_xmlData = a_info;
+	}
+	
+	/*public JAPCertificate getCertificate()
+	{
+		return m_isCertificate;
+	}*/
+	
+	public MultiCertPath getCertPath()
+	{
+		return m_certPath;
+	}
+	
+	public boolean isVerified()
+	{
+		return m_certPath != null;
 	}
 	
 	public String getId()
@@ -127,7 +171,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	 * Returns a performance entry for the giving Cascade. This method
 	 * should ONLY be used inside getAverageEntry!
 	 * 
-	 * @see PerformanceInfo#getAverageEntry(String)
+	 * @see PerformanceInfo#getLowestCommonBoundEntry(String)
 	 * 
 	 * @param a_id The cascade id
 	 * 
@@ -140,96 +184,101 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	
 	/**
 	 * Loops through all PerformanceInfo objects from the different 
-	 * Info Services and returns a new average PerformanceEntry for the
-	 * given cascade.
+	 * Info Services and returns a new PerformanceEntry for the
+	 * given cascade with the lowest common boundary
 	 * 
 	 * @param a_cascadeId Id of the cascade
 	 * 
-	 * @return PerformanceEntry with average values for the given cascade
+	 * @return PerformanceEntry with lowest common boundary values for the given cascade
 	 */
-	public static PerformanceEntry getAverageEntry(String a_cascadeId)
+	public static PerformanceEntry getLowestCommonBoundEntry(String a_cascadeId)
 	{
 		// loop through all PerformanceInfo objects (from the different Info Services)
-		// and calculate the average
+		PerformanceEntry perfEntry = new PerformanceEntry(a_cascadeId, false);
 		
-		Vector vec = Database.getInstance(PerformanceInfo.class).getEntryList();
-		PerformanceEntry avgEntry = new PerformanceEntry(a_cascadeId, -1);
+		Vector vPerfEntries = new Vector();
+		Vector vSpeedBoundaries = new Vector();
+		Vector vDelayBoundaries = new Vector();
 		
-		Vector v = new Vector();
-		
-		for (int i = 0; i < vec.size(); i++)
+		Vector vInfoServices = Database.getInstance(PerformanceInfo.class).getEntryList();
+		for (int i = 0; i < vInfoServices.size(); i++)
 		{
-			PerformanceEntry entry = ((PerformanceInfo) vec.elementAt(i)).getEntry(a_cascadeId);
+			PerformanceEntry entry = ((PerformanceInfo) vInfoServices.elementAt(i)).getEntry(a_cascadeId);
 			if (entry != null)
 			{
-				v.addElement(entry);
+				vPerfEntries.addElement(entry);
+				Long value = new Long(entry.getBound(PerformanceEntry.SPEED));
+				
+				if(!vSpeedBoundaries.contains(value))
+				{
+					vSpeedBoundaries.addElement(value);
+				}
+				
+				value = new Long(entry.getBound(PerformanceEntry.DELAY));
+				
+				if(!vDelayBoundaries.contains(value))
+				{
+					vDelayBoundaries.addElement(value);
+				}
 			}
 		}
 		
-		if(v.size() == 0)
+		Util.sort(vSpeedBoundaries, new LongSortDesc());
+		Util.sort(vDelayBoundaries, new LongSortAsc());
+		
+		if(vPerfEntries.size() == 0)
 		{
-			return avgEntry;
+			return perfEntry;
 		}
 		
-		long avgSpeed = 0;
-		long avgDelay = 0;
-		for(int j = 0; j < v.size(); j++)
-		{
-			avgSpeed += ((PerformanceEntry) v.elementAt(j)).getAverageSpeed();
-			avgDelay += ((PerformanceEntry) v.elementAt(j)).getAverageDelay();
-		}
-		avgSpeed /= v.size();
-		avgDelay /= v.size();
+		int agreeing;
+		long value = 0;
 		
-		Vector vToCheck = (Vector) v.clone();
-		Vector vResult = new Vector();
-		Vector vDeleted = new Vector();
-		double stray = PERFORMANCE_INFO_MAX_STRAY;
-		
-		// loop through all entries to eliminate stray entries
-		// if we deleted too many entries, re-add deleted entries
-		do
+		for(int i = 0; i < vSpeedBoundaries.size(); i++)
 		{
-			stray = eliminateStrayEntries(vToCheck, vDeleted, avgSpeed, avgDelay, stray);
-			// add the entries that passed the test to the result vector
-			for (Enumeration e = vToCheck.elements(); e.hasMoreElements(); )
+			agreeing = 0;
+			long bound = ((Long) vSpeedBoundaries.elementAt(i)).longValue();
+			value = bound;
+			
+			for(int j = 0; j < vPerfEntries.size(); j++)
 			{
-				vResult.addElement(e.nextElement() ); //.addAll would be faster, but is post-JDK 1.1.8
-			}
-			//vResult.addAll(vToCheck);
-			// only check the deleted entries next round
-			vToCheck = vDeleted;
-			// reset the deleted entries vector
-			vDeleted = new Vector();
-		}
-		while ((double)vResult.size() / v.size() < PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES);
-		
-		if (vResult.size() == 0)
-		{
-			return avgEntry;
-		}
-		
-		avgSpeed = 0;
-		avgDelay = 0;
-		for(int j = 0; j < vResult.size(); j++)
-		{
-			if(((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed() != 0)
-			{
-				avgSpeed += ((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed();
+				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
+				if(entry.getBound(PerformanceEntry.SPEED) >= bound)
+				{
+					agreeing++;
+				}
 			}
 			
-			if(((PerformanceEntry) vResult.elementAt(j)).getAverageSpeed() != 0)
+			if((double) agreeing / vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
 			{
-				avgDelay += ((PerformanceEntry) vResult.elementAt(j)).getAverageDelay();
+				break;
 			}
 		}
-		avgSpeed /= vResult.size();
-		avgDelay /= vResult.size();
+		perfEntry.setBound(PerformanceEntry.SPEED, value);
 		
-		avgEntry.overrideDailyAverageSpeed(avgSpeed);
-		avgEntry.overrideDailyAverageDelay(avgDelay);
+		for(int i = 0; i< vDelayBoundaries.size(); i++)
+		{
+			agreeing = 0;
+			long bound = ((Long) vDelayBoundaries.elementAt(i)).longValue();
+			value = bound;
+			
+			for(int j = 0; j < vPerfEntries.size(); j++)
+			{
+				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
+				if(entry.getBound(PerformanceEntry.DELAY) <= bound)
+				{
+					agreeing++;
+				}
+			}
+			
+			if((double) agreeing / vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			{
+				break;
+			}
+		}
+		perfEntry.setBound(PerformanceEntry.DELAY, value);
 		
-		return avgEntry;
+		return perfEntry;
 	}
 
 	/**
@@ -263,7 +312,7 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 	 * 
 	 * @return The minimum stray of the deleted entries
 	 */
-	public static double eliminateStrayEntries(Vector a_vec, Vector r_vecDeleted, long a_avgSpeed, long a_avgDelay, double a_maxStray)
+	/*public static double eliminateStrayEntries(Vector a_vec, Vector r_vecDeleted, long a_avgSpeed, long a_avgDelay, double a_maxStray)
 	{
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Looking for entries with stray >" + a_maxStray);
 		double nextStray = Double.MAX_VALUE;
@@ -272,11 +321,11 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		{
 			PerformanceEntry entry = ((PerformanceEntry) a_vec.elementAt(k));
 			
-			double straySpeed = (double) Math.abs(a_avgSpeed - entry.getAverageSpeed()) / (double) a_avgSpeed;
-			double strayDelay = (double) Math.abs(a_avgDelay - entry.getAverageDelay()) / (double) a_avgDelay;
-			if(straySpeed > a_maxStray)
+			double straySpeed = (double) Math.abs(a_avgSpeed - entry.getXMLAverage(PerformanceEntry.SPEED)) / (double) a_avgSpeed;
+			double strayDelay = (double) Math.abs(a_avgDelay - entry.getXMLAverage(PerformanceEntry.DELAY)) / (double) a_avgDelay;
+			if(entry.getXMLAverage(PerformanceEntry.SPEED) >= 0 && straySpeed > a_maxStray)
 			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with speed " + entry.getAverageSpeed());
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with speed " + entry.getAverage(PerformanceEntry.SPEED));
 				
 				r_vecDeleted.addElement(entry);
 				
@@ -291,9 +340,9 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 				continue;
 			}
 			
-			if(strayDelay > a_maxStray)
+			if(entry.getXMLAverage(PerformanceEntry.DELAY) >= 0 && strayDelay > a_maxStray)
 			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with delay " + entry.getAverageDelay());
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with delay " + entry.getAverage(PerformanceEntry.DELAY));
 				
 				r_vecDeleted.addElement(entry);
 				
@@ -310,5 +359,5 @@ public class PerformanceInfo extends AbstractDatabaseEntry implements IXMLEncoda
 		}
 		
 		return nextStray;
-	}
+	}*/
 }

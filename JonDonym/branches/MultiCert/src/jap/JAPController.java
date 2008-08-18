@@ -31,10 +31,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.URL;
 import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -53,6 +51,7 @@ import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -68,7 +67,6 @@ import anon.AnonServiceEventAdapter;
 import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.client.AnonClient;
-import anon.client.ITrustModel;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.AbstractMixCascadeContainer;
@@ -113,7 +111,6 @@ import gui.GUIUtils;
 import gui.JAPMessages;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
-import gui.dialog.JAPDialog.LinkedCheckBox;
 import gui.dialog.PasswordContentPane;
 import jap.forward.JAPRoutingEstablishForwardedConnectionDialog;
 import jap.forward.JAPRoutingMessage;
@@ -124,7 +121,6 @@ import logging.LogType;
 import platform.AbstractOS;
 import platform.MacOS;
 import proxy.DirectProxy;
-import proxy.DirectProxy.AllowUnprotectedConnectionCallback;
 import update.JAPUpdateWizard;
 import jap.pay.AccountUpdater;
 import anon.infoservice.ClickedMessageIDDBEntry;
@@ -188,6 +184,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		JAPController.class.getName() + "_cascadeNotParsable";
 	public static final String MSG_PAYMENT_DAMAGED = JAPController.class.getName() + "_paymentDamaged";
 	public static final String MSG_ACCOUNT_NOT_SAVED = JAPController.class.getName() + "_accountNotSaved";
+	public static final String MSG_UPDATING_HELP = JAPController.class.getName() + "_updatingHelp";
 
 
 	private static final String XML_ELEM_LOOK_AND_FEEL = "LookAndFeel";
@@ -209,8 +206,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	private final Object PROXY_SYNC = new Object();
 
-	private String m_commandLineArgs = "";
-	private Process m_portableFirefoxProcess = null;
+	private String m_commandLineArgs = "";	
 	boolean m_firstPortableFFStart = false;
 	/**
 	 * Stores all MixCascades we know (information comes from infoservice or was entered by a user).
@@ -271,7 +267,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private boolean m_bPresentationMode = false;
 	private boolean m_bPortableJava = false;
 	private boolean m_bPortable = false;
-
+	
 	private long m_nrOfBytesWWW = 0;
 	private long m_nrOfBytesOther = 0;
 
@@ -286,6 +282,41 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private IPasswordReader m_passwordReader;
 	private Object m_finishSync = new Object();
 	private ISplashResponse m_finishSplash;
+	private IRestarter m_restarter = new IRestarter()
+	{
+		public boolean hideWarnings()
+		{
+			return false;
+		}
+		
+		public boolean isConfigFileSaved()
+		{
+			return true;
+		}
+		
+		public void exec(String[] a_args) throws IOException
+		{
+			String command = "";
+			if (a_args == null)
+			{
+				return;
+			}
+			
+			if (a_args.length > 2)
+			{
+				Runtime.getRuntime().exec(a_args);
+				return;
+			}
+			
+			for (int i = 0; i < a_args.length; i++)
+			{
+				command += a_args[i] + " ";
+			}
+			command.trim();
+			
+			Runtime.getRuntime().exec(command);
+		}
+	};
 
 	private DirectProxy.AllowUnprotectedConnectionCallback m_proxyCallback;
 
@@ -296,7 +327,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private JAPController()
 	{
 		m_Model = JAPModel.getInstance();
-		JAPHelpController.getInstance();
 	}
 	
 	public void start() {
@@ -313,7 +343,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			public void run()
 			{
-				JAPController.getInstance().goodBye(false);
+				JAPController.goodBye(false);
 			}
 		},
 			JAPConstants.TIME_RESTART_AFTER_SOCKET_ERROR);
@@ -352,7 +382,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (JAPModel.getInstance().isNonAnonymousSurfingDenied() ||
 						JAPController.getInstance().getView() == null)
 					{
-						return new Answer(false, false);
+						return new Answer(false, false, true);
 					}
 
 					boolean bShowHtmlWarning;
@@ -369,14 +399,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 									   JAPController.getInstance().getViewWindow(),
 									   JAPMessages.getString(MSG_ALLOWUNPROTECTED), a_requestInfo.getURI()
 									   + (a_requestInfo.getPort() != 80 ? ":" + a_requestInfo.getPort() : ""), cb));
-					if (bShowHtmlWarning && cb.getState())
+					/*if (bShowHtmlWarning && cb.getState())
 					{
 						// user has chosen to never allow non anonymous websurfing
 						JAPModel.getInstance().denyNonAnonymousSurfing(true);
 						// do not remember as this may be switched in the control panel
 						return new Answer(!bShowHtmlWarning, false);
-					}
-					return new Answer(!bShowHtmlWarning, cb.getState());
+					}*/
+					return new Answer(!bShowHtmlWarning, cb.getState(), false);
 				}
 			};
 
@@ -467,7 +497,26 @@ public final class JAPController extends Observable implements IProxyListener, O
 		public void programExiting();
 	}
 
+	public IRestarter getRestarter()
+	{
+		return m_restarter;
+	}
+	
+	public void setRestarter(IRestarter a_restarter)
+	{
+		if (a_restarter != null)
+		{
+			m_restarter = a_restarter;
+		}
+	}
 
+	public static interface IRestarter
+	{
+		void exec(String[] a_args) throws IOException;
+		boolean isConfigFileSaved();
+		boolean hideWarnings();
+	}
+	
 	public class AnonConnectionChecker
 	{
 		public boolean checkAnonConnected()
@@ -521,6 +570,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 			m_commandLineArgs = a_cmdArgs;
 		}
 	}
+	
+	public String getCommandlineArgs()
+	{
+		return m_commandLineArgs;
+	}
+	
 	/**
 	public void simuateProxyError()
 	{
@@ -554,7 +609,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			public void run()
 			{
 				m_feedback.start(false);
-				if (JAPModel.getInstance().isInfoServiceDisabled())
+				if (JAPModel.isInfoServiceDisabled())
 				{
 					m_InfoServiceUpdater.start(false);
 					m_paymentInstanceUpdater.start(false);
@@ -568,7 +623,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					if (!m_InfoServiceUpdater.isFirstUpdateDone())
 					{
-						m_InfoServiceUpdater.update();
+						m_InfoServiceUpdater.updateAsync();
 					}
 					if (!m_paymentInstanceUpdater.isFirstUpdateDone())
 					{
@@ -576,23 +631,23 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 					if (!m_MixCascadeUpdater.isFirstUpdateDone())
 					{
-						m_MixCascadeUpdater.update();
+						m_MixCascadeUpdater.updateAsync();
 					}
 					if (!m_minVersionUpdater.isFirstUpdateDone())
 					{
-						m_minVersionUpdater.update();
+						m_minVersionUpdater.updateAsync();
 					}
 					if (!m_javaVersionUpdater.isFirstUpdateDone())
 					{
-						m_javaVersionUpdater.update();
+						m_javaVersionUpdater.updateAsync();
 					}
 					if (!m_messageUpdater.isFirstUpdateDone())
 					{
-						m_messageUpdater.update();
+						m_messageUpdater.updateAsync();
 					}
 					if (!m_perfInfoUpdater.isFirstUpdateDone())
 					{
-						m_perfInfoUpdater.update();
+						m_perfInfoUpdater.updateAsync();
 					}
 				}
 
@@ -896,8 +951,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				/* no config file was specified on the command line and the default config files don't
 				 * exist -> store the configuration in the OS-specific directory
 				 */
-				JAPModel.getInstance().setConfigFile(AbstractOS.getInstance().getConfigPath() +
-						JAPConstants.XMLCONFFN);
+				JAPModel.getInstance().setConfigFile(AbstractOS.getInstance().getConfigPath(
+						JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN);
 			}
 		}
 		Document doc = null;
@@ -988,9 +1043,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 
 				String strVersion = XMLUtil.parseAttribute(root, JAPConstants.CONFIG_VERSION, null);
-	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, m_Model.DLL_VERSION_UPDATE, false));
-
-
+	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_UPDATE, false));
+	            m_Model.setDllWarningVersion(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_WARNING_BELOW, 0));	        
 
 
 				JAPModel.getInstance().allowUpdateViaDirectConnection(
@@ -1025,6 +1079,20 @@ public final class JAPController extends Observable implements IProxyListener, O
 				
 				JAPModel.getInstance().initHelpPath(
 								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
+				if (!JAPDialog.isConsoleOnly())
+				{
+					String messageText = a_splash.getText();
+					a_splash.setText(JAPMessages.getString(MSG_UPDATING_HELP));
+					JAPModel.getInstance().getHelpURL();
+					if (!JAPModel.getInstance().isHelpPathDefined() &&
+						AbstractOS.getInstance().isHelpAutoInstalled())
+					{
+						JAPModel.getInstance().setHelpPath(new File(
+								AbstractOS.getInstance().getDefaultHelpPath(
+										JAPConstants.APPLICATION_NAME)), false);
+					}
+					a_splash.setText(messageText);
+				}
 						
 
 	            m_Model.setHttpListenerPortNumber(XMLUtil.parseAttribute(root,
@@ -1127,7 +1195,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					JAPModel.getInstance().setAutoConnect(
 									   XMLUtil.parseAttribute(root, "autoConnect", true));
 					// if auto-connect is not chosen, ask the user what to do
-					m_bAskAutoConnect =  !JAPModel.getInstance().isAutoConnect();
+					m_bAskAutoConnect =  !JAPModel.isAutoConnect();
 				}
 				else
 				{
@@ -1264,10 +1332,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 				// load the stored statusinfos
 				Database.getInstance(StatusInfo.class).loadFromXml(
 						(Element) XMLUtil.getFirstChildByName(root, StatusInfo.XML_ELEMENT_CONTAINER_NAME));
-				
+								
 				// load stored performanceinfo
 				Database.getInstance(PerformanceInfo.class).loadFromXml(
-						(Element) XMLUtil.getFirstChildByName(root, PerformanceInfo.XML_ELEMENT_CONTAINER_NAME));
+						(Element) XMLUtil.getFirstChildByName(root, 
+								PerformanceInfo.XML_ELEMENT_CONTAINER_NAME), true);
 				
 				// load deleted messages
 				Database.getInstance(DeletedMessageIDDBEntry.class).loadFromXml(
@@ -1824,14 +1893,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 								  "Error loading Mixminion configuration.", ex);
 				}
 
-				try
-				{
-					JAPExtension.loadDialogFromConfig(root);
-				}
-				catch(Exception e)
-				{
 				
-				}
+				//JAPExtension.loadDialogFromConfig(root);
+			
 				
 				/* read the settings of the JAP forwarding system */
 				Element japForwardingSettingsNode = (Element) (XMLUtil.getFirstChildByName(root,
@@ -1883,10 +1947,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 		// fire event
 		notifyJAPObservers();
 	}
-	
-	public Process getPortableFirefoxProcess() {
-		return m_portableFirefoxProcess;
-	}
 
 	public void preLoadConfigFile(String a_strJapConfFile) 
 	{
@@ -1934,8 +1994,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 		if (!success)
 		{
 			/* no config file at any position->use OS-specific path for storing a new one*/
-			m_Model.setConfigFile(AbstractOS.getInstance().getConfigPath() +
-												 JAPConstants.XMLCONFFN);
+			m_Model.setConfigFile(AbstractOS.getInstance().getConfigPath(
+					JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN);
 
 			/* As this is the first JAP start, show the config assistant */
 			m_bShowConfigAssistant = true;
@@ -1946,66 +2006,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 		return success;
 	}
-
-	public boolean startPortableFirefox(String[] cmds) 
-	{
-		if(m_portableFirefoxProcess != null)
-		{
-			try
-			{
-				int ffExitValue = m_portableFirefoxProcess.exitValue();
-				LogHolder.log(LogLevel.INFO, LogType.MISC,
-					"previous portable firefox process exited "+
-					((ffExitValue == 0) ? "normally " : "anormally ")+
-					"(exit value "+ffExitValue+").");
-			}
-			catch(IllegalThreadStateException itse)
-			{
-				LogHolder.log(LogLevel.WARNING, LogType.MISC,
-				"Portable Firefox process is still running!");
-				return false;
-			}
-		}
-		
-		try
-		{
-			m_portableFirefoxProcess = Runtime.getRuntime().exec(cmds);
-			return true;
-		} 
-		catch (SecurityException se)
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC,
-					"You are not allowed to lauch portable firefox: ", se);
-			return false;
-		}
-		catch (IOException ioe3) 
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC,
-			"Error occured while launching portable firefox with command "+cmds[0]+": ",ioe3);
-			// open dialog and allow user to specify the firefox command
-			if(m_View instanceof JAPNewView)
-			{
-				((JAPNewView) m_View).showChooseFirefoxPathDialog();
-			}			
-		}
-		catch (NullPointerException npe) 
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC,
-			"Launching portable firefox failed because the firefox command is null");
-			// open dialog and allow user to specify the firefox command
-			if(m_View instanceof JAPNewView)
-			{
-				((JAPNewView) m_View).showChooseFirefoxPathDialog();
-			}			
-		}
-		catch (ArrayIndexOutOfBoundsException aioobe) 
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC,
-			"Launching portable firefox failed because the firefox command array is empty");
-		}
-
-		return false;
-	}
 	
 	/**
 	 * Tries to load the config file provided in the command line
@@ -2014,7 +2014,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private boolean loadConfigFileCommandLine(String a_configFile)
 	{
 		LogHolder.log(LogLevel.INFO, LogType.MISC,
-					  "JAPController: loadConfigFile: Trying to load configuration from: " + a_configFile);
+					  "Trying to load configuration from: " + a_configFile);
 		try
 		{
 			FileInputStream f = new FileInputStream(a_configFile);
@@ -2096,7 +2096,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 */
 	private boolean loadConfigFileOSdependent()
 	{
-		String japConfFile = AbstractOS.getInstance().getConfigPath() + JAPConstants.XMLCONFFN;
+		String japConfFile = AbstractOS.getInstance().getConfigPath(
+				JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN;
 		LogHolder.log(LogLevel.INFO, LogType.MISC,
 					  "Trying to load configuration from: " + japConfFile);
 		try
@@ -2205,20 +2206,23 @@ public final class JAPController extends Observable implements IProxyListener, O
 		LogHolder.log(LogLevel.INFO, LogType.ALL, "Java vendor: " + strJavaVendor);
 
 		String javaExe = null;
+		String javaOptions = null;
 		String pathToJava = null;
 		if (strJavaVendor.toLowerCase().indexOf("microsoft") != -1)
 		{
-			System.out.println("Java vendor :"+strJavaVendor.toLowerCase());
+			//System.out.println("Java vendor :"+strJavaVendor.toLowerCase());
 			pathToJava = System.getProperty("com.ms.sysdir") + File.separator;
-			javaExe = "jview /cp";
+			javaExe = "jview";
+			javaOptions = "/cp";
 		}
 		else
 		{
-			pathToJava = System.getProperty("java.home") + File.separator + "bin" + File.separator;
-			javaExe = "javaw -cp"; // for windows
+			pathToJava = AbstractOS.getInstance().getProperty("java.home") + 
+			File.separator + "bin" + File.separator;
+			javaExe = "javaw"; // for windows
+			javaOptions = "-cp";
 		}
-		strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" " 
-		+ JapMainClass + m_commandLineArgs;
+		strRestartCommand = " \"" + CLASS_PATH + "\" " +  JapMainClass + m_commandLineArgs;
 		
 		boolean isMacOSBundle = (macOS != null) ? macOS.isBundle() : false;
 		
@@ -2226,33 +2230,35 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 	    	if(!isMacOSBundle)
 	    	{
-	    		Runtime.getRuntime().exec(strRestartCommand);	
+	    		m_restarter.exec(new String[]{pathToJava + javaExe, javaOptions + strRestartCommand});	
+	    		LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + 
+	    				pathToJava + javaExe + " " + javaOptions + strRestartCommand);
 	    	}
 	    	else
 	    	{
 	    		String[] cmdArray = {"open", "-n", macOS.getBundlePath()};
-	    		Runtime.getRuntime().exec(cmdArray);
+	    		m_restarter.exec(cmdArray);
 	    	}
-	    	LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);	
+	    		
 		}
 		catch (Exception ex)
 		{
-			javaExe = "java -cp"; // Linux/UNIX
+			javaExe = "java"; // Linux/UNIX
+			javaOptions = "-cp";
 			
-			strRestartCommand = pathToJava + javaExe + " \"" + CLASS_PATH + "\" "+ JapMainClass + 
-				m_commandLineArgs;
+			strRestartCommand = " \"" + CLASS_PATH + "\" "+ JapMainClass + m_commandLineArgs;
 
-			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + strRestartCommand);
+			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + 
+					pathToJava + javaExe + " " + javaOptions + strRestartCommand);
 			try
 			{
-				Runtime.getRuntime().exec(strRestartCommand);
+				m_restarter.exec(new String[]{pathToJava + javaExe, javaOptions + strRestartCommand});
 			}
 			catch (Exception a_e)
 			{
 				LogHolder.log(LogLevel.EXCEPTION, LogType.ALL, "Error auto-restart JAP: " + ex);
 			}
 		}
-    	
 	}
 
 	/**
@@ -2306,6 +2312,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 		catch (Throwable e)
 		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 			error = true;
 		}
 		return error;
@@ -2360,7 +2367,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			doc.appendChild(e);
 			
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_VERSION, JAPConstants.CURRENT_CONFIG_VERSION);
-			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.getDLLupdate());
+			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.isDLLupdated());
+			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_WARNING_BELOW, m_Model.getDLLWarningVersion());
 
 			XMLUtil.setAttribute(e, XML_ALLOW_NON_ANONYMOUS_UPDATE,
 								 JAPModel.getInstance().isUpdateViaDirectConnectionAllowed());
@@ -2381,7 +2389,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT,
 								 InfoServiceDBEntry.getConnectionTimeout());
 			
-			if(JAPModel.getInstance().isHelpPathDefined())
+			if(JAPModel.getInstance().isHelpPathDefined() && 
+					JAPModel.getInstance().isHelpPathChangeable())
 			{
 				XMLUtil.setAttribute(e, XML_ATTR_HELP_PATH, 
 									 JAPModel.getInstance().getHelpPath());
@@ -2564,16 +2573,17 @@ public final class JAPController extends Observable implements IProxyListener, O
 			addWindowLocationToConf(elemWindow, JAPModel.getInstance().getIconifiedWindowLocation());
 			elemGUI.appendChild(elemWindow);
 
+			/*
 			elemWindow = doc.createElement(JAPModel.XML_HELP_WINDOW);
 			addWindowLocationToConf(elemWindow, JAPModel.getInstance().getHelpWindowLocation());
 			addWindowSizeToConf(elemWindow, JAPModel.getInstance().getHelpWindowSize(),
 								JAPModel.getInstance().isHelpWindowSizeSaved());
-			elemGUI.appendChild(elemWindow);
+			elemGUI.appendChild(elemWindow);*/
 
 
 			Element elemMainWindow = doc.createElement(JAPConstants.CONFIG_MAIN_WINDOW);
 			elemGUI.appendChild(elemMainWindow);
-			addWindowLocationToConf(elemMainWindow, JAPModel.getInstance().getMainWindowLocation());
+			addWindowLocationToConf(elemMainWindow, JAPModel.getMainWindowLocation());
 
 			if (JAPModel.getMoveToSystrayOnStartup())
 			{
@@ -3050,7 +3060,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to start AN.ON service...");
 					}
-					JAPExtension.doIt();
+					//JAPExtension.doIt();
 					ret = m_proxyAnon.start(cascadeContainer);
 
 
@@ -3264,7 +3274,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						catch (NullPointerException a_e)
 						{
 						}
-						if (!JAPModel.getInstance().isInfoServiceDisabled() &&
+						if (!JAPModel.isInfoServiceDisabled() &&
 							cascade != null && !cascade.isUserDefined())
 						{
 							if (cascade.isFromCascade() ||
@@ -3299,7 +3309,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						m_proxyDirect = new DirectProxy(m_socketHTTPListener);
 						// ignore all connections to terminate all remaining connections from JAP threads
-						m_proxyDirect.setAllowUnprotectedConnectionCallback(null);
+						DirectProxy.setAllowUnprotectedConnectionCallback(null);
 						m_proxyDirect.startService();
 						try
 						{
@@ -3310,7 +3320,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							// ignore
 						}
 						// reactivate the callback (now all remaining JAP connections should be dead)
-						m_proxyDirect.setAllowUnprotectedConnectionCallback(m_proxyCallback);
+						DirectProxy.setAllowUnprotectedConnectionCallback(m_proxyCallback);
 					}
 					/* notify the forwarding system after! m_proxyAnon is set to null */
 					JAPModel.getInstance().getRoutingSettings().anonConnectionClosed();
@@ -3599,7 +3609,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 }
 	 */
 	//---------------------------------------------------------------------
-
+	
 	/** This (and only this) is the final exit procedure of JAP!
 	 * It shows a reminder to reset the proxy configurations and saves the current configuration.
 	 *	@param bDoNotRestart false if JAP should be restarted; true otherwise
@@ -3613,7 +3623,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				int returnValue;
 				JAPDialog.LinkedCheckBox checkBox;
 				if (!JAPModel.getInstance().isNeverRemindGoodbye() && bDoNotRestart &&
-					!getInstance().isPortableMode())
+					!getInstance().isPortableMode() && !getInstance().m_restarter.hideWarnings())
 				{
 					// show a Reminder message that active contents should be disabled
 					checkBox = new JAPDialog.LinkedCheckBox(false)
@@ -3637,7 +3647,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				}
 
 				if (returnValue == JAPDialog.RETURN_VALUE_OK &&
-					getInstance().getViewWindow() != null && getInstance().m_bAskSavePayment && bDoNotRestart)
+					getInstance().getViewWindow() != null && getInstance().m_bAskSavePayment && 
+					bDoNotRestart && !getInstance().m_restarter.hideWarnings())
 				{
 					// we are in GUI mode
 					Enumeration enumAccounts = PayAccountsFile.getInstance().getAccounts();
@@ -3718,8 +3729,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 						((ProgramExitListener)exitListeners.elementAt(i)).programExiting();
 					}
 
-					boolean error = m_Controller.saveConfigFile();
-					if (error && bDoNotRestart)
+					boolean error = m_Controller.m_restarter.isConfigFileSaved() ? 
+							m_Controller.saveConfigFile() : false;
+					if (error && bDoNotRestart && !getInstance().m_restarter.hideWarnings())
 					{
 						JAPDialog.showErrorDialog(parent, JAPMessages.getString(MSG_ERROR_SAVING_CONFIG,
 							JAPModel.getInstance().getConfigFile() ), LogType.MISC);
@@ -3747,7 +3759,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 										  "Stopping InfoService auto-update threads...");
 							getInstance().m_finishSplash.setText(
 								JAPMessages.getString(MSG_FINISHING_IS_UPDATES));
-							m_Controller.m_feedback.stop();
+							JAPController.m_feedback.stop();
 							m_Controller.m_AccountUpdater.stop();
 							m_Controller.m_MixCascadeUpdater.stop();
 							m_Controller.m_InfoServiceUpdater.stop();
@@ -4178,19 +4190,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 	}
 
 	//---------------------------------------------------------------------
-	public void setView(IJAPMainView v, boolean a_bAllowSplash)
+	public void setView(IJAPMainView v, ISplashResponse a_splash)
 	{
 		synchronized (SYNC_VIEW)
 		{
 			m_View = v;
-			if (m_View instanceof Frame && a_bAllowSplash)
-			{
-				m_finishSplash = new JAPSplash((Frame)m_View, JAPMessages.getString(MSG_FINISHING));
-			}
-			else
-			{
-				m_finishSplash = new ConsoleSplash();
-			}
+			m_finishSplash = a_splash;
 		}
 	}
 
@@ -4668,7 +4673,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			public void run()
 			{
-				if (!JAPModel.getInstance().isInfoServiceDisabled())
+				if (!JAPModel.isInfoServiceDisabled())
 				{
 					m_feedback.update();
 				}
@@ -4692,12 +4697,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 		
 		if(isPortableMode() && m_Model.getStartPortableFirefox())
 		{
-			if(!m_firstPortableFFStart)
+			if(!m_firstPortableFFStart && AbstractOS.getInstance().isDefaultURLAvailable())
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "First browser start");
 				m_firstPortableFFStart = true;
-				/*@todo: should better get the browser command from JAPModel */
-				startPortableFirefox(m_View.getBrowserCommand());
+				AbstractOS.getInstance().openBrowser();
 			}
 		}
 	}
@@ -4748,7 +4752,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	public void connectionError()
 	{
 		LogHolder.log(LogLevel.ERR, LogType.NET, "JAPController received connectionError");
-		if (!m_Model.isAutomaticallyReconnected())
+		if (!JAPModel.isAutomaticallyReconnected())
 		{
 			this.setAnonMode(false);
 		}

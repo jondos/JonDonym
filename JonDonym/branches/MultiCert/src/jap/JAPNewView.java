@@ -27,8 +27,6 @@
  */
 package jap;
 
-import java.io.File;
-
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -39,13 +37,13 @@ import java.util.Vector;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -74,7 +72,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.JFileChooser;
 
 import anon.AnonServerDescription;
 import anon.infoservice.BlacklistedCascadeIDEntry;
@@ -85,6 +82,8 @@ import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.JavaVersionDBEntry;
+import anon.infoservice.PerformanceInfo;
+import anon.infoservice.PerformanceEntry;
 import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
@@ -101,7 +100,7 @@ import gui.CountryMapper;
 import gui.FlippingPanel;
 import gui.GUIUtils;
 import gui.JAPDll;
-import gui.JAPHelp;
+import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPProgressBar;
 import gui.MixDetailsDialog;
@@ -111,6 +110,7 @@ import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.JAPDialog.LinkedInformationAdapter;
 import gui.dialog.JAPDialog.Options;
+import gui.help.JAPHelp;
 import jap.forward.JAPRoutingMessage;
 import jap.forward.JAPRoutingRegistrationStatusObserver;
 import jap.forward.JAPRoutingServerStatisticsListener;
@@ -125,6 +125,11 @@ import update.JAPUpdateWizard;
 final public class JAPNewView extends AbstractJAPMainView implements IJAPMainView, ActionListener,
 	JAPObserver, Observer, IMessageListener
 {
+	/**
+	 * serial version UID 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	public static final String MSG_UPDATE = JAPNewView.class.getName() + "_update";
 	public static final String MSG_NO_REAL_PAYMENT = JAPNewView.class.getName() + "_noRealPayment";
 
@@ -166,14 +171,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_ANTI_CENSORSHIP = JAPNewView.class.getName() + "_antiCensorship";
 
 	private static final String MSG_OBSERVABLE_EXPLAIN = JAPNewView.class.getName() + "_observableExplain";
-	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";
-	private static final String MSG_EXPLAIN_NO_FIREFOX_FOUND = JAPNewView.class.getName() + "_explainNoFirefoxFound";
+	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";	
 
-	private static final String MSG_STD_HELP_PATH_INSTALLATION = JAPNewView.class.getName() + "_stdHelpPathInstallation";
-	private static final String MSG_HELP_PATH_CHOICE = JAPNewView.class.getName() + "_helpPathChoice";
-	private static final String MSG_HELP_PATH_CONFIRM = JAPNewView.class.getName() + "_helpPathConfirm";
-
-	
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
 	private static final String MSG_LBL_HTTP_DATA =
@@ -226,6 +225,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	//private Icon[] meterIcons;
 	private JAPConf m_dlgConfig;
 	private Object LOCK_CONFIG = new Object();
+	private boolean m_bConfigActive = false;
 	private JAPViewIconified m_ViewIconified;
 	private Object SYNC_ICONIFIED_VIEW = new Object();
 	private boolean m_bIsIconified;
@@ -237,7 +237,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JLabel m_labelAnonService, m_labelAnonymity, m_labelAnonymitySmall, m_labelAnonymityOnOff;
 	private JLabel m_labelAnonMeter, m_labelAnonymityLow, m_labelAnonymityHigh;
 
-	private JLabel m_labelAnonymityUser, m_labelAnonymityUserLabel, m_labelMixCountries, m_labelOperatorCountries;
+	private JLabel m_labelSpeed, m_labelDelay, m_labelSpeedLabel, m_labelDelayLabel, m_labelMixCountries, m_labelOperatorCountries;
 	
 	private JLabel m_labelMixFlags[], m_labelOperatorFlags[];
 	private MixMouseAdapter m_adapterMix[];
@@ -270,7 +270,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private FlippingPanel m_flippingpanelAnon, m_flippingpanelOwnTraffic, m_flippingpanelForward;
 	private StatusPanel m_StatusPanel;
 	private JPanel m_panelAnonService;
-	private int m_iPreferredWidth;
 	private Object SYNC_DISCONNECTED_ERROR = new Object();
 	private boolean m_bDisconnectedErrorShown = false;
 	private boolean m_bIgnoreAnonComboEvents = false;
@@ -308,9 +307,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private int m_msgIDInsecure;
 
-	private String[] m_firefoxCommand; //the CLI command for re-opening firefox, usually just the path to the executable
-
-	public JAPNewView(String s, JAPController a_controller, String[] a_firefoxCommand)
+	public JAPNewView(String s, JAPController a_controller)
 	{
 		super(s, a_controller);
 		m_bIsSimpleView = (JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED);
@@ -321,7 +318,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_packetMixedJobs = new JobQueue("packet mixed update job queue");
 		m_lTrafficWWW = 0;
 		m_lTrafficOther = 0;
-		m_firefoxCommand = a_firefoxCommand;
 	}
 
 	public void create(boolean loadPay)
@@ -340,16 +336,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		// important to initialise for TinyL&F!!!
 		new SystrayPopupMenu(new SystrayPopupMenu.MainWindowListener()
 		{
-			public void onOpenBrowser()
-			{
-				m_Controller.startPortableFirefox(m_firefoxCommand);
-			}
-
-			public boolean isBrowserAvailable()
-			{
-				return (getBrowserCommand() != null);
-			}
-
 			public void onShowMainWindow()
 			{
 			}
@@ -375,20 +361,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				if (SwingUtilities.isRightMouseButton(a_event) || a_event.isPopupTrigger())
 				{
-
 					final SystrayPopupMenu popup = new SystrayPopupMenu(
 						new SystrayPopupMenu.MainWindowListener()
 					{
-						public void onOpenBrowser()
-						{
-							m_Controller.startPortableFirefox(m_firefoxCommand);
-						}
-
-						public boolean isBrowserAvailable()
-						{
-							return (getBrowserCommand() != null);
-						}
-
 						public void onShowMainWindow()
 						{
 							// do nothing
@@ -414,7 +389,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					popup.show(JAPNewView.this,
 							   new Point(a_event.getX() + getLocation().x,
 										 a_event.getY() + getLocation().y));
-
 				}
 				else if (a_event.getClickCount() == 2)
 				{
@@ -493,7 +467,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
-				if (JAPModel.getInstance().isInfoServiceDisabled())
+				if (JAPModel.isInfoServiceDisabled())
 				{
 					if (JAPDialog.showConfirmDialog(JAPNewView.this,
 						JAPMessages.getString(MSG_IS_DISABLED_EXPLAIN),
@@ -592,7 +566,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		constrVersion.insets = new Insets(0, 0, 0, 0);
 		m_pnlVersion.add(m_labelVersion, constrVersion);
 
-		if (m_Controller.isPortableMode())
+		if (m_Controller.isPortableMode() && AbstractOS.getInstance().isDefaultURLAvailable())
 		{
 			m_firefox = new JButton(GUIUtils.loadImageIcon("firefox.png", true, false));
 			m_firefox.setOpaque(false);
@@ -603,7 +577,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				public void actionPerformed(ActionEvent e)
 				{
-					m_Controller.startPortableFirefox(m_firefoxCommand);
+					AbstractOS.getInstance().openBrowser();	
 				}
 			});
 
@@ -740,13 +714,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.fill = GridBagConstraints.NONE;
 		m_panelAnonService.add(m_bttnAnonDetails, c1);
 
-		c1.gridx = 0;
-		c1.gridy = 1;
-		c1.anchor = GridBagConstraints.WEST;
-		c1.insets = new Insets(5, 0, 0, 0);
-		JLabel lblTrust = new JLabel(JAPMessages.getString(MSG_TRUST_FILTER) + ":");
-		//m_panelAnonService.add(lblTrust, c1);
-
 		c1.gridx = 1;
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
@@ -797,29 +764,43 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.insets = new Insets(0, 5, 0, 0);
 		p.add(m_labelAnonymity, c1);
 		
-		m_labelAnonymityUserLabel = new JLabel(JAPMessages.getString("ngNrOfUsers") + ":");
+		m_labelSpeedLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_speed") + ":");
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(5, 15, 0, 10);
-		p.add(m_labelAnonymityUserLabel, c1);
+		p.add(m_labelSpeedLabel, c1);
+		
+		m_labelDelayLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_latency") + ":");
+		c1.gridy = 2;
+		p.add(m_labelDelayLabel, c1);
 		
 		m_labelMixCountries = new JLabel(JAPMessages.getString("ngMixCountries"));
-		c1.gridy = 2;
+		c1.gridy = 3;
 		p.add(m_labelMixCountries, c1);
 		
 		m_labelOperatorCountries = new JLabel(JAPMessages.getString("ngOperatorCountries"));
-		c1.gridy = 3;
+		c1.gridy = 4;
 		p.add(m_labelOperatorCountries, c1);
 		
-		m_labelAnonymityUser = new JLabel("", SwingConstants.LEFT);
-		c1.insets = new Insets(0, 0, 0, 0);
+		m_labelSpeed = new JLabel("", SwingConstants.LEFT);
+		c1.insets = new Insets(5, 0, 0, 10);
 		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
 		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.gridy = 1;
 		c1.gridx = 1;
 		c1.gridwidth = 3;
-		p.add(m_labelAnonymityUser, c1);
+		p.add(m_labelSpeed, c1);
+		
+		m_labelDelay = new JLabel("", SwingConstants.LEFT);
+		c1.insets = new Insets(5, 0, 0, 10);
+		c1.anchor = GridBagConstraints.WEST;
+		c1.weightx = 0;
+		c1.fill = GridBagConstraints.HORIZONTAL;
+		c1.gridy = 2;
+		c1.gridx = 1;
+		c1.gridwidth = 3;
+		p.add(m_labelDelay, c1);
 
 		m_labelMixFlags = new JLabel[3];
 		m_labelOperatorFlags = new JLabel[3];
@@ -833,14 +814,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			c1.gridx = i + 1;
 			
 			m_labelMixFlags[i] = new JLabel("");
-			c1.gridy = 2;
+			c1.gridy = 3;
 			p.add(m_labelMixFlags[i], c1);
 			
 			m_labelMixFlags[i].addMouseListener(m_adapterMix[i] = 
 				new MixMouseAdapter(null, i));
 			m_labelMixFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			
-			c1.gridy = 3;
+			c1.gridy = 4;
 			m_labelOperatorFlags[i] = new JLabel("");
 			p.add(m_labelOperatorFlags[i], c1);
 			
@@ -856,13 +837,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void mouseClicked(MouseEvent a_event)
 			{
-				JAPHelp.getInstance().getContextObj().setContext(HLP_ANONYMETER);
+				JAPHelp.getInstance().setContext(
+						JAPHelpContext.createHelpContext(HLP_ANONYMETER, JAPNewView.this));
 				JAPHelp.getInstance().setVisible(true);
 			}
 		});
 		c1.gridx = 4;
 		c1.gridy = 0;
-		c1.gridheight = 4;
+		c1.gridheight = 5;
 		c1.anchor = GridBagConstraints.EAST;
 		c1.weightx = 1;
 		c1.fill = GridBagConstraints.NONE;
@@ -1316,13 +1298,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 		update(null, new JAPModel.FontResize(0, JAPModel.getInstance().getFontSize()));
 
-		Dimension d = super.getPreferredSize();
+		/*Dimension d = super.getPreferredSize();
 		m_iPreferredWidth = Math.max(d.width, Math.max(m_flippingpanelOwnTraffic.getPreferredSize().width,
 			Math.max(
 				Math.max(m_panelAnonService.getPreferredSize().width,
 						 m_flippingpanelForward.getPreferredSize().width),
-				m_flippingpanelAnon.getPreferredSize().width)));
-		if (!JAPModel.getInstance().isInfoServiceDisabled())
+				m_flippingpanelAnon.getPreferredSize().width)));*/
+		if (!JAPModel.isInfoServiceDisabled())
 		{
 			fetchMixCascadesAsync(false);
 		}
@@ -1331,7 +1313,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		updateValues(true);
 		setOptimalSize();
 		GUIUtils.centerOnScreen(this);
-		GUIUtils.restoreLocation(this, JAPModel.getInstance().getMainWindowLocation());
+		GUIUtils.restoreLocation(this, JAPModel.getMainWindowLocation());
 
 		Database.getInstance(StatusInfo.class).addObserver(this);
 		Database.getInstance(JAPVersionInfo.class).addObserver(this);
@@ -1346,35 +1328,32 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		JAPModel.getInstance().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().addObserver(this);
 
-		JAPHelp.init(this, AbstractOS.getInstance(), AbstractOS.getInstance());
-		JAPHelp.getInstance().setLocationCenteredOnOwner();
-		JAPHelp.getInstance().resetAutomaticLocation(JAPModel.getInstance().isHelpWindowLocationSaved());
-		JAPHelp.getInstance().restoreLocation(JAPModel.getInstance().getHelpWindowLocation());
-		JAPHelp.getInstance().restoreSize(JAPModel.getInstance().getHelpWindowSize());
-
+		JAPHelp.init(this, JAPModel.getInstance());
+		if(JAPHelp.getHelpDialog() != null)
+		{
+			JAPHelp.getHelpDialog().setLocationCenteredOnOwner();
+			JAPHelp.getHelpDialog().resetAutomaticLocation(JAPModel.getInstance().isHelpWindowLocationSaved());
+			JAPHelp.getHelpDialog().restoreLocation(JAPModel.getInstance().getHelpWindowLocation());
+			JAPHelp.getHelpDialog().restoreSize(JAPModel.getInstance().getHelpWindowSize());
+		}
 		m_mainMovedAdapter = new ComponentMovedAdapter();
 		m_helpMovedAdapter = new ComponentMovedAdapter();
 		m_configMovedAdapter = new ComponentMovedAdapter();
 		addComponentListener(m_mainMovedAdapter);
-		JAPHelp.getInstance().addComponentListener(m_helpMovedAdapter);
-
+		if(JAPHelp.getHelpDialog() != null)
+		{
+			JAPHelp.getHelpDialog().addComponentListener(m_helpMovedAdapter);
+		}
 		//new GUIUtils.WindowDocker(this);
 
-
-		new Thread(new Runnable()
+		synchronized (LOCK_CONFIG)
 		{
-			public void run()
+			if (m_dlgConfig == null)
 			{
-				synchronized (LOCK_CONFIG)
-				{
-					if (m_dlgConfig == null)
-					{
-						m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
-						m_dlgConfig.addComponentListener(m_configMovedAdapter);
-					}
-				}
+				m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
+				m_dlgConfig.addComponentListener(m_configMovedAdapter);
 			}
-		}).start();
+		}
 	}
 
 	private FlippingPanel buildForwarderPanel()
@@ -1386,7 +1365,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.insets = new Insets(0, 5, 0, 0);
 		c1.anchor = GridBagConstraints.WEST;
 		JPanel p = new JPanel(new GridBagLayout());
-		GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints c2 = new GridBagConstraints();
 		JPanel p2 = new JPanel(new GridBagLayout());
 		m_labelForwarding = new JLabel(JAPMessages.getString("ngForwarding"));
@@ -1939,7 +1917,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				public void run()
 				{
 					if (!JAPController.getInstance().isShuttingDown()
-						&& (JAPModel.getInstance().isInfoServiceDisabled() ||
+						&& (JAPModel.isInfoServiceDisabled() ||
 							(!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
 							 !JAPController.getInstance().isAnonConnected())))
 					{
@@ -2462,7 +2440,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				boolean bShowError = false;
 				synchronized (m_connectionEstablishedSync)
 				{
-					if (!a_bOnError || JAPModel.getInstance().isAutomaticallyReconnected())
+					if (!a_bOnError || JAPModel.isAutomaticallyReconnected())
 					{
 						if (m_Controller.getAnonMode() && !m_Controller.isAnonConnected())
 						{
@@ -2534,84 +2512,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
-		if(JAPConstants.EXT_HELP_NOTFINISHED)
-		{
-			showHelpInJonDo();
-			return;
-		}
-		
-		JAPHelpController helpController = JAPHelpController.getInstance();
-		JAPModel model = JAPModel.getInstance();
-		boolean showHelpInternal = false;
-		
-		/* If no external help path is specified and no help is installed: 
-		 * open dialog to ask the user
-		 */
-		if(!model.isHelpPathDefined() && !helpController.isHelpInstalled())
-		{
-			File f = askForHelpInstallationPath(IJAPMainView.WITH_DIALOG);
-			
-			boolean pathChosen = (f != null);
-			String pathValidation = pathChosen ? 
-					JAPModel.getInstance().helpPathValidityCheck(f) : JAPModel.HELP_INVALID_NULL;
-			boolean pathValid = JAPModel.getInstance().helpPathValidityCheck(f).equals(JAPModel.HELP_VALID);
-			boolean installationConfirmed = false;
-			if(pathChosen && pathValid)
-			{
-				installationConfirmed = JAPDialog.showYesNoDialog(this, 
-													JAPMessages.getString(MSG_HELP_PATH_CONFIRM)+
-													f.getPath());
-				/* when setting a valid path: help is automatically installed */
-				if(installationConfirmed)
-				{
-					JAPModel.getInstance().setHelpPath(f);
-					m_dlgConfig.updateValues();
-					/* When the Path is changed outside of
-				
-					/* TODO: improve asynchronous help installation when model updates */
-					synchronized(JAPHelpController.class)
-					{
-						try 
-						{
-							JAPHelpController.asynchHelpFileInstallThread.join();
-						} 
-						catch (InterruptedException e) 
-						{}
-					}
-				}
-			}
-			
-			if(!pathChosen || !pathValid || !installationConfirmed)
-			{
-				boolean stdInstall = JAPDialog.showYesNoDialog(this, 
-													((!pathValid || !pathChosen) ? JAPMessages.getString(pathValidation) : "")+
-													JAPMessages.getString(MSG_STD_HELP_PATH_INSTALLATION));
-				if(stdInstall)
-				{
-					JAPHelpController.getInstance().installHelp();
-				}
-				else
-				{
-					showHelpInternal = true;
-				}
-			}
-		}
-		
-		boolean helpOpened = false;
-		if(!showHelpInternal)
-		{
-			helpOpened = JAPHelpController.getInstance().openHelp();
-		}
-		if(!helpOpened)
-		{
-			showHelpInJonDo();
-		}
-	}
-	
-	private void showHelpInJonDo()
-	{
 		JAPHelp help = JAPHelp.getInstance();
-		help.getContextObj().setContext("index");
+		help.setContext(
+				JAPHelpContext.createHelpContext("index", this));
 		help.loadCurrentContext();
 	}
 
@@ -2648,26 +2551,56 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 		//if (m_helpMovedAdapter.hasMoved())
 		{
-			JAPModel.getInstance().setHelpWindowLocation(JAPHelp.getInstance().getLocation());
+			if(JAPHelp.getHelpDialog() != null)
+			{
+				JAPModel.getInstance().setHelpWindowLocation(JAPHelp.getHelpDialog().getLocation());
+			}
 		}
-		JAPModel.getInstance().setHelpWindowSize(JAPHelp.getInstance().getSize());
+		if(JAPHelp.getHelpDialog() != null)
+		{
+			JAPModel.getInstance().setHelpWindowSize(JAPHelp.getHelpDialog().getSize());
+		}
 	}
 
-	public void showConfigDialog(String card, Object a_value)
+	public void showConfigDialog(final String card, final Object a_value)
 	{
+		if (m_bConfigActive)
+		{
+			return;
+		}
+		m_bConfigActive = true;
+		
 		synchronized (LOCK_CONFIG)
 		{
+			if (!m_bConfigActive)
+			{
+				return;
+			}
+			
 			if (m_dlgConfig == null)
 			{
 				Cursor c = getCursor();
 				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				m_dlgConfig = new JAPConf(this, m_bWithPayment);
+				m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
 				m_dlgConfig.addComponentListener(m_configMovedAdapter);
 				setCursor(c);
 			}
-
+			m_dlgConfig.updateValues();
 			m_dlgConfig.selectCard(card, a_value);
 			m_dlgConfig.setVisible(true);
+			m_bConfigActive = false;
+		}
+	}
+	
+	public Component getCurrentView()
+	{
+		synchronized (LOCK_CONFIG)
+		{
+			if (m_dlgConfig != null && m_dlgConfig.isVisible())
+			{
+				return m_dlgConfig.getContentPane();
+			}
+			return this.getContentPane();
 		}
 	}
 
@@ -2695,11 +2628,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_comboAnonServices.showPopup();
 	}
 
-	public String[] getBrowserCommand()
-	{
-		return m_firefoxCommand;
-	}
-
 	public void onUpdateValues()
 	{
 		synchronized (SYNC_ICONIFIED_VIEW)
@@ -2716,7 +2644,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		 */
 		Enumeration entries =
 			Database.getInstance(JAPVersionInfo.class).getEntrySnapshotAsEnumeration();
-		String strTemp;
 		JAPVersionInfo vi = null;
 		while (entries.hasMoreElements())
 		{
@@ -2758,7 +2685,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 
 		if (!JAPController.getInstance().isShuttingDown()
-			&& (JAPModel.getInstance().isInfoServiceDisabled() ||
+			&& (JAPModel.isInfoServiceDisabled() ||
 				(!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
 				 !JAPController.getInstance().isAnonConnected())))
 		{
@@ -2844,7 +2771,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_progressAnonLevel.setFilledBarColor(color);
 			m_progressAnonLevel.setValue(anonLevel + 1);
 
-			String strSystrayTooltip = "JAP";
+			String strSystrayTooltip = "JonDo";
 			if (m_Controller.isAnonConnected())
 			{
 				strSystrayTooltip += " (" + JAPMessages.getString(MSG_CONNECTED) + ")";
@@ -2861,7 +2788,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					//{
 					//	userProgressBar.setMaximum(currentStatus.getNrOfActiveUsers());
 					//}
-					m_labelAnonymityUser.setText(Integer.toString(currentStatus.getNrOfActiveUsers()));
 					//strSystrayTooltip += "\n" + JAPMessages.getString("ngNrOfUsers") + ": " +
 					//currentStatus.getNrOfActiveUsers();
 					if (anonLevel >= StatusInfo.ANON_LEVEL_MIN)
@@ -2896,16 +2822,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						}
 					}
 				}
-				else
-				{
-					strTemp = JAPMessages.getString("meterNA");
-					if (m_labelAnonymityUser.getText() == null ||
-						!m_labelAnonymityUser.getText().equals(strTemp))
-					{
-						// optimized change...
-						m_labelAnonymityUser.setText(strTemp);
-					}
-				}
 				/*int t = currentStatus.getTrafficSituation();
 				if (t > -1)
 				{
@@ -2930,7 +2846,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				/* we are not in anonymity mode */
 				//m_progressAnonTraffic.setValue(0);
-				m_labelAnonymityUser.setText("");
 				m_progressAnonLevel.setValue(0);
 			}
 			
@@ -2979,12 +2894,49 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_labelMixFlags[i].setIcon(null);
 				m_labelOperatorFlags[i].setIcon(null);
 			}
-						
-			if (m_Controller.isAnonConnected())
+			
+			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(currentMixCascade.getId());
+			
+			long value = 0;
+			
+			if(entry != null)
 			{
-				JAPDll.setSystrayTooltip("JAP (connected)\n" + currentMixCascade.getName());
+				value = entry.getBound(PerformanceEntry.SPEED);						
+				if (value < 0)
+				{
+					m_labelSpeed.setText(JAPMessages.getString("statusUnknown"));
+				}
+				else if(value == 0)
+				{
+					m_labelSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1]));
+				}
+				else
+				{
+					m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+				}
+				
+				value = entry.getBound(PerformanceEntry.DELAY);
+				if (value < 0)
+				{
+					m_labelDelay.setText(JAPMessages.getString("statusUnknown"));
+				}
+				else if(value == Long.MAX_VALUE)
+				{
+					m_labelDelay.setText("> " + 
+							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
+							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
+				}
+				else
+				{
+					m_labelDelay.setText(value + " ms");
+				}
 			}
-
+			else
+			{
+				m_labelSpeed.setText(JAPMessages.getString("statusUnknown"));
+				m_labelDelay.setText(JAPMessages.getString("statusUnknown"));
+			}
+			
 			JAPDll.setSystrayTooltip(strSystrayTooltip);
 
 			LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Finished updateValues");
@@ -3414,28 +3366,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 	}
 
-	public void showChooseFirefoxPathDialog()
-	{
-		if(JAPDialog.showYesNoDialog(this, JAPMessages.getString(MSG_EXPLAIN_NO_FIREFOX_FOUND)))
-		{
-			JFileChooser chooser = new JFileChooser();
-			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			{
-				File f = chooser.getSelectedFile();
-				if(m_firefoxCommand == null)
-				{
-					m_firefoxCommand = new String[1];
-				}
-				m_firefoxCommand[0] = f.getAbsolutePath();
-				if(f != null)
-				{
-					m_Controller.startPortableFirefox(m_firefoxCommand);
-				}
-
-			}
-		}
-	}
-
 	private final class ComponentMovedAdapter extends ComponentAdapter
 	{
 		private boolean m_bMoved = false;
@@ -3495,41 +3425,5 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			m_operator = a_operator;
 		}
-	}
-
-	public File askForHelpInstallationPath(boolean withDialog) 
-	{
-		boolean openFileChooser = !withDialog;
-		if(withDialog)
-		{
-			openFileChooser = 
-				JAPDialog.showYesNoDialog(this, JAPMessages.getString(MSG_HELP_PATH_CHOICE));
-		}
-		if(openFileChooser)
-		{
-			JFileChooser chooser = new JFileChooser();
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			{
-				File f = chooser.getSelectedFile();
-				return f;
-			}
-		}
-		return null;
-	}
-	
-	public JAPHelpProgressDialog displayInstallProgress()
-	{
-		JAPHelpProgressDialog hpd = null;
-		if(m_dlgConfig != null)
-		{
-			if(m_dlgConfig.isVisible())
-			{
-				hpd = new JAPHelpProgressDialog(m_dlgConfig);
-				return hpd;
-			}
-		}
-		hpd = new JAPHelpProgressDialog(this);
-		return hpd;
 	}
 }

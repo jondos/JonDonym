@@ -41,13 +41,12 @@ import anon.crypto.XMLSignature;
  * @author Rolf Wendolsky
  */
 public abstract class AbstractDistributableCertifiedDatabaseEntry extends AbstractDistributableDatabaseEntry
+	implements ICertifiedDatabaseEntry
 {
 	public AbstractDistributableCertifiedDatabaseEntry(long a_expireTime)
 	{
 		super(a_expireTime);
 	}
-
-	//public abstract JAPCertificate getCertificate();
 	
 	public abstract MultiCertPath getCertPath();
 
@@ -69,7 +68,7 @@ public abstract class AbstractDistributableCertifiedDatabaseEntry extends Abstra
 			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- cert is NULL!");
 			return false;
 		}
-		return  getId().equals(new X509SubjectKeyIdentifier(
+		return  (getId() != null) && getId().equals(new X509SubjectKeyIdentifier(
 				 getCertificate().getPublicKey()).getValueWithoutColon());
 				 */
 		MultiCertPath path = getCertPath();

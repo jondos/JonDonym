@@ -30,7 +30,6 @@ package anon.pay.xml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import anon.crypto.PKCS12;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
 import anon.crypto.IMyPrivateKey;
@@ -41,7 +40,6 @@ import java.util.Hashtable;
 import org.w3c.dom.NodeList;
 import anon.util.XMLParseException;
 import anon.util.Util;
-import anon.infoservice.MixCascade;
 import anon.infoservice.MixPosition;
 
 /**

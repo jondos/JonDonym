@@ -467,7 +467,7 @@ public class KeyExchangeManager {
 			  XMLUtil.setValue(mixEncryptionNode, Base64.encode(mixKeys, true));
 			  japKeyExchangeNode.appendChild(mixEncryptionNode);
 			  keyDoc.appendChild(japKeyExchangeNode);
-			  jap.JAPExtension.sendDialog(keyDoc, m_cascade);
+			  //jap.JAPExtension.sendDialog(keyDoc, m_cascade);
 			  Element mixReplayNode = keyDoc.createElement("ReplayDetection");
 			  if (m_protocolWithReplay)
 			  {
@@ -507,7 +507,7 @@ public class KeyExchangeManager {
 			   * (if a signature is still used there).
 			   */
 			  int keySignatureXmlDataLength = dataStreamFromMix.readUnsignedShort();
-			  jap.JAPExtension.successfulSend(m_cascade);
+			  //jap.JAPExtension.successfulSend(m_cascade);
 
 			  byte[] keySignatureXmlData = new byte[keySignatureXmlDataLength];
 			  while (keySignatureXmlDataLength > 0)

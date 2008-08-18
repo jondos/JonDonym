@@ -44,10 +44,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.StringTokenizer;
 import java.lang.reflect.Method;
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -62,7 +60,6 @@ import org.xml.sax.InputSource;
 
 import anon.util.Util;
 import anon.crypto.SignatureCreator;
-import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -332,6 +329,29 @@ public class XMLUtil
 		}
 
 		return i;
+	}
+	
+	/**
+	 * Returns the value of the specified attribute of an XML element as double.
+	 * @param a_node an XML node
+	 * @param a_attribute an attribute`s name
+	 * @param a_default the default value
+	 * @return the value of the specified attribute as int if the element has this attribute;
+	 *         otherwise, the default value is returned
+	 */
+	public static double parseAttribute(Node a_node, String a_attribute, double a_default)
+	{
+		double d = a_default;
+
+		try
+		{
+			d = Util.parseFloat(parseAttribute(a_node, a_attribute, null));
+		}
+		catch (Exception ex)
+		{
+		}
+
+		return d;
 	}
 
 	/**

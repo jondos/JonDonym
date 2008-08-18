@@ -33,7 +33,6 @@ import java.util.Vector;
 //as flow control and so on ...
 public class BasicWizard implements Wizard
 	{
-		private WizardPage currentWizardPage;
 		private WizardHost wizardHost;
 		protected Vector m_Pages;
 		private String m_strTitle;

@@ -30,7 +30,6 @@ package jap;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.util.IPasswordReader;
 import gui.JAPMessages;
-import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.PasswordContentPane;
 

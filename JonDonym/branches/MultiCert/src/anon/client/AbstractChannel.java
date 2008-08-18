@@ -32,8 +32,6 @@
 package anon.client;
 
 import java.io.IOException;
-import anon.IServiceContainer;
-
 
 /**
  * @author Stefan Lieske

@@ -48,10 +48,11 @@ import anon.infoservice.StatusInfo;
 public class MixCascadeUpdater extends AbstractDatabaseUpdater
 {
 	private static final long UPDATE_INTERVAL_MS = 4 * 60000l; //every four minutes
+	private static final long MIN_UPDATE_INTERVAL_MS = 30000l;
 
 	public MixCascadeUpdater()
 	{
-		super(new ConstantUpdateInterval(UPDATE_INTERVAL_MS));
+		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
 	}
 
 	public Class getUpdatedClass()
@@ -118,8 +119,17 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 
 	protected Hashtable getEntrySerials()
 	{
-		return InfoServiceHolder.getInstance().getMixCascadeSerials();
-		//return new Hashtable();
+		Hashtable result = InfoServiceHolder.getInstance().getMixCascadeSerials();
+		if (result == null)
+		{
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
+		}
+		else
+		{
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+		}
+		
+		return result;
 	}
 
 	protected Hashtable getUpdatedEntries(Hashtable a_entriesToUpdate)
@@ -142,13 +152,14 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 
 	private Hashtable getUpdatedEntries_internal(Hashtable a_entriesToUpdate)
 	{
+		Hashtable result;
 		if (a_entriesToUpdate == null)
 		{
-			return InfoServiceHolder.getInstance().getMixCascades();
+			result = InfoServiceHolder.getInstance().getMixCascades();
 		}
 		else if (a_entriesToUpdate.size() == 0)
 		{
-			return new Hashtable();
+			result = new Hashtable();
 		}
 		else
 		{
@@ -164,7 +175,8 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 					returnedEntries.put(cascade.getId(), cascade);
 				}
 			}
-			return returnedEntries;
+			result = returnedEntries;
 		}
+		return result;
 	}
 }

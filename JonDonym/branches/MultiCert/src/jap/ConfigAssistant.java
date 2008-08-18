@@ -54,7 +54,7 @@ import javax.swing.JTextPane;
 import javax.swing.border.Border;
 
 import gui.GUIUtils;
-import gui.JAPHelp;
+import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JTextComponentToClipboardCopier;
 import gui.LanguageMapper;
@@ -62,6 +62,7 @@ import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
+import gui.help.JAPHelp;
 import logging.LogType;
 import platform.AbstractOS;
 
@@ -254,7 +255,7 @@ public class ConfigAssistant extends JAPDialog
 			{
 				for (int i = 0; i < m_lblPorts.length; i++)
 				{
-					m_lblPorts[i].setText("" + JAPModel.getInstance().getHttpListenerPortNumber());
+					m_lblPorts[i].setText("" + JAPModel.getHttpListenerPortNumber());
 				}
 
 				return super.checkUpdate();
@@ -711,7 +712,7 @@ public class ConfigAssistant extends JAPDialog
 				if (paneSetLang.getButtonValue() == DialogContentPane.RETURN_VALUE_OK)
 				{
 					JAPMessages.setLocale(((LanguageMapper)comboLang.getSelectedItem()).getLocale());
-					JAPController.getInstance().goodBye(false);
+					JAPController.goodBye(false);
 				}
 				else
 				{
@@ -723,13 +724,13 @@ public class ConfigAssistant extends JAPDialog
 							JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
 						{
 							JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_SIMPLIFIED);
-							JAPController.getInstance().goodBye(false);
+							JAPController.goodBye(false);
 						}
 						else if (m_radioAdvancedView.isSelected() &&
 								 JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED)
 						{
 							JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_NORMAL);
-							JAPController.getInstance().goodBye(false);
+							JAPController.goodBye(false);
 						}
 					}
 				}
@@ -809,7 +810,8 @@ public class ConfigAssistant extends JAPDialog
 			{
 				if (a_bHelpContext)
 				{
-					JAPHelp.getInstance().getContextObj().setContext(a_context);
+					JAPHelp.getInstance().setContext(
+							JAPHelpContext.createHelpContext(a_context,ConfigAssistant.this.getContentPane()));
 					JAPHelp.getInstance().setVisible(true);
 				}
 				else

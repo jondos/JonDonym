@@ -42,7 +42,6 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Point;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -83,7 +82,6 @@ import anon.util.ResourceLoader;
 import anon.infoservice.ServiceLocation;
 import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
-import gui.dialog.WorkerContentPane;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -92,7 +90,6 @@ import java.awt.EventQueue;
 import java.awt.MenuComponent;
 import java.applet.Applet;
 import java.awt.Container;
-import java.awt.Color;
 import java.awt.image.ColorModel;
 import java.lang.reflect.Field;
 import java.lang.reflect.Constructor;
@@ -395,7 +392,7 @@ public final class GUIUtils
 			if (img == null || (img.getImageLoadStatus() & statusBits) != 0)
 			{
 				LogHolder.log(LogLevel.INFO, LogType.GUI,
-							  "Could not load requested image '" + a_strRelativeImagePath + "'");
+							  "Could not load requested image '" + a_strRelativeImagePath + "'!");
 			}
 		}
 
@@ -1224,8 +1221,6 @@ public final class GUIUtils
 		Screen[] screens;
 		Object graphicsConfiguration;
 		Frame screenFrame;
-		Rectangle screenBounds;
-		Point screenLocation;
 
 		try
 		{

@@ -35,9 +35,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Window;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -58,7 +56,6 @@ import logging.LogLevel;
 import logging.LogType;
 import gui.*;
 import gui.dialog.*;
-import java.awt.Rectangle;
 
 /**
  * This class serves as a debugging interface.

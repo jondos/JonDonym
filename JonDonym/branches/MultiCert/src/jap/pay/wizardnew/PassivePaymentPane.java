@@ -114,8 +114,8 @@ public class PassivePaymentPane extends DialogContentPane implements IWizardSuit
 		m_c.weightx = 0;
 		m_c.weightx = 0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.NONE;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.NONE;
 
 		//Add some dummy labels for dialog sizing
 		/*
@@ -139,8 +139,8 @@ public class PassivePaymentPane extends DialogContentPane implements IWizardSuit
 		m_c.weightx = 0;
 		m_c.weightx = 0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.NONE;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.NONE;
 		m_c.gridwidth = 1;
 		setText(m_selectedOption.getDetailedInfo(m_language));
 		JLabel label;
@@ -461,8 +461,8 @@ public class PassivePaymentPane extends DialogContentPane implements IWizardSuit
 		m_c.weightx = 0;
 		m_c.weightx = 0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.NONE;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.NONE;
 
 		m_c.gridwidth = 1;
 
@@ -478,7 +478,7 @@ public class PassivePaymentPane extends DialogContentPane implements IWizardSuit
 		bounds = new JAPJIntField.IntFieldUnlimitedZerosBounds(9999);
 		m_c.gridy++;
 		m_c.gridwidth = 1;
-		m_c.fill = m_c.HORIZONTAL;
+		m_c.fill = GridBagConstraints.HORIZONTAL;
 		m_rootPanel.add(new JLabel(JAPMessages.getString(MSG_CARDNUMBER)), m_c);
 
 		JPanel panelCardNumer = new JPanel(new GridBagLayout());

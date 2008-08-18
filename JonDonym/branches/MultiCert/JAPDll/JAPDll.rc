@@ -51,12 +51,12 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-            VALUE "FileDescription", "JAP GUI Support DLL"
+            VALUE "FileDescription", "JAP/JonDo GUI Support DLL"
             VALUE "FileVersion", S_VERSION(L_VERSION)
             VALUE "InternalName", "JAPDll"
-            VALUE "LegalCopyright", "Copyright © 2000-2006, The JAP-Team"
+            VALUE "LegalCopyright", "The JAP-Team, JonDos GmbH"
             VALUE "OriginalFilename", "JAPDll.dll"
-            VALUE "ProductName", "JAP GUI Support DLL"
+            VALUE "ProductName", "JAP/JonDo GUI Support DLL"
             VALUE "ProductVersion", S_VERSION(L_VERSION)
         END
     END

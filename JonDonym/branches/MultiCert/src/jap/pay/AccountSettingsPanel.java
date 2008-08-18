@@ -526,8 +526,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 		JPanel buttonsPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		c.fill = c.HORIZONTAL;
-		c.anchor = c.NORTHWEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 0;
 		c.weighty = 0;
 		c.gridx = 0;
@@ -555,8 +555,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		buttonsPanel.add(m_btnImportAccount, c);
 
 		c = new GridBagConstraints();
-		c.fill = c.BOTH;
-		c.anchor = c.NORTHWEST;
+		c.fill = GridBagConstraints.BOTH;
+		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 2.0;
 		c.weighty = 1.0;
 		c.gridx = 0;
@@ -569,7 +569,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		rootPanel.add(scroller, c);
 
 		c.gridx++;
-		c.fill = c.NONE;
+		c.fill = GridBagConstraints.NONE;
 		c.gridheight = 1;
 		c.weighty = 0.0;
 		c.weightx = 0.0;
@@ -668,7 +668,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		c.weightx = 1;
 		c.weighty = 1;
 		c.gridy++;
-		c.fill = c.HORIZONTAL;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		rootPanel.add(this.createDetailsPanel(myActionListener), c);
 
 		//updateAccountList(); //would possibly lead to deadlock with AWT-Thread when showing JAPConf
@@ -755,8 +755,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	{
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		c.fill = c.NONE;
-		c.anchor = c.NORTHWEST;
+		c.fill = GridBagConstraints.NONE;
+		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 0;
 		c.weighty = 0;
 		c.gridx = 0;
@@ -818,8 +818,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 		JPanel buttonsPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints d = new GridBagConstraints();
-		d.fill = c.HORIZONTAL;
-		d.anchor = c.NORTHWEST;
+		d.fill = GridBagConstraints.HORIZONTAL;
+		d.anchor = GridBagConstraints.NORTHWEST;
 		d.weightx = 0;
 		d.weighty = 0;
 		d.gridx = 0;
@@ -872,7 +872,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 
 
-		c.anchor = c.NORTHWEST;
+		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.gridx = 0;
@@ -1154,10 +1154,9 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					"Current account ID: " + anAccount.getAccountNumber());
 			}
 		}
-
-		TransactionOverviewDialog d = new TransactionOverviewDialog(this,
+		
+		new TransactionOverviewDialog(this,
 			JAPMessages.getString(MSG_TRANSACTION_OVERVIEW_DIALOG), true, a_accounts);
-
 	}
 
 	/**
@@ -3490,6 +3489,11 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 	class CustomRenderer extends DefaultListCellRenderer
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public Component getListCellRendererComponent(JList list, Object value,
 			int index, boolean isSelected, boolean cellHasFocus)
 		{

@@ -41,11 +41,9 @@ import java.awt.Container;
 import logging.LogType;
 import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import anon.pay.xml.XMLGenericText;
 import gui.dialog.DialogContentPane.IWizardSuitable;
-import gui.JapHtmlPane;
 import java.awt.Dimension;
 import javax.swing.event.HyperlinkEvent;
 import java.net.URL;
@@ -92,8 +90,8 @@ public class CancellationPolicyPane extends DialogContentPane implements IWizard
 		m_c.weightx = 1.0;
 		m_c.weighty = 1.0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.BOTH;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.BOTH;
 
 	    String policyHtml = JAPMessages.getString(MSG_NO_POLICY_FOUND);
 		m_policyPane = new JEditorPane("text/html", policyHtml);

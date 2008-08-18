@@ -4,10 +4,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.Database;
-import anon.infoservice.InfoServiceDBEntry;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;

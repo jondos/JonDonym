@@ -209,7 +209,7 @@ public abstract class AbstractDataChain implements AnonChannel, Observer, Runnab
                     m_queueEntries.removeElementAt(0);
                     if (m_queueEntries.size() > 0) {
                       /* get the next entry */
-                      currentEntry = currentEntry = (DataChainInputStreamQueueEntry)(m_queueEntries.firstElement());
+                      currentEntry = (DataChainInputStreamQueueEntry)(m_queueEntries.firstElement());
                     }
                   }
                 }
