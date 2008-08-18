@@ -27,15 +27,11 @@
  */
 package anon.crypto.tinytls.ciphersuites;
 
-import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.DESedeEngine;
-import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-import anon.crypto.MyRandom;
 import anon.crypto.tinytls.TLSException;
-import anon.crypto.tinytls.TLSPlaintextRecord;
 import anon.crypto.tinytls.keyexchange.DHE_DSS_Key_Exchange;
 import anon.util.ByteArrayUtil;
 

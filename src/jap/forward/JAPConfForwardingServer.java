@@ -67,7 +67,6 @@ import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.MixCascade;
 import gui.GUIUtils;
-import gui.JAPHelp;
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import gui.dialog.WorkerContentPane;
@@ -171,10 +170,20 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 
 		final JTextField serverPortField = new JTextField(5)
 		{
+			/**
+			 * serial version UID
+			 */
+			private static final long serialVersionUID = 1L;
+
 			protected Document createDefaultModel()
 			{
 				return (new PlainDocument()
 				{
+					/**
+					 * serial version UID
+					 */
+					private static final long serialVersionUID = 1L;
+
 					public void insertString(int a_position, String a_stringToInsert,
 											 AttributeSet a_attributes) throws BadLocationException
 					{
@@ -300,10 +309,20 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 
 		final JTextField uploadBandwidthField = new JTextField()
 		{
+			/**
+			 * serial version UID
+			 */
+			private static final long serialVersionUID = 1L;
+
 			protected Document createDefaultModel()
 			{
 				return (new PlainDocument()
 				{
+					/**
+					 * serial version UID
+					 */
+					private static final long serialVersionUID = 1L;
+
 					public void insertString(int a_position, String a_stringToInsert,
 											 AttributeSet a_attributes) throws BadLocationException
 					{

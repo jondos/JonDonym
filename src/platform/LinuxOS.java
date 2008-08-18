@@ -64,7 +64,8 @@ public class LinuxOS extends AbstractOS
 		{
 		}
 		m_bGnome = properties.getProperty("GNOME_DESKTOP_SESSION_ID") != null;
-
+		
+		initEnv("env");
 	}
 
 	protected boolean openLink(String a_link)
@@ -103,7 +104,7 @@ public class LinuxOS extends AbstractOS
 		return false;
 	}
 
-	public String getConfigPath()
+	public String getConfigPath(String a_applicationName)
 	{
 		//Return path in user's home directory with hidden file (preceded by ".")
 		return System.getProperty("user.home", "") + "/.";

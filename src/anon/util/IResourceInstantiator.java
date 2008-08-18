@@ -68,5 +68,10 @@ public interface IResourceInstantiator
 	 */
 	public class ResourceInstantiationException extends Exception
 	{
+
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
 	}
 }

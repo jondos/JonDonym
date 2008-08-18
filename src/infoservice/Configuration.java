@@ -40,7 +40,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
-import java.util.Vector;
 
 import anon.crypto.JAPCertificate;
 import anon.crypto.PKCS12;
@@ -50,8 +49,6 @@ import anon.crypto.SignatureVerifier;
 import anon.infoservice.Constants;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.Database;
-import anon.util.ResourceLoader;
-import anon.util.Util;
 import infoservice.tor.TorDirectoryAgent;
 import infoservice.tor.TorDirectoryServer;
 import infoservice.tor.TorDirectoryServerUrl;
@@ -206,16 +203,18 @@ final public class Configuration
 	 */
 	private boolean m_bPerfEnabled;
 
-	/** Stores 5 configuration values for cascade performance monitoring.
+	/** Stores 7 configuration values for cascade performance monitoring.
 	 * <ul>
 	 *  <li>The local proxy host</li>
 	 * 	<li>The local proxy port</li>
 	 * 	<li>The size of the random test data block in bytes;</li>
 	 * 	<li>The interval between measurement blocks in milliseconds</li>
 	 *  <li>Requests per interval</li>
+	 *  <li>Test timeout</li>
+	 *  <li>Min amount of packets a cascade needs to be tested</li>
 	 * </ul>
 	 */
-	private final Object[] m_aPerfMeterConf = new Object[6];
+	private final Object[] m_aPerfMeterConf = new Object[7];
 	
 	private boolean m_bPerfServerEnabled;
 	
@@ -769,13 +768,13 @@ final public class Configuration
 					m_aPerfMeterConf[2] = new Integer(Math.min(512*1024*2, Integer.parseInt(value)));
 				}
 				
-				value = a_properties.getProperty("perf.majorInterval", "300000");
+				value = a_properties.getProperty("perf.majorInterval", "240000");
 				if(value != null)
 				{
 					m_aPerfMeterConf[3] = new Integer(Math.max(60*1000, Integer.parseInt(value)));
 				}
 				
-				value = a_properties.getProperty("perf.requestsPerInterval", "5");
+				value = a_properties.getProperty("perf.requestsPerInterval", "2");
 				if(value != null)
 				{
 					m_aPerfMeterConf[4] = Integer.valueOf(value);
@@ -785,6 +784,12 @@ final public class Configuration
 				if(value != null)
 				{
 					m_aPerfMeterConf[5] = new Integer(Math.max(5*1000, Integer.parseInt(value)));
+				}
+				
+				value = a_properties.getProperty("perf.minPackets", "0");
+				if(value != null)
+				{
+					m_aPerfMeterConf[6] = new Integer(Integer.parseInt(value));
 				}
 				
 				m_strPerfAccountDirectory = 

@@ -78,16 +78,21 @@ final class JAPConfMixminion extends AbstractJAPConfModule implements ActionList
 	long m_lastUpdate;
 
 	private class MyJTable extends JTable
+	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+		
+		public MyJTable(DefaultTableModel m)
 		{
-			public MyJTable(DefaultTableModel m)
-			{
-				super(m);
-			}
-			public boolean isCellEditable(int i, int j)
-			{
-				return false;
-			}
-		};
+			super(m);
+		}
+		public boolean isCellEditable(int i, int j)
+		{
+			return false;
+		}
+	};
 
 
 	public JAPConfMixminion()
@@ -373,6 +378,6 @@ final class JAPConfMixminion extends AbstractJAPConfModule implements ActionList
 		m_bttnResetKeyring.setEnabled(false);
 		m_sliderPathLen.setValue(JAPConstants.DEFAULT_MIXMINION_ROUTE_LEN);
 		m_email.setText(JAPConstants.DEFAULT_MIXMINION_EMAIL);
-		m_cbxActive.setSelected(!JAPConstants.m_bReleasedVersion);
+		m_cbxActive.setSelected(false);
 	}
 }

@@ -45,4 +45,18 @@ public class SimpleWizardContentPane extends DialogContentPane implements Dialog
 	{
 		super(a_parentDialog, a_strText, a_layout, a_options);
 	}
+	
+	public SimpleWizardContentPane(JAPDialog a_parentDialog, String a_strText,
+			   Layout a_layout, int a_options, DialogContentPane a_previous)
+	{
+		super(a_parentDialog, a_strText, a_layout, 
+				new DialogContentPaneOptions(a_options, a_previous));
+	}
+	
+	public SimpleWizardContentPane(JAPDialog a_parentDialog, String a_strText,
+			DialogContentPane a_previous)
+	{
+		super(a_parentDialog, a_strText, new Layout(), 
+				new DialogContentPaneOptions(OPTION_TYPE_DEFAULT, a_previous));
+	}	
 }

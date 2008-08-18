@@ -1,6 +1,5 @@
 package gui;
 
-import java.awt.event.ActionEvent;
 import gui.dialog.JAPDialog;
 import java.net.URL;
 import javax.swing.event.HyperlinkEvent;
@@ -8,14 +7,10 @@ import javax.swing.SwingUtilities;
 import anon.util.ResourceLoader;
 import javax.swing.event.HyperlinkListener;
 import java.awt.Cursor;
-import logging.LogType;
 import javax.swing.text.Document;
-import logging.LogLevel;
-import logging.LogHolder;
 import java.io.IOException;
 import javax.swing.JScrollPane;
 import javax.swing.JEditorPane;
-import java.util.Vector;
 
 /**
  * Generalized form of the private class HtmlPane found in JAPHelp

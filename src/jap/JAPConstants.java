@@ -35,7 +35,7 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.10.014"; //Never change the layout of this line!
+	public static final String aktVersion = "00.10.019"; //Never change the layout of this line!
 	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-04-11 13:04:12 $";
 
 	//Warning: This is a little bit tricky,
@@ -44,7 +44,7 @@ public final class JAPConstants
 
 	//Never change the layout of the next two lines as serveal automated tools use these lines to do fancy things...
 	public final static boolean m_bReleasedVersion = false; //Set to true if this is a stable (release) Version
-	private static final String RELEASE_DATE = "2008/21/05 21:00:01"; // Set only to a Value, if m_bReleaseVersion=true
+	private static final String RELEASE_DATE = "2008/08/06 12:11:16"; // Set only to a Value, if m_bReleaseVersion=true
 
 	public static final String CURRENT_CONFIG_VERSION = aktVersion;
 
@@ -66,6 +66,8 @@ public final class JAPConstants
 	}
 
 	public static final boolean DEBUG = false;
+	
+	public static final String APPLICATION_NAME = "JonDo";
 
 	public static final int DEFAULT_PORT_NUMBER = 4001;
 	public static final boolean DEFAULT_LISTENER_IS_LOCAL = true;
@@ -125,8 +127,8 @@ public final class JAPConstants
 	static final boolean DEFAULT_SAVE_MAIN_WINDOW_POSITION = true;
 	static final boolean DEFAULT_SAVE_MINI_WINDOW_POSITION = true;
 	static final boolean DEFAULT_SAVE_CONFIG_WINDOW_POSITION = false;
-	static final boolean DEFAULT_SAVE_HELP_WINDOW_POSITION = true;
-	static final boolean DEFAULT_SAVE_HELP_WINDOW_SIZE = true;
+	static final boolean DEFAULT_SAVE_HELP_WINDOW_POSITION = false;
+	static final boolean DEFAULT_SAVE_HELP_WINDOW_SIZE = false;
 	static final boolean DEFAULT_SAVE_CONFIG_WINDOW_SIZE = false;
 	static final boolean DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP = false;
 	static final boolean DEFAULT_MINIMIZE_ON_STARTUP = false;
@@ -141,7 +143,8 @@ public final class JAPConstants
 	public static final String DOWNLOADFN = "install.gif";
 	static final String IICON16FN = "icon16.gif";
 	static final String ICONFN = "icon.gif";
-	
+
+
 	//static final String   CONFIGICONFN                 = "icoc.gif";
 	static final String ENLARGEYICONFN = "enlarge.gif";
 	static final String METERICONFN = "icom.gif";
@@ -311,12 +314,7 @@ public final class JAPConstants
 	 */
 	public static final long TIME_RESTART_AFTER_SOCKET_ERROR = 1000 * 60;
 
-	/** Paysafecard: Payment confirmation timeout in minutes (older open psc payments should not be shown as usable)
-	 *  Correct value depends on the contract with the paysafecard company */
-	public final static int PAYSAFECARD_TIMEOUT = 60;
-
 	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr", "ru"}; // "zh", "ca", "es", "ru"}; //pt
-	public static final boolean EXT_HELP_NOTFINISHED = true;
 
 	public static String[] getSupportedLanguages()
 	{

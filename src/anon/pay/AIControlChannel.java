@@ -77,7 +77,7 @@ public class AIControlChannel extends XmlControlChannel
 	private static final long NO_CHARGED_ACCOUNT_UPDATE = 1000 * 60 * 5; // 5 minutes
 
   //codes for AI events that can be fired
-  private static final int EVENT_UNREAL = 1;
+  //private static final int EVENT_UNREAL = 1;
 
   private int m_aiLogin_timeout = AnonClient.DEFAULT_LOGIN_TIMEOUT;
 
@@ -142,7 +142,6 @@ public class AIControlChannel extends XmlControlChannel
 			  /*LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
 						"Thread "+ Thread.currentThread().getName()+" getting AI Login Confirmation with code "
 						+loginConfirm.getCode()+" and message "+loginConfirm.getMessage());*/
-			  int code = loginConfirm.getCode();
 
 			  synchronized(m_aiLoginSyncObject)
 			  {
@@ -636,7 +635,7 @@ public class AIControlChannel extends XmlControlChannel
 	  return error;
   }
 
-  private void fireAIEvent(int a_eventType, long a_additionalInfo) {
+  /*private void fireAIEvent(int a_eventType, long a_additionalInfo) {
     LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Firing AI event");
     Enumeration e = m_aiListeners.elements();
     while (e.hasMoreElements()) {
@@ -644,7 +643,7 @@ public class AIControlChannel extends XmlControlChannel
         ((IAIEventListener)e.nextElement()).unrealisticBytes(a_additionalInfo);
       }
     }
-  }
+  }*/
 
   public static long getBytes() {
     return m_totalBytes;

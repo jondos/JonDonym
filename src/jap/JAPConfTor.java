@@ -88,6 +88,11 @@ final class JAPConfTor extends AbstractJAPConfModule implements ActionListener
 		DateFormat.SHORT);
 	private class MyJTable extends JTable
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public MyJTable(DefaultTableModel m)
 		{
 			super(m);
@@ -472,7 +477,7 @@ final class JAPConfTor extends AbstractJAPConfModule implements ActionListener
 		m_sliderMaxPathLen.setValue(JAPConstants.DEFAULT_TOR_MAX_ROUTE_LEN);
 		m_sliderMinPathLen.setValue(JAPConstants.DEFAULT_TOR_MIN_ROUTE_LEN);
 		m_sliderConnectionsPerPath.setValue(JAPConstants.DEFAULT_TOR_MAX_CONNECTIONS_PER_ROUTE);
-		m_cbxActive.setSelected(!JAPConstants.m_bReleasedVersion);
+		m_cbxActive.setSelected(false);
 		m_cbNoDefaultTorServer.setSelected(JAPConstants.DEFAULT_TOR_USE_NONE_DEFAULT_DIR_SERVER);
 	}
 }

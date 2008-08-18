@@ -66,8 +66,6 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import java.util.Calendar;
-import anon.util.Util;
-import jap.pay.wizardnew.PaymentInfoPane;
 import java.util.Locale;
 
 /**
@@ -132,7 +130,7 @@ public final class JAPUtil
 	
 	public static String formatKbitPerSecValueOnlyUnit(long c)
 	{
-		return formatKbitPerSecValueOnlyUnit(MAX_FORMAT_ALL);
+		return formatKbitPerSecValueOnlyUnit(c, MAX_FORMAT_ALL);
 	}
 	
 	public static String formatKbitPerSecValueOnlyUnit(long c, int a_maxFormat)

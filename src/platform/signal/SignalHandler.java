@@ -1,6 +1,5 @@
 package platform.signal;
 
-import java.util.Vector;
 import java.util.Observable;
 
 public class SignalHandler extends Observable implements sun.misc.SignalHandler

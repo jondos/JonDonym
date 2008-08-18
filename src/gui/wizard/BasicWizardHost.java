@@ -27,9 +27,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 package gui.wizard;
 
-import gui.JAPMessages;
-import jap.JAPUtil;
-
 import java.awt.CardLayout;
 import java.awt.Container;
 import java.awt.Dialog;
@@ -41,13 +38,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
-import gui.GUIUtils;
+
 import gui.dialog.JAPDialog;
-import javax.swing.RootPaneContainer;
+import gui.JAPMessages;
 
 // this shall become the browser/wizardhost providing class ...
 public class BasicWizardHost implements WizardHost,ActionListener

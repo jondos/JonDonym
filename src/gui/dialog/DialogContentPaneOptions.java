@@ -1,5 +1,7 @@
 package gui.dialog;
 
+import java.awt.Container;
+
 import gui.JAPHelpContext;
 
 /**
@@ -53,19 +55,6 @@ public final class DialogContentPaneOptions
 
 	/**
 	 * Creates new button options. No buttons are shown by default.
-	 * @param a_strHelpContext a IHelpContext; if it returns an other help context value than null,
-	 * a help button is shown that opens the context;
-	 * @param a_previousContentPane A DialogContentPane that will be linked with this one; it gets this
-	 * content pane as next content pane. Call moveToNextContentPane() and moveToPreviousContentPane() to
-	 * move between the panes.
-	 */
-	public DialogContentPaneOptions(String a_strHelpContext, DialogContentPane a_previousContentPane)
-	{
-		this(IDialogOptions.OPTION_TYPE_EMPTY, a_strHelpContext, a_previousContentPane);
-	}
-
-	/**
-	 * Creates new button options. No buttons are shown by default.
 	 * @param a_helpContext a IHelpContext; if it returns an other help context value than null,
 	 * a help button is shown that opens the context;
 	 * @param a_previousContentPane A DialogContentPane that will be linked with this one; it gets this
@@ -111,7 +100,6 @@ public final class DialogContentPaneOptions
 		this(a_optionType, a_strHelpContext, null);
 	}
 
-
 	/**
 	 * Creates new button options.
 	 * @param a_optionType one of the available option types the define the type and number of buttons
@@ -124,7 +112,10 @@ public final class DialogContentPaneOptions
 	public DialogContentPaneOptions(int a_optionType, final String a_strHelpContext, DialogContentPane a_previousContentPane)
 	{
 		this(a_optionType,
-			 new JAPHelpContext.IHelpContext(){public String getHelpContext(){return a_strHelpContext;}},
+			 new JAPHelpContext.IHelpContext(){
+				public String getHelpContext(){return a_strHelpContext;}
+				public Container getHelpExtractionDisplayContext(){return null;}
+				},
 			a_previousContentPane);
 	}
 

@@ -65,9 +65,6 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import javax.swing.BorderFactory;
-import java.awt.Color;
-
-
 
 /**
  * Shows all available volume plans (as sent by the jpi in the form of a XMLVolumePlans object),
@@ -85,7 +82,7 @@ import java.awt.Color;
 	private static final String MSG_UNLIMITED = VolumePlanSelectionPane.class.getName() + "_unlimited";
 	private static final String MSG_ERROR_NO_PLAN_CHOSEN = VolumePlanSelectionPane.class.getName() + "_errorNoPlanChosen";
 	private static final String MSG_VALIDUNTIL = VolumePlanSelectionPane.class.getName() + "_validuntil";
-	private static final String MSG_VOLUMEPLAN = VolumePlanSelectionPane.class.getName() + "_volumeplan";
+	//private static final String MSG_VOLUMEPLAN = VolumePlanSelectionPane.class.getName() + "_volumeplan";
 	private static final String MSG_CHOOSEAPLAN = VolumePlanSelectionPane.class.getName() + "_chooseaplan";
 	private static final String MSG_ENTER_COUPON = VolumePlanSelectionPane.class.getName() + "_entercouponcode";
 	private static final String MSG_PLAN_OR_COUPON = VolumePlanSelectionPane.class.getName() + "_planorcoupon";
@@ -128,8 +125,8 @@ import java.awt.Color;
 		m_c.weightx = 0;
 		m_c.weightx = 0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.NONE;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.NONE;
 
 
 
@@ -464,8 +461,8 @@ import java.awt.Color;
 		m_c.weightx = 0;
 		m_c.weightx = 0;
 		m_c.insets = new Insets(5, 5, 5, 5);
-		m_c.anchor = m_c.NORTHWEST;
-		m_c.fill = m_c.NONE;
+		m_c.anchor = GridBagConstraints.NORTHWEST;
+		m_c.fill = GridBagConstraints.NONE;
 
 
 		m_c.gridx++;

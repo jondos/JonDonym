@@ -165,7 +165,7 @@ public final class LogHolder
 
 			if (m_messageDetailLevel <= DETAIL_LEVEL_LOWEST)
 			{
-				getInstance().getLogInstance().log(a_logLevel, a_logType, a_throwable.getMessage());
+				LogHolder.getLogInstance().log(a_logLevel, a_logType, a_throwable.getMessage());
 			}
 			else if (m_messageDetailLevel > DETAIL_LEVEL_LOWEST &&
 					 m_messageDetailLevel < DETAIL_LEVEL_HIGHEST)
@@ -179,7 +179,7 @@ public final class LogHolder
 					message += "\n" + LOGGED_THROWABLE + a_throwable.getMessage();
 				}
 
-				getInstance().getLogInstance().log(a_logLevel, a_logType, a_throwable.toString());
+				LogHolder.getLogInstance().log(a_logLevel, a_logType, a_throwable.toString());
 			}
 			else if (m_messageDetailLevel == DETAIL_LEVEL_HIGH)
 			{
@@ -192,7 +192,7 @@ public final class LogHolder
 					message += "\n" + LOGGED_THROWABLE + a_throwable.toString();
 				}
 
-				getInstance().getLogInstance().log(a_logLevel, a_logType,
+				LogHolder.getLogInstance().log(a_logLevel, a_logType,
 					Util.normaliseString(getCallingClassFile(false) + ": ", LINE_LENGTH_HIGH_DETAIL) +
 					message);
 			}
@@ -207,7 +207,7 @@ public final class LogHolder
 					message += "\n" + LOGGED_THROWABLE + Util.getStackTrace(a_throwable);
 				}
 
-				getInstance().getLogInstance().log(a_logLevel, a_logType,
+				LogHolder.getLogInstance().log(a_logLevel, a_logType,
 					Util.normaliseString(
 						getCallingMethod(false) + ": ", LINE_LENGTH_HIGHEST_DETAIL) +
 					message);
@@ -286,26 +286,11 @@ public final class LogHolder
 	 */
 	public static synchronized void setLogInstance(Log logInstance)
 	{
-		getInstance().ms_logInstance = logInstance;
-		if (getInstance().ms_logInstance == null)
+		LogHolder.ms_logInstance = logInstance;
+		if (LogHolder.ms_logInstance == null)
 		{
-			getInstance().ms_logInstance = new DummyLog();
+			LogHolder.ms_logInstance = new DummyLog();
 		}
-	}
-
-	/**
-	 * Returns the instance of LogHolder (Singleton). If there is no instance,
-	 * there is a new one created.
-	 *
-	 * @return The LogHolder instance.
-	 */
-	private static synchronized LogHolder getInstance()
-	{
-		if (ms_logHolderInstance == null)
-		{
-			ms_logHolderInstance = new LogHolder();
-		}
-		return ms_logHolderInstance;
 	}
 
 	/**

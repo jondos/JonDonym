@@ -32,7 +32,7 @@ import java.util.Hashtable;
 
 import java.awt.CardLayout;
 import java.awt.Component;
-import java.awt.Font;
+import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -54,8 +54,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import gui.GUIUtils;
-import gui.JAPHelp;
-import gui.JAPHelp;
 import gui.JAPMessages;
 import gui.JAPHelpContext;
 
@@ -133,6 +131,11 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 
 		TreeSelectionModel configurationTreeSelectionModel = new DefaultTreeSelectionModel()
 		{
+			/**
+			 * serial version UID
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void setSelectionPath(TreePath a_treePath)
 			{
 				String symbolicName = (String) (m_treeNodesToSymbolicNames.get(a_treePath.
@@ -275,6 +278,11 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 					{
 						return a_helpContext;
 					}
+					
+					public Container getHelpExtractionDisplayContext()
+					{
+						return JAPConf.getInstance().getContentPane();
+					}
 				});
 			}
 		}
@@ -311,6 +319,11 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 		return m_currentHelpContext.getHelpContext();
 	}
 
+	public Container getHelpExtractionDisplayContext() 
+	{
+		return JAPConf.getInstance().getContentPane();
+	}
+	
 	public AbstractJAPConfModule getCurrentModule()
 	{
 		return null;
@@ -442,5 +455,4 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 			}
 		}
 	}
-
 }

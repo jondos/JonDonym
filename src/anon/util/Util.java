@@ -27,6 +27,11 @@
  */
 package anon.util;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -393,6 +398,36 @@ public final class Util
 		public int compare(Object a_obj1, Object a_obj2);
 	}
 	
+	public static class LongSortAsc implements Comparable
+	{
+		public int compare(Object a_obj1, Object a_obj2)
+		{
+			if(a_obj1 == null && a_obj2 == null) return 0;
+			else if(a_obj1 == null) return -1;
+			else if(a_obj2 == null) return 1;
+			
+			if(((Long) a_obj1).longValue() == Long.MAX_VALUE) return 1;
+			if(((Long) a_obj2).longValue() == Long.MAX_VALUE) return -1;
+			
+			return (int) (((Long) a_obj1).longValue() - ((Long) a_obj2).longValue());
+		}
+	}
+	
+	public static class LongSortDesc implements Comparable
+	{
+		public int compare(Object a_obj1, Object a_obj2)
+		{
+			if(a_obj1 == null && a_obj2 == null) return 0;
+			else if(a_obj1 == null) return 1;
+			else if(a_obj2 == null) return -1;
+
+			if(((Long) a_obj1).longValue() == Long.MAX_VALUE) return -1;
+			if(((Long) a_obj2).longValue() == Long.MAX_VALUE) return 1;			
+			
+			return (int) (((Long) a_obj2).longValue() - ((Long) a_obj1).longValue());
+		}
+	}
+	
 	public static void sort(Vector a_vec, Comparable c)
 	{
 		if(a_vec != null)
@@ -550,6 +585,29 @@ public final class Util
 		}
 		encodeBuffer.append(stringWithWhitespaces.substring(lastIx));
 		return encodeBuffer.toString();
+	}
+	
+	public static void copyStream(InputStream a_input, OutputStream a_output)
+		throws IOException
+	{
+		if (a_input == null)
+		{
+			throw new IOException("Input stream is null!");
+		}
+		if (a_output == null)
+		{
+			throw new IOException("Output stream is null!");
+		}
+		
+		byte buffer[] = new byte[2048];
+		int len = -1;
+		while ( (len = a_input.read(buffer)) != -1)
+		{
+			a_output.write(buffer, 0, len);
+		}
+		a_input.close();
+		a_output.flush();
+		a_output.close();
 	}
 	
 	/**

@@ -28,7 +28,6 @@
 package jap;
 
 import anon.infoservice.InfoServiceHolder;
-import anon.infoservice.Database;
 import java.util.Hashtable;
 import anon.infoservice.JAPMinVersion;
 

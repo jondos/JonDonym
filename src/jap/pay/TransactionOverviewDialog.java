@@ -149,7 +149,7 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 	{
 		JPanel rootPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		c.anchor = c.NORTHWEST;
+		c.anchor = GridBagConstraints.NORTHWEST;
 		c.insets = new Insets(5, 5, 5, 5);
 
 		m_transactionsTable = new JTable();
@@ -161,7 +161,7 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 		rootPanel.add(new JScrollPane(m_transactionsTable), c);
 		c.weightx = 0;
 		c.weighty = 0;
-		c.fill = c.NONE;
+		c.fill = GridBagConstraints.NONE;
 
 		//The fetching label
 		c.gridy++;
@@ -174,7 +174,7 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 		c.gridy = 5;
 		c.gridx = 0;
 		c.weightx = 1;
-		c.anchor = c.SOUTHEAST;
+		c.anchor = GridBagConstraints.SOUTHEAST;
 		rootPanel.add(buildButtonPanel(), c);
 
 		getContentPane().add(rootPanel);
@@ -464,7 +464,8 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 				XMLPaymentOption curOption = (XMLPaymentOption) options.nextElement();
 
 				//skip passive payment options
-				if (curOption.getType().equals("passive") )
+				if (curOption.getType().equals("passive") || 
+					!curOption.worksWithJapVersion(JAPConstants.aktVersion))
 				{
 					continue; //we only need data for active and mixed payment options
 				}

@@ -531,10 +531,20 @@ public class JAPRoutingEstablishForwardedConnectionDialog
 
 		final JTextField captchaField = new JTextField()
 		{
+			/**
+			 * serial version UID
+			 */
+			private static final long serialVersionUID = 1L;
+
 			protected Document createDefaultModel()
 			{
 				return (new PlainDocument()
 				{
+					/**
+					 * serial version UID
+					 */
+					private static final long serialVersionUID = 1L;
+
 					public void insertString(int a_position, String a_stringToInsert,
 											 AttributeSet a_attributes) throws BadLocationException
 					{

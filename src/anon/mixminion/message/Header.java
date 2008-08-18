@@ -47,8 +47,8 @@ public class Header
 
 	//Constants
 	private final int HEADER_LEN = 2048;
-	private final int OAEP_OVERHEAD = 42;
-	private final int MIN_SUBHEADER_LEN = 42;
+	//private final int OAEP_OVERHEAD = 42;
+	//private final int MIN_SUBHEADER_LEN = 42;
 	private final int PK_ENC_LEN = 256;
 	private final int PK_OVERHEAD_LEN = 42;
 	private final int PK_MAX_DATA_LEN = 214;

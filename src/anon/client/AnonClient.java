@@ -72,18 +72,15 @@ import anon.client.TrustException;
  */
 public class AnonClient implements AnonService, Observer, DataChainErrorListener
 {
-
-	/**
-	 * @todo For most people, 20s are sufficient, but some cannot connect with this short
-	 * timeout. Make this configurable.
-	 */
-	public static final int DEFAULT_LOGIN_TIMEOUT = 20000;
+	public static final int DEFAULT_LOGIN_TIMEOUT = 30000;
+	private static final int FAST_LOGIN_TIMEOUT = 4000; // try the fast timeout first
 	private static final int CONNECT_TIMEOUT = 8000;
 
 	private static final int FIRST_MIX = 0;
 	private static final String SYNCH_AI_LOGIN_MIXVERSION = "00.07.20";
 	
 	private static int m_loginTimeout = DEFAULT_LOGIN_TIMEOUT;
+	private static int m_loginTimeoutFastAvailable;
 
 	private Multiplexer m_multiplexer;
 
@@ -122,6 +119,11 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		new IMutableProxyInterface.DummyMutableProxyInterface();
 
 	private boolean m_connected;
+	
+	static 
+	{
+		resetInternalLoginTimeout();				
+	}
 
 	public AnonClient()
 	{
@@ -272,6 +274,32 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		{
 			m_loginTimeout = a_loginTimeoutMS;
 		}
+	}
+	
+	private static void resetInternalLoginTimeout()
+	{			
+		int maxLoginTimeoutFastAvailable = DEFAULT_LOGIN_TIMEOUT / 1000;
+		
+		m_loginTimeoutFastAvailable = 
+			Math.max(m_loginTimeout / 1000, m_loginTimeout / FAST_LOGIN_TIMEOUT);
+				
+		if (m_loginTimeoutFastAvailable > maxLoginTimeoutFastAvailable)
+		{
+			m_loginTimeoutFastAvailable = maxLoginTimeoutFastAvailable;
+		}
+	}
+	
+	private static int getInternalLoginTimeout(IServiceContainer a_serviceContainer)
+	{
+		if (a_serviceContainer != null && m_loginTimeoutFastAvailable > 0 &&
+				a_serviceContainer.isReconnectedAutomatically() && 
+				a_serviceContainer.isServiceAutoSwitched())
+		{
+			m_loginTimeoutFastAvailable--;
+			return FAST_LOGIN_TIMEOUT;
+		}
+		
+		return m_loginTimeout;
 	}
 
 	public static int getLoginTimeout()
@@ -626,7 +654,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				try
 				{
 					/* limit timeouts while login procedure */
-					a_connectedSocket.setSoTimeout(m_loginTimeout);
+					a_connectedSocket.setSoTimeout(
+							getInternalLoginTimeout(a_serviceContainer));
 				}
 				catch (SocketException e)
 				{
@@ -767,6 +796,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	
 	public void connectionEstablished(final AnonServerDescription a_serverDescription)
 	{
+		resetInternalLoginTimeout();
+		
 		Thread notificationThread = new Thread(new Runnable()
 		{
 			public void run()
@@ -812,7 +843,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			}
 			try
 			{
-				TimestampUpdater updater = new TimestampUpdater(mixesWithReplayDetection,
+				new TimestampUpdater(mixesWithReplayDetection,
 					new ReplayControlChannel(a_multiplexer, a_serviceContainer));
 			}
 			catch (Exception e)

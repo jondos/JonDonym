@@ -467,11 +467,14 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * @param a_bDefault the default value of the checkbox
 		 * @param a_strHelpContext the help context that is opened when the help button is clicked
 		 */
-		public LinkedCheckBox(String a_strMessage, boolean a_bDefault, final String a_strHelpContext)
+		public LinkedCheckBox(String a_strMessage, boolean a_bDefault, 
+				final String a_strHelpContext)
 		{
 			this(a_strMessage, a_bDefault, new JAPHelpContext.IHelpContext()
 			{
 				public String getHelpContext(){ return a_strHelpContext;}
+				public Container getHelpExtractionDisplayContext(){ return null;}
+				
 			});
 		}
 
@@ -490,7 +493,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			m_bDefault = a_bDefault;
 			m_bState = m_bDefault;
 		}
-
+		
 		/**
 		 * Returns the information message of the checkbox.
 		 * @return the information message of the checkbox
@@ -663,6 +666,11 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				{
 					return a_strHelpContext;
 				}
+				
+				public Container getHelpExtractionDisplayContext()
+				{
+					return null;
+				}
 			};
 		}
 
@@ -673,6 +681,15 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				return null;
 			}
 			return m_helpContext.getHelpContext();
+		}
+		
+		public Container getHelpExtractionDisplayContext() 
+		{
+			if (m_helpContext == null)
+			{
+				return null;
+			}
+			return m_helpContext.getHelpExtractionDisplayContext();
 		}
 
 		/**
@@ -1296,8 +1313,53 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		return showConfirmDialog(a_parentComponent, a_message, a_title, new Options(a_optionType),
 								 a_messageType, a_icon, a_linkedInformation);
 	}
+	
+	/**
+	 * Displays a confirm dialog. Words are wrapped automatically if a message line is too long.
+	 * @param a_parentComponent The parent component for this dialog. If it is null or the parent
+	 *                          component is not within a frame, the dialog's parent frame is the
+	 *                          default frame. 
+	 * @param a_message The message to be displayed. It is interpreted as HTML. You do not need to put in
+	 * formatting tags, as the text will be auto-formatted in a way that the dialog's size is very close
+	 * to the golden ratio.
+	 * @param a_messageType use the message types from JOptionPane
+	 * @param a_options use the option types from JOptionPane
+	 * @return The value the user has selected. RETURN_VALUE_UNINITIALIZED implies
+	 * the user has not yet made a choice or that the current thread has been interrupted
+	 * @see javax.swing.JOptionPane
+	 */
+	public static int showConfirmDialog(Component a_parentComponent, String a_message, 
+										Options a_options, int a_messageType)
+	{
+		return showConfirmDialog(a_parentComponent, a_message, (String)null, 
+				a_options, a_messageType, (Icon)null, (ILinkedInformation)null);
+	}
+	
+	/**
+	 * Displays a confirm dialog. Words are wrapped automatically if a message line is too long.
+	 * @param a_parentComponent The parent component for this dialog. If it is null or the parent
+	 *                          component is not within a frame, the dialog's parent frame is the
+	 *                          default frame.
+	 * @param a_title The title of the message dialog
+	 * @param a_message The message to be displayed. It is interpreted as HTML. You do not need to put in
+	 * formatting tags, as the text will be auto-formatted in a way that the dialog's size is very close
+	 * to the golden ratio.
+	 * @param a_messageType use the message types from JOptionPane
+	 * @param a_options use the option types from JOptionPane
+	 * @param a_linkedInformation a clickable information message that is appended to the text
+	 * @return The value the user has selected. RETURN_VALUE_UNINITIALIZED implies
+	 * the user has not yet made a choice or that the current thread has been interrupted
+	 * @see javax.swing.JOptionPane
+	 */
+	public static int showConfirmDialog(Component a_parentComponent, String a_message, 
+										Options a_options, int a_messageType, 
+										ILinkedInformation a_linkedInformation)
+	{
+		return showConfirmDialog(a_parentComponent, a_message, (String)null, 
+				a_options, a_messageType, (Icon)null, a_linkedInformation);
+	}	
 
-/**
+	/**
 	 * Displays a confirm dialog. Words are wrapped automatically if a message line is too long.
 	 * @param a_parentComponent The parent component for this dialog. If it is null or the parent
 	 *                          component is not within a frame, the dialog's parent frame is the
@@ -1801,7 +1863,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 		dialog.addWindowListener(new SimpleDialogButtonFocusWindowAdapter(dialogContentPane));
 		dialog.m_bOnTop = bOnTop;
-		dialog.setVisible(true);
+		dialog.setVisible(true);		
 		dialog = null;
 
 		return dialogContentPane.getButtonValue();
@@ -2641,6 +2703,10 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		return m_internalDialog.getName();
 	}
 
+	public void setEnabled(boolean b)
+	{
+		m_internalDialog.setEnabled(b);
+	}
 
 	public void setAlwaysOnTop(boolean a_bOnTop)
 	{
@@ -3433,6 +3499,11 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 
 	private static class PreferredWidthBoxPanel extends JPanel
 	{
+		/**
+		 * serial version UID
+		 */
+		private static final long serialVersionUID = 1L;
+		
 		private int m_preferredWidth;
 		private int m_preferredHeigth;
 

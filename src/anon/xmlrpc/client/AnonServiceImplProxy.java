@@ -38,7 +38,6 @@ import anon.AnonServerDescription;
 import anon.AnonService;
 import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
-import anon.infoservice.ImmutableProxyInterface;
 import anon.IServiceContainer;
 import anon.infoservice.IMutableProxyInterface;
 public class AnonServiceImplProxy implements AnonService

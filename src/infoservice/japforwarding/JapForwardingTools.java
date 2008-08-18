@@ -27,7 +27,6 @@
  */
 package infoservice.japforwarding;
 
-import java.io.ByteArrayInputStream;
 import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.Vector;

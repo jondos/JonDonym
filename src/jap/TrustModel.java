@@ -55,7 +55,6 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.BlacklistedCascadeIDEntry;
-import anon.infoservice.NewCascadeIDEntry;
 import anon.pay.PayAccountsFile;
 import anon.client.TrustException;
 
@@ -126,8 +125,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	
 	private static final String MSG_EXCEPTION_PAY_CASCADE = TrustModel.class.getName() + "_exceptionPayCascade";
 	private static final String MSG_EXCEPTION_FREE_CASCADE = TrustModel.class.getName() + "_exceptionFreeCascade";
-	private static final String MSG_EXCEPTION_MORE_THAN_1_OPERATOR = TrustModel.class.getName() + "_exceptionMoreThan1Op";
-	private static final String MSG_EXCEPTION_SINGLE_MIX = TrustModel.class.getName() + "_exceptionSingleMix";
+	private static final String MSG_EXCEPTION_NOT_ENOUGH_MIXES = TrustModel.class.getName() + "_exceptionNotEnoughMixes";
 	private static final String MSG_EXCEPTION_EXPIRED_CERT = TrustModel.class.getName() + "_exceptionExpiredCert";
 	private static final String MSG_EXCEPTION_NOT_USER_DEFINED = TrustModel.class.getName() + "_exceptionNotUserDefined";
 	private static final String MSG_EXCEPTION_TOO_FEW_COUNTRIES = TrustModel.class.getName() + "_exceptionTooFewCountries";
@@ -295,22 +293,22 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 	};
 
-	public static class SingleMixAttribute extends TrustAttribute
+	public static class NumberOfMixesAttribute extends TrustAttribute
 	{
-		public SingleMixAttribute(int a_trustCondition, Object a_conditionValue)
+		public NumberOfMixesAttribute(int a_trustCondition, Object a_conditionValue)
 		{
-			super(a_trustCondition, a_conditionValue);
+			// MUST always be TRUST_IF_AT_LEAST
+			super(TRUST_IF_AT_LEAST, a_conditionValue);
 		}
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			if (m_trustCondition == TRUST_IF_TRUE && a_cascade.getNumberOfOperators() > 1)
+			int minMixes = ((Integer) m_conditionValue).intValue();
+			
+			if(m_trustCondition == TRUST_IF_AT_LEAST && (a_cascade == null ||  
+					a_cascade.getNumberOfOperators() < minMixes))
 			{
-				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_MORE_THAN_1_OPERATOR)));
-			}
-			else if (m_trustCondition == TRUST_IF_NOT_TRUE && a_cascade.getNumberOfOperators() <= 1)
-			{
-				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_SINGLE_MIX)));
+				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_MIXES)));
 			}
 		}
 	};
@@ -474,21 +472,23 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
+			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
 			
-			if(minSpeed == 0)
+			if(minSpeed == TRUST_ALWAYS)
 			{
 				return;
 			}
 			
 			// TODO: make it configurable
-			if(entry == null || entry.isInvalid()) 
+			if(entry == null || entry.getBound(PerformanceEntry.SPEED) < 0) 
 			{
 				return;
 			}
 			
-			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || entry.isInvalid() || entry.getAverageSpeed() < minSpeed))
+			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || 
+					entry.getBound(PerformanceEntry.SPEED) < 0 || 
+					entry.getBound(PerformanceEntry.SPEED) < minSpeed))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_SPEED)));
 			}
@@ -505,7 +505,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			PerformanceEntry entry = PerformanceInfo.getAverageEntry(a_cascade.getId());
+			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int maxDelay = ((Integer) m_conditionValue).intValue();
 			
 			if(maxDelay == TRUST_ALWAYS)
@@ -514,12 +514,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 			
 			// TODO: make it configurable
-			if(entry == null || entry.isInvalid())
+			if(entry == null || entry.getBound(PerformanceEntry.DELAY) < 0)
 			{
 				return;
 			}
 			
-			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || entry.isInvalid() || entry.getAverageDelay() > maxDelay))
+			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || 
+					entry.getBound(PerformanceEntry.DELAY) < 0 || 
+					entry.getBound(PerformanceEntry.DELAY) > maxDelay))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH)));
 			}
@@ -829,6 +831,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		return ms_currentTrustModel;
 	}
 
+	public static TrustModel getCustomFilter()
+	{
+		return TRUST_MODEL_CUSTOM_FILTER;
+	}
+	
 	public static void fromXmlElement(Element a_container)
 	{
 		int trustModelsAdded = 0;

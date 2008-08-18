@@ -57,7 +57,6 @@ import gui.JAPHtmlMultiLineLabel;
 import gui.JAPJIntField;
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
-import jap.JAPConf.AbstractRestartNeedingConfigChange;
 import jap.forward.JAPRoutingMessage;
 import jap.forward.JAPRoutingSettings;
 import logging.LogHolder;
@@ -651,7 +650,7 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 		c.gridy = 0;
 		c.gridx = 0;
 		c.weightx = 0;
-		c.fill = c.NONE;
+		c.fill = GridBagConstraints.NONE;
 		g.setConstraints(m_tfListenerPortNumber, c);
 		p1.add(m_tfListenerPortNumber);
 		c.fill = GridBagConstraints.HORIZONTAL;

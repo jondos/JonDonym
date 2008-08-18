@@ -77,7 +77,7 @@ public class PassivePaymentDetails extends JAPDialog implements ActionListener
 	private void buildDialog(XMLPassivePayment pp, long transfernumber, long accountnumber)
 	{
 		m_c = new GridBagConstraints();
-		m_c.anchor = m_c.NORTH;
+		m_c.anchor = GridBagConstraints.NORTH;
 		m_c.insets = new Insets(10, 30, 10, 30);
 		m_c.gridx = 0;
 		m_c.gridy = 0;

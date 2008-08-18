@@ -28,11 +28,22 @@
 package gui.dialog;
 
 import java.awt.BorderLayout;
+import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JProgressBar;
+
+import anon.util.ProgressCapsule;
 
 import gui.GUIUtils;
+import gui.JAPMessages;
+
+import logging.*;
 
 /**
  * This is a dialog that executes a given Thread or Runnable if it is shown on screen. It has an optional
@@ -62,10 +73,17 @@ public class WorkerContentPane extends DialogContentPane implements
 	private Runnable m_workerRunnable;
 	private Thread m_internalThread;
 	private boolean m_bInterruptThreadSafe = true;
+	private int m_iProgressStatus;
 
 	public WorkerContentPane(JAPDialog a_parentDialog, String a_strText, Runnable a_workerRunnable)
 	{
 		this(a_parentDialog, a_strText, "", null, a_workerRunnable);
+	}
+	
+	public WorkerContentPane(JAPDialog a_parentDialog, String a_strText, Runnable a_workerRunnable,
+			Observable a_observable)
+	{
+		this(a_parentDialog, a_strText, "", null, a_workerRunnable, a_observable);
 	}
 
 	public WorkerContentPane(JAPDialog a_parentDialog, String a_strText, String a_strTitle,
@@ -73,25 +91,97 @@ public class WorkerContentPane extends DialogContentPane implements
 	{
 		this(a_parentDialog, a_strText, a_strTitle, null, a_workerRunnable);
 	}
+	
+	public WorkerContentPane(JAPDialog a_parentDialog, String a_strText, String a_strTitle,
+			 Runnable a_workerRunnable, Observable a_observable)
+	{
+		this(a_parentDialog, a_strText, a_strTitle, null, a_workerRunnable, a_observable);
+	}
 
 	public WorkerContentPane(JAPDialog a_parentDialog, String a_strText,
 							 DialogContentPane a_previousContentPane, Runnable a_workerRunnable)
 	{
 		this(a_parentDialog, a_strText, "", a_previousContentPane, a_workerRunnable);
 	}
+	
+	public WorkerContentPane(JAPDialog a_parentDialog, String a_strText,
+			 DialogContentPane a_previousContentPane, Runnable a_workerRunnable, 
+			 Observable a_observable)
+	{
+	this(a_parentDialog, a_strText, "", a_previousContentPane, a_workerRunnable, a_observable);
+	}
 
 	public WorkerContentPane(JAPDialog a_parentDialog, String a_strText, String a_strTitle,
-							 DialogContentPane a_previousContentPane, Runnable a_workerRunnable)
+			 DialogContentPane a_previousContentPane, Runnable a_workerRunnable)
+	{
+		this(a_parentDialog, a_strText, a_strTitle, a_previousContentPane, a_workerRunnable, null);
+	}
+	
+	public WorkerContentPane(JAPDialog a_parentDialog, String a_strText, String a_strTitle,
+							 DialogContentPane a_previousContentPane, Runnable a_workerRunnable,
+							 final Observable a_observable)
 	{
 		super(a_parentDialog, a_strText, new Layout(a_strTitle),
 			  new DialogContentPaneOptions(OPTION_TYPE_CANCEL, a_previousContentPane));
 		setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG);
 		m_workerRunnable = a_workerRunnable;
-
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new JLabel(GUIUtils.loadImageIcon(IMG_BUSY, true)), BorderLayout.CENTER);
-
-		addComponentListener(new WorkerComponentListener());
+		
+		m_iProgressStatus = ProgressCapsule.PROGRESS_NOT_STARTED;
+		addComponentListener(new WorkerComponentListener());		
+		getContentPane().setLayout(new BorderLayout());								
+		
+		if (a_observable == null)
+		{
+			getContentPane().add(new JLabel(GUIUtils.loadImageIcon(IMG_BUSY, true)), BorderLayout.CENTER);
+		}
+		else
+		{
+			final JProgressBar progressBar = new JProgressBar();
+			progressBar.setBorderPainted(true);
+			progressBar.setStringPainted(true);
+			getContentPane().add(progressBar, BorderLayout.CENTER);
+			
+			final Observer progressObserver = new Observer()
+			{
+				public void update(Observable o, Object arg)
+				{
+					if((arg != null) && (arg instanceof ProgressCapsule))
+					{
+						ProgressCapsule pc = (ProgressCapsule) arg;
+						
+						int value = pc.getValue();
+						int maximum = pc.getMaximum();
+						int minimum = pc.getMinimum();
+						int progressStatus = pc.getStatus();												
+						
+						if(progressStatus == ProgressCapsule.PROGRESS_ONGOING)
+						{
+							synchronized(progressBar)
+							{
+								if(progressBar.getMaximum() != maximum)
+								{
+									progressBar.setMaximum(maximum);
+								}
+								if(progressBar.getMinimum() != minimum)
+								{
+									progressBar.setMinimum(minimum);
+								}
+								progressBar.setValue(value);
+								progressBar.validate();
+							}
+						}
+						else 
+						{
+							// aborted, failed or finished 
+							a_observable.deleteObserver(this);		
+						}					
+						
+						m_iProgressStatus = progressStatus;
+					}
+				}
+			};			
+			a_observable.addObserver(progressObserver);			
+		}		
 	}
 
 	/**
@@ -187,6 +277,14 @@ public class WorkerContentPane extends DialogContentPane implements
 		m_internalThread = null;
 	}
 
+	/**
+	 * Only meaningful if a ProgressCapsule observer is used.
+	 * @return ProgressCapsule status information
+	 */
+	public int getProgressStatus()
+	{
+		return m_iProgressStatus;
+	}
 
 	/**
 	 * Interrupts the thread.

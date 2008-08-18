@@ -92,10 +92,6 @@ final public class TimedOutputStream extends OutputStream
 
 	}
 
-	private TimedOutputStream()
-	{
-	}
-
 	public static void init()
 	{
 		ms_hashtableOutputStreams = new Hashtable(1000);

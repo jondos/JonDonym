@@ -36,19 +36,12 @@ import javax.swing.JCheckBox;
 import javax.swing.border.TitledBorder;
 import javax.swing.JPanel;
 import javax.swing.JComboBox;
-import javax.swing.JButton;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
 import gui.JAPMessages;
-import gui.GUIUtils;
 import gui.JAPMultilineLabel;
-import javax.swing.JList;
-import javax.swing.DefaultListModel;
-import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 import java.util.Dictionary;
 import java.util.Observable;
 import java.util.Hashtable;
@@ -58,7 +51,7 @@ import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.client.DummyTrafficControlChannel;
 import java.util.Observer;
 
-final class JAPConfAnonGeneral extends AbstractJAPConfModule implements Observer
+public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements Observer
 {
 	public static final String MSG_CONNECTION_TIMEOUT =
 		JAPConfAnonGeneral.class.getName() + "_loginTimeout";
@@ -126,8 +119,6 @@ final class JAPConfAnonGeneral extends AbstractJAPConfModule implements Observer
 	private JComboBox[] m_comboServices;
 	private JComboBox m_comboTimeout;
 
-
-	private JList m_knownCascadesList;
 
 	protected JAPConfAnonGeneral(IJAPConfSavePoint savePoint)
 	{
@@ -458,86 +449,6 @@ final class JAPConfAnonGeneral extends AbstractJAPConfModule implements Observer
 			}
 
 		}
-	}
-
-	private JPanel createRestrictedCacadesPanel()
-	{
-		GridBagConstraints c = new GridBagConstraints();
-
-		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		c.weighty = 0;
-
-		final JLabel lblKnownCascades =new JLabel(JAPMessages.getString(MSG_KNOWN_CASCADES));
-		//lblKnownCascades.setFont(getFontSetting());
-		final JLabel lblAllowedCascades = new JLabel(JAPMessages.getString(MSG_ALLOWED_CASCADES));
-		//lblAllowedCascades.setFont(getFontSetting());
-
-		DefaultListModel m_knownCascadesListModel = new DefaultListModel();
-		m_knownCascadesList = new JList(m_knownCascadesListModel);
-		m_knownCascadesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		final JScrollPane knownCascadesScrollPane = new JScrollPane(m_knownCascadesList);
-		//knownCascadesScrollPane.setFont(getFontSetting());
-		/* set the preferred size of the scrollpane to a 4x20 textarea */
-		knownCascadesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
-
-		DefaultListModel m_allowedCascadesListModel = new DefaultListModel();
-		final JList allowedCascadesList = new JList(m_allowedCascadesListModel);
-		allowedCascadesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		final JScrollPane allowedCascadesScrollPane = new JScrollPane(allowedCascadesList);
-		//allowedCascadesScrollPane.setFont(getFontSetting());
-		/* set the preferred size of the scrollpane to a 4x20 textarea */
-			allowedCascadesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
-
-
-		final JButton m_btnAddCascades = new JButton(GUIUtils.loadImageIcon(IMG_ARROW_RIGHT, true));
-		final JButton m_btnRemoveCascades = new JButton(GUIUtils.loadImageIcon(IMG_ARROW_LEFT, true));
-
-
-		JPanel panel = new JPanel(new GridBagLayout())
-		{
-			public void setEnabled(boolean a_bEnable)
-			{
-				super.setEnabled(a_bEnable);
-				lblKnownCascades.setEnabled(a_bEnable);
-				lblAllowedCascades.setEnabled(a_bEnable);
-				m_knownCascadesList.setEnabled(a_bEnable);
-				allowedCascadesList.setEnabled(a_bEnable);
-				m_btnAddCascades.setEnabled(a_bEnable);
-				m_btnRemoveCascades.setEnabled(a_bEnable);
-				knownCascadesScrollPane.setEnabled(a_bEnable);
-				allowedCascadesScrollPane.setEnabled(a_bEnable);
-			}
-		};
-
-
-		panel.add(lblKnownCascades, c);
-		c.gridx = 2;
-		panel.add(lblAllowedCascades, c);
-		c.gridx = 0;
-		c.gridy++;
-		c.gridheight = 2;
-		panel.add(knownCascadesScrollPane, c);
-		c.gridx++;
-		c.weightx = 0;
-		c.weighty = 1;
-		c.gridheight = 1;
-		c.fill = GridBagConstraints.BOTH;
-		panel.add(m_btnAddCascades, c);
-		c.gridy++;
-		panel.add(m_btnRemoveCascades, c);
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weighty = 0;
-		c.weightx = 1;
-		c.gridheight = 2;
-		c.gridx++;
-		c.gridy--;
-		panel.add(allowedCascadesScrollPane, c);
-
-		return panel;
 	}
 
 	private void setLoginTimeout(int a_timeoutMS)
