@@ -1306,4 +1306,9 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	{
 		return this.verify(this.getPublicKey());
 	}
+	
+	public boolean isRevoked()
+	{
+		return RevokedCertifcateStore.getInstance().isCertificateRevoked(this);
+	}
 }
