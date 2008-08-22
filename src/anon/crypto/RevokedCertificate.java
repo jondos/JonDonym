@@ -63,49 +63,42 @@ public class RevokedCertificate
 	
 	private BigInteger m_serial;
 	private Date m_revocationDate;
-	private Vector m_extVector;
 	private X509Extensions m_extensions;
 	
-	private JAPCertificate m_cert;
-	
-	public RevokedCertificate(X509CertificateStructure a_cert, Date a_revocationDate)
+	public RevokedCertificate(JAPCertificate a_cert, Date a_revocationDate, X509Extensions a_extensions)
 	{
-		this(JAPCertificate.getInstance(a_cert), a_revocationDate);
-	}
-	
-	public RevokedCertificate(JAPCertificate a_cert, Date a_revocationDate)
-	{
-		m_cert = a_cert;
 		m_revocationDate =  a_revocationDate;
-		
-		m_serial =  checkSerial(a_cert.getSerialNumber());
-		m_extVector = new Vector();
+		m_serial =  checkSerial(a_cert);
+		m_extensions = a_extensions;
 	}
 	
-	public RevokedCertificate(BigInteger a_serial, Date a_revocationDate)
+	/*public RevokedCertificate(BigInteger a_serial, Date a_revocationDate)
 	{
 		m_serial =  checkSerial(a_serial);
 		m_revocationDate =  a_revocationDate;
 		m_extVector = new Vector();
-	}
+	}*/
 	
 	protected RevokedCertificate(TBSCertList.CRLEntry a_crlEntry)
 	{
 		m_serial = a_crlEntry.getUserCertificate().getPositiveValue();
 		m_revocationDate = a_crlEntry.getRevocationDate().getDate();
-		m_extensions = new X509Extensions(a_crlEntry.getExtensions());
+		if(a_crlEntry.getExtensions() != null)
+		{
+			m_extensions = new X509Extensions(a_crlEntry.getExtensions());
+		}
 	}
 	
-	private BigInteger checkSerial(BigInteger a_serial)
+	private BigInteger checkSerial(JAPCertificate a_cert)
 	{
-		if(a_serial.equals(BigInteger.ZERO) || a_serial.equals(BigInteger.ONE))
+		if(a_cert.getSerialNumber().equals(BigInteger.ZERO) || a_cert.getSerialNumber().equals(BigInteger.ONE))
 		{
-			if(m_cert != null) 
+			if(a_cert != null) 
 			{
-				return createPseudoSerial(m_cert.toByteArray());
+				return createPseudoSerial(a_cert.toByteArray());
 			}
 		}
-		return a_serial;
+		return a_cert.getSerialNumber();
 	}
 	
 	private static BigInteger createPseudoSerial(byte[] a_rawCert)
@@ -126,26 +119,40 @@ public class RevokedCertificate
         v.add(new DERInteger(m_serial));
         v.add(new Time(m_revocationDate));
         
-        if (!m_extVector.isEmpty())
+        if (m_extensions != null)
         {
-            v.add(new X509Extensions(m_extVector).getBCX509Extensions());
+            v.add(m_extensions.getBCX509Extensions());
         }
         
         return new DERSequence(v);
 	}
-
-	public void addCertificateIssuerExtension()
+	
+	public BigInteger getSerialNumber()
 	{
-		//TODO check if already existing
-		m_extVector.add(new X509CertificateIssuer(m_cert.getIssuer()));
+		return m_serial;
+	}
+	
+	public X509DistinguishedName getCertificateIssuer()
+	{
+		X509CertificateIssuer issuer;
+		if(m_extensions != null)
+		{
+			issuer = (X509CertificateIssuer) m_extensions.getExtension(X509CertificateIssuer.IDENTIFIER);
+			if(issuer != null)
+			{
+				return issuer.getDistinguishedName();
+			}
+		}
+		return null;
+	}
+	
+	public Date getRevocationDate()
+	{
+		return m_revocationDate;
 	}
 	
 	public X509Extensions getExtensions()
 	{
-		if(m_extensions != null)
-		{
-			return m_extensions;
-		}
-		return new X509Extensions(m_extVector);
+		return m_extensions;
 	}
 }

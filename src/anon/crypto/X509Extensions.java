@@ -47,21 +47,25 @@ public final class X509Extensions
 	private DERObjectIdentifier X509_EXTENSIONS_IDENTIFIER =
 		new DERObjectIdentifier("1.2.840.113549.1.9.14");
 	
-	private static final Vector KNOWN_EXTENSIONS = new Vector(); 
+	private static final Vector KNOWN_CERTIFICATE_EXTENSIONS = new Vector();
+	private static final Vector KNOWN_CRL_EXTENSIONS = new Vector();
+	private static final Vector KNOWN_CRL_ENTRY_EXTENSIONS = new Vector();
 	
 	static 
 	{ 
 		//Certificate Extensions
-		KNOWN_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.AuthorityKeyIdentifier.toString());
-		KNOWN_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.SubjectKeyIdentifier.toString());
-		KNOWN_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.BasicConstraints.toString());
-		KNOWN_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.KeyUsage.toString());
-		KNOWN_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.IssuerAlternativeName.toString());
-		KNOWN_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName.toString());
+		KNOWN_CERTIFICATE_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.AuthorityKeyIdentifier.toString());
+		KNOWN_CERTIFICATE_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.SubjectKeyIdentifier.toString());
+		KNOWN_CERTIFICATE_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.BasicConstraints.toString());
+		KNOWN_CERTIFICATE_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.KeyUsage.toString());
+		KNOWN_CERTIFICATE_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.IssuerAlternativeName.toString());
+		KNOWN_CERTIFICATE_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName.toString());
 		//CRL Extensions
-		KNOWN_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.IssuingDistributionPoint.toString());
+		KNOWN_CRL_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.AuthorityKeyIdentifier.toString());
+		KNOWN_CRL_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.IssuerAlternativeName.toString());
+		KNOWN_CRL_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.IssuingDistributionPoint.toString());
 		//CRL Entry Extension
-		KNOWN_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.CertificateIssuer.toString());
+		KNOWN_CRL_ENTRY_EXTENSIONS.addElement(org.bouncycastle.asn1.x509.X509Extensions.CertificateIssuer.toString());
 	};
 
 	private DERSet m_extensions;
@@ -264,10 +268,13 @@ public final class X509Extensions
 			someExtension = (AbstractX509Extension) extensions.nextElement();
 			someIdentifier = someExtension.getIdentifier();
 			
-			if(!KNOWN_EXTENSIONS.contains(someIdentifier))
+			if(someExtension.isCritical())
 			{
-				if(someExtension.isCritical())
+				if(!KNOWN_CERTIFICATE_EXTENSIONS.contains(someIdentifier) &&
+					!KNOWN_CRL_EXTENSIONS.contains(someIdentifier) &&
+					 !KNOWN_CRL_EXTENSIONS.contains(someIdentifier))
 				{
+				
 					return true;
 				}
 			}

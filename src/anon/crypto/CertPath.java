@@ -245,31 +245,37 @@ public class CertPath implements IXMLEncodable
 		if(certificates.hasMoreElements())
 		{
 			current = (JAPCertificate) certificates.nextElement();
-		}
-		while(certificates.hasMoreElements())
-		{
-			pathPosition++;
-			issuer = (JAPCertificate) certificates.nextElement();
+			do
+			{
+				issuer = null;
 				
-			if(!current.verify(issuer))
-			{
-				return false;
-			}
-			if(!current.getValidity().isValid(new Date()))
-			{
-				return false;
-			}
-			//TODO implement me
-			/*if(!current.isRevoked())
-			{
-				return false;
-			}*/
-			if(!checkExtensions(current, pathPosition))
-			{
-				//return false;
-			}
-			current = issuer;
+				if(certificates.hasMoreElements())
+				{
+					issuer = (JAPCertificate) certificates.nextElement();
+					
+					if(!current.verify(issuer))
+					{
+						return false;
+					}
+				}
+				if(!current.getValidity().isValid(new Date()))
+				{
+					return false;
+				}
+				if(current.isRevoked())
+				{
+					return false;
+				}
+				if(!checkExtensions(current, pathPosition))
+				{
+					//TODO return false;
+				}
+				current = issuer;
+				pathPosition++;
+			} 
+			while(current != null);
 		}
+		
 		return true;
 	}
 
@@ -287,7 +293,7 @@ public class CertPath implements IXMLEncodable
 		{
 			if(basicConstraints.isCA())
 			{
-				if(a_position == 1)
+				if(a_position == 0)
 				{	//end entity certificates are not issued by a CA!
 					//TODO return false;
 				}
@@ -305,7 +311,7 @@ public class CertPath implements IXMLEncodable
 		if(keyUsage != null)
 		{
 			//TODO usages ok like this?
-			if(a_position == 1)
+			if(a_position == 0)
 			{
 				if(!keyUsage.allowsKeyEncipherment()
 						|| 	!keyUsage.allowsNonRepudiation())

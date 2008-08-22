@@ -145,4 +145,13 @@ public class X509CertificateIssuer extends AbstractX509Extension
 		}
 		return false;
 	}
+	
+	/**
+	 * Returns the X509DistinguishedName of the issuer represented by this extension
+	 * @return the issuer's X509DistinguishedName
+	 */
+	public X509DistinguishedName getDistinguishedName()
+	{
+		return m_issuer;
+	}
 }

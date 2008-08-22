@@ -28,18 +28,24 @@
 
 package anon.crypto;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DEREncodableVector;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -49,23 +55,31 @@ import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V2TBSCertListGenerator;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import anon.util.Base64;
+import anon.util.IResourceInstantiator;
+import anon.util.IXMLEncodable;
+import anon.util.ResourceLoader;
+import anon.util.XMLUtil;
 
 /**
  * This Class implements Certificate Revocation Lists (CRLs) as specified by RFC 5280.
  * @author Robert Hirschberger
  * @see http://tools.ietf.org/html/rfc5280
  */
-public class CertificateRevocationList
+public class CertificateRevocationList implements IXMLEncodable
 {	
+	private static final String BASE64_TAG = "X509 CRL";
+	
+	private static final String XML_ELEMENT_NAME = "X509CRL";
+	
 	private CertificateList m_crl;
 	private Date m_thisUpdate;
 	private Date m_nextUpdate;
 	private X509DistinguishedName m_issuer;
 	private X509Extensions m_extensions;
-	
-	private static Class[] CRL_EXTENSIONS = 
-		{X509AuthorityKeyIdentifier.class, X509IssuerAlternativeName.class,
-			X509IssuingDistributionPoint.class};
 	
 	public CertificateRevocationList(
 			PKCS12 a_issuerCertificate,
@@ -96,23 +110,74 @@ public class CertificateRevocationList
 			return null;
 		}
 
-		try
+		/*try
 		{
 			ByteArrayInputStream bis = new ByteArrayInputStream(a_rawCRL);
 			ASN1InputStream ais = new ASN1InputStream(bis);
 			DERSequence sequence = (DERSequence)ais.readObject();
 			return new CertificateRevocationList(new CertificateList(sequence));
-		}
-		catch(Exception e)
+		}*/
+		
+		try
 		{
-			e.printStackTrace();
+			ASN1Sequence crl = JAPCertificate.toASN1Sequence(a_rawCRL, XML_ELEMENT_NAME);
+
+			return new CertificateRevocationList(CertificateList.getInstance(crl));
+		}
+		catch (Exception e)
+		{
+			//LogHolder.log(LogLevel.ERR, LogType.CRYPTO, "Error loading CRL from byte array");
 			return null;
 		}
 	}
 	
-	public CertificateList getCRL()
+	public static CertificateRevocationList getInstance(File a_file)
 	{
-		return m_crl;
+		if (a_file != null)
+		{
+			try 
+			{
+				return CertificateRevocationList.getInstance(new FileInputStream(a_file));
+			}
+			catch (Exception e) 
+			{
+			}
+		}
+		return null;	
+	}
+	
+	/** 
+	 * Creates a crl by using an input stream.
+	 * @param a_in Inputstream that holds the crl
+	 * @return the CRL
+	 */
+	public static CertificateRevocationList getInstance(InputStream a_in)
+	{
+		byte[] bytes;
+
+		try
+		{
+			bytes = ResourceLoader.getStreamAsBytes(a_in);
+		}
+		catch (IOException a_e)
+		{
+			return null;
+		}
+
+		return CertificateRevocationList.getInstance(bytes);
+	}
+	
+	public static Hashtable getInstance(String a_strResourceSearchPath, boolean a_bRecursive, String a_ignoreCertMark)
+	{
+		try
+		{
+			return ResourceLoader.loadResources(a_strResourceSearchPath,
+							new CRLInstantiator(a_ignoreCertMark), a_bRecursive);
+		}
+		catch (Exception a_e)
+		{
+			return new Hashtable();
+		}
 	}
 	
 	public X509DistinguishedName getIssuer()
@@ -120,9 +185,25 @@ public class CertificateRevocationList
 		return m_issuer;
 	}
 	
+	public boolean isIndirectCRL()
+	{
+		X509IssuingDistributionPoint idp = 
+			(X509IssuingDistributionPoint) m_extensions.getExtension(X509IssuingDistributionPoint.IDENTIFIER);
+		if(idp != null)
+		{
+			return idp.isIndirectCRL();
+		}
+		return false;
+	}
+	
 	public Date getThisUpdate()
 	{
 		return m_thisUpdate;
+	}
+	
+	public Date getNextUpdate()
+	{
+		return m_nextUpdate;
 	}
 	
 	public X509Extensions getExtensions()
@@ -155,6 +236,77 @@ public class CertificateRevocationList
 		}
 		return bos.toByteArray();
 	}
+	
+	/**
+	 * Converts the crl to a byte array.
+	 * @param a_Base64Encoded if the crl is converted to a Base64 encoded form.
+	 * @throws IOException
+	 * @return the crl as a byte array
+	 */
+	public byte[] toByteArray(boolean a_Base64Encoded)
+	{
+		if (a_Base64Encoded)
+		{
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+			try
+			{
+				out.write(Base64.createBeginTag(BASE64_TAG).getBytes());
+				out.write(Base64.encode(toByteArray(), true).getBytes());
+				out.write(Base64.createEndTag(BASE64_TAG).getBytes());
+			}
+			catch (IOException a_e)
+			{
+				// should not be possible
+			}
+
+			return out.toByteArray();
+		}
+		else
+		{
+			return toByteArray();
+		}
+	}
+	
+	
+	public boolean verifiy(JAPCertificate a_cert)
+	{
+		if(a_cert == null)
+		{
+			return false;
+		}
+		
+		try
+		{
+			ByteArrayOutputStream bArrOStream = new ByteArrayOutputStream();
+				(new DEROutputStream(bArrOStream)).writeObject(m_crl.getTBSCertList());
+
+			return ByteSignature.verify(bArrOStream.toByteArray(),
+										m_crl.getSignature().getBytes(), a_cert.getPublicKey());
+		}
+		catch (IOException a_e)
+		{
+			// should not happen
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Creates XML element of crl consisting of:
+	 * <X509CRL>
+	 *  Base64 encocded crl
+	 * </X509CRL>
+	 * @param a_doc The XML document, which is the environment for the created XML element.
+	 * @return CRL as XML element.
+	 */
+	public Element toXmlElement(Document a_doc)
+	{
+		Element elemX509Crl = a_doc.createElement(XML_ELEMENT_NAME);
+		elemX509Crl.setAttribute("xml:space", "preserve");
+		XMLUtil.setValue(elemX509Crl, Base64.encode(toByteArray(), true));
+		return elemX509Crl;
+	}
 			
 	/**
 	 * This class is used to generate, sign and modify CRLs.
@@ -177,15 +329,17 @@ public class CertificateRevocationList
 			setExtensions(a_extensions.getBCX509Extensions());
 			if(a_certList != null)
 			{
+				X509Extensions entryExtensions;
 				Enumeration certificates = a_certList.elements();
 				while(certificates.hasMoreElements())
 				{
+					entryExtensions = null;
 					JAPCertificate currentCertificate = (JAPCertificate)certificates.nextElement();
-					RevokedCertificate revCert = new RevokedCertificate(currentCertificate, new Date());
 					if(!currentCertificate.getIssuer().equals(a_issuer))
 					{
-						revCert.addCertificateIssuerExtension();
+						entryExtensions = new X509Extensions(new X509CertificateIssuer(currentCertificate.getIssuer()));
 					}
+					RevokedCertificate revCert = new RevokedCertificate(currentCertificate, new Date(), entryExtensions);
 					addCRLEntry(revCert.toASN1Sequence());
 				}
 			}
@@ -227,5 +381,35 @@ public class CertificateRevocationList
 				return null;
 			}
 		}
+	}
+	
+	private static final class CRLInstantiator implements IResourceInstantiator
+	{
+		private String m_ignoreCRLMark;
+
+		public CRLInstantiator(String a_strIgnoreCertMark)
+		{
+			m_ignoreCRLMark = a_strIgnoreCertMark;
+		}
+
+		public Object getInstance(File a_file, File directory) throws Exception
+		{
+			if (a_file == null || (m_ignoreCRLMark != null && a_file.getName().endsWith(m_ignoreCRLMark)))
+			{
+				return null;
+			}
+			return CertificateRevocationList.getInstance(a_file);
+		}
+
+		public Object getInstance(ZipEntry a_entry, ZipFile a_file)
+				throws Exception
+		{
+			if (a_file == null || (m_ignoreCRLMark != null && a_file.getName().endsWith(m_ignoreCRLMark)))
+			{
+				return null;
+			}
+
+			return CertificateRevocationList.getInstance(a_file.getInputStream(a_entry));
+		}		
 	}
 }
