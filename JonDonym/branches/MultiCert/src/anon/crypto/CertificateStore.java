@@ -541,6 +541,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 						{
 							/* verification of the current certificate was successful */
 							currentCertificateContainer.setParentCertificate(a_certificate);
+							currentCertificateContainer.setEnabled(true);
 						}
 					}
 				}
@@ -567,6 +568,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 						{
 							/* the current certificate depends on the specified certificate -> deactivate it */
 							currentCertificateContainer.setParentCertificate(null);
+							currentCertificateContainer.setEnabled(false);
 						}
 					}
 				}

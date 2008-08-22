@@ -250,6 +250,11 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		return false;
 	}
 	
+	public XMLSignature getSignature()
+	{
+		return m_signature;
+	}
+	
 	public MultiCertPath getCertPath()
 	{
 		return m_certPath;

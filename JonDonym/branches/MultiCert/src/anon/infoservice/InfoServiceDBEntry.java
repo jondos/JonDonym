@@ -597,10 +597,10 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return m_userDefined || super.checkId();
 	}
 
-	/*public JAPCertificate getCertificate()
+	public XMLSignature getSignature()
 	{
-		return m_certificate;
-	}*/
+		return m_signature;
+	}
 	
 	public MultiCertPath getCertPath()
 	{

@@ -2778,7 +2778,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				MixCascade cascade = (MixCascade)Database.getInstance(MixCascade.class).getEntryById(a_mixId);
 				JAPCertificate mixCertificate;
-				if (cascade != null)
+				if (cascade != null && cascade.getCertPath() != null)
 				{
 					// this is a first mix
 					CertPath certPath = cascade.getCertPath().getPath();
@@ -2807,7 +2807,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				MixCascade cascade = (MixCascade)Database.getInstance(MixCascade.class).getEntryById(a_mixId);
 				JAPCertificate mixCertificate;
-				if (cascade != null)
+				if (cascade != null && cascade.getCertPath() != null)
 				{
 					// this is a first mix
 					CertPath certPath = cascade.getCertPath().getPath();

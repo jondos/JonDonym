@@ -29,6 +29,7 @@ import logging.LogType;
 import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.X509SubjectKeyIdentifier;
+import anon.crypto.XMLSignature;
 
 /**
  *
@@ -43,6 +44,8 @@ public abstract class AbstractCertifiedDatabaseEntry extends AbstractDatabaseEnt
 	}
 
 	public abstract MultiCertPath getCertPath();
+	
+	public abstract XMLSignature getSignature();
 
 	/**
 	 * Returns if this entry has been verified with a certificate chain.
@@ -56,13 +59,13 @@ public abstract class AbstractCertifiedDatabaseEntry extends AbstractDatabaseEnt
 	 */
 	public boolean checkId()
 	{
-		MultiCertPath path = getCertPath();
-		if(path == null)
+		XMLSignature signature = getSignature();
+		if(signature == null)
 		{
-			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"CertPath is NULL!");
+			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"Signature is NULL!");
 			return false;
 		}
-		return getId().equalsIgnoreCase(path.getXORofSKIs());
+		return getId().equalsIgnoreCase(signature.getXORofSKIs());
 		
 		/*JAPCertificate cert=getCertificate();
 		if(cert==null)

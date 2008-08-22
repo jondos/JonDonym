@@ -229,7 +229,7 @@ public class InfoServiceMessageFactory
             XMLSignature t = XMLSignature.getUnverified(a_node);
             if (t != null)
             {
-            	ski = t.getMultiCertPath().getXORofSKIs();
+            	ski = t.getXORofSKIs();
                 //JAPCertificate cert = (JAPCertificate) t.getCertificates().firstElement();
                 //ski = new X509SubjectKeyIdentifier(cert.getPublicKey()).getValueWithoutColon();
             }

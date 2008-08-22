@@ -1035,6 +1035,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	{
 		return m_nrPriceCerts;
 	}
+	
+	public XMLSignature getSignature()
+	{
+		return m_signature;
+	}
 
 	public MultiCertPath getCertPath()
 	{

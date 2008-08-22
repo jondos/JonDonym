@@ -223,10 +223,6 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			if (m_signature != null)
 			{
 				m_certPath = m_signature.getMultiCertPath();
-				/*if (m_certPath != null)
-				{
-					m_certificate = m_certPath.getFirstCertificate();
-				}*/
 			}
 		}
 		catch (Exception e)
@@ -427,11 +423,6 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		return false;
 	}
 
-	/*public JAPCertificate getCertificate()
-	{
-		return m_certificate;
-	}*/
-	
 	public XMLSignature getSignature()
 	{
 		return m_signature;
@@ -444,7 +435,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 
 	public boolean checkId()
 	{
-		return m_signature.getMultiCertPath().getXORofSKIs().equalsIgnoreCase(getId());
+		return m_signature != null && m_signature.getXORofSKIs().equalsIgnoreCase(getId());
 		/*return getCertificate() != null &&
 			 getId().equals(new X509SubjectKeyIdentifier(
 				 getCertificate().getPublicKey()).getValueWithoutColon());

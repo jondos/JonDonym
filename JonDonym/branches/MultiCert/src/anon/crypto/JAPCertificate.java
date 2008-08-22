@@ -879,7 +879,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 			return false;
 		}
 
-		//TODO:why?
+		//TODO:change this?
 		//the cert is verified, too, if the public key is the same as the test key
 		if (getPublicKey().equals(a_publicKey))
 		{
@@ -1297,12 +1297,11 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 			return JAPCertificate.getInstance(a_file.getInputStream(a_entry));
 		}
 	}
-
-	public String getCertIdentifier()
-	{
-		return m_subject.toString()+", "+ m_subjectKeyIdentifier.getValueWithoutColon();
-	}
 	
+	/**
+	 * Returns <code>true</code> if this cert is self-signed.
+	 * @return if this cert is self-signed.
+	 */
 	public boolean isSelfSigned()
 	{
 		return this.verify(this.getPublicKey());

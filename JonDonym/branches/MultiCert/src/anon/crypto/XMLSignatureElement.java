@@ -1,21 +1,11 @@
-package anon.crypto;
+ package anon.crypto;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Vector;
-
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import anon.util.Base64;
@@ -24,6 +14,11 @@ import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
+/**
+ * Holds a single <Signature>-Element which is held in an XMLSignature-object.
+ * Only instances of XMLSignature should use the methods of this class.
+ * @author Robert Hirschberger
+ */
 public class XMLSignatureElement implements IXMLEncodable
 {
 	private static final String XML_ELEMENT_NAME = "Signature";
@@ -48,14 +43,6 @@ public class XMLSignatureElement implements IXMLEncodable
 	private String m_digestMethod;
 	private String m_digestValue;
 	private byte[] m_signedInfoCanonical;
-	/**
-	 * This hashtable contains the appended certificates in the form
-	 * <dl compact>
-	 * <dt> <b> key </b> </dt> <dd> <i> JAPCertificate </i> </dd>
-	 * <dt> <b> value </b> </dt> <dd> <i> certificate XML element </i> </dd>
-	 * </dl>
-	 */
-	private Hashtable m_certificates;
 
 	/**
 	 * Stores all appended certificates
@@ -68,15 +55,12 @@ public class XMLSignatureElement implements IXMLEncodable
 	private Vector m_appendedCertXMLElements;
 	/** Stores the certification Path of this Signature */
 	private CertPath m_certPath;
-	/** Indicates if the Signature was verfied already */
-	private boolean m_bVerified;
 	
 	protected XMLSignatureElement(XMLSignature a_parent)
 	{
 		m_parent = a_parent;
 		m_appendedCerts = new Vector();
 		m_appendedCertXMLElements = new Vector();
-		m_bVerified = false;
 	}
 	
 	protected XMLSignatureElement(XMLSignature a_parent,
@@ -150,7 +134,6 @@ public class XMLSignatureElement implements IXMLEncodable
 			throw new XMLParseException(ELEM_SIGNATURE_VALUE);
 		}
 		m_signatureValue = XMLUtil.parseValue(node, "");
-		m_bVerified = false;
 	}
 	
 	private void createSignatureElement(IMyPrivateKey a_signKey, Element a_elementToSign, byte[] a_digestValue) throws Exception
@@ -216,7 +199,6 @@ public class XMLSignatureElement implements IXMLEncodable
 		/* now add the Signature node as a child to our toSign node */
 		a_elementToSign.appendChild(signatureNode);
 		m_elemSignature = signatureNode;
-		m_bVerified = true;
 	}
 	
 	private synchronized void setCertificates(Element a_xmlSignature)
@@ -317,7 +299,6 @@ public class XMLSignatureElement implements IXMLEncodable
 
 		if (!checkMessageDigest(a_node))
 		{
-			//m_certPath = new CertPath((JAPCertificate)null);
 			return false;
 		}
 
@@ -330,8 +311,7 @@ public class XMLSignatureElement implements IXMLEncodable
 	}
 
 	/**
-	 * Checks if the signature of the XMLSignature`s SIGNED_INFO is valid.
-	 * @param a_signature an XMLSignature
+	 * Checks if the signature of the XMLSignatureElement's SIGNED_INFO is valid.
 	 * @param a_publicKey a public key
 	 * @return true if the signature of the XMLSignature`s SIGNED_INFO is valid; false otherwise
 	 */
@@ -409,26 +389,19 @@ public class XMLSignatureElement implements IXMLEncodable
 	{
 		return m_referenceURI.trim();
 	}
-	
-	/**
-	 * @return true if the verification of the Signature was successful, false otherwise
-	 *         or if no verification was done
-	 */
-	public boolean isVerified()
-	{
-		return m_bVerified;
-	}
 
 	public CertPath getCertPath()
 	{
 		return m_certPath;
 	}
 	
+	//TODO implement these methods in XMLSignature!
+	
 	/**
 	 * Returns all X509 certificates that are embedded in this SignatureElement.
 	 * @return all X509 certificates that are emmbeded in this SignatureElement;
 	 */
-	public synchronized Vector getCertificates()
+	private synchronized Vector getCertificates()
 	{
 		Vector certificates = new Vector(m_appendedCerts.size());
 		Enumeration enumCerts = m_appendedCerts.elements();
@@ -603,4 +576,53 @@ public class XMLSignatureElement implements IXMLEncodable
 			return null;
 		}
 	}
+	
+	/**
+	 * Returns all certificates that are appended to the given signature element.
+	 * @param a_xmlSignature an XML signature Element
+	 * @return all certificates that are appended to the given signature node
+	 * @todo deprecated method from XMLSignature moved here...
+	 */
+	/*private static Hashtable findCertificates(Element a_xmlSignature)
+	{
+		Hashtable certificates = new Hashtable();
+		JAPCertificate currentCertificate;
+		Element elemContainer;
+		Node nodeCertificate;
+
+		elemContainer = (Element) XMLUtil.getFirstChildByName(a_xmlSignature, ELEM_KEY_INFO);
+		if (elemContainer == null)
+		{
+			return certificates;
+		}
+
+		elemContainer = (Element) XMLUtil.getFirstChildByName(elemContainer,
+			JAPCertificate.XML_ELEMENT_CONTAINER_NAME);
+		if (elemContainer == null)
+		{
+			return certificates;
+		}
+
+		nodeCertificate = XMLUtil.getFirstChildByName(elemContainer, JAPCertificate.XML_ELEMENT_NAME);
+		while (nodeCertificate != null)
+		{
+			try
+			{
+				currentCertificate = JAPCertificate.getInstance( (Element) nodeCertificate);
+				if (currentCertificate != null)
+				{
+					//certificates.put(currentCertificate, nodeCertificate);
+					certificates.put(currentCertificate.getCertIdentifier(), currentCertificate);
+				}
+			}
+			catch (ClassCastException a_e)
+			{
+				// the node not an XML element; should not happen...
+			}
+
+			nodeCertificate = nodeCertificate.getNextSibling();
+		}
+
+		return certificates;
+	}*/
 }

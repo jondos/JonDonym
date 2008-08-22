@@ -60,7 +60,8 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	 */
 	private Element m_xmlData;
 	
-	//private JAPCertificate m_isCertificate;
+	private XMLSignature m_signature;
+	
 	private MultiCertPath m_certPath;	
 	
 	/**
@@ -102,11 +103,11 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		/* try to get the certificate from the Signature node */
 		try
 		{
-			XMLSignature signature = SignatureVerifier.getInstance().getVerifiedXml(a_info,
+			m_signature = SignatureVerifier.getInstance().getVerifiedXml(a_info,
 				SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
-			if (signature != null && signature.isVerified())
+			if (m_signature != null && m_signature.isVerified())
 			{
-				m_certPath = signature.getMultiCertPath();
+				m_certPath = m_signature.getMultiCertPath();
 				/*CertPath certPath = signature.getCertPath();
 				if (certPath != null && certPath.getFirstCertificate() != null)
 				{
@@ -137,10 +138,10 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		m_xmlData = a_info;
 	}
 	
-	/*public JAPCertificate getCertificate()
+	public XMLSignature getSignature()
 	{
-		return m_isCertificate;
-	}*/
+		return m_signature;
+	}
 	
 	public MultiCertPath getCertPath()
 	{

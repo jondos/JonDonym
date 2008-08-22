@@ -1,18 +1,24 @@
 package anon.crypto;
 
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import org.bouncycastle.util.encoders.Hex;
 
+/**
+ * This class takes an array of CertPaths that is associated with
+ * a signed XML Document. A MultiCertPath is considered valid an verified
+ * if ONE CertPath in it is.
+ * @author zenoxx
+ */
 public class MultiCertPath
 {
 	private CertPath[] m_certPaths;
 	private X509DistinguishedName m_subject;
 	private X509DistinguishedName m_issuer;
+	private int m_documentType;
 	
-	protected MultiCertPath(CertPath[] a_certPaths)
+	protected MultiCertPath(CertPath[] a_certPaths, int a_documentType)
 	{
 		if(a_certPaths.length != 0 && a_certPaths[0] != null)
 		{
@@ -21,29 +27,29 @@ public class MultiCertPath
 						
 			for(int i=1; i<a_certPaths.length; i++)
 			{
+				//a MultiCertPath may only CertPaths for the same subject and fromt the same issuer
 				if(!m_subject.equals(a_certPaths[i].getFirstCertificate().getSubject()))
 				{
-					//TODO see below
+					throw new IllegalArgumentException("Wrong subject in MultiCertPath!");
 				}
 				if(!m_issuer.equals(a_certPaths[i].getFirstCertificate().getIssuer()))
 				{
-					//TODO print warning? throw IllegalArgumentsException
+					throw new IllegalArgumentException("Wrong issuer in MultiCertPath!");
 				}
 			}
 		}
+		m_documentType = a_documentType;
 		m_certPaths = a_certPaths;
 	}
 	
 	/**
-	 * Returns true if one verifyable path is valid
-	 * @todo verification needs to be done, this costs performance, 
-	 * because when validity is checked you normally check if path is verifyable
+	 * Returns <code>true</code> if one verifyable path is valid.
 	 * @param a_date
-	 * @return
+	 * @return if a MultiCertPath is valid for the time in question
 	 */
 	public boolean isValid(Date a_date)
 	{
-		CertPath path = getFirstVerifiedPath();
+		CertPath path = getPath();
 		if(path != null)
 		{
 			return path.checkValidity(a_date);
@@ -51,9 +57,29 @@ public class MultiCertPath
 		return false;
 	}
 	
+	/**
+	 * Check if the documentType that is associated with this MultiCertPath
+	 * needs signature verification.
+	 * @return <code>true</code> if the MultiCertPath has to be verified
+	 */
+	private boolean needsVerification()
+	{
+		return (SignatureVerifier.getInstance().isCheckSignatures() && 
+				SignatureVerifier.getInstance().isCheckSignatures(m_documentType));
+	}
+	
+	/**
+	 * At the moment we try to find a single verifiyable CertPath and return
+	 * <code>true</code> if there is one or if signature verification is disabled.
+	 * @return if this MultiCertPath is verified
+	 */
 	public boolean isVerified()
 	{
-		return getFirstVerifiedPath() != null;
+		if(!this.needsVerification())
+		{
+			return true;
+		}
+		return (getFirstVerifiedPath() != null);
 	}
 	
 	/**
@@ -89,19 +115,17 @@ public class MultiCertPath
 			return null;
 		}
 	}
-	
-	/*public JAPCertificate getFirstCertificate()
-	{
-		CertPath verified = getFirstVerifiedPath();
-		if(verified != null)
-		{
-			return verified.getFirstCertificate();
-		}
-		return null;
-	}*/
-	
 
-	public String getXORofSKIs()
+	/**
+	 * This method is used by the checkId()-methods of the database classes,
+	 * that compare the id of a given entry with the SubjectKeyIdentifier of
+	 * the assoicated cert(s). If there is only one cert its ski is returned, 
+	 * else the XOR of all end-entity-certs' SKIs is returned.
+	 * @see anon.infoservice.AbstractCertifiedDatabaseEntry.checkId()
+	 * @see anon.infoservice.AbstractDistributableCertifiedDatabaseEntry.checkId()
+	 * @return the xor of all end-entity-certs' SKIs
+	 */
+	/*public String getXORofSKIs()
 	{
 		synchronized (m_certPaths)
 		{
@@ -120,8 +144,14 @@ public class MultiCertPath
 			}
 			return new String(Hex.encode(raw));
 		}
-	}
+	}*/
 	
+	/**
+	 * Gets all successfully verified end entity Keys from this MultiCertPath.
+	 * Used by the KeyExchangeManager to verifiy the signature of the symmetric Key
+	 * @see anon.client.KeyExchangeManager
+	 * @return all verified end-entity-keys
+	 */
 	public Vector getEndEntityKeys()
 	{
 		synchronized (m_certPaths)
@@ -130,7 +160,7 @@ public class MultiCertPath
 			
 			for(int i=0; i<m_certPaths.length; i++)
 			{
-				if(m_certPaths[i].verify())
+				if(!this.needsVerification() || m_certPaths[i].verify())
 				{
 					keys.addElement(m_certPaths[i].getFirstCertificate().getPublicKey());
 				}
@@ -142,12 +172,20 @@ public class MultiCertPath
 			return null;
 		}
 	}
-
+	
+	/**
+	 * Returns this MultiCertPaths Subject which is the same for all end-entity certs
+	 * @return this MultiCertPaths Subject
+	 */
 	public X509DistinguishedName getSubject()
 	{
 		return m_subject;
 	}
 	
+	/**
+	 * Returns this MultiCertPaths Issuer which is the same for all end-entity certs
+	 * @return this MultiCertPaths Issuer
+	 */
 	public X509DistinguishedName getIssuer()
 	{
 		return m_issuer;

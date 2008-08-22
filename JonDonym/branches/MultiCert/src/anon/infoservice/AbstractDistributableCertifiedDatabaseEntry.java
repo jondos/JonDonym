@@ -48,7 +48,7 @@ public abstract class AbstractDistributableCertifiedDatabaseEntry extends Abstra
 		super(a_expireTime);
 	}
 	
-	public abstract MultiCertPath getCertPath();
+	public abstract XMLSignature getSignature();
 
 	/**
 	 * Returns if this entry has been verified with a certificate chain.
@@ -62,6 +62,13 @@ public abstract class AbstractDistributableCertifiedDatabaseEntry extends Abstra
 	 */
 	public boolean checkId()
 	{
+		XMLSignature signature = getSignature();
+		if(signature == null)
+		{
+			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry.checkId() -- Signature is NULL!");
+			return false;
+		}
+		return getId().equalsIgnoreCase(signature.getXORofSKIs());
 		/*JAPCertificate cert=getCertificate();
 		if(cert==null)
 		{
@@ -71,13 +78,6 @@ public abstract class AbstractDistributableCertifiedDatabaseEntry extends Abstra
 		return  (getId() != null) && getId().equals(new X509SubjectKeyIdentifier(
 				 getCertificate().getPublicKey()).getValueWithoutColon());
 				 */
-		MultiCertPath path = getCertPath();
-		if(path == null)
-		{
-			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry.checkId() -- CertPath is NULL!");
-			return false;
-		}
-		return getId().equalsIgnoreCase(path.getXORofSKIs());
 	}
 
 }
