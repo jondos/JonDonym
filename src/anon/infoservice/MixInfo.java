@@ -506,9 +506,9 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 
   public boolean isVerified()
   {
-	  if (m_mixSignature != null)
+	  if (m_mixCertPath != null)
 	  {
-		  return m_mixSignature.isVerified();
+		  return m_mixCertPath.isVerified();
 	  }
 	  return false;
   }
@@ -561,6 +561,12 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   {
 	  return m_mixCertPath;
   }
+  
+  public XMLSignature getSignature()
+  {
+	  return m_mixSignature;
+  } 
+  
   /**
    * Returns the location of the mix.
    *

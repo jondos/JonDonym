@@ -195,7 +195,7 @@ public class EchoMulticastMessageFactory
             {
                 //JAPCertificate cert = (JAPCertificate) t.getCertificates().firstElement();
                 //ski = new X509SubjectKeyIdentifier(cert.getPublicKey()).getValueWithoutColon();
-                ski = t.getMultiCertPath().getXORofSKIs();
+                ski = t.getXORofSKIs();
             }
         }
         catch (Exception e)

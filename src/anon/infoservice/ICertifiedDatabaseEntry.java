@@ -24,6 +24,7 @@
 package anon.infoservice;
 
 import anon.crypto.MultiCertPath;
+import anon.crypto.XMLSignature;
 
 /**
  *
@@ -32,6 +33,8 @@ import anon.crypto.MultiCertPath;
 public interface ICertifiedDatabaseEntry 
 {
 	public MultiCertPath getCertPath();
+	
+	public XMLSignature getSignature();
 
 	public boolean isVerified();
 

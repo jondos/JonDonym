@@ -49,7 +49,6 @@ import anon.ErrorCodes;
 import anon.client.crypto.ASymCipher;
 import anon.client.crypto.KeyPool;
 import anon.client.crypto.SymCipher;
-import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLEncryption;
 import anon.crypto.XMLSignature;
@@ -204,7 +203,7 @@ public class KeyExchangeManager {
 		  }
 
 		  /** Very important: Check if this cascade is trusted. Otherwise, an exception is thrown. */
-		  //a_trustModel.checkTrust(cascade);
+		  //TODO ? //a_trustModel.checkTrust(cascade);
 		  if (excepTrust != null)
 		  {
 			  throw excepTrust;
@@ -297,7 +296,7 @@ public class KeyExchangeManager {
 			  {
 				  throw (new SignatureException(
 					  "Received XML structure has an invalid signature for Mix " +
-					  Integer.toString(i) + "."));
+					  Integer.toString(i+1) + "."));
 			  }
 
 
