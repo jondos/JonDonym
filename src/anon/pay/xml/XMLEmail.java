@@ -32,9 +32,6 @@ import org.w3c.dom.*;
 import anon.util.*;
 import java.io.ByteArrayInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
 /**
  * simple XML representation of the subject, return Address, sender name (not an email field,

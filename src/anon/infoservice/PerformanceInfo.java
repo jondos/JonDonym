@@ -161,7 +161,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 
 	/**
 	 * Returns a performance entry for the giving Cascade. This method
-	 * should ONLY be used inside getAverageEntry!
+	 * should ONLY be used inside getLowestCommonBoundEntry!
 	 * 
 	 * @see PerformanceInfo#getLowestCommonBoundEntry(String)
 	 * 
