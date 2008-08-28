@@ -28,7 +28,7 @@
 #import "javah_JAPMacOSXLib.h"
 #import <Cocoa/Cocoa.h>
 
-@interface ApplicationDelegate : NSObject
+@interface AppDelegate : NSObject
 - (NSMenu*) applicationDockMenu:(NSApplication*) sender;
 - (void) dockMenuCallback:(id) sender;
 @end

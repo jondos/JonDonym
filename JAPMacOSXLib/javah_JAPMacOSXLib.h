@@ -23,6 +23,14 @@ JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_nativeInit
 JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_nativeInitDockMenu
   (JNIEnv *, jclass);
 
+/*
+ * Class:     gui_JAPMacOSXLib
+ * Method:    setMenu
+ * Signature: (Ljavax/swing/JMenu;)V
+ */
+JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_setMenu
+  (JNIEnv *, jclass, jobject);
+
 #ifdef __cplusplus
 }
 #endif
