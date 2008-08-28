@@ -145,6 +145,7 @@ public class JAP
 		{
 			m_arstrCmdnLnArgs = new Hashtable();
 		}
+		
 	}
 
 	/** Initializes and starts the JAP.
@@ -212,7 +213,7 @@ public class JAP
 			bConsoleOnly = true;
 		}
 	
-
+		
 		
 		// Test (part 2) for right JVM....
 		if (vendor.startsWith("Transvirtual"))
@@ -840,8 +841,9 @@ public class JAP
 		// it won't work
 		if(AbstractOS.getInstance() instanceof MacOS)
 		{
-			JAPMacOSXLib.loadLibrary();
 			JAPMacOSXLib.initDockMenu();
+			/*JAPMacOSXLib.loadLibrary();
+			JAPMacOSXLib.initDockMenu();*/
 			
 			javax.swing.JMenu menu = new javax.swing.JMenu();
 			javax.swing.JMenuItem item = new javax.swing.JMenuItem("test");
