@@ -33,6 +33,7 @@ import jap.TrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 
+import java.awt.EventQueue;
 import java.util.Vector;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -56,12 +57,11 @@ public class JAPMacOSXLib
 	
 	public static void dockMenuCallback()
 	{
-		/*EventQueue.invokeLater(new Runnable() {
-				public void run() {
-					osl.openSheetFinished(new SheetEvent(filenames));
-				}
-			});*/
-		System.out.println("dock menu item clicked");
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				System.out.println("dock menu item clicked");
+			}
+		});
 	}
 	
 	public static void init()
