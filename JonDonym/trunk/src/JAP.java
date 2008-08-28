@@ -842,7 +842,7 @@ public class JAP
 		{
 			JAPMacOSXLib.loadLibrary();
 			JAPMacOSXLib.initDockMenu();
-		
+			
 			javax.swing.JMenu menu = new javax.swing.JMenu();
 			javax.swing.JMenuItem item = new javax.swing.JMenuItem("test");
 			menu.add(item);
