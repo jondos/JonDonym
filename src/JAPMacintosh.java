@@ -37,6 +37,7 @@ public class JAPMacintosh extends JAP
 	JAPMacintosh(String[] argv) 
 	{
 		super(argv);
+
 	}
 
 	protected void registerMRJHandlers() {
