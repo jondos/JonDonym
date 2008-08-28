@@ -28,6 +28,7 @@
 package anon.client;
 
 import java.security.SignatureException;
+import anon.client.TrustException;
 import java.util.Observable;
 
 import gui.JAPMessages;

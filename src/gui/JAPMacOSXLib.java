@@ -27,6 +27,8 @@
  */
 package gui;
 
+
+import javax.swing.JMenu;
 /**
  * Utility class for the JAPMacOSX library
  *
@@ -62,4 +64,5 @@ public class JAPMacOSXLib
 	
 	private static native void nativeInit();
 	private static native void nativeInitDockMenu();
+	public static native void setMenu(JMenu menu);
 }

@@ -51,6 +51,7 @@ import gui.GUIUtils;
 import gui.JAPAWTMsgBox;
 import gui.JAPDll;
 import gui.JAPMessages;
+import gui.JAPMacOSXLib;
 import gui.dialog.JAPDialog;
 import jap.AbstractJAPMainView;
 import jap.ConsoleJAPMainView;
@@ -69,6 +70,7 @@ import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
 import platform.WindowsOS;
+import platform.MacOS;
 
 /** This is the main class of the JAP project. It starts everything. It can be inherited by another
  *  class that wants to initialize platform dependend features, e.g. see
@@ -149,6 +151,7 @@ public class JAP
 	 */
 	public void startJAP()
 	{
+		
 		final String msg =
 			"JAP/JonDo must run with a 1.1.3 or higher version Java!\nYou will find more information at the JAP webpage!\nYour Java Version: ";
 		String javaVersion = System.getProperty("java.version");
@@ -831,6 +834,22 @@ public class JAP
 		if (bConsoleOnly)
 		{
 			view.setVisible(true);
+		}
+		
+		// for some reason this needs to be done here, otherwise 
+		// it won't work
+		if(AbstractOS.getInstance() instanceof MacOS)
+		{
+			JAPMacOSXLib.loadLibrary();
+			JAPMacOSXLib.initDockMenu();
+		
+			javax.swing.JMenu menu = new javax.swing.JMenu();
+			javax.swing.JMenuItem item = new javax.swing.JMenuItem("test");
+			menu.add(item);
+			item = new javax.swing.JMenuItem("test2");
+			menu.add(item);
+			
+			JAPMacOSXLib.setMenu(menu);
 		}
 	}
 
