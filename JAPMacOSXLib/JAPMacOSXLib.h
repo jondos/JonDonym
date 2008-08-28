@@ -32,3 +32,5 @@
 - (NSMenu*) applicationDockMenu:(NSApplication*) sender;
 - (void) dockMenuCallback:(id) sender;
 @end
+
+NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj);
