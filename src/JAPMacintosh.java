@@ -90,9 +90,7 @@ public class JAPMacintosh extends JAP
 	public static void main(String[] argv)
 	{
 		JAPMacintosh japOnMac = new JAPMacintosh(argv);
-		
-		//japOnMac.registerMRJHandlers();
-
+		japOnMac.registerMRJHandlers();
 		japOnMac.startJAP();
 	}
 }
