@@ -281,7 +281,11 @@ public class PopupMenu
 		return false;
 
 	}
-
+	
+	public JPopupMenu getPopup()
+	{
+		return (JPopupMenu) m_popup;
+	}
 
 	public final Point getRelativePosition(Point a_pointOnScreen)
 	{

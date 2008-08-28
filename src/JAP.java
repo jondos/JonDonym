@@ -65,6 +65,7 @@ import jap.JAPModel;
 import jap.JAPNewView;
 import jap.JAPSplash;
 import jap.JAPViewIconified;
+import jap.SystrayPopupMenu;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -841,17 +842,41 @@ public class JAP
 		// it won't work
 		if(AbstractOS.getInstance() instanceof MacOS)
 		{
-			JAPMacOSXLib.initDockMenu();
-			/*JAPMacOSXLib.loadLibrary();
-			JAPMacOSXLib.initDockMenu();*/
+			JAPMacOSXLib.init();
+			
+			/*final SystrayPopupMenu systray = new SystrayPopupMenu(
+					new SystrayPopupMenu.MainWindowListener()
+				{
+					public void onShowMainWindow()
+					{
+						// do nothing
+					}
+
+					public void onShowSettings(String card, Object a_value)
+					{
+						
+					}
+
+					public void onShowHelp()
+					{
+
+					}
+				});
+			
+			javax.swing.JPopupMenu popup = systray.getPopup();
 			
 			javax.swing.JMenu menu = new javax.swing.JMenu();
-			javax.swing.JMenuItem item = new javax.swing.JMenuItem("test");
-			menu.add(item);
-			item = new javax.swing.JMenuItem("test2");
-			menu.add(item);
 			
-			JAPMacOSXLib.setMenu(menu);
+			for(int i = 0; i < popup.getComponentCount(); i++)
+			{
+				java.awt.Component c = popup.getComponent(i);
+				if(c instanceof javax.swing.JMenuItem)
+				{
+					menu.add(c);
+				}
+			}
+			
+			JAPMacOSXLib.setMenu(menu);*/
 		}
 	}
 

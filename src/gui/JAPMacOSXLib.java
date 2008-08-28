@@ -27,8 +27,17 @@
  */
 package gui;
 
+import gui.help.JAPHelp;
+import jap.SystrayPopupMenu;
+import jap.TrustModel;
+import anon.infoservice.Database;
+import anon.infoservice.MixCascade;
 
+import java.util.Vector;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
+
 /**
  * Utility class for the JAPMacOSX library
  *
@@ -36,9 +45,13 @@ import javax.swing.JMenu;
  */
 public class JAPMacOSXLib
 {
+	private static final String MSG_SETTINGS= SystrayPopupMenu.class.getName() + "_settings";
+	private static final String MSG_ANONYMITY_MODE = SystrayPopupMenu.class.getName() + "_anonymityMode";
+	private static final String MSG_SHOW_DETAILS = SystrayPopupMenu.class.getName() + "_showDetails";
+	
 	private JAPMacOSXLib()
 	{
-	
+		
 	}
 	
 	public static void dockMenuCallback()
@@ -51,18 +64,72 @@ public class JAPMacOSXLib
 		System.out.println("dock menu item clicked");
 	}
 	
-	public static void loadLibrary()
+	public static void init()
 	{
-		System.loadLibrary("JAPMacOSX");
-		nativeInit();
+		try
+		{
+			System.loadLibrary("JAPMacOSX");
+			nativeInit();
+			nativeInitDockMenu();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 	
-	public static void initDockMenu()
-	{
-		nativeInitDockMenu();
+	public static JMenu showDockMenu()
+	{	
+		JMenu menu = new JMenu();
+		JMenuItem item;
+		
+		item = new JMenuItem(JAPMessages.getString(MSG_ANONYMITY_MODE));
+		menu.add(item);
+		
+		item = new JMenuItem(JAPMessages.getString(MSG_SHOW_DETAILS));
+		menu.add(item);
+		
+		menu.add(new JSeparator());
+		
+		item = new JMenuItem(JAPMessages.getString(MSG_SETTINGS));
+		menu.add(item);
+		
+		item = new JMenuItem(JAPMessages.getString(JAPHelp.MSG_HELP_MENU_ITEM));
+		menu.add(item);
+		
+		menu.add(new JSeparator());
+		
+		Vector vec = TrustModel.getTrustModels();
+		
+		for(int i = 0; i < vec.size(); i++)
+		{
+			TrustModel model = (TrustModel) vec.elementAt(i);
+			if(model.isAdded())
+			{
+				JMenu sub = new JMenu(model.getName());
+				
+				Vector cascades = Database.getInstance(MixCascade.class).getEntryList();
+				for(int j = 0; j < cascades.size(); j++)
+				{
+					MixCascade cascade = (MixCascade) cascades.elementAt(j);
+					
+					if(!model.isTrusted(cascade))
+					{
+						continue;
+					}
+					
+					item = new JMenuItem(cascade.getName());
+					sub.add(item);
+				}
+				
+				menu.add(sub);
+			}
+		}
+		
+		return menu;
 	}
 	
 	private static native void nativeInit();
 	private static native void nativeInitDockMenu();
-	public static native void setMenu(JMenu menu);
+	//public static native void setMenu(JMenu menu);
 }
