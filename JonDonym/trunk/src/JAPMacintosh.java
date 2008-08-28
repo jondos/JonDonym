@@ -25,14 +25,17 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+import gui.JAPMacOSXLib;
 import jap.JAPController;
 import com.apple.eawt.Application;
 import com.apple.eawt.ApplicationAdapter;
 import com.apple.eawt.ApplicationEvent;
 
-public class JAPMacintosh extends JAP {
+public class JAPMacintosh extends JAP 
+{
 
-	JAPMacintosh(String[] argv) {
+	JAPMacintosh(String[] argv) 
+	{
 		super(argv);
 	}
 
@@ -83,11 +86,11 @@ public class JAPMacintosh extends JAP {
 			JAPController.aboutJAP();
 		}
 	}
-
-	public static void main(String[] argv) {
+	
+	public static void main(String[] argv)
+	{
 		JAPMacintosh japOnMac = new JAPMacintosh(argv);
 		japOnMac.registerMRJHandlers();
 		japOnMac.startJAP();
 	}
-
 }
