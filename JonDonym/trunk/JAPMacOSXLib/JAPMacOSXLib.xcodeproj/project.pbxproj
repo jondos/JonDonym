@@ -7,32 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C44103050E6587E30092D0DD /* JAPMacOSXLib.m in Sources */ = {isa = PBXBuildFile; fileRef = C44103030E6587E30092D0DD /* JAPMacOSXLib.m */; };
 		C441034F0E658B3D0092D0DD /* javah_JAPMacOSXLib.h in JavaArchive */ = {isa = PBXBuildFile; fileRef = C441034D0E658B3D0092D0DD /* javah_JAPMacOSXLib.h */; settings = {JAVA_ARCHIVE_SUBDIR = ""; }; };
 		C44103570E658BF30092D0DD /* JAPMacOSXLib.java in Sources */ = {isa = PBXBuildFile; fileRef = C44103550E658BF30092D0DD /* JAPMacOSXLib.java */; };
+		C4F9B9570E66C5400032AFB8 /* JAPMacOSXLib.m in Sources */ = {isa = PBXBuildFile; fileRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */; };
 		D2AAC0CC05546C4400DB518D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		C44103270E65895C0092D0DD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C441030D0E65881F0092D0DD;
-			remoteInfo = JavaHeaders;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
-		0867D69BFE84028FC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		0867D6A5FE840307C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		C44103030E6587E30092D0DD /* JAPMacOSXLib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JAPMacOSXLib.m; sourceTree = "<group>"; };
+		C44103030E6587E30092D0DD /* JAPMacOSXLib.old */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = JAPMacOSXLib.old; sourceTree = "<group>"; };
 		C44103040E6587E30092D0DD /* JAPMacOSXLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JAPMacOSXLib.h; sourceTree = "<group>"; };
 		C441030E0E65881F0092D0DD /* JavaHeaders.jar */ = {isa = PBXFileReference; explicitFileType = archive.jar; includeInIndex = 0; path = JavaHeaders.jar; sourceTree = BUILT_PRODUCTS_DIR; };
 		C441034D0E658B3D0092D0DD /* javah_JAPMacOSXLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = javah_JAPMacOSXLib.h; sourceTree = "<group>"; };
 		C44103550E658BF30092D0DD /* JAPMacOSXLib.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = JAPMacOSXLib.java; path = ../src/gui/JAPMacOSXLib.java; sourceTree = SOURCE_ROOT; };
-		D2A6134D07B89F6200DD23D3 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JAPMacOSXLib.m; sourceTree = "<group>"; };
 		D2AAC0C705546C1D00DB518D /* libJAPMacOSX.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libJAPMacOSX.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -68,8 +56,9 @@
 		0867D691FE84028FC02AAC07 /* JAPMacOSXLib */ = {
 			isa = PBXGroup;
 			children = (
+				C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */,
 				C44103550E658BF30092D0DD /* JAPMacOSXLib.java */,
-				C44103030E6587E30092D0DD /* JAPMacOSXLib.m */,
+				C44103030E6587E30092D0DD /* JAPMacOSXLib.old */,
 				C44103040E6587E30092D0DD /* JAPMacOSXLib.h */,
 				08FB77AEFE84172EC02AAC07 /* Classes */,
 				32C88DFF0371C24200C91783 /* Other Sources */,
@@ -106,9 +95,6 @@
 		1058C7B2FEA5585E11CA2CBB /* Other Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				0867D6A5FE840307C02AAC07 /* AppKit.framework */,
-				D2A6134D07B89F6200DD23D3 /* CoreData.framework */,
-				0867D69BFE84028FC02AAC07 /* Foundation.framework */,
 			);
 			name = "Other Frameworks";
 			sourceTree = "<group>";
@@ -175,7 +161,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				C44103280E65895C0092D0DD /* PBXTargetDependency */,
 			);
 			name = JAPMacOSXLib;
 			productName = JAPMacOSXLib;
@@ -243,25 +228,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C44103050E6587E30092D0DD /* JAPMacOSXLib.m in Sources */,
+				C4F9B9570E66C5400032AFB8 /* JAPMacOSXLib.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		C44103280E65895C0092D0DD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C441030D0E65881F0092D0DD /* JavaHeaders */;
-			targetProxy = C44103270E65895C0092D0DD /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1DEB917E08733D990010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = (
+					i386,
+					ppc,
+					ppc64,
+					x86_64,
+				);
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -275,6 +258,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				PRODUCT_NAME = JAPMacOSX;
+				VALID_ARCHS = "ppc64 ppc7400 ppc970 i386 x86_64 ppc";
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -283,6 +267,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = (
+					i386,
+					ppc,
+					ppc64,
+					x86_64,
+				);
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -293,13 +283,14 @@
 				INSTALL_PATH = /usr/local/lib;
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				PRODUCT_NAME = JAPMacOSX;
+				VALID_ARCHS = "ppc64 ppc7400 ppc970 i386 x86_64 ppc";
 			};
 			name = Release;
 		};
 		1DEB918208733D990010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = (
 					i386,
 					ppc,
@@ -310,6 +301,7 @@
 				EXECUTABLE_PREFIX = lib;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaFM.framework/Headers;
 				INSTALL_PATH = /usr/local/lib;
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				MACH_O_TYPE = mh_dylib;
@@ -324,7 +316,7 @@
 		1DEB918308733D990010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = (
 					i386,
 					ppc,
@@ -335,6 +327,7 @@
 				EXECUTABLE_PREFIX = lib;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaFM.framework/Headers;
 				INSTALL_PATH = /usr/local/lib;
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				MACH_O_TYPE = mh_dylib;
