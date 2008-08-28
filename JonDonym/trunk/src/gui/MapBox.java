@@ -216,7 +216,7 @@ public class MapBox extends JAPDialog implements ChangeListener
 	/** Contact <a href="http://maps.yahoo.com">Yahoo Maps</a> to re-load the map.
 	 * To retrieve the image, it is necessary to submit a HTTP GET request to the
 	 * web site and parse the returned HTML page for the image.<br>
-
+	 *
 	 * @throws IOException If an error occurs while retrieving the web site
 	 */
 	private void refresh() throws IOException
@@ -228,7 +228,7 @@ public class MapBox extends JAPDialog implements ChangeListener
 		// Create the URL
 		m_sImageURL = "http://www.maps.google.com/staticmap?markers=" + m_sLatitude + "," + m_sLongitude +
 		              "&zoom=" + (m_sldZoom.getValue()+2) + "&size=" + m_sImageSize + "&key=" + KEY;
-		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Getting image: " + m_sImageURL);
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Getting map: " + m_sImageURL);
 		// Set the title
 		String sTitle = JAPMessages.getString(MSG_TITLE, new String[]{m_sLatitude, m_sLongitude});
 		setTitle(sTitle);
