@@ -27,23 +27,18 @@
  */
 package gui.dialog;
 
+import gui.GUIUtils;
+
 import java.awt.BorderLayout;
-import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
 import anon.util.ProgressCapsule;
-
-import gui.GUIUtils;
-import gui.JAPMessages;
-
-import logging.*;
 
 /**
  * This is a dialog that executes a given Thread or Runnable if it is shown on screen. It has an optional
