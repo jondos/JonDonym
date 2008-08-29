@@ -15,7 +15,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					156,
+					373,
 					20,
 					48,
 					43,
@@ -44,6 +44,22 @@
 					PBXFindDataSource_LocationID,
 				);
 			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXSymbolsDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXSymbolsDataSource_SymbolNameID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					16,
+					200,
+					50,
+					313.20849609375,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXSymbolsDataSource_SymbolTypeIconID,
+					PBXSymbolsDataSource_SymbolNameID,
+					PBXSymbolsDataSource_SymbolTypeID,
+					PBXSymbolsDataSource_ReferenceNameID,
+				);
+			};
 			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
 				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
@@ -66,8 +82,56 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 241617062;
-			PBXWorkspaceStateSaveDate = 241617062;
+			PBXPerProjectTemplateStateSaveDate = 241687054;
+			PBXWorkspaceStateSaveDate = 241687054;
+		};
+		perUserProjectItems = {
+			C44D00DA0E67DB4F005A47D8 /* PBXBookmark */ = C44D00DA0E67DB4F005A47D8 /* PBXBookmark */;
+			C44D00DF0E67DD26005A47D8 /* PBXTextBookmark */ = C44D00DF0E67DD26005A47D8 /* PBXTextBookmark */;
+			C44D00E20E67DD32005A47D8 /* PBXTextBookmark */ = C44D00E20E67DD32005A47D8 /* PBXTextBookmark */;
+			C44D00E30E67DD32005A47D8 /* PBXTextBookmark */ = C44D00E30E67DD32005A47D8 /* PBXTextBookmark */;
+			C44D00E70E67DD33005A47D8 /* PBXTextBookmark */ = C44D00E70E67DD33005A47D8 /* PBXTextBookmark */;
+			C44D00EA0E67DD33005A47D8 /* PBXTextBookmark */ = C44D00EA0E67DD33005A47D8 /* PBXTextBookmark */;
+			C44D00EC0E67DD73005A47D8 /* PBXTextBookmark */ = C44D00EC0E67DD73005A47D8 /* PBXTextBookmark */;
+			C44D00ED0E67DD73005A47D8 /* PBXTextBookmark */ = C44D00ED0E67DD73005A47D8 /* PBXTextBookmark */;
+			C44D00F10E67DE1B005A47D8 /* PBXTextBookmark */ = C44D00F10E67DE1B005A47D8 /* PBXTextBookmark */;
+			C44D00F40E67DE27005A47D8 /* PBXTextBookmark */ = C44D00F40E67DE27005A47D8 /* PBXTextBookmark */;
+			C44D00F50E67DE27005A47D8 /* PBXTextBookmark */ = C44D00F50E67DE27005A47D8 /* PBXTextBookmark */;
+			C44D00F60E67DE27005A47D8 /* PBXTextBookmark */ = C44D00F60E67DE27005A47D8 /* PBXTextBookmark */;
+			C44D00F80E67DE99005A47D8 /* PBXTextBookmark */ = C44D00F80E67DE99005A47D8 /* PBXTextBookmark */;
+			C44D00F90E67DE99005A47D8 /* PBXTextBookmark */ = C44D00F90E67DE99005A47D8 /* PBXTextBookmark */;
+			C44D00FB0E67DECE005A47D8 /* PBXTextBookmark */ = C44D00FB0E67DECE005A47D8 /* PBXTextBookmark */;
+			C44D00FC0E67DECE005A47D8 /* PBXTextBookmark */ = C44D00FC0E67DECE005A47D8 /* PBXTextBookmark */;
+			C44D00FE0E67DF6E005A47D8 /* PBXTextBookmark */ = C44D00FE0E67DF6E005A47D8 /* PBXTextBookmark */;
+			C44D00FF0E67DF6E005A47D8 /* PBXTextBookmark */ = C44D00FF0E67DF6E005A47D8 /* PBXTextBookmark */;
+			C44D01000E67E209005A47D8 /* PBXTextBookmark */ = C44D01000E67E209005A47D8 /* PBXTextBookmark */;
+			C44D01010E67E209005A47D8 /* PBXTextBookmark */ = C44D01010E67E209005A47D8 /* PBXTextBookmark */;
+			C44D01040E67E22B005A47D8 /* PBXTextBookmark */ = C44D01040E67E22B005A47D8 /* PBXTextBookmark */;
+			C44D01060E67E238005A47D8 /* PBXTextBookmark */ = C44D01060E67E238005A47D8 /* PBXTextBookmark */;
+			C44D01070E67E238005A47D8 /* PBXTextBookmark */ = C44D01070E67E238005A47D8 /* PBXTextBookmark */;
+			C44D01080E67E254005A47D8 /* PBXTextBookmark */ = C44D01080E67E254005A47D8 /* PBXTextBookmark */;
+			C44D01090E67E254005A47D8 /* PBXTextBookmark */ = C44D01090E67E254005A47D8 /* PBXTextBookmark */;
+			C44D010A0E67E2AD005A47D8 /* PBXTextBookmark */ = C44D010A0E67E2AD005A47D8 /* PBXTextBookmark */;
+			C44D010B0E67E2AD005A47D8 /* PBXTextBookmark */ = C44D010B0E67E2AD005A47D8 /* PBXTextBookmark */;
+			C44D010E0E67E2C0005A47D8 /* PBXTextBookmark */ = C44D010E0E67E2C0005A47D8 /* PBXTextBookmark */;
+			C44D010F0E67E2C0005A47D8 /* PBXTextBookmark */ = C44D010F0E67E2C0005A47D8 /* PBXTextBookmark */;
+			C44D01120E67E36C005A47D8 /* PBXTextBookmark */ = C44D01120E67E36C005A47D8 /* PBXTextBookmark */;
+			C44D01130E67E36C005A47D8 /* PBXTextBookmark */ = C44D01130E67E36C005A47D8 /* PBXTextBookmark */;
+			C44D01150E67E3BE005A47D8 /* PBXTextBookmark */ = C44D01150E67E3BE005A47D8 /* PBXTextBookmark */;
+			C44D01160E67E3BE005A47D8 /* PBXTextBookmark */ = C44D01160E67E3BE005A47D8 /* PBXTextBookmark */;
+			C44D01180E67E41E005A47D8 /* PBXTextBookmark */ = C44D01180E67E41E005A47D8 /* PBXTextBookmark */;
+			C44D01190E67E41E005A47D8 /* PBXTextBookmark */ = C44D01190E67E41E005A47D8 /* PBXTextBookmark */;
+			C44D011B0E67E481005A47D8 /* PBXTextBookmark */ = C44D011B0E67E481005A47D8 /* PBXTextBookmark */;
+			C44D011C0E67E481005A47D8 /* PBXTextBookmark */ = C44D011C0E67E481005A47D8 /* PBXTextBookmark */;
+			C44D01200E67E4A4005A47D8 /* PBXTextBookmark */ = C44D01200E67E4A4005A47D8 /* PBXTextBookmark */;
+			C44D01210E67E4A4005A47D8 /* PBXTextBookmark */ = C44D01210E67E4A4005A47D8 /* PBXTextBookmark */;
+			C44D01340E67E654005A47D8 /* PBXTextBookmark */ = C44D01340E67E654005A47D8 /* PBXTextBookmark */;
+			C44D01380E67E67B005A47D8 /* PBXTextBookmark */ = C44D01380E67E67B005A47D8 /* PBXTextBookmark */;
+			C44D01390E67E67B005A47D8 /* PBXTextBookmark */ = C44D01390E67E67B005A47D8 /* PBXTextBookmark */;
+			C44D013A0E67E6A3005A47D8 /* PBXTextBookmark */ = C44D013A0E67E6A3005A47D8 /* PBXTextBookmark */;
+			C44D013B0E67E6A3005A47D8 /* PBXTextBookmark */ = C44D013B0E67E6A3005A47D8 /* PBXTextBookmark */;
+			C44D013D0E67E6B3005A47D8 /* PBXTextBookmark */ = C44D013D0E67E6B3005A47D8 /* PBXTextBookmark */;
+			C44D013E0E67E6B3005A47D8 /* PBXTextBookmark */ = C44D013E0E67E6B3005A47D8 /* PBXTextBookmark */;
 		};
 		sourceControlManager = C44102FF0E6587650092D0DD /* Source Control */;
 		userBuildSettings = {
@@ -95,7 +159,7 @@
 	C44103040E6587E30092D0DD /* JAPMacOSXLib.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {803, 518}}";
-			sepNavSelRange = "{1564, 0}";
+			sepNavSelRange = "{1680, 0}";
 			sepNavVisRange = "{148, 1632}";
 			sepNavWindowFrame = "{{449, 130}, {862, 579}}";
 		};
@@ -113,17 +177,459 @@
 	};
 	C44103550E658BF30092D0DD /* JAPMacOSXLib.java */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {638, 1302}}";
-			sepNavSelRange = "{1939, 99}";
-			sepNavVisRange = "{1636, 403}";
+			sepNavIntBoundsRect = "{{0, 0}, {803, 2114}}";
+			sepNavSelRange = "{2393, 0}";
+			sepNavVisRange = "{2008, 777}";
 			sepNavWindowFrame = "{{317, 204}, {862, 579}}";
 		};
 	};
+	C44D00DA0E67DB4F005A47D8 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+	};
+	C44D00DF0E67DD26005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: syntax error before '*' token";
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		rLen = 1;
+		rLoc = 62;
+		rType = 1;
+	};
+	C44D00E20E67DD32005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "warning: unused variable 'isSelected_mID'";
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		rLen = 0;
+		rLoc = 175;
+		rType = 1;
+	};
+	C44D00E30E67DD32005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 122";
+		rLen = 0;
+		rLoc = 4477;
+		rType = 0;
+		vrLen = 607;
+		vrLoc = 2677;
+	};
+	C44D00E70E67DD33005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 56";
+		rLen = 0;
+		rLoc = 1274;
+		rType = 0;
+		vrLen = 473;
+		vrLoc = 967;
+	};
+	C44D00EA0E67DD33005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 33";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1669;
+		vrLoc = 148;
+	};
+	C44D00EC0E67DD73005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 53";
+		rLen = 0;
+		rLoc = 1235;
+		rType = 0;
+		vrLen = 491;
+		vrLoc = 967;
+	};
+	C44D00ED0E67DD73005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 33";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1669;
+		vrLoc = 148;
+	};
+	C44D00F10E67DE1B005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "warning: method definition for '-checkboxToggle:' not found";
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		rLen = 1;
+		rLoc = 91;
+		rType = 1;
+	};
+	C44D00F40E67DE27005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 68";
+		rLen = 5;
+		rLoc = 1938;
+		rType = 0;
+		vrLen = 771;
+		vrLoc = 1046;
+	};
+	C44D00F50E67DE27005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 33";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1669;
+		vrLoc = 148;
+	};
+	C44D00F60E67DE27005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D00F80E67DE99005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 174";
+		rLen = 0;
+		rLoc = 6131;
+		rType = 0;
+		vrLen = 1246;
+		vrLoc = 3775;
+	};
+	C44D00F90E67DE99005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D00FB0E67DECE005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 166";
+		rLen = 0;
+		rLoc = 5872;
+		rType = 0;
+		vrLen = 1251;
+		vrLoc = 3772;
+	};
+	C44D00FC0E67DECE005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D00FE0E67DF6E005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 174";
+		rLen = 0;
+		rLoc = 6131;
+		rType = 0;
+		vrLen = 1254;
+		vrLoc = 2083;
+	};
+	C44D00FF0E67DF6E005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D01000E67E209005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 185";
+		rLen = 0;
+		rLoc = 6373;
+		rType = 0;
+		vrLen = 1247;
+		vrLoc = 4479;
+	};
+	C44D01010E67E209005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D01040E67E22B005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "warning: 'NSString' may not respond to '+stringWithUTS8String:'";
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		rLen = 1;
+		rLoc = 198;
+		rType = 1;
+	};
+	C44D01060E67E238005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 185";
+		rLen = 0;
+		rLoc = 6402;
+		rType = 0;
+		vrLen = 1230;
+		vrLoc = 4529;
+	};
+	C44D01070E67E238005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D01080E67E254005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 117";
+		rLen = 0;
+		rLoc = 4477;
+		rType = 0;
+		vrLen = 1309;
+		vrLoc = 2252;
+	};
+	C44D01090E67E254005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D010A0E67E2AD005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 146";
+		rLen = 0;
+		rLoc = 4477;
+		rType = 0;
+		vrLen = 724;
+		vrLoc = 3216;
+	};
+	C44D010B0E67E2AD005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D010E0E67E2C0005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 137";
+		rLen = 0;
+		rLoc = 4477;
+		rType = 0;
+		vrLen = 694;
+		vrLoc = 3449;
+	};
+	C44D010F0E67E2C0005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D01120E67E36C005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 134";
+		rLen = 0;
+		rLoc = 3961;
+		rType = 0;
+		vrLen = 623;
+		vrLoc = 3670;
+	};
+	C44D01130E67E36C005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D01150E67E3BE005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 96";
+		rLen = 0;
+		rLoc = 2544;
+		rType = 0;
+		vrLen = 1435;
+		vrLoc = 1570;
+	};
+	C44D01160E67E3BE005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D01180E67E41E005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 97";
+		rLen = 0;
+		rLoc = 2638;
+		rType = 0;
+		vrLen = 1516;
+		vrLoc = 1570;
+	};
+	C44D01190E67E41E005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D011B0E67E481005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 71";
+		rLen = 0;
+		rLoc = 1457;
+		rType = 0;
+		vrLen = 509;
+		vrLoc = 1178;
+	};
+	C44D011C0E67E481005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D01200E67E4A4005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 70";
+		rLen = 0;
+		rLoc = 1432;
+		rType = 0;
+		vrLen = 532;
+		vrLoc = 1178;
+	};
+	C44D01210E67E4A4005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D01340E67E654005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: too few arguments to function '(*env)->NewString'";
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		rLen = 1;
+		rLoc = 80;
+		rType = 1;
+	};
+	C44D01380E67E67B005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 84";
+		rLen = 0;
+		rLoc = 1841;
+		rType = 0;
+		vrLen = 720;
+		vrLoc = 1478;
+	};
+	C44D01390E67E67B005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
+	C44D013A0E67E6A3005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: too few arguments to function '(*env)->NewString'";
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		rLen = 1;
+		rLoc = 80;
+		rType = 1;
+	};
+	C44D013B0E67E6A3005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 81";
+		rLen = 0;
+		rLoc = 1741;
+		rType = 0;
+		vrLen = 344;
+		vrLoc = 1663;
+	};
+	C44D013D0E67E6B3005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 106";
+		rLen = 0;
+		rLoc = 2354;
+		rType = 0;
+		vrLen = 658;
+		vrLoc = 3627;
+	};
+	C44D013E0E67E6B3005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C44103040E6587E30092D0DD /* JAPMacOSXLib.h */;
+		name = "JAPMacOSXLib.h: 32";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1632;
+		vrLoc = 148;
+	};
 	C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {867, 2464}}";
-			sepNavSelRange = "{150, 0}";
-			sepNavVisRange = "{0, 659}";
+			sepNavIntBoundsRect = "{{0, 0}, {867, 3640}}";
+			sepNavSelRange = "{2354, 0}";
+			sepNavVisRange = "{3627, 658}";
 			sepNavWindowFrame = "{{364, 168}, {926, 559}}";
 		};
 	};
