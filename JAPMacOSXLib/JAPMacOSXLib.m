@@ -96,8 +96,8 @@ JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_nativeInit
   (JNIEnv * env, jclass clazz) 
 {
 	jDelegateClass = (*env)->NewGlobalRef(env, clazz);
-	dockMenuCallback_mID = (*env)->GetStaticMethodID(env, clazz, "dockMenuCallback", "(Ljava/lang/String;)V");
-	showDockMenu_mID = (*env)->GetStaticMethodID(env, clazz, "showDockMenu", "()Ljavax/swing/JMenu;");
+	dockMenuCallback_mID = (*env)->GetStaticMethodID(env, jDelegateClass, "dockMenuCallback", "(Ljava/lang/String;)V");
+	showDockMenu_mID = (*env)->GetStaticMethodID(env, jDelegateClass, "showDockMenu", "()Ljavax/swing/JMenu;");
 	
 	jMenuClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "javax/swing/JMenu"));
 	jMenuItemClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "javax/swing/JMenuItem"));
