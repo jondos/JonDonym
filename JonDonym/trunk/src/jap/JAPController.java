@@ -99,6 +99,7 @@ import anon.pay.PaymentInstanceDBEntry;
 import anon.proxy.AnonProxy;
 import anon.proxy.IProxyListener;
 import anon.tor.TorAnonServerDescription;
+import anon.transport.address.IAddress;
 import anon.util.Base64;
 import anon.util.ClassUtil;
 import anon.util.IMiscPasswordReader;

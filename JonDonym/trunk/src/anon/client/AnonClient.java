@@ -43,6 +43,10 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
+
+import anon.transport.connection.ConnectionException;
+import anon.transport.connection.IStreamConnection;
+import anon.transport.connection.SocketConnection;
 import anon.util.JobQueue;
 import HTTPClient.ThreadInterruptedIOException;
 
@@ -111,7 +115,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 	private KeyExchangeManager m_keyExchangeManager;
 
-	private Socket m_connectedSocket;
+	private IStreamConnection m_streamConnection;
 
 	private Pay m_paymentInstance;
 
@@ -133,7 +137,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		m_dummyTrafficControlChannel = null;
 		m_dummyTrafficInterval = -1;
 		m_keyExchangeManager = null;
-		m_connectedSocket = null;
+		m_streamConnection = null;
 		m_paymentInstance = null;
 		m_internalSynchronization = new Object();
 		m_internalSynchronizationForSocket = new Object();
@@ -144,10 +148,10 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		m_queuePacketCount = new JobQueue("AnonClient Packet count updater");
 	}
 
-	public AnonClient(Socket a_connectedSocket)
+	public AnonClient(IStreamConnection a_theConnection)
 	{
 		this();
-		m_connectedSocket = a_connectedSocket;
+		m_streamConnection = a_theConnection;
 	}
 
 	private static interface StatusThread extends Runnable
@@ -196,17 +200,17 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 						//}
 					}
 
-					Socket socketToMixCascade = null;
-					if (m_connectedSocket != null)
+					IStreamConnection connectionToMixCascade = null;
+					if (m_streamConnection != null)
 					{
-						socketToMixCascade = m_connectedSocket;
-						m_connectedSocket = null;
+						connectionToMixCascade = m_streamConnection;
+						m_streamConnection = null;
 					}
 					else
 					{
 						try
 						{
-							socketToMixCascade = connectMixCascade(mixCascade,
+							connectionToMixCascade = connectMixCascade(mixCascade,
 								m_proxyInterface.getProxyInterface(false).getProxyInterface());
 						}
 						catch (InterruptedIOException a_e)
@@ -219,7 +223,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 							return;
 						}
 					}
-					if (socketToMixCascade == null)
+					if (connectionToMixCascade == null)
 					{
 						status = ErrorCodes.E_CONNECT;
 						synchronized (m_threadInitialise)
@@ -228,7 +232,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 						}
 						return;
 					}
-					status = initializeProtocol(socketToMixCascade, a_mixCascade, a_serviceContainer);
+					status = initializeProtocol(connectionToMixCascade, a_mixCascade, a_serviceContainer);
 					synchronized (m_threadInitialise)
 					{
 						m_threadInitialise.notify();
@@ -563,7 +567,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		return m_paymentInstance;
 	}
 
-	private Socket connectMixCascade(final MixCascade a_mixCascade, ImmutableProxyInterface a_proxyInterface) throws
+	private IStreamConnection connectMixCascade(final MixCascade a_mixCascade, ImmutableProxyInterface a_proxyInterface) throws
 		InterruptedIOException
 	{
 		LogHolder.log(LogLevel.DEBUG, LogType.NET,
@@ -637,10 +641,10 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			LogHolder.log(LogLevel.ERR, LogType.NET,
 						  "Failed to connect to MixCascade '" + a_mixCascade.toString() + "'.");
 		}
-		return connectedSocket;
+		return new SocketConnection(connectedSocket);
 	}
 
-	private int initializeProtocol(Socket a_connectedSocket, final AnonServerDescription a_mixCascade,
+	private int initializeProtocol(IStreamConnection a_connectionToMixCascade, final AnonServerDescription a_mixCascade,
 								   final IServiceContainer a_serviceContainer)
 	{
 		synchronized (m_internalSynchronization)
@@ -649,15 +653,15 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			{
 				synchronized (m_internalSynchronizationForSocket)
 				{
-					m_socketHandler = new SocketHandler(a_connectedSocket);
+					m_socketHandler = new SocketHandler(a_connectionToMixCascade);
 				}
 				try
 				{
 					/* limit timeouts while login procedure */
-					a_connectedSocket.setSoTimeout(
+					a_connectionToMixCascade.setTimeout(
 							getInternalLoginTimeout(a_serviceContainer));
 				}
-				catch (SocketException e)
+				catch (ConnectionException e)
 				{
 					/* ignore it */
 				}
@@ -736,9 +740,9 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			try
 			{
 				/* try to set infinite timeout */
-				a_connectedSocket.setSoTimeout(0);
+				a_connectionToMixCascade.setTimeout(0);
 			}
-			catch (SocketException e)
+			catch (ConnectionException e)
 			{
 				/* ignore it */
 			}
@@ -767,7 +771,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			}
 			/* maybe we have to start some more services */
 			int errorCode = finishInitialization(m_multiplexer, m_keyExchangeManager, m_paymentProxyInterface,
-												 m_packetCounter, a_connectedSocket, a_serviceContainer,
+												 m_packetCounter, a_connectionToMixCascade, a_serviceContainer,
 												 m_keyExchangeManager.getConnectedCascade() );
 			if (errorCode != ErrorCodes.E_SUCCESS)
 			{
@@ -824,7 +828,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 	private int finishInitialization(Multiplexer a_multiplexer, KeyExchangeManager a_keyExchangeManager,
 									 IMutableProxyInterface a_proxyInterface, PacketCounter a_packetCounter,
-									 Socket a_connectedSocket, IServiceContainer a_serviceContainer,
+									 IStreamConnection a_connection, IServiceContainer a_serviceContainer,
 									 MixCascade a_cascade)
 	{
 		if (a_keyExchangeManager.isProtocolWithTimestamp())

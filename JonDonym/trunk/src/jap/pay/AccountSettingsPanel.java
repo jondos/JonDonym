@@ -1157,6 +1157,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		
 		new TransactionOverviewDialog(this,
 			JAPMessages.getString(MSG_TRANSACTION_OVERVIEW_DIALOG), true, a_accounts);
+
 	}
 
 	/**
@@ -3493,7 +3494,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		 * serial version UID
 		 */
 		private static final long serialVersionUID = 1L;
-
 		public Component getListCellRendererComponent(JList list, Object value,
 			int index, boolean isSelected, boolean cellHasFocus)
 		{

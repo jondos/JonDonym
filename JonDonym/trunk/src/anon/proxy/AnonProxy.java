@@ -45,16 +45,17 @@ import anon.client.DummyTrafficControlChannel;
 import anon.infoservice.MixCascade;
 import anon.infoservice.AbstractMixCascadeContainer;
 import anon.mixminion.MixminionServiceDescription;
-import anon.shared.ProxyConnection;
 import anon.tor.TorAnonServerDescription;
+import anon.transport.connection.IStreamConnection;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.AnonServerDescription;
 import anon.pay.IAIEventListener;
 import anon.infoservice.IMutableProxyInterface;
-import anon.util.Queue;
+import anon.util.ObjectQueue;
 import java.security.SignatureException;
+
 import anon.client.TrustException;
 
 /**
@@ -212,7 +213,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	 *          there is no need for dummy traffic on that connection on the
 	 *          server side.
 	 */
-	public AnonProxy(ServerSocket a_listener, ProxyConnection a_proxyConnection,
+	public AnonProxy(ServerSocket a_listener, IStreamConnection a_proxyConnection,
 					 int a_maxDummyTrafficInterval)
 	{
 		if (a_listener == null)
@@ -220,7 +221,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			throw new IllegalArgumentException("Socket listener is null!");
 		}
 		m_socketListener = a_listener;
-		m_Anon = new AnonClient(a_proxyConnection.getSocket()); // uups very nasty....
+		m_Anon = new AnonClient(a_proxyConnection); 
 		m_forwardedConnection = true;
 		m_maxDummyTrafficInterval = a_maxDummyTrafficInterval;
 		setDummyTraffic(a_maxDummyTrafficInterval);
@@ -439,7 +440,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 	private class OpenSocketRequester implements Runnable
 	{
-		private Queue m_socketQueue = new Queue();
+		private ObjectQueue m_socketQueue = new ObjectQueue();
 		private AnonProxy m_proxy;
 		private Object m_syncObject;
 		private boolean m_bIsClosed = false;

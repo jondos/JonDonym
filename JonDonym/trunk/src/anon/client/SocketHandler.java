@@ -37,13 +37,17 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Observable;
 
+import anon.transport.connection.ConnectionException;
+import anon.transport.connection.IStreamConnection;
+
+
 
 /**
  * @author Stefan Lieske
  */
 public class SocketHandler extends Observable {
 
-  private Socket m_socket;
+  private IStreamConnection m_underlyingConnection;
 
   private SocketInputStreamImplementation m_socketInputStream;
 
@@ -151,23 +155,21 @@ public class SocketHandler extends Observable {
   }
 
 
-  public SocketHandler(Socket a_connectedSocket) throws IOException {
-    m_socket = a_connectedSocket;
+  public SocketHandler(IStreamConnection a_baseConnection) throws IOException {
+    m_underlyingConnection = a_baseConnection;
+    // keep in sync with old behavior
+    if (m_underlyingConnection.getCurrentState() == IStreamConnection.ConnectionState_CLOSE)
+    	throw new IOException("Connection allready closed");
     m_internalSynchronization = new Object();
-    try {
-      m_socketInputStream = new SocketInputStreamImplementation(m_socket.getInputStream());
-      m_socketOutputStream = new SocketOutputStreamImplementation(m_socket.getOutputStream());
-    }
-    catch (IOException e) {
-      closeSocket();
-      throw e;
-    }
+    
+    m_socketInputStream = new SocketInputStreamImplementation(m_underlyingConnection.getInputStream());
+    m_socketOutputStream = new SocketOutputStreamImplementation(m_underlyingConnection.getOutputStream());
   }
 
 
   public void closeSocket() {
     try {
-      m_socket.close();
+      m_underlyingConnection.close();
     }
     catch (IOException e) {
       /* no handling necessary */

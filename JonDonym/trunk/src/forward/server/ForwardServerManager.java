@@ -213,6 +213,30 @@ public class ForwardServerManager {
     }
     return serverManagerId;
   }
+  
+  /**
+   * Adds an ServerManager. Clients can connect to it as it starts Listning on his own Endpoint
+   * and the associated ForwardScheduler will manage that forwarded connections. If forwarding is not
+   * enabled while the call of this function, nothing happens and the result is false. 
+   */ 
+  public Object addServerManager(IServerManager a_manager) {
+	  Object serverManagerId = null;
+	    synchronized (this) {
+	      if (m_forwardScheduler != null) {
+	        try {
+	          m_forwardScheduler.addServerManager(a_manager);
+	          /* ServerSocketManager established successful */
+	          serverManagerId = a_manager.getId();
+	          LogHolder.log(LogLevel.DEBUG, LogType.NET, "Establishing ServerManager with ID '" + serverManagerId.toString() + "' was successful.");
+	        }
+	        catch (Exception e) {
+	          LogHolder.log(LogLevel.EXCEPTION, LogType.NET, "Error adding Servermanager of Type "+ a_manager.getClass().getName() +
+	        		  ". Reason: " + e.toString());
+	        }
+	      }
+	    }
+	    return serverManagerId;
+  }
 
   /**
    * Removes one ServerManager from the list of associated ServerManagers of this
