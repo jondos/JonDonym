@@ -28,6 +28,8 @@
 package gui;
 
 import gui.help.JAPHelp;
+import jap.JAPConf;
+import jap.JAPController;
 import jap.SystrayPopupMenu;
 import jap.TrustModel;
 import anon.infoservice.Database;
@@ -35,8 +37,11 @@ import anon.infoservice.MixCascade;
 
 import java.awt.EventQueue;
 import java.util.Vector;
+
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JSeparator;
 
 /**
@@ -55,11 +60,55 @@ public class JAPMacOSXLib
 		
 	}
 	
-	public static void dockMenuCallback()
+	public static void dockMenuCallback(String a_command)
 	{
+		final String cmd = a_command;
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				System.out.println("dock menu item clicked");
+				if(cmd.equals(MSG_ANONYMITY_MODE))
+				{
+					if(JAPController.getInstance().getAnonMode())
+					{
+						JAPController.getInstance().setAnonMode(false);
+					}
+					else
+					{
+						JAPController.getInstance().setAnonMode(true);
+					}
+				}
+				else if(cmd.equals(MSG_SHOW_DETAILS))
+				{
+					JAPController.getInstance().getView().showConfigDialog(JAPConf.ANON_TAB,
+							JAPController.getInstance().getCurrentMixCascade());					
+				}
+				else if(cmd.equals(MSG_SETTINGS))
+				{
+					JAPController.getInstance().getView().showConfigDialog(null, null);
+				}
+				else if(cmd.equals(JAPHelp.MSG_HELP_MENU_ITEM))
+				{
+					JAPHelp.getInstance().setContext(
+							JAPHelpContext.createHelpContext("index", 
+									 (JAPController.getInstance().getViewWindow() instanceof JFrame) ?
+										(JFrame) JAPController.getInstance().getViewWindow() : null));
+					if(JAPHelp.getHelpDialog() != null)
+					{
+						JAPHelp.getHelpDialog().setAlwaysOnTop(true);
+						JAPHelp.getHelpDialog().setVisible(true);
+						JAPHelp.getHelpDialog().setAlwaysOnTop(false);
+					}
+				}
+				else
+				{
+					// action command is probably a cascade id
+					MixCascade cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(cmd);
+					
+					if(cascade != null)
+					{
+						JAPController.getInstance().setCurrentMixCascade(cascade);
+					}
+				}
 			}
 		});
 	}
@@ -82,19 +131,25 @@ public class JAPMacOSXLib
 	{	
 		JMenu menu = new JMenu();
 		JMenuItem item;
+		JCheckBoxMenuItem chk;
 		
-		item = new JMenuItem(JAPMessages.getString(MSG_ANONYMITY_MODE));
-		menu.add(item);
+		chk = new JCheckBoxMenuItem(JAPMessages.getString(MSG_ANONYMITY_MODE));
+		chk.setSelected(JAPController.getInstance().getAnonMode());
+		chk.setActionCommand(MSG_ANONYMITY_MODE);
+		menu.add(chk);
 		
 		item = new JMenuItem(JAPMessages.getString(MSG_SHOW_DETAILS));
+		item.setActionCommand(MSG_SHOW_DETAILS);
 		menu.add(item);
 		
 		menu.add(new JSeparator());
 		
 		item = new JMenuItem(JAPMessages.getString(MSG_SETTINGS));
+		item.setActionCommand(MSG_SETTINGS);
 		menu.add(item);
 		
 		item = new JMenuItem(JAPMessages.getString(JAPHelp.MSG_HELP_MENU_ITEM));
+		item.setActionCommand(JAPHelp.MSG_HELP_MENU_ITEM);
 		menu.add(item);
 		
 		menu.add(new JSeparator());
@@ -119,6 +174,7 @@ public class JAPMacOSXLib
 					}
 					
 					item = new JMenuItem(cascade.getName());
+					item.setActionCommand(cascade.getId());
 					sub.add(item);
 				}
 				
