@@ -1,0 +1,170 @@
+// !$*UTF8*$!
+{
+	0867D690FE84028FC02AAC07 /* Project object */ = {
+		activeArchitecture = i386;
+		activeBuildConfigurationName = Release;
+		activeTarget = D2AAC0C605546C1D00DB518D /* JAPMacOSXLib */;
+		addToTargets = (
+			D2AAC0C605546C1D00DB518D /* JAPMacOSXLib */,
+			C441030D0E65881F0092D0DD /* JavaHeaders */,
+		);
+		codeSenseManager = C44103000E6587650092D0DD /* Code sense */;
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					373,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFindDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFindDataSource_LocationID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					200,
+					170.20849609375,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFindDataSource_MessageID,
+					PBXFindDataSource_LocationID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					116,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 241691375;
+			PBXWorkspaceStateSaveDate = 241691375;
+		};
+		perUserProjectItems = {
+			C44D01440E67E994005A47D8 = C44D01440E67E994005A47D8 /* PBXBookmark */;
+			C44D01490E67E99D005A47D8 = C44D01490E67E99D005A47D8 /* PBXTextBookmark */;
+			C44D01520E67EAF8005A47D8 /* PBXTextBookmark */ = C44D01520E67EAF8005A47D8 /* PBXTextBookmark */;
+		};
+		sourceControlManager = C44102FF0E6587650092D0DD /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	C44102FF0E6587650092D0DD /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	C44103000E6587650092D0DD /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	C44103030E6587E30092D0DD /* JAPMacOSXLib.old */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {803, 2926}}";
+			sepNavSelRange = "{4238, 1781}";
+			sepNavVisRange = "{3909, 1160}";
+			sepNavWindowFrame = "{{522, 234}, {862, 579}}";
+		};
+	};
+	C44103040E6587E30092D0DD /* JAPMacOSXLib.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {803, 518}}";
+			sepNavSelRange = "{1564, 0}";
+			sepNavVisRange = "{148, 1632}";
+			sepNavWindowFrame = "{{449, 130}, {862, 579}}";
+		};
+	};
+	C441030D0E65881F0092D0DD /* JavaHeaders */ = {
+		activeExec = 0;
+	};
+	C441034D0E658B3D0092D0DD /* javah_JAPMacOSXLib.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {803, 451}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 592}";
+			sepNavWindowFrame = "{{61, 253}, {862, 579}}";
+		};
+	};
+	C44103550E658BF30092D0DD /* JAPMacOSXLib.java */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {638, 1302}}";
+			sepNavSelRange = "{1939, 99}";
+			sepNavVisRange = "{1636, 403}";
+			sepNavWindowFrame = "{{317, 204}, {862, 579}}";
+		};
+	};
+	C44D01440E67E994005A47D8 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+	};
+	C44D01490E67E99D005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 72";
+		rLen = 0;
+		rLoc = 1477;
+		rType = 0;
+		vrLen = 653;
+		vrLoc = 1360;
+	};
+	C44D01520E67EAF8005A47D8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */;
+		name = "JAPMacOSXLib.m: 75";
+		rLen = 0;
+		rLoc = 1572;
+		rType = 0;
+		vrLen = 655;
+		vrLoc = 3289;
+	};
+	C4F9B9560E66C5400032AFB8 /* JAPMacOSXLib.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {867, 3262}}";
+			sepNavSelRange = "{1572, 0}";
+			sepNavVisRange = "{3289, 655}";
+			sepNavWindowFrame = "{{364, 168}, {926, 559}}";
+		};
+	};
+	D2AAC0C605546C1D00DB518D /* JAPMacOSXLib */ = {
+		activeExec = 0;
+	};
+	D2AAC0C705546C1D00DB518D /* libJAPMacOSX.jnilib */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {5684, 952}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {1248, 485}}";
+			sepNavWindowFrame = "{{153, 134}, {1287, 613}}";
+		};
+	};
+}
