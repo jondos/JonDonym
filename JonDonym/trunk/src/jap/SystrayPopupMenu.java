@@ -228,12 +228,14 @@ public class SystrayPopupMenu extends PopupMenu
 						JAPHelpContext.createHelpContext("index", 
 								 (JAPController.getInstance().getViewWindow() instanceof JFrame) ?
 									(JFrame) JAPController.getInstance().getViewWindow() : null));
-				if(JAPHelp.getHelpDialog() != null)
+				/*if(JAPHelp.getHelpDialog() != null)
 				{
 					JAPHelp.getHelpDialog().setAlwaysOnTop(true);
 					JAPHelp.getHelpDialog().setVisible(true);
 					JAPHelp.getHelpDialog().setAlwaysOnTop(false);
-				}
+				}*/
+				
+				JAPHelp.getInstance().loadCurrentContext();
 			}
 		});
 
