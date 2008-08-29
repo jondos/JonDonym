@@ -202,7 +202,7 @@
 			<key>Content</key>
 			<dict>
 				<key>PBXProjectModuleGUID</key>
-				<string>C44D00E50E67DD33005A47D8</string>
+				<string>C44D01470E67E99D005A47D8</string>
 				<key>PBXProjectModuleLabel</key>
 				<string>JAPMacOSXLib.m</string>
 				<key>PBXSplitModuleInNavigatorKey</key>
@@ -210,16 +210,16 @@
 					<key>Split0</key>
 					<dict>
 						<key>PBXProjectModuleGUID</key>
-						<string>C44D00E60E67DD33005A47D8</string>
+						<string>C44D01480E67E99D005A47D8</string>
 						<key>PBXProjectModuleLabel</key>
 						<string>JAPMacOSXLib.m</string>
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>C44D013D0E67E6B3005A47D8</string>
+						<string>C44D01520E67EAF8005A47D8</string>
 						<key>history</key>
 						<array>
-							<string>C44D01340E67E654005A47D8</string>
+							<string>C44D01490E67E99D005A47D8</string>
 						</array>
 					</dict>
 					<key>SplitCount</key>
@@ -235,47 +235,7 @@
 				<key>PBXModuleWindowStatusBarHidden2</key>
 				<false/>
 				<key>RubberWindowFrame</key>
-				<string>410 275 926 503 0 0 1440 878 </string>
-			</dict>
-		</dict>
-		<dict>
-			<key>Content</key>
-			<dict>
-				<key>PBXProjectModuleGUID</key>
-				<string>C44D00E80E67DD33005A47D8</string>
-				<key>PBXProjectModuleLabel</key>
-				<string>JAPMacOSXLib.h</string>
-				<key>PBXSplitModuleInNavigatorKey</key>
-				<dict>
-					<key>Split0</key>
-					<dict>
-						<key>PBXProjectModuleGUID</key>
-						<string>C44D00E90E67DD33005A47D8</string>
-						<key>PBXProjectModuleLabel</key>
-						<string>JAPMacOSXLib.h</string>
-						<key>_historyCapacity</key>
-						<integer>0</integer>
-						<key>bookmark</key>
-						<string>C44D013E0E67E6B3005A47D8</string>
-						<key>history</key>
-						<array>
-							<string>C44D00F50E67DE27005A47D8</string>
-						</array>
-					</dict>
-					<key>SplitCount</key>
-					<string>1</string>
-				</dict>
-				<key>StatusBarVisibility</key>
-				<true/>
-			</dict>
-			<key>Geometry</key>
-			<dict>
-				<key>Frame</key>
-				<string>{{0, 20}, {862, 482}}</string>
-				<key>PBXModuleWindowStatusBarHidden2</key>
-				<false/>
-				<key>RubberWindowFrame</key>
-				<string>449 186 862 523 0 0 1440 878 </string>
+				<string>505 213 926 503 0 0 1440 878 </string>
 			</dict>
 		</dict>
 	</array>
@@ -360,7 +320,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>2</integer>
+									<integer>1</integer>
 									<integer>0</integer>
 								</array>
 							</array>
@@ -465,9 +425,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>C44D00D40E67DA13005A47D8</string>
+				<string>C44D01500E67EAF8005A47D8</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>C44D00D50E67DA13005A47D8</string>
+				<string>C44D01510E67EAF8005A47D8</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -601,10 +561,8 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>C441031A0E6588F80092D0DD</string>
-		<string>C44D00E80E67DD33005A47D8</string>
 		<string>/Users/gesu/Documents/Coding/Java/JAP/JAPMacOSXLib/JAPMacOSXLib.xcodeproj</string>
-		<string>C44D00E50E67DD33005A47D8</string>
+		<string>C44D01470E67E99D005A47D8</string>
 	</array>
 	<key>WindowString</key>
 	<string>227 225 907 459 0 0 1440 878 </string>
