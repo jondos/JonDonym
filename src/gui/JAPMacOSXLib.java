@@ -88,16 +88,10 @@ public class JAPMacOSXLib
 				}
 				else if(cmd.equals(JAPHelp.MSG_HELP_MENU_ITEM))
 				{
-					JAPHelp.getInstance().setContext(
-							JAPHelpContext.createHelpContext("index", 
-									 (JAPController.getInstance().getViewWindow() instanceof JFrame) ?
-										(JFrame) JAPController.getInstance().getViewWindow() : null));
-					if(JAPHelp.getHelpDialog() != null)
-					{
-						JAPHelp.getHelpDialog().setAlwaysOnTop(true);
-						JAPHelp.getHelpDialog().setVisible(true);
-						JAPHelp.getHelpDialog().setAlwaysOnTop(false);
-					}
+					JAPHelp help = JAPHelp.getInstance();
+					help.setContext(JAPHelpContext.createHelpContext("index", 
+							JAPController.getInstance().getViewWindow()));
+					help.loadCurrentContext();
 				}
 				else
 				{
