@@ -1,37 +1,40 @@
 #import "JAPMacOSXLib.h"
 
 static JavaVM *jvm;
+
+static jclass japMacOSXLibClass;
+static jclass jMenuClass;
+static jclass jMenuItemClass;
+static jclass jCheckBoxMenuItemClass;
+static jclass jSeparatorClass;
+
 static jmethodID dockMenuCallback_mID;
 static jmethodID showDockMenu_mID;
-static jclass jDelegateClass;
+static jmethodID getMenuComponentCount_mID;
+static jmethodID getMenuComponent_mID;
+static jmethodID getText_mID;
+static jmethodID getActionCommand_mID;
+static jmethodID isSelected_mID;
 
-jclass jMenuClass;
-jclass jMenuItemClass;
-jclass jCheckBoxMenuItemClass;
-jclass jSeparatorClass;
-	
-jmethodID getMenuComponentCount_mID;
-jmethodID getMenuComponent_mID;
-jmethodID getText_mID;
-jmethodID getActionCommand_mID;
-jmethodID isSelected_mID;
-
-jint GetJNIEnv(JNIEnv **env, bool *mustDetach) 
+jint GetJNIEnv(JNIEnv** r_env, bool* r_bMustDetach) 
 {
-	jint getEnvErr = JNI_OK;
-	*mustDetach = false;
-	if (jvm) {
-		getEnvErr = (*jvm)->GetEnv(jvm, (void **)env, JNI_VERSION_1_4);
-		if (getEnvErr == JNI_EDETACHED) 
+	jint result = JNI_OK;
+	*r_bMustDetach = false;
+	
+	if(jvm) 
+	{
+		result = (*jvm)->GetEnv(jvm, (void**) r_env, JNI_VERSION_1_4);
+		if(result == JNI_EDETACHED) 
 		{
-			getEnvErr = (*jvm)->AttachCurrentThread(jvm, (void **)env, NULL);
-			if (getEnvErr == JNI_OK) 
+			result = (*jvm)->AttachCurrentThread(jvm, (void**) r_env, NULL);
+			if(result == JNI_OK) 
 			{
-				*mustDetach = true;
+				*r_bMustDetach = true;
 			}
 		}
 	}
-	return getEnvErr;
+	
+	return result;
 }
 
 @implementation AppDelegate
@@ -46,7 +49,7 @@ jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 		return NULL;
 	}
 	
-	jobject obj = (*env)->CallStaticObjectMethod(env, jDelegateClass, showDockMenu_mID);
+	jobject obj = (*env)->CallStaticObjectMethod(env, japMacOSXLibClass, showDockMenu_mID);
 	
 	NSMenu* menu = getNSMenuFromJMenu(env, obj);
 	
@@ -73,7 +76,7 @@ jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 	const char* buffer = [cmd UTF8String];
 	jstring string = (*env)->NewStringUTF(env, buffer);
 	
-	(*env)->CallStaticVoidMethod(env, jDelegateClass, dockMenuCallback_mID, string);
+	(*env)->CallStaticVoidMethod(env, japMacOSXLibClass, dockMenuCallback_mID, string);
 	
 	(*env)->DeleteLocalRef(env, string);
 	
@@ -92,18 +95,16 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 }
 
 //	% javap -classpath JavaHeaders.jar -s gui.JAPMacOSXLib
-JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_nativeInit
-  (JNIEnv * env, jclass clazz) 
+JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_nativeInit(JNIEnv* env, jclass class) 
 {
-	jDelegateClass = (*env)->NewGlobalRef(env, clazz);
-	dockMenuCallback_mID = (*env)->GetStaticMethodID(env, jDelegateClass, "dockMenuCallback", "(Ljava/lang/String;)V");
-	showDockMenu_mID = (*env)->GetStaticMethodID(env, jDelegateClass, "showDockMenu", "()Ljavax/swing/JMenu;");
-	
+	japMacOSXLibClass = (*env)->NewGlobalRef(env, class);	
 	jMenuClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "javax/swing/JMenu"));
 	jMenuItemClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "javax/swing/JMenuItem"));
 	jCheckBoxMenuItemClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "javax/swing/JCheckBoxMenuItem"));	
 	jSeparatorClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "javax/swing/JSeparator"));
 	
+	dockMenuCallback_mID = (*env)->GetStaticMethodID(env, japMacOSXLibClass, "dockMenuCallback", "(Ljava/lang/String;)V");
+	showDockMenu_mID = (*env)->GetStaticMethodID(env, japMacOSXLibClass, "showDockMenu", "()Ljavax/swing/JMenu;");
 	getMenuComponentCount_mID = (*env)->GetMethodID(env, jMenuClass, "getMenuComponentCount", "()I");
 	getMenuComponent_mID = (*env)->GetMethodID(env, jMenuClass, "getMenuComponent", "(I)Ljava/awt/Component;");
 	getText_mID = (*env)->GetMethodID(env, jMenuItemClass, "getText", "()Ljava/lang/String;");
@@ -112,37 +113,36 @@ JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_nativeInit
 	
 	if(getMenuComponentCount_mID == 0)
 	{
-		NSLog(@"getNSMenuFromJMenu: could not find method JMenu_getMenuComponentCount");
+		NSLog(@"nativeInit: could not find method JMenu_getMenuComponentCount");
 		return;
 	}
 	
 	if(getMenuComponent_mID == 0)
 	{
-		NSLog(@"getNSMenuFromJMenu: could not find method JMenu_getMenuComponent");
+		NSLog(@"nativeInit: could not find method JMenu_getMenuComponent");
 		return;
 	}
 
 	if(getText_mID == 0)
 	{
-		NSLog(@"getNSMenuFromJMenu: could not find method JMenuItem_getText");
+		NSLog(@"nativeInit: could not find method JMenuItem_getText");
 		return;
 	}
 	
 	if(getActionCommand_mID == 0)
 	{
-		NSLog(@"getNSMenuFromJMenu: could not find method JMenuItem_getActionCommand");
+		NSLog(@"nativeInit: could not find method JMenuItem_getActionCommand");
 		return;
 	}
 	
 	if(isSelected_mID == 0)
 	{
-		NSLog(@"getNSMenuFromJMenu: could not find method JMenuItem_isSelected");
+		NSLog(@"nativeInit: could not find method JMenuItem_isSelected");
 		return;
 	}
 }
 
-JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_nativeInitDockMenu
-  (JNIEnv * env, jclass class)
+JNIEXPORT void JNICALL Java_gui_JAPMacOSXLib_nativeInitDockMenu(JNIEnv * env, jclass class)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
@@ -158,15 +158,11 @@ NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj)
 	NSMenu* menu = [NSMenu new];
 	[menu retain];
 	
-
-	
 	if(!(*env)->IsInstanceOf(env, obj, jMenuClass) == JNI_TRUE)
 	{
 		NSLog(@"getNSMenuFromJMenu: object is not a JMenu");
 		return NULL;
 	}
-	
-
 	
 	jint count = (*env)->CallIntMethod(env, obj, getMenuComponentCount_mID);
 	jint i;

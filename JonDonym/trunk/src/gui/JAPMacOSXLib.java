@@ -38,7 +38,6 @@ import anon.infoservice.MixCascade;
 import java.awt.EventQueue;
 import java.util.Vector;
 
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JCheckBoxMenuItem;
@@ -64,8 +63,10 @@ public class JAPMacOSXLib
 	{
 		final String cmd = a_command;
 		
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
+		EventQueue.invokeLater(new Runnable() 
+		{
+			public void run() 
+			{
 				if(cmd.equals(MSG_ANONYMITY_MODE))
 				{
 					if(JAPController.getInstance().getAnonMode())
@@ -100,6 +101,7 @@ public class JAPMacOSXLib
 					
 					if(cascade != null)
 					{
+						// TODO: switch trustmodels
 						JAPController.getInstance().setCurrentMixCascade(cascade);
 					}
 				}
