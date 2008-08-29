@@ -70,13 +70,6 @@ jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 	}
 	
 	NSString* cmd = [sender representedObject];
-	
-	/*jsize length = [cmd length];
-	jchar buffer[length];
-	
-	[cmd getCharacters:(unichar *)buffer];
-			// fill the jobjectArray
-			jstring js = (*env)->NewString(env, buffer, buflen);*/
 	const char* buffer = [cmd UTF8String];
 	jstring string = (*env)->NewStringUTF(env, buffer);
 	
