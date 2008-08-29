@@ -176,7 +176,7 @@ public final class LogHolder
 				}
 				else
 				{
-					message += "\n" + LOGGED_THROWABLE + a_throwable.getMessage();
+					message =message+ "\n" + LOGGED_THROWABLE + a_throwable.getMessage();
 				}
 
 				LogHolder.getLogInstance().log(a_logLevel, a_logType, a_throwable.toString());

@@ -32,77 +32,130 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 
-final public class ProxyConnection
-{
+import anon.transport.address.IAddress;
+import anon.transport.address.TcpIpAddress;
+import anon.transport.connection.ConnectionException;
+import anon.transport.connection.IStreamConnection;
 
-	private Socket m_ioSocket;
-	private InputStream m_In;
-	private OutputStream m_Out;
-
-	public ProxyConnection(Socket a_connectedSocket) throws Exception
+final public class ProxyConnection implements IStreamConnection
 	{
-		m_ioSocket = a_connectedSocket;
-		try
-		{
-			m_ioSocket.setSoTimeout(0);
-		}
-		catch (Exception e)
-		{
-			/* do nothing */
-		}
-		try
-		{
-			m_In = m_ioSocket.getInputStream();
-			m_Out = m_ioSocket.getOutputStream();
-		}
-		catch (Exception e)
-		{
-			/* close everything */
-			close();
-			throw (e);
-		}
-	}
 
-	public Socket getSocket()
-	{
-		return m_ioSocket;
-	}
+		private Socket m_ioSocket;
+		private InputStream m_In;
+		private OutputStream m_Out;
+		private int m_State;
 
-	public InputStream getInputStream()
-	{
-		return m_In;
-	}
+		public ProxyConnection(Socket a_connectedSocket) throws Exception
+			{
+				m_ioSocket = a_connectedSocket;
+				m_State = IStreamConnection.ConnectionState_OPEN;
+				try
+					{
+						m_ioSocket.setSoTimeout(0);
+					}
+				catch (Exception e)
+					{
+						/* do nothing */
+					}
+				try
+					{
+						m_In = m_ioSocket.getInputStream();
+						m_Out = m_ioSocket.getOutputStream();
+					}
+				catch (Exception e)
+					{
+						/* close everything */
+						close();
+						throw (e);
+					}
+			}
 
-	public OutputStream getOutputStream()
-	{
-		return m_Out;
-	}
+		public Socket getSocket()
+			{
+				return m_ioSocket;
+			}
 
-	public void setSoTimeout(int ms) throws SocketException
-	{
-		m_ioSocket.setSoTimeout(ms);
-	}
+		public InputStream getInputStream()
+			{
+				return m_In;
+			}
 
-	public void close()
-	{
-		try
-		{
-			m_In.close();
-		}
-		catch (Exception e)
-		{}
-		try
-		{
-			m_Out.close();
-		}
-		catch (Exception e)
-		{}
-		try
-		{
-			m_ioSocket.close();
-		}
-		catch (Exception e)
-		{}
-	}
+		public OutputStream getOutputStream()
+			{
+				return m_Out;
+			}
 
-}
+		public void setSoTimeout(int ms) throws SocketException
+			{
+				m_ioSocket.setSoTimeout(ms);
+			}
+
+		public void close()
+			{
+				try
+					{
+						m_In.close();
+					}
+				catch (Exception e)
+					{
+					}
+				try
+					{
+						m_Out.close();
+					}
+				catch (Exception e)
+					{
+					}
+				try
+					{
+						m_ioSocket.close();
+					}
+				catch (Exception e)
+					{
+					}
+				m_State = IStreamConnection.ConnectionState_CLOSE;
+			}
+
+		public int getCurrentState()
+			{
+				return m_State;
+			}
+
+		public int getTimeout() throws ConnectionException
+			{
+
+				try
+					{
+						return m_ioSocket.getSoTimeout();
+					}
+				catch (SocketException e)
+					{
+						throw new ConnectionException(e);
+					}
+			}
+
+		public void setTimeout(int value) throws ConnectionException
+			{
+				try
+					{
+						m_ioSocket.setSoTimeout(value);
+					}
+				catch (SocketException e)
+					{
+						throw new ConnectionException(e);
+					}
+			}
+
+		public IAddress getLocalAddress()
+			{
+				return new TcpIpAddress(m_ioSocket.getLocalAddress(), m_ioSocket
+						.getLocalPort());
+			}
+
+		public IAddress getRemoteAddress()
+			{
+				return new TcpIpAddress(m_ioSocket.getInetAddress(), m_ioSocket
+						.getPort());
+			}
+
+	}

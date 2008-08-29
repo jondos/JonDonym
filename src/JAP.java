@@ -38,6 +38,7 @@ import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import java.awt.Frame;
@@ -146,14 +147,12 @@ public class JAP
 		{
 			m_arstrCmdnLnArgs = new Hashtable();
 		}
-		
 	}
 
 	/** Initializes and starts the JAP.
 	 */
 	public void startJAP()
 	{
-		
 		final String msg =
 			"JAP/JonDo must run with a 1.1.3 or higher version Java!\nYou will find more information at the JAP webpage!\nYour Java Version: ";
 		String javaVersion = System.getProperty("java.version");
@@ -164,7 +163,7 @@ public class JAP
 		boolean loadPay = true;
 		String listenHost = null;
 		int listenPort = 0;
-		ListenerInterface listenerCascade = null;
+		MixCascade commandlineCascade = null;
 
 		if (isArgumentSet("--version") || isArgumentSet("-v"))
 		{
@@ -201,7 +200,7 @@ public class JAP
 			System.out.println("--presenation, -p            Presentation mode (slight GUI changes).");
 			System.out.println("--forwarder, -f {port}       Act as a forwarder on a specified port.");
 			System.out.println("--listen, -l {[host][:port]} Listen on the specified interface.");
-			System.out.println("--cascade {[host][:port]}    Connects to the specified Mix-Cascade.");
+			System.out.println("--cascade {[host][:port][:id]}    Connects to the specified Mix-Cascade.");
 			System.out.println("--portable [path_to_browser] Tell JonDo that it runs in a portable environment.");
 			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
 			System.out.println("--portable-help-path         Path of external html help files for portable use.");
@@ -214,7 +213,7 @@ public class JAP
 			bConsoleOnly = true;
 		}
 	
-		
+
 		
 		// Test (part 2) for right JVM....
 		if (vendor.startsWith("Transvirtual"))
@@ -522,7 +521,24 @@ public class JAP
 			String tmpStr = getArgumentValue("--cascade");
 			try
 			{
-				listenerCascade = new ListenerInterface(tmpStr);
+				//cascade is given as host[:port][:id]
+				StringTokenizer st=new StringTokenizer(tmpStr,":");
+				String host=null;
+				String id=null;
+				int port=6544;
+				if(st.hasMoreTokens())
+				{
+						host=st.nextToken();
+				}
+				if(st.hasMoreTokens())
+					{
+							port=Integer.parseInt(st.nextToken());
+					}
+				if(st.hasMoreTokens())
+					{
+							id=st.nextToken();
+					}
+				commandlineCascade=new MixCascade("Commandline Cascade",id,host,port);
 			}
 			catch (Throwable t)
 			{
@@ -813,17 +829,12 @@ public class JAP
 		//WP: check japdll.dll version
 		JAPDll.checkDllVersion(true);
 
-		// initially start services
-		m_controller.initialRun(listenHost, listenPort);
-
 		//set cascade if given on command line
-		if (listenerCascade != null)
+		if (commandlineCascade != null)
 		{
 			try
 			{
-				m_controller.setCurrentMixCascade(new MixCascade("Commandline Cascade", null,
-					listenerCascade.toVector()));
-				m_controller.setAnonMode(true);
+				m_controller.setCurrentMixCascade(commandlineCascade);
 			}
 			catch (Throwable t)
 			{
@@ -831,6 +842,11 @@ public class JAP
 					"Could not set Cascade specified on the Command line! Ignoring information given and continue...");
 			}
 		}
+		
+		// initially start services
+		m_controller.initialRun(listenHost, listenPort);
+
+
 
 		// show alternative view (console, http server,...);
 		if (bConsoleOnly)

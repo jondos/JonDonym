@@ -63,8 +63,11 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
+
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
+import anon.transport.address.Endpoint;
+import anon.transport.address.IAddress;
 import anon.util.captcha.IImageEncodedCaptcha;
 import forward.client.ClientForwardException;
 import forward.client.ForwardConnectionDescriptor;
@@ -180,6 +183,57 @@ public class JAPRoutingEstablishForwardedConnectionDialog
 		/* forwarding successful enabled or the dialog was canceled by the user */
 	}
 
+	/**
+	 * Creates a new JAPRoutingEstablishForwardedConnectionDialog. This will create a forwarded
+	 * connection and starting the anonymity mode (if possible). No CAPATCHE Dialog will
+	 * be shown, as the Address of the Forwarding Server is directly provided.
+	 *
+	 * @param a_parentComponent The parent component over which the dialog is centered.
+	 * @param a_address The address of the forwarding Server
+	 */
+	public JAPRoutingEstablishForwardedConnectionDialog(
+			Component a_parentComponent, IAddress a_address) {
+		m_parentComponent = a_parentComponent;
+
+		/** @todo forwarder does not yet support trust models */
+		TrustModel.setCurrentTrustModel(TrustModel.TRUST_MODEL_ALL);
+
+		// bypass captcha and directly set the address
+		JAPModel.getInstance().getRoutingSettings().setForwarderAddress(
+				a_address);
+		if (!showConfigClientDialogConnectToForwarder()) return; 
+		/*
+		 * contacting the forwarder was successful -> in the other case,
+		 * we show the fetch-captcha step again in the next while loop
+		 */
+		ForwardConnectionDescriptor connectionOffer = showConfigClientDialogGetOffer();
+		if (connectionOffer == null) return; 
+		/*
+		 * obtaining the connection offer from the forwarder was
+		 * successful -> in the other case, we show the
+		 * fetch-captcha step again in the next while loop
+		 */
+		//MixCascade 
+		MixCascade selectedMixCascade=JAPController.getInstance().getCurrentMixCascade(); //check if we can use a self defined cascade hopefully given on the command line...
+		if(selectedMixCascade==null || !selectedMixCascade.isUserDefined()) //use a self defined cascade hopefully given on the command line...
+			{
+				selectedMixCascade = showConfigClientDialogStep2(connectionOffer);
+			}
+		if (selectedMixCascade == null) return; 
+		/*
+		 * the user has selected a mixcascade -> announce that
+		 * cascade to the forwarder; if there user pressed
+		 * cancel, we show the fetch-captcha step again in the
+		 * next while loop
+		 */
+		/*
+		 * if the final step is successful, we can close the
+		 * dialog
+		 */
+		m_bForwardingSuccessful = showConfigClientDialogAnnounceCascade(selectedMixCascade);
+
+	}
+	
 	public boolean isForwardingSuccessful()
 	{
 		return m_bForwardingSuccessful;
@@ -775,12 +829,11 @@ public class JAPRoutingEstablishForwardedConnectionDialog
 			}
 		};
 
-		ListenerInterface currentForwarder = JAPModel.getInstance().getRoutingSettings().getForwarder();
+		IAddress currentForwarderAddress = JAPModel.getInstance().getRoutingSettings().getForwarderAddress();
 		String currentForwarderString = "";
-		if (currentForwarder != null)
+		if (currentForwarderAddress != null)
 		{
-			currentForwarderString = currentForwarder.getHost() + ":" +
-				Integer.toString(currentForwarder.getPort());
+			currentForwarderString = Endpoint.toURN(currentForwarderAddress);
 		}
 
 		WorkerContentPane worker = new WorkerContentPane(connectDialog,

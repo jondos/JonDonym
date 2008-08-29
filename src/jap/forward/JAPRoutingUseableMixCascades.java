@@ -126,8 +126,11 @@ final public class JAPRoutingUseableMixCascades extends Observable implements Ob
 				{
 					synchronized (this)
 					{
-						if (JAPModel.getInstance().getRoutingSettings().getRoutingMode() ==
-							JAPRoutingSettings.ROUTING_MODE_SERVER)
+						if ((JAPModel.getInstance().getRoutingSettings().getRoutingMode() ==
+							JAPRoutingSettings.ROUTING_MODE_SERVER) ||
+							JAPModel.getInstance().getRoutingSettings().getForwarderAddress().getTransportIdentifier().equals("local"))
+							// ^ simple hack to allow the local forwarder to see the allowed mixcascades
+							// TODO: this is not the best way, but the one with the smallest changes and sideeffects
 						{
 							/* look, whether the update-thread is running */
 							if (m_updateMixCascadesListThread == null)

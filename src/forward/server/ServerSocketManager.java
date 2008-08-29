@@ -30,6 +30,9 @@ package forward.server;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import anon.transport.connection.SocketConnection;
+
+
 /**
  * This class manages a ServerSocket for a ForwardScheduler.
  */
@@ -142,7 +145,7 @@ public class ServerSocketManager implements Runnable, IServerManager {
         /* we got a new connection */
         try {
           newConnection.setSoTimeout(ForwardServerManager.CLIENT_CONNECTION_TIMEOUT);
-          m_parentScheduler.handleNewConnection(newConnection);
+          m_parentScheduler.handleNewConnection(new SocketConnection(newConnection));
         }
         catch (Exception e) {
         }

@@ -29,10 +29,19 @@ package forward;
 
 import java.net.Socket;
 
+
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.ListenerInterface;
 import anon.shared.ProxyConnection;
+import anon.transport.address.Endpoint;
+import anon.transport.address.IAddress;
+import anon.transport.address.SkypeAddress;
+import anon.transport.address.TcpIpAddress;
+import anon.transport.connection.ConnectionException;
+import anon.transport.connection.IStreamConnection;
+import anon.transport.connector.IConnector;
+import anon.transport.connector.SkypeConnector;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -105,6 +114,35 @@ public class ForwardUtils {
       LogHolder.log(LogLevel.ERR, LogType.NET, e);
     }
     return proxyConnection;
+  }
+  
+  /**
+   * Creates a ForwardConnection according to the Type of the given Address.
+   * Unified the creating of Connection to different Forwarder.
+   */
+  public IStreamConnection createForwardingConnection(IAddress a_address){
+	  if (a_address instanceof TcpIpAddress){
+		  TcpIpAddress spezialisedAddress = (TcpIpAddress) a_address;
+		  return createProxyConnection(spezialisedAddress.getHostname(), spezialisedAddress.getPort());
+	  }
+	  if (a_address instanceof SkypeAddress){
+		  SkypeConnector connector = new SkypeConnector();
+		  try {
+			return connector.connect((SkypeAddress) a_address);
+		} catch (ConnectionException e) {
+			LogHolder.log(LogLevel.ERR, LogType.TRANSPORT, "Unable to create Skype Forwarding Connection. Cause: "
+					+ e.getMessage());
+		}
+	  }
+	  if (a_address instanceof LocalAddress){
+		  try {
+			return (IStreamConnection) LocalForwarder.getConnector().connect(a_address);
+		} catch (ConnectionException e) {
+			LogHolder.log(LogLevel.ERR, LogType.TRANSPORT, "unable to contact local forwarder. " + 
+					e.getMessage());
+		}
+	  }
+	  return null;
   }
 
   /**
