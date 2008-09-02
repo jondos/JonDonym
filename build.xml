@@ -25,6 +25,7 @@
   <property name="classpath_bouncy_file_name" location="${build.libs}/BouncyCastleLightForJAP.jar"/>
   <property name="classpath_xmlrpc_file_name" location="${build.libs}/apache-xml-rpc-1.1.jar"/>
   <property name="classpath_jaf_file_name" location="${build.libs}/activation.jar"/>
+  <property name="classpath_skype_file_name" location="${build.libs}/skype.zip"/>
 	
   <path id="classpath_httplib" location="${classpath_httplib_file_name}"/>
   <path id="classpath_ftplib" location="${classpath_ftplib_file_name}"/>
@@ -37,6 +38,7 @@
   <path id="classpath_log4j" location="${classpath_log4j_file_name}"/>
   <path id="classpath_bouncycastle_jap" location="${classpath_bouncy_file_name}"/>
   <path id="classpath_jaf" location="${classpath_jaf_file_name}"/>
+  <path id="classpath_skype" location="${classpath_skype_file_name}"/>
 	
   <path id="classpath_all">
     <path refid="classpath_swing"/>
@@ -50,6 +52,7 @@
     <path refid="classpath_aje"/>
     <path refid="classpath_bouncycastle_jap"/>
   	<path refid="classpath_jaf"/>
+  	<path refid="classpath_skype"/>
   </path>
   <path id="java_1_1_boot_classes" location="${build.libs}/java_1_1_classes.zip"/>
  
@@ -151,6 +154,12 @@
   		 usetimestamp="true"
   	     ignoreerrors="true"
   		 dest="${build.libs}/japdllversion.txt"/> 
+  	
+  	<get src="http://svn.jondos.de/japlibs/skype.zip" 
+  	  		 verbose="true" 
+  	  		 usetimestamp="true"
+  	  	     ignoreerrors="true"
+  	  		 dest="${classpath_skype_file_name}"/> 
   	 
   	<available file="${classpath_httplib_file_name}" property="httplib.available"/>
   	<available file="${classpath_xmllib_file_name}" property="xmllib.available"/>
@@ -161,6 +170,7 @@
   	<available file="${classpath_bouncy_file_name}" property="bouncy.available"/>
   	<available file="${classpath_xmlrpc_file_name}" property="xmlrpc.available"/>
   	<available file="${classpath_jaf_file_name}" property="jaf.available"/>
+  	<available file="${classpath_skype_file_name}" property="skype.available"/>
   	
   	<fail unless="httplib.available" message="HTTP lib not available"/>
 	<fail unless="xmllib.available" message="XML lib not available"/>
@@ -171,6 +181,7 @@
   	<fail unless="bouncy.available" message="Bouncy Castle not available"/>
   	<fail unless="xmlrpc.available" message="XML RPC not available"/>
   	<fail unless="jaf.available" message="Java Activation not available"/>
+  	<fail unless="skype.available" message="Skype4Java not available"/>
   </target>
   
   <target name="init" depends="init-libs"/>
@@ -277,6 +288,7 @@
       <zipfileset src="${classpath_log4j_file_name}"/>
       <zipfileset src="${classpath_bouncy_file_name}"/>
       <zipfileset src="${classpath_xmlrpc_file_name}"/>
+      <zipfileset src="${classpath_skype_file_name}"/>
       <zipfileset file="${build.libs}/japdll.dll" fullpath="japdll.dll.${currentJAPDllVersion}"/>
     </jar>
   </target>
@@ -409,7 +421,7 @@
 				<zipfileset src="${classpath_jama_file_name}"/>
 				<zipfileset src="${classpath_bouncy_file_name}"/>
 				<zipfileset src="${classpath_xmlrpc_file_name}"/>
-			
+				<zipfileset src="${classpath_skype_file_name}"/>
 			</jar>
 	</target>
 	
