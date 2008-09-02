@@ -235,7 +235,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		setJonDoFoxHeaderEnabled(true);
 	}
 
-	void setJonDoFoxHeaderEnabled(boolean enable)
+	public void setJonDoFoxHeaderEnabled(boolean enable)
 	{
 		if(enable)
 		{

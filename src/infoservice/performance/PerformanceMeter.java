@@ -257,6 +257,7 @@ public class PerformanceMeter implements Runnable
 		{
 			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
 			m_proxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
+			m_proxy.setJonDoFoxHeaderEnabled(false);
 		} 
 		catch (UnknownHostException e1) 
 		{
