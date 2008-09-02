@@ -31,8 +31,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public static final int USERS = 2;
 	
 	public static final long[][] BOUNDARIES = new long[][] { 
-		{ 0, 100, 250, 500, 750, 1000, 1500, 2000 },
-		{ 500, 750, 1000, 2000, 2500, 3000, 4000, Long.MAX_VALUE} };
+		{ 0, 50, 100, 250, 500, 750, 1000, 1500, 2000 },
+		{ 500, 750, 1000, 2000, 2500, 3000, 4000, 8000, Long.MAX_VALUE} };
 
 	private static final String XML_ATTR_ID = "id";
 	private static final String XML_ELEMENT_CURRENT_HOURLY_DATA = "Data";
