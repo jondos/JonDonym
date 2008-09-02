@@ -277,7 +277,7 @@ public class JAPMacOSXLib
 				
 				if(model == TrustModel.getCurrentTrustModel())
 				{
-					sub = new JMenu(model.getName() + " (" + JAPMessages.getString("active")+ ")");
+					sub = new JMenu(model.getName() + " (" + JAPMessages.getString("active") + ")");
 				}
 				else
 				{
