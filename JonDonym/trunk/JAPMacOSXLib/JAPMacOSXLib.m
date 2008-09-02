@@ -191,9 +191,10 @@ NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj)
 			{
 				NSLog(@"getNSMenuFromJMenu: adding submenu");
 				NSMenu* submenu = getNSMenuFromJMenu(env, item);
-				[menu setSubmenu: submenu forItem: [menu addItemWithTitle: string action:@selector(dockMenuCallback:) keyEquivalent:@""]]; 
+				NSMenuItem* menuItem = [menu addItemWithTitle: string action:@selector(dockMenuCallback:) keyEquivalent:@""];
+				[menu setSubmenu: submenu forItem: menuItem];
 			}
-			else if((*env)->IsInstanceOf(env, item, jCheckBoxMenuItemClass) == JNI_TRUE)
+			/*else if((*env)->IsInstanceOf(env, item, jCheckBoxMenuItemClass) == JNI_TRUE)
 			{
 				NSLog(@"getNSMenuFromJMenu: adding checkbox item");
 				NSMenuItem* menuItem = [menu addItemWithTitle: string action: @selector(dockMenuCallback:) keyEquivalent: @""];
@@ -203,17 +204,18 @@ NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj)
 				{
 					[menuItem setState:NSOnState];
 				}
-				else
-				{
-					[menuItem setState:NSOffState];
-				}
-			}
+			}*/
 			else
 			{
 				NSLog(@"getNSMenuFromJMenu: adding menu item '%s' - command: %s", buffer, cmdBuffer);
 				NSMenuItem* menuItem = [menu addItemWithTitle: string action: @selector(dockMenuCallback:) keyEquivalent: @""];
+				jboolean isSelected = (*env)->CallBooleanMethod(env, item, isSelected_mID);
 				[menuItem setRepresentedObject:cmdString];
-			}
+				if(isSelected == JNI_TRUE)
+				{
+					[menuItem setState:NSOnState];
+				}
+		}
 			
 			(*env)->ReleaseStringUTFChars(env, text, buffer);
 			(*env)->ReleaseStringUTFChars(env, text, cmdBuffer);
@@ -226,4 +228,9 @@ NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj)
 	}
 	
 	return menu;
+}
+
+JNIEXPORT jstring JNICALL Java_gui_JAPMacOSXLib_getLibVersion(JNIEnv* env, jclass class)
+{
+	return (*env)->NewStringUTF(env, LIB_VERSION);
 }
