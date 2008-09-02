@@ -27,14 +27,6 @@
  */
 package gui;
 
-import gui.help.JAPHelp;
-import jap.JAPConf;
-import jap.JAPController;
-import jap.SystrayPopupMenu;
-import jap.TrustModel;
-import anon.infoservice.Database;
-import anon.infoservice.MixCascade;
-
 import java.awt.EventQueue;
 import java.util.Vector;
 
@@ -42,6 +34,17 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JSeparator;
+
+import gui.help.JAPHelp;
+import jap.JAPConf;
+import jap.JAPController;
+import jap.SystrayPopupMenu;
+import jap.TrustModel;
+import anon.infoservice.Database;
+import anon.infoservice.MixCascade;
+import logging.LogHolder;
+import logging.LogType;
+import logging.LogLevel;
 
 /**
  * Utility class for the JAPMacOSX library
@@ -119,6 +122,7 @@ public class JAPMacOSXLib
 		}
 		catch(Exception ex)
 		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Could not initialise JAPMacOSXLib", ex);
 			ex.printStackTrace();
 		}
 	}
@@ -158,6 +162,7 @@ public class JAPMacOSXLib
 			if(model.isAdded())
 			{
 				JMenu sub = new JMenu(model.getName());
+				sub.setSelected(true);
 				
 				Vector cascades = Database.getInstance(MixCascade.class).getEntryList();
 				for(int j = 0; j < cascades.size(); j++)
