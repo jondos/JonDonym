@@ -28,6 +28,8 @@
 package gui;
 
 import java.awt.EventQueue;
+import java.io.File;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.swing.JMenu;
@@ -38,10 +40,13 @@ import javax.swing.JSeparator;
 import gui.help.JAPHelp;
 import jap.JAPConf;
 import jap.JAPController;
+import jap.JAPModel;
 import jap.SystrayPopupMenu;
 import jap.TrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
+import anon.util.ClassUtil;
+import anon.util.ResourceLoader;
 import logging.LogHolder;
 import logging.LogType;
 import logging.LogLevel;
@@ -53,13 +58,42 @@ import logging.LogLevel;
  */
 public class JAPMacOSXLib
 {
-	private static final String MSG_SETTINGS= SystrayPopupMenu.class.getName() + "_settings";
+	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION = "00.00.002";
+	public static final String JAP_MACOSX_LIB_FILENAME = "libJAPMacOSX.jnilib";
+	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME = JAP_MACOSX_LIB_FILENAME + "." + JAP_MACOSX_LIB_REQUIRED_VERSION;
+	
+	private static final String UPDATE_PATH;
+	
+	private static final String MSG_SETTINGS = SystrayPopupMenu.class.getName() + "_settings";
 	private static final String MSG_ANONYMITY_MODE = SystrayPopupMenu.class.getName() + "_anonymityMode";
 	private static final String MSG_SHOW_DETAILS = SystrayPopupMenu.class.getName() + "_showDetails";
 	
 	private JAPMacOSXLib()
 	{
 		
+	}
+	
+	static
+	{
+		File japdir = ClassUtil.getClassDirectory(JAPMacOSXLib.class);
+		if (japdir == null)
+		{
+			String strUpdatePath = null;
+			// the update method might not work; maybe this is Java Webstart?
+			try
+			{
+				strUpdatePath = System.getProperty("user.dir", (String)null);
+			}
+			catch (Throwable a_e)
+			{
+				a_e.printStackTrace();
+			}
+			UPDATE_PATH = strUpdatePath;
+		}
+		else
+		{
+			UPDATE_PATH = japdir.getParent();
+		}
 	}
 	
 	public static void dockMenuCallback(String a_command)
@@ -99,13 +133,20 @@ public class JAPMacOSXLib
 				}
 				else
 				{
-					// action command is probably a cascade id
-					MixCascade cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(cmd);
-					
-					if(cascade != null)
+					// try to split the action command in trustmodel and cascade id
+					StringTokenizer tokenizer = new StringTokenizer(cmd,",");
+					if(tokenizer.countTokens() == 2)
 					{
-						// TODO: switch trustmodels
-						JAPController.getInstance().setCurrentMixCascade(cascade);
+						long model = Long.parseLong(tokenizer.nextToken());
+						
+						TrustModel.setCurrentTrustModel(model);
+						
+						MixCascade cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(tokenizer.nextToken());
+						
+						if(cascade != null)
+						{
+							JAPController.getInstance().setCurrentMixCascade(cascade);
+						}
 					}
 				}
 			}
@@ -114,17 +155,88 @@ public class JAPMacOSXLib
 	
 	public static void init()
 	{
+		if(!load())
+		{
+			return;
+		}
+		
+		nativeInit();
+		nativeInitDockMenu();
+		
+		System.out.println(getLibVersion());
+	}
+	
+	private static boolean load()
+	{
 		try
 		{
 			System.loadLibrary("JAPMacOSX");
-			nativeInit();
-			nativeInitDockMenu();
 		}
-		catch(Exception ex)
+		catch(Throwable t)
 		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Could not initialise JAPMacOSXLib", ex);
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Could not initialise JAPMacOSXLib", t);
+			t.printStackTrace();
+			
+			return false;
 		}
+		
+		return true;
+	}
+	
+	public static void checkLibVersion()
+	{
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Existing " + JAP_MACOSX_LIB_FILENAME + " version: " + getLibVersion());
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Required " + JAP_MACOSX_LIB_FILENAME + " version: " + JAP_MACOSX_LIB_REQUIRED_VERSION);
+		
+		// checks, if the MacOSX library must (and can) be extracted from the jar-file.
+		if (getLibVersion() != null && // != null means that there is a loaded library
+			getLibVersion().compareTo(JAP_MACOSX_LIB_REQUIRED_VERSION) < 0 &&
+			ResourceLoader.getResourceURL(JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME) != null && // null means there is no new library available
+			getUpdatePath() != null)
+		{
+			System.out.println("needs update + update possible");
+		}
+		else
+		{
+			// version status OK
+			// OR no library loaded
+			// OR no new library in jar-file
+			if (JAPModel.getInstance().isMacOSXLibraryUpdated())
+			{
+				JAPModel.getInstance().setMacOSXLibraryUpdate(false);
+				JAPController.getInstance().saveConfigFile();
+			}
+		}
+	}
+	
+	/**
+	 * Returns the path where the dll should be stored into.
+	 * @return
+	 */
+	private static String getUpdatePath()
+	{
+		String file = getLibFileName();
+		if (file != null)
+		{
+			file = (new File(file)).getParent();
+		}
+		return file;
+	}
+	
+	static public String getLibFileName()
+	{
+		if (UPDATE_PATH != null)
+		{
+			if (!UPDATE_PATH.endsWith(File.separator))
+			{
+				return UPDATE_PATH + File.separator + JAP_MACOSX_LIB_FILENAME;
+			}
+			else
+			{
+				return UPDATE_PATH + JAP_MACOSX_LIB_FILENAME;
+			}			
+		}
+		return null;
 	}
 	
 	public static JMenu showDockMenu()
@@ -161,8 +273,16 @@ public class JAPMacOSXLib
 			TrustModel model = (TrustModel) vec.elementAt(i);
 			if(model.isAdded())
 			{
-				JMenu sub = new JMenu(model.getName());
-				sub.setSelected(true);
+				JMenu sub;
+				
+				if(model == TrustModel.getCurrentTrustModel())
+				{
+					sub = new JMenu(model.getName() + " (" + JAPMessages.getString("active")+ ")");
+				}
+				else
+				{
+					sub = new JMenu(model.getName());
+				}
 				
 				Vector cascades = Database.getInstance(MixCascade.class).getEntryList();
 				for(int j = 0; j < cascades.size(); j++)
@@ -175,7 +295,11 @@ public class JAPMacOSXLib
 					}
 					
 					item = new JMenuItem(cascade.getName());
-					item.setActionCommand(cascade.getId());
+					if(JAPController.getInstance().getCurrentMixCascade() == cascade)
+					{
+						item.setSelected(true);
+					}
+					item.setActionCommand(model.getId() + "," + cascade.getId());
 					sub.add(item);
 				}
 				
@@ -188,5 +312,5 @@ public class JAPMacOSXLib
 	
 	private static native void nativeInit();
 	private static native void nativeInitDockMenu();
-	//public static native void setMenu(JMenu menu);
+	private static native String getLibVersion();
 }
