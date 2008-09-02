@@ -104,6 +104,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final Integer CHANGED_DENY_NON_ANONYMOUS = new Integer(8);
 	public static final Integer CHANGED_HELP_PATH = new Integer(9);
 	public static final Integer CHANGED_DLL_UPDATE = new Integer(10);
+	public static final Integer CHANGED_MACOSX_LIBRARY_UPDATE = new Integer(11);
 
 	private static final int DIRECT_CONNECTION_INFOSERVICE = 0;
 	private static final int DIRECT_CONNECTION_PAYMENT = 1;
@@ -232,6 +233,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	/** Boolen value which describes if a dll update is necessary */
 	private boolean m_bUpdateDll = false;
 	private long m_noWarningForDllVersionBelow = 0;
+	
+	private boolean m_bUpdateMacOSXLibrary = false;
 
 	private BigInteger m_iDialogVersion=new BigInteger("-1");
 
@@ -1621,6 +1624,21 @@ public final class JAPModel extends Observable implements IHelpModel
 		}
 		notifyObservers(CHANGED_DLL_UPDATE);
     }
+	
+	public synchronized void setMacOSXLibraryUpdate(boolean a_update)
+	{
+		if (m_bUpdateMacOSXLibrary != a_update)
+		{
+			m_bUpdateMacOSXLibrary = a_update;
+			setChanged();
+		}
+		notifyObservers(CHANGED_MACOSX_LIBRARY_UPDATE);
+	}
+	
+	public boolean isMacOSXLibraryUpdated()
+	{
+		return m_bUpdateMacOSXLibrary;
+	}
 
 	public boolean isDLLupdated() {
 		return m_bUpdateDll;
