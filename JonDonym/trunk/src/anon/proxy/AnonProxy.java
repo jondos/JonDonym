@@ -108,6 +108,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	private final Object SHUTDOWN_SYNC = new Object();
 	private boolean bShuttingDown = false;
 
+	private ProxyCallbackHandler m_callbackHandler = new ProxyCallbackHandler();
+	private JonDoFoxHeader m_jfxHeader = null;
+	
 	/**
 	 * Stores the MixCascade we are connected to.
 	 */
@@ -193,6 +196,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
 		// SOCKS\uFFFD
+		setJonDoFoxHeaderEnabled(true);
 	}
 
 	/**
@@ -228,8 +232,28 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_anonServiceListener = new Vector();
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
+		setJonDoFoxHeaderEnabled(true);
 	}
 
+	void setJonDoFoxHeaderEnabled(boolean enable)
+	{
+		if(enable)
+		{
+			if (m_callbackHandler != null && m_jfxHeader == null )
+			{
+				m_jfxHeader = new JonDoFoxHeader(); 
+				m_callbackHandler.registerProxyCallback(m_jfxHeader);
+			}
+		}
+		else
+		{
+			if (m_callbackHandler != null && m_jfxHeader != null )
+			{
+				m_callbackHandler.removeCallback(m_jfxHeader);
+			}
+		}
+	}
+	
 	/**
 	 * Sets a new MixCascade.
 	 *
@@ -480,7 +504,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 				{
 					try
 					{
-						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject);
+						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject, m_callbackHandler);
 					}
 					catch (Exception e)
 					{

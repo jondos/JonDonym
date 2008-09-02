@@ -45,7 +45,8 @@ public final class AnonProxyRequest implements Runnable
 	private static int ms_nrOfRequests = 0;
 
 	private static final long TIMEOUT_RECONNECT = 60000;
-
+	private static final int CHUNK_SIZE = 1000;
+	
 	private static int ms_currentRequest;
 
 	private InputStream m_InChannel;
@@ -71,8 +72,15 @@ public final class AnonProxyRequest implements Runnable
 	private int m_iProtocol;
 
 	private Object m_syncObject;
+	
+	private ProxyCallbackHandler m_callbackHandler = null;
 
-	AnonProxyRequest(AnonProxy proxy, Socket clientSocket, Object a_syncObject) throws IOException
+	/*AnonProxyRequest(AnonProxy proxy, Socket clientSocket, Object a_syncObject) throws IOException
+	{
+		this(proxy, clientSocket, a_syncObject, null);
+	}*/
+	
+	AnonProxyRequest(AnonProxy proxy, Socket clientSocket, Object a_syncObject, ProxyCallbackHandler callbackHandler) throws IOException
 	{
 			m_Proxy = proxy;
 			m_clientSocket = clientSocket;
@@ -83,6 +91,8 @@ public final class AnonProxyRequest implements Runnable
 			m_OutSocket = clientSocket.getOutputStream();
 			m_threadRequest = new Thread(this, "JAP - AnonProxy Request "+Integer.toString(ms_currentRequest));
 			ms_currentRequest++;
+			m_callbackHandler = callbackHandler;
+			
 			m_threadRequest.setDaemon(true);
 			m_threadRequest.start();
 	}
@@ -238,7 +248,7 @@ public final class AnonProxyRequest implements Runnable
 			m_OutChannel = newChannel.getOutputStream();
 			m_Channel = newChannel;
 
-			m_threadResponse = new Thread(new Response(), "JAP - AnonProxy Response");
+			m_threadResponse = new Thread(new Response(), "JAP - AnonProxy Response for "+Thread.currentThread().getName());
 			m_threadResponse.start();
 
 			buff = new byte[1900];
@@ -272,7 +282,22 @@ public final class AnonProxyRequest implements Runnable
 				}
 				try
 				{
-					m_OutChannel.write(buff, 0, len);
+					if(m_callbackHandler != null)
+					{
+						byte[] dsChunk = m_callbackHandler.deliverUpstreamChunk(this, buff, len);
+						if(dsChunk != buff)
+						{
+							m_OutChannel.write(dsChunk);
+						}
+						else
+						{
+							m_OutChannel.write(buff, 0, len );
+						}
+					}
+					else
+					{
+						m_OutChannel.write(buff, 0, len);
+					}
 					/* everything was OK */
 					aktPos = 0;
 				}
@@ -356,16 +381,34 @@ public final class AnonProxyRequest implements Runnable
 		{
 			int len = 0;
 			byte[] buff = new byte[2900];
-			try
-			{
-				while ( (len = m_InChannel.read(buff, 0, 1000)) > 0)
+			
+			try 
+			{	
+				len = m_InChannel.read(buff, 0, CHUNK_SIZE);
+				while ( len > 0)
 				{
 					int count = 0;
 					for (; ; )
 					{
 						try
 						{
-							m_OutSocket.write(buff, 0, len);
+							if(m_callbackHandler != null)
+							{
+								byte[] dsChunk = m_callbackHandler.deliverDownstreamChunk(AnonProxyRequest.this, buff, len);
+								if(dsChunk != buff)
+								{
+									m_OutSocket.write(dsChunk);
+								}
+								else
+								{
+									m_OutSocket.write(buff, 0, len);
+								}
+							}
+							else
+							{
+								m_OutSocket.write(buff, 0, len);
+							}
+							
 							m_OutSocket.flush();
 							break;
 						}
@@ -382,6 +425,7 @@ public final class AnonProxyRequest implements Runnable
 					}
 					m_Proxy.transferredBytes(len, m_iProtocol);
 					Thread.yield();
+					len = m_InChannel.read(buff, 0, CHUNK_SIZE);
 				}
 			}
 			catch (Exception e)
