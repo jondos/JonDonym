@@ -1131,7 +1131,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		}
 		else
 		{
-			p = new PasswordContentPane(d, PasswordContentPane.PASSWORD_NEW, "");
+			p = new PasswordContentPane(d, PasswordContentPane.PASSWORD_NEW, JAPMessages.getString(MSG_ENCRYPT_ACCOUNTS));
 		}
 		p.updateDialog();
 		d.pack();
