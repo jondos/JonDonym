@@ -174,7 +174,6 @@ public class PasswordContentPane extends DialogContentPane implements IMiscPassw
 		});
 		m_popup.add(itemInsertPassword);
 
-
 		if (a_type == PASSWORD_CHANGE)
 		{
 			m_lblOld = new JLabel(getOldPasswordLabel());
