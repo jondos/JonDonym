@@ -26,7 +26,10 @@ package jap;
  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
- */import javax.swing.JPanel;
+ */import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+import javax.swing.JPanel;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -68,22 +71,37 @@ public class ConsoleJAPMainView implements IJAPMainView
 	 */
 	public void setVisible(boolean a_bVisible)
 	{
-		try
-		{
 			String entered = null;
+			System.out.println("Type 'exit' to quit or 'save' to save the configuration.");
 			while (true)
 			{
-				System.out.println("Type 'exit' to quit or 'save' to save the configuration.");
-				entered = new java.io.BufferedReader(new java.io.InputStreamReader(System.in)).readLine();
+				entered=null;
+				try
+					{
+						entered = new BufferedReader(new InputStreamReader(System.in)).readLine();
+					}
+				catch(Throwable t)
+					{
+					}
 				if (entered == null)
 				{
+					//Hm something is strange... do not simply continue but wait some time
+					//BTW: That are situations when this could happen?
+					// One is if JAP is run on VNC based X11 server
+					try
+						{
+							Thread.sleep(2000);
+						}
+					catch (InterruptedException e)
+						{
+						}
 					continue;
 				}
 				if (entered.equals("exit"))
 				{
 					break;
 				}
-				if (entered.equals("save"))
+				else if (entered.equals("save"))
 				{
 					System.out.println("Saving configuration...");
 					if (!JAPController.getInstance().saveConfigFile())
@@ -95,13 +113,9 @@ public class ConsoleJAPMainView implements IJAPMainView
 						System.out.println("Error while saving configuration!");
 					}
 				}
-
-			}
-			JAPController.goodBye(true);
-		}
-		catch (java.io.IOException a_e)
-		{
-		}
+				System.out.println("Type 'exit' to quit or 'save' to save the configuration.");
+			}	
+		JAPController.goodBye(true);
 	}
 
 	public void channelsChanged(int channels)
