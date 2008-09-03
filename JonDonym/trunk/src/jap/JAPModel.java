@@ -66,6 +66,7 @@ import anon.util.Util;
 /* This is the Model of All. It's a Singelton!*/
 public final class JAPModel extends Observable implements IHelpModel
 {
+	public static final String MACOSX_LIB_NEEDS_UPDATE = "macOSXLibNeedsUpdate";
 	public static final String DLL_VERSION_UPDATE = "dllVersionUpdate";
 	public static final String DLL_VERSION_WARNING_BELOW = "dllWarningVersion";
 
