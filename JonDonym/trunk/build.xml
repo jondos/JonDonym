@@ -25,7 +25,7 @@
   <property name="classpath_bouncy_file_name" location="${build.libs}/BouncyCastleLightForJAP.jar"/>
   <property name="classpath_xmlrpc_file_name" location="${build.libs}/apache-xml-rpc-1.1.jar"/>
   <property name="classpath_jaf_file_name" location="${build.libs}/activation.jar"/>
-  <property name="classpath_skype_file_name" location="${build.libs}/skype.zip"/>
+  <property name="classpath_skype_file_name" location="${build.libs}/skype.jar"/>
 	
   <path id="classpath_httplib" location="${classpath_httplib_file_name}"/>
   <path id="classpath_ftplib" location="${classpath_ftplib_file_name}"/>
@@ -155,7 +155,7 @@
   	     ignoreerrors="true"
   		 dest="${build.libs}/japdllversion.txt"/> 
   	
-  	<get src="http://svn.jondos.de/japlibs/skype.zip" 
+  	<get src="http://anon.inf.tu-dresden.de/develop/skype.jar" 
   	  		 verbose="true" 
   	  		 usetimestamp="true"
   	  	     ignoreerrors="true"
