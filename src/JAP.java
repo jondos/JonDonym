@@ -52,7 +52,6 @@ import gui.GUIUtils;
 import gui.JAPAWTMsgBox;
 import gui.JAPDll;
 import gui.JAPMessages;
-import gui.JAPMacOSXLib;
 import gui.dialog.JAPDialog;
 import jap.AbstractJAPMainView;
 import jap.ConsoleJAPMainView;
@@ -66,6 +65,7 @@ import jap.JAPModel;
 import jap.JAPNewView;
 import jap.JAPSplash;
 import jap.JAPViewIconified;
+import jap.MacOSXLib;
 import jap.SystrayPopupMenu;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -858,7 +858,7 @@ public class JAP
 		// it won't work
 		if(AbstractOS.getInstance() instanceof MacOS)
 		{
-			JAPMacOSXLib.init();
+			MacOSXLib.init();
 			
 			/*final SystrayPopupMenu systray = new SystrayPopupMenu(
 					new SystrayPopupMenu.MainWindowListener()
