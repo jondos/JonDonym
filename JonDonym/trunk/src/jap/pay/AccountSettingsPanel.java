@@ -1139,7 +1139,13 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		if (p.getButtonValue() != PasswordContentPane.RETURN_VALUE_CANCEL &&
 			p.getButtonValue() != PasswordContentPane.RETURN_VALUE_CLOSED)
 		{
-			JAPController.getInstance().setPaymentPassword(new String(p.getPassword()));
+			String pw = new String(p.getPassword());
+			if(pw.equals(""))
+			{
+				pw = null;
+			}
+			
+			JAPController.getInstance().setPaymentPassword(pw);
 		}
 	}
 
