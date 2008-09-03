@@ -143,6 +143,12 @@
   	     ignoreerrors="true"
   		 dest="${build.libs}/japdll.dll"/>
   	
+    <get src="http://anon.inf.tu-dresden.de/develop/libMacOSX.jnilib" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/libMacOSX.jnilib"/>
+  	
     <get src="http://anon.inf.tu-dresden.de/develop/activation.jar" 
   		 verbose="true"
   		 usetimestamp="true"
@@ -154,6 +160,12 @@
   		 usetimestamp="true"
   	     ignoreerrors="true"
   		 dest="${build.libs}/japdllversion.txt"/> 
+  	
+    <get src="http://anon.inf.tu-dresden.de/develop/japmacosxlibversion.txt" 
+  		 verbose="true" 
+  		 usetimestamp="true"
+  	     ignoreerrors="true"
+  		 dest="${build.libs}/japmacosxlibversion.txt"/> 
   	
   	<get src="http://anon.inf.tu-dresden.de/develop/skype.jar" 
   	  		 verbose="true" 
@@ -267,7 +279,7 @@
 	
   <target name="dist" depends="compile, make-only-jap-jar" description="generate the distribution">  </target>
 
-  <target name="make-only-jap-jar" depends="getcurrentjapdllversion">
+  <target name="make-only-jap-jar" depends="getcurrentjapdllversion,getcurrentmacosxlibversion">
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}"/>
     <jar jarfile="${dist}/JAP.jar" manifest="MANIFEST.MF" index="true" duplicate="preserve">
@@ -290,6 +302,7 @@
       <zipfileset src="${classpath_xmlrpc_file_name}"/>
       <zipfileset src="${classpath_skype_file_name}"/>
       <zipfileset file="${build.libs}/japdll.dll" fullpath="japdll.dll.${currentJAPDllVersion}"/>
+      <zipfileset file="${build.libs}/libMacOSX.jnilib" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
     </jar>
   </target>
 	
@@ -335,6 +348,15 @@
     <echo message="Current JAPDLL Version is: ${currentJAPDllVersion}"/>
   </target>
 	
+  <target name="getcurrentmacosxlibversion" description="Sets the protpery 'currentMacOSXLibVersion' to the value provided on the Web">
+	<loadfile property="currentMacOSXLibVersion" srcfile="${build.libs}/macosxlibversion.txt">
+		<filterchain>
+			<deletecharacters chars="\r\n" />
+		</filterchain>
+	</loadfile>
+	<echo message="Current MacOSXLib Version is: ${currentMacOSXLibVersion}"/>
+  </target>
+
   <target name="sign-setup-files" description="Signes the setup files on the Web">
     <input message="Enter passwd for JAP setup files signing key:" addproperty="japsetupfileskeypass"/>
     <exec executable="/home/www/make_sig.bat">
