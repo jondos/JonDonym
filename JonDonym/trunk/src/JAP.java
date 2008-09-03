@@ -859,7 +859,6 @@ public class JAP
 		if(AbstractOS.getInstance() instanceof MacOS)
 		{
 			JAPMacOSXLib.init();
-			JAPMacOSXLib.checkLibVersion();
 			
 			/*final SystrayPopupMenu systray = new SystrayPopupMenu(
 					new SystrayPopupMenu.MainWindowListener()

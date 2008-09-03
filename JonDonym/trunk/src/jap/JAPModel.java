@@ -234,7 +234,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	private boolean m_bUpdateDll = false;
 	private long m_noWarningForDllVersionBelow = 0;
 	
-	private boolean m_bUpdateMacOSXLibrary = false;
+	private boolean m_bMacOSXLibraryUpdateAtStartupNeeded = false;
 
 	private BigInteger m_iDialogVersion=new BigInteger("-1");
 
@@ -1625,21 +1625,21 @@ public final class JAPModel extends Observable implements IHelpModel
 		notifyObservers(CHANGED_DLL_UPDATE);
     }
 	
-	public synchronized void setMacOSXLibraryUpdate(boolean a_update)
+	public synchronized void setMacOSXLibraryUpdateAtStartupNeeded(boolean a_update)
 	{
-		if (m_bUpdateMacOSXLibrary != a_update)
+		if (m_bMacOSXLibraryUpdateAtStartupNeeded != a_update)
 		{
-			m_bUpdateMacOSXLibrary = a_update;
+			m_bMacOSXLibraryUpdateAtStartupNeeded = a_update;
 			setChanged();
 		}
 		notifyObservers(CHANGED_MACOSX_LIBRARY_UPDATE);
 	}
 	
-	public boolean isMacOSXLibraryUpdated()
+	public boolean isMacOSXLibraryUpdateAtStartupNeeded()
 	{
-		return m_bUpdateMacOSXLibrary;
+		return m_bMacOSXLibraryUpdateAtStartupNeeded;
 	}
-
+	
 	public boolean isDLLupdated() {
 		return m_bUpdateDll;
 	}

@@ -28,7 +28,9 @@
 package gui;
 
 import java.awt.EventQueue;
+import java.awt.Window;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -37,6 +39,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JSeparator;
 
+import gui.dialog.JAPDialog;
 import gui.help.JAPHelp;
 import jap.JAPConf;
 import jap.JAPController;
@@ -47,6 +50,7 @@ import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;
 import anon.util.ResourceLoader;
+import anon.util.Util;
 import logging.LogHolder;
 import logging.LogType;
 import logging.LogLevel;
@@ -58,8 +62,9 @@ import logging.LogLevel;
  */
 public class JAPMacOSXLib
 {
-	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION = "00.00.002";
+	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION = "00.00.003";
 	public static final String JAP_MACOSX_LIB_FILENAME = "libJAPMacOSX.jnilib";
+	private static final String JAP_MACOSX_LIB_OLD_FILENAME = JAP_MACOSX_LIB_FILENAME + ".old";
 	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME = JAP_MACOSX_LIB_FILENAME + "." + JAP_MACOSX_LIB_REQUIRED_VERSION;
 	
 	private static final String UPDATE_PATH;
@@ -67,6 +72,8 @@ public class JAPMacOSXLib
 	private static final String MSG_SETTINGS = SystrayPopupMenu.class.getName() + "_settings";
 	private static final String MSG_ANONYMITY_MODE = SystrayPopupMenu.class.getName() + "_anonymityMode";
 	private static final String MSG_SHOW_DETAILS = SystrayPopupMenu.class.getName() + "_showDetails";
+	
+	private static boolean ms_bLibraryLoaded = false;
 	
 	private JAPMacOSXLib()
 	{
@@ -155,62 +162,163 @@ public class JAPMacOSXLib
 	
 	public static void init()
 	{
-		if(!load())
+		// library needs update at startup, we'll deal with the error handling inside
+		// checkLibVersion()
+		if(getUpdatePath() != null && JAPModel.getInstance().isMacOSXLibraryUpdateAtStartupNeeded())
 		{
-			return;
+			update();
 		}
 		
-		nativeInit();
-		nativeInitDockMenu();
+		load();
 		
-		System.out.println(getLibVersion());
+		checkLibVersion();
+		
+		if(ms_bLibraryLoaded)
+		{
+			nativeInit();
+			nativeInitDockMenu();
+			
+			System.out.println(getLibVersion());
+		}
 	}
 	
-	private static boolean load()
+	private static void load()
 	{
 		try
 		{
 			System.loadLibrary("JAPMacOSX");
+			ms_bLibraryLoaded = true;
 		}
 		catch(Throwable t)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Could not initialise JAPMacOSXLib", t);
-			t.printStackTrace();
-			
-			return false;
+			ms_bLibraryLoaded = false;
 		}
-		
-		return true;
 	}
 	
 	public static void checkLibVersion()
 	{
-		LogHolder.log(LogLevel.INFO, LogType.GUI, "Existing " + JAP_MACOSX_LIB_FILENAME + " version: " + getLibVersion());
-		LogHolder.log(LogLevel.INFO, LogType.GUI, "Required " + JAP_MACOSX_LIB_FILENAME + " version: " + JAP_MACOSX_LIB_REQUIRED_VERSION);
+		boolean bUpdateNeeded = false;
+		String version = null;
 		
-		// checks, if the MacOSX library must (and can) be extracted from the jar-file.
-		if (getLibVersion() != null && // != null means that there is a loaded library
-			getLibVersion().compareTo(JAP_MACOSX_LIB_REQUIRED_VERSION) < 0 &&
-			ResourceLoader.getResourceURL(JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME) != null && // null means there is no new library available
-			getUpdatePath() != null)
+		if(ms_bLibraryLoaded)
 		{
-			System.out.println("needs update + update possible");
+			try
+			{
+				version = getLibVersion();
+				LogHolder.log(LogLevel.INFO, LogType.GUI, "Existing " + JAP_MACOSX_LIB_FILENAME + " version: " + version);
+			}
+			catch(Throwable t)
+			{
+				LogHolder.log(LogLevel.INFO, LogType.GUI, JAP_MACOSX_LIB_FILENAME + " does not support version check. Update needed.");
+				bUpdateNeeded = true;
+			}
 		}
 		else
 		{
-			// version status OK
-			// OR no library loaded
-			// OR no new library in jar-file
-			if (JAPModel.getInstance().isMacOSXLibraryUpdated())
+			LogHolder.log(LogLevel.INFO, LogType.GUI, JAP_MACOSX_LIB_FILENAME + " does not exist or failed to load. Update needed.");
+			bUpdateNeeded = true;
+		}
+		
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Required " + JAP_MACOSX_LIB_FILENAME + " version: " + JAP_MACOSX_LIB_REQUIRED_VERSION);
+		
+		if(version != null &&
+			version.compareTo(JAP_MACOSX_LIB_REQUIRED_VERSION) < 0)
+		{
+			bUpdateNeeded = true;
+		}
+
+		// we already tried an update at startup and it failed
+		if(bUpdateNeeded && JAPModel.getInstance().isMacOSXLibraryUpdateAtStartupNeeded())
+		{
+			// TODO: ask user
+			return;
+		}
+		
+		if(bUpdateNeeded)
+		{
+			LogHolder.log(LogLevel.INFO, LogType.GUI, "Trying to fetch " + JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME + " from JAP.jar.");
+			if(ResourceLoader.getResourceURL(JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME) != null &&
+			   getUpdatePath() != null)
 			{
-				JAPModel.getInstance().setMacOSXLibraryUpdate(false);
+				if(update())
+				{
+					// update successful, don't need to update at startup
+					JAPModel.getInstance().setMacOSXLibraryUpdateAtStartupNeeded(false);
+					JAPController.getInstance().saveConfigFile();
+					
+					// try to load the new library
+					// this probably fails every time, but ah well maybe we're lucky
+					// the only time this won't fail is if there was no old library
+					load();
+					try
+					{
+						version = getLibVersion();
+					}
+					catch(Throwable t)
+					{
+						version = null;
+					}
+					
+					// the new library was loaded - whoa! how did that happen?!
+					if(version != null &&
+						version.compareTo(JAP_MACOSX_LIB_REQUIRED_VERSION) >= 0)
+					{
+						LogHolder.log(LogLevel.INFO, LogType.GUI, JAP_MACOSX_LIB_FILENAME + " successfully updated to version " + JAP_MACOSX_LIB_REQUIRED_VERSION + ".");
+						return;
+					}
+					else
+					{
+						// this is usually the case... update successful 
+						// but we need a restart for the new library to load
+						LogHolder.log(LogLevel.INFO, LogType.GUI, JAP_MACOSX_LIB_FILENAME + " successfully updated to version " + JAP_MACOSX_LIB_REQUIRED_VERSION + ". Restart needed.");
+						informUserAboutJapRestart();
+					}
+				}
+				
+				// update failed, try again at next startup
+				LogHolder.log(LogLevel.INFO, LogType.GUI, "Update failed, trying to restart JAP to retry update.");
+				JAPModel.getInstance().setMacOSXLibraryUpdateAtStartupNeeded(true);
+				JAPController.getInstance().saveConfigFile();
+				informUserAboutJapRestart();
+			}
+			else
+			{
+				LogHolder.log(LogLevel.INFO, LogType.GUI, "Required version not available in JAP.jar. Update aborted.");
+				// TODO: fetch otherwise? ask user?
+				return;
+			}
+		}
+		else
+		{
+			if (JAPModel.getInstance().isMacOSXLibraryUpdateAtStartupNeeded())
+			{
+				JAPModel.getInstance().setMacOSXLibraryUpdateAtStartupNeeded(false);
 				JAPController.getInstance().saveConfigFile();
 			}
 		}
 	}
 	
+	private static boolean update()
+	{
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Trying to update " + JAP_MACOSX_LIB_FILENAME + " to version " + JAP_MACOSX_LIB_REQUIRED_VERSION);
+		
+		if (renameLib(JAP_MACOSX_LIB_FILENAME, JAP_MACOSX_LIB_OLD_FILENAME) && extractDLL(new File(getLibFileName())))
+		{
+			JAPModel.getInstance().setDLLupdate(false);
+			JAPController.getInstance().saveConfigFile();
+			
+			return true;
+		}
+		else
+		{
+			renameLib(JAP_MACOSX_LIB_OLD_FILENAME, JAP_MACOSX_LIB_FILENAME);
+			return false;
+		}
+	}
+	
 	/**
-	 * Returns the path where the dll should be stored into.
+	 * Returns the path where the library should be stored into.
 	 * @return
 	 */
 	private static String getUpdatePath()
@@ -237,6 +345,62 @@ public class JAPMacOSXLib
 			}			
 		}
 		return null;
+	}
+	
+	private static boolean renameLib(String a_oldName, String a_newName)
+	{
+		try
+		{
+			File file = new File(getUpdatePath() + File.separator + a_oldName);
+			if(file.exists())
+			{
+				file.renameTo(new File(getUpdatePath() + File.separator + a_newName));
+				return true;
+			}
+			else 
+			{
+				// the file doesn't exist but return true so we can extract
+				// the library file from the jar
+				return true;
+			}
+
+		}
+		catch (Exception e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.GUI, "Unable to copy " + getUpdatePath() + 
+					File.separator + a_oldName + ".", e);
+		}
+		
+		return false;
+   }
+	
+	private static boolean extractDLL(File a_file)
+	{
+		LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Extracting " + JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME + 
+				" from jar-file to: " + a_file);
+
+		try
+		{
+			Util.copyStream(
+					ResourceLoader.loadResourceAsStream(JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME),
+					new FileOutputStream(a_file));
+			
+			return true;
+		}
+		catch (Exception e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
+		}
+		return false;
+	}
+	
+	private static void informUserAboutJapRestart()
+	{
+		//Inform the User about the necessary JAP restart
+		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
+									JAPMessages.getString("mac osx library update needs restart"));
+		//close JAP
+		JAPController.goodBye(false);
 	}
 	
 	public static JMenu showDockMenu()
