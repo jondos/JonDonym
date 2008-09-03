@@ -1684,100 +1684,85 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 							passwordReader = new IMiscPasswordReader()
 							{
-								private Vector passwordsToTry = new Vector();
-
+								private Vector pwMatches = new Vector();
+								private Enumeration currentPWIteration = null;
+								private Object lastAccount = null;
+								private boolean skipAll = false;
+								
 								public String readPassword(Object a_message)
 								{
-									PasswordContentPane panePassword;
-									String password;
-									panePassword = new PasswordContentPane(
+									String password = null;
+									PasswordContentPane panePassword = new PasswordContentPane(
 										dialog, PasswordContentPane.PASSWORD_ENTER,
 										JAPMessages.getString(MSG_ACCPASSWORDENTER, a_message));
 									panePassword.setDefaultButtonOperation(PasswordContentPane.
 																		   ON_CLICK_HIDE_DIALOG);
-									if (passwordsToTry == null)
+									if(skipAll)
 									{
 										return null;
 									}
-
-									if (!completedAccounts.containsKey(a_message))
+									
+									if(lastAccount == null)
 									{
-										passwordsToTry.removeAllElements();
+										lastAccount = a_message;
 									}
-
-									if (cachedPasswords.size() == 0 ||
-										(completedAccounts.containsKey(a_message) &&
-										((Boolean)completedAccounts.get(a_message)).booleanValue()))
+									
+									/* try to query a new account -> the last one matched */
+									if(!a_message.equals(lastAccount))
 									{
-										while (true)
+										pwMatches.add(completedAccounts.get(lastAccount));
+										currentPWIteration = null;
+										currentPWIteration = pwMatches.elements();
+										lastAccount = a_message;
+									}
+									
+									if(currentPWIteration != null)
+									{
+										if(currentPWIteration.hasMoreElements())
 										{
-											password = panePassword.readPassword(null);
-											if (password == null)
+											return (String) currentPWIteration.nextElement();
+										}
+										else
+										{
+											currentPWIteration = null;
+										}
+									}
+									
+									while (true)
+									{
+										password = panePassword.readPassword(null);
+										if (password == null)
+										{
+											completedAccounts.remove(a_message);
+											
+											if (JAPDialog.showYesNoDialog(
+												(Component)a_splash,
+												JAPMessages.getString(MSG_LOSEACCOUNTDATA),
+												onTopAdapter))
 											{
-												if (JAPDialog.showYesNoDialog(
-													(Component)a_splash,
-													JAPMessages.getString(MSG_LOSEACCOUNTDATA),
-													onTopAdapter))
-												{
-													// user clicked cancel
-													passwordsToTry = null;
-													// do not use the password from this account
-													//cachedPasswords.remove(a_message);
-													break;
-												}
-												else
-												{
-													continue;
-												}
-											}
-											else
-											{
+												// user clicked cancel
+												skipAll = true;
 												break;
 											}
 										}
-										if (password != null)
+										else
 										{
-											cachedPasswords.put(password, password);
-											completedAccounts.put(a_message, new Boolean(true));
+											completedAccounts.put(a_message, password);
+											break;
 										}
-									}
-									else
-									{
-										if (passwordsToTry.size() == 0)
-										{
-											Enumeration enumCachedPasswordKeys = cachedPasswords.elements();
-											while (enumCachedPasswordKeys.hasMoreElements())
-											{
-												passwordsToTry.addElement(enumCachedPasswordKeys.
-													nextElement());
-											}
-											// start using cached paasswords for this account
-											completedAccounts.put(a_message, new Boolean(false));
-										}
-										password = (String) passwordsToTry.elementAt(passwordsToTry.size() -
-											1);
-										passwordsToTry.removeElementAt(passwordsToTry.size() - 1);
-
-										if (passwordsToTry.size() == 0)
-										{
-											// all cached passwords have been used so far
-											completedAccounts.put(a_message, new Boolean(true));
-										}
-
 									}
 									return password;
 								}
 							};
 						}
-						PayAccountsFile.init(elemAccounts, passwordReader, JAPConstants.m_bReleasedVersion);
+						boolean accountLoaded = PayAccountsFile.init(elemAccounts, passwordReader, JAPConstants.m_bReleasedVersion);
 						if (tempDialog != null)
 						{
 							tempDialog.dispose();
 						}
-						if (cachedPasswords.size() > 0)
+						if (completedAccounts.size() > 0)
 						{
-							// choose any password from the working ones
-							setPaymentPassword((String)cachedPasswords.elements().nextElement());
+							setPaymentPassword((String)completedAccounts.elements().nextElement());
 						}
 					}
 				}
@@ -2762,6 +2747,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 */
 	public void setCurrentMixCascade(MixCascade newMixCascade)
 	{
+		System.out.println("set new Mix Cascade");
 		if (newMixCascade == null)
 		{
 			return;
@@ -3010,6 +2996,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						/* we use a direct connection */
 						if (!bSwitchCascade)
 						{
+							System.out.println("new Anon Proxy");
 							m_proxyAnon = new AnonProxy(
 								m_socketHTTPListener, JAPModel.getInstance().getMutableProxyInterface(),
 								JAPModel.getInstance().getPaymentProxyInterface());
