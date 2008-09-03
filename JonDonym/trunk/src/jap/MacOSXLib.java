@@ -59,8 +59,9 @@ import logging.LogLevel;
  */
 public class MacOSXLib
 {
-	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION = "00.00.003";
-	public static final String JAP_MACOSX_LIB_FILENAME = "libJonDoMacOSX.jnilib";
+	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION = "00.00.005";
+	public static final String JAP_MACOSX_LIB = "MacOSX";
+	public static final String JAP_MACOSX_LIB_FILENAME = "lib" + JAP_MACOSX_LIB + ".jnilib";
 	private static final String JAP_MACOSX_LIB_OLD_FILENAME = JAP_MACOSX_LIB_FILENAME + ".old";
 	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME = JAP_MACOSX_LIB_FILENAME + "." + JAP_MACOSX_LIB_REQUIRED_VERSION;
 	
@@ -183,12 +184,12 @@ public class MacOSXLib
 	{
 		try
 		{
-			System.loadLibrary("JAPMacOSX");
+			System.loadLibrary(JAP_MACOSX_LIB);
 			ms_bLibraryLoaded = true;
 		}
 		catch(Throwable t)
 		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Could not initialise JAPMacOSXLib", t);
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Could not initialise MacOSXLib", t);
 			ms_bLibraryLoaded = false;
 		}
 	}
