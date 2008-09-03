@@ -65,6 +65,7 @@ public class MacOSXLib
 	private static final String JAP_MACOSX_LIB_OLD_FILENAME = JAP_MACOSX_LIB_FILENAME + ".old";
 	public static final String JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME = JAP_MACOSX_LIB_FILENAME + "." + JAP_MACOSX_LIB_REQUIRED_VERSION;
 	
+	private static final String MSG_MACOSX_LIB_UPDATE = MacOSXLib.class.getName() + "_macOSXLibUpdate";
 	private static final String UPDATE_PATH;
 	
 	private static final String MSG_SETTINGS = SystrayPopupMenu.class.getName() + "_settings";
@@ -229,7 +230,10 @@ public class MacOSXLib
 		// we already tried an update at startup and it failed
 		if(bUpdateNeeded && JAPModel.getInstance().isMacOSXLibraryUpdateAtStartupNeeded())
 		{
-			// TODO: ask user
+			// give up
+			LogHolder.log(LogLevel.INFO, LogType.GUI, "Update failed twice. Giving up.");			
+			JAPModel.getInstance().setMacOSXLibraryUpdateAtStartupNeeded(false);
+			JAPController.getInstance().saveConfigFile();
 			return;
 		}
 		
@@ -283,7 +287,6 @@ public class MacOSXLib
 			else
 			{
 				LogHolder.log(LogLevel.INFO, LogType.GUI, "Required version not available in JAP.jar. Update aborted.");
-				// TODO: fetch otherwise? ask user?
 				return;
 			}
 		}
@@ -299,8 +302,8 @@ public class MacOSXLib
 	
 	private static boolean update()
 	{
-		LogHolder.log(LogLevel.INFO, LogType.GUI, "Trying to update " + JAP_MACOSX_LIB_FILENAME + " to version " + JAP_MACOSX_LIB_REQUIRED_VERSION);
-		
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Trying to update " + JAP_MACOSX_LIB_FILENAME + " to version " + JAP_MACOSX_LIB_REQUIRED_VERSION + ".");
+
 		if (renameLib(JAP_MACOSX_LIB_FILENAME, JAP_MACOSX_LIB_OLD_FILENAME) && extractDLL(new File(getLibFileName())))
 		{
 			JAPModel.getInstance().setDLLupdate(false);
@@ -396,7 +399,7 @@ public class MacOSXLib
 	{
 		//Inform the User about the necessary JAP restart
 		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
-									JAPMessages.getString("mac osx library update needs restart"));
+									JAPMessages.getString(MSG_MACOSX_LIB_UPDATE));
 		//close JAP
 		JAPController.goodBye(false);
 	}
