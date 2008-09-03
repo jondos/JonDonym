@@ -94,8 +94,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 	return JNI_VERSION_1_4;
 }
 
-//	% javap -classpath JavaHeaders.jar -s gui.MacOSXLib
-JNIEXPORT void JNICALL Java_gui_MacOSXLib_nativeInit(JNIEnv* env, jclass class) 
+//	% javap -classpath JavaHeaders.jar -s jap.MacOSXLib
+JNIEXPORT void JNICALL Java_jap_MacOSXLib_nativeInit(JNIEnv* env, jclass class) 
 {
 	MacOSXLibClass = (*env)->NewGlobalRef(env, class);	
 	jMenuClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "javax/swing/JMenu"));
@@ -142,7 +142,7 @@ JNIEXPORT void JNICALL Java_gui_MacOSXLib_nativeInit(JNIEnv* env, jclass class)
 	}
 }
 
-JNIEXPORT void JNICALL Java_gui_MacOSXLib_nativeInitDockMenu(JNIEnv * env, jclass class)
+JNIEXPORT void JNICALL Java_jap_MacOSXLib_nativeInitDockMenu(JNIEnv * env, jclass class)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
@@ -219,7 +219,7 @@ NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj)
 	return menu;
 }
 
-JNIEXPORT jstring JNICALL Java_gui_MacOSXLib_getLibVersion(JNIEnv* env, jclass class)
+JNIEXPORT jstring JNICALL Java_jap_MacOSXLib_getLibVersion(JNIEnv* env, jclass class)
 {
 	return (*env)->NewStringUTF(env, LIB_VERSION);
 }

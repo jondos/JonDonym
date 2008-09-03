@@ -15,7 +15,7 @@
 
 /* Begin PBXFileReference section */
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		C41E35580E6E9A0D00B54631 /* JavaHeaders */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = JavaHeaders; path = build/Debug/JavaHeaders; sourceTree = "<group>"; };
+		C41E35580E6E9A0D00B54631 /* JavaHeaders */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = JavaHeaders; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4DA806D0E6E973200D16E80 /* javah_MacOSXLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = javah_MacOSXLib.h; sourceTree = "<group>"; };
 		C4DA806E0E6E973200D16E80 /* MacOSXLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MacOSXLib.h; sourceTree = "<group>"; };
 		C4DA806F0E6E973200D16E80 /* MacOSXLib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MacOSXLib.m; sourceTree = "<group>"; };
