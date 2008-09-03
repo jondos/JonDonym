@@ -194,17 +194,6 @@ NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj)
 				NSMenuItem* menuItem = [menu addItemWithTitle: string action:@selector(dockMenuCallback:) keyEquivalent:@""];
 				[menu setSubmenu: submenu forItem: menuItem];
 			}
-			/*else if((*env)->IsInstanceOf(env, item, jCheckBoxMenuItemClass) == JNI_TRUE)
-			{
-				NSLog(@"getNSMenuFromJMenu: adding checkbox item");
-				NSMenuItem* menuItem = [menu addItemWithTitle: string action: @selector(dockMenuCallback:) keyEquivalent: @""];
-				jboolean isSelected = (*env)->CallBooleanMethod(env, item, isSelected_mID);
-				[menuItem setRepresentedObject:cmdString];
-				if(isSelected == JNI_TRUE)
-				{
-					[menuItem setState:NSOnState];
-				}
-			}*/
 			else
 			{
 				NSLog(@"getNSMenuFromJMenu: adding menu item '%s' - command: %s", buffer, cmdBuffer);

@@ -28,7 +28,7 @@
 #import "javah_JAPMacOSXLib.h"
 #import <Cocoa/Cocoa.h>
 
-#define LIB_VERSION "00.00.001"
+#define LIB_VERSION "00.00.003"
 
 @interface AppDelegate : NSObject
 - (NSMenu*) applicationDockMenu:(NSApplication*) sender;
