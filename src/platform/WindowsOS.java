@@ -42,6 +42,23 @@ import java.net.URL;
  */
 public class WindowsOS extends AbstractOS
 {
+	public static final int HKEY_CLASSES_ROOT = 0x80000000;
+	public static final int HKEY_CURRENT_USER = 0x80000001;
+	public static final int HKEY_LOCAL_MACHINE = 0x80000002;
+	
+	public static final int DELETE = 0x10000;
+	public static final int KEY_QUERY_VALUE = 0x0001;
+	public static final int KEY_SET_VALUE = 0x0002;
+	public static final int KEY_CREATE_SUB_KEY = 0x0004;
+	public static final int KEY_ENUMERATE_SUB_KEYS = 0x0008;
+	public static final int KEY_READ = 0x20019;
+	public static final int KEY_WRITE = 0x20006;
+	public static final int KEY_ALL_ACCESS = 0xf003f;
+	
+	public static final int ERROR_SUCCESS = 0;
+	public static final int ERROR_FILE_NOT_FOUND = 2;
+	public static final int ERROR_ACCESS_DENIED = 5;
+    
 	public WindowsOS() throws Exception
 	{
 		String osName = System.getProperty("os.name", "").toLowerCase();
@@ -68,6 +85,7 @@ public class WindowsOS extends AbstractOS
 			Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + a_link);
 			//Runtime.getRuntime().exec(
 				//	new String[]{"C:\\Program Files\\Mozilla Firefox\\firefox.exe", a_link});
+			
 			return true;
 		}
 		catch (Exception ex)
