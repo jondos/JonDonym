@@ -1,9 +1,0 @@
-D/interfaces////
-D/messages////
-/.cvsignore/1.1/Fri Jan 25 17:00:04 2008//
-/AbstractEMCAdapter.java/1.6/Tue Jan 15 15:40:56 2008//
-/AgreementMessageTypes.java/1.3/Tue Jan 15 15:40:56 2008//
-/ConsensusLogEchoMulticast.java/1.4/Tue Jan 15 15:40:56 2008//
-/EchoMulticastAgreementHandlerImpl.java/1.6/Tue Jan 15 15:40:56 2008//
-/InfoserviceEMCAdapter.java/1.4/Tue Jan 15 15:40:56 2008//
-/MessageHandlerThread.java/1.4/Tue Jan 15 15:40:56 2008//
