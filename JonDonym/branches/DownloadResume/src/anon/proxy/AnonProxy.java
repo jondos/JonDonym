@@ -27,6 +27,8 @@
  */
 package anon.proxy;
 
+import jap.JAPModel;
+
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -114,7 +116,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	/**
 	 * Stores the MixCascade we are connected to.
 	 */
-	private AbstractMixCascadeContainer m_currentMixCascade = new DummyMixCascadeContainer();
+	public AbstractMixCascadeContainer m_currentMixCascade = new DummyMixCascadeContainer();
 
 	/**
 	 * Stores the Tor params.
@@ -235,6 +237,25 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		setJonDoFoxHeaderEnabled(true);
 	}
 
+	AnonChannel prepareConnectionHandover() throws NotConnectedToMixException, Exception
+	{
+		m_Anon.shutdown(false);
+		m_currentMixCascade.keepCurrentService(false);
+		m_Anon.initialize(m_currentMixCascade.getNextMixCascade(), m_currentMixCascade);
+		return createChannel(AnonChannel.HTTP);
+		/*if(m_Anon != null)
+		{
+			m_Anon.shutdown(false);
+			m_Anon.removeEventListeners();
+		}
+		m_Anon = AnonServiceFactory.getAnonServiceInstance(AnonServiceFactory.SERVICE_ANON);
+		m_Anon.setProxy(m_proxyInterface);
+		( (AnonClient) m_Anon).setPaymentProxy(JAPModel.getInstance().getPaymentProxyInterface());
+		m_Anon.addEventListener(this);
+		m_currentMixCascade.keepCurrentService(false);*/
+		
+	}
+	
 	void setJonDoFoxHeaderEnabled(boolean enable)
 	{
 		if(enable)
