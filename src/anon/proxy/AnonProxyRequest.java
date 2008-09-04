@@ -451,8 +451,8 @@ public final class AnonProxyRequest implements Runnable
 						m_Channel.close();
 						
 						//JAPController.getInstance().setAnonMode(false);
-						//JAPController.getInstance().switchToNextMixCascade();
-						m_Channel = m_Proxy.createChannel(AnonChannel.HTTP);
+						//m_Proxy.m_currentMixCascade.keepCurrentService(false);
+						m_Channel = m_Proxy.prepareConnectionHandover();
 						m_InChannel = m_Channel.getInputStream();
 						m_OutChannel = m_Channel.getOutputStream();
 						
