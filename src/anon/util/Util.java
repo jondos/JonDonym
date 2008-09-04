@@ -428,6 +428,18 @@ public final class Util
 		}
 	}
 	
+	public static class StringSortAsc implements Comparable
+	{
+		public int compare(Object a_obj1, Object a_obj2)
+		{
+			if(a_obj1 == null && a_obj2 == null) return 0;
+			else if(a_obj1 == null) return -1;
+			else if(a_obj2 == null) return 1;
+			
+			return ((String)a_obj1).compareTo((String)a_obj2);
+		}
+	}
+	
 	public static void sort(Vector a_vec, Comparable c)
 	{
 		if(a_vec != null)

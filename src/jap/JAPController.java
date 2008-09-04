@@ -1710,7 +1710,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 									/* try to query a new account -> the last one matched */
 									if(!a_message.equals(lastAccount))
 									{
-										pwMatches.add(completedAccounts.get(lastAccount));
+										pwMatches.addElement(completedAccounts.get(lastAccount));
 										currentPWIteration = null;
 										currentPWIteration = pwMatches.elements();
 										lastAccount = a_message;

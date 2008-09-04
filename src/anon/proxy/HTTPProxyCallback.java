@@ -2,7 +2,6 @@ package anon.proxy;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -328,7 +327,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 		
 		private String removeHeader(Hashtable headerMap, Vector headerOrder, String header)
 		{
-			headerOrder.remove(header);
+			headerOrder.removeElement(header);
 			return (String) headerMap.remove(header);
 		}
 		
