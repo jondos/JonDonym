@@ -1,0 +1,155 @@
+###########################################################
+### JAP TODO
+###########################################################
+
+#Bunt gemischtes ToDo....
+Anzeige 'Kein Proxy konfiguriert', wenn nicht eingetragen
+Fertigstellen der Proxy Authorisation
+Analyse der 'Spitzen' bei den Nutzern  - Gegenmaßnahmen
+Einsatz mehrerer Squids für LoadBalancing und Fehlertoleranz
+WEB-Seiten mittels cvs ermöglichen
+Differentielles Update-Download im JAP aktivieren
+Testseite für richtige Browser-Konfiguration erstellen
+Automatisches Generieren der Web-Start Dateien
+Bessere Integration des 'Status' in die WEB-Seiten
+Zusammenstellen einer 'read-only' Linux-Mix-Distribution
+Klären root-Rechte <---> SSL Port
+FTP-Support für 'Direct-Proxy'
+Bessere Kryptographie im JAP (RSa-Padding,Schlüsselaustausch...)
+Signieren der Setup-Dateien
+Überlegungen zu verteiltem Support-System
+Problembehebung JAP <--> Netscape
+Ändern der Mixe für > 1024 Nutzer
+Integration von RMI (Beleg) in JAP
+Verbessern der Precompiled Binaries Web Page (Größe, Datum + Version)
+Fehlerbeseitgung: Schnelles Verbindungstrenne; erneutes Verbinden
+!!Verhindern des Blockieren des Mixes, wenn Squid keine Daten mehr entgegennimmt!!
+Zusammenstellen eine RPM-PAckets für Linux
+
+
+
+
+
+
+##IN-WORK
+Autostart startet MUX nicht
+Bei Abschalten "anonymer zugriff":
+   ProxyServer Exception: java.io.InterruptedIOException: accept interrupted
+   besser: regulaer accept schliessen
+?? Exception bei Server 
+
+##TODO
+Versionscheck, JAPFeedback via Proxy, wenn Proxy-Mode ist aktiviert
+JAPDirectConnection ggf. erweitern/aendern, dass direkte beobachtbare
+   Verbindung nach Warnung moeglich ist
+?? bug: Bei Click auf einstellungen label change
+sprache aendern settings implementieren
+!! (!!=immer zu tun) properties-file: fehlende Texte zufuegen
+
+
+##ERLEDIGT (= OK)
+2000-02-02 Fehlermeldungen in JAP.java verbessert 
+           (Check auf VM-Version, Swing etc)
+OK Neue Klasse JAPFeedback, die ueber den InfoService das Anonym-O-Meter
+   bedient
+OK Bei Download einer neuen JAP-Version: Frame mit Fortschrittsanzeige
+OK Probleme bei Bilder laden (habe hier was geaendert, aber jetzt klappt 
+   es nicht mehr, wenn ich das .jar File versuche zu starten. 
+   (Mac-PC-Inkompatibilitaet?)
+OK Info Service wird Ÿber 6543 kontaktiert ab sofort
+OK Konfiguration f. InfoService hinzugefuegt
+OK Versionscheck geht jetzt ueber InfoService
+OK Versionschecker umgestellt auf oeffnen einer eigenen Socketverbindung, 
+   weil er immer ueber den lokalen Proxy zugreifen wollte (Feedback)
+OK Feedback an Nutzer (class JAPDirectConnection) falls Anon Mode == off
+OK Versionsnummer in JAPModel in Frame anzeigen (-->in Info)
+OK JAP: Fenster šffnen, wenn neue Version
+OK Versionscheck erst, wenn Haken an
+OK alert: not implemented fuer proxy (Loesung: setEnabled(false))
+OK add: debuglevel wŠhlen in einstellungen...
+OK JAPConf: Wenn ein Wert geaendert wird, aber dann Abbrechen gedrueckt wird, 
+   steht beim naechsten Auftruf von "Einstellungen" nicht wieder der aktuelle 
+   Wert drin.
+OK Config:Anon:[ ] Auto-connect to Anonymity Service after program start
+OK JAPVersion throws Exception
+
+
+###########################################################
+### InfoService
+###########################################################
+Info Service implementieren
+Info Service sendet an JAP:
+ anon_host // Mix 1 der Kaskade
+ anon_port
+ nr_of_mixes
+ key_1
+ key_2
+ ...
+ key_n
+
+ key_i :=
+  len2Byte, Bytearray
+  
+
+GET /connectionInfos JAP/0.11 
+GET /status HTTP/1.1
+GET /status JAP/0.1
+POST /publicMixingKey
+POST /status
+
+###########################################################
+### MIX TODO
+###########################################################
+MIX: replay erkennung
+MIX: sortierung ausgabenachricht
+MIX: unabhŠngiges Beenden und Starten
+     neue Option in "proxytest ... infoserver:port"
+     1. RSA-SchlŸssel generieren
+     2. Lauschenden Port erzeugen
+     3. RSA-Key an Info-service senden
+     4. Info-Service wartet auf alle Mixe
+     5. Erster Mix startet Route
+     bei Fehler: Route abbauen und jeder Mix versucht es neu
+     Info Server bekommt mit, welcher Mix down ist
+     Problem, wenn ein Mix zwar Verbindung zu Info Server bekommt, 
+     aber keine Verbindung zu seinem nachfolgenden Mix --> nachfolgende
+     Mixe gekommen nicht mit, dass eine Route neu aufgebaut werden muss, 
+     d.h. sie sich wieder beim Info Service melden mŸssen.
+MIX: Signieren von SchlŸssel mit statischem Sig-Key
+
+###########################################################
+### OPEN QUESTIONS
+###########################################################
+kann squid chache https, ftp?
+erster Mix in Dresden
+letzter Mix in LŸbeck
+
+###########################################################
+### Sonstiges, Merker
+###########################################################
+XML.jar
+www.javasoft.com -->xml
+sk13, 654321
+java.sun.com/xml/download.html <-- v1.0.1
+
+
+---Webseite erstellen: 
+ JAP
+
+---Mixbetreiber:
+ SaarbrŸcken
+ Dresden
+ LŸbeck/Kiel
+ Secunet
+ Aachen
+ Borking
+ ICSI
+ Canad Privacy Commissioner
+
+---Aktueller Status (Stand zum Anon Workshop am ICSI):
+ - Start MIX:
+ - RSA key generated
+ - letzter Mix als erstes gestartet
+ ! Bei Neustart eines Mix muss ganze Kette neu gestartet werden
+ - keine Replay-Erkennung in Mixen
+
