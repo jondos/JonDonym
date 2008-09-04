@@ -1,0 +1,434 @@
+<html>
+<head>
+	<title>Entwicklerdokumentation zum Bezahlsystem</title>
+</head>
+<body>
+<h1>Entwicklerdokumentation zum Bezahlsystem</h1>
+<p>Stand 29.06.2004</p>
+
+<p>Dieses Dokument beschreibt die Änderungen und Erweiterungen, die bei der Implementierung der Bezahlfunktion am ursprünglichen von Andreas Müller in seiner Diplomarbeit entworfenen Protokoll 
+vorgenommen wurden. Es soll dazu dienen, Entwicklern einen Überblick über die Implementierung zu 
+geben und den Einstieg zu erleichtern.
+Zum Teil sind auch Aspekte enthalten, die vielleicht eher in eine Benutzerdokumentation gehören
+und später ausgegliedert werden können.</p>
+<p><strong>Für das gesamte Dokument gilt: Da die Implementierung noch nicht abgeschlossen ist,
+sind einige Bereiche noch nicht genau spezifiziert und können sich auch noch ändern.</strong></p>
+
+<p>&nbsp;</p>
+
+
+<a name="anfang"><h2>Inhaltsverzeichnis</h2></a>
+
+<ol>
+	<li><a href="#kap01">Änderungen am JAP - BI - Protokoll</a>
+	<ol>
+		<li><a href="#kap0101">Generierung der Transaktionsnummern</a>
+		<li><a href="#kap0102">Einzahlung per Web-Interface</a>
+		<li><a href="#kap0103">Tarifmodelle</a>
+		<li><a href="#kap0104">Erstellung von Tarifen</a>
+		<li><a href="#kap0105">Abfrage von Kontostand und Kostenbestätigungen</a>
+	</ol>
+
+	<li><a href="#kap02">Änderungen am JAP - AI - Protokoll</a>
+	<ol>
+		<li><a href="#kap0201">Realisierung des Übertragungskanals</a>
+		<li><a href="#kap0202">Verschlüsselung</a>
+		<li><a href="#kap0203">Verbindungsaufbau</a>
+	</ol>
+
+	<li><a href="#kap03">Änderungen am AI - BI - Protokoll</a>
+	<ol>
+	</ol>
+	
+	<li><a href="#kap04">Implementierung der Bezahlinstanz (BI)</a>
+	<ol>
+		<li><a href="#kap0401">Blubber</a>
+		<li><a href="#kap0402">Änderungen der Datenbank</a>
+		<ol>
+			<li><a href="#kap040201">Umstellungen in der Tabelle ACCOUNTS</a>
+			<li><a href="#kap040202">Die Tabelle TRANSFERS</a>
+			<li><a href="#kap040203">Die Tabelle RATES</a>
+			<li><a href="#kap040204">Umstellungen der anderen Tabellen</a>
+		</ol>
+	</ol>
+	
+	<li><a href="#kap05">Implementierung der Abrechnungsinstanz (AI)</a>
+	<ol>
+		
+	</ol>
+	
+	<li><a href="#kap06">Implementierung der Bezahlfunktionalität im JAP</a>
+</ol>
+<p>&nbsp;&nbsp;</p>
+
+
+
+
+<h2><a name="kap01">1. Änderungen am JAP - BI - Protokoll</a></h2>
+
+<h3><a name="kap0101">1.1 Generierung der Transaktionsnummern</a></h3>
+
+<p>Um das Konto eines Nutzerpseudonyms aufzuladen, werden so genannte Transaktionsnummern 
+(transfer numbers) verwendet. Wenn der Nutzer eine Aufladung durchführen möchte und den
+entspr. Button im JAP anklickt, fordert der JAP per /charge Request eine Transaktionsnummer
+bei der Bezahlinstanz an. Diese generiert nach dem im c't-Magazin 4/97 ("Blütenrein")
+beschriebenen Diedergruppen-Prüfsummen-Verfahren eine 12-stellige Transaktionsnummer mit 
+Prüfziffer am Ende und schickt diese in einem sogenannten transfer certificate an den JAP 
+zurück.</p>
+<p>Das Hinzufügen einer Prüfsumme erschien hier sinnvoll, da die Transaktionsnummern bei 
+"manuellen" Bezahlmethoden wie der Banküberweisung von Hand aufgeschrieben werden müssen, 
+und deshalb eine frühzeitige Erkennung von Abschreibefehlern die Verwaltung wesentlich 
+vereinfachen kann.</p>
+
+
+
+<h3><a name="kap0102">1.2 Einzahlung per Web-Interface</a></h3>
+
+<p>Um die Einzahlung für den Benutzer zu vereinfachen, haben wir in PHP ein Web-Interface
+implementiert. Dieses sollte auf einem Apache-Server mit SSL-Verschlüsselung laufen.
+Die entsprechende URL mit der vorher generierten Transaktionsnummer als Parameter
+wird vom JAP automatisch aufgerufen. Die Interaktion mit dem Web-Interface kann auch
+über den Anonymisierungsdienst durchgeführt werden, damit die Bezahlinstanz nicht die 
+IP-Adresse des Benutzers mit seiner Account-Nummer verketten kann.</p>
+
+<p>Das Web-Interface ermöglicht eine Auswahl der angebotenen Tarife und der gewünschten
+Zahlungsmethode. Zur Zeit werden die Zahlungsmethoden Banküberweisung und PayPal 
+unterstützt. Bei einer Überweisung per PayPal kann die Überweisung vollständig über
+das Webinterface durchgeführt werden und der eingezahlte Betrag landet (normalerweise!) 
+innerhalb weniger Sekunden auf dem Pseudonymkonto und kann sofort versurft werden.
+Bei einer Banküberweisung zeigt das Webinterface lediglich eine Zusammenfassung an, auf 
+der genau beschrieben wird was in die einzelnen Felder der Überweisung einzutragen ist.
+Dies erschien sinnvoll, da viele Benutzer sonst (nach Erfahrungen von CookieCooker-Maintainer
+Oliver Berthold) auf Überweisungsformularen zusätzliche unnötige Informationen eintragen 
+und somit den Verwaltungsaufwand erhöhen.</p>
+
+
+<h3><a name="kap0103">1.3 Tarifmodelle</a></h3>
+
+<p>Andreas Müller geht in seiner Diplomarbeit davon aus, dass es nur einen einzigen Tarif geben 
+soll der so aussieht, dass Benutzer pro versurftem KByte eine bestimmte Gebühr zahlen müssen.
+Als Erweiterung unterstützt das System nun mehrere Tarifmodelle, so dass es beispielsweise
+möglich ist eine Art Flatrate, d.h. unbegrenzte Nutzung des Anonymisierungsdienstes gegen einen
+monatlichen Pauschalbetrag, sowie einige weitere Tarifmodelle anzubieten. Die Änderungen in der
+BI-Datenbank, die dies ermöglichen, sind in <a href="#kap0403">Kapitel 4.3</a> beschrieben.</p>
+
+
+<h3><a name="kap0104">1.4 Erstellung von Tarifen</a></h3>
+
+<p>Zur Erstellung von neuen Tarifen und deren Beschreibungstexten in verschiedenen Sprachen
+kann das Skript rate-manager.php verwendet werden, das bei der BI mitgeliefert wird.
+Es ist leider etwas kompliziert zu bedienen (da ein ganz schneller Hack), aber immerhin
+muss man nicht von Hand in der Datenbank herumpfuschen.</p>
+
+<h3><a name="kap0105">1.5 Abfrage von Kontostand und Kostenbestätigungen</a></h3>
+
+<p>
+Bei der Abfrage des Kontostandes schickt die BI eine XML-Struktur an den JAP, in
+der der aktuelle Kontostand sowie auch der kumulierte bisher überwiesene Gesamtbetrag 
+(G_max bzw. maxbalance) enthalten sind. Da das in der Diplomarbeit spezifizierte Format
+kein korrektes XML ist, haben wir das Format wie folgt verändert:</p>
+
+<pre>
+&lt;?xml version="1.0"&gt;
+&lt;AccountInfo&gt;
+    &lt;Balance&gt;
+      .
+      .
+      .    
+    &lt;/Balance&gt;
+    &lt;Confirmations&gt;
+        &lt;Confirmation&gt;
+            &lt;CC&gt; ... &lt;/CC&gt;
+            &lt;Digest&gt; ... &lt;/Digest&gt;
+        &lt;/Confirmation&gt;
+           .
+           .
+           .
+        &lt;Confirmation&gt;
+            &lt;CC&gt; ... &lt;/CC&gt;
+            &lt;Digest&gt; ... &lt;/Digest&gt;
+        &lt;/Confirmation&gt;
+    &lt;/Confirmations&gt;
+&lt;/AccountInfo&gt;
+</pre>
+
+<p> Die wichtigste Änderung besteht darin, das gesamte Dokument in ein AccountInfo-Element
+einzubetten, da es in XML genau ein Root-Element geben muss.</p>
+
+<h2><a name="kap02">2. Änderungen am JAP - AI - Protokoll</a></h2>
+
+<h3><a name="kap0201">2.1 Realisierung des Übertragungskanals</a></h3>
+
+<p>Für den in der Diplomarbeit noch nicht näher spezifizierten Übertragungskanal (dort Steuerkanal
+genannt) zwischen Jap und der Abrechnungsinstanz haben wir folgendes implementiert: Der Übertragungskanal 
+ist in der bestehenden Socket-Verbindung zwischen JAP und erstem Mix integriert und hat die 
+reservierte Channel-ID 0xffffffff. Der erste Mix filtert also alle Pakete, die mit dieser ID
+beginnen aus dem Datenstrom heraus und gibt sie an die AI weiter. Das gleiche passiert im JAP
+für von der AI kommende Nachrichten.</p>
+
+<p>Da eine zwischen JAP und AI ausgetauschte XML-Nachricht auch mal länger sein kann als die
+988 Bytes Payload/Paket, kann sich eine Nachricht auch über mehrere Pakete erstrecken. 
+Die Gesamtlänge einer zu übertragenden Nachricht wird daher in den ersten 4 Bytes des ersten
+Paketes dieser Nachricht mitgesendet. </p>
+
+
+<h3><a name="kap0202">2.2 Verschlüsselung</a></h3>
+
+<p>Der Übertragungskanal zwischen JAP und AI wird mit zwei dedizierten symmetrischen Stromchiffren
+verschlüsselt. Dabei ist die erste Chiffre für die Richtung JAP-&gt;AI, der zweite Schlüssel für die 
+Richtung AI-&gt;JAP. Die Schlüssel dafür werden beim Verbindungsaufbau vom Jap generiert und zusammen mit 
+den beiden anderen symmetrischen Schlüsseln, die zur Verschlüsselung der Kanalnummern eingesetzt werden,
+im ersten Mixpaket übertragen (siehe unten).</p>
+
+
+<h3><a name="kap0203">2.3 Verbindungsaufbau</a></h3>
+
+<p><strong>Achtung: Dieser Teil wird sich demnächst ändern, da die Anmeldung statt mit einem 
+binären "keypacket" in Zukunft mit XML laufen wird</strong></p>
+
+<p>Den Verbindungsaufbau JAP-AI mussten wir wegen der anderen Beschaffenheit des Übertragungskanals 
+(in der Diplomarbeit wurde von einer vollständigen Trennung der AI vom ersten Mix ausgegangen, wir
+haben jedoch die AI in den Mix integriert) leicht modifizieren:</p>
+<ol>
+    <li>JAP verbindet sich zum ersten Mix
+    <li>Der Mix antwortet mit seinem öffentlichen Schlüssel und einer Challenge
+    <li>Der JAP erzeugt insgesamt vier zufällige symmetrische Sitzungsschlüssel (2 für normale Mixpakete
+        und 2 für den Steuerkanal, auf dem Kostenbestätigungen ausgetauscht werden). Außerdem berechnet
+        er aus der Challenge mit seinem privaten Key eine response. Alles zusammen wird mit dem öffentlichen
+        Key des Mixes verschlüsselt und als sogenanntes "Keypacket" an den Mix geschickt. Aufbau des
+        Keypacket:
+
+        <table width="300" border="1" cellspacing="0" cellpadding="5">
+            <tr>
+                <td align="left">Offset</td>
+                <td align="left">Daten</td>
+            </tr>
+            <tr>
+                <td align="left">0</td>
+                <td align="left">String "KEYPACKET"</td>
+            </tr>
+            <tr>
+                <td align="left">9</td>
+                <td align="left">32 Bytes Sitzungsschlüssel für die normalen Mixpakete 
+                (16 Byte upstream, 16 Byte downstream)</td>
+            </tr>
+            <tr>
+                <td align="left">41</td>
+                <td align="left">16 Bytes Sitzungsschlüssel für den Steuerkanal in Richtung AI-&gt;JAP</td>
+            </tr>
+            <tr>
+                <td align="left">57</td>
+                <td align="left">16 Bytes Sitzungsschlüssel für den Steuerkanal in Richtung JAP-&gt;AI</td>
+            </tr>
+            <tr>
+                <td align="left">73</td>
+                <td align="left">XYZ Bytes Response </td>
+            </tr>
+        </table>
+    <li>Nach diesem Keypacket sendet der JAP (bereits mit dem entspr. Sitzungsschlüssel verschlüsselt) sein 
+        Kontozertifikat
+        auf dem Steuerkanal an die AI. Erst jetzt kann die AI die im vorigen Paket mitgesendete Response prüfen
+        und somit entscheiden ob es sich um einen legitimen Benutzer handelt. Falls das Challenge/Response 
+        Verfahren fehlschlägt, wird die Verbindung an diesem Punkt geschlossen.
+</ol>
+
+
+
+<h2><a name="kap03">3. Änderungen am AI - BI - Protokoll</a></h2>
+
+<p>Einige erste Punkte:</p>
+<ul>
+    <li>Der /settle Request wird nicht automatisch mit einem neuen Balance Certificate 
+    beantwortet. Es muss statt dessen ein extra /update geschickt werden. Standardmäßig
+    ist der Body der Antwort auf /settle einfach nur leer
+</ul>
+
+
+
+<h2><a name="kap04">4. Implementierung der BI</a></h2>
+
+<h3><a name="kap0401">Blubber</a></h3>
+
+<h3><a name="kap0402">4.2 Änderungen an der BI-internen Datenbank</a></h3>
+
+Die BI benutzt eine PostgreSQL-Datenbank, um Kontonummern und -Stände, Tarifmodelle, 
+Transaktionsnummern und Kostenbestätigungen zu speichern. Im Zuge der oben beschriebenen 
+Erweiterungen musste ich auch die Datenbanktabellen um einige Features erweitern, die hier 
+beschrieben sind.
+
+<h3><a name="kap040201">4.2.1 Umstellungen in der Accounts-Tabelle</a></h3>
+
+<ul>
+<li>Der Datentyp für Accountnummern wurde von BIGINT auf BIGSERIAL geändert, somit werden doppelte
+  Accountnummern bereits durch das Datenbanksystem ausgeschlossen.
+
+<li>Statt eines etwas missverständlichen Ablaufdatums (VALIDTIME) wird jetzt das Erstellungsdatum 
+  (CREATION_TIME) im Format TIMESTAMP (umfasst Datum und Uhrzeit) gespeichert.
+
+<li>Das Ablaufdatum des Guthabens (nutzbar für Flatrate-ähnliche TarifAngebote) wird im Feld
+  BALANCE_VALIDTIME gespeichert
+
+<li>Das Feld MAXBALANCE (enthält die Summe aller bisherigen Einzahlungen auf das Pseudonymkonto,
+  Name etwas missverständlich) hat jetzt den Datentyp BIGINT um sicherzustellen, dass es nicht
+  überlaufen kann. Das Guthaben wird in KBytes gespeichert.
+</ul>
+
+
+
+<h3><a name="kap040202">4.2.2 Die Tabelle TRANSFERS</a></h3>
+
+<p>Die Tabelle Transfers speichert Transaktionsnummern und übernimmt somit die Funktion der alten
+Tabelle CREDITCARDTRANSFERS. Gespeichert wird die Transaktionsnummer selbst als eindeutige ID,
+die Accountnummer für die die Transaktionsnummer erstellt wurde, die MAXBALANCE, die zum 
+Erstellungszeitpunkt der TAN aktuell war (dies wird benötigt um zu verhindern, dass der Nutzer
+behaupten kann das überwiesene Guthaben sei nicht eingebucht worden), sowie ein Ablaufdatum und
+ein Flag, welches besagt ob die Nummer schon verwendet wurde.</p>
+
+
+
+<h3><a name="kap040203">4.2.3 Die Tabelle RATES</a></h3>
+
+<p>In dieser Tabelle werden Tarifmodelle abgelegt. Jedes Tarifmodell hat eine eindeutige Nummer,
+die im Feld ID gespeichert wird. Im Feld Name kann dem Tarifmodell ein Name zugeordnet werden.
+Der Quotient aus den beiden Feldern AMOUNT/MBYTES bestimmt den Preis pro Megabyte. Das Flag
+FIXED_AMOUNT gibt an, ob der Benutzer gezwungen wird genau diesen Betrag zu überweisen 
+(für Flatrate-ähnliche Modelle), oder ob er je nach gewünschtem Datenvolumen mehr oder 
+weniger überweisen kann (Volumentarife).</p>
+
+<p>In den Feldern VALID_DAYS und VALID_MONTHS wird gespeichert, wie lange der überwiesene Betrag auf
+dem Pseudonymkonto gültig bleibt. Dies ist nötig, um bei Pseudo-Flatrates den Restbetrag am Monatsende
+verfallen zu lassen.</p>
+
+<p>Zusätzlich zur Tabelle RATES gibt es noch weitere Tabellen, in denen die Beschreibungen der Tarifmodelle
+in verschiedenen Sprachen gespeichert wird. Diese haben die Namen RATE_DESCR_XX, wobei XX für das 2stellige
+Landeskürzel steht (z.B. DE, EN, FR, ...). </p>
+
+
+
+<h3><a name="kap040204">4.2.4 Umstellungen der anderen Tabellen</a></h3>
+
+<ul>
+<li>Überall, wo Nummern als eindeutige Bezeichner benutzt werden, habe ich den Typ SERIAL anstatt INTEGER
+  bzw BIGSERIAL statt BIGINT genommen
+  
+<li>Alle Datums/Zeit-Felder haben den Typ TIMESTAMP bekommen
+
+<li>Wo es sinnvoll erschien, habe ich das Kaskadieren beim Löschen von Einträgen aktiviert
+</ul>
+
+
+
+
+<h2><a name="kap05">5. Implementierung der Abrechnungsinstanz (AI)</a></h2>
+
+<p>Die Abrechnungsinstanz wurde, anders als in der Diplomarbeit beschrieben, direkt in den Mixcode 
+(Projekt proxytest) integriert. Grundsätzlich ist alles, was zur Bezahlfunktion gehört, im Mixcode
+in "#ifdef PAYMENT" eingeschlossen, wird also nur dann mitcompiliert wenn man die Bezahlfunktion
+explizit einschaltet.</p>
+
+<h3><a name="kap0501">5.1. Klassen, die zum Projekt Proxytest hinzugefügt wurden</a></h3>
+<ul>
+        <li>CAAccountingInstance:
+        <p>Implementiert wurde ein bidirektionaler in die normale Socketverbindung zum JAP integrierter 
+        Kommunikationskanal zum JAP sowie ein Thread, der die von verschiedenen JAPs hereinkommenden Nachrichten
+        asynchron verarbeitet. Das Parsen der XML-Strukturen und daraufhin Anstoßen von Aktionen wie Verbindung 
+        schließen, Bestätigung von der BI holen usw. ist noch unvollständig.</p>
+
+        <li>CAAccountingDBInterface:
+        <p>Implementiert wurde eine Verbindung zu einer Postgresql-Datenbank, in der CostConfirmations
+        gespeichert werden sollen. In der Klasse CACndLnOptions wurde zusätzlicher Code zum Auslesen
+        der Verbindungsdaten zur Datenbank aus der XML-Configurationsdatei hinzugefügt</p>
+        
+        <li>CAAccountingBIInterface:
+        <p>Implementierung eines SSL-verschlüsselten HTTP-Kommunikationskanals zur BI, aufbauend auf 
+        CASSLClientSocket. Status: Theoretisch vollständig, aber noch nicht getestet</p>
+
+        <li>CASSLClientSocket:
+        <p>Eine auf der OpenSSL-Bibliothek aufbauende einfache Socket-Klasse, die das Verbinden mit 
+        SSL-Servern ermöglicht.
+        Die Klasse ist soweit vollständig dass man Verbindungen aufbauen und Daten transferieren kann.
+        Die Authentifikation beim Verbindungsaufbau ist noch nicht getestet und evtl. fehlerhaft bzw. 
+        unvollständig</p>
+
+        <li>CASSLContext:
+        <p>Diese Klasse kapselt das SSL_CTX Objekt. Diesem Objekt werden beim Aufbau der ersten 
+        SSLSocket-Verbindung 
+        das Mixzertifikat und der Signierschlüssel zugewiesen. Das Zertifikat und der Schlüssel werden dann
+        für alle SSLSocket-Verbdinungen verwendet. Sollte vollständig sein, ist aber noch nicht getestet</p>
+        
+        <li>CATempIPBlockList:
+        <p>Eine Klasse, die IP-Adressen von "bösen" JAP-Nutzern für eine bestimmte Zeitspanne 
+        (z.B. 10 Minuten) aufnimmt. In dieser Zeit nimmt der erste Mix dann Verbindungen von 
+        diesen IP-Adressen nicht an. Dies ist notwendig, da es möglich sein soll eine bestimmte 
+        Zeit ohne Anmeldung am Bezahlsystem auf Kulanz den Dienst zu nutzen. Man soll dies aber nicht
+        unbegrenzt oft und immer wieder tun können, deshalb die 10-Minuten-Sperre</p>
+</ul>
+
+
+
+
+<h2><a name="kap06">6. Implementierung der Bezahlfunktionalität im JAP</a></h2>
+<p>Die Bezahlfunktion im JAP wurde bis Ende 2003 von Grischan Glänzel &lt;grischan@web.de&gt;
+implementiert, ist allerdings noch nicht völlig vollständig. Den folgenden Text
+hat Grischan als "Pay_Todo" geschrieben, als sein Arbeitsvertrag auslief.</p>
+<hr>
+<pre>
+Was noch zu tun ist:
+
+JAP - BI
+--------
+Die Kommunikation steht im Prinzip evententuell müsste das übertragen der Cost Confirmation nochmals getestet
+werden.
+
+JAP - AI
+--------
+        Der Kommunikationsaufbau zur AI und auch das versenden von CostConfirmations ist geschrieben
+        aber beides noch nicht getestet.
+        
+        
+        AICommunication.java
+        es müsste überlegt werden wie oft die CostConfrimation gesendet wird und was bei abbruch des Programmes 
+        passiert
+        (die letzten gesendeten Pakete werden dann -zurzeit- von Jap aus nicht berechnet - auch nicht 
+        gespeichert)
+        
+        [Zeile 61] beim test darauf achten ob das warten auf PayRequests das versenden der CC's blokiert.
+        
+        AnonProxy.java
+        Nach dem Testen die alten einwege Methoden ausbauen
+        [168] gucken ob die Verbindung zur AI an dieser Stelle gestartet werden sollte. 
+        
+        MuxSocket.java
+        Eventuell Methode nach AIComm. verschieben (siehe Quellcode AIComm)
+
+
+    
+JAP
+-----
+Inhalt        Die PayFunktionalität müsste per CVS in den Code des orginal Jap integriert werden.
+        
+        Die Felder name der BI, port der BI sowie das flag sslOn könnten in das Jap XML File intigriert werden.
+        (habe ich noch nicht gemacht weil diese daten zurzeit darüber immer aktuell angezeit werden das die 
+        speichernde
+        Klasse eine Eventquelle ist - d.h es müssten evetuell umfangreicher änderungen im JAP Code vorgenommen 
+        werden -
+        dies wollte ich nicht machen - solang es noch gar nie in die aktuelle Version intigriert war)
+        
+        Einige Strings die Ausgegeben werden müssten vermutlich noch internationalisiert werden.
+        
+        
+Code        Eventuell könnte die Benutzerinteraktion aus den pay.view Klassen und PayAccountsControl komplett nach PayControl 
+        bzw. in klassen im pay.control Package verschoben werden.
+        
+
+
+</pre>
+<hr>
+<p>&nbsp;</p>
+
+
+<hr>
+<p>Zuletzt geändert am 29.06.2004 von Bastian Voigt <a href="mailto:bavoigt@inf.fu-berlin.de">&lt;bavoigt@inf.fu-berlin.de&gt;</a></p>
+
+
+
