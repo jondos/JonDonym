@@ -30,6 +30,18 @@ package platform;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
+/**
+ * Simple wrapper class to access the windows registy.
+ * 
+ * The trick is to access a hidden java class inside the JDK
+ * which is available at JDK 1.4
+ * 
+ * @author Christian Banse
+ */
 public class WindowsRegistry 
 {
 	private static final int NATIVE_HANDLE = 0;
@@ -63,22 +75,31 @@ public class WindowsRegistry
 		}
 		catch(ClassNotFoundException ex)
 		{
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
 		}
 		catch(NoSuchMethodException ex)
 		{
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
 		}
 		catch(InvocationTargetException ex)
 		{
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
 		}
 		catch(IllegalAccessException ex)
 		{
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
 		}
 	}
 	
+	/**
+	 * Opens a registry key for further processing.
+	 * 
+	 * @param a_hKey The key to open (for example {@link WindowsOS#HKEY_CLASSES_ROOT}.
+	 * @param a_subKey The sub key.
+	 * @param a_securityMask The security mask (for example {@link WindowsOS#KEY_ALL_ACCESS}.
+	 * 
+	 * @return the native handle to the registry key.
+	 */
 	public static int openKey(int a_hKey, String a_subKey, int a_securityMask)
 	{
 		try
@@ -91,21 +112,30 @@ public class WindowsRegistry
 		}
 		catch(InvocationTargetException ex)
 		{
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
 		}
 		catch(IllegalAccessException ex)
 		{
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
 		}
 		
 		return -1;
 	}
 	
-	public static String queryValue(int a_hKey, String a_subKey)
+	/**
+	 * Queries a certain value of an opened registry key. This only works
+	 * if the value is REG_SZ
+	 * 
+	 * @param a_hKey The native handle to the key.
+	 * @param a_valueName The value name.
+	 * 
+	 * @return the value of the specified value name.
+	 */
+	public static String queryValue(int a_hKey, String a_valueName)
 	{
 		try
 		{
-			byte[] b = (byte[]) ms_queryValueMethod.invoke(null, new Object[] {new Integer(a_hKey), (a_subKey + "\0").getBytes()});
+			byte[] b = (byte[]) ms_queryValueMethod.invoke(null, new Object[] {new Integer(a_hKey), (a_valueName + "\0").getBytes()});
 			if(b != null)
 			{
 				String s = new String(b);
@@ -118,16 +148,23 @@ public class WindowsRegistry
 		}
 		catch(InvocationTargetException ex)
 		{
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
 		}
 		catch(IllegalAccessException ex)
 		{
-			ex.printStackTrace();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
 		}
 		
 		return null;
 	}
 	
+	/**
+	 * Closes the handle to an opened key.
+	 * 
+	 * @param a_hKey The native handle of the key.
+	 * 
+	 * @return a windows error code. Returns {@link WindowsOS#ERROR_SUCCESS} on success.
+	 */
 	public static int closeKey(int a_hKey)
 	{
 		try
