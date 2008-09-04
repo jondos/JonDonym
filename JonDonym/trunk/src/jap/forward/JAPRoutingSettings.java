@@ -510,6 +510,7 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 				}
 				if (a_routingMode == ROUTING_MODE_CLIENT)
 				{
+					LogHolder.log(LogLevel.DEBUG, LogType.NET,"JAPRountingSettings:setRoutingMode() start the client");
 					/* close an existing anon connection, if there is one */
 					if (JAPController.getInstance().getAnonMode() == true)
 					{
@@ -531,6 +532,8 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 						LocalForwarder.registerLocalForwarder(getBandwidth());
 					
 					/* try to connect to a forwarder */
+					LogHolder.log(LogLevel.DEBUG, LogType.NET,"JAPRountingSettings:setRoutingMode() tryto connect to forwarder");
+
 					m_forwardedConnection = ForwardUtils.getInstance().createForwardingConnection(m_forwadingAddress);
 					if (m_forwardedConnection != null)
 					{
