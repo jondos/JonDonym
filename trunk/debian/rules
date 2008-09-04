@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+# debian/rules file for JAP (uses cdbs)
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/ant.mk
+#include /usr/share/cdbs/1/rules/simple-patchsys.mk
+
+export UPSTREAM_VERSION = $(shell head -1 debian/changelog | cut -f2 -d\( | cut -f1 -d\) | cut -f1 -d\-)
+
+
+ANT_HOME:=/usr/share/ant
+JAVA_HOME:=/usr/lib/jvm/java-1.5.0-sun
+
+DEB_ANT_BUILDFILE:=build.xml
+DEB_ANT_CLEAN_TARGET=clean
+
+install/jap::
+	install -m 644 dist/JAP.jar debian/jap/usr/share/java/JAP-$(UPSTREAM_VERSION).jar
+	ln -s JAP-$(UPSTREAM_VERSION).jar debian/jap/usr/share/java/JAP.jar
+	install -m755 debian/bin/jap debian/jap/usr/bin/jap
+			
