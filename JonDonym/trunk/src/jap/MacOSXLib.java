@@ -27,13 +27,13 @@
  */
 package jap;
 
-import java.awt.EventQueue;
 import java.awt.Window;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import javax.swing.SwingUtilities;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JCheckBoxMenuItem;
@@ -106,7 +106,7 @@ public class MacOSXLib
 	{
 		final String cmd = a_command;
 		
-		EventQueue.invokeLater(new Runnable() 
+		SwingUtilities.invokeLater(new Runnable() 
 		{
 			public void run() 
 			{
