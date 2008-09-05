@@ -432,33 +432,43 @@ public final class AnonProxyRequest implements Runnable
 					try 
 					{
 						len = m_InChannel.read(buff, 0, CHUNK_SIZE);
-						oi++;
+						/*oi++;
 						if(oi == 1000)
 						{
 							oi=0;
 							throw new IOException("HICKS-Test");
-						}
+						}*/
 					}
 					catch(IOException ioe)
 					{
-						System.out.println(ioe);
-						if(ioe.getMessage().indexOf("HICKS")==-1)
+						
+						System.out.println("Got the Excpetion: "+ioe);
+						//JAPController.getInstance().switchToNextMixCascade();
+						len = 0;
+						
+						
+						byte[] resumeRequestChunk = m_callbackHandler.deliverUpstreamChunk(AnonProxyRequest.this, null, 0);
+						if(resumeRequestChunk != null)
+						{
+							System.out.println("Go on resuming: "+new String(resumeRequestChunk));
+							m_Channel.close();
+							m_Channel = m_Proxy.prepareConnectionHandover();
+							m_InChannel = m_Channel.getInputStream();
+							m_OutChannel = m_Channel.getOutputStream();
+							
+							m_OutChannel.write(resumeRequestChunk);
+							len = m_InChannel.read(buff, 0, CHUNK_SIZE);
+						}
+						else
 						{
 							throw ioe;
 						}
-						//JAPController.getInstance().switchToNextMixCascade();
-						len = 0;
-						m_Channel.close();
 						
 						//JAPController.getInstance().setAnonMode(false);
 						//m_Proxy.m_currentMixCascade.keepCurrentService(false);
-						m_Channel = m_Proxy.prepareConnectionHandover();
-						m_InChannel = m_Channel.getInputStream();
-						m_OutChannel = m_Channel.getOutputStream();
 						
-						byte[] resumeRequestChunk = m_callbackHandler.deliverUpstreamChunk(AnonProxyRequest.this, null, 0);
-						m_OutChannel.write(resumeRequestChunk);
-						len = m_InChannel.read(buff, 0, CHUNK_SIZE);
+						
+						
 						// TODO: handle download resuming:
 						// 1. Connect to another Cascade
 						// 2. Create new channel
