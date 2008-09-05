@@ -240,7 +240,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	AnonChannel prepareConnectionHandover() throws NotConnectedToMixException, Exception
 	{
 		m_Anon.shutdown(false);
-		m_currentMixCascade.keepCurrentService(false);
+		//m_currentMixCascade.keepCurrentService(false);
 		m_Anon.initialize(m_currentMixCascade.getNextMixCascade(), m_currentMixCascade);
 		return createChannel(AnonChannel.HTTP);
 		/*if(m_Anon != null)
@@ -960,15 +960,17 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 	public void connectionError()
 	{
+		/*
 		LogHolder.log(LogLevel.ERR, LogType.NET, "AnonProxy received connectionError", true);
 		fireConnectionError();
 		new Thread(new Runnable()
 		{
 			public void run()
 			{
+				//m_currentMixCascade.keepCurrentService(false);
 				reconnect();
 			}
-		}, "Connection error reconnect thead").start();
+		}, "Connection error reconnect thead").start();*/
 	}
 
 	public synchronized void addEventListener(AnonServiceEventListener l)
