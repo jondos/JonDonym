@@ -85,7 +85,6 @@ import anon.infoservice.JAPMinVersion;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
-import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.infoservice.ProxyInterface;
@@ -733,10 +732,13 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 			// listener has started correctly
 			// do initial setting of anonMode
+			if (JAPModel.isAutoConnect())
+				startAnonymousMode(getViewWindow());
+			/*
 			if (JAPModel.isAutoConnect() &&
 				JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder())
 			{
-				/* show the connect via forwarder dialog -> the dialog will do the remaining things */
+				// show the connect via forwarder dialog -> the dialog will do the remaining things 
 				new JAPRoutingEstablishForwardedConnectionDialog(getViewWindow());
 				notifyObservers();
 			}
@@ -744,6 +746,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			{
 				setAnonMode(JAPModel.isAutoConnect());
 			}
+			*/
 		}
 	}
 
@@ -1249,7 +1252,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 				/* try to load information about cascades */
 				Node nodeCascades = XMLUtil.getFirstChildByName(root, MixCascade.XML_ELEMENT_CONTAINER_NAME);
-				MixCascade currentCascade;
+				MixCascade currentCascade = null;
 				if (nodeCascades != null)
 				{
 					Node nodeCascade = nodeCascades.getFirstChild();
@@ -1295,6 +1298,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 								new MixCascade("Tor - Onion Routing", "Tor", "myhost.de", 1234));*/
 
 				/* try to load information about user defined mixes */
+				/* not needed any more
 				Node nodeMixes = XMLUtil.getFirstChildByName(root, MixInfo.XML_ELEMENT_CONTAINER_NAME);
 				if (nodeMixes != null)
 				{
@@ -1324,7 +1328,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						}
 						nodeMix = nodeMix.getNextSibling();
 					}
-				}
+				}*/
 				
 				/* load trust models */
 				TrustModel.fromXmlElement(
@@ -2493,6 +2497,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 
 			/*stores mixes */
+			/* not needed any more
 			Element elemMixes = doc.createElement(MixInfo.XML_ELEMENT_CONTAINER_NAME);
 			e.appendChild(elemMixes);
 			Enumeration enumerMixes = Database.getInstance(MixInfo.class).getEntrySnapshotAsEnumeration();
@@ -2503,7 +2508,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					elemMixes.appendChild(element);
 				}
-			}
+			}*/
+			
 			/* store the current MixCascade */
 			MixCascade defaultMixCascade = getCurrentMixCascade();
 			if (defaultMixCascade != null)
@@ -3409,7 +3415,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 		if (JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder())
 		{
 			/* show the connect via forwarder dialog -> the dialog will do the remaining things */
-			new JAPRoutingEstablishForwardedConnectionDialog(a_parentComponent);
+
+			// do we have an valid Forwarding Address
+			IAddress userAddress = JAPModel.getInstance().getRoutingSettings().getUserProvidetForwarder();
+			if (userAddress != null)
+				// use it
+				new JAPRoutingEstablishForwardedConnectionDialog(a_parentComponent, userAddress);
+			else
+				// otherwise use invoservice and captcha
+				new JAPRoutingEstablishForwardedConnectionDialog(a_parentComponent);
+			
 			/* maybe connection to forwarder failed -> notify the observers, because the view maybe
 			 * still shows the anonymity mode enabled
 			 */
