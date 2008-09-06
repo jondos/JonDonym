@@ -526,20 +526,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 		JPanel buttonsPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		c.gridy = 0;
-		c.weightx = 0;
-		c.weighty = 0;
-		c.gridx = 0;
-		c.gridwidth = 3;
-		rootPanel.add(buttonsPanel, c);
-		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 0;
 		c.weighty = 0;
 		c.gridx = 0;
-		c.gridy = 1;
-		c.gridwidth = 1;
+		c.gridy = 0;
 		c.insets = new Insets(5, 5, 5, 5);
 
 		m_btnCreateAccount = new JButton(JAPMessages.getString(MSG_BTN_CREATE));
@@ -568,7 +560,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		c.weightx = 2.0;
 		c.weighty = 1.0;
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 0;
 		c.gridheight = 6;
 		c.insets = new Insets(5, 5, 5, 5);
 		JScrollPane scroller = new JScrollPane(m_listAccounts);
@@ -662,38 +654,22 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		m_lblNoBackupMessage.setForeground(Color.red);
 		rootPanel.add(m_lblNoBackupMessage, c);
 
-		/*c.gridy++;
-		c.weightx = 0;
-		c.weighty = 0;
-		c.gridx = 0;
-		c.gridwidth = 3;
-		rootPanel.add(buttonsPanel, c);*/
-
-		/*c.weightx = 0;
-		c.gridx = 0;
-		c.gridwidth = 3;
 		c.gridy++;
-		JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
-		sep.setPreferredSize(new Dimension(520, 10));
-		rootPanel.add(sep, c);*/
-
-		c.weightx = 1;
-		c.weighty = 1;
-		c.gridwidth = 3;
-		c.gridx = 0;
-		c.gridy++;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		rootPanel.add(this.createDetailsPanel(myActionListener), c);
-		
 		c.weightx = 0;
 		c.gridx = 0;
 		c.gridwidth = 3;
+		rootPanel.add(buttonsPanel, c);
+
 		c.gridy++;
 		JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
 		sep.setPreferredSize(new Dimension(520, 10));
 		rootPanel.add(sep, c);
-		
-		
+
+		c.weightx = 1;
+		c.weighty = 1;
+		c.gridy++;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		rootPanel.add(this.createDetailsPanel(myActionListener), c);
 
 		//updateAccountList(); //would possibly lead to deadlock with AWT-Thread when showing JAPConf
 		enableDisableButtons();
@@ -777,6 +753,69 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	private JPanel createDetailsPanel(ActionListener a_actionListener)
 	{
+		JPanel p = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.NONE;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.weightx = 0;
+		c.weighty = 0;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(5, 5, 5, 5);
+		c.gridwidth = 2;
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_DETAILS)), c);
+
+		c.gridwidth = 1;
+		c.insets = new Insets(5, 10, 5, 5);
+		c.gridy++;
+		c.gridheight = 5;
+		m_coinstack = new JProgressBar(0, 8);
+		p.add(m_coinstack, c);
+
+		c.gridheight = 1;
+		c.gridx++;
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_FLAT_VOLUME) + ":"), c);		
+		c.gridx++;
+		m_labelVolume = new JLabel();
+		m_labelVolume.addMouseListener(myActionListener);
+		p.add(m_labelVolume, c);
+		
+
+		/*
+		c.gridx--;
+		c.gridy++;
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_BALANCE) + ":"), c);
+		c.gridx++;
+		m_labelBalance = new JLabel();
+		p.add(m_labelBalance, c);*/
+
+
+		c.gridx--;
+		c.gridy++;
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_SPENT)), c);		
+		c.gridx++;
+		m_labelSpent = new JLabel();
+		p.add(m_labelSpent, c);
+				
+
+		/*
+		c.gridx--;
+		c.gridy++;
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_FLAT_ENDDATE) + ":"), c);
+		c.gridx++;
+		m_labelEnddate = new JLabel();
+		p.add(m_labelEnddate, c);*/
+
+		c.gridx--;
+		c.gridy++;
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_DEPOSIT)), c);		
+		c.gridx++;
+		m_labelDeposit = new JLabel();
+		p.add(m_labelDeposit, c);
+
+		c.gridy++;
+		c.gridy++;
+
 		JPanel buttonsPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints d = new GridBagConstraints();
 		d.fill = GridBagConstraints.HORIZONTAL;
@@ -830,89 +869,16 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		m_btnExportAccount = new JButton(JAPMessages.getString(MSG_BUTTON_EXPORT));
 		m_btnExportAccount.addActionListener(a_actionListener);
 		buttonsPanel.add(m_btnExportAccount, d);
-		
-	
-		
-		
-		JPanel p = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		
+
+
+
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy++;
 		c.gridwidth = 3;
 		p.add(buttonsPanel, c);
-		
-		c.fill = GridBagConstraints.NONE;
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.weightx = 0;
-		c.weighty = 0;
-		c.gridx = 0;
-		c.gridy++;
-		c.insets = new Insets(5, 5, 5, 5);
-		c.gridwidth = 2;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_DETAILS)), c);
-		
-		c.weightx = 0;
-		c.weighty = 0;
-		c.gridwidth = 1;
-		c.insets = new Insets(5, 10, 5, 5);
-		c.gridy++;
-		c.gridheight = 5;
-		m_coinstack = new JProgressBar(0, 8);
-		p.add(m_coinstack, c);
-
-		c.gridheight = 1;
-		c.gridx++;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_FLAT_VOLUME) + ":"), c);		
-		c.gridx++;
-		m_labelVolume = new JLabel();
-		m_labelVolume.addMouseListener(myActionListener);
-		p.add(m_labelVolume, c);
-		
-
-		/*
-		c.gridx--;
-		c.gridy++;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_BALANCE) + ":"), c);
-		c.gridx++;
-		m_labelBalance = new JLabel();
-		p.add(m_labelBalance, c);*/
-
-
-		c.gridx--;
-		c.gridy++;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_SPENT)), c);		
-		c.gridx++;
-		m_labelSpent = new JLabel();
-		p.add(m_labelSpent, c);
-				
-
-		/*
-		c.gridx--;
-		c.gridy++;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_FLAT_ENDDATE) + ":"), c);
-		c.gridx++;
-		m_labelEnddate = new JLabel();
-		p.add(m_labelEnddate, c);*/
-
-		c.gridx--;
-		c.gridy++;
-		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_DEPOSIT)), c);		
-		c.gridx++;
-		m_labelDeposit = new JLabel();
-		p.add(m_labelDeposit, c);
-
-		/*c.gridy++;
-		c.gridy++;*/
-
-		
-
-
-
-
 
 		return p;
 	}
