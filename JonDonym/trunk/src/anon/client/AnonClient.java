@@ -635,13 +635,14 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			LogHolder.log(LogLevel.DEBUG, LogType.NET,
 						  "Connection to MixCascade '" +
 						  a_mixCascade.toString() + "' successfully established - starting key-exchange...");
+			return new SocketConnection(connectedSocket);
 		}
 		else
 		{
 			LogHolder.log(LogLevel.ERR, LogType.NET,
 						  "Failed to connect to MixCascade '" + a_mixCascade.toString() + "'.");
+			return null;
 		}
-		return new SocketConnection(connectedSocket);
 	}
 
 	private int initializeProtocol(IStreamConnection a_connectionToMixCascade, final AnonServerDescription a_mixCascade,
