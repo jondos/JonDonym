@@ -232,7 +232,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	private String m_paymentPassword;
 
 	/** Boolen value which describes if a dll update is necessary */
-	private boolean m_bUpdateDll = false;
+	private String m_bDllUpdatePath;
 	private long m_noWarningForDllVersionBelow = 0;
 	
 	private boolean m_bMacOSXLibraryUpdateAtStartupNeeded = false;
@@ -935,9 +935,12 @@ public final class JAPModel extends Observable implements IHelpModel
 		buff.append("Help path: ");
 		buff.append(getHelpPath());
 		buff.append("\n");
-		buff.append("DLL update status: ");
-		buff.append(m_bUpdateDll);
-		buff.append("\n");
+		if (m_bDllUpdatePath != null)
+		{
+			buff.append("DLL update path: ");
+			buff.append(m_bDllUpdatePath);
+			buff.append("\n");
+		}
 		buff.append("Command line arguments: ");
 		buff.append("'" + JAPController.getInstance().getCommandlineArgs() + "'");
 		buff.append("\n");
@@ -1616,11 +1619,21 @@ public final class JAPModel extends Observable implements IHelpModel
 		return m_helpFileStorageManager.getStorageObservable();
 	}
 	
-	public synchronized void setDLLupdate(boolean a_update)
+	public synchronized void setDLLupdate(String a_dllUpdatePath)
 	{
-		if (m_bUpdateDll != a_update)
+		if (a_dllUpdatePath != null && 
+			(m_bDllUpdatePath == null || !m_bDllUpdatePath.equals(a_dllUpdatePath)))
 		{
-			m_bUpdateDll = a_update;
+			File file = new File(a_dllUpdatePath);
+			if (file.exists() && file.isDirectory())
+			{
+				m_bDllUpdatePath = file.getAbsolutePath();
+				setChanged();
+			}			
+		}
+		else if (a_dllUpdatePath == null && m_bDllUpdatePath != null)
+		{
+			m_bDllUpdatePath = null;
 			setChanged();
 		}
 		notifyObservers(CHANGED_DLL_UPDATE);
@@ -1641,8 +1654,9 @@ public final class JAPModel extends Observable implements IHelpModel
 		return m_bMacOSXLibraryUpdateAtStartupNeeded;
 	}
 	
-	public boolean isDLLupdated() {
-		return m_bUpdateDll;
+	public String getDllUpdatePath() 
+	{
+		return m_bDllUpdatePath;
 	}
 	
 	

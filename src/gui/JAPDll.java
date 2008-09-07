@@ -73,12 +73,10 @@ final public class JAPDll {
 	private static final String DLL_LIBRARY_NAME = "japdll";
 	private static final String DLL_LIBRARY_NAME_32bit = DLL_LIBRARY_NAME;
 	private static final String DLL_LIBRARY_NAME_64bit = DLL_LIBRARY_NAME + "_x64";
-	private static final String JAP_DLL_32bit = DLL_LIBRARY_NAME_32bit + ".dll";
-	private static final String JAP_DLL_64bit = DLL_LIBRARY_NAME_32bit + ".dll";
-	private static final String JAP_DLL_NEW_32bit  = JAP_DLL_32bit + "." + JAP_DLL_REQUIRED_VERSION;
-	private static final String JAP_DLL_NEW_64bit  = JAP_DLL_64bit + "." + JAP_DLL_REQUIRED_VERSION;
-	private static final String JAP_DLL_OLD_32bit = DLL_LIBRARY_NAME_32bit + ".old";
-	private static final String JAP_DLL_OLD_64bit = DLL_LIBRARY_NAME_64bit + ".old";
+	private static final String JAP_DLL = DLL_LIBRARY_NAME + ".dll";
+	private static final String JAP_DLL_NEW_32bit  = JAP_DLL + "." + JAP_DLL_REQUIRED_VERSION;
+	private static final String JAP_DLL_NEW_64bit  = JAP_DLL + "." + JAP_DLL_REQUIRED_VERSION;
+	private static final String JAP_DLL_OLD = DLL_LIBRARY_NAME + ".old";
 
 	/** Messages */
 	private static final String MSG_DLL_UPDATE = JAPDll.class.getName() + "_updateRestartMessage";
@@ -167,7 +165,7 @@ final public class JAPDll {
 				});
 				
 				
-//				 delete any temporary dll that might remain somewhere from an earlier manual update attempt
+//				delete any temporary dll that might remain somewhere from an earlier manual update attempt
 				try
 				{
 					String tempDir = AbstractOS.getInstance().getTempPath();
@@ -190,11 +188,10 @@ final public class JAPDll {
 				}
 				
 				boolean bUpdateDone = false;
-				if (getUpdatePath() != null && JAPModel.getInstance().isDLLupdated())
+				if (getUpdatePath() != null && JAPModel.getInstance().getDllUpdatePath() != null)
 				{
 					update(a_window);
-					bUpdateDone = true;
-					
+					bUpdateDone = true;					
 				}
 
 				loadDll();								
@@ -212,9 +209,13 @@ final public class JAPDll {
 									version.compareTo(JAP_DLL_REQUIRED_VERSION) < 0))
 				{
 					// update was not successful
-					 JAPModel.getInstance().setDLLupdate(true);
+					 JAPModel.getInstance().setDLLupdate(getUpdatePath());
 					 JAPController.getInstance().saveConfigFile();
-				}				
+				}
+				else
+				{
+					JAPModel.getInstance().setDLLupdate(null);
+				}
 				
 				JAPController.getInstance().addProgramExitListener(new JAPController.ProgramExitListener()
 				{
@@ -317,8 +318,8 @@ final public class JAPDll {
 			return;
 		}
 
-		LogHolder.log(LogLevel.INFO, LogType.GUI, "Existing " + JAP_DLL_32bit + " version: " + JAPDll.getDllVersion());
-		LogHolder.log(LogLevel.INFO, LogType.GUI, "Required " + JAP_DLL_32bit + " version: " + JAP_DLL_REQUIRED_VERSION);
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Existing " + JAP_DLL + " version: " + JAPDll.getDllVersion());
+		LogHolder.log(LogLevel.INFO, LogType.GUI, "Required " + JAP_DLL + " version: " + JAP_DLL_REQUIRED_VERSION);
 
 		// checks, if the japdll.dll must (and can) be extracted from jar-file.
 		if (JAPDll.getDllVersion() != null && // != null means that there is a loaded dll
@@ -334,8 +335,8 @@ final public class JAPDll {
 				return;
 			}
 
-			// tried to updated AND there is still a problem
-			if (JAPModel.getInstance().isDLLupdated())
+			// tried to update AND there is still a problem
+			if (JAPModel.getInstance().getDllUpdatePath() != null)
 			{
 				if (a_bShowDialogAndCloseOnUpdate)
 				{
@@ -346,19 +347,16 @@ final public class JAPDll {
 
 			// try to update, perhaps it even works right now when the dll is loaded
 			if (update(JAPController.getInstance().getViewWindow()) && 
-					JAPDll.getDllVersion() != null && // == null means that there were problems...
+				JAPDll.getDllVersion() != null && // == null means that there were problems...
 				JAPDll.getDllVersion().compareTo(JAP_DLL_REQUIRED_VERSION) < 0)
 			{
 				// update was successful
 				LogHolder.log(LogLevel.INFO, LogType.GUI,
-							  "Update successful, existing " + JAP_DLL_32bit + " version: " + JAPDll.getDllVersion());
+							  "Update successful, existing " + JAP_DLL + " version: " + JAPDll.getDllVersion());
 				loadDll();
 				if ( JAPDll.getDllVersion().compareTo(JAP_DLL_REQUIRED_VERSION) < 0 )
-				{
-					JAPModel.getInstance().setDLLupdate(true);
-					JAPController.getInstance().saveConfigFile();
-					informUserAboutJapRestart();
-
+				{					
+					a_bShowDialogAndCloseOnUpdate = true; // reloading the dll failed; recommend restart 
 				}
 				else
 				{
@@ -367,7 +365,7 @@ final public class JAPDll {
 			}
 
 			//write a flag to the jap.conf, that at the next startup the dll must be extracted from jar-file
-			JAPModel.getInstance().setDLLupdate(true);
+			JAPModel.getInstance().setDLLupdate(getUpdatePath());
 			JAPController.getInstance().saveConfigFile();
 			if (a_bShowDialogAndCloseOnUpdate)
 			{
@@ -379,9 +377,9 @@ final public class JAPDll {
 			// version status OK
 			// OR no dll loaded
 			// OR no new-dll in jar-file
-			if (JAPModel.getInstance().isDLLupdated())
+			if (JAPModel.getInstance().getDllUpdatePath() != null)
 			{
-				JAPModel.getInstance().setDLLupdate(false);
+				JAPModel.getInstance().setDLLupdate(null);
 				JAPController.getInstance().saveConfigFile();
 			}
 		}
@@ -389,9 +387,9 @@ final public class JAPDll {
 
 	private static boolean update(Window a_window)
 	{
-		if (renameDLL(JAP_DLL_32bit, JAP_DLL_OLD_32bit) && extractDLL(new File(getDllFileName())))
+		if (renameDLL(JAP_DLL, JAP_DLL_OLD) && extractDLL(new File(getDllFileName())))
 		{
-			JAPModel.getInstance().setDLLupdate(false);
+			JAPModel.getInstance().setDLLupdate(null);
 			JAPController.getInstance().saveConfigFile();
 			
 			if (m_bStartedAsAdmin)
@@ -427,7 +425,7 @@ final public class JAPDll {
 		}
 		else
 		{
-			renameDLL(JAP_DLL_OLD_32bit, JAP_DLL_32bit);
+			renameDLL(JAP_DLL_OLD, JAP_DLL);
 			return false;
 		}
 	}
@@ -513,7 +511,7 @@ final public class JAPDll {
 				JAPMessages.getString(MSG_IGNORE_UPDATE), false);
 		
 		String[] args = new String[2];
-		args[0] = JAP_DLL_32bit;
+		args[0] = JAP_DLL;
 		args[1] = getUpdatePath();
 		int answer =
 			JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(),
@@ -606,7 +604,7 @@ final public class JAPDll {
 								"Could not create temporary directory!", a_e);
 					}
 					
-					if (bTmpDirCreated && extractDLL(new File(tempDir + JAP_DLL_32bit)))
+					if (bTmpDirCreated && extractDLL(new File(tempDir + JAP_DLL)))
 					{
 						try
 						{
@@ -633,7 +631,7 @@ final public class JAPDll {
 	{
 		//Inform the User about the necessary JAP restart
 		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
-									JAPMessages.getString(MSG_DLL_UPDATE, "'" + JAP_DLL_32bit + "'"));
+									JAPMessages.getString(MSG_DLL_UPDATE, "'" + JAP_DLL + "'"));
 		//close JAP
 		JAPController.goodBye(false);
 	}
@@ -827,34 +825,41 @@ final public class JAPDll {
 		return fileDLL;
 	}
 	
-	/** Returns the Filename of the JAPDll.
+	/** Returns the file name of the JAPDll.
 	 * @ret filename pf the JAP dll
 	 * @ret null if getting the file name fails
 	 */	
 	static public String getDllFileName()
 	{
-		try
-		{
-			String s=getDllFileName_dll();
-			if(s==null||s.length()==0)
-				return null;
-			return s;
-		}
-		catch (Throwable t)
-		{
-		}
-		if (UPDATE_PATH != null)
-		{
-			if (!UPDATE_PATH.endsWith(File.separator))
+		String strFileName = JAPModel.getInstance().getDllUpdatePath();
+		if (strFileName == null)
+		{		
+			try
 			{
-				return UPDATE_PATH + File.separator + JAP_DLL_32bit;
+				String s=getDllFileName_dll();
+				if(s==null||s.length()==0)
+					return null;
+				return s;
+			}
+			catch (Throwable t)
+			{
+			}
+			strFileName = UPDATE_PATH;
+		}
+		
+		
+		if (strFileName != null)
+		{
+			if (!strFileName.endsWith(File.separator))
+			{
+				strFileName += File.separator + JAP_DLL;
 			}
 			else
 			{
-				return UPDATE_PATH + JAP_DLL_32bit;
+				strFileName += JAP_DLL;
 			}			
 		}
-		return null;
+		return strFileName;
 	}
 
 	static public long showMainWindow()

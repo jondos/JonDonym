@@ -1047,7 +1047,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 
 				String strVersion = XMLUtil.parseAttribute(root, JAPConstants.CONFIG_VERSION, null);
-	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_UPDATE, false));
+	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_UPDATE, null));
 	            m_Model.setDllWarningVersion(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_WARNING_BELOW, 0));
 	            m_Model.setMacOSXLibraryUpdateAtStartupNeeded(XMLUtil.parseAttribute(root, JAPModel.MACOSX_LIB_NEEDS_UPDATE, false));
 
@@ -2358,7 +2358,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 			doc.appendChild(e);
 			
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_VERSION, JAPConstants.CURRENT_CONFIG_VERSION);
-			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.isDLLupdated());
+			if (m_Model.getDllUpdatePath() != null)
+			{
+				XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.getDllUpdatePath());
+			}			
 			XMLUtil.setAttribute(e, JAPModel.MACOSX_LIB_NEEDS_UPDATE, m_Model.isMacOSXLibraryUpdateAtStartupNeeded());
 			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_WARNING_BELOW, m_Model.getDLLWarningVersion());
 

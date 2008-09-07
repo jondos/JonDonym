@@ -306,7 +306,7 @@ public class MacOSXLib
 
 		if (renameLib(JAP_MACOSX_LIB_FILENAME, JAP_MACOSX_LIB_OLD_FILENAME) && extractDLL(new File(getLibFileName())))
 		{
-			JAPModel.getInstance().setDLLupdate(false);
+			JAPModel.getInstance().setMacOSXLibraryUpdateAtStartupNeeded(false);
 			JAPController.getInstance().saveConfigFile();
 			
 			return true;

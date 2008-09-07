@@ -156,7 +156,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 				else if (a_message == JAPModel.CHANGED_DLL_UPDATE)
 				{
 					m_cbIgnoreDLLUpdate.setSelected(!JAPModel.getInstance().isDLLWarningActive());
-					m_cbIgnoreDLLUpdate.setEnabled(JAPModel.getInstance().isDLLupdated());
+					m_cbIgnoreDLLUpdate.setEnabled(JAPModel.getInstance().getDllUpdatePath() != null);
 				}
 			}
 		};
@@ -734,7 +734,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		c.gridy++;
 		
 		m_cbIgnoreDLLUpdate = new JCheckBox(JAPMessages.getString(gui.JAPDll.MSG_IGNORE_UPDATE));
-		if (JAPDll.getDllVersion() == null || !JAPModel.getInstance().isDLLupdated())
+		if (JAPDll.getDllVersion() == null || JAPModel.getInstance().getDllUpdatePath() == null)
 		{
 			m_cbIgnoreDLLUpdate.setEnabled(false);			
 		}
