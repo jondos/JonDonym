@@ -352,12 +352,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_feedback = new JAPFeedback();
 		m_AccountUpdater = new AccountUpdater();
 		m_InfoServiceUpdater = new InfoServiceUpdater();
+		m_perfInfoUpdater = new PerformanceInfoUpdater();
 		m_paymentInstanceUpdater = new PaymentInstanceUpdater();
 		m_MixCascadeUpdater = new MixCascadeUpdater();
 		m_minVersionUpdater = new MinVersionUpdater();
 		m_javaVersionUpdater = new JavaVersionUpdater();
 		m_messageUpdater = new MessageUpdater();
-		m_perfInfoUpdater = new PerformanceInfoUpdater();
 
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
@@ -612,18 +612,22 @@ public final class JAPController extends Observable implements IProxyListener, O
 				if (JAPModel.isInfoServiceDisabled())
 				{
 					m_InfoServiceUpdater.start(false);
+					m_perfInfoUpdater.start(false);
 					m_paymentInstanceUpdater.start(false);
 					m_MixCascadeUpdater.start(false);
 					m_minVersionUpdater.start(false);
 					m_javaVersionUpdater.start(false);
-					m_messageUpdater.start(false);
-					m_perfInfoUpdater.start(false);
+					m_messageUpdater.start(false);					
 				}
 				else
 				{
 					if (!m_InfoServiceUpdater.isFirstUpdateDone())
 					{
 						m_InfoServiceUpdater.updateAsync();
+					}
+					if (!m_perfInfoUpdater.isFirstUpdateDone())
+					{
+						m_perfInfoUpdater.updateAsync();
 					}
 					if (!m_paymentInstanceUpdater.isFirstUpdateDone())
 					{
@@ -644,11 +648,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (!m_messageUpdater.isFirstUpdateDone())
 					{
 						m_messageUpdater.updateAsync();
-					}
-					if (!m_perfInfoUpdater.isFirstUpdateDone())
-					{
-						m_perfInfoUpdater.updateAsync();
-					}
+					}					
 				}
 
 				m_AccountUpdater.start(false);
