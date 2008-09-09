@@ -3004,7 +3004,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 						/* we use a direct connection */
 						if (!bSwitchCascade)
 						{
-							System.out.println("new Anon Proxy");
 							m_proxyAnon = new AnonProxy(
 								m_socketHTTPListener, JAPModel.getInstance().getMutableProxyInterface(),
 								JAPModel.getInstance().getPaymentProxyInterface());
