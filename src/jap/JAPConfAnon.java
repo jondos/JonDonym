@@ -460,7 +460,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			if(conditionValue != null)
 			{
-				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
+				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 0)
+				{
+					m_filterCascadeGroup.setSelected(m_filterAllMixes.getModel(), true);
+				}
+				else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
 				{
 					m_filterCascadeGroup.setSelected(m_filterAtLeast2Mixes.getModel(), true);
 				}
@@ -478,7 +482,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			if(conditionValue != null)
 			{
-				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
+				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 0)
+				{
+					m_filterInternationalGroup.setSelected(m_filterAllCountries.getModel(), true);
+				}
+				else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
 				{
 					m_filterInternationalGroup.setSelected(m_filterAtLeast2Countries.getModel(), true);
 				}
@@ -1140,6 +1148,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			hideEditFilter();
 		}
 		
+		m_filterAllMixes.setEnabled(true);
+		m_filterAtLeast2Mixes.setEnabled(true);
+		
 		TrustModel.restoreDefault();
 	}
 	
@@ -1155,7 +1166,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if(m_filterPanel != null && m_filterPanel.isVisible())
 		{
-			editFilter();
+			applyFilter();
 			hideEditFilter();
 		}
 		
@@ -1573,9 +1584,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	}
 	
 	/**
-	 * Edits the filter
+	 * Applies the filter
 	 */
-	private void editFilter()
+	private void applyFilter()
 	{
 		if(!m_trustModelCopy.isEditable() || !TrustModel.getCurrentTrustModel().isEditable()) return;
 		
@@ -1612,8 +1623,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			else
 			{
 				JAPDialog.showWarningDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_NO_CASCADES));
+				m_filterAllMixes.setEnabled(true);
+				m_filterAtLeast2Mixes.setEnabled(true);
 			}
-			
 		}
 		catch(NumberFormatException ex)
 		{
@@ -1741,10 +1753,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if(a_bFromUtilToReal && a_delay == m_filterLatencySlider.getMinimum())
 		{
-			return TrustModel.TRUST_ALWAYS;
+			return Integer.MAX_VALUE;
 		}
 		
-		if(!a_bFromUtilToReal && a_delay == TrustModel.TRUST_ALWAYS)
+		if(!a_bFromUtilToReal && a_delay == Integer.MAX_VALUE)
 		{
 			return m_filterLatencySlider.getMinimum();
 		}
