@@ -54,7 +54,6 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 		int content = (int) getLengthOfPayloadBytes(chunk, len);
 		if(content != len)
 		{
-			
 			extractHeaderParts(anonRequest, chunk, HEADER_TYPE_REQUEST);
 			HTTPConnectionHeader connHeader;
 			synchronized(connectionHTTPHeaders)
@@ -83,7 +82,6 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 	public byte[] handleDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
 	{
 		int content = (int) getLengthOfPayloadBytes(chunk, len);
-		
 		if(content != len)
 		{
 			extractHeaderParts(anonRequest, chunk, HEADER_TYPE_RESPONSE);
@@ -150,14 +148,14 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 				connectionHTTPHeaders.put(anonRequest, connHeader);
 			}
 		}
-		String chunkData = null;
+		String chunkData = new String(chunk);
 		
-		int off_firstline= new String(chunk).indexOf(HTTP_VERSION_PREFIX);
-		int off_headers_end = new String(chunk).indexOf(HTTP_HEADER_END);
+		int off_firstline= chunkData.indexOf(HTTP_VERSION_PREFIX);
+		int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
 		if( (off_firstline != -1)  && (off_headers_end != -1) )
 		{
 			//Because it is assumed that the chunk is aligned: the HTTP message starts at index 0
-			parseHTTPHeader(new String(chunk, 0, off_headers_end), connHeader, headerType);
+			parseHTTPHeader(chunkData.substring(0, off_headers_end), connHeader, headerType);
 			//Also the whole chunk must fit in a single chunk: after parsing the 
 			//response headers we are finished.
 			if(headerType == HEADER_TYPE_RESPONSE)
@@ -202,8 +200,10 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 	
 	protected long getLengthOfPayloadBytes(byte[] chunk, int len)
 	{
-		int off_firstline= new String(chunk).indexOf(HTTP_VERSION_PREFIX);
-		int off_headers_end = new String(chunk).indexOf(HTTP_HEADER_END);
+		String chunkData = new String(chunk);
+		
+		int off_firstline= chunkData.indexOf(HTTP_VERSION_PREFIX);
+		int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
 		if( (off_firstline != -1) )
 		{
 			if(off_headers_end == -1)
@@ -355,7 +355,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 				}
 			}
 			allHeaders += CRLF;
-			LogHolder.log(LogLevel.INFO, LogType.NET, "header dump:\n"+allHeaders);
+			LogHolder.log(LogLevel.ALERT, LogType.NET, "header dump:\n"+allHeaders);
 			return allHeaders.getBytes();
 		}
 		
