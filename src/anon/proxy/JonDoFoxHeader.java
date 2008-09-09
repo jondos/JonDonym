@@ -1,7 +1,5 @@
 package anon.proxy;
 
-import anon.proxy.HTTPProxyCallback.HTTPConnectionHeader;
-
 public final class JonDoFoxHeader extends HTTPProxyCallback {
 
 	public final String JONDOFOX_USER_AGENT = "Mozilla/5.0 Gecko/20070713 Firefox/2.0.0.0";
@@ -10,12 +8,12 @@ public final class JonDoFoxHeader extends HTTPProxyCallback {
 	public final String JONDOFOX_CONTENT_TYPES = "*/*";
 	public final String JONDOFOX_ENCODING = "gzip,deflate";
 	
-	public void modifyRequestHeaders(HTTPConnectionHeader connHeader)
+	public void handleRequest(HTTPConnectionHeader connHeader)
 	{
 		if(connHeader != null)
 		{
 			String domain = connHeader.getRequestHeader(HTTP_START_LINE_KEY);
-			if(domain!= null)
+			if(domain != null)
 			{
 				int afterMethod = domain.indexOf(" ");
 				if(afterMethod != -1)
@@ -27,8 +25,7 @@ public final class JonDoFoxHeader extends HTTPProxyCallback {
 						slashix = domain.indexOf('/', slashix+2);
 						if(slashix != -1)
 						{
-							domain = domain.substring(0,slashix);
-							System.out.println("domain: "+domain);
+							domain = domain.substring(0,slashix+1);
 							connHeader.setRequestHeader(HTTP_REFERER, domain);
 						}
 					}
@@ -44,7 +41,7 @@ public final class JonDoFoxHeader extends HTTPProxyCallback {
 	}
 
 
-	public void modifyResponseHeaders(HTTPConnectionHeader connHeader)
+	public void handleResponse(HTTPConnectionHeader connHeader)
 	{
 		
 	}
