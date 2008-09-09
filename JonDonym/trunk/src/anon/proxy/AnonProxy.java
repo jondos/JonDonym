@@ -237,9 +237,14 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 	public void setJonDoFoxHeaderEnabled(boolean enable)
 	{
+		if( m_callbackHandler == null)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "No Callbackhandler activated: cannot process HTTP headers.");
+			return;
+		}
 		if(enable)
 		{
-			if (m_callbackHandler != null && m_jfxHeader == null )
+			if (m_jfxHeader == null )
 			{
 				m_jfxHeader = new JonDoFoxHeader(); 
 				m_callbackHandler.registerProxyCallback(m_jfxHeader);
@@ -247,9 +252,10 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		}
 		else
 		{
-			if (m_callbackHandler != null && m_jfxHeader != null )
+			if (m_jfxHeader != null )
 			{
 				m_callbackHandler.removeCallback(m_jfxHeader);
+				m_jfxHeader = null;
 			}
 		}
 	}

@@ -67,7 +67,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 				boolean performMods = (request_line == null) ? false : !request_line.startsWith("CONNECT");
 				if(performMods)
 				{
-					modifyRequestHeaders(connHeader);
+					handleRequest(connHeader);
 					byte[] newHeaders = connHeader.dumpRequestHeader();
 					byte[] newChunk = new byte[newHeaders.length+content];
 					System.arraycopy(newHeaders, 0, newChunk, 0, newHeaders.length);
@@ -98,7 +98,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 				boolean performMods = (request_line == null) ? false : !request_line.startsWith("CONNECT");
 				if(performMods)
 				{
-					modifyResponseHeaders(connHeader);
+					handleResponse(connHeader);
 					
 					byte[] newHeaders = connHeader.dumpResponseHeader();
 					byte[] newChunk = new byte[newHeaders.length+content];
@@ -112,9 +112,9 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 		return chunk;
 	}
 	
-	public abstract void modifyRequestHeaders(HTTPConnectionHeader connHeader);
+	public abstract void handleRequest(HTTPConnectionHeader connHeader);
 	
-	public abstract void modifyResponseHeaders(HTTPConnectionHeader connHeader);
+	public abstract void handleResponse(HTTPConnectionHeader connHeader);
 	
 	/* 
 	 * 	extract headers from data chunk
@@ -208,7 +208,6 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 		{
 			if(off_headers_end == -1)
 			{
-				System.out.println("THIS SHOULD NEVER HAPPEN.");
 				return 0l;
 			}
 			return (long) (len - (off_headers_end+HTTP_HEADER_END.length())); 
@@ -218,7 +217,6 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 	
 	private static void parseHTTPHeader(String headerData, HTTPConnectionHeader connHeader, int headerType)
 	{
-		//System.out.println(headerData+"\n");
 		StringTokenizer lineTokenizer = new StringTokenizer(headerData,CRLF);
 		if(lineTokenizer.countTokens() == 0)
 		{
@@ -357,7 +355,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 				}
 			}
 			allHeaders += CRLF;
-			LogHolder.log(LogLevel.ALERT, LogType.NET, "header dump:\n"+allHeaders);
+			LogHolder.log(LogLevel.INFO, LogType.NET, "header dump:\n"+allHeaders);
 			return allHeaders.getBytes();
 		}
 		
