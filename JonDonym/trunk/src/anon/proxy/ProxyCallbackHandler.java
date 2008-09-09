@@ -36,7 +36,6 @@ public class ProxyCallbackHandler
 			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();
 			chunk = callback.handleDownstreamChunk(anonRequest, chunk, len);
 		}
-		System.out.println("Memory usage (free mem) : "+Runtime.getRuntime().freeMemory());
 		return chunk;
 	}
 	
