@@ -833,11 +833,15 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 				m_moduleSystem.selectNode(ANON_SERVICES_TAB);
 				if (a_value instanceof MixCascade)
 				{
-					m_confServices.selectAnonTab( (MixCascade) a_value);
+					m_confServices.selectAnonTab( (MixCascade) a_value, false);
+				}
+				else if(a_value instanceof Boolean)
+				{
+					m_confServices.selectAnonTab(null, ((Boolean) a_value).booleanValue());
 				}
 				else
 				{
-					m_confServices.selectAnonTab(null);
+					m_confServices.selectAnonTab(null, false);
 				}
 			}
 			else if (a_strSelectedCard.equals(PAYMENT_TAB))
