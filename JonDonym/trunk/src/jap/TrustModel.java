@@ -365,7 +365,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	{
 		public InternationalAttribute(int a_trustCondition, Object a_conditionValue)
 		{
-			super(a_trustCondition, a_conditionValue);
+			// MUST always be TRUST_IF_AT_LEAST
+			super(TRUST_IF_AT_LEAST, a_conditionValue);
 		}
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
@@ -373,14 +374,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			if(m_trustCondition == TRUST_IF_AT_LEAST && a_cascade.getNumberOfCountries() < ((Integer) m_conditionValue).intValue())
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_TOO_FEW_COUNTRIES)));
-			}
-			else if (m_trustCondition == TRUST_IF_TRUE && a_cascade.getNumberOfCountries() <= 1)
-			{
-				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_INTERNATIONAL)));
-			}
-			else if (m_trustCondition == TRUST_IF_NOT_TRUE && a_cascade.getNumberOfCountries() > 1)
-			{
-				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_INTERNATIONAL)));
 			}
 		}
 	};
@@ -475,13 +468,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
 			
-			if(minSpeed == TRUST_ALWAYS)
-			{
-				return;
-			}
-			
-			// TODO: make it configurable
-			if(entry == null || entry.getBound(PerformanceEntry.SPEED) < 0) 
+			// no performance data
+			if(entry == null || entry.getBound(PerformanceEntry.SPEED) == 0) 
 			{
 				return;
 			}
@@ -508,13 +496,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int maxDelay = ((Integer) m_conditionValue).intValue();
 			
-			if(maxDelay == TRUST_ALWAYS)
-			{
-				return;
-			}
-			
-			// TODO: make it configurable
-			if(entry == null || entry.getBound(PerformanceEntry.DELAY) < 0)
+			// no performance data
+			if(entry == null || entry.getBound(PerformanceEntry.DELAY) == 0)
 			{
 				return;
 			}
@@ -535,17 +518,23 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		model = new TrustModel(MSG_ALL_SERVICES, 0);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
+		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
+		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
 		TRUST_MODEL_DEFAULT = model;
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
+		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000));
+		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100));
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
+		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
+		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_USER_DEFINED, 4)
