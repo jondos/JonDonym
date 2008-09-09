@@ -73,7 +73,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final String XML_REMIND_OPTIONAL_UPDATE = "remindOptionalUpdate";
 	public static final String XML_REMIND_JAVA_UPDATE = "remindJavaUpdate";
 	public static final String XML_RESTRICT_CASCADE_AUTO_CHANGE = "restrictCascadeAutoChange";
-	public static final String XML_DENY_NON_ANONYMOUS_SURFING = "denyNonAnonymousSurfing";
+	public static final String XML_DENY_NON_ANONYMOUS_SURFING = "denyUnprotectedSurfing";
 	public static final String XML_ATTR_ACTIVATED = "activated";
 	public static final String XML_FONT_SIZE = "fontSize";
 	public static final String XML_CONFIG_WINDOW = "ConfigWindow";
