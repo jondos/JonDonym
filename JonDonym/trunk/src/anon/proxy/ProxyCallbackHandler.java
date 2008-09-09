@@ -6,8 +6,9 @@ import java.util.Vector;
 /**
  * 
  * @author Simon Pecher
- * A Framework class to filter or modify before it is transferred via the gateway.
- * Customized Callback-Objects can be registered. 
+ * Experimental framework class to filter or modify data before it is
+ * transferred via the gateway. Customized Callback-Objects can 
+ * be registered. 
  */
 public class ProxyCallbackHandler 
 {
@@ -35,6 +36,7 @@ public class ProxyCallbackHandler
 			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();
 			chunk = callback.handleDownstreamChunk(anonRequest, chunk, len);
 		}
+		System.out.println("Memory usage (free mem) : "+Runtime.getRuntime().freeMemory());
 		return chunk;
 	}
 	
