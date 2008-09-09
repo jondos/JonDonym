@@ -1361,9 +1361,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			if(m_filterPanel == null || !m_filterPanel.isVisible())
 			{
-				m_previousTrustModel = (TrustModel) m_cmbCascadeFilter.getSelectedItem();
-				m_cmbCascadeFilter.setSelectedItem(TrustModel.getCustomFilter());
-				drawFilterPanel();
+				showFilter();
 			}
 			else if(m_filterPanel != null && m_filterPanel.isVisible())
 			{
@@ -1389,6 +1387,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterAllMixes.setEnabled(false);
 			m_filterAtLeast2Mixes.setEnabled(false);
 		}
+	}
+
+	public void showFilter()
+	{
+		m_previousTrustModel = (TrustModel) m_cmbCascadeFilter.getSelectedItem();
+		m_cmbCascadeFilter.setSelectedItem(TrustModel.getCustomFilter());
+		drawFilterPanel();
 	}
 	
 	private void hideEditFilter() 
