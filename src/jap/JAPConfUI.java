@@ -222,6 +222,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		c1.gridy+=2;
 		c1.fill = GridBagConstraints.BOTH;
 		c1.weighty = 1;
+		c1.gridwidth = 2;
 		tempPanel =  createHelpPathPanel(); //new JPanel();
 		
 		panelRoot.add(tempPanel, c1);

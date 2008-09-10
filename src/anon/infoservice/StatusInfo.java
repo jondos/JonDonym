@@ -540,7 +540,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		
 			if(delayBound == Long.MAX_VALUE)
 			{
-				htmlTableLine += "> " + PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2];
+				htmlTableLine += ">" + PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2];
 			}
 			else
 			{
@@ -569,7 +569,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			
 			if(speedBound == 0)
 			{
-				htmlTableLine += "< " + PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1];
+				htmlTableLine += "<" + PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1];
 			}
 			else
 			{

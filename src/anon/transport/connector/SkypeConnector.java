@@ -46,6 +46,7 @@ import com.skype.Application;
 import com.skype.Skype;
 import com.skype.SkypeException;
 import com.skype.Stream;
+import com.skype.connector.Connector;
 
 /**
  * Connector welche auf Basis einer uebergebenen {@link SkypeAddress} versucht
@@ -69,16 +70,13 @@ public class SkypeConnector implements IConnector
 				throws ConnectionException
 			{
 				Application app=null;
-				//LogHolder.log(LogLevel.DEBUG, LogType.NET,"Skye Connector - Skype.setDaemon()");
-				//Skype.setDeamon(false);
 				try
 					{
-						LogHolder.log(LogLevel.DEBUG, LogType.NET,"Skye Connector - Skype.setDebug()");
-						Skype.setDebug(true);
-						Skype.setDebug(false);
-						LogHolder.log(LogLevel.DEBUG, LogType.NET,"Skye Connector - Skype.setDebug - finished()");
-										}
-				catch (SkypeException e1)
+						Connector.getInstance().setApplicationName(a_address.getApplicationName());
+						if(LogHolder.isLogged(LogLevel.DEBUG,LogType.TRANSPORT))
+							Skype.setDebug(true);
+					}
+				catch (Exception e1)
 					{
 						LogHolder.log(LogLevel.DEBUG, LogType.NET,"Skye Connector - exception");
 					}
