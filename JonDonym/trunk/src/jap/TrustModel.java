@@ -34,6 +34,7 @@ import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Observable;
 import java.util.Observer;
+import java.lang.reflect.Method;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -178,6 +179,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			m_category = CATEGORY_DEFAULT;
 		}
 
+		public static int getDefaultValue()
+		{
+			return 0;
+		}
+		
 		public final int getCategory()
 		{
 			return m_category;
@@ -194,7 +200,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 
 		public abstract void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException;
-
+		
 		public Element toXmlElement(Document a_doc)
 		{
 			if(a_doc == null) return null;
@@ -265,7 +271,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			{
 				throw new XMLParseException(XML_ELEMENT_NAME);
 			}
-
+			
 			return attr;
 		}
 	}
@@ -483,14 +489,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 	}
 	
-	public static class DelayTrustAttribute extends TrustAttribute
+	public static class DelayAttribute extends TrustAttribute
 	{
-		public DelayTrustAttribute(int a_trustCondition, Object a_conditionValue)
+		public DelayAttribute(int a_trustCondition, Object a_conditionValue)
 		{
 			// MUST always be TRUST_IF_AT_MOST
 			super(TRUST_IF_AT_MOST, a_conditionValue);
 		}
-
+		
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
@@ -509,6 +515,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH)));
 			}
 		}
+		
+		public static int getDefaultValue()
+		{
+			return Integer.MAX_VALUE;
+		}
 	}	
 	
 	static
@@ -518,7 +529,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		model = new TrustModel(MSG_ALL_SERVICES, 0);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
-		model.setAttribute(DelayTrustAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
+		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
 		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
 		TRUST_MODEL_DEFAULT = model;
 		ms_trustModels.addElement(model);
@@ -526,14 +537,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
-		model.setAttribute(DelayTrustAttribute.class, TRUST_IF_AT_MOST, new Integer(4000));
+		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000));
 		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100));
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
-		model.setAttribute(DelayTrustAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
+		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
 		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
 		ms_trustModels.addElement(model);
 
@@ -719,7 +730,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			 return setAttribute((TrustAttribute) a_attr.getConstructor(new Class[] { int.class, Object.class })
 			 	.newInstance(new Object[] { new Integer(a_trustCondition), a_conditionValue}));
 		}
-		catch(Exception ex) { LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Could not create " + a_attr); return null; }}
+		catch(Exception ex) 
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Could not create " + a_attr); return null; 
+		}
+	}
 
 	public TrustAttribute setAttribute(TrustAttribute a_attr)
 	{
@@ -750,7 +765,18 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			TrustAttribute attr = (TrustAttribute) m_trustAttributes.get(a_attr);
 			if(attr == null)
 			{
-				return setAttribute(a_attr, TRUST_ALWAYS, new Integer(0));
+				Integer defaultValue = new Integer(0);
+				try
+				{
+					Method getDefaultValue = a_attr.getMethod("getDefaultValue", (Class[]) null);
+					defaultValue = (Integer) getDefaultValue.invoke(null, (Object[]) null);
+				}
+				catch(Exception ex)
+				{
+					ex.printStackTrace();
+				}
+				
+				return setAttribute(a_attr, TRUST_ALWAYS, defaultValue);
 			}
 
 			return attr;
