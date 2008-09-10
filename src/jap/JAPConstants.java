@@ -116,6 +116,7 @@ public final class JAPConstants
 
 	public static final boolean REMIND_OPTIONAL_UPDATE = true;
 	public static final boolean REMIND_JAVA_UPDATE = true;
+	public static final boolean ANONYMIZED_HTTP_HEADERS = true;
 
 	static final int SMALL_FONT_SIZE = 9;
 	static final int SMALL_FONT_STYLE = Font.PLAIN;

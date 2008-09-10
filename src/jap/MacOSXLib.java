@@ -176,8 +176,6 @@ public class MacOSXLib
 		{
 			nativeInit();
 			nativeInitDockMenu();
-			
-			System.out.println(getLibVersion());
 		}
 	}
 	
@@ -397,10 +395,10 @@ public class MacOSXLib
 	
 	private static void informUserAboutJapRestart()
 	{
-		//Inform the User about the necessary JAP restart
+		// inform the User about the necessary JAP restart
 		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
 									JAPMessages.getString(MSG_MACOSX_LIB_UPDATE));
-		//close JAP
+		// close JAP
 		JAPController.goodBye(false);
 	}
 	

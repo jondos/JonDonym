@@ -1055,6 +1055,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 				JAPModel.getInstance().allowUpdateViaDirectConnection(
 								XMLUtil.parseAttribute(root, XML_ALLOW_NON_ANONYMOUS_UPDATE,
 					JAPConstants.DEFAULT_ALLOW_UPDATE_NON_ANONYMOUS_CONNECTION));
+				
+				JAPModel.getInstance().setAnonymizedHttpHeaders(
+						XMLUtil.parseAttribute(root, JAPModel.XML_ANONYMIZED_HTTP_HEADERS, 
+						JAPConstants.ANONYMIZED_HTTP_HEADERS));
+				
 				JAPModel.getInstance().setReminderForOptionalUpdate(
 								XMLUtil.parseAttribute(root, JAPModel.XML_REMIND_OPTIONAL_UPDATE,
 					JAPConstants.REMIND_OPTIONAL_UPDATE));
@@ -2365,6 +2370,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, JAPModel.MACOSX_LIB_NEEDS_UPDATE, m_Model.isMacOSXLibraryUpdateAtStartupNeeded());
 			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_WARNING_BELOW, m_Model.getDLLWarningVersion());
 
+			XMLUtil.setAttribute(e, JAPModel.XML_ANONYMIZED_HTTP_HEADERS, 
+								JAPModel.getInstance().isAnonymizedHttpHeaders());
+			
 			XMLUtil.setAttribute(e, XML_ALLOW_NON_ANONYMOUS_UPDATE,
 								 JAPModel.getInstance().isUpdateViaDirectConnectionAllowed());
 			XMLUtil.setAttribute(e, JAPModel.XML_REMIND_OPTIONAL_UPDATE,

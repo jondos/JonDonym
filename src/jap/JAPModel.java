@@ -70,6 +70,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final String DLL_VERSION_UPDATE = "dllVersionUpdate";
 	public static final String DLL_VERSION_WARNING_BELOW = "dllWarningVersion";
 
+	public static final String XML_ANONYMIZED_HTTP_HEADERS = "anonymizedHttpHeaders";
 	public static final String XML_REMIND_OPTIONAL_UPDATE = "remindOptionalUpdate";
 	public static final String XML_REMIND_JAVA_UPDATE = "remindJavaUpdate";
 	public static final String XML_RESTRICT_CASCADE_AUTO_CHANGE = "restrictCascadeAutoChange";
@@ -106,6 +107,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final Integer CHANGED_HELP_PATH = new Integer(9);
 	public static final Integer CHANGED_DLL_UPDATE = new Integer(10);
 	public static final Integer CHANGED_MACOSX_LIBRARY_UPDATE = new Integer(11);
+	public static final Integer CHANGED_ANONYMIZED_HTTP_HEADERS = new Integer(12);
 
 	private static final int DIRECT_CONNECTION_INFOSERVICE = 0;
 	private static final int DIRECT_CONNECTION_PAYMENT = 1;
@@ -161,6 +163,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	private Object LOOK_AND_FEEL_SYNC = new Object();
 	
 	private boolean m_bShowDialogFormat = false;
+	
+	private boolean m_bAnonymizedHttpHeaders = JAPConstants.ANONYMIZED_HTTP_HEADERS;
 
 	private int m_fontSize = 0;
 
@@ -1647,6 +1651,21 @@ public final class JAPModel extends Observable implements IHelpModel
 			setChanged();
 		}
 		notifyObservers(CHANGED_MACOSX_LIBRARY_UPDATE);
+	}
+	
+	public synchronized void setAnonymizedHttpHeaders(boolean a_update)
+	{
+		if(m_bAnonymizedHttpHeaders != a_update)
+		{
+			m_bAnonymizedHttpHeaders = a_update;
+			setChanged();
+		}
+		notifyObservers(CHANGED_ANONYMIZED_HTTP_HEADERS);
+	}
+	
+	public boolean isAnonymizedHttpHeaders()
+	{
+		return m_bAnonymizedHttpHeaders;
 	}
 	
 	public boolean isMacOSXLibraryUpdateAtStartupNeeded()
