@@ -498,7 +498,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			m_filterSpeedSlider.setValue(((Integer)m_trustModelCopy.getAttribute(TrustModel.SpeedAttribute.class).getConditionValue()).intValue() / FILTER_SPEED_MAJOR_TICK);
 			
-			int delay = ((Integer)m_trustModelCopy.getAttribute(TrustModel.DelayTrustAttribute.class).getConditionValue()).intValue();
+			int delay = ((Integer)m_trustModelCopy.getAttribute(TrustModel.DelayAttribute.class).getConditionValue()).intValue();
 			m_filterLatencySlider.setValue(convertDelayValue(delay, false));
 			
 			((OperatorsTableModel)m_listOperators.getModel()).update();
@@ -1615,7 +1615,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_trustModelCopy.setAttribute(TrustModel.OperatorBlacklistAttribute.class, TrustModel.TRUST_IF_NOT_IN_LIST, ((OperatorsTableModel) m_listOperators.getModel()).getBlacklist());
 			
 			m_trustModelCopy.setAttribute(TrustModel.SpeedAttribute.class, TrustModel.TRUST_IF_AT_LEAST, m_filterSpeedSlider.getValue() * FILTER_SPEED_MAJOR_TICK);
-			m_trustModelCopy.setAttribute(TrustModel.DelayTrustAttribute.class, TrustModel.TRUST_IF_AT_MOST, convertDelayValue(m_filterLatencySlider.getValue(), true));
+			m_trustModelCopy.setAttribute(TrustModel.DelayAttribute.class, TrustModel.TRUST_IF_AT_MOST, convertDelayValue(m_filterLatencySlider.getValue(), true));
 			
 			if(m_filterNameField.getText().length() > 0)
 				m_trustModelCopy.setName(m_filterNameField.getText());
