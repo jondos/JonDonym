@@ -355,7 +355,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 				}
 			}
 			allHeaders += CRLF;
-			LogHolder.log(LogLevel.ALERT, LogType.NET, "header dump:\n"+allHeaders);
+			LogHolder.log(LogLevel.DEBUG, LogType.NET, "header dump:\n"+allHeaders);
 			return allHeaders.getBytes();
 		}
 		
