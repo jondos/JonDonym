@@ -46,6 +46,8 @@ import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Calendar;
+import java.util.Observer;
+import java.util.Observable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,6 +59,7 @@ import anon.ErrorCodes;
 import anon.client.AnonClient;
 import anon.client.DummyTrafficControlChannel;
 import anon.crypto.SignatureVerifier;
+import anon.infoservice.DatabaseMessage;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.PerformanceEntry;
@@ -88,10 +91,11 @@ import logging.LogType;
  *
  * @author Christian Banse
  */
-public class PerformanceMeter implements Runnable 
+public class PerformanceMeter implements Runnable, Observer
 {	
 	private Object SYNC_METER = new Object();
 	private Object SYNC_SOCKET = new Object();
+	private Object SYNC_TEST = new Object();
 	
 	private String m_proxyHost;
 	private int m_proxyPort;
@@ -178,6 +182,8 @@ public class PerformanceMeter implements Runnable
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
 		}
+		
+		Database.getInstance(MixCascade.class).addObserver(this);
 	}
 	
 	private void readOldPerformanceData(int week) 
@@ -284,100 +290,28 @@ public class PerformanceMeter implements Runnable
 			m_lastUpdateRuntime = 0;
 			m_nextUpdate = updateBegin + m_majorInterval;
 			
-			Vector knownMixCascades = Database.getInstance(MixCascade.class).getEntryList();		
+			Vector knownMixCascades;
+			synchronized(SYNC_TEST)
+			{
+				knownMixCascades = Database.getInstance(MixCascade.class).getEntryList();		
+			}
 			
 			m_lastTotalUpdates = 0;
 			while(knownMixCascades.size() > 0) 
 			{
-				LogHolder.log(LogLevel.WARNING, LogType.THREAD, "Cascades left to test: " + knownMixCascades.size());
-				intRandom = Math.abs(random.nextInt()) % knownMixCascades.size();
-				final MixCascade cascade = (MixCascade) knownMixCascades.elementAt(intRandom);		
-				knownMixCascades.removeElementAt(intRandom);
+				synchronized(SYNC_TEST)
+				{
+					LogHolder.log(LogLevel.WARNING, LogType.THREAD, "Cascades left to test: " + knownMixCascades.size());
+					intRandom = Math.abs(random.nextInt()) % knownMixCascades.size();
+					final MixCascade cascade = (MixCascade) knownMixCascades.elementAt(intRandom);		
+					knownMixCascades.removeElementAt(intRandom);
 				
-				loadAccountFiles();
-				m_accUpdater.update();
-				performTestThread = new Thread(new Runnable()
-				{
-					public void run()
+					startTest(cascade);
+				
+					if (m_lastTotalUpdates > 0)
 					{
-						try
-						{					
-							if (performTest(cascade))
-							{
-								m_lastTotalUpdates++;
-							}
-						}
-						catch (InterruptedException a_e)
-						{
-						}
+						m_lastUpdateRuntime = System.currentTimeMillis() - updateBegin;
 					}
-				});	
-				performTestThread.start();
-				try
-				{
-					performTestThread.join(m_maxWaitForTest);						
-				}
-				catch (InterruptedException e)
-				{
-					// test is finished
-				}
-									
-				// interrupt the test if it is not finished yet
-				if (m_proxy.isConnected())
-				{
-					m_proxy.stop();
-				}
-				try
-				{
-					performTestThread.join(500);						
-				}
-				catch (InterruptedException e)
-				{
-					// test is finished
-				}					
-				int iWait = 0;
-				while (performTestThread.isAlive())
-				{	
-					iWait++;
-					performTestThread.interrupt();
-					
-					if (iWait > 5)
-					{	
-						closeMeterSocket();
-						if (iWait > 20)
-						{
-							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
-								"Using deprecated stop method to finish meter thread!");
-							performTestThread.stop();
-						}
-						else if (iWait > 5)
-						{
-							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
-								"Problems finishing meter thread!");
-						}
-
-						try
-						{
-							performTestThread.join(1000);
-						}
-						catch (InterruptedException e)
-						{	
-						}
-					}
-					else
-					{
-						try
-						{
-							performTestThread.join(500);
-						}
-						catch (InterruptedException e)
-						{								
-						}
-					}
-				}
-				if (m_lastTotalUpdates > 0)
-				{
-					m_lastUpdateRuntime = System.currentTimeMillis() - updateBegin;
 				}
 			}			
 			
@@ -396,6 +330,92 @@ public class PerformanceMeter implements Runnable
 		    			//break;
 		    		}	    		
 	    		}
+			}
+		}
+	}
+
+	private void startTest(final MixCascade a_cascade) 
+	{
+		Thread performTestThread;
+		loadAccountFiles();
+		m_accUpdater.update();
+		performTestThread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{					
+					if (performTest(a_cascade))
+					{
+						m_lastTotalUpdates++;
+					}
+				}
+				catch (InterruptedException a_e)
+				{
+				}
+			}
+		});	
+		performTestThread.start();
+		try
+		{
+			performTestThread.join(m_maxWaitForTest);						
+		}
+		catch (InterruptedException e)
+		{
+			// test is finished
+		}
+						
+		// interrupt the test if it is not finished yet
+		if (m_proxy.isConnected())
+		{
+			m_proxy.stop();
+		}
+		try
+		{
+			performTestThread.join(500);						
+		}
+		catch (InterruptedException e)
+		{
+			// test is finished
+		}					
+		int iWait = 0;
+		while (performTestThread.isAlive())
+		{	
+			iWait++;
+			performTestThread.interrupt();
+		
+			if (iWait > 5)
+			{	
+				closeMeterSocket();
+				if (iWait > 20)
+				{
+					LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
+						"Using deprecated stop method to finish meter thread!");
+					performTestThread.stop();
+				}
+				else if (iWait > 5)
+				{
+				LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
+					"Problems finishing meter thread!");
+				}
+
+				try
+				{
+					performTestThread.join(1000);
+				}
+				catch (InterruptedException e)
+				{	
+				}
+			}
+			else
+			{
+				try
+				{
+					performTestThread.join(500);
+				}
+				catch (InterruptedException e)
+				{								
+				}
 			}
 		}
 	}
@@ -1008,6 +1028,38 @@ public class PerformanceMeter implements Runnable
 		}
 		
 		return null;
+	}
+	
+	public void update(Observable a_observable, Object a_message)
+	{
+		if(a_message != null && a_message instanceof DatabaseMessage)
+		{
+			DatabaseMessage msg = (DatabaseMessage) a_message;
+			
+			if(msg.getMessageCode() == DatabaseMessage.ENTRY_ADDED)
+			{
+				try
+				{
+					MixCascade cascade = (MixCascade) msg.getMessageData();
+					
+					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(cascade.getId());
+					
+					if(entry == null)
+					{
+						// new cascade, let's start our performance test immediately
+						LogHolder.log(LogLevel.INFO, LogType.MISC, "Found new cascade, starting performance test immediately.");
+						synchronized(SYNC_TEST)
+						{
+							startTest(cascade);
+						}
+					}
+				}
+				catch(Exception ex)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Error while starting performance test for new cascade: ", ex);
+				}
+			}
+		}
 	}
 		
 	private class HTTPResponse
