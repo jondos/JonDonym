@@ -54,40 +54,32 @@ public class WindowsRegistry
 	
 	static
 	{
-		try
+		if(System.getProperty("os.name", "").toLowerCase().indexOf("win") != -1)
 		{
-			Class accessibleObjectClass = Class.forName("java.lang.reflect.AccessibleObject");
-			Method setAccessibleMethod = accessibleObjectClass.getMethod("setAccessible", new Class[]{ Boolean.TYPE });
+		
+			try
+			{
+				Class accessibleObjectClass = Class.forName("java.lang.reflect.AccessibleObject");
+				Method setAccessibleMethod = accessibleObjectClass.getMethod("setAccessible", new Class[]{ Boolean.TYPE });
 			
-			ms_windowsPreferencesClass = Class.forName("java.util.prefs.WindowsPreferences");
-			ms_openKeyMethod = ms_windowsPreferencesClass.getDeclaredMethod("WindowsRegOpenKey", 
-					new Class[] { int.class, byte[].class, Integer.TYPE });
+				ms_windowsPreferencesClass = Class.forName("java.util.prefs.WindowsPreferences");
+				ms_openKeyMethod = ms_windowsPreferencesClass.getDeclaredMethod("WindowsRegOpenKey", 
+						new Class[] { int.class, byte[].class, Integer.TYPE });
 			
-			ms_queryValueMethod = ms_windowsPreferencesClass.getDeclaredMethod("WindowsRegQueryValueEx",
-					new Class[] { Integer.TYPE, byte[].class });
+				ms_queryValueMethod = ms_windowsPreferencesClass.getDeclaredMethod("WindowsRegQueryValueEx",
+						new Class[] { Integer.TYPE, byte[].class });
 			
-			ms_closeKeyMethod = ms_windowsPreferencesClass.getDeclaredMethod("WindowsRegCloseKey",
-					new Class[] { int.class});
+				ms_closeKeyMethod = ms_windowsPreferencesClass.getDeclaredMethod("WindowsRegCloseKey",
+						new Class[] { int.class});
 			
-			setAccessibleMethod.invoke(ms_openKeyMethod, new Object[] { Boolean.TRUE });
-			setAccessibleMethod.invoke(ms_queryValueMethod, new Object[] { Boolean.TRUE });
-			setAccessibleMethod.invoke(ms_closeKeyMethod, new Object[] { Boolean.TRUE });
-		}
-		catch(ClassNotFoundException ex)
-		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
-		}
-		catch(NoSuchMethodException ex)
-		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
-		}
-		catch(InvocationTargetException ex)
-		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
-		}
-		catch(IllegalAccessException ex)
-		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", ex);
+				setAccessibleMethod.invoke(ms_openKeyMethod, new Object[] { Boolean.TRUE });
+				setAccessibleMethod.invoke(ms_queryValueMethod, new Object[] { Boolean.TRUE });
+				setAccessibleMethod.invoke(ms_closeKeyMethod, new Object[] { Boolean.TRUE });
+			}
+			catch(Throwable t)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, "Error while accessing windows registry.", t);
+			}
 		}
 	}
 	
