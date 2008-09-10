@@ -27,11 +27,15 @@
  */
 package anon.proxy;
 
+import jap.JAPModel;
+
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Vector;
 
 import anon.AnonChannel;
@@ -67,7 +71,7 @@ import anon.client.TrustException;
  * portNumberOfMixCascade)); theProxy.start(); }
  */
 
-final public class AnonProxy implements Runnable, AnonServiceEventListener
+final public class AnonProxy implements Runnable, AnonServiceEventListener, Observer
 {
 	public static final int UNLIMITED_REQUESTS = Integer.MAX_VALUE;
 	public static final int MIN_REQUESTS = 5;
@@ -196,7 +200,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
 		// SOCKS\uFFFD
-		setJonDoFoxHeaderEnabled(true);
+		
+		JAPModel.getInstance().addObserver(this);
+		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 	}
 
 	/**
@@ -232,9 +238,11 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_anonServiceListener = new Vector();
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
-		setJonDoFoxHeaderEnabled(true);
+		
+		JAPModel.getInstance().addObserver(this);
+		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 	}
-
+	
 	public void setJonDoFoxHeaderEnabled(boolean enable)
 	{
 		if( m_callbackHandler == null)
@@ -1099,6 +1107,17 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		{
 			/** @todo reconnect is not yet supported with forwarded connections */
 			return!m_forwardedConnection && m_mixCascadeContainer.isReconnectedAutomatically();
+		}
+	}
+	
+	public void update(Observable a_notifier, Object a_message)
+	{
+		if (a_message != null)
+		{
+			if (a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
+			{
+				setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+			}
 		}
 	}
 }
