@@ -161,7 +161,7 @@
   	     ignoreerrors="true"
   		 dest="${build.libs}/japdllversion.txt"/> 
   	
-    <get src="http://anon.inf.tu-dresden.de/develop/japmacosxlibversion.txt" 
+    <get src="http://anon.inf.tu-dresden.de/develop/macosxlibversion.txt" 
   		 verbose="true" 
   		 usetimestamp="true"
   	     ignoreerrors="true"
