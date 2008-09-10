@@ -773,7 +773,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				}
 				catch(Exception ex)
 				{
-					ex.printStackTrace();
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Exception occured while trying to get the default value of a TrustAttribute: ", ex);
 				}
 				
 				return setAttribute(a_attr, TRUST_ALWAYS, defaultValue);
