@@ -430,7 +430,34 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				htmlData += "<td>" + entry.getAverageValue() + " " + a_unit + "</td>" +
 					"<td>" + entry.getMinValue() + " " + a_unit + "</td>" +
 					"<td>" + entry.getMaxValue() + " " + a_unit + "</td>" +
-					"<td>" + entry.getBound() + " " + a_unit + "</td>";
+					"<td>";
+				
+				long bound = (entry == null ? -1 : entry.getBound());
+			
+				if(a_attribute == DELAY)
+				{
+					if(bound == Long.MAX_VALUE)
+					{
+						htmlData += "> " + PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2];
+					}
+					else
+					{
+						htmlData += bound;
+					}
+				}
+				else if(a_attribute == SPEED)
+				{
+					if(bound == 0)
+					{
+						htmlData += "< " + PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1];
+					}
+					else
+					{
+						htmlData += bound;
+					}
+				}
+				
+				htmlData += " " + a_unit + "</td>";
 				
 				/*
 				if(a_selectedDay == dayOfWeek)
