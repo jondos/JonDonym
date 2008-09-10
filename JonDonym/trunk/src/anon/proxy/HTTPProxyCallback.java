@@ -39,6 +39,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 	public final String HTTP_REFERER = "Referer";
 	public final String HTTP_CACHE_CONTROL = "Cache-Control";
 	public final String HTTP_PRAGMA = "Pragma";
+	public final String HTTP_IE_UA_CPU = "UA-CPU";	
 	
 
 	public HTTPProxyCallback()
@@ -355,7 +356,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 				}
 			}
 			allHeaders += CRLF;
-			LogHolder.log(LogLevel.DEBUG, LogType.NET, "header dump:\n"+allHeaders);
+			LogHolder.log(LogLevel.INFO, LogType.NET, "header dump:\n"+allHeaders);
 			return allHeaders.getBytes();
 		}
 		
