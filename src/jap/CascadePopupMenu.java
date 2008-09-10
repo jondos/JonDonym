@@ -144,6 +144,7 @@ public class CascadePopupMenu extends PopupMenu
 			{
 				m_editFilter = new JMenuItem(JAPMessages.getString(MSG_EDIT_FILTER));
 				m_editFilter.addActionListener(m_cascadeItemListener);
+				m_editFilter.setIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_CASCADE_MANUELL, true));
 				add(m_editFilter);
 				addSeparator(new JSeparator());
 			}			
