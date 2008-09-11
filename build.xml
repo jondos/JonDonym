@@ -165,7 +165,7 @@
   		 verbose="true" 
   		 usetimestamp="true"
   	     ignoreerrors="true"
-  		 dest="${build.libs}/japmacosxlibversion.txt"/> 
+  		 dest="${build.libs}/macosxlibversion.txt"/> 
   	
   	<get src="http://anon.inf.tu-dresden.de/develop/skype.jar" 
   	  		 verbose="true" 
