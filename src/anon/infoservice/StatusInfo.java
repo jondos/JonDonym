@@ -538,7 +538,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 				delayBound = perfEntry.getBound(PerformanceEntry.DELAY);
 			}
 		
-			if(delayBound == Long.MAX_VALUE)
+			if(delayBound == Integer.MAX_VALUE)
 			{
 				htmlTableLine += ">" + PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2];
 			}
