@@ -12,8 +12,8 @@ import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.Util;
-import anon.util.Util.LongSortAsc;
-import anon.util.Util.LongSortDesc;
+import anon.util.Util.IntegerSortAsc;
+import anon.util.Util.IntegerSortDesc;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
@@ -199,24 +199,24 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			if (entry != null)
 			{
 				vPerfEntries.addElement(entry);
-				Long value = new Long(entry.getBound(PerformanceEntry.SPEED));
+				Integer value = new Integer(entry.getBound(PerformanceEntry.SPEED));
 				
-				if(!vSpeedBoundaries.contains(value))
+				if (!vSpeedBoundaries.contains(value))
 				{
 					vSpeedBoundaries.addElement(value);
 				}
 				
-				value = new Long(entry.getBound(PerformanceEntry.DELAY));
+				value = new Integer(entry.getBound(PerformanceEntry.DELAY));
 				
-				if(!vDelayBoundaries.contains(value))
+				if (!vDelayBoundaries.contains(value))
 				{
 					vDelayBoundaries.addElement(value);
 				}
 			}
 		}
 		
-		Util.sort(vSpeedBoundaries, new LongSortDesc());
-		Util.sort(vDelayBoundaries, new LongSortAsc());
+		Util.sort(vSpeedBoundaries, new IntegerSortDesc());
+		Util.sort(vDelayBoundaries, new IntegerSortAsc());
 		
 		if(vPerfEntries.size() == 0)
 		{
@@ -224,12 +224,12 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		}
 		
 		int agreeing;
-		long value = 0;
+		int value = 0;
 		
 		for(int i = 0; i < vSpeedBoundaries.size(); i++)
 		{
 			agreeing = 0;
-			long bound = ((Long) vSpeedBoundaries.elementAt(i)).longValue();
+			int bound = ((Integer) vSpeedBoundaries.elementAt(i)).intValue();
 			value = bound;
 			
 			for(int j = 0; j < vPerfEntries.size(); j++)
@@ -251,7 +251,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		for(int i = 0; i< vDelayBoundaries.size(); i++)
 		{
 			agreeing = 0;
-			long bound = ((Long) vDelayBoundaries.elementAt(i)).longValue();
+			int bound = ((Integer) vDelayBoundaries.elementAt(i)).intValue();
 			value = bound;
 			
 			for(int j = 0; j < vPerfEntries.size(); j++)

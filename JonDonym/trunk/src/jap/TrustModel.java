@@ -473,9 +473,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
-			
+
 			// no performance data
-			if(entry == null || entry.getBound(PerformanceEntry.SPEED) == 0) 
+			if (entry == null || entry.getBound(PerformanceEntry.SPEED) == Integer.MAX_VALUE) 
 			{
 				return;
 			}
@@ -503,12 +503,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			int maxDelay = ((Integer) m_conditionValue).intValue();
 			
 			// no performance data
-			if(entry == null || entry.getBound(PerformanceEntry.DELAY) == 0)
+			if (entry == null || entry.getBound(PerformanceEntry.DELAY) == 0)
 			{
 				return;
 			}
 			
-			if(m_trustCondition == TRUST_IF_AT_MOST && (entry == null || 
+			if (m_trustCondition == TRUST_IF_AT_MOST && (entry == null || 
 					entry.getBound(PerformanceEntry.DELAY) < 0 || 
 					entry.getBound(PerformanceEntry.DELAY) > maxDelay))
 			{

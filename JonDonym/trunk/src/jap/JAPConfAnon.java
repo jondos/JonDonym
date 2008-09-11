@@ -1994,7 +1994,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						{
 							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
 						}
-						else if(value == Long.MAX_VALUE)
+						else if(value == Integer.MAX_VALUE)
 						{
 							m_lblDelay.setText("> " + 
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][

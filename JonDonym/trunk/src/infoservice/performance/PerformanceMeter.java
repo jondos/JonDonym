@@ -214,19 +214,29 @@ public class PerformanceMeter implements Runnable, Observer
 				{
 					long timestamp = Long.parseLong(line.substring(0, firstTab));
 					String id = line.substring(firstTab + 1, secondTab);
-					long delay = Long.parseLong(line.substring(secondTab + 1, thirdTab));
+					long lDelay = Integer.parseInt(line.substring(secondTab + 1, thirdTab));
+					int delay = Integer.MAX_VALUE;
+					if (lDelay < Integer.MAX_VALUE)
+					{
+						delay = (int)lDelay;
+					}
 					
 					// old format without users
-					long speed = 0;
-					long users = -1;
+					long lSpeed;
+					int speed = Integer.MAX_VALUE;
+					int users = -1;
 					if(fourthTab == -1)
 					{
-						speed = Long.parseLong(line.substring(thirdTab + 1));
+						lSpeed = Integer.parseInt(line.substring(thirdTab + 1));
 					}
 					else
 					{
-						speed = Long.parseLong(line.substring(thirdTab + 1, fourthTab));
-						users = Long.parseLong(line.substring(fourthTab +1));
+						lSpeed = Integer.parseInt(line.substring(thirdTab + 1, fourthTab));
+						users = Integer.parseInt(line.substring(fourthTab +1));
+					}
+					if (lSpeed < Integer.MAX_VALUE)
+					{
+						speed = (int)lSpeed;
 					}
 						
 					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(id);
@@ -628,12 +638,12 @@ public class PerformanceMeter implements Runnable, Observer
 		Hashtable vSpeed = new Hashtable();
 		Hashtable vUsers = new Hashtable();
 		
-		for(int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
+		for (int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
 			m_proxy.isConnected(); i++)
 		{
-    		long delay = -1;
-    		long speed = -1;
-    		long users = -1;
+    		int delay = -1;
+    		int speed = -1;
+    		int users = -1;
     		long timestamp;
     		
 			try 
@@ -739,7 +749,14 @@ public class PerformanceMeter implements Runnable, Observer
 		        long responseStartTime = System.currentTimeMillis();
 		        
 		        //	delay in ms
-        		delay = responseStartTime - transferInitiatedTime;
+		        if (responseStartTime - transferInitiatedTime > Integer.MAX_VALUE)
+		        {
+		        	delay = Integer.MAX_VALUE;
+		        }
+		        else
+		        {
+		        	delay = (int)(responseStartTime - transferInitiatedTime);
+		        }
 		        
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Downloading bytes for performance test...");
 		        reader.reset();
@@ -801,7 +818,15 @@ public class PerformanceMeter implements Runnable, Observer
         		}        		        		
         		
         		// speed in bit/s;
-        		speed = (bytesRead * 8) / (responseEndTime - responseStartTime);
+        		long lSpeed = (bytesRead * 8) / (responseEndTime - responseStartTime);
+        		if (lSpeed > Integer.MAX_VALUE)
+        		{
+        			speed = Integer.MAX_VALUE;
+        		}
+        		else
+        		{
+        			speed = (int)lSpeed;
+        		}
         		
         		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/s.");
         		
@@ -821,9 +846,9 @@ public class PerformanceMeter implements Runnable, Observer
         	
     		timestamp = System.currentTimeMillis();
     		
-    		vDelay.put(new Long(timestamp), new Long(delay));
-    		vSpeed.put(new Long(timestamp), new Long(speed));
-    		vUsers.put(new Long(timestamp), new Long(users));
+    		vDelay.put(new Long(timestamp), new Integer(delay));
+    		vSpeed.put(new Long(timestamp), new Integer(speed));
+    		vUsers.put(new Long(timestamp), new Integer(users));
     		
     		try
     		{
@@ -846,9 +871,9 @@ public class PerformanceMeter implements Runnable, Observer
     		}
 		}
 		
-		long lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
-		long lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
-		long lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
+		int lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
+		int lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
+		int lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
 		
 		Database.getInstance(PerformanceEntry.class).update(entry);
 		
