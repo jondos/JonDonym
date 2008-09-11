@@ -2585,7 +2585,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_dlgConfig.addComponentListener(m_configMovedAdapter);
 				setCursor(c);
 			}
-			m_dlgConfig.updateValues();
 			m_dlgConfig.selectCard(card, a_value);
 			m_dlgConfig.setVisible(true);
 			m_bConfigActive = false;
