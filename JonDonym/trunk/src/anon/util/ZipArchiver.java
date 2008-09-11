@@ -47,24 +47,6 @@ public class ZipArchiver extends Observable
 		m_archive = archive;
 	}
 	
-	/*public boolean extractArchive(String pathName, String destination)
-	{
-		
-		long maxLen = 100l * ((long)Integer.MAX_VALUE);
-		notifyAboutChanges(0, maxLen, ProgressCapsule.PROGRESS_ONGOING);
-		System.out.println("Max Len: "+maxLen);
-		for (long i = 0; i <= maxLen; i+=((long)Integer.MAX_VALUE)) {
-			notifyAboutChanges(i, maxLen, ProgressCapsule.PROGRESS_ONGOING);
-			try 
-			{
-				Thread.sleep(20);
-			} 
-			catch (InterruptedException e)
-			{}
-		}
-		return false;
-	}*/
-	
 	public boolean extractArchive(String pathName, String destination)
 	{	
 		String dest = destination;
@@ -165,13 +147,6 @@ public class ZipArchiver extends Observable
 				extractedFiles.addElement(zEntry.getName());
 				sizeOfCopied += zEntry.getSize();
 				notifyAboutChangesInterruptable(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ONGOING);
-				
-				/*try 
-				{
-					Thread.sleep(20);
-				} 
-				catch (InterruptedException e) 
-				{}*/
 			}
 		}
 		catch(IllegalStateException ise)

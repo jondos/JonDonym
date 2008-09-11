@@ -655,7 +655,7 @@ public class JAPInternalHelpViewer extends JAPDialog
 	
 	/**
 	 * We need this delegator to allow JAPInternalHelpViwer to extend JAPDialog
-	 * although it should ingherit from JAPHelp.
+	 * although it should inherit from JAPHelp.
 	 * @author simon
 	 *
 	 */
