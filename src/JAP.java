@@ -592,12 +592,13 @@ public class JAP
 				/**
 				 * Allow non-anonymous surfing for https payment pages.
 				 */
+				/*
 				if (a_url != null && !m_controller.getAnonMode() &&
 					JAPModel.getInstance().isNonAnonymousSurfingDenied() &&
 					a_url.toString().startsWith("https"))
 				{
 					JAPModel.getInstance().denyNonAnonymousSurfing(false);
-				}
+				}*/
 			}
 		},new AbstractOS.AbstractURLOpener()
 		{									

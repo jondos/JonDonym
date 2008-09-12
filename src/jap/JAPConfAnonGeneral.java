@@ -154,7 +154,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 			}
 			else if (a_message.equals(JAPModel.CHANGED_DENY_NON_ANONYMOUS))
 			{
-				m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isNonAnonymousSurfingDenied());
+				m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
 			}
 			else if(a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
 			{
@@ -187,7 +187,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 			( (JLabel) d.get(new Integer(i * DT_INTERVAL_STEPLENGTH))).setEnabled(
 						 m_sliderDummyTrafficIntervall.isEnabled());
 		}
-		m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isNonAnonymousSurfingDenied());
+		m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
 		m_cbAnonymizedHttpHeaders.setSelected(JAPModel.getInstance().isAnonymizedHttpHeaders());
 		m_cbAutoConnect.setSelected(JAPModel.isAutoConnect());
 		m_cbAutoReConnect.setSelected(JAPModel.isAutomaticallyReconnected());
