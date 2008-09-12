@@ -539,7 +539,8 @@ final public class DirectProxy implements Runnable, AnonService
 		public static final boolean SET_TIMEOUT = true;
 		public static final boolean SET_UNLIMITED = false;
 	
-		private static final long TEMPORARY_REMEMBER_TIME = 30000l;
+		private static final long TEMPORARY_REMEMBER_TIME = 60000l;
+		private static final long TEMPORARY_REMEMBER_TIME_NO_WARNING = 300000l;
 		
 		private long m_timeRemembered;
 		private boolean m_bWarn;
@@ -550,7 +551,14 @@ final public class DirectProxy implements Runnable, AnonService
 			m_URI = a_URI;
 			if (a_bTimeout)
 			{
-				m_timeRemembered = System.currentTimeMillis() + TEMPORARY_REMEMBER_TIME;
+				if (a_bWarn)
+				{
+					m_timeRemembered = System.currentTimeMillis() + TEMPORARY_REMEMBER_TIME;
+				}
+				else
+				{
+					m_timeRemembered = System.currentTimeMillis() + TEMPORARY_REMEMBER_TIME_NO_WARNING;
+				}
 			}
 			else
 			{
