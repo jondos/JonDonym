@@ -21,6 +21,8 @@ import anon.util.IXMLEncodable;
 
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
+	private static final double BOUND_ROUNDING = 0.2d; // remove the x% worst results
+	
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
 	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
 	
@@ -927,7 +929,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				Util.sort(vec, new IntegerSortDesc());
 			}
 			
-			int limit = (int) Math.floor(vec.size() / 10);
+			int limit = (int) Math.floor((double)vec.size() * BOUND_ROUNDING);
 			
 			for(int i = 0; i < limit; i++)
 			{
