@@ -161,6 +161,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		"_cascadeNotTrusted";
 
 	private static final String MSG_ALLOWUNPROTECTED = JAPController.class.getName() + "_allowunprotected";
+	private static final String MSG_ALLOWUNPROTECTED_ALL = JAPController.class.getName() + "_allowunprotectedAll";
 	public static final String MSG_IS_NOT_ALLOWED = JAPController.class.getName() + "_isNotAllowed";
 	public static final String MSG_ASK_SWITCH = JAPController.class.getName() + "_askForSwitchOnError";
 	public static final String MSG_ASK_RECONNECT = JAPController.class.getName() + "_askForReconnectOnError";
@@ -376,15 +377,17 @@ public final class JAPController extends Observable implements IProxyListener, O
 			m_proxyCallback = new DirectProxy.AllowUnprotectedConnectionCallback()
 			{
 				public DirectProxy.AllowUnprotectedConnectionCallback.Answer callback(
-								DirectProxy.RequestInfo a_requestInfo
-					)
-				{
-					if (JAPModel.getInstance().isNonAnonymousSurfingDenied() ||
-						JAPController.getInstance().getView() == null)
+						DirectProxy.RequestInfo a_requestInfo)
+				{	
+					String uri;
+					String message;
+					String headline = null;
+					
+					if (JAPController.getInstance().getView() == null)
 					{
-						return new Answer(false, false, true);
-					}
-
+							return new Answer(false, false);
+					}		
+					
 					boolean bShowHtmlWarning;
 					JAPDialog.LinkedCheckBox cb = new JAPDialog.LinkedCheckBox(
 									   JAPMessages.getString(JAPDialog.LinkedCheckBox.MSG_REMEMBER_ANSWER), false,
@@ -395,18 +398,23 @@ public final class JAPController extends Observable implements IProxyListener, O
 							return true;
 						}
 					};
-					bShowHtmlWarning = ! (JAPDialog.showYesNoDialog(
-									   JAPController.getInstance().getViewWindow(),
-									   JAPMessages.getString(MSG_ALLOWUNPROTECTED), a_requestInfo.getURI()
-									   + (a_requestInfo.getPort() != 80 ? ":" + a_requestInfo.getPort() : ""), cb));
-					/*if (bShowHtmlWarning && cb.getState())
+					
+					uri = a_requestInfo.getURI() + (a_requestInfo.getPort() != 80 ? ":" + a_requestInfo.getPort() : "");
+					if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
 					{
-						// user has chosen to never allow non anonymous websurfing
-						JAPModel.getInstance().denyNonAnonymousSurfing(true);
-						// do not remember as this may be switched in the control panel
-						return new Answer(!bShowHtmlWarning, false);
-					}*/
-					return new Answer(!bShowHtmlWarning, cb.getState(), false);
+						message = JAPMessages.getString(MSG_ALLOWUNPROTECTED, "<b>" + uri + "</b>");
+						headline = uri;
+					}
+					else
+					{
+						message = JAPMessages.getString(MSG_ALLOWUNPROTECTED_ALL);
+					}
+					
+					
+					bShowHtmlWarning = !(JAPDialog.showYesNoDialog(
+									   JAPController.getInstance().getViewWindow(), message, headline, cb));
+					
+					return new Answer(!bShowHtmlWarning, cb.getState());
 				}
 			};
 
@@ -2384,7 +2392,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, XML_ATTR_AUTO_CHOOSE_CASCADES_ON_STARTUP,
 								 JAPModel.getInstance().isCascadeAutoChosenOnStartup());
 			XMLUtil.setAttribute(e, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING,
-								 JAPModel.getInstance().isNonAnonymousSurfingDenied());
+								 JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_CONFIG_ASSISTANT, m_bShowConfigAssistant);
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_SPLASH_SCREEN, m_Model.getShowSplashScreen());
 

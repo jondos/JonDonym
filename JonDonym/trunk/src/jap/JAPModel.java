@@ -690,7 +690,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		return m_connectionChecker.checkAnonConnected();
 	}
 
-	public boolean isNonAnonymousSurfingDenied()
+	public boolean isAskForAnyNonAnonymousRequest()
 	{
 		return m_bDenyNonAnonymousSurfing;
 	}
