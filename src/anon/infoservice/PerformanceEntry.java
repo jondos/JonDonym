@@ -19,6 +19,7 @@ import anon.util.XMLUtil;
 import anon.util.XMLParseException;
 import anon.util.IXMLEncodable;
 
+
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
 	private static final double BOUND_ROUNDING = 0.2d; // remove the x% worst results
@@ -542,7 +543,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public static final long DEFAULT_TIMEFRAME = 60 * 60 * 1000; // 60 minutes
 		
-		public long m_timeFrame;
 		public int m_attribute;
 		public long m_lastUpdate;
 		
@@ -553,14 +553,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public PerformanceAttributeFloatingTimeEntry(int a_attribute, boolean a_bInfoService)
 		{
-			m_timeFrame = DEFAULT_TIMEFRAME;
 			m_attribute = a_attribute;
 			m_bInfoService = a_bInfoService;
 		}
 		
 		public PerformanceAttributeFloatingTimeEntry(int a_attribute, Node a_node)
 		{
-			m_timeFrame = DEFAULT_TIMEFRAME;
 			m_attribute = a_attribute;
 			m_bInfoService = false;
 			
@@ -577,23 +575,26 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		public void addValue(long a_lTimeStamp, int a_lValue)
 		{
-			if(System.currentTimeMillis() - a_lTimeStamp > m_timeFrame)
+			if (System.currentTimeMillis() - a_lTimeStamp > DEFAULT_TIMEFRAME)
 			{
 				return;
 			}
 			
 			Long timestamp;
 			
-			Enumeration e = m_Values.keys();
-			
-			m_Values.put(new Long(a_lTimeStamp), new Integer(a_lValue));
-			
-			while(e.hasMoreElements())
+			synchronized (m_Values)
 			{
-				timestamp = (Long) e.nextElement();
-				if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
+				Enumeration e = m_Values.keys();
+				
+				m_Values.put(new Long(a_lTimeStamp), new Integer(a_lValue));
+				
+				while (e.hasMoreElements())
 				{
-					m_Values.remove(timestamp);
+					timestamp = (Long) e.nextElement();
+					if (System.currentTimeMillis() - timestamp.longValue() > DEFAULT_TIMEFRAME)
+					{
+						m_Values.remove(timestamp);
+					}
 				}
 			}
 		}
@@ -627,7 +628,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				while(e.hasMoreElements())
 				{
 					timestamp = (Long) e.nextElement();
-					if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
+					if(System.currentTimeMillis() - timestamp.longValue() > DEFAULT_TIMEFRAME)
 					{
 						continue;
 					}
@@ -650,7 +651,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			{
 				return -1;
 			}
-			else if(values == 0)
+			else if (values == 0)
 			{
 				return 0;
 			}
@@ -662,16 +663,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			else
 			{
 				Util.sort(vec, new IntegerSortDesc());
+				//LogHolder.log(LogLevel.ALERT, LogType.MISC, vec.toString());
 			}
 			
-			int limit = (int) Math.floor(vec.size() / 10);
+			int limit = (int) Math.floor((double)vec.size() * BOUND_ROUNDING);
 			
-			for(int i = 0; i < limit; i++)
+			for (int i = 0; i < limit; i++)
 			{
-				vec.removeElementAt(i);
+				vec.removeElementAt(0);
 			}
 			
-			if(vec.elementAt(0) != null)
+			if (vec.size() > 0)
 			{
 				int value = ((Integer) vec.elementAt(0)).intValue();
 			
@@ -679,7 +681,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				{
 					for (int i = BOUNDARIES[m_attribute].length -1 ; i >= 0; i--)
 					{
-						if(value >= BOUNDARIES[m_attribute][i])
+						if (value >= BOUNDARIES[m_attribute][i])
 						{
 							return BOUNDARIES[m_attribute][i];
 						}
@@ -689,7 +691,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				{
 					for (int i = 0; i < BOUNDARIES[m_attribute].length; i++)
 					{
-						if(value <= BOUNDARIES[m_attribute][i])
+						if (value <= BOUNDARIES[m_attribute][i])
 						{
 							return BOUNDARIES[m_attribute][i];
 						}
@@ -718,26 +720,29 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			long errors = 0;
 			Long timestamp;
 			
-			Enumeration e = m_Values.keys();
-			
-			while(e.hasMoreElements())
+			synchronized (m_Values)
 			{
-				timestamp = (Long) e.nextElement();
-				if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
-				{
-					continue;
-				}
+				Enumeration e = m_Values.keys();
 				
-				value = ((Integer) m_Values.get(timestamp)).intValue();
-				
-				if(value < 0)
+				while(e.hasMoreElements())
 				{
-					errors++;
-				}
-				else
-				{
-					values++;
-					lAverageValue += value;
+					timestamp = (Long) e.nextElement();
+					if(System.currentTimeMillis() - timestamp.longValue() > DEFAULT_TIMEFRAME)
+					{
+						continue;
+					}
+					
+					value = ((Integer) m_Values.get(timestamp)).intValue();
+					
+					if(value < 0)
+					{
+						errors++;
+					}
+					else
+					{
+						values++;
+						lAverageValue += value;
+					}
 				}
 			}
 			
@@ -771,26 +776,29 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			long mseValue = 0;
 			Long timestamp;
 			
-			Enumeration e = m_Values.keys();
-			
-			while(e.hasMoreElements())
+			synchronized (m_Values)
 			{
-				timestamp = (Long) e.nextElement();
-				if(System.currentTimeMillis() - timestamp.longValue() > m_timeFrame)
-				{
-					continue;
-				}
+				Enumeration e = m_Values.keys();
 				
-				value = ((Integer) m_Values.get(timestamp)).intValue();
-				
-				if(value < 0)
+				while(e.hasMoreElements())
 				{
-					errors++;
-				}
-				else
-				{
-					values++;
-					mseValue += Math.pow(value - getAverage(), 2);
+					timestamp = (Long) e.nextElement();
+					if(System.currentTimeMillis() - timestamp.longValue() > DEFAULT_TIMEFRAME)
+					{
+						continue;
+					}
+					
+					value = ((Integer) m_Values.get(timestamp)).intValue();
+					
+					if(value < 0)
+					{
+						errors++;
+					}
+					else
+					{
+						values++;
+						mseValue += Math.pow(value - getAverage(), 2);
+					}
 				}
 			}
 			
@@ -805,7 +813,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			else
 			{
-				mseValue /= m_Values.size();
+				mseValue /= values;
 				// standard deviation
 				return Math.sqrt(mseValue);
 			}
@@ -927,16 +935,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			else
 			{
 				Util.sort(vec, new IntegerSortDesc());
+				//LogHolder.log(LogLevel.ALERT, LogType.MISC, vec.toString());
 			}
 			
 			int limit = (int) Math.floor((double)vec.size() * BOUND_ROUNDING);
 			
-			for(int i = 0; i < limit; i++)
+			for (int i = 0; i < limit; i++)
 			{
-				vec.removeElementAt(i);
+				vec.removeElementAt(0);
 			}
 			
-			if(vec.size() > 0)
+			if (vec.size() > 0)
 			{
 				int value = ((Integer) vec.elementAt(0)).intValue();
 				
@@ -955,7 +964,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				{
 					for (int i = 0; i < BOUNDARIES[m_attribute].length; i++)
 					{
-						if(value <= BOUNDARIES[m_attribute][i])
+						if (value <= BOUNDARIES[m_attribute][i])
 						{
 							m_lBound = BOUNDARIES[m_attribute][i];
 							return;
