@@ -1092,8 +1092,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 								XMLUtil.parseAttribute(root, XML_ATTR_AUTO_CHOOSE_CASCADES, true));
 				JAPModel.getInstance().setAutoChooseCascadeOnStartup(
 								XMLUtil.parseAttribute(root, XML_ATTR_AUTO_CHOOSE_CASCADES_ON_STARTUP, true));
-				JAPModel.getInstance().denyNonAnonymousSurfing(
-								XMLUtil.parseAttribute(root, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING, false));
+				JAPModel.getInstance().setAskForAnyNonAnonymousRequest(
+								XMLUtil.parseAttribute(root, JAPModel.XML_ASK_FOR_NON_ANONYMOUS_SURFING, true));
 				
 				JAPModel.getInstance().initHelpPath(
 								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
@@ -2391,7 +2391,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 								 JAPModel.getInstance().isCascadeAutoSwitched());
 			XMLUtil.setAttribute(e, XML_ATTR_AUTO_CHOOSE_CASCADES_ON_STARTUP,
 								 JAPModel.getInstance().isCascadeAutoChosenOnStartup());
-			XMLUtil.setAttribute(e, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING,
+			XMLUtil.setAttribute(e, JAPModel.XML_ASK_FOR_NON_ANONYMOUS_SURFING,
 								 JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_CONFIG_ASSISTANT, m_bShowConfigAssistant);
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_SPLASH_SCREEN, m_Model.getShowSplashScreen());
