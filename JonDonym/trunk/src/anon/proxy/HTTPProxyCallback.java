@@ -63,7 +63,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			}
 			if(connHeader != null)
 			{
-				String request_line = connHeader.getRequestHeader(HTTP_START_LINE_KEY);
+				String request_line = connHeader.getRequestLine();
 				boolean performMods = (request_line == null) ? false : !request_line.startsWith("CONNECT");
 				if(performMods)
 				{
@@ -93,7 +93,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			}
 			if(connHeader != null)
 			{
-				String request_line = connHeader.getRequestHeader(HTTP_START_LINE_KEY);
+				String request_line = connHeader.getRequestLine();
 				boolean performMods = (request_line == null) ? false : !request_line.startsWith("CONNECT");
 				if(performMods)
 				{
@@ -290,44 +290,138 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			setHeader(resHeaders, resHeaderOrder, header, value);
 		}
 		
-		protected synchronized String getRequestHeader(String header)
+		protected synchronized void replaceRequestHeader(String header, String value)
+		{
+			replaceHeader(reqHeaders, reqHeaderOrder, header, value);
+		}
+		
+		protected synchronized void replaceResponseHeader(String header, String value)
+		{
+			replaceHeader(resHeaders, resHeaderOrder, header, value);
+		}
+		
+		protected synchronized String getRequestLine()
+		{
+			return getStartLine(reqHeaders);
+		}
+		
+		protected synchronized String getResponseLine()
+		{
+			return getStartLine(resHeaders);
+		}
+		
+		protected synchronized String[] getRequestHeader(String header)
 		{
 			return getHeader(reqHeaders, header);
 		}
 		
-		protected synchronized String getResponseHeader(String header)
+		protected synchronized String[] getResponseHeader(String header)
 		{
 			return getHeader(resHeaders, header);
 		}
 		
-		protected synchronized String removeRequestHeader(String header)
+		protected synchronized String[] removeRequestHeader(String header)
 		{
 			return removeHeader(reqHeaders, reqHeaderOrder, header);
 		}
 		
-		protected synchronized String removeResponseHeader(String header)
+		protected synchronized String[] removeResponseHeader(String header)
 		{
 			return removeHeader(resHeaders, resHeaderOrder, header);
 		}
 		
 		private void setHeader(Hashtable headerMap, Vector headerOrder, String header, String value)
 		{
-			if(headerMap.get(header) == null)
+			Vector valueContainer = (Vector) headerMap.get(header.toLowerCase());
+			if(valueContainer == null)
 			{
-				headerOrder.addElement(header);
+				/* it's possible that a header was removed but is still in the order list. 
+				 * because when a header is removed, it is not deleted from there.
+				 * this is convenient for replacing headers but can cause side effects.
+				 * (Removing and the setting a header will set the header in the place where 
+				 * it first was). 
+				 */
+				boolean addToOrder = true;
+				for(Enumeration enumeration = headerOrder.elements(); enumeration.hasMoreElements();)
+				{
+					String aktheader = (String) enumeration.nextElement();
+					if(aktheader.equalsIgnoreCase(header))
+					{
+						addToOrder = false;
+					}
+				}
+				if(addToOrder)
+				{
+					headerOrder.addElement(header);
+				}
+				valueContainer = new Vector();
 			}
-			headerMap.put(header, value);
+			valueContainer.addElement(value);
+			headerMap.put(header.toLowerCase(), valueContainer);
+		}
+		private void replaceHeader(Hashtable headerMap, Vector headerOrder, String header, String value)
+		{
+			removeHeader(headerMap, headerOrder, header);
+			setHeader(headerMap, headerOrder, header, value);
 		}
 		
-		private String getHeader(Hashtable headerMap, String header)
+		private String[] getHeader(Hashtable headerMap, String header)
 		{
-			return (String) headerMap.get(header);
+			Vector valueContainer = (Vector) headerMap.get(header.toLowerCase());
+			return valuesToArray(valueContainer);
 		}
 		
-		private String removeHeader(Hashtable headerMap, Vector headerOrder, String header)
+		private String[] removeHeader(Hashtable headerMap, Vector headerOrder, String header)
 		{
-			headerOrder.removeElement(header);
-			return (String) headerMap.remove(header);
+			/*for(Enumeration enumeration = headerOrder.elements(); enumeration.hasMoreElements();)
+			{
+				String aktheader = (String) enumeration.nextElement();
+				if(aktheader.equalsIgnoreCase(header))
+				{
+					headerOrder.remove(aktheader);
+				}
+			}*/
+			/* header is not removed from the order list: beware of side-effects */
+			Vector valueContainer = (Vector) headerMap.remove(header.toLowerCase());
+			return valuesToArray(valueContainer);
+		}
+		
+		private String getStartLine(Hashtable headerMap)
+		{
+			Vector valueContainer = (Vector) headerMap.get(HTTP_START_LINE_KEY.toLowerCase());
+			String[] startlineRet = valuesToArray(valueContainer);
+			if(startlineRet.length > 1)
+			{
+				String errOutput = "";
+				for (int i = 0; i < startlineRet.length; i++) 
+				{
+					errOutput+= startlineRet[i]+"\n";
+				}
+				LogHolder.log(LogLevel.ERR, LogType.NET, 
+						"This HTTP message seems to be invalid, because it has multiple start lines:\n"
+					+errOutput);
+			}
+			return startlineRet[0];
+		}
+		
+		private String[] valuesToArray(Vector valueContainer)
+		{
+			if(valueContainer == null)
+			{
+				return null;
+			}
+			int valueCount = valueContainer.size();
+			if(valueCount == 0)
+			{
+				return null;
+			}
+			String[] values = new String[valueCount];
+			Enumeration enumeration = valueContainer.elements();
+			for(int i = 0; enumeration.hasMoreElements(); i++)
+			{
+				values[i] = (String) enumeration.nextElement();
+			}
+			return values;
 		}
 		
 		private byte[] dumpRequestHeader()
@@ -348,15 +442,35 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			for(Enumeration enumeration = headerOrder.elements(); enumeration.hasMoreElements(); )
 			{
 				header = (String) enumeration.nextElement();
-				value = (String) headerMap.get(header);
-				if(value != null)
+				if(header.equalsIgnoreCase(HTTP_START_LINE_KEY))
 				{
-					allHeaders += (header.equals(HTTP_START_LINE_KEY)) ? 
-							value+CRLF : header+": "+value+CRLF;
+					if(!allHeaders.equals(""))
+					{
+						LogHolder.log(LogLevel.ERR, LogType.NET, "HTTP startline set after Message-Header. " +
+								"This is a Bug. please report this.");
+						throw new  IllegalStateException("HTTP startline set after Message-Header. " +
+								"This is a Bug. please report this.");
+					}
+					allHeaders += getStartLine(headerMap)+CRLF;
+				}
+				else
+				{
+					String[] values = getHeader(headerMap, header);
+					if(values != null)
+					{
+						allHeaders += header+": ";
+						for (int i = 0; i < values.length; i++) 
+						{
+							//allHeaders += header+": "+values[i]+CRLF;
+							allHeaders += values[i];
+							allHeaders += (i == values.length - 1) ? CRLF : ", ";
+						}
+					}
 				}
 			}
+			
 			allHeaders += CRLF;
-			LogHolder.log(LogLevel.INFO, LogType.NET, "header dump:\n"+allHeaders);
+			LogHolder.log(LogLevel.INFO, LogType.NET, Thread.currentThread().getName()+": header dump:\n"+allHeaders);
 			return allHeaders.getBytes();
 		}
 		

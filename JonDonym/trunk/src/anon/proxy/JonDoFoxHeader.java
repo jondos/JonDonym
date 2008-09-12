@@ -12,7 +12,7 @@ public final class JonDoFoxHeader extends HTTPProxyCallback {
 	{
 		if(connHeader != null)
 		{
-			String domain = connHeader.getRequestHeader(HTTP_START_LINE_KEY);
+			String domain = connHeader.getRequestLine();
 			if(domain != null)
 			{
 				int afterMethod = domain.indexOf(" ");
@@ -26,17 +26,19 @@ public final class JonDoFoxHeader extends HTTPProxyCallback {
 						if(slashix != -1)
 						{
 							domain = domain.substring(0,slashix+1);
-							connHeader.setRequestHeader(HTTP_REFERER, domain);
+							connHeader.replaceRequestHeader(HTTP_REFERER, domain);
 						}
 					}
 				}
 			}
 			
-			connHeader.setRequestHeader(HTTP_USER_AGENT, JONDOFOX_USER_AGENT);
-			connHeader.setRequestHeader(HTTP_ACCEPT_LANGUAGE, JONDOFOX_LANGUAGE);
-			connHeader.setRequestHeader(HTTP_ACCEPT_CHARSET, JONDOFOX_CHARSET);
-			connHeader.setRequestHeader(HTTP_ACCEPT, JONDOFOX_CONTENT_TYPES);
-			connHeader.setRequestHeader(HTTP_ACCEPT_ENCODING, JONDOFOX_ENCODING);
+			connHeader.replaceRequestHeader(HTTP_USER_AGENT, JONDOFOX_USER_AGENT);
+			connHeader.replaceRequestHeader(HTTP_ACCEPT_LANGUAGE, JONDOFOX_LANGUAGE);
+			connHeader.replaceRequestHeader(HTTP_ACCEPT_CHARSET, JONDOFOX_CHARSET);
+			connHeader.replaceRequestHeader(HTTP_ACCEPT, JONDOFOX_CONTENT_TYPES);
+			connHeader.replaceRequestHeader(HTTP_ACCEPT_ENCODING, JONDOFOX_ENCODING);
+			/*connHeader.removeRequestHeader(HTTP_KEEP_ALIVE);
+			connHeader.replaceRequestHeader(HTTP_PROXY_CONNECTION, "close");*/
 			connHeader.removeRequestHeader(HTTP_IE_UA_CPU);
 		}
 	}
