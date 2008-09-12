@@ -74,7 +74,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final String XML_REMIND_OPTIONAL_UPDATE = "remindOptionalUpdate";
 	public static final String XML_REMIND_JAVA_UPDATE = "remindJavaUpdate";
 	public static final String XML_RESTRICT_CASCADE_AUTO_CHANGE = "restrictCascadeAutoChange";
-	public static final String XML_DENY_NON_ANONYMOUS_SURFING = "denyUnprotectedSurfing";
+	public static final String XML_ASK_FOR_NON_ANONYMOUS_SURFING = "askForUnprotectedSurfing";
 	public static final String XML_ATTR_ACTIVATED = "activated";
 	public static final String XML_FONT_SIZE = "fontSize";
 	public static final String XML_CONFIG_WINDOW = "ConfigWindow";
@@ -103,7 +103,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final Integer CHANGED_AUTO_CONNECT = new Integer(5);
 	public static final Integer CHANGED_AUTO_RECONNECT = new Integer(6);
 	public static final Integer CHANGED_CASCADE_AUTO_CHANGE = new Integer(7);
-	public static final Integer CHANGED_DENY_NON_ANONYMOUS = new Integer(8);
+	public static final Integer CHANGED_ASK_FOR_NON_ANONYMOUS = new Integer(8);
 	public static final Integer CHANGED_HELP_PATH = new Integer(9);
 	public static final Integer CHANGED_DLL_UPDATE = new Integer(10);
 	public static final Integer CHANGED_MACOSX_LIBRARY_UPDATE = new Integer(11);
@@ -145,7 +145,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	private boolean m_bAllowInfoServiceViaDirectConnection;
 	private boolean m_bAllowUpdateViaDirectConnection;
 
-	private boolean m_bDenyNonAnonymousSurfing;
+	private boolean m_bAskForAnyNonAnonymousRequest;
 
 	private boolean m_bRemindOptionalUpdate;
 	private boolean m_bRemindJavaUpdate;
@@ -692,19 +692,19 @@ public final class JAPModel extends Observable implements IHelpModel
 
 	public boolean isAskForAnyNonAnonymousRequest()
 	{
-		return m_bDenyNonAnonymousSurfing;
+		return m_bAskForAnyNonAnonymousRequest;
 	}
 
-	public void denyNonAnonymousSurfing(boolean a_bDenyNonAnonymousSurfing)
+	public void setAskForAnyNonAnonymousRequest(boolean a_bAskForAnyNonAnonymousRequest)
 	{
 		synchronized (this)
 		{
-			if (m_bDenyNonAnonymousSurfing != a_bDenyNonAnonymousSurfing)
+			if (m_bAskForAnyNonAnonymousRequest != a_bAskForAnyNonAnonymousRequest)
 			{
-				m_bDenyNonAnonymousSurfing = a_bDenyNonAnonymousSurfing;
+				m_bAskForAnyNonAnonymousRequest = a_bAskForAnyNonAnonymousRequest;
 				setChanged();
 			}
-			notifyObservers(CHANGED_DENY_NON_ANONYMOUS);
+			notifyObservers(CHANGED_ASK_FOR_NON_ANONYMOUS);
 		}
 	}
 
