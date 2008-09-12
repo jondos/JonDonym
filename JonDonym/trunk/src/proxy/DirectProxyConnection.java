@@ -379,6 +379,11 @@ final class DirectProxyConnection implements Runnable
 			toClient.flush();
 			toClient.close();
 		}
+		catch (SocketException a_e)
+		{
+			// typically, the socket to browser is closed here
+			LogHolder.log(LogLevel.INFO, LogType.NET, "C(" + m_threadNumber + ") - Exception: ", a_e);
+		}
 		catch (Exception e)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, "C(" + m_threadNumber + ") - Exception: ", e);
@@ -398,7 +403,6 @@ final class DirectProxyConnection implements Runnable
 
 	private void badRequest()
 	{
-		new Exception().printStackTrace();
 		responseTemplate("400 Bad Request", "Bad request: " + m_requestLine);
 	}
 
