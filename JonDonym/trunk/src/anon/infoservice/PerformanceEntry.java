@@ -410,7 +410,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 
 		long dayTimestamp = getDayTimestamp(a_attribute, a_selectedDay);
 		
-		for(int hour = 0; hour < 24; hour++)
+		for (int hour = 0; hour < 24; hour++)
 		{
 			htmlData += "<tr>" +
 					"<td CLASS=\"name\">" + hour + ":00 - " + ((hour + 1) % 24) + ":00</td>";
@@ -420,7 +420,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			Calendar calLastTest = Calendar.getInstance();
 			calLastTest.setTime(new Date(m_lastTestTime));
 			
-			if(entry == null || System.currentTimeMillis() - dayTimestamp > 7 * 24 * 60 * 60 * 1000 )
+			if (entry == null || System.currentTimeMillis() - dayTimestamp > 7 * 24 * 60 * 60 * 1000 )
 			{
 				htmlData += "<td colspan=\"6\" align=\"center\">No data available</td>";
 			}
@@ -437,11 +437,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				
 				int bound = (entry == null ? -1 : entry.getBound());
 			
-				if(a_attribute == DELAY)
+				if (a_attribute == DELAY)
 				{
 					if(bound == Integer.MAX_VALUE)
 					{
 						htmlData += "> " + PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2];
+					}
+					else if (bound <= 0)
+					{
+						htmlData += "?";
 					}
 					else
 					{
@@ -453,6 +457,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					if(bound == 0)
 					{
 						htmlData += "< " + PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1];
+					}
+					else if (bound < 0 || bound == Integer.MAX_VALUE)
+					{
+						htmlData += "?";
 					}
 					else
 					{

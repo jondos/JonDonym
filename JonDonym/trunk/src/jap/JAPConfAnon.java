@@ -1967,7 +1967,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					}
 
 					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
-					long value;
+					int value;
 					
 					DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
 					df.applyPattern("#,####0.00");
@@ -1975,9 +1975,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					if(entry != null)
 					{
 						value = entry.getBound(PerformanceEntry.SPEED);						
-						if (value < 0)
+						if (value < 0 || value == Integer.MAX_VALUE)
 						{
-							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
+							m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 						}
 						else if(value == 0)
 						{
@@ -1990,9 +1990,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						
 													
 						value = entry.getBound(PerformanceEntry.DELAY);
-						if (value < 0)
+						if (value <= 0)
 						{
-							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
+							m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 						}
 						else if(value == Integer.MAX_VALUE)
 						{
@@ -2007,8 +2007,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					}
 					else
 					{
-						m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
-						m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
+						m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+						m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 					}
 					
 					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));
