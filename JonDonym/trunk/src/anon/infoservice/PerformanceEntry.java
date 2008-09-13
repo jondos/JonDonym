@@ -34,8 +34,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public static final int USERS = 2;
 	
 	public static final int[][] BOUNDARIES = new int[][] { 
-		{ 0, 50, 100, 200, 300, 400, 500, 750, 1000 },
-		{ 500, 750, 1000, 2000, 2500, 3000, 4000, 8000, Integer.MAX_VALUE},
+		{ 0, 50, 100, 200, 300, 400, 500, 750, 1000, 1500 },
+		{ 500, 750, 1000, 2000, 2500, 3000, 4000, 8000, Integer.MAX_VALUE },
 		{ 0 } };
 
 	private static final String XML_ATTR_ID = "id";
@@ -655,14 +655,22 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 			}
 			
-			if(values == 0 && errors > 0)
+			if (values == 0)
 			{
-				return -1;
+				if(errors > 0)
+				{
+					return -1;
+				}
+				else if (a_bLow)
+				{
+					return Integer.MAX_VALUE;
+				}
+				else 
+				{
+					return 0;
+				}
 			}
-			else if (values == 0)
-			{
-				return 0;
-			}
+			
 			
 			if(a_bLow)
 			{
