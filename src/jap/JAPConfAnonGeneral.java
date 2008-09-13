@@ -335,9 +335,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		panelRoot.add(m_cbAnonymizedHttpHeaders, c);
 		c.gridy++;
 		panelRoot.add(m_cbDenyNonAnonymousSurfing, c);
-		c.gridy++;
-		panelRoot.add(m_cbAutoBlacklist, c);
-		c.gridy++;
+		c.gridy++;		
 		panelRoot.add(m_cbAutoConnect, c);
 		c.gridy++;
 		panelRoot.add(m_cbAutoReConnect, c);
@@ -356,13 +354,15 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		c.gridwidth = 1;
 		c.insets = new Insets(10, 0, 0, 0);
 		panelRoot.add(m_cbAutoChooseCascadesOnStartup, c);
-		c.insets = new Insets(10, 10, 0, 10);
-
-
-
-		c.gridy++;
+		
 		c.gridx = 0;
+		c.gridy++;
 		c.weightx = 0.0;
+		c.gridwidth = 4;
+		c.insets = new Insets(10, 10, 0, 10);
+		panelRoot.add(m_cbAutoBlacklist, c);
+				
+		c.gridy++;				
 		c.gridwidth = 2;
 		//panelRoot.add(m_cbDummyTraffic, c);
 		panelRoot.add(new JLabel(JAPMessages.getString("ngConfAnonGeneralSendDummy")), c);
