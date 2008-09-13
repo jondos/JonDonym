@@ -167,7 +167,7 @@ public class PerformanceMeter implements Runnable, Observer
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
 		
 		readOldPerformanceData(m_currentWeek);
-		if(m_cal.get(Calendar.DAY_OF_WEEK) != 6)
+		if(m_cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY)
 		{
 			readOldPerformanceData(m_currentWeek - 1);
 		}
@@ -268,7 +268,6 @@ public class PerformanceMeter implements Runnable, Observer
 	
 	public void run() 
 	{
-		Thread performTestThread;
 		try
 		{
 			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
@@ -819,7 +818,7 @@ public class PerformanceMeter implements Runnable, Observer
         		
         		// speed in bit/s;
         		long lSpeed = (bytesRead * 8) / (responseEndTime - responseStartTime);
-        		if (lSpeed > Integer.MAX_VALUE)
+        		if (lSpeed <= 0 || lSpeed > Integer.MAX_VALUE)
         		{
         			speed = Integer.MAX_VALUE;
         		}

@@ -220,6 +220,8 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		
 		if(vPerfEntries.size() == 0)
 		{
+			perfEntry.setBound(PerformanceEntry.SPEED, Integer.MAX_VALUE);
+			perfEntry.setBound(PerformanceEntry.DELAY, 0);
 			return perfEntry;
 		}
 		
