@@ -1158,6 +1158,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if(m_filterPanel != null && m_filterPanel.isVisible())
 		{
+			if(m_previousTrustModel != TrustModel.getCustomFilter())
+			{
+				m_cmbCascadeFilter.setSelectedItem(m_previousTrustModel);
+			}
 			hideEditFilter();
 		}		
 	}
