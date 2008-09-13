@@ -201,14 +201,14 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				vPerfEntries.addElement(entry);
 				Integer value = new Integer(entry.getBound(PerformanceEntry.SPEED));
 				
-				if (value != Integer.MAX_VALUE && !vSpeedBoundaries.contains(value))
+				if (value.intValue() != Integer.MAX_VALUE && !vSpeedBoundaries.contains(value))
 				{
 					vSpeedBoundaries.addElement(value);
 				}
 				
 				value = new Integer(entry.getBound(PerformanceEntry.DELAY));
 				
-				if (value != 0 && !vDelayBoundaries.contains(value))
+				if (value.intValue() != 0 && !vDelayBoundaries.contains(value))
 				{
 					vDelayBoundaries.addElement(value);
 				}
