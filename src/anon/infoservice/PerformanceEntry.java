@@ -22,7 +22,7 @@ import anon.util.IXMLEncodable;
 
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
-	private static final double BOUND_ROUNDING = 0.2d; // remove the x% worst results
+	private static final double BOUND_ROUNDING = 0.15d; // remove the x% worst results
 	
 	public static final String XML_ELEMENT_CONTAINER_NAME = "PerformanceInfo";
 	public static final String XML_ELEMENT_NAME = "PerformanceEntry";	
