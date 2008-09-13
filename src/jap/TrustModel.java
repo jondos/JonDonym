@@ -473,16 +473,15 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
-
-			// no performance data
-			if (entry == null || entry.getBound(PerformanceEntry.SPEED) == Integer.MAX_VALUE) 
+			
+			if (entry == null || entry.getBound(PerformanceEntry.SPEED) == Integer.MAX_VALUE || // no performance data
+				minSpeed <= 0) // do not test speed, as all speed values are accepted
 			{
 				return;
 			}
 			
-			if(m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || 
-					entry.getBound(PerformanceEntry.SPEED) < 0 || 
-					entry.getBound(PerformanceEntry.SPEED) < minSpeed))
+			if (m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || 
+				entry.getBound(PerformanceEntry.SPEED) < minSpeed))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_SPEED)));
 			}
