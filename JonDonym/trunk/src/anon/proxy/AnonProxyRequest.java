@@ -430,6 +430,7 @@ public final class AnonProxyRequest implements Runnable
 			}
 			catch (Exception e)
 			{
+				LogHolder.log(LogLevel.ERR, LogType.NET, e);
 			}
 			try
 			{
