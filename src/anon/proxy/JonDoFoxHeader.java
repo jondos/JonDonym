@@ -37,8 +37,8 @@ public final class JonDoFoxHeader extends HTTPProxyCallback {
 			connHeader.replaceRequestHeader(HTTP_ACCEPT_CHARSET, JONDOFOX_CHARSET);
 			connHeader.replaceRequestHeader(HTTP_ACCEPT, JONDOFOX_CONTENT_TYPES);
 			connHeader.replaceRequestHeader(HTTP_ACCEPT_ENCODING, JONDOFOX_ENCODING);
-			/*connHeader.removeRequestHeader(HTTP_KEEP_ALIVE);
-			connHeader.replaceRequestHeader(HTTP_PROXY_CONNECTION, "close");*/
+			//connHeader.removeRequestHeader(HTTP_KEEP_ALIVE);
+			//connHeader.replaceRequestHeader(HTTP_PROXY_CONNECTION, "close");
 			connHeader.removeRequestHeader(HTTP_IE_UA_CPU);
 		}
 	}
