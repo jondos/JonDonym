@@ -31,9 +31,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.Socket;
-import java.util.Arrays;
 
 import anon.AnonChannel;
 import anon.NotConnectedToMixException;
@@ -290,7 +288,6 @@ public final class AnonProxyRequest implements Runnable
 						dsChunk = m_callbackHandler.deliverUpstreamChunk(this, buff, len);
 						if(dsChunk == null)
 						{
-							Arrays.fill(buff, (byte)0);
 							aktPos = 0;
 							continue;
 						}
