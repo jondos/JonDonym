@@ -37,11 +37,18 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 
-
+/**
+ * Provides functionality for parsing and storing the headers of a
+ * HTTP-Connection. Invoked by the ProxyCallbackHandler framework.
+ * Inheriting from this class and implementing the abstract handler functions
+ * allows examining and modifying of rthe correspondende HTTP messages before it is
+ * transmitted further.
+ * @author Simon Pecher
+ */
 public abstract class HTTPProxyCallback implements ProxyCallback
 {
-	final static int HEADER_TYPE_REQUEST = 0;
-	final static int HEADER_TYPE_RESPONSE = 1;
+	final static int MESSAGE_TYPE_REQUEST = 0;
+	final static int MESSAGE_TYPE_RESPONSE = 1;
 	
 	final static String CRLF = "\r\n";
 	final static String HTTP_HEADER_END = CRLF+CRLF; //end of http message headers
@@ -65,7 +72,15 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 	public final String HTTP_PRAGMA = "Pragma";
 	public final String HTTP_IE_UA_CPU = "UA-CPU";	
 	
-	private Hashtable m_connectionHTTPHeaders = null; //saves the HTTP Header
+	/** Container for the Headers of a whole HTTP Connection
+	 * including Request and Response. 
+	 */
+	private Hashtable m_connectionHTTPHeaders = null;
+	/** request messages whose parsing hasn't finished yet */
+	private Hashtable m_unfinishedRequests = null;
+	/** response messages whose parsing hasn't finished yet */
+	private Hashtable m_unfinishedResponses = null;
+	
 	private static final IHTTPHelper UPSTREAM_HELPER = new IHTTPHelper()
 	{
 		public byte[] dumpHeader(HTTPProxyCallback a_callback, HTTPConnectionHeader a_header)
@@ -86,26 +101,53 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 	public HTTPProxyCallback()
 	{
 		m_connectionHTTPHeaders = new Hashtable();
+		m_unfinishedRequests = new Hashtable();
+		m_unfinishedResponses = new Hashtable();
 	}
 	
 	public byte[] handleUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
 	{
-		return handleStreamChunk(anonRequest, chunk, len, HEADER_TYPE_REQUEST, UPSTREAM_HELPER);
+		return handleStreamChunk(anonRequest, chunk, len, MESSAGE_TYPE_REQUEST, UPSTREAM_HELPER);
+		//return chunk;
 	}
 	
 	public byte[] handleDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
 	{
-		return handleStreamChunk(anonRequest, chunk, len, HEADER_TYPE_RESPONSE, DOWNSTREAM_HELPER);
+		return handleStreamChunk(anonRequest, chunk, len, MESSAGE_TYPE_RESPONSE, DOWNSTREAM_HELPER);
+		//return chunk;
 	}
-	
+
 	private byte[] handleStreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len, 
-			int a_headerType, IHTTPHelper a_helper)
+			int a_messageType, IHTTPHelper a_helper)
 	{
-		String chunkData = new String(chunk);
-		int content = (int) getLengthOfPayloadBytes(chunkData, len);
-		if(content != len)
+		
+		/* Does only work with a valid AnonProxy reference */
+		if(anonRequest == null)
 		{
-			extractHeaderParts(anonRequest, chunkData, a_headerType);
+			throw new NullPointerException("AnonProxyRequest must not be null!");
+		}
+		Hashtable unfinishedMessages = 
+			(a_messageType == MESSAGE_TYPE_REQUEST) ? 
+				m_unfinishedRequests : m_unfinishedResponses;
+		
+		/* check if header parsing already started but hasn't finished yet for this AnonRequest */
+		String unfinishedHeaderPart = (String) unfinishedMessages.get(anonRequest);
+		String chunkData = new String(chunk, 0, len);
+		chunkData = ((unfinishedHeaderPart != null) ? unfinishedHeaderPart : "") + chunkData;
+		
+		int content = (int) getLengthOfPayloadBytes(chunkData);
+	
+		if( hasAlignedHTTPStartLine(chunkData, a_messageType) )
+		{
+			boolean finished = extractHeaderParts(anonRequest, chunkData, a_messageType);
+			if(!finished)
+			{
+				/* if header parsing hasn't finished yet:
+				 * chunk can be delivered with delay by returning null for now and
+				 * the rest later on.
+				 */
+				return null;
+			}
 			HTTPConnectionHeader connHeader;
 			synchronized (m_connectionHTTPHeaders)
 			{
@@ -115,11 +157,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			if(connHeader != null)
 			{
 				String request_line = connHeader.getRequestLine();
-				/*
-				if (request_line == null)
-				{
-					System.out.println("**\n" + chunkData + "**");
-				}*/
+		
 				boolean performMods = (request_line == null) ? false : !request_line.startsWith("CONNECT");
 				if(performMods)
 				{
@@ -134,6 +172,7 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 		return chunk;		
 	}
 	
+	
 	private interface IHTTPHelper
 	{
 		byte[] dumpHeader(HTTPProxyCallback a_callback, HTTPConnectionHeader a_header);
@@ -147,16 +186,15 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 	 * 	extract headers from data chunk
 	 * returns false if header could not be extracted
 	 */
-	private boolean extractHeaderParts(AnonProxyRequest anonRequest, String chunkData, int headerType)
+	private boolean extractHeaderParts(AnonProxyRequest anonRequest, String chunkData, int messageType)
 	{
-		// assumes, that the complete header fits into a whole chunk and the chunk is aligned.
-		//Works in almost every case, but should work with every chunk size.
+		// assumes, that the chunk is aligned.
+		//Works in almost every case.
 		
 		if(anonRequest == null)
 		{
-			return false;
+			throw new NullPointerException("AnonProxyRequest must not be null!");
 		}
-		
 		HTTPConnectionHeader connHeader = null;
 		
 		synchronized(m_connectionHTTPHeaders)
@@ -164,11 +202,17 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			connHeader = (HTTPConnectionHeader) 
 				m_connectionHTTPHeaders.get(anonRequest);
 			
-			if( (connHeader != null) && connHeader.isFinished() )
+			if( (connHeader != null) )
 			{
-				//This is an old one: replace it with a new one
-				m_connectionHTTPHeaders.remove(anonRequest);
-				connHeader = null;
+				/* old http messages already delivered by this AnonProxyRequest-Thread can be removed */ 
+				if((messageType == MESSAGE_TYPE_REQUEST) && connHeader.isRequestFinished())
+				{
+					connHeader.clearRequest();
+				}
+				else if ((messageType == MESSAGE_TYPE_RESPONSE) && connHeader.isResponseFinished())
+				{
+					connHeader.clearResponse();
+				}
 			}
 			
 			if ( connHeader == null )
@@ -178,55 +222,59 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			}
 		}
 		
-		int off_firstline= chunkData.indexOf(HTTP_VERSION_PREFIX);
-		int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
-		if( (off_firstline != -1)  && (off_headers_end != -1) )
+		if(hasAlignedHTTPStartLine(chunkData, messageType))
 		{
-			//Because it is assumed that the chunk is aligned: the HTTP message starts at index 0
-			parseHTTPHeader(chunkData.substring(0, off_headers_end), connHeader, headerType);
-			//Also the whole chunk must fit in a single chunk: after parsing the 
-			//response headers we are finished.
-			if(headerType == HEADER_TYPE_RESPONSE)
+			Hashtable unfinishedMessages = 
+				(messageType == MESSAGE_TYPE_REQUEST) ? 
+					m_unfinishedRequests : m_unfinishedResponses;
+			int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
+
+			if((off_headers_end != -1))
 			{
-				connHeader.setFinished(true);
-			}
-			return true;
-		}
-		return false;
-		
-		/*
-		String chunkPart = new String(chunk);
-		
-		// already started extracting the headers but not finished yet
-		String currentHeaderPart = (String) headerParts.get(Thread.currentThread());
-		if(currentHeaderPart != null)
-		{
-			
-		}
-		//case: we don't have started extracting the HTTP headers
-		else
-		{
-			int http_headers_start = chunkPart.indexOf(HTTP_VERSION_PREFIX);
-			if(http_headers_start == -1)
-			{
-				for (int i = 0; i < HTTP_REQUEST_METHODS.length; i++) 
+				//Because it is assumed that the chunk is aligned: the HTTP message starts at index 0
+				parseHTTPHeader(chunkData.substring(0, off_headers_end), connHeader, messageType);
+				if(messageType == MESSAGE_TYPE_REQUEST)
 				{
-					http_headers_start = chunkPart.indexOf(HTTP_REQUEST_METHODS[i]);
-					if(http_headers_start != -1)
-					{
-						break;
-					}
+					connHeader.setRequestFinished(true);
 				}
+				else if (messageType == MESSAGE_TYPE_RESPONSE)
+				{
+					connHeader.setResponseFinished(true);
+				}
+				unfinishedMessages.remove(anonRequest);
+				return true;
 			}
-			//In this case we receive the first chunk
-			if(http_headers_start == -1)
+			else 
 			{
+				unfinishedMessages.put(anonRequest, chunkData);
 				return false;
 			}
-		}*/
+		}
+		return false;
 	}
 	
-	protected long getLengthOfPayloadBytes(String chunkData, int len)
+	private boolean hasAlignedHTTPStartLine(String chunkData, int messageType)
+	{
+		return (messageType == MESSAGE_TYPE_REQUEST) ? isRequest(chunkData) : isResponse(chunkData);
+	}
+	
+	private boolean isRequest(String chunkData)
+	{
+		for (int i = 0; i < HTTP_REQUEST_METHODS.length; i++) {
+			if( chunkData.startsWith(HTTP_REQUEST_METHODS[i]) )
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isResponse(String chunkData)
+	{
+		return chunkData.startsWith(HTTP_VERSION_PREFIX);
+	}
+	
+	protected long getLengthOfPayloadBytes(String chunkData)
 	{	
 		int off_firstline= chunkData.indexOf(HTTP_VERSION_PREFIX);
 		int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
@@ -236,9 +284,9 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			{
 				return 0l;
 			}
-			return (long) (len - (off_headers_end+HTTP_HEADER_END.length())); 
+			return (long) (chunkData.length() - (off_headers_end+HTTP_HEADER_END.length())); 
 		}
-		return (long) len;
+		return (long) chunkData.length();
 	}
 	
 	private static void parseHTTPHeader(String headerData, HTTPConnectionHeader connHeader, int headerType)
@@ -251,11 +299,11 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 		String header = null;
 		String key = null;
 		String value = null;
-		if(headerType == HEADER_TYPE_REQUEST)
+		if(headerType == MESSAGE_TYPE_REQUEST)
 		{
 			connHeader.setRequestHeader(HTTP_START_LINE_KEY, lineTokenizer.nextToken());
 		}
-		else if (headerType == HEADER_TYPE_RESPONSE)
+		else if (headerType == MESSAGE_TYPE_RESPONSE)
 		{
 			connHeader.setResponseHeader(HTTP_START_LINE_KEY, lineTokenizer.nextToken());
 		}
@@ -272,11 +320,11 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 				}
 				if( (key != null) && (value != null) )
 				{
-					if(headerType == HEADER_TYPE_REQUEST)
+					if(headerType == MESSAGE_TYPE_REQUEST)
 					{
 						connHeader.setRequestHeader(key, value);
 					}
-					else if (headerType == HEADER_TYPE_RESPONSE)
+					else if (headerType == MESSAGE_TYPE_RESPONSE)
 					{
 						connHeader.setResponseHeader(key, value);
 					}
@@ -293,18 +341,32 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 		private Vector reqHeaderOrder = new Vector();
 		private Vector resHeaderOrder = new Vector();
 		
-		private boolean finished = false;
+		private boolean requestFinished = false;
+		private boolean responseFinished = false;
 		
-		public synchronized boolean isFinished() 
+		public synchronized boolean isResponseFinished() 
 		{
-			return finished;
+			return responseFinished;
 		}
 
-		public synchronized void setFinished(boolean finished) 
+		public synchronized void setResponseFinished(boolean responseFinished) 
 		{
-			this.finished = finished;
+			this.responseFinished = responseFinished;
 		}
 
+		public synchronized boolean isRequestFinished() 
+		{
+			return requestFinished;
+		}
+
+		public synchronized void setRequestFinished(boolean finished) 
+		{
+			this.requestFinished = finished;
+		}
+
+		/*
+		 * methods for checking or modifying HTTP message headers
+		 */
 		protected synchronized void setRequestHeader(String header, String value)
 		{
 			setHeader(reqHeaders, reqHeaderOrder, header, value);
@@ -355,6 +417,19 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			return removeHeader(resHeaders, resHeaderOrder, header);
 		}
 		
+		protected synchronized void clearRequest()
+		{
+			clearHeader(reqHeaders, reqHeaderOrder);
+		}
+		
+		protected synchronized void clearResponse()
+		{
+			clearHeader(resHeaders, resHeaderOrder);
+		}
+		
+		/* private util-fucntion area. All of these functions are not thread safe and are only to be accessed  
+		 * synchronized by the actual ConnectionHeader object
+		 */
 		private void setHeader(Hashtable headerMap, Vector headerOrder, String header, String value)
 		{
 			Vector valueContainer = (Vector) headerMap.get(header.toLowerCase());
@@ -411,12 +486,20 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 			return valuesToArray(valueContainer);
 		}
 		
+		private void clearHeader(Hashtable headerMap, Vector headerOrder)
+		{
+			headerMap.clear();
+			headerOrder.removeAllElements();
+		}
+		
 		private String getStartLine(Hashtable headerMap)
 		{
 			Vector valueContainer = (Vector) headerMap.get(HTTP_START_LINE_KEY.toLowerCase());
 			String[] startlineRet = valuesToArray(valueContainer);
 			if (startlineRet == null)
 			{
+				LogHolder.log(LogLevel.ERR, LogType.NET, "Invalid request because it contains no startline");
+				new Exception("DFg").printStackTrace();
 				return null;
 			}
 			if(startlineRet.length > 1)
@@ -487,17 +570,13 @@ public abstract class HTTPProxyCallback implements ProxyCallback
 					String[] values = getHeader(headerMap, header);
 					if(values != null)
 					{
-						allHeaders += header+": ";
 						for (int i = 0; i < values.length; i++) 
 						{
-							//allHeaders += header+": "+values[i]+CRLF;
-							allHeaders += values[i];
-							allHeaders += (i == values.length - 1) ? CRLF : ", ";
+							allHeaders += header+": "+values[i]+CRLF;
 						}
 					}
 				}
 			}
-			
 			allHeaders += CRLF;
 			LogHolder.log(LogLevel.INFO, LogType.NET, Thread.currentThread().getName()+": header dump:\n"+allHeaders);
 			return allHeaders.getBytes();

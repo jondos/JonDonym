@@ -49,6 +49,10 @@ public class ProxyCallbackHandler
 	
 	public synchronized byte[] deliverUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
 	{
+		if(anonRequest == null)
+		{
+			throw new NullPointerException("AnonProxyRequest must not be null!");
+		}
 		for (Enumeration enumeration = callbacks.elements(); enumeration.hasMoreElements();) 
 		{
 			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();
@@ -59,6 +63,10 @@ public class ProxyCallbackHandler
 	
 	public synchronized byte[] deliverDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
 	{
+		if(anonRequest == null)
+		{
+			throw new NullPointerException("AnonProxyRequest must not be null!");
+		}
 		for (Enumeration enumeration = callbacks.elements(); enumeration.hasMoreElements();) 
 		{
 			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();

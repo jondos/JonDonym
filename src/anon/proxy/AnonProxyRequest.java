@@ -31,7 +31,9 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.Socket;
+import java.util.Arrays;
 
 import anon.AnonChannel;
 import anon.NotConnectedToMixException;
@@ -242,6 +244,7 @@ public final class AnonProxyRequest implements Runnable
 			aktPos = 1;
 		}
 		byte[] buff = null;
+		byte[] dsChunk = null;
 		try
 		{
 			m_InChannel = newChannel.getInputStream();
@@ -284,7 +287,13 @@ public final class AnonProxyRequest implements Runnable
 				{
 					if(m_callbackHandler != null)
 					{
-						byte[] dsChunk = m_callbackHandler.deliverUpstreamChunk(this, buff, len);
+						dsChunk = m_callbackHandler.deliverUpstreamChunk(this, buff, len);
+						if(dsChunk == null)
+						{
+							Arrays.fill(buff, (byte)0);
+							aktPos = 0;
+							continue;
+						}
 						if(dsChunk != buff)
 						{
 							m_OutChannel.write(dsChunk);
@@ -311,10 +320,20 @@ public final class AnonProxyRequest implements Runnable
 					 * it out).
 					 * Solution: Send the remaining bytes again in the next write-call.
 					 */
-					byte[] tempBuff = new byte[buff.length - e.getBytesSent()];
-					System.arraycopy(buff, e.getBytesSent(), tempBuff, 0, tempBuff.length);
-					System.arraycopy(tempBuff, 0, buff, 0, tempBuff.length);
-					aktPos = tempBuff.length;
+					if(m_callbackHandler != null)
+					{
+						/*callback processing has most likely caused this exception
+						 * and needs another handling.
+						 */
+						sendRemainingBytesRecursion(dsChunk, e.getBytesSent(), m_OutChannel);
+					}
+					else
+					{
+						byte[] tempBuff = new byte[buff.length - e.getBytesSent()];
+						System.arraycopy(buff, e.getBytesSent(), tempBuff, 0, tempBuff.length);
+						System.arraycopy(tempBuff, 0, buff, 0, tempBuff.length);
+						aktPos = tempBuff.length;
+					}
 				}
 				// LogHolder.log(LogLevel.DEBUG,LogType.NET,"Channel
 				// "+Integer.toString(m_Channel.hashCode())+" Request Len: "+re+" Read:
@@ -331,6 +350,23 @@ public final class AnonProxyRequest implements Runnable
 		m_Proxy.decNumChannels();
 	}
 
+	private static void sendRemainingBytesRecursion(byte[] overfullBuffer, 
+													int sentBytes, 
+													OutputStream outputStream) throws IOException
+	{
+		byte[] tempBuff = new byte[overfullBuffer.length - sentBytes];
+		System.arraycopy(overfullBuffer, sentBytes, tempBuff, 0, tempBuff.length);
+		System.arraycopy(tempBuff, 0, overfullBuffer, 0, tempBuff.length);
+		try
+		{
+			outputStream.write(tempBuff);
+		}
+		catch(TooMuchDataForPacketException e)
+		{
+			sendRemainingBytesRecursion(tempBuff, e.getBytesSent(), outputStream);
+		}
+	}
+	
 	private synchronized void closeRequest()
 	{
 		if (m_bRequestIsAlive)
@@ -385,7 +421,7 @@ public final class AnonProxyRequest implements Runnable
 			try 
 			{	
 				len = m_InChannel.read(buff, 0, CHUNK_SIZE);
-				while ( len > 0)
+mainLoop:		while ( len > 0)
 				{
 					int count = 0;
 					for (; ; )
@@ -395,6 +431,11 @@ public final class AnonProxyRequest implements Runnable
 							if(m_callbackHandler != null)
 							{
 								byte[] dsChunk = m_callbackHandler.deliverDownstreamChunk(AnonProxyRequest.this, buff, len);
+								if(dsChunk == null)
+								{
+									len = m_InChannel.read(buff, 0, CHUNK_SIZE);
+									continue mainLoop;
+								}
 								if(dsChunk != buff)
 								{
 									m_OutSocket.write(dsChunk);
@@ -420,7 +461,7 @@ public final class AnonProxyRequest implements Runnable
 						count++;
 						if (count > 3)
 						{
-							throw new Exception("Could not send to Browser...");
+							throw new IOException("Could not send to Browser...");
 						}
 					}
 					m_Proxy.transferredBytes(len, m_iProtocol);
@@ -428,7 +469,7 @@ public final class AnonProxyRequest implements Runnable
 					len = m_InChannel.read(buff, 0, CHUNK_SIZE);
 				}
 			}
-			catch (Exception e)
+			catch (IOException e)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.NET, e);
 			}
@@ -436,25 +477,19 @@ public final class AnonProxyRequest implements Runnable
 			{
 				m_clientSocket.close();
 			}
-			catch (Exception e)
+			catch (IOException e)
 			{
 			}
 			try
 			{
 				Thread.sleep(500);
 			}
-			catch (Exception e)
+			catch (InterruptedException e)
 			{
 			}
 			if (m_bRequestIsAlive)
 			{
-				try
-				{
-					m_threadRequest.interrupt();
-				}
-				catch (Exception e)
-				{
-				}
+				m_threadRequest.interrupt();
 			}
 		}
 
