@@ -756,52 +756,6 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	}
 
 	/**
-	 * Returns the first JAPCertificate or CertificateInfostructure from the
-	 * Enumeration that could verify this JAPCertificate.  If you call this
-	 * Method with an Enumeration of JAPCertificates you will get a JAPCertificate
-	 * as return value, but you have to cast this. If you just check on != null you
-	 * do not have to make a ClassCast.
-	 * With CertificateInfoStructures it runs the same way.
-	 * Null is returned if there was no Verifier.
-	 * @param a_verifyingCertificates An Enumeration of JAPCertificates or
-	 *                                CertificateInfoStructures to verify
-	 *                                this JAPCertificate
-	 * @param checkValidity shall the Validity of the Certs be checked or not?
-	 * @return the first JAPCertificate or CertificateInfoStructure that verified
-	 *         this JAPCertificate or null if there was no Verifier
-	 */
-	public synchronized Object getVerifier(Enumeration a_verifyingCertificates, boolean checkValidity)
-	{
-		if(a_verifyingCertificates != null)
-		{
-			Date today = new Date();
-			while (a_verifyingCertificates.hasMoreElements())
-			{
-				Object object = a_verifyingCertificates.nextElement();
-				JAPCertificate certificate = null;
-				if(object instanceof JAPCertificate)
-				{
-					certificate = (JAPCertificate)object;
-				}
-				else if(object instanceof CertificateInfoStructure)
-				{
-					certificate = ((CertificateInfoStructure)object).getCertificate();
-				}
-				else
-				{ //the nextElement is neither a JAPCertificate nor a CertificateInfoStructure
-					continue;
-				}
-				if (this.verify(certificate) &&
-					! (checkValidity && ! (certificate.getValidity().isValid(today))))
-				{
-					return object;
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Checks if a given Certificate could be directly verified against a set of other certificates.
 	 * @param a_verifyingCertificates A Vector of JAPCertificates to verify this JAPCertificate.
 	 * @return True, if this certificate could be verified.

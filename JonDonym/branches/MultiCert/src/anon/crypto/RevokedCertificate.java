@@ -30,7 +30,6 @@ package anon.crypto;
 
 import java.math.BigInteger;
 import java.util.Date;
-import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -38,7 +37,6 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.Time;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.crypto.digests.GeneralDigest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 
@@ -68,7 +66,7 @@ public class RevokedCertificate
 	public RevokedCertificate(JAPCertificate a_cert, Date a_revocationDate, X509Extensions a_extensions)
 	{
 		m_revocationDate =  a_revocationDate;
-		m_serial =  checkSerial(a_cert);
+		m_serial =  getUniqueSerial(a_cert);
 		m_extensions = a_extensions;
 	}
 	
@@ -76,7 +74,6 @@ public class RevokedCertificate
 	{
 		m_serial =  checkSerial(a_serial);
 		m_revocationDate =  a_revocationDate;
-		m_extVector = new Vector();
 	}*/
 	
 	protected RevokedCertificate(TBSCertList.CRLEntry a_crlEntry)
@@ -89,18 +86,26 @@ public class RevokedCertificate
 		}
 	}
 	
-	private BigInteger checkSerial(JAPCertificate a_cert)
+	/**
+	 * If the cert's serial is greater than 1 then the serial is returned,
+	 * otherwise a pseudo-serial is created to uniquely identify the cert. 
+	 * @param a_cert the cert to get the unique serial
+	 * @return the serial of the cert of a pseudo-serial
+	 */
+	protected static BigInteger getUniqueSerial(JAPCertificate a_cert)
 	{
 		if(a_cert.getSerialNumber().equals(BigInteger.ZERO) || a_cert.getSerialNumber().equals(BigInteger.ONE))
 		{
-			if(a_cert != null) 
-			{
-				return createPseudoSerial(a_cert.toByteArray());
-			}
+			return createPseudoSerial(a_cert.toByteArray());
 		}
 		return a_cert.getSerialNumber();
 	}
 	
+	/**
+	 * Creates a pseudo-serial for a cert from the SHA1-value of its raw data.
+	 * @param a_rawCert
+	 * @return a pseudo-serial
+	 */
 	private static BigInteger createPseudoSerial(byte[] a_rawCert)
 	{
 		GeneralDigest digest = new SHA1Digest();
@@ -132,6 +137,12 @@ public class RevokedCertificate
 		return m_serial;
 	}
 	
+	/**
+	 * Checks if this RevokedCertificate contains a X509CertificateIssuer CRLEntry-Extension.
+	 * If so the contained distinguished name is returned, <code>null</code> otherwise
+	 * @return the certificate's issuer or <code>null</code> if the cert's issuer is the same
+	 *         as the crl's issuer
+	 */
 	public X509DistinguishedName getCertificateIssuer()
 	{
 		X509CertificateIssuer issuer;

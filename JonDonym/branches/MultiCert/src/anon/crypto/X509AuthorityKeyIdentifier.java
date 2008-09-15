@@ -146,6 +146,7 @@ public class X509AuthorityKeyIdentifier extends AbstractX509KeyIdentifier {
 		{
 			AuthorityKeyIdentifier aki = new AuthorityKeyIdentifier((DERSequence)new ASN1InputStream(
 					 new ByteArrayInputStream(getDEROctets())).readObject());
+			
 			identifier = aki.getKeyIdentifier();
 			m_value = ByteSignature.toHexString(identifier);
 			m_serial = aki.getAuthorityCertSerialNumber();

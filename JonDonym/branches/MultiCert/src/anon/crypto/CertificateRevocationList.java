@@ -68,6 +68,7 @@ import anon.util.XMLUtil;
  * This Class implements Certificate Revocation Lists (CRLs) as specified by RFC 5280.
  * @author Robert Hirschberger
  * @see http://tools.ietf.org/html/rfc5280
+ * @todo implement methods to change or update a crl.
  */
 public class CertificateRevocationList implements IXMLEncodable
 {	
@@ -81,6 +82,13 @@ public class CertificateRevocationList implements IXMLEncodable
 	private X509DistinguishedName m_issuer;
 	private X509Extensions m_extensions;
 	
+	/**
+	 * Creates a new crl.
+	 * @param a_issuerCertificate the crl's issuer
+	 * @param a_certList the vector of certificates to revoke
+	 * @param a_nextUpdate the date when the next crl will be published
+	 * @param a_extensions the extensions for the crl
+	 */
 	public CertificateRevocationList(
 			PKCS12 a_issuerCertificate,
 			Vector a_certList,
@@ -90,7 +98,11 @@ public class CertificateRevocationList implements IXMLEncodable
 		this(new CRLGenerator(a_issuerCertificate.getSubject().getX509Name(), 
 				a_certList, a_nextUpdate, a_extensions).sign(a_issuerCertificate));
 	}
-		
+	
+	/**
+	 * Creates a new instance of CertificateRevocationList from a BC CertificateList
+	 * @param a_crl a BC CertificateList
+	 */
 	public CertificateRevocationList(CertificateList a_crl)
 	{
 		m_crl = a_crl;
@@ -103,6 +115,11 @@ public class CertificateRevocationList implements IXMLEncodable
 		}
 	}
 	
+	/**
+	 * Creates a crl from a byte array
+	 * @param a_rawCRL the byte array holding the crl
+	 * @return an instance of CertificateRevocationList or <code>null</code> if an error occured
+	 */
 	public static CertificateRevocationList getInstance(byte[] a_rawCRL)
 	{
 		if (a_rawCRL == null || a_rawCRL.length == 0)
@@ -131,6 +148,11 @@ public class CertificateRevocationList implements IXMLEncodable
 		}
 	}
 	
+	/**
+	 * Create a crl from a file.
+	 * @param a_file a file containing a crl
+	 * @return an instance of CertificateRevocationList or <code>null</code> if an error occured
+	 */
 	public static CertificateRevocationList getInstance(File a_file)
 	{
 		if (a_file != null)
@@ -149,7 +171,7 @@ public class CertificateRevocationList implements IXMLEncodable
 	/** 
 	 * Creates a crl by using an input stream.
 	 * @param a_in Inputstream that holds the crl
-	 * @return the CRL
+	 * @return an instance of CertificateRevocationList or <code>null</code> if an error occured
 	 */
 	public static CertificateRevocationList getInstance(InputStream a_in)
 	{
@@ -167,6 +189,13 @@ public class CertificateRevocationList implements IXMLEncodable
 		return CertificateRevocationList.getInstance(bytes);
 	}
 	
+	/**
+	 * Method to get instances of CertificateRevocationList from files in the specified path
+	 * @param a_strResourceSearchPath
+	 * @param a_bRecursive
+	 * @param a_ignoreCertMark
+	 * @return
+	 */
 	public static Hashtable getInstance(String a_strResourceSearchPath, boolean a_bRecursive, String a_ignoreCertMark)
 	{
 		try
@@ -211,6 +240,10 @@ public class CertificateRevocationList implements IXMLEncodable
 		return m_extensions;
 	}
 	
+	/** 
+	 * Creates a vector of RevokedCertificates from the CRLEntries on this crl.
+	 * @return a vector of RevokedCertificates
+	 */
 	public Vector getRevokedCertificates()
 	{
 		Vector v = new Vector();
@@ -222,6 +255,10 @@ public class CertificateRevocationList implements IXMLEncodable
 		return v;
 	}
 	
+	/**
+	 * Convertes the crl to a byte array.
+	 * @return the crl as a byte array
+	 */
 	public byte[] toByteArray()
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -268,7 +305,12 @@ public class CertificateRevocationList implements IXMLEncodable
 		}
 	}
 	
-	
+	/**
+	 * Verifiy the crl with the given cert
+	 * @param a_cert the cert for the verification
+	 * @return <code>true</code> if the signature on the crl could be verified
+	 *         with the cert's public key or <code>false</code> otherwise.
+	 */
 	public boolean verifiy(JAPCertificate a_cert)
 	{
 		if(a_cert == null)
