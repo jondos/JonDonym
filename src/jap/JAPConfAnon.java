@@ -33,6 +33,7 @@ import gui.JAPHelpContext;
 import gui.JAPJIntField;
 import gui.JAPMessages;
 import gui.MapBox;
+import gui.MultiCertOverview;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp;
 import jap.forward.JAPRoutingMessage;
@@ -288,7 +289,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private final Object LOCK_OBSERVABLE = new Object();
 
 	/** the Certificate of the selected Mix-Server */
-	private MultiCertPath m_serverCert;
+	private MultiCertPath m_serverCertPaths;
 	private MixInfo m_serverInfo;
 	
 	private Vector m_locationCoordinates;
@@ -1085,12 +1086,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_locationLabel.setToolTipText(m_infoService.getLocation(cascade, selectedMixId));
 
 		m_serverInfo = m_infoService.getMixInfo(cascade, selectedMixId);
-		m_serverCert = m_infoService.getMixCertPath(cascade, selectedMixId);
+		m_serverCertPaths = m_infoService.getMixCertPath(cascade, selectedMixId);
 
-		if (m_serverCert != null && m_serverInfo != null)
+		if (m_serverCertPaths != null && m_serverInfo != null)
 		{
 			boolean bVerified = isServerCertVerified();
-			boolean bValid = m_serverCert.isValid(new Date());
+			boolean bValid = m_serverCertPaths.isValid(new Date());
 
 			m_viewCertLabel.setText((bVerified ? JAPMessages.getString(CertDetailsDialog.MSG_CERT_VERIFIED) + "," :
 				JAPMessages.getString(CertDetailsDialog.MSG_CERT_NOT_VERIFIED) + ","));
@@ -1701,14 +1702,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 		else if (e.getSource() == m_viewCertLabel || e.getSource() == m_viewCertLabelValidity)
 		{
-			/*if (m_serverCert != null && m_serverInfo != null)
+			
+			if (m_serverCertPaths != null && m_serverInfo != null)
 			{
-				CertDetailsDialog dialog = new CertDetailsDialog(getRootPanel().getParent(),
+				MultiCertOverview dialog = new MultiCertOverview(getRootPanel().getParent(), m_serverCertPaths, m_serverInfo.getName());
+				/*CertDetailsDialog dialog = new CertDetailsDialog(getRootPanel().getParent(),
 					m_serverCert.getFirstCertificate(), isServerCertVerified(),
 					JAPMessages.getLocale(), m_serverInfo.getCertPath().getFirstVerifiedPath());
 				dialog.pack();
-				dialog.setVisible(true);
-			}*/
+				dialog.setVisible(true);*/
+			}
 		}
 		else if (e.getSource() == m_locationLabel)
 		{
@@ -1795,8 +1798,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if ( (e.getSource() == m_operatorLabel && getUrlFromLabel(m_operatorLabel) != null) ||
 			 (e.getSource() == m_emailLabel && getEMailFromLabel(m_emailLabel) != null) ||
-			(e.getSource() == m_viewCertLabel && m_serverCert != null) ||
-			(e.getSource() == m_viewCertLabelValidity && m_serverCert != null) ||
+			(e.getSource() == m_viewCertLabel && m_serverCertPaths != null) ||
+			(e.getSource() == m_viewCertLabelValidity && m_serverCertPaths != null) ||
 			(e.getSource() == m_locationLabel && m_locationCoordinates != null))
 		{
 			((JLabel)e.getSource()).setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

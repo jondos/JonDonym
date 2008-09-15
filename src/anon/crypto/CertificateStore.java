@@ -201,7 +201,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 						/* try to verify the certificate against the next root certificate */
 						JAPCertificate currentRootCertificate = ( (CertificateInfoStructure) (
 							rootCertificates.nextElement())).getCertificate();
-						verificationSuccessful = a_certificate.verify(currentRootCertificate);
+						verificationSuccessful = a_certificate.isVerifier(currentRootCertificate);
 						if (verificationSuccessful)
 						{
 							/* we have found the parent certificate */
@@ -537,7 +537,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 						/* the current certificate needs verification but is not verified -> try to do it
 						 * with the specified certificate
 						 */
-						if (currentCertificateContainer.getCertPath().verify(a_certificate))
+						if (currentCertificateContainer.getCertPath().isVerifier(a_certificate))
 						{
 							/* verification of the current certificate was successful */
 							currentCertificateContainer.setParentCertificate(a_certificate);

@@ -77,10 +77,11 @@ public final class MyECPublicKey extends AbstractPublicKey implements IMyPublicK
 	}
 
 	public int getKeyLength()
-	{
-		//was ausgeben? größe der Kurve oder Schlüssellänge?!
-		return new X9IntegerConverter().getByteLength(m_params.getECDomainParams().getCurve())*8;
-		//return m_Q.getPoint().getEncoded().length*8;
+	{ 
+		/* return the length of the order n of the base point G because this determines the 
+		 * key's security better than its pure length. 
+		 */
+		return m_params.getECDomainParams().getN().bitLength()-1;
 	}
 	
 	/**

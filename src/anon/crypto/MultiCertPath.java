@@ -1,14 +1,40 @@
+/*
+ Copyright (c) 2000 - 2008, The JAP-Team
+ All rights reserved.
+ Redistribution and use in source and binary forms, with or without modification,
+ are permitted provided that the following conditions are met:
+
+  - Redistributions of source code must retain the above copyright notice,
+ this list of conditions and the following disclaimer.
+
+  - Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation and/or
+ other materials provided with the distribution.
+
+  - Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+ may be used to endorse or promote products derived from this software without specific
+ prior written permission.
+
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+ OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+ BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ */
+
 package anon.crypto;
 
 import java.util.Date;
 import java.util.Vector;
 
-import org.bouncycastle.util.encoders.Hex;
-
 /**
  * This class takes an array of CertPaths that is associated with
  * a signed XML Document. A MultiCertPath is considered valid an verified
- * if ONE CertPath in it is.
+ * if ONE CertPath in it is both.
  * @author zenoxx
  */
 public class MultiCertPath
@@ -27,7 +53,7 @@ public class MultiCertPath
 						
 			for(int i=1; i<a_certPaths.length; i++)
 			{
-				//a MultiCertPath may only CertPaths for the same subject and fromt the same issuer
+				//a MultiCertPath may only consist of CertPaths for the same subject and from the same issuer
 				if(!m_subject.equals(a_certPaths[i].getFirstCertificate().getSubject()))
 				{
 					throw new IllegalArgumentException("Wrong subject in MultiCertPath!");
@@ -70,7 +96,7 @@ public class MultiCertPath
 	
 	/**
 	 * At the moment we try to find a single verifiyable CertPath and return
-	 * <code>true</code> if there is one or if signature verification is disabled.
+	 * <code>true</code> if there is one, or if signature verification is disabled.
 	 * @return if this MultiCertPath is verified
 	 */
 	public boolean isVerified()
@@ -89,12 +115,15 @@ public class MultiCertPath
 	 */
 	public CertPath getPath()
 	{
-		CertPath path = getFirstVerifiedPath();
-		if(path == null)
+		synchronized (m_certPaths)
 		{
-			path = m_certPaths[0];
-		}
-		return path;
+			CertPath path = getFirstVerifiedPath();
+			if(path == null)
+			{
+				path = m_certPaths[0];
+			}
+			return path;
+		}	
 	}
 	
 	/**
@@ -174,8 +203,8 @@ public class MultiCertPath
 	}
 	
 	/**
-	 * Returns this MultiCertPaths Subject which is the same for all end-entity certs
-	 * @return this MultiCertPaths Subject
+	 * Returns this MultiCertPath's Subject which is the same for all end-entity certs
+	 * @return this MultiCertPath's Subject
 	 */
 	public X509DistinguishedName getSubject()
 	{
@@ -189,5 +218,70 @@ public class MultiCertPath
 	public X509DistinguishedName getIssuer()
 	{
 		return m_issuer;
+	}
+	
+	
+	/**
+	 * Returns the number of CertPaths in this MultCertPath
+	 * @return the number of CertPaths in this MultCertPath
+	 */
+	public int countPaths()
+	{
+		synchronized (m_certPaths)
+		{
+			return m_certPaths.length;
+		}
+	}
+	
+	/**
+	 * Returns the number of verified CertPaths in this MultCertPath
+	 * @return the number of verified CertPaths in this MultCertPath
+	 */
+	public int countVerifiedPaths()
+	{
+		int count = 0;
+		
+		synchronized (m_certPaths)
+		{
+			for(int i=0; i<m_certPaths.length; i++)
+			{
+				if(m_certPaths[i].verify())
+				{
+					count++;
+				}
+			}
+			return count;
+		}	
+	}
+	
+	public int getMaxLength() 
+	{
+		int maxLength = 0;
+		
+		synchronized (m_certPaths)
+		{
+			for(int i=0; i<m_certPaths.length; i++)
+			{
+				if(m_certPaths[i].length() > maxLength)
+				{
+					maxLength = m_certPaths[i].length();
+				}
+			}		
+			return maxLength;
+		}
+	}
+	
+	public CertPathInfo[] getPathInfos()
+	{
+		synchronized (m_certPaths)
+		{
+			CertPathInfo[] infos = new CertPathInfo[m_certPaths.length];
+			
+			for(int i=0; i<m_certPaths.length; i++)
+			{
+				infos[i] = m_certPaths[i].getPathInfo();
+			}
+			return infos;
+		}
 	}
 }
