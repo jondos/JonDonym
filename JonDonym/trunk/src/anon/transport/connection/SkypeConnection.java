@@ -253,14 +253,14 @@ public class SkypeConnection implements IChunkConnection {
 		m_writer = new SkypeWriter(m_appStream);
 		m_application = m_appStream.getApplication();
 		String appName = m_application.getName();
-		String remoteUserID = m_appStream.getFriend().getId();
+		String remoteUserID = m_appStream.getFriend();
 		String localUserID = "<unresolved>";
-		try {
+		/*try {
 			localUserID = Skype.getProfile().getId();
 		} catch (SkypeException e) {
 			LogHolder.log(LogLevel.WARNING, LogType.TRANSPORT,
 					"Unable to resolve local Skype User ID.");
-		}
+		}*/
 		m_localAddress = new SkypeAddress(localUserID, appName);
 		m_remoteAddress = new SkypeAddress(remoteUserID, appName);
 		m_state = ConnectionState_OPEN;
