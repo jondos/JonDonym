@@ -83,7 +83,7 @@ public class SkypeConnector implements IConnector
 				// are we trying to connect to ourself?
 				LogHolder.log(LogLevel.DEBUG, LogType.NET,"Skye Connector - try to get user id");
 
-				try
+				/*try
 					{
 						String localID = Skype.getProfile().getId();
 						if (localID.equals(a_address.getUserID())) throw new CommunicationException(
@@ -94,7 +94,7 @@ public class SkypeConnector implements IConnector
 						LogHolder.log(LogLevel.WARNING, LogType.TRANSPORT,
 								"Unable to get local Skype User ID");
 					}
-
+				 */
 				// so we try to register the application
 				LogHolder.log(LogLevel.DEBUG, LogType.TRANSPORT,"Try to register Skype forwarding application");
 				try
@@ -118,7 +118,7 @@ public class SkypeConnector implements IConnector
 				Stream[] connectionStreams=null;
 				try
 					{
-						connectionStreams = app.connect(new String[] { a_address.getUserID() });
+						connectionStreams = app.connect(a_address.getUserID());
 					}
 				catch (SkypeException e)
 					{
