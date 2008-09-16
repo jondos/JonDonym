@@ -36,6 +36,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
@@ -59,7 +60,7 @@ import logging.LogType;
 public class MapBox extends JAPDialog implements ChangeListener
 {
 	/** Messages */
-	public static final String MSG_ERROR_WHILE_LOADING = MapBox.class.getName() + "_errorLoading";
+	private static final String MSG_ERROR_WHILE_LOADING = MapBox.class.getName() + "_errorLoading";
 	private static final String MSG_PLEASE_WAIT = MapBox.class.getName() + "_pleaseWait";
 	private static final String MSG_CLOSE = MapBox.class.getName() + "_close";
 	private static final String MSG_TITLE = MapBox.class.getName() + "_title";
@@ -90,7 +91,7 @@ public class MapBox extends JAPDialog implements ChangeListener
 	 * @param level The zoom level to be set (0 - 19)
 	 * @throws Exception If an error occurs
 	 */
-	public MapBox(Component parent, String lat, String lon, int level) throws IOException
+	public MapBox(Component parent, String lat, String lon, int level) //throws IOException
 	{
 		super(parent, "");
 		m_sLongitude = lon;
@@ -196,58 +197,54 @@ public class MapBox extends JAPDialog implements ChangeListener
 
 	public void stateChanged(ChangeEvent e)
 	{
-		try
+		JSlider s1 = (JSlider) e.getSource();
+		if (!s1.getValueIsAdjusting())
 		{
-			JSlider s1 = (JSlider) e.getSource();
-			if (!s1.getValueIsAdjusting())
-			{
-				refresh();
-			}
-		}
-		catch (IOException ioe)
-		{
-			JAPDialog.showErrorDialog(this, JAPMessages.getString(MSG_ERROR_WHILE_LOADING), LogType.NET, ioe);
+			refresh();
 		}
 	}
 
 	/** 
 	 * Contact <a href="http://maps.google.com">Google Maps</a> to (re-)load the map.
-	 *
 	 * @throws IOException If an error occurs while retrieving the web site
 	 */
-	private void refresh() throws IOException
+	private void refresh()
 	{
 		// Set the icon to null at first
 		m_lblMap.setIcon(null);
 		m_lblMap.setText(JAPMessages.getString(MSG_PLEASE_WAIT) + "...");
 		m_lblMap.repaint();
+		
 		// Create the URL
 		m_sImageURL = "http://maps.google.com/staticmap?markers=" + m_sLatitude + "," + m_sLongitude +
 		              "&zoom=" + (m_sldZoom.getValue()+2) + "&size=" + m_sImageSize + "&key=" + KEY;
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Getting map: " + m_sImageURL);
+		
 		// Set the title
 		String sTitle = JAPMessages.getString(MSG_TITLE, new String[]{m_sLatitude, m_sLongitude});
 		setTitle(sTitle);
-		// Set the image as the icon
-		m_lblMap.setText("");
-		m_lblMap.setIcon(new ImageIcon(new URL(m_sImageURL)));
 		
-		// TODO: Remove this, no need for parsing the site for the image URL anymore
-		/*
-		// Request the site and parse for the image-URL
-		URL url = new URL(site);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()), 1024);
-		SiteParser sp = new SiteParser();
-		DocumentParser dp = new DocumentParser(DTD.getDTD("-//W3C//DTD HTML 4.01//EN"));
-		m_urlString = null;
-		// m_urlString is set from outside
-		dp.parse(reader, sp, true);
-		if (m_urlString == null)
-		{
-			throw new IOException("Image reference not found on site " + site);
+		try {
+			// Instantiate the map image as ImageIcon
+			ImageIcon map = new ImageIcon(new URL(m_sImageURL));
+			// Check if there is a map image
+			if (map.getIconHeight() == -1)
+			{
+				this.dispose();
+				JAPDialog.showErrorDialog(this.getParentComponent(), 
+						                  JAPMessages.getString(MSG_ERROR_WHILE_LOADING), 
+						                  LogType.NET);
+			} 
+			else
+			{
+				// Set the map image as the icon
+				m_lblMap.setText("");
+				m_lblMap.setIcon(map);			
+			}
+		} catch (MalformedURLException e) {
+			this.dispose();
+			JAPDialog.showErrorDialog(this.getParentComponent(), e.getMessage(), LogType.NET);
 		}
-		map.setIcon(new ImageIcon(new URL(m_urlString)));
-	    */
 	}
 
     /** A subclass of <CODE>javax.swing.text.html.HTMLEditorKit.ParserCallback</CODE>
