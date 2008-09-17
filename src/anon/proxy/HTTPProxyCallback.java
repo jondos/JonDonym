@@ -40,9 +40,10 @@ import logging.LogType;
 /**
  * Provides functionality for parsing and storing the headers of a
  * HTTP-Connection. Invoked by the ProxyCallbackHandler framework.
- * Inheriting from this class and implementing the abstract handler functions
- * allows examining and modifying of rthe correspondende HTTP messages before it is
- * transmitted further.
+ * HTTPConnectionListeners can be registered to examine and modify 
+ * the corresponding HTTP messages before they are
+ * transmitted further. Also Listeners can be notified about how much
+ * payload was transmitted via the corresponding HTTPConnection. 
  * @author Simon Pecher
  */
 public class HTTPProxyCallback implements ProxyCallback
@@ -157,8 +158,6 @@ public class HTTPProxyCallback implements ProxyCallback
 		
 		int contentBytes = (int) getLengthOfPayloadBytes(chunkData);
 		
-		
-		
 		if( hasAlignedHTTPStartLine(chunkData, a_messageType) )
 		{
 			boolean finished = extractHeaderParts(anonRequest, chunkData, a_messageType);
@@ -183,28 +182,6 @@ public class HTTPProxyCallback implements ProxyCallback
 				boolean performMods = (request_line == null) ? false : !request_line.startsWith("CONNECT");
 				if(performMods)
 				{
-					/*if(a_helper == UPSTREAM_HELPER)
-					{
-						String[] alreadyDownloadedBytes = null;
-						synchronized (this)
-						{
-							alreadyDownloadedBytes = connHeader.getRequestHeader(HTTP_RANGE);
-						}
-						
-						if(alreadyDownloadedBytes != null)
-						{
-							int tix = alreadyDownloadedBytes[0].indexOf("=");
-							int tix2 = alreadyDownloadedBytes[0].indexOf("-");
-							if( (tix != -1) && (tix2 != -1) )
-							{
-								String alreadyDownloadedStr = alreadyDownloadedBytes[0].substring(tix+1, tix2);
-								System.out.println("Already downloaded: " +alreadyDownloadedStr);
-								long downloadedBytes = Long.parseLong(alreadyDownloadedStr);
-								m_downstreamBytes.put(anonRequest, new Long(alreadyDownloadedStr));
-							}
-						}
-					}*/
-					
 					byte[] newHeaders = a_helper.dumpHeader(this, connHeader, anonRequest);
 					countContentBytes(anonRequest, contentBytes, byteCounter, FIRE_EVENT);
 					byte[] newChunk = new byte[newHeaders.length+contentBytes];
@@ -297,40 +274,36 @@ public class HTTPProxyCallback implements ProxyCallback
 	{
 		// assumes, that the chunk is aligned.
 		//Works in almost every case.
-		
 		if(anonRequest == null)
 		{
 			throw new NullPointerException("AnonProxyRequest must not be null!");
 		}
 		HTTPConnectionHeader connHeader = null;
+	
+		connHeader = (HTTPConnectionHeader) 
+			m_connectionHTTPHeaders.get(anonRequest);
 		
-		//synchronized(m_connectionHTTPHeaders)
-		//{
-			connHeader = (HTTPConnectionHeader) 
-				m_connectionHTTPHeaders.get(anonRequest);
-			
-			if( (connHeader != null) )
+		if( (connHeader != null) )
+		{
+			/* old http messages already delivered by this AnonProxyRequest-Thread can be removed */ 
+			if((messageType == MESSAGE_TYPE_REQUEST) && connHeader.isRequestFinished())
 			{
-				/* old http messages already delivered by this AnonProxyRequest-Thread can be removed */ 
-				if((messageType == MESSAGE_TYPE_REQUEST) && connHeader.isRequestFinished())
-				{
-					connHeader.clearRequest();
-					m_upstreamBytes.remove(anonRequest);
-				}
-				else if ((messageType == MESSAGE_TYPE_RESPONSE) && connHeader.isResponseFinished())
-				{
-					connHeader.clearResponse();
-					m_downstreamBytes.remove(anonRequest);
-				}
+				connHeader.clearRequest();
+				m_upstreamBytes.remove(anonRequest);
 			}
-			
-			if ( connHeader == null )
+			else if ((messageType == MESSAGE_TYPE_RESPONSE) && connHeader.isResponseFinished())
 			{
-				connHeader = new HTTPConnectionHeader();
-				m_connectionHTTPHeaders.put(anonRequest, connHeader);
+				connHeader.clearResponse();
+				m_downstreamBytes.remove(anonRequest);
 			}
-		//}
+		}
 		
+		if ( connHeader == null )
+		{
+			connHeader = new HTTPConnectionHeader();
+			m_connectionHTTPHeaders.put(anonRequest, connHeader);
+		}
+	
 		if(hasAlignedHTTPStartLine(chunkData, messageType))
 		{
 			Hashtable unfinishedMessages = 
