@@ -113,6 +113,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 	private boolean bShuttingDown = false;
 
 	private ProxyCallbackHandler m_callbackHandler = new ProxyCallbackHandler();
+	private HTTPProxyCallback m_httpProxyCallback = null;
 	private JonDoFoxHeader m_jfxHeader = null;
 	
 	/**
@@ -243,6 +244,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 	}
 	
+	/* TODO: this also enables the experimental ConnectionWatch
+	 * has to be handled by another enable method
+	 */
 	public void setJonDoFoxHeaderEnabled(boolean enable)
 	{
 		if( m_callbackHandler == null)
@@ -252,17 +256,30 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		}
 		if(enable)
 		{
-			if (m_jfxHeader == null )
+			if (m_httpProxyCallback == null )
 			{
-				m_jfxHeader = new JonDoFoxHeader(); 
-				m_callbackHandler.registerProxyCallback(m_jfxHeader);
+				m_httpProxyCallback = new HTTPProxyCallback(); 
 			}
+			
+			if(m_jfxHeader == null)
+			{
+				m_jfxHeader = new JonDoFoxHeader();
+			}
+			m_httpProxyCallback.addHTTPConnectionListener(m_jfxHeader);
+			m_httpProxyCallback.addHTTPConnectionListener(new HTTPConnectionWatch());
+			m_callbackHandler.registerProxyCallback(m_httpProxyCallback);
 		}
 		else
 		{
-			if (m_jfxHeader != null )
+			if (m_httpProxyCallback != null )
 			{
-				m_callbackHandler.removeCallback(m_jfxHeader);
+				if(m_jfxHeader != null)
+				{
+					//m_httpProxyCallback.removeHTTPConnectionListener(m_jfxHeader);
+					m_httpProxyCallback.removeAlllHTTPConnectionListeners();
+				}
+				m_callbackHandler.removeCallback(m_httpProxyCallback);
+				m_httpProxyCallback = null;
 				m_jfxHeader = null;
 			}
 		}

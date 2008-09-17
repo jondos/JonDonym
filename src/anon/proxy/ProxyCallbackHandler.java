@@ -77,7 +77,10 @@ public class ProxyCallbackHandler
 	
 	public synchronized void registerProxyCallback(ProxyCallback callback)
 	{
-		callbacks.addElement(callback);
+		if(! callbacks.contains(callback))
+		{
+			callbacks.addElement(callback);
+		}
 	}
 	
 	public synchronized void removeCallback(ProxyCallback callback)
