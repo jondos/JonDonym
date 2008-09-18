@@ -28,6 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package anon.proxy;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -56,6 +58,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	final static String CRLF = "\r\n";
 	final static String HTTP_HEADER_END = CRLF+CRLF; //end of http message headers
+	final static byte[] HTTP_HEADER_END_BYTES = {13, 10, 13, 10};
 	final static String HTTP_HEADER_DELIM = ": ";
 	final static String HTTP_START_LINE_KEY = "start-line";
 	final static String HTTP_VERSION_PREFIX = "HTTP/";
@@ -153,13 +156,19 @@ public class HTTPProxyCallback implements ProxyCallback
 		{
 			unfinishedHeaderPart = (String) unfinishedMessages.get(anonRequest);
 		}
-		String chunkData = new String(chunk, 0, len);
-		chunkData = ((unfinishedHeaderPart != null) ? unfinishedHeaderPart : "") + chunkData;
 		
-		int contentBytes = (int) getLengthOfPayloadBytes(chunkData);
+		String chunkData = new String(chunk);
+		
+		int contentBytes = len;
+		if (unfinishedHeaderPart != null)
+		{
+			chunkData = unfinishedHeaderPart + chunkData;
+		}
 		
 		if( hasAlignedHTTPStartLine(chunkData, a_messageType) )
 		{
+			contentBytes = len - (indexOfHTTPHeaderEnd(chunk)+HTTP_HEADER_END.length());
+			
 			boolean finished = extractHeaderParts(anonRequest, chunkData, a_messageType);
 			if(!finished)
 			{
@@ -187,6 +196,7 @@ public class HTTPProxyCallback implements ProxyCallback
 					byte[] newChunk = new byte[newHeaders.length+contentBytes];
 					System.arraycopy(newHeaders, 0, newChunk, 0, newHeaders.length);
 					System.arraycopy(chunk, len-contentBytes, newChunk, newHeaders.length, contentBytes);
+					
 					return newChunk;
 				}				
 			}
@@ -264,8 +274,6 @@ public class HTTPProxyCallback implements ProxyCallback
 		return new HTTPConnectionEvent(connHeader, upStreamBytes, downStreamBytes, anonRequest);
 	}
 	
-	
-	
 	/* 
 	 * 	extract headers from data chunk
 	 * returns false if header could not be extracted
@@ -310,7 +318,6 @@ public class HTTPProxyCallback implements ProxyCallback
 				(messageType == MESSAGE_TYPE_REQUEST) ? 
 					m_unfinishedRequests : m_unfinishedResponses;
 			int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
-
 			if((off_headers_end != -1))
 			{
 				//Because it is assumed that the chunk is aligned: the HTTP message starts at index 0
@@ -356,19 +363,36 @@ public class HTTPProxyCallback implements ProxyCallback
 		return chunkData.startsWith(HTTP_VERSION_PREFIX);
 	}
 	
-	protected long getLengthOfPayloadBytes(String chunkData)
+	/*protected long getLengthOfPayloadBytes(byte[] chunkData, int l)
 	{	
-		int off_firstline= chunkData.indexOf(HTTP_VERSION_PREFIX);
-		int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
-		if( (off_firstline != -1) )
+		//int off_firstline= chunkData.indexOf(HTTP_VERSION_PREFIX);
+		int off_headers_end = indexOfHTTPHeaderEnd(chunkData);
+		//if( (off_firstline != -1) )
+		//{
+		if(off_headers_end == -1)
 		{
-			if(off_headers_end == -1)
-			{
-				return 0l;
-			}
-			return (long) (chunkData.length() - (off_headers_end+HTTP_HEADER_END.length())); 
+			return 0l;
 		}
+		System.out.println("payload check: "+chunkData.length());
+		return (long) (chunkData.length() - (off_headers_end+HTTP_HEADER_END.length())); 
+		//}
 		return (long) chunkData.length();
+	}*/
+	
+	private int indexOfHTTPHeaderEnd(byte[] chunk)
+	{
+		for (int i = 0; i < (chunk.length-HTTP_HEADER_END_BYTES.length); i++) 
+		{
+			if( (chunk[i] == HTTP_HEADER_END_BYTES[0]) &&  
+				(chunk[i+1] == HTTP_HEADER_END_BYTES[1]) &&
+				(chunk[i+2] == HTTP_HEADER_END_BYTES[2]) &&
+				(chunk[i+3] == HTTP_HEADER_END_BYTES[3]) )
+			{
+				return i;
+			}
+					
+		}
+		return -1;
 	}
 	
 	private synchronized void parseHTTPHeader(String headerData, HTTPConnectionHeader connHeader, int headerType)
@@ -647,7 +671,6 @@ public class HTTPProxyCallback implements ProxyCallback
 			if (startlineRet == null)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.NET, "Invalid request because it contains no startline");
-				new Exception("DFg").printStackTrace();
 				return null;
 			}
 			if(startlineRet.length > 1)
@@ -726,7 +749,7 @@ public class HTTPProxyCallback implements ProxyCallback
 				}
 			}
 			allHeaders += CRLF;
-			LogHolder.log(LogLevel.INFO, LogType.NET, Thread.currentThread().getName()+": header dump:\n"+allHeaders);
+			LogHolder.log(LogLevel.ALERT, LogType.NET, Thread.currentThread().getName()+": header dump:\n"+allHeaders);
 			return allHeaders.getBytes();
 		}
 		
