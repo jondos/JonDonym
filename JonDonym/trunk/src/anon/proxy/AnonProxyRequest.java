@@ -339,9 +339,9 @@ public final class AnonProxyRequest implements Runnable
 				Thread.yield();
 			}
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
-			LogHolder.log(LogLevel.DEBUG,LogType.NET,"Exception in AnonProxyRequest - upstream loop.", e );
+			LogHolder.log(LogLevel.ERR,LogType.NET,"Exception in AnonProxyRequest - upstream loop.", e );
 		}
 		closeRequest();
 		m_Proxy.decNumChannels();
@@ -417,9 +417,14 @@ public final class AnonProxyRequest implements Runnable
 			
 			try 
 			{	
-				len = m_InChannel.read(buff, 0, CHUNK_SIZE);
-mainLoop:		while ( len > 0)
+				
+mainLoop:		do
 				{
+					len = m_InChannel.read(buff, 0, CHUNK_SIZE);
+					if(len <= 0)
+					{
+						break;
+					}
 					int count = 0;
 					for (; ; )
 					{
@@ -430,7 +435,6 @@ mainLoop:		while ( len > 0)
 								byte[] dsChunk = m_callbackHandler.deliverDownstreamChunk(AnonProxyRequest.this, buff, len);
 								if(dsChunk == null)
 								{
-									len = m_InChannel.read(buff, 0, CHUNK_SIZE);
 									continue mainLoop;
 								}
 								if(dsChunk != buff)
@@ -463,8 +467,7 @@ mainLoop:		while ( len > 0)
 					}
 					m_Proxy.transferredBytes(len, m_iProtocol);
 					Thread.yield();
-					len = m_InChannel.read(buff, 0, CHUNK_SIZE);
-				}
+				}	while ( len > 0); 
 			}
 			catch (IOException e)
 			{
