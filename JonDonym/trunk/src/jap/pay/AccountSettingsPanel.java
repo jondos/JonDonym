@@ -330,6 +330,10 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	private static final String MSG_TERMS_AND_COND_HINT =
 		AccountSettingsPanel.class.getName() + "_termsAndConditionsHint";
 	
+	private static final String MSG_THANK_YOU = AccountSettingsPanel.class.getName() + "_thankYou";
+	
+	
+	
 	private static final String MSG_CHARGING_SUCCESSFUL = AccountSettingsPanel.class.getName() + "_chargingSuccessful";
 
 
@@ -1961,8 +1965,10 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					{
 						messagesToShow.addElement(passiveError);
 					}
-
-				}
+				}				
+				
+				messagesToShow.addElement(JAPMessages.getString(MSG_THANK_YOU));
+				
 				//combine messages and set text
 				String combinedString = "";
 				String stringToAdd;
