@@ -28,8 +28,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package anon.proxy;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -51,7 +49,6 @@ import logging.LogType;
 public class HTTPProxyCallback implements ProxyCallback
 {
 	private final static boolean FIRE_EVENT = true;
-	private final static boolean DONT_FIRE_EVENT = !FIRE_EVENT;
 	
 	final static int MESSAGE_TYPE_REQUEST = 0;
 	final static int MESSAGE_TYPE_RESPONSE = 1;
