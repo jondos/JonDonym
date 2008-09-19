@@ -785,7 +785,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.gridy = 4;
 		p.add(m_labelOperatorCountries, c1);
 		
-		m_lblUsers = new JLabel("0 Nutzer", SwingConstants.LEFT);
+		m_lblUsers = new JLabel("", SwingConstants.LEFT);
 		c1.insets = new Insets(0, 0, 0, 10);
 		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
@@ -797,22 +797,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		
 		m_labelSpeed = new JLabel("", SwingConstants.LEFT);
 		c1.insets = new Insets(5, 0, 0, 10);
-		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
-		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.gridy = 1;
-		c1.gridx = 1;
-		c1.gridwidth = 3;
 		p.add(m_labelSpeed, c1);
 		
 		m_labelDelay = new JLabel("", SwingConstants.LEFT);
-		c1.insets = new Insets(5, 0, 0, 10);
-		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
-		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.gridy = 2;
-		c1.gridx = 1;
-		c1.gridwidth = 3;
 		p.add(m_labelDelay, c1);
 
 		m_labelMixFlags = new JLabel[3];
@@ -2791,21 +2782,31 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			strSystrayTooltip += "\n" + GUIUtils.trim(currentMixCascade.getName(), 25);
 
+			if (currentStatus.getNrOfActiveUsers() > -1)
+			{
+				m_lblUsers.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
+						(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : "") + 
+						" " + JAPMessages.getString(MSG_USERS));
+			}
+			else
+			{
+				m_lblUsers.setText("");
+				/*
+				strTemp = JAPMessages.getString("meterNA");
+				if (m_lblUsers.getText() == null ||
+					!m_lblUsers.getText().equals(strTemp))
+				{
+					// optimized change...
+					m_lblUsers.setText(strTemp);
+				}*/
+			}
+			
+			
 			if (m_Controller.isAnonConnected())
 			{
 				//m_bShowConnecting = false;
 				if (currentStatus.getNrOfActiveUsers() > -1)
 				{
-					// Nr of active users
-					//if (currentStatus.getNrOfActiveUsers() > userProgressBar.getMaximum())
-					//{
-					//	userProgressBar.setMaximum(currentStatus.getNrOfActiveUsers());
-					//}
-					m_lblUsers.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
-							(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : "") + 
-							" " + JAPMessages.getString(MSG_USERS));
-					//strSystrayTooltip += "\n" + JAPMessages.getString("ngNrOfUsers") + ": " +
-					//currentStatus.getNrOfActiveUsers();
 					if (anonLevel >= StatusInfo.ANON_LEVEL_MIN)
 					{
 						strSystrayTooltip += "\n" + JAPMessages.getString(JAPViewIconified.MSG_ANON) + ": ";
@@ -2838,16 +2839,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						}
 					}
 				}
-				else
-				{
-					strTemp = JAPMessages.getString("meterNA");
-					if (m_lblUsers.getText() == null ||
-						!m_lblUsers.getText().equals(strTemp))
-					{
-						// optimized change...
-						m_lblUsers.setText(strTemp);
-					}
-				}
+				
 				/*int t = currentStatus.getTrafficSituation();
 				if (t > -1)
 				{
@@ -2870,8 +2862,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			else
 			{
-				/* we are not in anonymity mode */
-				m_lblUsers.setText("");
+				/* we are not in anonymity mode */				
 				//m_progressAnonTraffic.setValue(0);
 				m_progressAnonLevel.setValue(0);
 			}
