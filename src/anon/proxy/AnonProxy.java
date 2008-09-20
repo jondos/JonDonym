@@ -115,6 +115,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 	private ProxyCallbackHandler m_callbackHandler = new ProxyCallbackHandler();
 	private HTTPProxyCallback m_httpProxyCallback = null;
 	private JonDoFoxHeader m_jfxHeader = null;
+	private HTTPConnectionWatch m_connectionWatch = null;
 	
 	/**
 	 * Stores the MixCascade we are connected to.
@@ -203,6 +204,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		// SOCKS\uFFFD
 		
 		JAPModel.getInstance().addObserver(this);
+		setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 	}
 
@@ -241,7 +243,33 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		m_Anon.addEventListener(this);
 		
 		JAPModel.getInstance().addObserver(this);
-		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+		setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());		
+	}
+	
+	public void setHTTPHeaderProcessingEnabled(boolean enable)
+	{
+		if(enable)
+		{
+			if(m_callbackHandler == null)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "No ProxyCallbackHandler activated: cannot process HTTP headers.");
+				return;
+			}
+			if(m_httpProxyCallback == null)
+			{
+				m_httpProxyCallback = new HTTPProxyCallback();
+			}
+			m_callbackHandler.registerProxyCallback(m_httpProxyCallback);
+		}
+		else
+		{
+			if(m_httpProxyCallback != null)
+			{
+				m_callbackHandler.removeCallback(m_httpProxyCallback);
+			}
+			m_httpProxyCallback = null;
+		}
 	}
 	
 	/* TODO: this also enables the experimental ConnectionWatch
@@ -249,16 +277,17 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 	 */
 	public void setJonDoFoxHeaderEnabled(boolean enable)
 	{
-		if( m_callbackHandler == null)
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "No Callbackhandler activated: cannot process HTTP headers.");
-			return;
-		}
 		if(enable)
 		{
-			if (m_httpProxyCallback == null )
+			if( m_callbackHandler == null)
 			{
-				m_httpProxyCallback = new HTTPProxyCallback(); 
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "No Callbackhandler activated: cannot activate JonDoFox headers.");
+				return;
+			}
+			if(m_httpProxyCallback == null)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "No HTTPProxyCallback activated: cannot activate JonDoFox headers.");
+				return;
 			}
 			
 			if(m_jfxHeader == null)
@@ -266,7 +295,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 				m_jfxHeader = new JonDoFoxHeader();
 			}
 			m_httpProxyCallback.addHTTPConnectionListener(m_jfxHeader);
-			m_httpProxyCallback.addHTTPConnectionListener(new HTTPConnectionWatch());
 			m_callbackHandler.registerProxyCallback(m_httpProxyCallback);
 		}
 		else
@@ -275,12 +303,45 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 			{
 				if(m_jfxHeader != null)
 				{
-					//m_httpProxyCallback.removeHTTPConnectionListener(m_jfxHeader);
-					m_httpProxyCallback.removeAlllHTTPConnectionListeners();
+					m_httpProxyCallback.removeHTTPConnectionListener(m_jfxHeader);
+					m_jfxHeader = null;
 				}
-				m_callbackHandler.removeCallback(m_httpProxyCallback);
-				m_httpProxyCallback = null;
-				m_jfxHeader = null;
+			}
+		}
+	}
+	
+	public void setConnnectionWatchEnabled(boolean enabled)
+	{
+		if(enabled)
+		{
+			if( m_callbackHandler == null)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "No Callbackhandler activated: cannot enable ConnectionWatch.");
+				return;
+			}
+			if(m_httpProxyCallback == null)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "No HTTPProxyCallback activated: cannot enable ConnectionWatch.");
+				return;
+			}
+			if(m_connectionWatch != null)
+			{
+					
+			}
+			m_httpProxyCallback.removeHTTPConnectionListener(m_connectionWatch);
+			m_connectionWatch = new HTTPConnectionWatch();
+			m_httpProxyCallback.addHTTPConnectionListener(m_connectionWatch);
+			m_callbackHandler.registerProxyCallback(m_httpProxyCallback);
+		}
+		else
+		{
+			if (m_httpProxyCallback != null )
+			{
+				if(m_connectionWatch != null)
+				{
+					m_httpProxyCallback.removeHTTPConnectionListener(m_connectionWatch);
+					m_connectionWatch = null;
+				}
 			}
 		}
 	}
@@ -1133,6 +1194,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		{
 			if (a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
 			{
+				setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 				setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 			}
 		}
