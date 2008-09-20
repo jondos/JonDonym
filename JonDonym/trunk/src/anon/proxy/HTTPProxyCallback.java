@@ -154,7 +154,7 @@ public class HTTPProxyCallback implements ProxyCallback
 			unfinishedHeaderPart = (String) unfinishedMessages.get(anonRequest);
 		}
 		
-		String chunkData = new String(chunk);
+		String chunkData = new String(chunk, 0, len);
 		
 		int contentBytes = len;
 		if (unfinishedHeaderPart != null)
