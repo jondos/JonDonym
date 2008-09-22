@@ -28,88 +28,151 @@ href="certificates.html">deren Identit&auml;t ver&ouml;ffentlicht wird</a>. Die
 Betreiber m&uuml;ssen sich an strikte Betriebsrichtlinien halten, die ihnen
 verbieten, Verbindungsdaten speichern oder mit den anderen Mix-Betreibern in
 der Kaskade Surfdaten von Nutzern austauschen. Jede Internetverbindung eines
-Nutzers wird f&uuml;r jeden dieser Mixe einzeln verschl&uuml;sselt und
+Nutzers wird f&uuml;r jeden Mix einer Kaskade einzeln verschl&uuml;sselt und
 &uuml;ber die Mixkaskade bis zum Ziel, z.B. zu einer Webseite, gesendet. Ziel
 dieser mehrfachen Verschl&uuml;sselung und Weiterleitung ist, dass kein
-Mixbetreiber alleine den Nutzer enttarnen kann und dass Lauscher auf den
+Mixbetreiber alleine den Nutzer enttarnen kann, und dass Lauscher auf den
 Verbindungen (Provider, W-LAN) keine Inhaltsdaten abgreifen k&ouml;nnen. Da
-au&szlig;erdem viele Benutzer gleichzeitig den Anonymisierungsdienst nutzen,
+au&szlig;erdem viele Benutzer gleichzeitig den Anonymisierungsdienst nutzen und
+sich dabei alle dieselbe <a href="wwwprivacy.html#ip">IP-Adresse</a> teilen,
 werden die Internetverbindungen jedes Benutzers unter denen aller anderen
 Benutzer auf derselben Kaskade versteckt: Jeder Benutzer k&ouml;nnte der
-Urheber einer bestimmten Verbindung gewesen sein. Dieses Verfahren macht es
-f&uuml;r Au&szlig;enstehende (Provider, Webseiten) und auch f&uuml;r die
-Mixbetreiber selbst ungew&ouml;hnlich schwer herauszubekommen, welche
-Verbindungen ein bestimmter Benutzer aufgebaut hat, oder von welchem Benutzer
-eine bestimmte Verbindung stammt. </p>
+Urheber einer bestimmten Verbindung gewesen sein. Dieses Verfahren verhindert,
+dass Mixbetreiber oder Au&szlig;enstehende (Provider, W-LAN-Lauscher,
+Webseiten) erfahren, welche Verbindungen ein bestimmter Benutzer aufgebaut hat
+oder von welchem Benutzer eine bestimmte Verbindung stammt.</p>
 
-<p>JonDonym hat im Vergleich zu anderen Anonymisierungsdiensten einige
-Vorteile:</p>
+<p>JonDonym bietet im Vergleich zu anderen Anonymisierungsdiensten einige
+konkrete Vorteile:</p>
 <ul>
-  <li>starker technischer und juristischer Schutz gegen eine Beobachtung durch
-    die Betreiber des Dienstes</li>
-  <li>starker technischer und organisatorischer Schutz gegen eine Beobachtung
-    durch Provider und Webseitenbetreiber</li>
-  <li>Betreiber werden regelm&auml;&szlig;ig auf Seriosit&auml;t und
-    Professionalit&auml;t gepr&uuml;ft, zertifiziert und
-  ver&ouml;ffentlicht</li>
-  <li>st&auml;ndige Weiterentwicklung im Rahmen aktiver Forschungsarbeit (TU
-    Dresden, Universit&auml;t Regensburg, Forschungsabteilung von JonDos)</li>
-  <li>Rechtssicherheit f&uuml;r Benutzer: Entwicklung, Support und Abrechnung
-    in Deutschland statt bei einer anonyme Offshore-Firma ohne
-    ladungsf&auml;hige Anschrift</li>
-  <li>Leistungsgarantie f&uuml;r die optional nutzbaren, kostenpflichtigen
-    Premiumdienste (90%-Garantie: Geschwindigkeit von mindestens 100 kbit/s,
-    Latenz von maximal 4 Sekunden)</li>
-  <li>transparente Funktionalit&auml;t durch eine informative
-    Programmoberfl&auml;che und die Offenheit der Quelltexte von JonDo</li>
-  <li>kompetenter und schneller Support (ausf&uuml;hrliche Hilfefunktion,
-    Nutzerforen, E-Mail)</li>
-  <li>Premiumdienste erlauben Verbindungen zu allen Internet-Ports</li>
-  <li>speziell f&uuml;r anonymes und sicheres Surfen mit JonDonym optimiertes
-    Firefox-Profil JonDoFox</li>
-  <li>vom USB-Stick ohne Installation auf jedem Computer ausf&uuml;hrbare
-    Client-Software (Windows / MacOS X)</li>
+  <li><b>Starke Verschl&uuml;sselung und Authentisierung:</b> Niemand kann den
+    Datenverkehr zwischen Ihrem Rechner und dem JonDonym-Dienst mitlesen.</li>
+  <li><b>Schutz vor dem Dienstbetreiber:</b> Solange nicht alle Dienstbetreiber
+    von JonDonym unabh&auml;ngig voneinander gezwungen werden, Sie zu
+    &uuml;berwachen, sind Ihre Internet-Verbindungen sicher. Die Mixbetreiber
+    werden regelm&auml;&szlig;ig auf ihre Seriosit&auml;t und
+    Professionalit&auml;t gepr&uuml;ft, Ihre Identit&auml;t wird
+    ver&ouml;ffentlicht. </li>
+  <li><b>Keine Logdaten:</b> Den Mixbetreibern ist es vertraglich untersagt,
+    Logdaten &uuml;ber die IP-Adressen der Nutzer zu speichern, auch nicht
+    f&uuml;r wenige Sekunden.</li>
+  <li><b>Transparente Funktionalit&auml;t:</b> informative
+    Programmoberfl&auml;che, publizierte Verfahren, und offene, OSI-konforme
+    Quelltexte aller Programmkomponenten</li>
+  <li><b>Keine Software-Hintert&uuml;r:</b> Es gibt keine M&ouml;glichkeit,
+    einzelne Verbindungen "an JonDonym vorbei" zu &uuml;berwachen. Die Software
+    l&auml;uft vollst&auml;ndig auf Ihrem Rechner, und kann nicht ohne Ihre
+    Zustimmung manipuliert werden. Beim Update werden keinerlei
+    Identit&auml;tsinformationen, Serien- oder Kontonummern
+  &uuml;bertragen.</li>
+  <li><b>Sicheres Browserprofil:</b> Mit <a href="jondofox.html">JonDoFox</a>
+    steht Ihnen ein speziell f&uuml;r anonymes und sicheres Surfen mit JonDonym
+    entwickeltes Firefox-Profil kostenlos zur Verf&uuml;gung.</li>
+  <li><b>Anonymit&auml;t zum Mitnehmen:</b> <a href="about.html">JonDo</a>
+    l&auml;uft auch ohne Installation auf dem Rechner direkt von einem
+    tragbaren USB-Stick (Windows / MacOS X).</li>
+  <li><b>Weiterentwicklung durch Forschung:</b> Wissenschaftliche Arbeiten an
+    der Technischen Universit&auml;t Dresden (AN.ON), der Universit&auml;t
+    Regensburg (AN.ON) und bei der JonDos GmbH (JonDonym) erweitern und
+    verbessern das System.</li>
+  <li><b>Kompetenter, schneller und kostenloser Support:</b> ausf&uuml;hrliche
+    Hilfefunktion, betreute Nutzerforen, E-Mail-Support</li>
 </ul>
 
-<p>Eine &auml;hnlich starke Anonymisierung kann nur der Dienst Tor bieten,
-welcher gerade f&uuml;r Internet-Profis als Erg&auml;nzung zu JonDonym sehr
-empfehlenswert ist. Internet-Anf&auml;nger und Computer-Unerfahrene sollten mit
-Tor jedoch vorsichtig sein, denn bei diesem Dienst wird nicht kontrolliert,
-welche Menschen die Server betreiben, &uuml;ber die ihre Daten laufen. In der
-Vergangenheit gab es immer wieder den Verdacht, dass Kriminelle und
-Geheimdienste das Tor-Netzwerk nutzen, um unbemerkt unverschl&uuml;sselt
-&uuml;bertragene Informationen wie Passw&ouml;rter, Kontoverbindungen und
-Kreditkartendaten abzufangen und zu missbrauchen. Auch die jeweils letzten
-Mix-Server einer JonDonym-Kaskade k&ouml;nnten Datenverkehr, der nicht
-zus&auml;tzlich &uuml;ber HTTPS/SSL gesichert ist, mitschneiden. Im Gegensatz
-zu Tor und anderen Diensten k&ouml;nnen allerdings nur von JonDos und eventuell
-weiteren Zertifizierungsstellen auf Ihre Seriosit&auml;t gepr&uuml;fte und
-namentlich ver&ouml;ffentlichte Personen und Organisationen einen Mix-Server
-betreiben. Die Nutzer k&ouml;nnen dann selbst entscheiden, ob sie den
-jeweiligen Betreibern vertrauen m&ouml;chten oder nicht. Dadurch wird es sehr
-unwahrscheinlich, dass sich kriminelle Betreiber in JonDonym einschleichen und
-ungestraft ihr Unwesen treiben k&ouml;nnen.</p>
+<p>Eine &auml;hnlich starke Anonymisierung kann nur das nicht-kommerzielle
+System <a href="http://tor.eff.org/">Tor</a> bieten, welches f&uuml;r
+Internet-Profis als Erg&auml;nzung zu JonDonym sehr empfehlenswert ist.
+Internet-Anf&auml;nger und Computer-Unerfahrene sollten mit Tor jedoch
+vorsichtig sein: bei diesem Dienst wird nicht kontrolliert, welche Menschen die
+Server betreiben, &uuml;ber die ihre Daten laufen. In der Vergangenheit gab es
+immer wieder den Verdacht, dass Kriminelle und Geheimdienste das Tor-Netzwerk
+missbrauchen, um unbemerkt an unverschl&uuml;sselt &uuml;bertragene
+Informationen wie Passw&ouml;rter, Kontoverbindungen und Kreditkartendaten
+abzufangen und zu missbrauchen. Mit bestimten Tricks k&ouml;nnen einzelne
+Tor-Server besonders viel Datenverkehr auf sich leiten, um diese Angriffe
+effektiver zu machen.</p>
 
-<p>JonDonym und Tor haben allerdings auch kleine Nachteile, die man bei der
-Benutzung beachten sollte:</p>
+<p>Auch die jeweils letzten Mix-Server einer JonDonym-Kaskade k&ouml;nnten
+Datenverkehr, der nicht zus&auml;tzlich &uuml;ber HTTPS/SSL gesichert ist,
+mitschneiden. Im Gegensatz zu Tor und anderen Diensten k&ouml;nnen allerdings
+nur von JonDos und eventuell weiteren Zertifizierungsstellen auf Ihre
+Seriosit&auml;t gepr&uuml;fte und namentlich ver&ouml;ffentlichte Personen und
+Organisationen einen Mix-Server betreiben. Die Nutzer k&ouml;nnen dann selbst
+entscheiden, ob sie den jeweiligen Betreibern vertrauen m&ouml;chten oder
+nicht. Dadurch wird es sehr unwahrscheinlich, dass sich kriminelle Betreiber in
+JonDonym einschleichen und ungestraft ihr Unwesen treiben k&ouml;nnen.</p>
+
+<h3><a name="premium" id="premium">Premiumdienste</a></h3>
+
+<p>Bei JonDonym haben Sie die Wahl zwischen kostenlosen Diensten und den
+Premiumdiensten, welche kostenpflichtig sind. <b>Durch die freiwillige
+Prepaid-Buchung der Premiumdienste unterst&uuml;tzen Sie den Erhalt des
+JonDonym-Systems und die Weiterentwicklung der JonDo-Software</b>. Die
+Premiumdienste bieten Ihnen zus&auml;tzlich zu den sonstigen
+JonDonym-Eigenschaften folgende Vorteile:</p>
 <ul>
-  <li>Plugins (Java/Flash/Silverlight/ActiveX) m&uuml;ssen deaktiviert werden.
-    Ansonsten kann die wahre IP-Adresse des Rechners/Routers von einer Webseite
-    aufgedeckt werden.</li>
-  <li>Die &Uuml;bertragungsgeschwindigkeit liegt deutlich unter DSL-Niveau
-    (maximal 1-2 MBit/s sind m&ouml;glich). Die JonDonym-Premiumdienste
-    erm&ouml;glichen immer fl&uuml;ssiges Websurfen, die kostenlosen Dienste
-    und Tor k&ouml;nnen teilweise sehr langsam sein.</li>
+  <li><b>Leistungsgarantie:</b> Geschwindigkeit von mindestens 100 kbit/s und
+    Verz&ouml;gerung von maximal 4 Sekunden zu 90% der Tageszeit. Kostenlose
+    Dienste, auch Tor, sind in der Regel deutlich langsamer.</li>
+  <li><b>Verf&uuml;gbarkeitsgarantie</b>: Eine Verbindung zum JonDonym-System
+    ist zu jeder Zeit m&ouml;glich.</li>
+  <li><b>Rechtssicherheit:</b> Entwicklungs-, Support- und Rechnungsadresse in
+    sind Deutschland statt bei einer anonyme Offshore-Firma ohne
+    ladungsf&auml;hige Anschrift. Deutschland setzt weltweit Standards im
+    Verbraucherschutz.</li>
+  <li><b>Drei-Betreiber-Garantie:</b> Jede Mixkaskade wird von jeweils drei
+    voneinander unabh&auml;ngigen Organisationen oder Personen betrieben.</li>
+  <li><b>Internationalit&auml;tsgarantie:</b> Mixe und Betreiber jeder
+    Mixkaskade stehen verteilt in jeweils mindestens zwei unterschiedlichen
+    L&auml;ndern. Dies verhindert, dass gro&szlig;e Netzknoten (CIX) den
+    gesamten Datenverkehr beobachten k&ouml;nnen. Nebenbei wird dadurch
+    zuverl&auml;ssig jede nationale Vorratsdatenspeicherung ausgehebelt, da
+    nicht alle Mixe einer Kaskade mitloggen.</li>
+  <li><b>Verbindungsgarantie:</b> Die Mixbetreiber blockieren keine
+    Internetports.</li>
+  <li><b>Demn&auml;chst: SOCKS-Unterst&uuml;tzung</b>: Sie k&ouml;nnen das
+    SOCKS-Protokoll zus&auml;tzlich zu HTTP einsetzen und damit die meisten
+    Internetprogramme anonymisieren.</li>
+</ul>
+
+<p>Wenn Sie die Premiumdienste nutzen m&ouml;chten, erstellen Sie in Ihrem
+JonDo-Programm ein <a href="payment_account.html">Einmalkonto</a> und
+aktivieren es mittels Bezahlung &uuml;ber eine anonyme oder nicht-anonyme <a
+href="https://www.jondos.de/de/payment">Bezahlmethode Ihrer Wahl</a>. Danach
+steht ihnen <a href="https://www.jondos.de/de/payment">je nach gew&auml;hltem
+Tarif</a> ein bestimmtes Datenvolumen f&uuml;r die Nutzung der Premiumdienste
+zur Verf&uuml;gung. Wenn dieses Datenvolumen verbraucht ist und Sie mit
+JonDonym zufrieden sind, k&ouml;nnen Sie jederzeit ein neues Einmalkonto
+erzeugen und aktivieren.</p>
+
+<p>Hinweise zum Datenschutz: Zur Abrechnung des Datenvolumens mit den
+Mixbetreibern wird jeweils kumulativ gespeichert, wie viel Volumen ein Konto
+auf welcher Mixkaskade verbraucht. Eine mehr als tagesgenaue Abrechnung erfolgt
+dabei nicht. Eine Zuordnung von Konten zu Nutzeridentit&auml;ten wird nicht
+gespeichert. &Uuml;ber das abgerechnete Datenvolumen ist es technisch nicht
+m&ouml;glich, aufgerufene Internetseiten zu erkennen, selbst bei
+sekundengenauer (maximal genauer) Speicherung.</p>
+
+<h3>Zus&auml;tzliche Absicherung mit VPN-Diensten wie Relakks, Steganos Anonym
+VPN, Perfect Privacy, Cyber Ghost VPN, XeroBank VPN</h3>
+
+<p>JonDonym und Tor sind zwar die technisch besten Anonymisierungssysteme,
+haben aber prinzipbedingt kleine Nachteile, die man bei der Benutzung beachten
+sollte:</p>
+<ul>
+  <li>Browser-Plugins (Java/Flash/Silverlight/ActiveX) m&uuml;ssen deaktiviert
+    werden. Ansonsten kann die wahre IP-Adresse des Rechners/Routers von einer
+    Webseite aufgedeckt werden.</li>
+  <li>Die &Uuml;bertragungsgeschwindigkeit liegt grunds&auml;tzlich deutlich
+    unter DSL-Niveau (maximal 1-2 MBit/s sind m&ouml;glich).</li>
   <li>Anwendungen werden nicht transparent anonymisiert, sondern m&uuml;ssen
     jeweils einzeln konfiguriert werden (der <a
     href="jondofox.html">JonDoFox-Browser</a> ist jedoch schon
   vorkonfiguriert).</li>
   <li>Nicht alle Anwendungen k&ouml;nnen anonymisiert werden
-    (HTTP/SOCKS-Proxies m&uuml;ssen unterst&uuml;tzt werden)</li>
+    (HTTP/SOCKS-Proxies m&uuml;ssen von der jeweiligen Anwendung
+    unterst&uuml;tzt werden).</li>
 </ul>
-
-<h3>Zus&auml;tzliche Absicherung mit VPN-Diensten wie Relakks, Steganos Anonym
-VPN, Perfect Privacy, Cyber Ghost VPN</h3>
 
 <p>Falls JonDo mit einer bestimmten Anwendung nicht kompatibel ist, oder
 f&uuml;r eine bestimmte Anwendung eine weniger starke Anonymisierung zugunsten
@@ -121,62 +184,25 @@ begrenzten Schutz f&uuml;r Ihre IP-Adresse bieten, wenn Sie gelegentlich
 aber unbedingt darauf, dass Ihr Rechner hinter einem Router steht oder in einer
 virtuellen Maschine l&auml;uft. Auch JonDos bereitet bis Ende 2009 ein eigenes
 VPN-Erg&auml;nzungsangebot vor, das als kostenpflichtiges Kombi-Paket
-integriert in JonDo erh&auml;ltlich sein soll und ein erg&auml;nzendes VPN von
-Dritten &uuml;berfl&uuml;ssig macht.</p>
+integriert in JonDo erh&auml;ltlich sein wird.</p>
 
 <p>Zum Websurfen, au&szlig;er vielleicht f&uuml;r gr&ouml;&szlig;ere Downloads,
 sollten VPN-Dienste allerdings nicht eingesetzt werden. Denn zum Einen
 k&uuml;mmern sich deren Anbieter nicht darum, dass die Nutzer auch &uuml;ber
 andere Merkmale als die IP-Adresse im Web wiedererkennbar sind (<a
 href="wwwprivacy.html">siehe vorangegangenes Kapitel</a>). Zum Anderen kann ein
-Beobachter durch eine Gr&ouml;&szlig;en- und Zeitanalyse des
-verschl&uuml;sselten VPN-Datenstroms recht gut auf &uuml;ber das VPN abgerufene
-Webseiten schlie&szlig;en. JonDonym und Tor sind gegen diesen Angriff dagegen
-sehr resistent (ein Forschungsartikel, der den Angriff demonstriert und
-experimentelle Ergebnisse auflistet, ist in Vorbereitung; die Erkennungsraten
-von Webseiten liegen bei VPNs &gt;90%). Au&szlig;erdem sollte Ihnen immer klar
-sein, dass der Anbieter eines VPN-Systems, im Gegensatz zu JonDonym und Tor,
-jeden Ihrer Schritte verfolgen und speichern kann.</p>
-
-<h3>Premiumdienste</h3>
-
-<p>Bei JonDonym haben Sie die Wahl zwischen <b>kostenlosen Diensten</b> und den
-<b>Premiumdiensten</b>. Bei den Premiumdiensten Diensten ist die Sicherheit
-etwas h&ouml;her, da Sie von jeweils drei statt zwei unabh&auml;ngigen
-Anbietern betrieben werden, und &uuml;ber teils weit auseinanderliegende
-L&auml;nder verteilt sind. Dar&uuml;berhinaus bieten die Premiumdienste Ihnen
-Garantien f&uuml;r eine hohe Verf&uuml;gbarkeit und Mindestgeschwindigkeit und
-erlauben die Anonymisierung weiterer Programme als nur des Webbrowsers.
-<b>Durch die freiwillige Buchung der Premiumdienste unterst&uuml;tzen Sie
-au&szlig;erdem den Erhalt des JonDonym-Systems und die Weiterentwicklung der
-JonDo-Software</b>.</p>
-
-<p>Mithilfe der Bezahlfunktion Ihres JonDos sind Sie in der Lage, die
-Premiumdienste zu nutzen. Um auf diese zugreifen zu k&ouml;nnen, haben Sie die
-M&ouml;glichkeit <a href="payment_account.html">Konten </a> zu erstellen. Ein
-Konto umfasst ein bestimmtes Daten-Volumen f&uuml;r die Nutzung der
-Premiumdienste. Ist dieses Datenvolumens verbraucht, kann das leere Konto
-gel&ouml;scht werden. Wenn Sie die Premiumdienste weiter nutzen m&ouml;chten,
-haben Sie die M&ouml;glichkeit ein neues Konto zu erzeugen. F&uuml;r die
-Kontoerzeugung stehen Ihnen eine Reihe von Tarifen zur Auswahl, die sich in
-Ihrem Preis, dem verf&uuml;gbaren Datenvolumen und der G&uuml;ltigsdauer
-unterscheiden. Das Konto wird automatisch aktiviert, sobald Sie JonDos den
-Betrag &uuml;berwiesen haben, den der von Ihnen gew&auml;hlte Tarif kostet. Die
-jeweils aktuellen Tarife finden Sie auf unserer Homepage unter <a
-href="https://www.jondos.de/de/payment">www.jondos.de/de/payment</a>. </p>
-
-<p><b>Hinweis:</b><br>
-Mit der Erzeugung eines Kontos entstehen Ihnen keinerlei
-Zahlungsverpflichtungen. JonDonym verkauft <b>keine Abonnements</b>, bei denen
-Sie nach der Erzeugung eines Kontos zu weiteren Zahlungen verpflichtet
-w&auml;ren. Das Guthaben auf einem Konto ist <b>Prepaid</b>, d.h. mit Eingang
-der Zahlung wird Ihr Datenvolumen freigeschaltet und Sie k&ouml;nnen alle
-Premiumdienste solange nutzen, bis Ihr Guthaben aufgebraucht oder die
-G&uuml;ltigkeit des Kontos abgelaufen ist. Dabei steht es Ihnen frei, ob Sie
-danach neue Konten erzeugen m&ouml;chten, um die Premiumdienste zu nutzen. </p>
-
-<p>Die f&uuml;r die Bezahlung erforderlichen Einstellungen im JonDo finden Sie
-in dieser <a href="payment.html">Anleitung</a>. </p>
+lokaler Beobachter in Ihrem Netz (Provider, W-LAN) durch eine
+Gr&ouml;&szlig;en- und Zeitanalyse des verschl&uuml;sselten VPN-Datenstroms
+recht gut auf &uuml;ber das VPN abgerufene Webseiten schlie&szlig;en. JonDonym
+und Tor sind gegen diesen Angriff dagegen sehr resistent (ein
+Forschungsartikel, der den Angriff demonstriert und experimentelle Ergebnisse
+auflistet, ist in Vorbereitung; die Erkennungsraten von Webseiten liegen bei
+VPNs &gt;90%). Au&szlig;erdem sollte Ihnen immer klar sein, dass Anbieter von
+VPN-Systemen, im Gegensatz zu JonDonym und Tor, jeden Ihrer Schritte verfolgen
+und speichern k&ouml;nnen, da sie s&auml;mtliche Server des VPN kontrollieren -
+auch wenn manche Anbieter, wie z.B. XeroBank, etwas anderes behaupten. Jedoch
+ist der Schutz durch das VPN eines professionellen und seri&ouml;sen Anbieters
+oft besser als gar kein Schutz. </p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="wwwprivacy.html"><img
