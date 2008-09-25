@@ -306,7 +306,7 @@ public class Multiplexer extends Observable implements Runnable
 		catch (IOException e)
 		{
 			/* end of input stream handling */
-			LogHolder.log(LogLevel.WARNING, LogType.NET, Thread.currentThread().getName()+": terminated!");
+			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, Thread.currentThread().getName()+": terminated!", e);
 		}
 		/* close the channel-table (notifies also all open channels) */
 		m_channelTable.closeChannelTable();
