@@ -29,6 +29,7 @@ package anon.proxy;
 
 import jap.JAPModel;
 
+import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -592,39 +593,31 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		{
 			while (!Thread.currentThread().isInterrupted() && !m_bIsClosed)
 			{
-				if (m_socketQueue.getSize() > 0 && AnonProxyRequest.getNrOfRequests() < m_maxRequests)
+				synchronized (m_socketQueue)
 				{
+					while (m_socketQueue.getSize() == 0 )
+					{
+						try
+						{
+							m_socketQueue.wait();
+						}
+						catch (InterruptedException ex)
+						{
+							LogHolder.log(LogLevel.INFO, LogType.NET, "Open socket thread interrupted.");
+							return;
+						}
+					}
 					try
 					{
 						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject, m_callbackHandler);
 					}
-					catch (Exception e)
+					catch (IOException e)
 					{
 						LogHolder.log(LogLevel.ERR, LogType.NET, e);
 					}
 				}
-				else
-				{
-					try
-					{
-						synchronized (m_socketQueue)
-						{
-							if (AnonProxyRequest.getNrOfRequests() >= m_maxRequests)
-							{
-								m_socketQueue.wait(100);
-							}
-							else
-							{
-								m_socketQueue.wait();
-							}
-						}
-					}
-					catch (InterruptedException ex)
-					{
-						break;
-					}
-				}
-			}
+					
+			}			
 			LogHolder.log(LogLevel.INFO, LogType.NET, "Open socket thread stopped.");
 		}
 	}
