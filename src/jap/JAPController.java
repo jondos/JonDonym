@@ -3254,7 +3254,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							}
 							//else
 							{
-								getView().doClickOnCascadeChooser();
+								//getView().doClickOnCascadeChooser();
 							}
 						}
 					}

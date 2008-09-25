@@ -99,7 +99,8 @@ public class UnlimitedDataChannel extends AbstractDataChannel {
     return true;
   }
 
-  public void multiplexerClosed() {
+  public void multiplexerClosed() 
+  {
     LogHolder.log(LogLevel.ERR, LogType.NET, "UnlimitedDataChannel: multiplexerClosed(): Multiplexer closed while channel was still active.");
     /* send an exception and a channel-close message */
     getChannelMessageQueue().addChannelMessage(new InternalChannelMessage(InternalChannelMessage.CODE_CHANNEL_EXCEPTION, null));
