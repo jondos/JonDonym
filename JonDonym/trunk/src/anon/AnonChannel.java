@@ -71,4 +71,6 @@ public interface AnonChannel
 
 	/** Closes the channel and releases all resources used. */
 	public void close();
+	
+	public boolean isClosed();
 }

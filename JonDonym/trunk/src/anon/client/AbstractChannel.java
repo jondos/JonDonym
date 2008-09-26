@@ -73,6 +73,11 @@ public abstract class AbstractChannel {
       }
     }
   }
+  
+  public boolean isClosed()
+  {
+	  return !m_channelOpen;
+  }
 
   public void deleteChannel() {
     /* Attention: It can take some time until we get the synchronization monitor, if a

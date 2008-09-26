@@ -467,7 +467,7 @@ mainLoop:		do
 					}
 					m_Proxy.transferredBytes(len, m_iProtocol);
 					Thread.yield();
-				}	while ( len > 0); 
+				}	while (len > 0 && !m_Channel.isClosed()); 
 			}
 			catch (IOException e)
 			{

@@ -200,7 +200,11 @@ public class TorChannel extends AbstractChannel
 		{
 			m_oWaitForOpen.notify();
 		}
-
+	}
+	
+	public boolean isClosed()
+	{
+		return m_bCreateError;
 	}
 
 	public void closedByPeer()
