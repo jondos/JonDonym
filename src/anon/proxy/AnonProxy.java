@@ -585,12 +585,11 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 			{
 				m_socketQueue.notify();
 			}
-
-
 		}
 
 		public void run()
 		{
+			Socket socket;
 			while (!Thread.currentThread().isInterrupted() && !m_bIsClosed)
 			{
 				synchronized (m_socketQueue)
@@ -603,21 +602,40 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 						}
 						catch (InterruptedException ex)
 						{
-							LogHolder.log(LogLevel.INFO, LogType.NET, "Open socket thread interrupted.");
-							return;
+							m_bIsClosed = true;							
 						}
 					}
+					if (m_bIsClosed)
+					{
+						break;
+					}
+					socket = (Socket)m_socketQueue.pop();					
+				}								 
+				
+				try
+				{
+					new AnonProxyRequest(m_proxy, socket, m_syncObject, m_callbackHandler);
+				}
+				catch (IOException e)
+				{
+					LogHolder.log(LogLevel.ERR, LogType.NET, e);
+				}					
+			}	
+			
+			synchronized (m_socketQueue)
+			{
+				while (m_socketQueue.getSize() > 0)
+				{
 					try
 					{
-						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject, m_callbackHandler);
+						((Socket)m_socketQueue.pop()).close();
 					}
 					catch (IOException e)
 					{
-						LogHolder.log(LogLevel.ERR, LogType.NET, e);
+						LogHolder.log(LogLevel.NOTICE, LogType.NET, e);
 					}
 				}
-					
-			}			
+			}
 			LogHolder.log(LogLevel.INFO, LogType.NET, "Open socket thread stopped.");
 		}
 	}
@@ -674,8 +692,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 								  "Could not set non-Blocking mode for Channel-Socket!", soex);
 					continue;
 				}
-
-
 			}
 		}
 		catch (Exception e)

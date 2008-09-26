@@ -83,6 +83,11 @@ abstract public class AbstractChannel implements AnonChannel
 		return m_outputStream;
 	}
 
+	public boolean isClosed()
+	{
+		return m_bIsClosed;
+	}
+	
 	public synchronized void close()
 	{
 		try

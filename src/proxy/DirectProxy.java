@@ -144,6 +144,11 @@ final public class DirectProxy implements Runnable, AnonService
 	{
 		return new AnonChannel()
 		{
+			public boolean isClosed()
+			{
+				return false;
+			}
+			
 			public void close()
 			{
 

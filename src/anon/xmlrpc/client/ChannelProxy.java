@@ -90,6 +90,11 @@ class ChannelProxy implements AnonChannel {
     return (989 - 10 * 16);
   }
 
+  public boolean isClosed()
+  {
+	  return m_bIsClosed;
+  }
+  
   public synchronized void close() {
     /*
      * try { if(!m_bIsClosed) { m_outputStream.close(); m_inputStream.close();
