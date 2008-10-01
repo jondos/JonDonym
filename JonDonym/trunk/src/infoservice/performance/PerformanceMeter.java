@@ -8,11 +8,11 @@
 
     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright notice,
-       this list of conditions and the following disclaimer in the documentation and/or
-       other materials provided with the distribution.
+      this list of conditions and the following disclaimer in the documentation and/or
+      other materials provided with the distribution.
     * Neither the name of the University of Technology Dresden, Germany, nor the name of
-       the JonDos GmbH, nor the names of their contributors may be used to endorse or
-       promote products derived from this software without specific prior written permission.
+      the JonDos GmbH, nor the names of their contributors may be used to endorse or
+      promote products derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -64,6 +64,7 @@ import anon.crypto.SignatureVerifier;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.SimpleMixCascadeContainer;
 import anon.infoservice.Database;
@@ -443,7 +444,7 @@ public class PerformanceMeter implements Runnable, Observer
 		{
 			long updateBegin = System.currentTimeMillis();
 			int intRandom;
-						
+			
 			m_lastUpdateRuntime = 0;
 			m_nextUpdate = updateBegin + m_majorInterval;
 			
@@ -798,7 +799,7 @@ public class PerformanceMeter implements Runnable, Observer
 		}
 		
 		// allocate the recv buff
-		char[] m_recvBuff = new char[m_dataSize];				
+		char[] recvBuff = new char[m_dataSize];				
 		
 		while(!Thread.currentThread().isInterrupted())
 		{			
@@ -989,7 +990,7 @@ public class PerformanceMeter implements Runnable, Observer
 		    		    {
 		    		    	bRetry = true;
 		    		    }
-		        	}		        	
+		        	}
 		        	throw new Exception("Error while reading from mix cascade");  	
 		        }
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance meter parsed server header.");
@@ -1009,11 +1010,63 @@ public class PerformanceMeter implements Runnable, Observer
 		        // read the whole packet
 		        while(bytesRead < m_dataSize) 
 		        {
-		        	recvd = reader.read(m_recvBuff, bytesRead, toRead);
-
+		        	recvd = reader.read(recvBuff, bytesRead, toRead);
+		        	
 		        	if(recvd == -1) break;
 		        	bytesRead += recvd;
 		        	toRead -= recvd;
+		        }
+		        
+		        byte[] ip;
+		        int ipSize = 0;
+		        
+		        if((byte) recvBuff[0] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[0] &&
+		           (byte) recvBuff[1] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[1] &&
+		           (byte) recvBuff[2] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[2] &&
+		           (byte) recvBuff[3] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[3])
+		        {
+		        	ipSize = 4;
+		        }
+		        else if((byte) recvBuff[0] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[0] &&
+		           (byte) recvBuff[1] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[1] &&
+		           (byte) recvBuff[2] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[2] &&
+		           (byte) recvBuff[3] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[3])
+		        {
+		        	ipSize = 16;
+		        }
+		        
+		        if(ipSize > 0)
+		        {
+		        	ip = new byte[ipSize];
+		        	for(int j = 0; j < ipSize; j++)
+		        	{
+		        		ip[j] = (byte) recvBuff[4 + j];
+		        	}
+		        
+		        	try
+		        	{
+		        		InetAddress addr = InetAddress.getByAddress(ip);
+		        		if(addr != null)
+		        		{
+		        			MixCascadeExitAddresses exit =
+		        				(MixCascadeExitAddresses) Database.getInstance(MixCascadeExitAddresses.class).
+		        				getEntryById(a_cascade.getId());
+		        		
+		        			if(exit == null)
+		        			{
+		        				exit = new MixCascadeExitAddresses(a_cascade.getId());
+		        			}
+		        		
+		        			if(exit.addInetAddress(addr))
+		        			{
+		        				Database.getInstance(MixCascadeExitAddresses.class).update(exit);
+		        			}
+		        		}
+		        	}
+		        	catch(Exception ex)
+		        	{
+		        		LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not parse IP address", ex);
+		        	}
 		        }
 		        
 		        long responseEndTime = System.currentTimeMillis();
@@ -1413,6 +1466,5 @@ public class PerformanceMeter implements Runnable, Observer
 			return m_infoServiceConfig.getPerfAccountPassword();
 		}
 	}
-
 }
 

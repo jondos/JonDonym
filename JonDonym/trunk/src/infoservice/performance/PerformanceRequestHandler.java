@@ -8,11 +8,11 @@
 
     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright notice,
-       this list of conditions and the following disclaimer in the documentation and/or
-       other materials provided with the distribution.
+      this list of conditions and the following disclaimer in the documentation and/or
+      other materials provided with the distribution.
     * Neither the name of the University of Technology Dresden, Germany, nor the name of
-       the JonDos GmbH, nor the names of their contributors may be used to endorse or
-       promote products derived from this software without specific prior written permission.
+      the JonDos GmbH, nor the names of their contributors may be used to endorse or
+      promote products derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,6 +34,9 @@ import infoservice.HttpResponseStructure;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+import java.net.InetAddress;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import anon.util.XMLUtil;
 import anon.util.XMLParseException;
 import anon.infoservice.Database;
@@ -47,6 +50,16 @@ import anon.crypto.SignatureVerifier;
  */
 public class PerformanceRequestHandler 
 {
+	/**
+	 * Magic bytes for the IPv4 address.
+	 */
+	public static byte[] MAGIC_BYTES_IPV4 = { 0x49, 0x50, 0x56, 0x34 }; // IPV4
+	
+	/**
+	 * Magic bytes for the IPv6 address.
+	 */
+	public static byte[] MAGIC_BYTES_IPV6 = { 0x49, 0x50, 0x56, 0x36 }; // IPV6
+	
 	/**
 	 * Retrieves the XML structure of a PerformanceTokenRequest and
 	 * issues a new token to the <code>InfoService</code>.
@@ -97,7 +110,7 @@ public class PerformanceRequestHandler
 	 * @param a_postData The XML data.
 	 * @return A <code>HttpResponseStructure</code> with the issued token.
 	 */
-	public HttpResponseStructure handlePerformanceRequest(byte[] a_postData)
+	public HttpResponseStructure handlePerformanceRequest(InetAddress a_address, byte[] a_postData)
 	{
 		Document doc = null;
 		PerformanceRequest request = null;
@@ -123,6 +136,21 @@ public class PerformanceRequestHandler
 		// generate random data
 		byte[] data = new byte[request.getDataSize()];
 		new java.util.Random().nextBytes(data);
+		
+		if(a_address instanceof Inet4Address)
+		{
+			System.arraycopy(MAGIC_BYTES_IPV4, 0, data, 0, 4);
+		
+			byte[] ip = a_address.getAddress();
+			System.arraycopy(ip, 0, data, 4, 4);
+		} 
+		else if(a_address instanceof Inet6Address)
+		{
+			System.arraycopy(MAGIC_BYTES_IPV6, 0, data, 0, 4);
+			
+			byte[] ip = a_address.getAddress();
+			System.arraycopy(ip, 0, data, 4, 16);			
+		}
 		
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
 				HttpResponseStructure.HTTP_ENCODING_PLAIN, data);
