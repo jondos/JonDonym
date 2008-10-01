@@ -55,6 +55,7 @@ import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.JavaVersionDBEntry;
 import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.PerformanceEntry;
@@ -114,6 +115,13 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		public Class getDatabaseClass()
 		{
 			return PerformanceEntry.class;
+		}
+	};
+	private final HTTPResponseGetter m_exitAddressListResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return MixCascadeExitAddresses.class;
 		}
 	};
 
@@ -1836,11 +1844,21 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		{
 			/** Full Command: GET /performanceinfo
 			 * Source: 
-			 * Descriptioin: ?
+			 * Description: ?
 			 * Description_de: 
 			 */
 			ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
 			httpResponse = m_performanceResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if( (command.startsWith("/exitaddresses") && (method == Constants.REQUEST_METHOD_GET)))
+		{
+			/** Full Command: GET /exitaddresses
+			 * Source: 
+			 * Description: ?
+			 * Description_de: 
+			 */
+			//ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
+			httpResponse = m_exitAddressListResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals("/helo")) && (method == Constants.REQUEST_METHOD_POST))
 		{
@@ -2265,7 +2283,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		else if(command.startsWith("/requestperformance") 
 				&& (method == Constants.REQUEST_METHOD_POST))
 		{
-			httpResponse = m_perfRequestHandler.handlePerformanceRequest(postData);
+			httpResponse = m_perfRequestHandler.handlePerformanceRequest(a_sourceAddress, postData);
 		}
 		else
 		{
