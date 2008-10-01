@@ -41,8 +41,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+
 import anon.infoservice.MixCascade;
 import anon.shared.ProxyConnection;
+import anon.transport.connection.IStreamConnection;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
@@ -107,7 +109,7 @@ public class DefaultClientProtocolHandler
 	/**
 	 * This stores the forwarded connection.
 	 */
-	private ProxyConnection m_connection;
+	private IStreamConnection m_connection;
 
 	/**
 	 * This stores the internal protocol state. See the constants in this class.
@@ -131,7 +133,7 @@ public class DefaultClientProtocolHandler
 	 *
 	 * @param a_connection A active ProxyConnection to a forwarder.
 	 */
-	public DefaultClientProtocolHandler(ProxyConnection a_connection)
+	public DefaultClientProtocolHandler(IStreamConnection a_connection)
 	{
 		m_connection = a_connection;
 		m_state = STATE_INITIALIZE;
@@ -461,7 +463,7 @@ public class DefaultClientProtocolHandler
 			int readBytes = 0;
 			while (readBytes < messageHeader.length)
 			{
-				int lastRead = m_connection.getSocket().getInputStream().read(messageHeader, readBytes,
+				int lastRead = m_connection.getInputStream().read(messageHeader, readBytes,
 					messageHeader.length - readBytes);
 				if (lastRead == -1)
 				{
@@ -500,7 +502,7 @@ public class DefaultClientProtocolHandler
 			readBytes = 0;
 			while (readBytes < remainingMessage.length)
 			{
-				int lastRead = m_connection.getSocket().getInputStream().read(remainingMessage, readBytes,
+				int lastRead = m_connection.getInputStream().read(remainingMessage, readBytes,
 					remainingMessage.length - readBytes);
 				if (lastRead == -1)
 				{
@@ -541,7 +543,8 @@ public class DefaultClientProtocolHandler
 	{
 		try
 		{
-			m_connection.getSocket().getOutputStream().write(a_message);
+			m_connection.getOutputStream().write(a_message);
+			m_connection.getOutputStream().flush();
 		}
 		catch (IOException e)
 		{

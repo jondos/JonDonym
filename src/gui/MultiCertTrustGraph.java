@@ -25,22 +25,24 @@ public class MultiCertTrustGraph
 		m_endNodes = new Hashtable();
 		JAPCertificate root, op, end;
 		Node parent, child;
+		boolean verified;
 		
 		for(int i=0; i<infos.length; i++)
 		{
 			root = infos[i].getRootCertificate();
 			op = infos[i].getSecondCertificate();
 			end = infos[i].getFirstCertificate();
+			verified = infos[i].isVerified();
 			
 			if(root != null)
 			{
-				m_rootNodes.put(root, new Node(root, infos[i].isVerified()));
+				m_rootNodes.put(root, new Node(root, verified));
 			}
 			if(op != null)
 			{
-				m_opNodes.put(op, new Node(op));
+				m_opNodes.put(op, new Node(op, verified));
 			}
-			m_endNodes.put(end, new Node(end));
+			m_endNodes.put(end, new Node(end, verified));
 		}
 		
 		for(int i=0; i<infos.length; i++)
@@ -166,6 +168,23 @@ public class MultiCertTrustGraph
 	public Enumeration getEndNodes()
 	{
 		return m_endNodes.elements();
+	}
+	
+	public int countTrustedRootNodes()
+	{
+		int count = 0;
+		Enumeration rootNodes = getRootNodes();
+		Node current;
+		
+		while(rootNodes.hasMoreElements())
+		{
+			current = (Node) rootNodes.nextElement();
+			if(current.isTrusted())
+			{
+				count++;
+			}
+		}
+		return count;
 	}
 	
 	public final class Node

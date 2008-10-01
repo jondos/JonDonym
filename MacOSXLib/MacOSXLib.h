@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2007, JonDos GmbH
+ Copyright (c) 2000 - 2008, The JAP-Team
  All rights reserved.
  Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
@@ -11,7 +11,7 @@
  this list of conditions and the following disclaimer in the documentation and/or
  other materials provided with the distribution.
 
-  - Neither the name of the JonDos GmbH nor the names of its contributors
+  - Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
  may be used to endorse or promote products derived from this software without specific
  prior written permission.
 
@@ -25,78 +25,14 @@
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-package anon.util;
+#import "javah_MacOSXLib.h"
+#import <Cocoa/Cocoa.h>
 
+#define LIB_VERSION "00.00.005"
 
-/**
- * This is a generic object queue.
- *
- * @author Rolf Wendolsky
- */
-public class Queue
-{
-	private QueueItem m_head = null;
-	private QueueItem m_foot = null;
-	private int m_size = 0;
+@interface AppDelegate : NSObject
+- (NSMenu*) applicationDockMenu:(NSApplication*) sender;
+- (void) dockMenuCallback:(id) sender;
+@end
 
-	private class QueueItem
-	{
-		private Object m_object;
-		private QueueItem m_previous = null;
-
-		public QueueItem(Object a_object)
-		{
-			m_object = a_object;
-		}
-	}
-
-	public int getSize()
-	{
-		return m_size;
-	}
-
-
-	public synchronized void push(Object a_object)
-	{
-		QueueItem newItem = new QueueItem(a_object);
-		m_size++;
-
-		if (m_head == null)
-		{
-			// there is no item im the queue
-			m_head = newItem;
-			m_foot = newItem;
-		}
-		else
-		{
-			// there is more than one item in the queue
-			m_head.m_previous = newItem;
-			m_head = newItem;
-		}
-	}
-	public synchronized Object pop()
-	{
-		Object object;
-		if (m_head == null)
-		{
-			// there is not item in the queue
-			return null;
-		}
-		else if (m_head == m_foot)
-		{
-			// there is only one object in the queue
-			object = m_foot.m_object;
-			m_head = null;
-			m_foot = null;
-		}
-		else
-		{
-			// there is more than one object in the queue
-			object = m_foot.m_object;
-			m_foot = m_foot.m_previous;
-
-		}
-		m_size--;
-		return object;
-	}
-	}
+NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj);

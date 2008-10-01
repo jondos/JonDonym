@@ -39,7 +39,7 @@ public final class LogType
 {
 	/** The human readyble names of all log types. New log types must be added here, too. */
 	private static final String[] STR_LOG_TYPES =
-		{"NUL", "GUI", "NET", "THREAD", "MISC", "PAY", "TOR", "CRYPTO", "FILTER", "AGREEMENT", "DB", "ALL"};
+		{"NUL", "GUI", "NET", "THREAD", "MISC", "PAY", "TOR", "CRYPTO", "FILTER", "AGREEMENT", "DB", "TRANSPORT" , "ALL"};
 
 	/** The concatenation string of the human readable log types. */
 	private static final String STR_ADD_LOG_TYPE = "+";
@@ -81,6 +81,9 @@ public final class LogType
 
 	/** messages about database records, e.g. those to be cleaned up * */
 	public static final int DB = LOG_TYPES[10];
+	
+	/** messages transport and connection system**/
+	public static final int TRANSPORT = LOG_TYPES[11];
 
 	/** Indicates all messages*/
 	public static final int ALL = createLogTypeALL();

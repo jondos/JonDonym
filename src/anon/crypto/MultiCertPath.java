@@ -241,6 +241,10 @@ public class MultiCertPath
 	{
 		int count = 0;
 		
+		if(!this.needsVerification())
+		{
+			return countPaths();
+		}
 		synchronized (m_certPaths)
 		{
 			for(int i=0; i<m_certPaths.length; i++)
@@ -280,6 +284,10 @@ public class MultiCertPath
 			for(int i=0; i<m_certPaths.length; i++)
 			{
 				infos[i] = m_certPaths[i].getPathInfo();
+				if(!this.needsVerification())
+				{
+					infos[i].setVerified(true);
+				}
 			}
 			return infos;
 		}

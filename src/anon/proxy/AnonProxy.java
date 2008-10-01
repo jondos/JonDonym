@@ -27,11 +27,15 @@
  */
 package anon.proxy;
 
+import jap.JAPModel;
+
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Vector;
 
 import anon.AnonChannel;
@@ -45,16 +49,17 @@ import anon.client.DummyTrafficControlChannel;
 import anon.infoservice.MixCascade;
 import anon.infoservice.AbstractMixCascadeContainer;
 import anon.mixminion.MixminionServiceDescription;
-import anon.shared.ProxyConnection;
 import anon.tor.TorAnonServerDescription;
+import anon.transport.connection.IStreamConnection;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.AnonServerDescription;
 import anon.pay.IAIEventListener;
 import anon.infoservice.IMutableProxyInterface;
-import anon.util.Queue;
+import anon.util.ObjectQueue;
 import java.security.SignatureException;
+
 import anon.client.TrustException;
 
 /**
@@ -66,7 +71,7 @@ import anon.client.TrustException;
  * portNumberOfMixCascade)); theProxy.start(); }
  */
 
-final public class AnonProxy implements Runnable, AnonServiceEventListener
+final public class AnonProxy implements Runnable, AnonServiceEventListener, Observer
 {
 	public static final int UNLIMITED_REQUESTS = Integer.MAX_VALUE;
 	public static final int MIN_REQUESTS = 5;
@@ -107,6 +112,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	private final Object SHUTDOWN_SYNC = new Object();
 	private boolean bShuttingDown = false;
 
+	private ProxyCallbackHandler m_callbackHandler = new ProxyCallbackHandler();
+	private JonDoFoxHeader m_jfxHeader = null;
+	
 	/**
 	 * Stores the MixCascade we are connected to.
 	 */
@@ -192,6 +200,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
 		// SOCKS\uFFFD
+		
+		JAPModel.getInstance().addObserver(this);
+		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 	}
 
 	/**
@@ -212,7 +223,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	 *          there is no need for dummy traffic on that connection on the
 	 *          server side.
 	 */
-	public AnonProxy(ServerSocket a_listener, ProxyConnection a_proxyConnection,
+	public AnonProxy(ServerSocket a_listener, IStreamConnection a_proxyConnection,
 					 int a_maxDummyTrafficInterval)
 	{
 		if (a_listener == null)
@@ -220,15 +231,43 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			throw new IllegalArgumentException("Socket listener is null!");
 		}
 		m_socketListener = a_listener;
-		m_Anon = new AnonClient(a_proxyConnection.getSocket()); // uups very nasty....
+		m_Anon = new AnonClient(a_proxyConnection); 
 		m_forwardedConnection = true;
 		m_maxDummyTrafficInterval = a_maxDummyTrafficInterval;
 		setDummyTraffic(a_maxDummyTrafficInterval);
 		m_anonServiceListener = new Vector();
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
+		
+		JAPModel.getInstance().addObserver(this);
+		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 	}
-
+	
+	public void setJonDoFoxHeaderEnabled(boolean enable)
+	{
+		if( m_callbackHandler == null)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "No Callbackhandler activated: cannot process HTTP headers.");
+			return;
+		}
+		if(enable)
+		{
+			if (m_jfxHeader == null )
+			{
+				m_jfxHeader = new JonDoFoxHeader(); 
+				m_callbackHandler.registerProxyCallback(m_jfxHeader);
+			}
+		}
+		else
+		{
+			if (m_jfxHeader != null )
+			{
+				m_callbackHandler.removeCallback(m_jfxHeader);
+				m_jfxHeader = null;
+			}
+		}
+	}
+	
 	/**
 	 * Sets a new MixCascade.
 	 *
@@ -439,7 +478,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 	private class OpenSocketRequester implements Runnable
 	{
-		private Queue m_socketQueue = new Queue();
+		private ObjectQueue m_socketQueue = new ObjectQueue();
 		private AnonProxy m_proxy;
 		private Object m_syncObject;
 		private boolean m_bIsClosed = false;
@@ -479,7 +518,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 				{
 					try
 					{
-						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject);
+						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject, m_callbackHandler);
 					}
 					catch (Exception e)
 					{
@@ -1068,6 +1107,17 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		{
 			/** @todo reconnect is not yet supported with forwarded connections */
 			return!m_forwardedConnection && m_mixCascadeContainer.isReconnectedAutomatically();
+		}
+	}
+	
+	public void update(Observable a_notifier, Object a_message)
+	{
+		if (a_message != null)
+		{
+			if (a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
+			{
+				setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+			}
 		}
 	}
 }

@@ -29,6 +29,10 @@ package forward.server;
 
 import java.net.Socket;
 
+import anon.transport.address.Endpoint;
+import anon.transport.connection.IStreamConnection;
+
+
 /**
  * This is the implementation of the forwarding component between client and the protocol
  * handler. The bandwidth limit is implemented here.
@@ -39,7 +43,7 @@ public class ForwardConnection
 	/**
 	 * Stores the connection to the client.
 	 */
-	private Socket m_clientConnection;
+	private IStreamConnection m_clientConnection;
 
 	/**
 	 * Stores the protocol handler, which processes the data or forwards them to the mixcascade.
@@ -95,7 +99,7 @@ public class ForwardConnection
 	 * @param a_clientConnection The Socket with the active connection to the client.
 	 * @param a_parentScheduler The scheduler which controls this connection.
 	 */
-	public ForwardConnection(Socket a_clientConnection, ForwardScheduler a_parentScheduler) throws Exception
+	public ForwardConnection(IStreamConnection a_clientConnection, ForwardScheduler a_parentScheduler) throws Exception
 	{
 		m_clientConnection = a_clientConnection;
 		/* it's important to set the parent scheduler before creating the ProtocolHandler, because
@@ -274,6 +278,7 @@ public class ForwardConnection
 								m_parentScheduler.getStatistics().incrementTransferVolume(readBytes);
 								/* write the bytes to the client connection */
 								m_clientConnection.getOutputStream().write(bufferServer);
+								m_clientConnection.getOutputStream().flush();
 							}
 						}
 					}
@@ -514,8 +519,9 @@ public class ForwardConnection
 	 */
 	public String toString()
 	{
-		return (m_clientConnection.getInetAddress().getHostAddress() + ":" +
-				Integer.toString(m_clientConnection.getPort()));
+		//return (m_clientConnection.getInetAddress().getHostAddress() + ":" +
+		//		Integer.toString(m_clientConnection.getPort()));
+		return Endpoint.toURN(m_clientConnection.getRemoteAddress());
 	}
 
 }

@@ -127,7 +127,9 @@ import anon.util.Util.Comparable;
 class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, ActionListener,
 	ListSelectionListener, ItemListener, KeyListener, Observer
 {
+	private static final String MSG_X_OF_Y_CERTS_TRUSTED = JAPConfAnon.class.getName() + "_certXofYtrusted";
 	private static final String MSG_LABEL_CERTIFICATE = JAPConfAnon.class.getName() + "_certificate";
+	private static final String MSG_LABEL_CERTIFICATES = JAPConfAnon.class.getName() + "_certificates";
 	private static final String MSG_LABEL_EMAIL = JAPConfAnon.class.getName() + "_labelEMail";
 	private static final String MSG_REALLY_DELETE = JAPConfAnon.class.getName() + "_reallyDelete";
 	private static final String MSG_MIX_VERSION = JAPConfAnon.class.getName() + "_mixVersion";
@@ -179,8 +181,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
 
-	private static final int FILTER_SPEED_MAJOR_TICK = 250;
-	private static final int FILTER_SPEED_MAX = 1000;
+	private static final int FILTER_SPEED_MAJOR_TICK = 100;
+	private static final int FILTER_SPEED_MAX = 400;
 	private static final int FILTER_SPEED_STEPS = (FILTER_SPEED_MAX / FILTER_SPEED_MAJOR_TICK) + 1;
 	
 	private static final int FILTER_LATENCY_STEPS = 5;
@@ -247,7 +249,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private boolean m_blacklist;
 	private boolean m_unknownPI;
 	private JLabel m_viewCertLabel;
-	private JLabel m_viewCertLabelValidity;
+	//private JLabel m_viewCertLabelValidity;
 
 	private JButton m_manualCascadeButton;
 	private JButton m_reloadCascadesButton;
@@ -463,7 +465,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			if(conditionValue != null)
 			{
-				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
+				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 0)
+				{
+					m_filterCascadeGroup.setSelected(m_filterAllMixes.getModel(), true);
+				}
+				else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
 				{
 					m_filterCascadeGroup.setSelected(m_filterAtLeast2Mixes.getModel(), true);
 				}
@@ -481,7 +487,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			if(conditionValue != null)
 			{
-				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
+				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 0)
+				{
+					m_filterInternationalGroup.setSelected(m_filterAllCountries.getModel(), true);
+				}
+				else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
 				{
 					m_filterInternationalGroup.setSelected(m_filterAtLeast2Countries.getModel(), true);
 				}
@@ -1091,9 +1101,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		if (m_serverCertPaths != null && m_serverInfo != null)
 		{
 			boolean bVerified = isServerCertVerified();
-			boolean bValid = m_serverCertPaths.isValid(new Date());
+			//boolean bValid = m_serverCertPaths.isValid(new Date());
+			
+			m_viewCertLabel.setText(JAPMessages.getString(MSG_X_OF_Y_CERTS_TRUSTED, 
+					new Object[]{new Integer(m_serverCertPaths.countVerifiedPaths()),
+								new Integer(m_serverCertPaths.countPaths())}));
+			m_viewCertLabel.setForeground(bVerified ? Color.GREEN.darker().darker() : Color.RED);
 
-			m_viewCertLabel.setText((bVerified ? JAPMessages.getString(CertDetailsDialog.MSG_CERT_VERIFIED) + "," :
+			/*m_viewCertLabel.setText((bVerified ? JAPMessages.getString(CertDetailsDialog.MSG_CERT_VERIFIED) + "," :
 				JAPMessages.getString(CertDetailsDialog.MSG_CERT_NOT_VERIFIED) + ","));
 			m_viewCertLabel.setForeground(bVerified ? Color.blue : Color.red);
 			m_viewCertLabelValidity.setText((bValid ? " " +
@@ -1103,14 +1118,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_viewCertLabel.setToolTipText(
 						 m_viewCertLabel.getText() + m_viewCertLabelValidity.getText());
 			m_viewCertLabelValidity.setToolTipText(
-						 m_viewCertLabel.getText() + m_viewCertLabelValidity.getText());
+						 m_viewCertLabel.getText() + m_viewCertLabelValidity.getText());*/
 			m_ExplainCertLabelBegin.setVisible(true);
 			m_ExplainCertLabel.setVisible(true);
 			m_ExplainCertLabelEnd.setText(")");			
 		}
 		else
 		{
-			m_viewCertLabelValidity.setText(" ");
+			//m_viewCertLabelValidity.setText(" ");
 			m_viewCertLabel.setText("N/A");
 			m_viewCertLabel.setToolTipText("N/A");
 			m_viewCertLabel.setForeground(m_nrLabel.getForeground());
@@ -1143,6 +1158,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			hideEditFilter();
 		}
 		
+		m_filterAllMixes.setEnabled(true);
+		m_filterAtLeast2Mixes.setEnabled(true);
+		
 		TrustModel.restoreDefault();
 	}
 	
@@ -1150,6 +1168,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if(m_filterPanel != null && m_filterPanel.isVisible())
 		{
+			if(m_previousTrustModel != TrustModel.getCustomFilter())
+			{
+				m_cmbCascadeFilter.setSelectedItem(m_previousTrustModel);
+			}
 			hideEditFilter();
 		}		
 	}
@@ -1158,7 +1180,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if(m_filterPanel != null && m_filterPanel.isVisible())
 		{
-			editFilter();
+			applyFilter();
 			hideEditFilter();
 		}
 		
@@ -1353,9 +1375,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			if(m_filterPanel == null || !m_filterPanel.isVisible())
 			{
-				m_previousTrustModel = (TrustModel) m_cmbCascadeFilter.getSelectedItem();
-				m_cmbCascadeFilter.setSelectedItem(TrustModel.getCustomFilter());
-				drawFilterPanel();
+				showFilter();
 			}
 			else if(m_filterPanel != null && m_filterPanel.isVisible())
 			{
@@ -1381,6 +1401,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterAllMixes.setEnabled(false);
 			m_filterAtLeast2Mixes.setEnabled(false);
 		}
+	}
+
+	public void showFilter()
+	{
+		m_previousTrustModel = (TrustModel) m_cmbCascadeFilter.getSelectedItem();
+		m_cmbCascadeFilter.setSelectedItem(TrustModel.getCustomFilter());
+		drawFilterPanel();
 	}
 	
 	private void hideEditFilter() 
@@ -1576,9 +1603,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	}
 	
 	/**
-	 * Edits the filter
+	 * Applies the filter
 	 */
-	private void editFilter()
+	private void applyFilter()
 	{
 		if(!m_trustModelCopy.isEditable() || !TrustModel.getCurrentTrustModel().isEditable()) return;
 		
@@ -1615,8 +1642,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			else
 			{
 				JAPDialog.showWarningDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_NO_CASCADES));
+				m_filterAllMixes.setEnabled(true);
+				m_filterAtLeast2Mixes.setEnabled(true);
 			}
-			
 		}
 		catch(NumberFormatException ex)
 		{
@@ -1700,7 +1728,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				//m_listMixCascade.repaint();
 			}
 		}
-		else if (e.getSource() == m_viewCertLabel || e.getSource() == m_viewCertLabelValidity)
+		else if (e.getSource() == m_viewCertLabel ) //|| e.getSource() == m_viewCertLabelValidity)
 		{
 			
 			if (m_serverCertPaths != null && m_serverInfo != null)
@@ -1746,10 +1774,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		if(a_bFromUtilToReal && a_delay == m_filterLatencySlider.getMinimum())
 		{
-			return TrustModel.TRUST_ALWAYS;
+			return Integer.MAX_VALUE;
 		}
 		
-		if(!a_bFromUtilToReal && a_delay == TrustModel.TRUST_ALWAYS)
+		if(!a_bFromUtilToReal && a_delay == Integer.MAX_VALUE)
 		{
 			return m_filterLatencySlider.getMinimum();
 		}
@@ -1799,7 +1827,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		if ( (e.getSource() == m_operatorLabel && getUrlFromLabel(m_operatorLabel) != null) ||
 			 (e.getSource() == m_emailLabel && getEMailFromLabel(m_emailLabel) != null) ||
 			(e.getSource() == m_viewCertLabel && m_serverCertPaths != null) ||
-			(e.getSource() == m_viewCertLabelValidity && m_serverCertPaths != null) ||
+			//(e.getSource() == m_viewCertLabelValidity && m_serverCertPaths != null) ||
 			(e.getSource() == m_locationLabel && m_locationCoordinates != null))
 		{
 			((JLabel)e.getSource()).setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -1829,6 +1857,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				/* register observables */
 				JAPController.getInstance().addObserver(this);
 				JAPModel.getInstance().getRoutingSettings().addObserver(this);
+				SignatureVerifier.getInstance().addObserver(this);
 				SignatureVerifier.getInstance().getVerificationCertificateStore().addObserver(this);
 				Database.getInstance(MixCascade.class).addObserver(this);
 				Database.getInstance(StatusInfo.class).addObserver(this);
@@ -1856,6 +1885,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_tableMixCascade.getSelectionModel().setSelectionInterval(0, 0);
 		}
+		
+		this.updateValues(false);
 	}
 
 	public void setSelectedCascade(MixCascade a_cascade)
@@ -1955,7 +1986,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					}
 
 					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
-					long value;
+					int value;
 					
 					DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
 					df.applyPattern("#,####0.00");
@@ -1963,9 +1994,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					if(entry != null)
 					{
 						value = entry.getBound(PerformanceEntry.SPEED);						
-						if (value < 0)
+						if (value < 0 || value == Integer.MAX_VALUE)
 						{
-							m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
+							m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 						}
 						else if(value == 0)
 						{
@@ -1978,11 +2009,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						
 													
 						value = entry.getBound(PerformanceEntry.DELAY);
-						if (value < 0)
+						if (value <= 0)
 						{
-							m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
+							m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 						}
-						else if(value == Long.MAX_VALUE)
+						else if(value == Integer.MAX_VALUE)
 						{
 							m_lblDelay.setText("> " + 
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
@@ -1995,8 +2026,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					}
 					else
 					{
-						m_lblSpeed.setText(JAPMessages.getString("statusUnknown"));
-						m_lblDelay.setText(JAPMessages.getString("statusUnknown"));
+						m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+						m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 					}
 					
 					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));
@@ -3201,7 +3232,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridwidth = 2;
 			add(m_locationLabel, c);
 
-			l = new JLabel(JAPMessages.getString(MSG_LABEL_CERTIFICATE) + ":");
+			l = new JLabel(JAPMessages.getString(MSG_LABEL_CERTIFICATES) + ":");
 			c.gridx = 0;
 			c.gridy++;
 			c.gridwidth = 1;
@@ -3223,16 +3254,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		    certConstraints.insets = new Insets(5, 30, 5, 0);
 		    m_ExplainCertPanel.add(m_viewCertLabel, certConstraints);
 
-			m_viewCertLabelValidity = new JLabel();
+			/*m_viewCertLabelValidity = new JLabel();
 			m_viewCertLabelValidity.addMouseListener(a_listener);
-			certConstraints.gridx++;
+			certConstraints.gridx++;*/
 			/*
 			c.gridx = 2;
 			c.gridwidth = 1;
 			c.insets = new Insets(5, 0, 5, 5);
 			add(m_viewCertLabelValidity, c);*/
-		    certConstraints.insets = new Insets(5, 0, 5, 0);
-		    m_ExplainCertPanel.add(m_viewCertLabelValidity, certConstraints);
+		    //certConstraints.insets = new Insets(5, 0, 5, 0);
+		    //m_ExplainCertPanel.add(m_viewCertLabelValidity, certConstraints);
 
 			certConstraints.gridx++;
 			certConstraints.insets = new Insets(5, 10, 5, 0);

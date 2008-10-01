@@ -132,6 +132,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	
 	public static final String MSG_UPDATE = JAPNewView.class.getName() + "_update";
 	public static final String MSG_NO_REAL_PAYMENT = JAPNewView.class.getName() + "_noRealPayment";
+	public static final String MSG_UNKNOWN_PERFORMANCE = JAPNewView.class.getName() + "_unknownPerformance";
 
 	private static final String MSG_ANONYMETER_TOOL_TIP = JAPNewView.class.getName() + "_anonymeterToolTip";
 	private static final String MSG_SERVICE_NAME = JAPNewView.class.getName() + "_ngAnonymisierungsdienst";
@@ -2585,7 +2586,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_dlgConfig.addComponentListener(m_configMovedAdapter);
 				setCursor(c);
 			}
-			m_dlgConfig.updateValues();
 			m_dlgConfig.selectCard(card, a_value);
 			m_dlgConfig.setVisible(true);
 			m_bConfigActive = false;
@@ -2897,14 +2897,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(currentMixCascade.getId());
 			
-			long value = 0;
+			int value = 0;
 			
 			if(entry != null)
 			{
 				value = entry.getBound(PerformanceEntry.SPEED);						
-				if (value < 0)
+				if (value < 0 || value == Integer.MAX_VALUE)
 				{
-					m_labelSpeed.setText(JAPMessages.getString("statusUnknown"));
+					m_labelSpeed.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
 				}
 				else if(value == 0)
 				{
@@ -2916,11 +2916,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				
 				value = entry.getBound(PerformanceEntry.DELAY);
-				if (value < 0)
+				if (value <= 0)
 				{
-					m_labelDelay.setText(JAPMessages.getString("statusUnknown"));
+					m_labelDelay.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
 				}
-				else if(value == Long.MAX_VALUE)
+				else if(value == Integer.MAX_VALUE)
 				{
 					m_labelDelay.setText("> " + 
 							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
@@ -2933,8 +2933,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			else
 			{
-				m_labelSpeed.setText(JAPMessages.getString("statusUnknown"));
-				m_labelDelay.setText(JAPMessages.getString("statusUnknown"));
+				m_labelSpeed.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
+				m_labelDelay.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
 			}
 			
 			JAPDll.setSystrayTooltip(strSystrayTooltip);

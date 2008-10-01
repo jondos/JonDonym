@@ -85,7 +85,6 @@ import anon.infoservice.JAPMinVersion;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
-import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.infoservice.ProxyInterface;
@@ -99,6 +98,7 @@ import anon.pay.PaymentInstanceDBEntry;
 import anon.proxy.AnonProxy;
 import anon.proxy.IProxyListener;
 import anon.tor.TorAnonServerDescription;
+import anon.transport.address.IAddress;
 import anon.util.Base64;
 import anon.util.ClassUtil;
 import anon.util.IMiscPasswordReader;
@@ -161,6 +161,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		"_cascadeNotTrusted";
 
 	private static final String MSG_ALLOWUNPROTECTED = JAPController.class.getName() + "_allowunprotected";
+	private static final String MSG_ALLOWUNPROTECTED_ALL = JAPController.class.getName() + "_allowunprotectedAll";
 	public static final String MSG_IS_NOT_ALLOWED = JAPController.class.getName() + "_isNotAllowed";
 	public static final String MSG_ASK_SWITCH = JAPController.class.getName() + "_askForSwitchOnError";
 	public static final String MSG_ASK_RECONNECT = JAPController.class.getName() + "_askForReconnectOnError";
@@ -352,12 +353,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_feedback = new JAPFeedback();
 		m_AccountUpdater = new AccountUpdater();
 		m_InfoServiceUpdater = new InfoServiceUpdater();
+		m_perfInfoUpdater = new PerformanceInfoUpdater();
 		m_paymentInstanceUpdater = new PaymentInstanceUpdater();
 		m_MixCascadeUpdater = new MixCascadeUpdater();
 		m_minVersionUpdater = new MinVersionUpdater();
 		m_javaVersionUpdater = new JavaVersionUpdater();
 		m_messageUpdater = new MessageUpdater();
-		m_perfInfoUpdater = new PerformanceInfoUpdater();
 
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
@@ -376,15 +377,17 @@ public final class JAPController extends Observable implements IProxyListener, O
 			m_proxyCallback = new DirectProxy.AllowUnprotectedConnectionCallback()
 			{
 				public DirectProxy.AllowUnprotectedConnectionCallback.Answer callback(
-								DirectProxy.RequestInfo a_requestInfo
-					)
-				{
-					if (JAPModel.getInstance().isNonAnonymousSurfingDenied() ||
-						JAPController.getInstance().getView() == null)
+						DirectProxy.RequestInfo a_requestInfo)
+				{	
+					String uri;
+					String message;
+					String headline = null;
+					
+					if (JAPController.getInstance().getView() == null)
 					{
-						return new Answer(false, false, true);
-					}
-
+							return new Answer(false, false);
+					}		
+					
 					boolean bShowHtmlWarning;
 					JAPDialog.LinkedCheckBox cb = new JAPDialog.LinkedCheckBox(
 									   JAPMessages.getString(JAPDialog.LinkedCheckBox.MSG_REMEMBER_ANSWER), false,
@@ -395,18 +398,23 @@ public final class JAPController extends Observable implements IProxyListener, O
 							return true;
 						}
 					};
-					bShowHtmlWarning = ! (JAPDialog.showYesNoDialog(
-									   JAPController.getInstance().getViewWindow(),
-									   JAPMessages.getString(MSG_ALLOWUNPROTECTED), a_requestInfo.getURI()
-									   + (a_requestInfo.getPort() != 80 ? ":" + a_requestInfo.getPort() : ""), cb));
-					/*if (bShowHtmlWarning && cb.getState())
+					
+					uri = a_requestInfo.getURI() + (a_requestInfo.getPort() != 80 ? ":" + a_requestInfo.getPort() : "");
+					if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
 					{
-						// user has chosen to never allow non anonymous websurfing
-						JAPModel.getInstance().denyNonAnonymousSurfing(true);
-						// do not remember as this may be switched in the control panel
-						return new Answer(!bShowHtmlWarning, false);
-					}*/
-					return new Answer(!bShowHtmlWarning, cb.getState(), false);
+						message = JAPMessages.getString(MSG_ALLOWUNPROTECTED, "<b>" + uri + "</b>");
+						headline = uri;
+					}
+					else
+					{
+						message = JAPMessages.getString(MSG_ALLOWUNPROTECTED_ALL);
+					}
+					
+					
+					bShowHtmlWarning = !(JAPDialog.showYesNoDialog(
+									   JAPController.getInstance().getViewWindow(), message, headline, cb));
+					
+					return new Answer(!bShowHtmlWarning, cb.getState());
 				}
 			};
 
@@ -612,18 +620,22 @@ public final class JAPController extends Observable implements IProxyListener, O
 				if (JAPModel.isInfoServiceDisabled())
 				{
 					m_InfoServiceUpdater.start(false);
+					m_perfInfoUpdater.start(false);
 					m_paymentInstanceUpdater.start(false);
 					m_MixCascadeUpdater.start(false);
 					m_minVersionUpdater.start(false);
 					m_javaVersionUpdater.start(false);
-					m_messageUpdater.start(false);
-					m_perfInfoUpdater.start(false);
+					m_messageUpdater.start(false);					
 				}
 				else
 				{
 					if (!m_InfoServiceUpdater.isFirstUpdateDone())
 					{
 						m_InfoServiceUpdater.updateAsync();
+					}
+					if (!m_perfInfoUpdater.isFirstUpdateDone())
+					{
+						m_perfInfoUpdater.updateAsync();
 					}
 					if (!m_paymentInstanceUpdater.isFirstUpdateDone())
 					{
@@ -644,11 +656,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (!m_messageUpdater.isFirstUpdateDone())
 					{
 						m_messageUpdater.updateAsync();
-					}
-					if (!m_perfInfoUpdater.isFirstUpdateDone())
-					{
-						m_perfInfoUpdater.updateAsync();
-					}
+					}					
 				}
 
 				m_AccountUpdater.start(false);
@@ -732,10 +740,13 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 			// listener has started correctly
 			// do initial setting of anonMode
+			if (JAPModel.isAutoConnect())
+				startAnonymousMode(getViewWindow());
+			/*
 			if (JAPModel.isAutoConnect() &&
 				JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder())
 			{
-				/* show the connect via forwarder dialog -> the dialog will do the remaining things */
+				// show the connect via forwarder dialog -> the dialog will do the remaining things 
 				new JAPRoutingEstablishForwardedConnectionDialog(getViewWindow());
 				notifyObservers();
 			}
@@ -743,6 +754,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			{
 				setAnonMode(JAPModel.isAutoConnect());
 			}
+			*/
 		}
 	}
 
@@ -1043,13 +1055,19 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 
 				String strVersion = XMLUtil.parseAttribute(root, JAPConstants.CONFIG_VERSION, null);
-	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_UPDATE, false));
-	            m_Model.setDllWarningVersion(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_WARNING_BELOW, 0));	        
+	            m_Model.setDLLupdate(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_UPDATE, null));
+	            m_Model.setDllWarningVersion(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_WARNING_BELOW, 0));
+	            m_Model.setMacOSXLibraryUpdateAtStartupNeeded(XMLUtil.parseAttribute(root, JAPModel.MACOSX_LIB_NEEDS_UPDATE, false));
 
 
 				JAPModel.getInstance().allowUpdateViaDirectConnection(
 								XMLUtil.parseAttribute(root, XML_ALLOW_NON_ANONYMOUS_UPDATE,
 					JAPConstants.DEFAULT_ALLOW_UPDATE_NON_ANONYMOUS_CONNECTION));
+				
+				JAPModel.getInstance().setAnonymizedHttpHeaders(
+						XMLUtil.parseAttribute(root, JAPModel.XML_ANONYMIZED_HTTP_HEADERS, 
+						JAPConstants.ANONYMIZED_HTTP_HEADERS));
+				
 				JAPModel.getInstance().setReminderForOptionalUpdate(
 								XMLUtil.parseAttribute(root, JAPModel.XML_REMIND_OPTIONAL_UPDATE,
 					JAPConstants.REMIND_OPTIONAL_UPDATE));
@@ -1074,8 +1092,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 								XMLUtil.parseAttribute(root, XML_ATTR_AUTO_CHOOSE_CASCADES, true));
 				JAPModel.getInstance().setAutoChooseCascadeOnStartup(
 								XMLUtil.parseAttribute(root, XML_ATTR_AUTO_CHOOSE_CASCADES_ON_STARTUP, true));
-				JAPModel.getInstance().denyNonAnonymousSurfing(
-								XMLUtil.parseAttribute(root, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING, false));
+				JAPModel.getInstance().setAskForAnyNonAnonymousRequest(
+								XMLUtil.parseAttribute(root, JAPModel.XML_ASK_FOR_NON_ANONYMOUS_SURFING, true));
 				
 				JAPModel.getInstance().initHelpPath(
 								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
@@ -1247,7 +1265,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 				/* try to load information about cascades */
 				Node nodeCascades = XMLUtil.getFirstChildByName(root, MixCascade.XML_ELEMENT_CONTAINER_NAME);
-				MixCascade currentCascade;
+				MixCascade currentCascade = null;
 				if (nodeCascades != null)
 				{
 					Node nodeCascade = nodeCascades.getFirstChild();
@@ -1293,6 +1311,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 								new MixCascade("Tor - Onion Routing", "Tor", "myhost.de", 1234));*/
 
 				/* try to load information about user defined mixes */
+				/* not needed any more
 				Node nodeMixes = XMLUtil.getFirstChildByName(root, MixInfo.XML_ELEMENT_CONTAINER_NAME);
 				if (nodeMixes != null)
 				{
@@ -1322,7 +1341,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						}
 						nodeMix = nodeMix.getNextSibling();
 					}
-				}
+				}*/
 				
 				/* load trust models */
 				TrustModel.fromXmlElement(
@@ -1682,100 +1701,85 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 							passwordReader = new IMiscPasswordReader()
 							{
-								private Vector passwordsToTry = new Vector();
-
+								private Vector pwMatches = new Vector();
+								private Enumeration currentPWIteration = null;
+								private Object lastAccount = null;
+								private boolean skipAll = false;
+								
 								public String readPassword(Object a_message)
 								{
-									PasswordContentPane panePassword;
-									String password;
-									panePassword = new PasswordContentPane(
+									String password = null;
+									PasswordContentPane panePassword = new PasswordContentPane(
 										dialog, PasswordContentPane.PASSWORD_ENTER,
 										JAPMessages.getString(MSG_ACCPASSWORDENTER, a_message));
 									panePassword.setDefaultButtonOperation(PasswordContentPane.
 																		   ON_CLICK_HIDE_DIALOG);
-									if (passwordsToTry == null)
+									if(skipAll)
 									{
 										return null;
 									}
-
-									if (!completedAccounts.containsKey(a_message))
+									
+									if(lastAccount == null)
 									{
-										passwordsToTry.removeAllElements();
+										lastAccount = a_message;
 									}
-
-									if (cachedPasswords.size() == 0 ||
-										(completedAccounts.containsKey(a_message) &&
-										((Boolean)completedAccounts.get(a_message)).booleanValue()))
+									
+									/* try to query a new account -> the last one matched */
+									if(!a_message.equals(lastAccount))
 									{
-										while (true)
+										pwMatches.addElement(completedAccounts.get(lastAccount));
+										currentPWIteration = null;
+										currentPWIteration = pwMatches.elements();
+										lastAccount = a_message;
+									}
+									
+									if(currentPWIteration != null)
+									{
+										if(currentPWIteration.hasMoreElements())
 										{
-											password = panePassword.readPassword(null);
-											if (password == null)
+											return (String) currentPWIteration.nextElement();
+										}
+										else
+										{
+											currentPWIteration = null;
+										}
+									}
+									
+									while (true)
+									{
+										password = panePassword.readPassword(null);
+										if (password == null)
+										{
+											completedAccounts.remove(a_message);
+											
+											if (JAPDialog.showYesNoDialog(
+												(Component)a_splash,
+												JAPMessages.getString(MSG_LOSEACCOUNTDATA),
+												onTopAdapter))
 											{
-												if (JAPDialog.showYesNoDialog(
-													(Component)a_splash,
-													JAPMessages.getString(MSG_LOSEACCOUNTDATA),
-													onTopAdapter))
-												{
-													// user clicked cancel
-													passwordsToTry = null;
-													// do not use the password from this account
-													//cachedPasswords.remove(a_message);
-													break;
-												}
-												else
-												{
-													continue;
-												}
-											}
-											else
-											{
+												// user clicked cancel
+												skipAll = true;
 												break;
 											}
 										}
-										if (password != null)
+										else
 										{
-											cachedPasswords.put(password, password);
-											completedAccounts.put(a_message, new Boolean(true));
+											completedAccounts.put(a_message, password);
+											break;
 										}
-									}
-									else
-									{
-										if (passwordsToTry.size() == 0)
-										{
-											Enumeration enumCachedPasswordKeys = cachedPasswords.elements();
-											while (enumCachedPasswordKeys.hasMoreElements())
-											{
-												passwordsToTry.addElement(enumCachedPasswordKeys.
-													nextElement());
-											}
-											// start using cached paasswords for this account
-											completedAccounts.put(a_message, new Boolean(false));
-										}
-										password = (String) passwordsToTry.elementAt(passwordsToTry.size() -
-											1);
-										passwordsToTry.removeElementAt(passwordsToTry.size() - 1);
-
-										if (passwordsToTry.size() == 0)
-										{
-											// all cached passwords have been used so far
-											completedAccounts.put(a_message, new Boolean(true));
-										}
-
 									}
 									return password;
 								}
 							};
 						}
-						PayAccountsFile.init(elemAccounts, passwordReader, JAPConstants.m_bReleasedVersion);
+						boolean accountLoaded = PayAccountsFile.init(elemAccounts, passwordReader, JAPConstants.m_bReleasedVersion);
 						if (tempDialog != null)
 						{
 							tempDialog.dispose();
 						}
-						if (cachedPasswords.size() > 0)
+						if (completedAccounts.size() > 0)
 						{
-							// choose any password from the working ones
-							setPaymentPassword((String)cachedPasswords.elements().nextElement());
+							setPaymentPassword((String)completedAccounts.elements().nextElement());
 						}
 					}
 				}
@@ -2367,9 +2371,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 			doc.appendChild(e);
 			
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_VERSION, JAPConstants.CURRENT_CONFIG_VERSION);
-			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.isDLLupdated());
+			if (m_Model.getDllUpdatePath() != null)
+			{
+				XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_UPDATE, m_Model.getDllUpdatePath());
+			}			
+			XMLUtil.setAttribute(e, JAPModel.MACOSX_LIB_NEEDS_UPDATE, m_Model.isMacOSXLibraryUpdateAtStartupNeeded());
 			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_WARNING_BELOW, m_Model.getDLLWarningVersion());
 
+			XMLUtil.setAttribute(e, JAPModel.XML_ANONYMIZED_HTTP_HEADERS, 
+								JAPModel.getInstance().isAnonymizedHttpHeaders());
+			
 			XMLUtil.setAttribute(e, XML_ALLOW_NON_ANONYMOUS_UPDATE,
 								 JAPModel.getInstance().isUpdateViaDirectConnectionAllowed());
 			XMLUtil.setAttribute(e, JAPModel.XML_REMIND_OPTIONAL_UPDATE,
@@ -2380,8 +2391,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 								 JAPModel.getInstance().isCascadeAutoSwitched());
 			XMLUtil.setAttribute(e, XML_ATTR_AUTO_CHOOSE_CASCADES_ON_STARTUP,
 								 JAPModel.getInstance().isCascadeAutoChosenOnStartup());
-			XMLUtil.setAttribute(e, JAPModel.XML_DENY_NON_ANONYMOUS_SURFING,
-								 JAPModel.getInstance().isNonAnonymousSurfingDenied());
+			XMLUtil.setAttribute(e, JAPModel.XML_ASK_FOR_NON_ANONYMOUS_SURFING,
+								 JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_CONFIG_ASSISTANT, m_bShowConfigAssistant);
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_SPLASH_SCREEN, m_Model.getShowSplashScreen());
 
@@ -2505,6 +2516,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 
 			/*stores mixes */
+			/* not needed any more
 			Element elemMixes = doc.createElement(MixInfo.XML_ELEMENT_CONTAINER_NAME);
 			e.appendChild(elemMixes);
 			Enumeration enumerMixes = Database.getInstance(MixInfo.class).getEntrySnapshotAsEnumeration();
@@ -2515,7 +2527,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					elemMixes.appendChild(element);
 				}
-			}
+			}*/
+			
 			/* store the current MixCascade */
 			MixCascade defaultMixCascade = getCurrentMixCascade();
 			if (defaultMixCascade != null)
@@ -3420,7 +3433,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 		if (JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder())
 		{
 			/* show the connect via forwarder dialog -> the dialog will do the remaining things */
-			new JAPRoutingEstablishForwardedConnectionDialog(a_parentComponent);
+
+			// do we have an valid Forwarding Address
+			IAddress userAddress = JAPModel.getInstance().getRoutingSettings().getUserProvidetForwarder();
+			if (userAddress != null)
+				// use it
+				new JAPRoutingEstablishForwardedConnectionDialog(a_parentComponent, userAddress);
+			else
+				// otherwise use invoservice and captcha
+				new JAPRoutingEstablishForwardedConnectionDialog(a_parentComponent);
+			
 			/* maybe connection to forwarder failed -> notify the observers, because the view maybe
 			 * still shows the anonymity mode enabled
 			 */

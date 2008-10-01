@@ -42,7 +42,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 
-import anon.infoservice.ListenerInterface;
+
+import anon.transport.address.AddressParameter;
+import anon.transport.address.IAddress;
 import gui.JAPHtmlMultiLineLabel;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -528,15 +530,18 @@ public class JAPConfForwardingState extends AbstractJAPConfModule
 								JAPRoutingSettings.ROUTING_MODE_CLIENT)
 							{
 								/* we are connected to a new client -> update the forwarder information label */
-								ListenerInterface currentForwarder = JAPModel.getInstance().
-									getRoutingSettings().getForwarder();
-								if (currentForwarder != null)
+								IAddress currentForwarderAddress = JAPModel.getInstance().
+									getRoutingSettings().getForwarderAddress();
+								if (currentForwarderAddress != null)
 								{
+									AddressParameter[] paramters = currentForwarderAddress.getAllParameters();
+									//TODO: check ob Laenge mindestens 2 und evtl. auf Reihenfolge achten
+									// ideal extra Texte fuer unterschiedliche Addresstypen.
 									settingsRoutingClientStatusForwarderInformationLabel.setText(JAPMessages.
 										getString("settingsRoutingClientStatusForwarderInformationLabelPart1") +
-										" " + currentForwarder.getHost() + "    " +
+										" " + paramters[0].getValue() + "    " +
 										JAPMessages.getString("settingsRoutingClientStatusForwarderInformationLabelPart2") +
-										" " + Integer.toString(currentForwarder.getPort()));
+										" " + paramters[1].getValue());
 								}
 								else
 								{

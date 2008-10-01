@@ -13,8 +13,8 @@ import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.Util;
-import anon.util.Util.LongSortAsc;
-import anon.util.Util.LongSortDesc;
+import anon.util.Util.IntegerSortAsc;
+import anon.util.Util.IntegerSortDesc;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
@@ -170,7 +170,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 
 	/**
 	 * Returns a performance entry for the giving Cascade. This method
-	 * should ONLY be used inside getAverageEntry!
+	 * should ONLY be used inside getLowestCommonBoundEntry!
 	 * 
 	 * @see PerformanceInfo#getLowestCommonBoundEntry(String)
 	 * 
@@ -208,37 +208,40 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			if (entry != null)
 			{
 				vPerfEntries.addElement(entry);
-				Long value = new Long(entry.getBound(PerformanceEntry.SPEED));
+				Integer value = new Integer(entry.getBound(PerformanceEntry.SPEED));
 				
-				if(!vSpeedBoundaries.contains(value))
+				if (value.intValue() != Integer.MAX_VALUE && !vSpeedBoundaries.contains(value))
 				{
 					vSpeedBoundaries.addElement(value);
 				}
 				
-				value = new Long(entry.getBound(PerformanceEntry.DELAY));
+				value = new Integer(entry.getBound(PerformanceEntry.DELAY));
 				
-				if(!vDelayBoundaries.contains(value))
+				if (value.intValue() != 0 && !vDelayBoundaries.contains(value))
 				{
 					vDelayBoundaries.addElement(value);
 				}
 			}
 		}
 		
-		Util.sort(vSpeedBoundaries, new LongSortDesc());
-		Util.sort(vDelayBoundaries, new LongSortAsc());
+		Util.sort(vSpeedBoundaries, new IntegerSortDesc());
+		Util.sort(vDelayBoundaries, new IntegerSortAsc());
 		
 		if(vPerfEntries.size() == 0)
 		{
+			perfEntry.setBound(PerformanceEntry.SPEED, Integer.MAX_VALUE);
+			perfEntry.setBound(PerformanceEntry.DELAY, 0);
 			return perfEntry;
 		}
 		
 		int agreeing;
-		long value = 0;
+		int value;
 		
+		value = Integer.MAX_VALUE;
 		for(int i = 0; i < vSpeedBoundaries.size(); i++)
 		{
 			agreeing = 0;
-			long bound = ((Long) vSpeedBoundaries.elementAt(i)).longValue();
+			int bound = ((Integer) vSpeedBoundaries.elementAt(i)).intValue();
 			value = bound;
 			
 			for(int j = 0; j < vPerfEntries.size(); j++)
@@ -250,17 +253,18 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				}
 			}
 			
-			if((double) agreeing / vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			if((double)agreeing / (double)vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
 			{
 				break;
 			}
 		}
 		perfEntry.setBound(PerformanceEntry.SPEED, value);
 		
+		value = 0;
 		for(int i = 0; i< vDelayBoundaries.size(); i++)
 		{
 			agreeing = 0;
-			long bound = ((Long) vDelayBoundaries.elementAt(i)).longValue();
+			int bound = ((Integer) vDelayBoundaries.elementAt(i)).intValue();
 			value = bound;
 			
 			for(int j = 0; j < vPerfEntries.size(); j++)

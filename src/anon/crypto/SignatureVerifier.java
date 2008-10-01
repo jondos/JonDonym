@@ -28,20 +28,21 @@
 package anon.crypto;
 
 import java.util.Enumeration;
-import java.util.Vector;
 import java.util.Hashtable;
+import java.util.Observable;
+import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  * Manages the verification of all signatures.
  */
-public class SignatureVerifier implements IXMLEncodable
+public class SignatureVerifier extends Observable implements IXMLEncodable
 {
         /**
          * This is the class for all documents coming from mixes (mixinfo, cascadeinfo, status).

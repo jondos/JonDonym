@@ -58,6 +58,8 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 
 	public static final String MSG_DENY_NON_ANONYMOUS_SURFING = JAPConfAnonGeneral.class.getName() +
 		"_denyNonAnonymousSurfing";
+	public static final String MSG_ANONYMIZED_HTTP_HEADERS = JAPConfAnonGeneral.class.getName() +
+		"_anonymizedHttpHeaders";
 	private static final String MSG_AUTO_CHOOSE_CASCADES = JAPConfAnonGeneral.class.getName() +
 		"_autoChooseCascades";
 	private static final String MSG_RESTRICT_AUTO_CHOOSE = JAPConfAnonGeneral.class.getName() +
@@ -108,6 +110,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		new Integer(30), new Integer(40), new Integer(50), new Integer(60)};
 
 	private JCheckBox m_cbDenyNonAnonymousSurfing;
+	private JCheckBox m_cbAnonymizedHttpHeaders;
 	//private JCheckBox m_cbDummyTraffic;
 	private JCheckBox m_cbAutoConnect;
 	private JCheckBox m_cbAutoReConnect;
@@ -116,7 +119,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 	private JCheckBox m_cbAutoChooseCascadesOnStartup;
 	private JSlider m_sliderDummyTrafficIntervall;
 	private JAPController m_Controller;
-	private JComboBox[] m_comboServices;
+	//private JComboBox[] m_comboServices;
 	private JComboBox m_comboTimeout;
 
 
@@ -149,9 +152,13 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 			{
 				m_cbAutoConnect.setSelected(JAPModel.isAutoConnect());
 			}
-			else if (a_message.equals(JAPModel.CHANGED_DENY_NON_ANONYMOUS))
+			else if (a_message.equals(JAPModel.CHANGED_ASK_FOR_NON_ANONYMOUS))
 			{
-				m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isNonAnonymousSurfingDenied());
+				m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
+			}
+			else if(a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
+			{
+				m_cbAnonymizedHttpHeaders.setSelected(JAPModel.getInstance().isAnonymizedHttpHeaders());
 			}
 		}
 	}
@@ -180,7 +187,8 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 			( (JLabel) d.get(new Integer(i * DT_INTERVAL_STEPLENGTH))).setEnabled(
 						 m_sliderDummyTrafficIntervall.isEnabled());
 		}
-		m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isNonAnonymousSurfingDenied());
+		m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
+		m_cbAnonymizedHttpHeaders.setSelected(JAPModel.getInstance().isAnonymizedHttpHeaders());
 		m_cbAutoConnect.setSelected(JAPModel.isAutoConnect());
 		m_cbAutoReConnect.setSelected(JAPModel.isAutomaticallyReconnected());
 		m_cbAutoBlacklist.setSelected(BlacklistedCascadeIDEntry.areNewCascadesInBlacklist());
@@ -188,8 +196,8 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		m_cbAutoChooseCascadesOnStartup.setSelected(JAPModel.getInstance().isCascadeAutoChosenOnStartup());
 		m_cbAutoChooseCascadesOnStartup.setEnabled(m_cbAutoChooseCascades.isSelected());
 
-		m_comboServices[2].setEnabled(JAPModel.getInstance().isMixMinionActivated());
-		m_comboServices[3].setEnabled(JAPModel.getInstance().isTorActivated());
+		/*m_comboServices[2].setEnabled(JAPModel.getInstance().isMixMinionActivated());
+		m_comboServices[3].setEnabled(JAPModel.getInstance().isTorActivated());*/
 
 		setLoginTimeout(AnonClient.getLoginTimeout());
 	}
@@ -220,13 +228,13 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		}).start();
 
 		// Anonservice settings
-		JAPModel.getInstance().denyNonAnonymousSurfing(m_cbDenyNonAnonymousSurfing.isSelected());
+		JAPModel.getInstance().setAskForAnyNonAnonymousRequest(m_cbDenyNonAnonymousSurfing.isSelected());
 		BlacklistedCascadeIDEntry.putNewCascadesInBlacklist(m_cbAutoBlacklist.isSelected());
 		JAPModel.getInstance().setAutoConnect(m_cbAutoConnect.isSelected());
 		JAPModel.getInstance().setAutoReConnect(m_cbAutoReConnect.isSelected());
 		JAPModel.getInstance().setCascadeAutoSwitch(m_cbAutoChooseCascades.isSelected());
 		JAPModel.getInstance().setAutoChooseCascadeOnStartup(m_cbAutoChooseCascadesOnStartup.isSelected());
-
+		JAPModel.getInstance().setAnonymizedHttpHeaders(m_cbAnonymizedHttpHeaders.isSelected());
 
 		AnonClient.setLoginTimeout(((Integer)m_comboTimeout.getSelectedItem()).intValue() * 1000);
 
@@ -239,6 +247,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		panelRoot.removeAll();
 
 		m_cbDenyNonAnonymousSurfing = new JCheckBox(JAPMessages.getString(MSG_DENY_NON_ANONYMOUS_SURFING));
+		m_cbAnonymizedHttpHeaders = new JCheckBox(JAPMessages.getString(MSG_ANONYMIZED_HTTP_HEADERS));
 		m_cbAutoConnect = new JCheckBox(JAPMessages.getString("settingsautoConnectCheckBox"));
 		m_cbAutoReConnect = new JCheckBox(JAPMessages.getString("settingsautoReConnectCheckBox"));
 		m_cbAutoChooseCascades = new JCheckBox(JAPMessages.getString(MSG_AUTO_CHOOSE_CASCADES));
@@ -257,7 +266,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		//m_cbDummyTraffic = new JCheckBox(JAPMessages.getString("ngConfAnonGeneralSendDummy"));
 
 		/** @todo implement this panel... */
-		JPanel panelServices = new JPanel(new GridBagLayout());
+		/*JPanel panelServices = new JPanel(new GridBagLayout());
 		GridBagConstraints constrServices = new GridBagConstraints();
 		panelServices.setBorder(new TitledBorder(panelServices.getBorder(),
 												 JAPMessages.getString(MSG_TITLE_ASSIGN_SERVICES)));
@@ -303,7 +312,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		constrServices.insets = new Insets(0, 0, 0, 0);
 		constrServices.gridx = 4;
 		constrServices.weightx = 1.0;
-		panelServices.add(new JLabel(), constrServices);
+		panelServices.add(new JLabel(), constrServices);*/
 
 
 		panelRoot.setLayout(new GridBagLayout());
@@ -317,16 +326,16 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
-		if (!JAPConstants.m_bReleasedVersion)
+		/*if (!JAPConstants.m_bReleasedVersion)
 		{
 			panelRoot.add(panelServices, c);
-		}
+		}*/
 		c.weighty = 0;
 		c.gridy++;
+		panelRoot.add(m_cbAnonymizedHttpHeaders, c);
+		c.gridy++;
 		panelRoot.add(m_cbDenyNonAnonymousSurfing, c);
-		c.gridy++;
-		panelRoot.add(m_cbAutoBlacklist, c);
-		c.gridy++;
+		c.gridy++;		
 		panelRoot.add(m_cbAutoConnect, c);
 		c.gridy++;
 		panelRoot.add(m_cbAutoReConnect, c);
@@ -345,13 +354,15 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 		c.gridwidth = 1;
 		c.insets = new Insets(10, 0, 0, 0);
 		panelRoot.add(m_cbAutoChooseCascadesOnStartup, c);
-		c.insets = new Insets(10, 10, 0, 10);
-
-
-
-		c.gridy++;
+		
 		c.gridx = 0;
+		c.gridy++;
 		c.weightx = 0.0;
+		c.gridwidth = 4;
+		c.insets = new Insets(10, 10, 0, 10);
+		panelRoot.add(m_cbAutoBlacklist, c);
+				
+		c.gridy++;				
 		c.gridwidth = 2;
 		//panelRoot.add(m_cbDummyTraffic, c);
 		panelRoot.add(new JLabel(JAPMessages.getString("ngConfAnonGeneralSendDummy")), c);
@@ -416,7 +427,8 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 	//defaults
 	public void onResetToDefaultsPressed()
 	{
-		m_cbDenyNonAnonymousSurfing.setSelected(false);
+		m_cbDenyNonAnonymousSurfing.setSelected(true);
+		m_cbAnonymizedHttpHeaders.setSelected(JAPConstants.ANONYMIZED_HTTP_HEADERS);
 		//m_cbDummyTraffic.setSelected(true);
 		m_cbAutoBlacklist.setSelected(BlacklistedCascadeIDEntry.DEFAULT_AUTO_BLACKLIST);
 		m_sliderDummyTrafficIntervall.setEnabled(true);
@@ -435,7 +447,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 
 	protected void onRootPanelShown()
 	{
-		m_comboServices[2].setEnabled(JAPModel.getInstance().isMixMinionActivated());
+		/*m_comboServices[2].setEnabled(JAPModel.getInstance().isMixMinionActivated());
 		m_comboServices[3].setEnabled(JAPModel.getInstance().isTorActivated());
 		for (int i = 0; i < m_comboServices.length; i++)
 		{
@@ -448,7 +460,7 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 				m_comboServices[i].setToolTipText(JAPMessages.getString(MSG_TOOLTIP_SERVICE_DEACTIVATED));
 			}
 
-		}
+		}*/
 	}
 
 	private void setLoginTimeout(int a_timeoutMS)

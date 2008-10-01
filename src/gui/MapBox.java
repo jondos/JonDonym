@@ -58,16 +58,13 @@ import logging.LogType;
  */
 public class MapBox extends JAPDialog implements ChangeListener
 {
+	/** Messages */
 	public static final String MSG_ERROR_WHILE_LOADING = MapBox.class.getName() + "_errorLoading";
 	private static final String MSG_PLEASE_WAIT = MapBox.class.getName() + "_pleaseWait";
 	private static final String MSG_CLOSE = MapBox.class.getName() + "_close";
 	private static final String MSG_TITLE = MapBox.class.getName() + "_title";
 	private static final String MSG_ZOOM = MapBox.class.getName() + "_zoom";
-	
-	// Previously used images
-	//private static final String IMG_MAPQUEST = MapBox.class.getName() + "_mapquest-logo.gif";
-	//private static final String IMG_YAHOO = MapBox.class.getName() + "_yahoo-logo.gif";
-	
+		
 	/** The label containing the map in form of an <CODE>ImageIcon</CODE> */
 	private JLabel m_lblMap;
 	/** The slider for adjusting zoom level */
@@ -213,10 +210,9 @@ public class MapBox extends JAPDialog implements ChangeListener
 		}
 	}
 
-	/** Contact <a href="http://maps.yahoo.com">Yahoo Maps</a> to re-load the map.
-	 * To retrieve the image, it is necessary to submit a HTTP GET request to the
-	 * web site and parse the returned HTML page for the image.<br>
-
+	/** 
+	 * Contact <a href="http://maps.google.com">Google Maps</a> to (re-)load the map.
+	 *
 	 * @throws IOException If an error occurs while retrieving the web site
 	 */
 	private void refresh() throws IOException
@@ -226,9 +222,9 @@ public class MapBox extends JAPDialog implements ChangeListener
 		m_lblMap.setText(JAPMessages.getString(MSG_PLEASE_WAIT) + "...");
 		m_lblMap.repaint();
 		// Create the URL
-		m_sImageURL = "http://www.maps.google.com/staticmap?markers=" + m_sLatitude + "," + m_sLongitude +
+		m_sImageURL = "http://maps.google.com/staticmap?markers=" + m_sLatitude + "," + m_sLongitude +
 		              "&zoom=" + (m_sldZoom.getValue()+2) + "&size=" + m_sImageSize + "&key=" + KEY;
-		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Getting image: " + m_sImageURL);
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Getting map: " + m_sImageURL);
 		// Set the title
 		String sTitle = JAPMessages.getString(MSG_TITLE, new String[]{m_sLatitude, m_sLongitude});
 		setTitle(sTitle);
@@ -237,19 +233,21 @@ public class MapBox extends JAPDialog implements ChangeListener
 		m_lblMap.setIcon(new ImageIcon(new URL(m_sImageURL)));
 		
 		// TODO: Remove this, no need for parsing the site for the image URL anymore
+		/*
 		// Request the site and parse for the image-URL
-		//URL url = new URL(site);
-		//BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()), 1024);
-		//SiteParser sp = new SiteParser();
-		//DocumentParser dp = new DocumentParser(DTD.getDTD("-//W3C//DTD HTML 4.01//EN"));
-		//m_urlString = null;
+		URL url = new URL(site);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()), 1024);
+		SiteParser sp = new SiteParser();
+		DocumentParser dp = new DocumentParser(DTD.getDTD("-//W3C//DTD HTML 4.01//EN"));
+		m_urlString = null;
 		// m_urlString is set from outside
-		//dp.parse(reader, sp, true);
-		//if (m_urlString == null)
-		//{
-		//	throw new IOException("Image reference not found on site " + site);
-		//}
-		//map.setIcon(new ImageIcon(new URL(m_urlString)));
+		dp.parse(reader, sp, true);
+		if (m_urlString == null)
+		{
+			throw new IOException("Image reference not found on site " + site);
+		}
+		map.setIcon(new ImageIcon(new URL(m_urlString)));
+	    */
 	}
 
     /** A subclass of <CODE>javax.swing.text.html.HTMLEditorKit.ParserCallback</CODE>
@@ -262,6 +260,7 @@ public class MapBox extends JAPDialog implements ChangeListener
 	 * <br>
 	 * The 'src'-attribute contains the real URL of the map image.
      */
+	// FIXME: Not needed anymore
 	private class SiteParser extends ParserCallback
 	{
 		public void handleSimpleTag(Tag t, MutableAttributeSet a, int pos)

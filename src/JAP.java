@@ -38,6 +38,7 @@ import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import java.awt.Frame;
@@ -64,11 +65,14 @@ import jap.JAPModel;
 import jap.JAPNewView;
 import jap.JAPSplash;
 import jap.JAPViewIconified;
+import jap.MacOSXLib;
+import jap.SystrayPopupMenu;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
 import platform.WindowsOS;
+import platform.MacOS;
 
 /** This is the main class of the JAP project. It starts everything. It can be inherited by another
  *  class that wants to initialize platform dependend features, e.g. see
@@ -159,7 +163,7 @@ public class JAP
 		boolean loadPay = true;
 		String listenHost = null;
 		int listenPort = 0;
-		ListenerInterface listenerCascade = null;
+		MixCascade commandlineCascade = null;
 
 		if (isArgumentSet("--version") || isArgumentSet("-v"))
 		{
@@ -196,7 +200,7 @@ public class JAP
 			System.out.println("--presenation, -p            Presentation mode (slight GUI changes).");
 			System.out.println("--forwarder, -f {port}       Act as a forwarder on a specified port.");
 			System.out.println("--listen, -l {[host][:port]} Listen on the specified interface.");
-			System.out.println("--cascade {[host][:port]}    Connects to the specified Mix-Cascade.");
+			System.out.println("--cascade {[host][:port][:id]}    Connects to the specified Mix-Cascade.");
 			System.out.println("--portable [path_to_browser] Tell JonDo that it runs in a portable environment.");
 			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
 			System.out.println("--portable-help-path         Path of external html help files for portable use.");
@@ -517,7 +521,24 @@ public class JAP
 			String tmpStr = getArgumentValue("--cascade");
 			try
 			{
-				listenerCascade = new ListenerInterface(tmpStr);
+				//cascade is given as host[:port][:id]
+				StringTokenizer st=new StringTokenizer(tmpStr,":");
+				String host=null;
+				String id=null;
+				int port=6544;
+				if(st.hasMoreTokens())
+				{
+						host=st.nextToken();
+				}
+				if(st.hasMoreTokens())
+					{
+							port=Integer.parseInt(st.nextToken());
+					}
+				if(st.hasMoreTokens())
+					{
+							id=st.nextToken();
+					}
+				commandlineCascade=new MixCascade("Commandline Cascade",id,host,port);
 			}
 			catch (Throwable t)
 			{
@@ -571,12 +592,13 @@ public class JAP
 				/**
 				 * Allow non-anonymous surfing for https payment pages.
 				 */
+				/*
 				if (a_url != null && !m_controller.getAnonMode() &&
 					JAPModel.getInstance().isNonAnonymousSurfingDenied() &&
 					a_url.toString().startsWith("https"))
 				{
 					JAPModel.getInstance().denyNonAnonymousSurfing(false);
-				}
+				}*/
 			}
 		},new AbstractOS.AbstractURLOpener()
 		{									
@@ -808,17 +830,12 @@ public class JAP
 		//WP: check japdll.dll version
 		JAPDll.checkDllVersion(true);
 
-		// initially start services
-		m_controller.initialRun(listenHost, listenPort);
-
 		//set cascade if given on command line
-		if (listenerCascade != null)
+		if (commandlineCascade != null)
 		{
 			try
 			{
-				m_controller.setCurrentMixCascade(new MixCascade("Commandline Cascade", null,
-					listenerCascade.toVector()));
-				m_controller.setAnonMode(true);
+				m_controller.setCurrentMixCascade(commandlineCascade);
 			}
 			catch (Throwable t)
 			{
@@ -826,11 +843,57 @@ public class JAP
 					"Could not set Cascade specified on the Command line! Ignoring information given and continue...");
 			}
 		}
+		
+		// initially start services
+		m_controller.initialRun(listenHost, listenPort);
+
+
 
 		// show alternative view (console, http server,...);
 		if (bConsoleOnly)
 		{
 			view.setVisible(true);
+		}
+		
+		// for some reason this needs to be done here, otherwise 
+		// it won't work
+		if(AbstractOS.getInstance() instanceof MacOS)
+		{
+			MacOSXLib.init();
+			
+			/*final SystrayPopupMenu systray = new SystrayPopupMenu(
+					new SystrayPopupMenu.MainWindowListener()
+				{
+					public void onShowMainWindow()
+					{
+						// do nothing
+					}
+
+					public void onShowSettings(String card, Object a_value)
+					{
+						
+					}
+
+					public void onShowHelp()
+					{
+
+					}
+				});
+			
+			javax.swing.JPopupMenu popup = systray.getPopup();
+			
+			javax.swing.JMenu menu = new javax.swing.JMenu();
+			
+			for(int i = 0; i < popup.getComponentCount(); i++)
+			{
+				java.awt.Component c = popup.getComponent(i);
+				if(c instanceof javax.swing.JMenuItem)
+				{
+					menu.add(c);
+				}
+			}
+			
+			JAPMacOSXLib.setMenu(menu);*/
 		}
 	}
 

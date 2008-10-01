@@ -301,10 +301,7 @@ public class CertificateContainer implements IXMLEncodable
 	public void setEnabled(boolean a_enabled)
 	{
 		m_enabled = a_enabled;
-		//if(!a_enabled)
-		{
-			m_certPath.resetVerification();
-		}
+		m_certPath.resetVerification();
 	}
 
 	/**

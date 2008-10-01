@@ -523,7 +523,6 @@ public class KeyExchangeManager {
 					  keySignatureXmlDataLength = keySignatureXmlDataLength - bytesRead;
 				  }
 			  }
-
 			  Document keySignatureDoc = XMLUtil.toXMLDocument(keySignatureXmlData);
 			  Element keySignatureNode=null;
 // if version=0.81
