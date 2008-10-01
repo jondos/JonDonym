@@ -1,29 +1,30 @@
 /*
- Copyright (c) 2000 - 2005, The JAP-Team
+ Copyright (c) 2008 The JAP-Team, JonDos GmbH
+
  All rights reserved.
- Redistribution and use in source and binary forms, with or without modification,
+
+ Redistribution and use in source and binary forms, with or without modification, 
  are permitted provided that the following conditions are met:
 
-  - Redistributions of source code must retain the above copyright notice,
- this list of conditions and the following disclaimer.
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation and/or
+       other materials provided with the distribution.
+    * Neither the name of the University of Technology Dresden, Germany, nor the name of
+       the JonDos GmbH, nor the names of their contributors may be used to endorse or
+       promote products derived from this software without specific prior written permission.
 
-  - Redistributions in binary form must reproduce the above copyright notice,
- this list of conditions and the following disclaimer in the documentation and/or
- other materials provided with the distribution.
-
-  - Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
- may be used to endorse or promote products derived from this software without specific
- prior written permission.
-
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
- OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
- BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
- IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package infoservice.performance;
 
@@ -53,6 +54,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import HTTPClient.HTTPConnection;
+import HTTPClient.HTTPResponse;
 
 import jap.pay.AccountUpdater;
 import anon.ErrorCodes;
@@ -82,59 +84,162 @@ import logging.LogType;
  * A simple performance meter for Mix cascades.<br>
  * 
  * The meter runs as a thread inside the <code>InfoService</code> and periodically sends requests
- * to the performance server of each known cascade. The transport is doing by setting up a local
- * <code>AnonProxy</code>
+ * to another <code>InfoService</code> through a <code>MixCascade</code>. The transport is done
+ * by a local <code>AnonProxy</code>
  * The delay (the time between sending the first byte and receiving the first byte of the response)
  * and the throughput (the data rate of the response in bytes
  * per millisecond) are measured and set to the corresponding cascade.
- * 
  *
  * @author Christian Banse
  */
 public class PerformanceMeter implements Runnable, Observer
 {	
+	/**
+	 * The time-to-live for a <code>PerformanceEntry</code>.
+	 */
+	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60;
+	
+	/**
+	 * The suffix for performance log files.
+	 */
+	public static final String PERFORMANCE_LOG_FILE = "performance_"; 	
+	
+	/**
+	 * Lock for the <code>PerformanceMeter</code>.
+	 */
 	private Object SYNC_METER = new Object();
+	
+	/**
+	 * Lock for the socket connection to the <code>AnonProxy</code>.
+	 */
 	private Object SYNC_SOCKET = new Object();
+	
+	/**
+	 * Lock for the individual test of a mix cascade.
+	 */
 	private Object SYNC_TEST = new Object();
 	
-	private String m_proxyHost;
-	private int m_proxyPort;
+	/**
+	 * The size of data to be requested.
+	 */
 	private int m_dataSize;
+	
+	/**
+	 * Interval in milliseconds between the tests.
+	 */
 	private int m_majorInterval;
+	
+	/**
+	 * The number of requests per interval.
+	 */
 	private int m_requestsPerInterval;
+	
+	/**
+	 * The test timeout.
+	 */
 	private int m_maxWaitForTest;
+	
+	/**
+	 * The number of packets the meter must receive
+	 * from the mix cascade for a speed test. 
+	 */
 	private int m_minPackets;
 	
+	/**
+	 * The local <code>AnonProxy</code>.
+	 */
 	private AnonProxy m_proxy;
-	private char[] m_recvBuff;
 	
+	/**
+	 * Socket connection to the local <code>AnonProxy</code>.
+	 */
+	private Socket m_meterSocket;
+	
+	/**
+	 * The host of the local <code>AnonProxy</code>
+	 */
+	private String m_proxyHost;
+	
+	/**
+	 * The port of the local <code>AnonProxy</code>
+	 */
+	private int m_proxyPort;
+	
+	/**
+	 * The info service configuration.
+	 */
 	private Configuration m_infoServiceConfig = null;
 	
+	/**
+	 * Time of the last update.
+	 */
 	private long m_lastUpdate = 0;
+	
+	/**
+	 * Estimated time of the next update. 
+	 */
 	private long m_nextUpdate = 0;
+	
+	/**
+	 * The number of total successful updates.
+	 */
 	private int m_lastTotalUpdates = 0;
+	
+	/**
+	 * The duration of the last update.
+	 */
 	private long m_lastUpdateRuntime = 0;
 	
+	/**
+	 * The name of the last updated mix cascade.
+	 */
 	private String m_lastCascadeUpdated = "(none)";
+	
+	/**
+	 * Total amount of bytes received from mix cascades.
+	 */
 	private long m_lBytesRecvd;
-	
-	public static final int PERFORMANCE_ENTRY_TTL = 1000*60*60;
-	public static final String PERFORMANCE_LOG_FILE = "performance_"; 
-	
+
+	/**
+	 * The pay account manager.
+	 */
 	private PayAccountsFile m_payAccountsFile;
 	
-	private Socket m_meterSocket;
-
+	/**
+	 * A hashtable that stores the used account files.
+	 */
 	private Hashtable m_usedAccountFiles = new Hashtable();
+	
+	/**
+	 * An account updater that refreshes the credit balance on the pay accounts.
+	 */
 	private AccountUpdater m_accUpdater = null;
 	
+	/**
+	 * The random number generator.
+	 */
 	private Random ms_rnd = new Random();
 	
+	/**
+	 * Stream to the performance log file.
+	 */
 	private FileOutputStream m_stream = null;
 	
+	/**
+	 * The current week.
+	 */
 	private int m_currentWeek;
+	
+	/**
+	 * A <code>Calendar</code> object for various date calculations.
+	 */
 	private Calendar m_cal = Calendar.getInstance();
 
+	/**
+	 * Constructs a new <code>PerformanceMeter</code> with a given <code>AccountUpdater</code>.
+	 * 
+	 * @param updater An account updater for the pay accounts.
+	 */
 	public PerformanceMeter(AccountUpdater updater)
 	{
 		init();
@@ -143,6 +248,9 @@ public class PerformanceMeter implements Runnable, Observer
 		m_lBytesRecvd = 0;
 	}
 	
+	/**
+	 * Initialises the performance meter.
+	 */
 	public void init() 
 	{
 		m_infoServiceConfig = Configuration.getInstance(); 
@@ -151,6 +259,7 @@ public class PerformanceMeter implements Runnable, Observer
 			//@todo: throw something. Assert InfoServiceConfig is not null
 		}
 		
+		// get the performance meter config from the infoservice config
 		Object[] a_config = m_infoServiceConfig.getPerformanceMeterConfig();
 		
 		m_proxyHost = (String) a_config[0];
@@ -160,32 +269,46 @@ public class PerformanceMeter implements Runnable, Observer
 		m_requestsPerInterval = ((Integer) a_config[4]).intValue();
 		m_maxWaitForTest = ((Integer) a_config[5]).intValue();
 		m_minPackets = ((Integer) a_config[6]).intValue();
-		AnonClient.setLoginTimeout(m_maxWaitForTest);
-		//AnonClient.setLoginTimeout(LOGIN_TIMEOUT);
 		
+		// set anon client timeout
+		AnonClient.setLoginTimeout(m_maxWaitForTest);
+
+		// set calendar to current time
 		m_cal.setTimeInMillis(System.currentTimeMillis());
+		
+		// set the current week
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
 		
+		// import old performance date from this week
 		readOldPerformanceData(m_currentWeek);
+		// if we're on the last day of the week (saturday) we already have enough
+		// performance data for the last 7 days.
 		if(m_cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY)
 		{
+			// if it's not saturday -> import last week, too
 			readOldPerformanceData(m_currentWeek - 1);
 		}
 		
 		try
 		{
-			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 
-				
-			m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
+			// open the stream for the performance log file
+			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 				
+					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
 		}
 		catch(FileNotFoundException ex)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
 		}
 		
+		// add ourself as observer to the MixCascade database so we knew when new MixCascades show up
 		Database.getInstance(MixCascade.class).addObserver(this);
 	}
 	
+	/**
+	 * Imports old performance date from the hard disk.
+	 * 
+	 * @param week The week we want to import.
+	 */
 	private void readOldPerformanceData(int week) 
 	{
 		int year = m_cal.get(Calendar.YEAR);
@@ -197,23 +320,32 @@ public class PerformanceMeter implements Runnable, Observer
 		
 		try
 		{
+			// open the stream
 			FileInputStream stream = new FileInputStream(PERFORMANCE_LOG_FILE + 
 					year + "_" + week + ".log");
 			
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 			String line = null;
 			
+			// read until EOF
 			while((line = reader.readLine()) != null)
 			{
+				// the performance data is separated by tabs so look for the tabs in our file
 				int firstTab = line.indexOf('\t');
 				int secondTab = line.indexOf('\t', firstTab + 1);
 				int thirdTab = line.indexOf('\t', secondTab + 1);
 				int fourthTab = line.indexOf('\t', thirdTab + 1);
 				
+				// we have found at list 3 tabs (timestamp, cascade id, speed, delay)
 				if(firstTab != -1 && secondTab != -1 && thirdTab != -1)
 				{
+					// extract the timestamp
 					long timestamp = Long.parseLong(line.substring(0, firstTab));
+					
+					// then the mix cascade id
 					String id = line.substring(firstTab + 1, secondTab);
+					
+					// then the delay
 					long lDelay = Integer.parseInt(line.substring(secondTab + 1, thirdTab));
 					int delay = Integer.MAX_VALUE;
 					if (lDelay < Integer.MAX_VALUE)
@@ -221,16 +353,21 @@ public class PerformanceMeter implements Runnable, Observer
 						delay = (int)lDelay;
 					}
 					
-					// old format without users
+
 					long lSpeed;
 					int speed = Integer.MAX_VALUE;
+					
+					// default users to -1.  used if we are import from the old format
 					int users = -1;
+					
+					// we might be importing performance data without the users entry (old format)
 					if(fourthTab == -1)
 					{
 						lSpeed = Integer.parseInt(line.substring(thirdTab + 1));
 					}
 					else
 					{
+						// this is the new format, speed and then users
 						lSpeed = Integer.parseInt(line.substring(thirdTab + 1, fourthTab));
 						users = Integer.parseInt(line.substring(fourthTab +1));
 					}
@@ -238,17 +375,21 @@ public class PerformanceMeter implements Runnable, Observer
 					{
 						speed = (int)lSpeed;
 					}
-						
+					
+					// look for an existing performance entry
 					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(id);
 					
+					// create one if necessary
 					if(entry == null)
 					{
 						entry = new PerformanceEntry(id);
 					}
 					
+					// import the extracted value into the performace entry
 					entry.importValue(PerformanceEntry.DELAY, timestamp, delay);
 					entry.importValue(PerformanceEntry.SPEED, timestamp, speed);
 					
+					// only import users if we have a valid value
 					if(users != -1)
 					{
 						entry.importValue(PerformanceEntry.USERS, timestamp, users);
@@ -266,28 +407,35 @@ public class PerformanceMeter implements Runnable, Observer
 		LogHolder.log(LogLevel.WARNING, LogType.NET, "Added previous performance data for week" + week);
 	}
 	
+	/**
+	 * The main meter thread.
+	 */
 	public void run() 
 	{
+		// create our local anon proxy
 		try
 		{
 			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
 			m_proxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
+			
+			// disable header processing and jondofox headers. these used to cause problems with the test.
 			m_proxy.setHTTPHeaderProcessingEnabled(false);
 			m_proxy.setJonDoFoxHeaderEnabled(false);
 		} 
-		catch (UnknownHostException e1) 
+		catch (UnknownHostException e1)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, 
 					"An error occured while setting up performance monitoring, cause: ", e1);
 			return;
 		} 
-		catch (IOException e1) 
+		catch (IOException e1)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, 
 					"An I/O error occured while setting up performance monitoring, cause: ", e1);
 			return;
 		}
 
+		// load pay account files and update them to show the correct credit balance.
 		loadAccountFiles();
 		m_accUpdater.update();
 		
@@ -295,11 +443,11 @@ public class PerformanceMeter implements Runnable, Observer
 		{
 			long updateBegin = System.currentTimeMillis();
 			int intRandom;
-			Random random = new Random();
-			
+						
 			m_lastUpdateRuntime = 0;
 			m_nextUpdate = updateBegin + m_majorInterval;
 			
+			// retrieve all currently known mix cascades
 			Vector knownMixCascades;
 			synchronized(SYNC_TEST)
 			{
@@ -307,26 +455,35 @@ public class PerformanceMeter implements Runnable, Observer
 			}
 			
 			m_lastTotalUpdates = 0;
+			
+			// loop through all mix cascade that need to be tested
 			while(knownMixCascades.size() > 0) 
 			{
 				synchronized(SYNC_TEST)
 				{
 					LogHolder.log(LogLevel.WARNING, LogType.THREAD, "Cascades left to test: " + knownMixCascades.size());
-					intRandom = Math.abs(random.nextInt()) % knownMixCascades.size();
+
+					// randomly choose the next mix cascade					
+					intRandom = Math.abs(ms_rnd.nextInt()) % knownMixCascades.size();
 					final MixCascade cascade = (MixCascade) knownMixCascades.elementAt(intRandom);		
+					
+					// remove the cascade from the to-be-tested-vector
 					knownMixCascades.removeElementAt(intRandom);
 				
+					// start the test
 					startTest(cascade);
-				
+					
+					// update the last update time
 					if (m_lastTotalUpdates > 0)
 					{
 						m_lastUpdateRuntime = System.currentTimeMillis() - updateBegin;
 					}
 				}
-			}			
+			}
 			
 			synchronized (SYNC_METER)
 			{
+				// all tests in the current interval are done, wait for the specified time
 				long sleepFor = m_nextUpdate - System.currentTimeMillis();    			
 				if (sleepFor > 0)
 				{
@@ -343,18 +500,29 @@ public class PerformanceMeter implements Runnable, Observer
 			}
 		}
 	}
-
+	
+	/**
+	 * Starts a test with giving mix cascade. The test itself is done within another thread
+	 * that is being created. Otherwise the main thread might get a dead-lock.
+	 *  
+	 * @param a_cascade The mix cascade that needs to be tested.
+	 */
 	private void startTest(final MixCascade a_cascade) 
 	{
 		Thread performTestThread;
+		
+		// update the account files again
 		loadAccountFiles();
 		m_accUpdater.update();
+		
+		// create the test thread
 		performTestThread = new Thread(new Runnable()
 		{
 			public void run()
 			{
 				try
-				{					
+				{
+					// the actual testing is done inside performTest()
 					if (performTest(a_cascade))
 					{
 						m_lastTotalUpdates++;
@@ -364,7 +532,9 @@ public class PerformanceMeter implements Runnable, Observer
 				{
 				}
 			}
-		});	
+		});
+		
+		// start the thread
 		performTestThread.start();
 		try
 		{
@@ -387,11 +557,14 @@ public class PerformanceMeter implements Runnable, Observer
 		catch (InterruptedException e)
 		{
 			// test is finished
-		}					
+		}
+		
+		// for some reason the test thread is still alive, try various methods to stop it
 		int iWait = 0;
 		while (performTestThread.isAlive())
 		{	
 			iWait++;
+			// try to interrupt it
 			performTestThread.interrupt();
 		
 			if (iWait > 5)
@@ -442,6 +615,11 @@ public class PerformanceMeter implements Runnable, Observer
 		}
 	}
 	
+	/**
+	 * Loads the pay account files from the account directory.
+	 * 
+	 * @return <code>true</code> if successful, <code>false</code> otherwise.
+	 */
 	private boolean loadAccountFiles() 
 	{
 		LogHolder.log(LogLevel.INFO, LogType.PAY, "Looking for new account files");
@@ -456,7 +634,6 @@ public class PerformanceMeter implements Runnable, Observer
 			return false;
 		}
 		
-		/* Loop through all files in the directory to find an account file we haven't used yet */
 		try
 		{
 			String[] files = accountDir.list();
@@ -466,6 +643,7 @@ public class PerformanceMeter implements Runnable, Observer
 				return false;
 			}
 			
+			/* Loop through all files in the directory to find an account file we haven't used yet */
 			for (int i = 0; i < files.length; i++)
 			{
 				try
@@ -484,9 +662,8 @@ public class PerformanceMeter implements Runnable, Observer
 					Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
 					if(payAccountElem != null)
 					{
-						PayAccount payAccount = null;
-						//LogHolder.log(LogLevel.INFO, LogType.PAY, "Trying to decode password encrypted file");
-						payAccount = new PayAccount(payAccountElem,new PerformanceAccountPasswordReader());
+						PayAccount payAccount = new PayAccount(payAccountElem,new PerformanceAccountPasswordReader());
+						
 						m_payAccountsFile = PayAccountsFile.getInstance();
 						if(m_payAccountsFile != null)
 						{
@@ -521,6 +698,12 @@ public class PerformanceMeter implements Runnable, Observer
 		return true;
 	}
 
+	/**
+	 * Determines whether a performance test is allowed for the giving mix cascade or not.
+	 * 
+	 * @param a_cascade The mix cascade to be tested.
+	 * @return <code>false</code> if the cascade is in a blacklist or on the same host as the <code>InfoService</code>, <code>true</code> otherwise.
+	 */
 	private boolean isPerftestAllowed(MixCascade a_cascade)
 	{
 		Vector cascadeHosts = a_cascade.getHosts();
@@ -546,6 +729,9 @@ public class PerformanceMeter implements Runnable, Observer
 		return true;
 	}
 	
+	/**
+	 * Closes the socket to the <code>AnonProxy</code>.
+	 */
 	private void closeMeterSocket()
 	{
 		synchronized (SYNC_SOCKET)
@@ -566,12 +752,11 @@ public class PerformanceMeter implements Runnable, Observer
 	}
 	
 	/**
-	 * Performs a performance test on the given MixCascade using the parameters
-	 * of m_majorInterval and m_requestsPerInterval
+	 * Performs a performance test on the given <code>MixCascade</code>.
 	 * 
-	 * @param a_cascade The MixCascade that should be tested
+	 * @param a_cascade The MixCascade that should be tested.
 	 * 
-	 * @return true if the test was successful, false otherwise
+	 * @return <code>true</code> if the test was successful, <code>false</code> otherwise.
 	 */
 	private boolean performTest(MixCascade a_cascade) throws InterruptedException
 	{
@@ -579,35 +764,45 @@ public class PerformanceMeter implements Runnable, Observer
 		int errorCode = ErrorCodes.E_UNKNOWN; 
 		boolean bRetry = true;
 		Hashtable hashBadInfoServices = new Hashtable();
-		HTTPClient.HTTPResponse httpResponse;
+		HTTPResponse httpResponse;
+		
 		Document doc;
 		String host;
 		int port;
 		String xml;
 		
 		// skip cascades on the same host as the infoservice
+		// and skip blacklisted cascades
 		if (a_cascade == null || !isPerftestAllowed(a_cascade))
 		{
 			return false;
 		}
 		
+		// try to fetch the current cascade status
 		a_cascade.fetchCurrentStatus();
-		if(a_cascade.getCurrentStatus() == null || a_cascade.getCurrentStatus().getMixedPackets() < m_minPackets)
+		
+		// check if the cascade has enough packets to be tested
+		if(a_cascade.getCurrentStatus() == null || 
+			a_cascade.getCurrentStatus().getMixedPackets() < m_minPackets)
 		{
 			return false;
 		}
 		
+		// look for a performance entry for this cascade
 		PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascade.getId());
 		
+		// create one if necessary
 		if(entry == null)
 		{
 			entry = new PerformanceEntry(a_cascade.getId());
 		}
 		
-		m_recvBuff = new char[m_dataSize];				
+		// allocate the recv buff
+		char[] m_recvBuff = new char[m_dataSize];				
 		
 		while(!Thread.currentThread().isInterrupted())
 		{			
+			// connect to the mix cascade
 		    errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
 		    if (errorCode == ErrorCodes.E_CONNECT || errorCode == ErrorCodes.E_UNKNOWN)
 		    {
@@ -630,10 +825,11 @@ public class PerformanceMeter implements Runnable, Observer
 			// interrupted or any other not recoverable error 
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not start performance test. Connection to cascade " + a_cascade.getName() + " failed.");
 			return bUpdated;
-		}					
+		}
 		
 		LogHolder.log(LogLevel.WARNING, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
 		
+		// hashtable that holds the delay, speed and users value from this test
 		Hashtable vDelay = new Hashtable();
 		Hashtable vSpeed = new Hashtable();
 		Hashtable vUsers = new Hashtable();
@@ -653,16 +849,20 @@ public class PerformanceMeter implements Runnable, Observer
 		       	
 		       	InfoServiceDBEntry infoservice;
 		       	
+		       	// fetch cascade status
 	    		a_cascade.fetchCurrentStatus(m_maxWaitForTest);
 	    		StatusInfo info = a_cascade.getCurrentStatus();
 	    		
 	    		if(info != null)
 	    		{
+	    			// and store the amount of users
 	    			users = info.getNrOfActiveUsers();
 	    		}
 		       	
+	    		// loop until we have a valid token from an info service
 		       	while (true)
 		       	{
+		       		// choose a random info service for our performance test
 		       		infoservice = chooseRandomInfoService(hashBadInfoServices);
 			       	if(infoservice == null)
 			       	{
@@ -670,6 +870,7 @@ public class PerformanceMeter implements Runnable, Observer
 			       		return bUpdated;
 			       	}
 			        
+			       	// get the host and port from the chosen info service
 			       	host = ((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getHost();
 			       	port = ((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getPort();
 	        		
@@ -680,6 +881,7 @@ public class PerformanceMeter implements Runnable, Observer
 			       	
 			       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
 			       	
+			       	// open HTTP connection
 			       	HTTPConnection conn = new HTTPConnection(host, port);
 			       	httpResponse = conn.Post("/requestperformancetoken", xml);
 			       	
@@ -702,6 +904,7 @@ public class PerformanceMeter implements Runnable, Observer
 		       		throw new Exception("Error while reading from infoservice");
 		       	}
 		       	
+		       	// fetch the token from the response data
 		       	PerformanceToken token = null;
 		        try
 		        {
@@ -718,14 +921,16 @@ public class PerformanceMeter implements Runnable, Observer
 		       	
 		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
 		       	
+		       	// open the socket connection to the AnonProxy
 		       	synchronized (SYNC_SOCKET)
 		       	{
 		       		m_meterSocket = new Socket(m_proxyHost, m_proxyPort);	
 		       		m_meterSocket.setSoTimeout(m_maxWaitForTest);			       	
 			       	stream = m_meterSocket.getOutputStream();
 			       	reader = new BufferedReader(new InputStreamReader(m_meterSocket.getInputStream()));
-		       	}		       			       			       	
+		       	}
 		       	
+		       	// send a PerformanceRequest to the info service while using the anonproxy
 		       	PerformanceRequest perfRequest = new PerformanceRequest(token.getId(), m_dataSize);
 		       	doc = XMLUtil.toSignedXMLDocument(perfRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		       	xml = XMLUtil.toString(doc);
@@ -738,8 +943,10 @@ public class PerformanceMeter implements Runnable, Observer
 		       	
 				// read first byte for delay
 		        long transferInitiatedTime = System.currentTimeMillis();
-		        	
+		        
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Reading first byte for performance test...");
+		        
+		        // set a mark at the beginning
 		        reader.mark(2);
 		        if (reader.read() < 0)
 		        {
@@ -759,9 +966,11 @@ public class PerformanceMeter implements Runnable, Observer
 		        }
 		        
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Downloading bytes for performance test...");
+		        
+		        // reset the mark
 		        reader.reset();
 		        
-		        HTTPResponse resp = null;
+		        HTTPResponseHeader resp = null;
 		        
 		        // read HTTP header from PerformanceServer
 		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
@@ -785,17 +994,19 @@ public class PerformanceMeter implements Runnable, Observer
 		        }
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance meter parsed server header.");
 		        
-		        if(resp.m_length != m_dataSize)
+		        // check if the content length is supposed to be the same as the requested data size
+		        if(resp.m_contentLength != m_dataSize)
 		        {
-        			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_length + " of " + m_dataSize + " bytes.");
+        			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_contentLength + " of " + m_dataSize + " bytes.");
         			closeMeterSocket();
         			throw new Exception("Invalid Packet-Length");
 		        }
 		        
 		        int bytesRead = 0;
 		        int recvd = 0;
-		        int toRead = resp.m_length;
+		        int toRead = resp.m_contentLength;
 		        
+		        // read the whole packet
 		        while(bytesRead < m_dataSize) 
 		        {
 		        	recvd = reader.read(m_recvBuff, bytesRead, toRead);
@@ -807,6 +1018,7 @@ public class PerformanceMeter implements Runnable, Observer
 		        
 		        long responseEndTime = System.currentTimeMillis();
 		        
+		        // could not read all data
         		if(bytesRead != m_dataSize)
         		{
         			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not get all requested bytes. Received " + bytesRead + " of " + m_dataSize + " bytes.");
@@ -844,8 +1056,10 @@ public class PerformanceMeter implements Runnable, Observer
 	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
 	        }
         	
+        	// timestamp at which the test data was retrieved
     		timestamp = System.currentTimeMillis();
     		
+    		// put the values into the hashtable
     		vDelay.put(new Long(timestamp), new Integer(delay));
     		vSpeed.put(new Long(timestamp), new Integer(speed));
     		vUsers.put(new Long(timestamp), new Integer(users));
@@ -853,6 +1067,7 @@ public class PerformanceMeter implements Runnable, Observer
     		try
     		{
     			m_cal.setTimeInMillis(System.currentTimeMillis());
+    			// check if we're still in the same week, if not open a new performance log file
     			if(m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
     			{
     				m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
@@ -871,6 +1086,7 @@ public class PerformanceMeter implements Runnable, Observer
     		}
 		}
 		
+		// add the data hashtable to the PerformanceEntry 
 		int lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
 		int lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
 		int lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
@@ -892,11 +1108,19 @@ public class PerformanceMeter implements Runnable, Observer
     	
 		return bUpdated;
 	}
-		
-	public HTTPResponse parseHTTPHeader(BufferedReader a_reader) throws IOException, NumberFormatException
+	
+	/**
+	 * Parses the incoming HTTP header from the info service.
+	 * 
+	 * @param a_reader The buffered reader which holds the data.
+	 * @return A <code>HTTPResponseHeader</code> filled with corresponding entries.
+	 * @throws IOException If a stream operation fails.
+	 * @throws NumberFormatException If the transfered status code is not a number.
+	 */
+	public HTTPResponseHeader parseHTTPHeader(BufferedReader a_reader) throws IOException, NumberFormatException
 	{	
 		String line;
-		HTTPResponse r = new HTTPResponse();
+		HTTPResponseHeader r = new HTTPResponseHeader();
 		int i = 0;
 		
 		do
@@ -913,7 +1137,7 @@ public class PerformanceMeter implements Runnable, Observer
 			
 			if(line.startsWith("Content-Length: "))
 			{
-				r.m_length = Integer.parseInt(line.substring(16));
+				r.m_contentLength = Integer.parseInt(line.substring(16));
 			}
 			
 			i++;
@@ -922,41 +1146,83 @@ public class PerformanceMeter implements Runnable, Observer
 		return r;
 	}
 	
+	/**
+	 * Returns the number of updates since startup.
+	 * 
+	 * @return The number of udpates since startup.
+	 */
 	public int getLastTotalUpdates()
 	{
 		return m_lastTotalUpdates;
 	}
 	
+	/**
+	 * Returns the runtime of the last update.
+	 * 
+	 * @return Returns the runtime of the last update.
+	 */
 	public long getLastUpdateRuntime()
 	{
 		return m_lastUpdateRuntime;
 	}
 	
+	/**
+	 * Returns the time of the last successful update.
+	 * 
+	 * @return The time of the last successful update.
+	 */
 	public long getLastSuccessfulUpdate()
 	{
 		return m_lastUpdate;
 	}
 	
+	/**
+	 * Returns the estimated time of the next update. 
+	 * 
+	 * @return The estimated time of the next update.
+	 */
 	public long getNextUpdate()
 	{
 		return m_nextUpdate;
 	}
 	
+	/**
+	 * Returns the name of the last updated cascade.
+	 * 
+	 * @return The name of the last updated cascade.
+	 */
 	public String getLastCascadeUpdated()
 	{
 		return m_lastCascadeUpdated;
 	}
 	
+	/**
+	 * Returns the amount of bytes received since startup.
+	 * 
+	 * @return The amount of bytes received since startup.
+	 */
 	public long getBytesRecvd()
 	{
 		return m_lBytesRecvd;
 	}
 	
+	/**
+	 * Returns a list of used pay account files.
+	 * 
+	 * @return A list of used pay account files.
+	 */
 	public Hashtable getUsedAccountFiles()
 	{
 		return m_usedAccountFiles;
 	}
 	
+	/**
+	 * Estimates how long the balance of all current loaded pay accounts 
+	 * of one payment instance will last.
+	 * 
+	 * @param a_piid The payment instance.
+	 * @return The time when the balance will reach zero.
+	 */
 	public long calculateRemainingPayTime(String a_piid)
 	{
 		long remainingTests;
@@ -970,6 +1236,12 @@ public class PerformanceMeter implements Runnable, Observer
 		return System.currentTimeMillis() + (remainingTests * m_majorInterval);
 	}
 
+	/**
+	 * Calculates how much traffic one batch of tests with all pay cascades will produce.
+	 *  
+	 * @param a_piid The payment instances of the pay cascade.
+	 * @return The estimated traffic.
+	 */
 	private long calculatePayTrafficPerTest(String a_piid) 
 	{
 		int payCascades = 0;
@@ -977,6 +1249,7 @@ public class PerformanceMeter implements Runnable, Observer
 		
 		Iterator cascades = Database.getInstance(MixCascade.class).getEntryList().iterator();
 		
+		// determine the amount of pay cascades
 		while(cascades.hasNext()) 
 		{
 			MixCascade cascade = (MixCascade) cascades.next();
@@ -989,10 +1262,17 @@ public class PerformanceMeter implements Runnable, Observer
 			}
 		}
 		
+		// calculate the traffic per test
 		trafficPerTest = payCascades * m_requestsPerInterval * m_dataSize;
 		return trafficPerTest;
 	}
 	
+	/**
+	 * Estimates how much traffic all pay cascades will produce in one day.
+	 * 
+	 * @param a_piid The payment instance.
+	 * @return The estimated traffic.
+	 */
 	public long calculatePayTrafficPerDay(String a_piid)
 	{
 		int testsPerDay = (3600 * 24 * 1000) / (m_majorInterval);
@@ -1000,6 +1280,12 @@ public class PerformanceMeter implements Runnable, Observer
 		return calculatePayTrafficPerTest(a_piid) * testsPerDay;
 	}
 	
+	/**
+	 * Calculates the remaining credit of all pay accounts of one payment instance.
+	 * 
+	 * @param a_piid The payment instance.
+	 * @return The remaining credit.
+	 */
 	public long getRemainingCredit(String a_piid)
 	{			
 		if(a_piid == null || m_payAccountsFile == null)
@@ -1023,6 +1309,11 @@ public class PerformanceMeter implements Runnable, Observer
 		return credit;
 	}
 	
+	/**
+	 * Randomly chooses one InfoService from the database.
+	 * @param a_badInfoServices A hashtable of InfoServices that should not be chosen.
+	 * @return A random InfoService.
+	 */
 	public InfoServiceDBEntry chooseRandomInfoService(Hashtable a_badInfoServices)
 	{
 		if (!a_badInfoServices.contains(Configuration.getInstance().getID()))
@@ -1057,10 +1348,12 @@ public class PerformanceMeter implements Runnable, Observer
 	
 	public void update(Observable a_observable, Object a_message)
 	{
+		// the observer message came from the databse
 		if(a_message != null && a_message instanceof DatabaseMessage)
 		{
 			DatabaseMessage msg = (DatabaseMessage) a_message;
 			
+			// a new entry was added
 			if(msg.getMessageCode() == DatabaseMessage.ENTRY_ADDED)
 			{
 				try
@@ -1069,9 +1362,10 @@ public class PerformanceMeter implements Runnable, Observer
 					
 					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(cascade.getId());
 					
+					// we don't have a PerformanceEntry for this cascade yes
 					if(entry == null)
 					{
-						// new cascade, let's start our performance test immediately
+						// let's start our performance test immediately
 						LogHolder.log(LogLevel.INFO, LogType.MISC, "Found new cascade, starting performance test immediately.");
 						synchronized(SYNC_TEST)
 						{
@@ -1086,17 +1380,36 @@ public class PerformanceMeter implements Runnable, Observer
 			}
 		}
 	}
-		
-	private class HTTPResponse
+	
+	/**
+	 * Small helper class to store HTTP response header information.
+	 * 
+	 * @author Christian Banse
+	 */
+	private class HTTPResponseHeader
 	{
+		/**
+		 * HTTP status code.
+		 */
 		int m_statusCode = -1;
-		int m_length = 0;
+		
+		/**
+		 * Length of the HTTP content.
+		 */
+		int m_contentLength = 0;
 	}
 	
+	/**
+	 * Small utility class to open pay account files with passwords
+	 *  
+	 * @author Christian Banse
+	 */
 	private final class PerformanceAccountPasswordReader implements IMiscPasswordReader
 	{
 		public String readPassword(Object a_message)
 		{
+			// the password must be specified in the InfoService config and it must be the
+			// same for all pay account files.
 			return m_infoServiceConfig.getPerfAccountPassword();
 		}
 	}
