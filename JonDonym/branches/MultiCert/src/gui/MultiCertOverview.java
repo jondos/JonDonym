@@ -22,7 +22,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -39,14 +41,18 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	private String m_name;
 	private Hashtable m_buttonsAndCerts;
 	private ButtonGroup m_certButtons;
+	private JButton m_closeButton;
+	private CertInfoPanel m_certInfoPanel;
+	private CertPathInfo[] m_pathInfos;
+	private MultiCertTrustGraph m_graph;
 
 	public MultiCertOverview(Component a_parent, MultiCertPath a_multiCertPath, String a_name)
 	{
 		super(a_parent, "Zertifikatsüberblick für " + a_name);
-	
-		this.setResizable(false);
 		
 		m_multiCertPath = a_multiCertPath;
+		m_pathInfos = m_multiCertPath.getPathInfos();
+		m_graph = new MultiCertTrustGraph(m_pathInfos);
 		m_name = a_name;
 		if(m_name == null)
 		{
@@ -67,57 +73,130 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		c.anchor = GridBagConstraints.CENTER;
 		c.insets = new Insets(5, 5, 5, 5);
 		rootPanel.add(drawOverviewPanel(), c);
+		
+		
+		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane.add("Zusammenfassung", drawSummaryPanel());
+		tabbedPane.add("Erklärung", drawExplanationPanel());
 		c.gridy = 2;
-		rootPanel.add(drawDetailsPanel(), c);
-		
-		this.getContentPane().add(rootPanel);
-		this.setSize(550, 500);
-		this.setVisible(true);
-	}
-		
-	private JPanel drawDetailsPanel()
-	{
-		JPanel details = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		TitledBorder title;
-		JButton button;
-		JAPMultilineLabel mlabel;
-		
-		//Border
-		title = BorderFactory.createTitledBorder(
-				BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Details");
-		title.setTitleJustification(TitledBorder.LEFT);
-		details.setBorder(title);
-		
-		//Info
-		int number = m_multiCertPath.countPaths();
-		int verified = m_multiCertPath.countVerifiedPaths();
-		mlabel = new JAPMultilineLabel(m_name + " verwendet " + number + " Zertifikat" + 
-										(number > 1?"e":"") + ".\nDavon " + (verified > 1?"sind ":"ist ") + verified + " vertauenswürdig.");
-		c.gridx = 0;
-		c.gridy = 0;
-		c.insets = new Insets(5, 10, 5, 5);
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1.0;
-		details.add(mlabel, c);
+		rootPanel.add(tabbedPane, c);
 		
 		//Close Button
-		button = new JButton("Schließen");
-		button.addActionListener(new ActionListener()
+		m_closeButton = new JButton("Schließen");
+		m_closeButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				dispose();
 			}
 		});
-		c.gridx = 1;//a_multiCertPath.countPaths();
-		c.gridy = 1;//a_multiCertPath.getMaxLength();
-		c.anchor = GridBagConstraints.SOUTHEAST;
-		c.fill = GridBagConstraints.NONE;
-		details.add(button, c);
 		
-		return details;
+		this.getContentPane().add(rootPanel);
+		this.setSize(550, 550);
+		//this.setResizable(false);
+		this.setVisible(true);
+	}
+
+	private JPanel drawSummaryPanel()
+	{
+		JPanel summary = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		JAPMultilineLabel mlabel;
+				
+		//Info
+		int number = m_multiCertPath.countPaths();
+		int verified = m_multiCertPath.countVerifiedPaths();
+		String info = m_name + " verwendet " + number + " Zertifikat" + (number > 1?"e":"") + ",\n" +
+									"davon " + (verified != 1?"sind ":"ist ") + verified + " vertauenswürdig.";
+		if(verified == 0)
+		{
+			mlabel = new JAPMultilineLabel(info, Color.RED);
+		}
+		else
+		{
+			mlabel = new JAPMultilineLabel(info);
+		}
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(5, 20, 5, 5);
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1.0;
+		summary.add(mlabel, c);
+		
+		int count = m_graph.countTrustedRootNodes();
+		info = "Die Identität des Betreibers " + m_multiCertPath.getIssuer().getOrganisation() + 
+		   "\nwird von " + count + " unabhängigen " + (count != 1?"Stellen":"Stelle") + " bestätigt.";
+		if(count == 0)
+		{
+			mlabel = new JAPMultilineLabel(info, Color.RED);
+		}
+		else
+		{
+			mlabel = new JAPMultilineLabel(info, Color.GREEN.darker().darker());
+		}
+		
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.SOUTHWEST;
+		summary.add(mlabel, c);
+
+		
+		m_certInfoPanel = new CertInfoPanel();
+		//c.gridy = 2;
+		//details.add(m_certInfoPanel, c);
+		
+		return summary;
+	}
+	
+	private JPanel drawExplanationPanel()
+	{
+		JPanel explanation =  new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		JLabel label;
+		
+		label = new JLabel("Klicken Sie doppelt auf ein Zertifikat, um es anzuzeigen.");
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 1.0;
+		c.weighty = 1.0;
+		c.insets = new Insets(3, 3, 3, 3);
+		c.fill = GridBagConstraints.BOTH;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.gridheight = 2;
+		c.gridwidth = 2;
+		explanation.add(label, c);
+		
+		label = new JLabel("Symbole:");
+		c.gridy = 2;
+		c.gridheight = 1;
+		c.fill = GridBagConstraints.NONE;
+		explanation.add(label, c);
+		
+		label = new JLabel(GUIUtils.loadImageIcon("certs/trusted.png"));
+		label.setText("vertrauenswürdig");
+		c.insets.left = 7;
+		c.gridy = 3;
+		c.gridwidth = 1;
+		explanation.add(label, c);
+		
+		label = new JLabel(GUIUtils.loadImageIcon("certs/not_trusted.png"));
+		label.setText("nicht vertrauenswürdig");
+		c.gridy = 4;
+		explanation.add(label, c);
+		
+		label = new JLabel(GUIUtils.loadImageIcon("certs/valid2.png"));
+		label.setText("gültig");
+		c.insets.left = 3;
+		c.gridy = 3;
+		c.gridx = 1;
+		explanation.add(label, c);
+		
+		label = new JLabel(GUIUtils.loadImageIcon("certs/invalid2.png"));
+		label.setText("abgelaufen");
+		c.gridy = 4;
+		explanation.add(label, c);
+		
+		return explanation;
 	}
 
 	private JPanel drawOverviewPanel()
@@ -125,9 +204,6 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		JPanel overview = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		JAPMultilineLabel mlabel;
-		JLabel label;
-		JRadioButton radioButton;
-		JPanel panel;
 		
 		Insets none = new Insets(0, 0, 0, 0);
 		Insets norm = new Insets(10, 10, 10, 10);
@@ -135,6 +211,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		overview.setBorder(BorderFactory.createLoweredBevelBorder());
 		overview.setBackground(Color.WHITE);
 		
+		//first column
 		mlabel = new JAPMultilineLabel("Root-\nZertifikate");
 		mlabel.setBackground(Color.WHITE);
 		mlabel.setToolTipText("Root-Zertifikate stellen den Vertrauensanker für Mix-Zertifikate dar.");
@@ -169,9 +246,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		//cert-buttons
 		drawTrustGraph(overview);
 		
-		//drawArrow(overview, 2, 1, SwingConstants.NORTH_EAST);
-		//drawArrow(overview, 3, 1, SwingConstants.NORTH_WEST);
-				
+		//separators		
 		c.gridx = 1;
 		c.gridy = 0;
 		c.gridheight = 5;
@@ -204,17 +279,27 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	
 	private void drawTrustGraph(JPanel parent)
 	{
-		CertPathInfo[] data = m_multiCertPath.getPathInfos();
-		MultiCertTrustGraph graph = new MultiCertTrustGraph(data);
 		Enumeration rootNodes;
 		MultiCertTrustGraph.Node node;
 		int x = 2;
-		rootNodes = graph.getRootNodes();
 		
+		rootNodes = m_graph.getRootNodes();
 		while(rootNodes.hasMoreElements())
 		{
 			node = (MultiCertTrustGraph.Node) rootNodes.nextElement();
 			x += drawSubGraph(parent, node, x, 0);
+		}
+		rootNodes = m_graph.getOperatorNodes();
+		while(rootNodes.hasMoreElements())
+		{
+			node = (MultiCertTrustGraph.Node) rootNodes.nextElement();
+			x += drawSubGraph(parent, node, x, 2);
+		}
+		rootNodes = m_graph.getEndNodes();
+		while(rootNodes.hasMoreElements())
+		{
+			node = (MultiCertTrustGraph.Node) rootNodes.nextElement();
+			x += drawSubGraph(parent, node, x, 4);
 		}		
 	}
 	
@@ -286,7 +371,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		
 		radioButton = new JRadioButton();
 		radioButton.setIcon(GUIUtils.loadImageIcon("certs/cert_"+color+".png"));
-		radioButton.setSelectedIcon(GUIUtils.loadImageIcon("certs/cert_"+color+"_selected.png"));
+		//radioButton.setSelectedIcon(GUIUtils.loadImageIcon("certs/cert_"+color+"_selected.png"));
 		radioButton.setRolloverIcon(GUIUtils.loadImageIcon("certs/cert_"+color+"_rollover.png"));
 		radioButton.setToolTipText(getToolTipText(cert));
 		m_certButtons.add(radioButton);
@@ -296,39 +381,46 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		c.anchor = GridBagConstraints.CENTER;
 		c.gridx = 0;
 		c.gridy = 0;
-		c.gridwidth = 2;
+		c.gridwidth = 3;
 		certPanel.add(radioButton, c);
 		
 		//verification icon
 		if(trusted)
 		{
-			label = new JLabel(GUIUtils.loadImageIcon("cenabled.gif"));
+			label = new JLabel(GUIUtils.loadImageIcon("certs/trusted.png"));
 			label.setToolTipText("Dieses Zertifikat ist vertrauenswürdig.");
 		}
 		else
 		{
-			label = new JLabel(GUIUtils.loadImageIcon("cdisabled.gif"));
+			label = new JLabel(GUIUtils.loadImageIcon("certs/not_trusted.png"));
 			label.setToolTipText("Dieses Zertifikat ist nicht vertrauenswürdig.");
 		}
-		c.anchor = GridBagConstraints.EAST;
 		c.gridy = 1;
 		c.gridwidth = 1;
+		c.insets = new Insets(0, 6, 0, 0);
 		certPanel.add(label, c);
 		
 		//validity icon
 		if(cert.getValidity().isValid(new Date())) 
 		{
-			label = new JLabel(GUIUtils.loadImageIcon("cenabled.gif"));
+			label = new JLabel(GUIUtils.loadImageIcon("certs/valid2.png"));
 			label.setToolTipText("Das Zertifikat ist noch gültig bis: "+cert.getValidity().getValidTo());
 		}
 		else
 		{
-			label = new JLabel(GUIUtils.loadImageIcon("warning.gif"));
+			label = new JLabel(GUIUtils.loadImageIcon("certs/invalid2.png"));
 			label.setToolTipText("Das Zertifikat ist abgelaufen seit: "+cert.getValidity().getValidTo());
 		}
-		c.anchor = GridBagConstraints.WEST;
 		c.gridx = 1;
 		certPanel.add(label,c);
+		
+		//flag icon
+		CountryMapper country = new CountryMapper(cert.getSubject().getCountryCode(), JAPMessages.getLocale());
+		label = new JLabel(GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"));
+		label.setToolTipText("Der Inhaber des Zertifikats sitzt in "+country.toString() + ".");
+		c.insets.left = 3;
+		c.gridx = 2;
+		certPanel.add(label, c);
 		
 		//add panel to parent
 		certPanel.setBackground(Color.WHITE);
@@ -365,7 +457,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		{
 			return;
 		}
-		label.setToolTipText("Ein Pfeil von A nach B bedeutet: A ist von B zertifiziert.");
+		label.setToolTipText("Ein Pfeil von A nach B bedeutet: A ist von B zertifiziert worden.");
 		
 		
 		c.fill = GridBagConstraints.NONE;
@@ -396,6 +488,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		ttt.append("von: "+a_cert.getValidity().getValidFrom()+"<br>");
 		ttt.append("bis: "+a_cert.getValidity().getValidFrom()+"<br></blockquote><hr>"); 
 		ttt.append("Schlüssel-Algorithmus: "+a_cert.getPublicKey().getAlgorithm()+"<br>");
+		ttt.append("Schlüssel-Stärke: "+a_cert.getPublicKey().getKeyLength()+"<br>");
 		ttt.append("Unterzeichnungs-Algorithmus: "+a_cert.getSignatureAlgorithmName());
 		ttt.append("</html>");
 		
@@ -404,16 +497,22 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 
 	public void mouseClicked(MouseEvent e)
 	{
-		if(e.getClickCount() > 1)
+		if(m_buttonsAndCerts.containsKey(e.getSource()))
 		{
-			if(m_buttonsAndCerts.containsKey(e.getSource()))
+			JAPCertificate cert = (JAPCertificate) m_buttonsAndCerts.get(e.getSource());
+			
+			if(e.getClickCount() == 1)
 			{
-				JAPCertificate cert = (JAPCertificate) m_buttonsAndCerts.get(e.getSource());
-				
+				m_certInfoPanel.setFirstLine("Das gewählte Zertifikat ist vertrauenswürdig.", null);
+				m_certInfoPanel.setSecondLine("Es ist außerdem gültig.", null);
+			}
+			
+			else if(e.getClickCount() > 1)
+			{
 				CertDetailsDialog dialog = new CertDetailsDialog(this.getParentComponent(), cert, true, JAPMessages.getLocale());
 				dialog.setVisible(true);
 			}
-		}
+		}	
 	}
 
 	public void mouseEntered(MouseEvent e)
@@ -437,6 +536,50 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	public void mouseReleased(MouseEvent e)
 	{
 		// TODO Auto-generated method stub
+		
+	}
+	
+	private final class CertInfoPanel extends JPanel
+	{
+		private JLabel m_firstLine;
+		private JLabel m_secondLine;
+		
+		public CertInfoPanel()
+		{
+			setLayout(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+			
+			m_firstLine = new JLabel("Bitte wählen Sie ein Zertifikat aus.");
+			c.fill = GridBagConstraints.BOTH;
+			c.weightx = 1.0;
+			c.weighty = 1.0;
+			c.anchor = GridBagConstraints.WEST;
+			c.gridy = 0;
+			add(m_firstLine, c);
+			
+			m_secondLine = new JLabel("Klicken Sie doppelt um das Zertifikat anzuzeigen");
+			c.gridy = 1;
+			add(m_secondLine, c);
+		}
+		
+		public void setFirstLine(String text, Color textColor)
+		{
+			m_firstLine.setText(text);
+			if(textColor != null)
+			{
+				m_firstLine.setForeground(textColor);
+			}
+		}
+		
+		public void setSecondLine(String text, Color textColor)
+		{
+			m_secondLine.setText(text);
+			if(textColor != null)
+			{
+				m_secondLine.setForeground(textColor);
+			}
+		}
 		
 	}
 }

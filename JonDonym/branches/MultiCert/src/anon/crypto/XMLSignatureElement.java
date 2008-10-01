@@ -88,9 +88,7 @@ public class XMLSignatureElement implements IXMLEncodable
 		
 		m_parent = a_parent;
 		m_elemSignature = a_element;
-		setCertificates(m_elemSignature);
-		//MuliCert
-		//m_certificates = findCertificates(m_elemSignature);
+		findCertificates(m_elemSignature);
 
 		node = XMLUtil.getFirstChildByName(m_elemSignature, ELEM_SIGNED_INFO);
 		if (node == null)
@@ -201,7 +199,7 @@ public class XMLSignatureElement implements IXMLEncodable
 		m_elemSignature = signatureNode;
 	}
 	
-	private synchronized void setCertificates(Element a_xmlSignature)
+	private synchronized void findCertificates(Element a_xmlSignature)
 	{
 		m_appendedCerts = new Vector();
 		m_appendedCertXMLElements = new Vector();
@@ -246,34 +244,49 @@ public class XMLSignatureElement implements IXMLEncodable
 	{
 		return verify(a_node, a_publicKey);
 	}
-		
+	
+	/**
+	 * Verifies this Signature Element with either the appended certs or
+	 * with the directCertPaths, if there are no appended certs.
+	 * @param a_node
+	 * @param a_documentType
+	 * @param a_directCertPaths
+	 * @return
+	 * @throws XMLParseException
+	 */
 	public boolean verify(Node a_node, int a_documentType, Vector a_directCertPaths) throws XMLParseException
 	{
-		Enumeration certificates = m_appendedCerts.elements();
-		//try to verify the signature with its appended certificates
-		while(certificates.hasMoreElements())
+		Enumeration certificates;
+		
+		if(m_appendedCerts.size() > 0)
 		{
-			JAPCertificate currentCertificate = (JAPCertificate) certificates.nextElement();
-			if(verify(a_node, currentCertificate.getPublicKey()))
+			certificates = m_appendedCerts.elements();
+			//try to verify the signature with its appended certificates
+			while(certificates.hasMoreElements())
 			{
-				Vector appendedCertificates = (Vector)this.getCertificates().clone();
-				appendedCertificates.remove(currentCertificate);
-				m_certPath = CertPath.getInstance(currentCertificate, a_documentType, appendedCertificates);
-				return true;
+				JAPCertificate currentCertificate = (JAPCertificate) certificates.nextElement();
+				if(verify(a_node, currentCertificate.getPublicKey()))
+				{
+					Vector appendedCertificates = (Vector)this.getCertificates().clone();
+					appendedCertificates.remove(currentCertificate);
+					m_certPath = CertPath.getInstance(currentCertificate, a_documentType, appendedCertificates);
+					return true;
+				}
 			}
 		}
-		
-		//if this does not work or if there are no appended certs try verification with
-		//the direct certificates
-		certificates = a_directCertPaths.elements();
-		while(certificates.hasMoreElements())
+		else
 		{
-			CertPath currentPath = (CertPath) certificates.nextElement();
-			
-			if(verify(a_node, currentPath.getFirstCertificate().getPublicKey()))
+			//if there are no appended certs try verification with the stored certificates
+			certificates = a_directCertPaths.elements();
+			while(certificates.hasMoreElements())
 			{
-				m_certPath = currentPath;
-				return true;
+				CertPath currentPath = (CertPath) certificates.nextElement();
+				
+				if(verify(a_node, currentPath.getFirstCertificate().getPublicKey()))
+				{
+					m_certPath = currentPath;
+					return true;
+				}
 			}
 		}
 		return false;

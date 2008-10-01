@@ -69,15 +69,6 @@ public abstract class AbstractDistributableCertifiedDatabaseEntry extends Abstra
 			return false;
 		}
 		return getId().equalsIgnoreCase(signature.getXORofSKIs());
-		/*JAPCertificate cert=getCertificate();
-		if(cert==null)
-		{
-			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- cert is NULL!");
-			return false;
-		}
-		return  (getId() != null) && getId().equals(new X509SubjectKeyIdentifier(
-				 getCertificate().getPublicKey()).getValueWithoutColon());
-				 */
 	}
 
 }

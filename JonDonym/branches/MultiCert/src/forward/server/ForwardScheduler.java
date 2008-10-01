@@ -32,6 +32,10 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import anon.transport.address.Endpoint;
+import anon.transport.connection.IStreamConnection;
+
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -116,7 +120,7 @@ public class ForwardScheduler implements Runnable
 	 *
 	 * @param a_newConnection The new connection.
 	 */
-	public void handleNewConnection(Socket a_newConnection)
+	public void handleNewConnection(IStreamConnection a_newConnection)
 	{
 		boolean connectionAccepted = false;
 		ForwardConnection newConnection = null;
@@ -130,17 +134,15 @@ public class ForwardScheduler implements Runnable
 					m_connectionHandler.addElement(newConnection);
 					connectionAccepted = true;
 					LogHolder.log(LogLevel.INFO, LogType.NET,
-								  "ForwardScheduler: handleNewConnection: New forwarding connection from " +
-								  a_newConnection.getInetAddress().getHostAddress() + ":" +
-								  Integer.toString(a_newConnection.getPort()) + " accepted.");
+							  "ForwardScheduler: handleNewConnection: New forwarding connection from " +
+							  Endpoint.toURN(a_newConnection.getRemoteAddress()) + " accepted."); 
 					m_statistics.incrementAcceptedConnections();
 				}
 				catch (Exception e)
 				{
 					LogHolder.log(LogLevel.EXCEPTION, LogType.NET,
-						"ForwardScheduler: handleNewConnection: Error initializing protocol on forwarding connection from " +
-								  a_newConnection.getInetAddress().getHostAddress() + ":" +
-								  Integer.toString(a_newConnection.getPort()) + " (" + e.toString() + ").");
+							"ForwardScheduler: handleNewConnection: Error initializing protocol on forwarding connection from " +
+							Endpoint.toURN(a_newConnection.getRemoteAddress()) + " (" + e.toString() + ").");
 				}
 			}
 		}
@@ -151,8 +153,7 @@ public class ForwardScheduler implements Runnable
 			 */
 			LogHolder.log(LogLevel.INFO, LogType.NET,
 						  "ForwardScheduler: handleNewConnection: New forwarding connection from " +
-						  a_newConnection.getInetAddress().getHostAddress() + ":" +
-						  Integer.toString(a_newConnection.getPort()) +
+						  Endpoint.toURN(a_newConnection.getRemoteAddress()) +
 						  " rejected (maximum number of connections is reached).");
 			m_statistics.incrementRejectedConnections();
 			try

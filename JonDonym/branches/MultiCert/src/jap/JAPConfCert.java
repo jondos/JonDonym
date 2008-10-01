@@ -170,6 +170,8 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
+				//verification settings
+				SignatureVerifier.getInstance().setCheckSignatures(m_cbCertCheckEnabled.isSelected());
 				if (!m_cbCertCheckEnabled.isSelected())
 				{
 					JAPDialog.showWarningDialog(
@@ -473,8 +475,6 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 
 	protected boolean onOkPressed()
 	{
-		//Cert seetings
-		SignatureVerifier.getInstance().setCheckSignatures(m_cbCertCheckEnabled.isSelected());
 		return true;
 	}
 

@@ -66,13 +66,15 @@ import anon.util.Util;
 /* This is the Model of All. It's a Singelton!*/
 public final class JAPModel extends Observable implements IHelpModel
 {
+	public static final String MACOSX_LIB_NEEDS_UPDATE = "macOSXLibNeedsUpdate";
 	public static final String DLL_VERSION_UPDATE = "dllVersionUpdate";
 	public static final String DLL_VERSION_WARNING_BELOW = "dllWarningVersion";
 
+	public static final String XML_ANONYMIZED_HTTP_HEADERS = "anonymizedHttpHeaders";
 	public static final String XML_REMIND_OPTIONAL_UPDATE = "remindOptionalUpdate";
 	public static final String XML_REMIND_JAVA_UPDATE = "remindJavaUpdate";
 	public static final String XML_RESTRICT_CASCADE_AUTO_CHANGE = "restrictCascadeAutoChange";
-	public static final String XML_DENY_NON_ANONYMOUS_SURFING = "denyNonAnonymousSurfing";
+	public static final String XML_ASK_FOR_NON_ANONYMOUS_SURFING = "askForUnprotectedSurfing";
 	public static final String XML_ATTR_ACTIVATED = "activated";
 	public static final String XML_FONT_SIZE = "fontSize";
 	public static final String XML_CONFIG_WINDOW = "ConfigWindow";
@@ -101,9 +103,11 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final Integer CHANGED_AUTO_CONNECT = new Integer(5);
 	public static final Integer CHANGED_AUTO_RECONNECT = new Integer(6);
 	public static final Integer CHANGED_CASCADE_AUTO_CHANGE = new Integer(7);
-	public static final Integer CHANGED_DENY_NON_ANONYMOUS = new Integer(8);
+	public static final Integer CHANGED_ASK_FOR_NON_ANONYMOUS = new Integer(8);
 	public static final Integer CHANGED_HELP_PATH = new Integer(9);
 	public static final Integer CHANGED_DLL_UPDATE = new Integer(10);
+	public static final Integer CHANGED_MACOSX_LIBRARY_UPDATE = new Integer(11);
+	public static final Integer CHANGED_ANONYMIZED_HTTP_HEADERS = new Integer(12);
 
 	private static final int DIRECT_CONNECTION_INFOSERVICE = 0;
 	private static final int DIRECT_CONNECTION_PAYMENT = 1;
@@ -141,7 +145,7 @@ public final class JAPModel extends Observable implements IHelpModel
 	private boolean m_bAllowInfoServiceViaDirectConnection;
 	private boolean m_bAllowUpdateViaDirectConnection;
 
-	private boolean m_bDenyNonAnonymousSurfing;
+	private boolean m_bAskForAnyNonAnonymousRequest;
 
 	private boolean m_bRemindOptionalUpdate;
 	private boolean m_bRemindJavaUpdate;
@@ -159,6 +163,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	private Object LOOK_AND_FEEL_SYNC = new Object();
 	
 	private boolean m_bShowDialogFormat = false;
+	
+	private boolean m_bAnonymizedHttpHeaders = JAPConstants.ANONYMIZED_HTTP_HEADERS;
 
 	private int m_fontSize = 0;
 
@@ -230,8 +236,10 @@ public final class JAPModel extends Observable implements IHelpModel
 	private String m_paymentPassword;
 
 	/** Boolen value which describes if a dll update is necessary */
-	private boolean m_bUpdateDll = false;
+	private String m_bDllUpdatePath;
 	private long m_noWarningForDllVersionBelow = 0;
+	
+	private boolean m_bMacOSXLibraryUpdateAtStartupNeeded = false;
 
 	private BigInteger m_iDialogVersion=new BigInteger("-1");
 
@@ -682,21 +690,21 @@ public final class JAPModel extends Observable implements IHelpModel
 		return m_connectionChecker.checkAnonConnected();
 	}
 
-	public boolean isNonAnonymousSurfingDenied()
+	public boolean isAskForAnyNonAnonymousRequest()
 	{
-		return m_bDenyNonAnonymousSurfing;
+		return m_bAskForAnyNonAnonymousRequest;
 	}
 
-	public void denyNonAnonymousSurfing(boolean a_bDenyNonAnonymousSurfing)
+	public void setAskForAnyNonAnonymousRequest(boolean a_bAskForAnyNonAnonymousRequest)
 	{
 		synchronized (this)
 		{
-			if (m_bDenyNonAnonymousSurfing != a_bDenyNonAnonymousSurfing)
+			if (m_bAskForAnyNonAnonymousRequest != a_bAskForAnyNonAnonymousRequest)
 			{
-				m_bDenyNonAnonymousSurfing = a_bDenyNonAnonymousSurfing;
+				m_bAskForAnyNonAnonymousRequest = a_bAskForAnyNonAnonymousRequest;
 				setChanged();
 			}
-			notifyObservers(CHANGED_DENY_NON_ANONYMOUS);
+			notifyObservers(CHANGED_ASK_FOR_NON_ANONYMOUS);
 		}
 	}
 
@@ -931,9 +939,12 @@ public final class JAPModel extends Observable implements IHelpModel
 		buff.append("Help path: ");
 		buff.append(getHelpPath());
 		buff.append("\n");
-		buff.append("DLL update status: ");
-		buff.append(m_bUpdateDll);
-		buff.append("\n");
+		if (m_bDllUpdatePath != null)
+		{
+			buff.append("DLL update path: ");
+			buff.append(m_bDllUpdatePath);
+			buff.append("\n");
+		}
 		buff.append("Command line arguments: ");
 		buff.append("'" + JAPController.getInstance().getCommandlineArgs() + "'");
 		buff.append("\n");
@@ -1612,18 +1623,59 @@ public final class JAPModel extends Observable implements IHelpModel
 		return m_helpFileStorageManager.getStorageObservable();
 	}
 	
-	public synchronized void setDLLupdate(boolean a_update)
+	public synchronized void setDLLupdate(String a_dllUpdatePath)
 	{
-		if (m_bUpdateDll != a_update)
+		if (a_dllUpdatePath != null && 
+			(m_bDllUpdatePath == null || !m_bDllUpdatePath.equals(a_dllUpdatePath)))
 		{
-			m_bUpdateDll = a_update;
+			File file = new File(a_dllUpdatePath);
+			if (file.exists() && file.isDirectory())
+			{
+				m_bDllUpdatePath = file.getAbsolutePath();
+				setChanged();
+			}			
+		}
+		else if (a_dllUpdatePath == null && m_bDllUpdatePath != null)
+		{
+			m_bDllUpdatePath = null;
 			setChanged();
 		}
 		notifyObservers(CHANGED_DLL_UPDATE);
     }
-
-	public boolean isDLLupdated() {
-		return m_bUpdateDll;
+	
+	public synchronized void setMacOSXLibraryUpdateAtStartupNeeded(boolean a_update)
+	{
+		if (m_bMacOSXLibraryUpdateAtStartupNeeded != a_update)
+		{
+			m_bMacOSXLibraryUpdateAtStartupNeeded = a_update;
+			setChanged();
+		}
+		notifyObservers(CHANGED_MACOSX_LIBRARY_UPDATE);
+	}
+	
+	public synchronized void setAnonymizedHttpHeaders(boolean a_update)
+	{
+		if(m_bAnonymizedHttpHeaders != a_update)
+		{
+			m_bAnonymizedHttpHeaders = a_update;
+			setChanged();
+		}
+		notifyObservers(CHANGED_ANONYMIZED_HTTP_HEADERS);
+	}
+	
+	public boolean isAnonymizedHttpHeaders()
+	{
+		return m_bAnonymizedHttpHeaders;
+	}
+	
+	public boolean isMacOSXLibraryUpdateAtStartupNeeded()
+	{
+		return m_bMacOSXLibraryUpdateAtStartupNeeded;
+	}
+	
+	public String getDllUpdatePath() 
+	{
+		return m_bDllUpdatePath;
 	}
 	
 	

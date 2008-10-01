@@ -224,6 +224,7 @@ public class DefaultProtocolHandler implements IProtocolHandler {
     if (m_serverConnection != null) {
       /* we are connected to a server -> send all the bytes to the server */
       m_serverConnection.getOutputStream().write(a_buffer);
+      m_serverConnection.getOutputStream().flush();
     }
     else {
       /* we are not connected with a server, this must be protocol data */

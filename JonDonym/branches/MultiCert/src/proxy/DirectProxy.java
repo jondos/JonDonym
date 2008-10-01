@@ -63,6 +63,8 @@ import anon.infoservice.IMutableProxyInterface;
 
 final public class DirectProxy implements Runnable, AnonService
 {
+	private static final String GENERAL_RULE = "*";
+	
 	private static AllowUnprotectedConnectionCallback ms_callback;
 
 	private AnonService m_tor;
@@ -78,6 +80,7 @@ final public class DirectProxy implements Runnable, AnonService
 	public static void setAllowUnprotectedConnectionCallback(AllowUnprotectedConnectionCallback a_callback)
 	{
 		ms_callback = a_callback;
+		
 	}
 
 	public static class RequestInfo
@@ -116,15 +119,13 @@ final public class DirectProxy implements Runnable, AnonService
 		{
 			private boolean m_bRemembered;
 			private boolean m_bAllow;
-			private boolean m_bResetMemory;
 
-			public Answer(boolean a_bAllow, boolean a_bRemembered, boolean a_bResetMemory)
+			public Answer(boolean a_bAllow, boolean a_bRemembered)
 			{
 				m_bAllow = a_bAllow;
 				m_bRemembered = a_bRemembered;
-				m_bResetMemory = a_bResetMemory;
-			}
-
+			}			
+			
 			public boolean isRemembered()
 			{
 				return m_bRemembered;
@@ -133,11 +134,6 @@ final public class DirectProxy implements Runnable, AnonService
 			public boolean isAllowed()
 			{
 				return m_bAllow;
-			}
-			
-			public boolean isMemoryReset()
-			{
-				return m_bResetMemory;
 			}
 		}
 
@@ -292,7 +288,20 @@ final public class DirectProxy implements Runnable, AnonService
 			}
 
 			requestInfo = DirectProxyConnection.getURI(clientInputStream, 200);
-			requestRight = (RememberedRequestRight)rememberedDomains.get(requestInfo.getURI());
+			requestRight = (RememberedRequestRight)rememberedDomains.get(GENERAL_RULE); // if a rule for all requests is set
+			if (requestRight == null && !JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
+			{
+				rememberedDomains.clear();
+			}
+			if (requestRight != null && (requestRight.isTimedOut() || JAPModel.getInstance().isAskForAnyNonAnonymousRequest()))
+			{
+				rememberedDomains.remove(GENERAL_RULE);
+				requestRight = null;
+			}
+			if (requestRight == null)
+			{
+				requestRight = (RememberedRequestRight)rememberedDomains.get(requestInfo.getURI());
+			}
 			if (requestRight != null && requestRight.isTimedOut())
 			{
 				rememberedDomains.remove(requestInfo.getURI());
@@ -308,18 +317,22 @@ final public class DirectProxy implements Runnable, AnonService
 				}
 				else
 				{
-					answer = new AllowUnprotectedConnectionCallback.Answer(false, false, true);
+					answer = new AllowUnprotectedConnectionCallback.Answer(false, false);
 				}
 				
-				requestRight = new RememberedRequestRight(requestInfo.getURI(), 
-						!answer.isAllowed(), !answer.isRemembered());
-				if (answer.isMemoryReset())
+				
+				if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
 				{
-					rememberedDomains.clear();
+					requestRight = new RememberedRequestRight(requestInfo.getURI(), 
+							!answer.isAllowed(), !answer.isRemembered());
+					rememberedDomains.put(requestInfo.getURI(), requestRight);
 				}
 				else
 				{
-					rememberedDomains.put(requestInfo.getURI(), requestRight);
+					requestRight = new RememberedRequestRight(GENERAL_RULE, 
+							!answer.isAllowed(), !answer.isRemembered());
+					rememberedDomains.clear();
+					rememberedDomains.put(GENERAL_RULE, requestRight);					
 				}
 			}
 
@@ -406,6 +419,10 @@ final public class DirectProxy implements Runnable, AnonService
 	{
 		private static final String MSG_BLOCKED = 
 			SendAnonWarning.class.getName() + "_blocked";
+		private static final String MSG_BLOCKED_ALL = 
+			SendAnonWarning.class.getName() + "_blockedAll";
+		private static final String MSG_BLOCKED_DOMAIN = 
+			SendAnonWarning.class.getName() + "_blockedDomain";
 		private static final String MSG_COUNTDOWN = 
 			SendAnonWarning.class.getName() + "_countdown";	
 		private static final String MSG_RELOAD = 
@@ -435,6 +452,7 @@ final public class DirectProxy implements Runnable, AnonService
 		{
 			long countDown;
 			String[] addedMessage;
+			String blockedMessage;
 			try
 			{
 				// read something so that the browser realises everything is OK
@@ -474,19 +492,28 @@ final public class DirectProxy implements Runnable, AnonService
 				{
 					countDown = m_requestRight.getCountDown();
 					
+					if (m_requestRight.getURI().equals(GENERAL_RULE))
+					{
+						blockedMessage = JAPMessages.getString(MSG_BLOCKED_ALL);
+					}
+					else
+					{
+						blockedMessage = JAPMessages.getString(MSG_BLOCKED_DOMAIN, m_requestRight.getURI());
+					}
+					
 					if (countDown == Long.MAX_VALUE)
 					{
-						addedMessage = new String[]{m_requestRight.getURI(), 
+						addedMessage = new String[]{blockedMessage, 
 								JAPMessages.getString(MSG_BLOCKED_PERMANENTLY)};
 					}
 					else if (countDown / 1000 == 0)
 					{
-						addedMessage = new String[]{m_requestRight.getURI(), 
+						addedMessage = new String[]{blockedMessage, 
 								JAPMessages.getString(MSG_RELOAD)};
 					}
 					else 
 					{
-						addedMessage = new String[]{m_requestRight.getURI(), 
+						addedMessage = new String[]{blockedMessage, 
 								JAPMessages.getString(MSG_COUNTDOWN, 
 										new String[]{"" + (countDown / 1000),
 											JAPMessages.getString(MSG_RELOAD)})};
@@ -513,6 +540,7 @@ final public class DirectProxy implements Runnable, AnonService
 		public static final boolean SET_UNLIMITED = false;
 	
 		private static final long TEMPORARY_REMEMBER_TIME = 60000l;
+		private static final long TEMPORARY_REMEMBER_TIME_NO_WARNING = 300000l;
 		
 		private long m_timeRemembered;
 		private boolean m_bWarn;
@@ -523,7 +551,14 @@ final public class DirectProxy implements Runnable, AnonService
 			m_URI = a_URI;
 			if (a_bTimeout)
 			{
-				m_timeRemembered = System.currentTimeMillis() + TEMPORARY_REMEMBER_TIME;
+				if (a_bWarn)
+				{
+					m_timeRemembered = System.currentTimeMillis() + TEMPORARY_REMEMBER_TIME;
+				}
+				else
+				{
+					m_timeRemembered = System.currentTimeMillis() + TEMPORARY_REMEMBER_TIME_NO_WARNING;
+				}
 			}
 			else
 			{

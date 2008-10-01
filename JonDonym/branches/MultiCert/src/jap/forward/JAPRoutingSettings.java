@@ -27,6 +27,7 @@
  */
 package jap.forward;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Enumeration;
 import java.util.Observable;
@@ -34,21 +35,33 @@ import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.ProxyInterface;
 import anon.shared.ProxyConnection;
+import anon.transport.address.AddressMappingException;
+import anon.transport.address.Endpoint;
+import anon.transport.address.IAddress;
+import anon.transport.address.MalformedURNException;
+import anon.transport.address.SkypeAddress;
+import anon.transport.address.TcpIpAddress;
+import anon.transport.connection.ConnectionException;
+import anon.transport.connection.IStreamConnection;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
 import forward.ForwardUtils;
+import forward.LocalAddress;
+import forward.LocalForwarder;
 import forward.client.ClientForwardException;
 import forward.client.DefaultClientProtocolHandler;
 import forward.client.ForwardConnectionDescriptor;
 import forward.server.ForwardSchedulerStatistics;
 import forward.server.ForwardServerManager;
 import forward.server.ServerSocketPropagandist;
+import forward.server.SkypeServerManager;
 import jap.JAPConstants;
 import jap.JAPController;
 import jap.JAPModel;
@@ -65,6 +78,72 @@ import anon.proxy.AnonProxy;
 final public class JAPRoutingSettings extends Observable implements IXMLEncodable
 {
 
+	/**
+	 * This Class holds all supported Ways to establish 
+	 * an forwarding Connection.
+	 * <p>
+	 * It's also acts as an registry, for mapping the different
+	 * transport Modes to the corresponding Transportidentifier.   
+	 */
+	public static final class TransportMode {
+		
+		/** Constant for Transport over Skype */
+		public final static TransportMode SKYPE = new TransportMode(SkypeAddress.TRANSPORT_IDENTIFIER);
+		
+		/** Constant for direkt Transport over TCP/IP */
+		public final static TransportMode TCPIP = new TransportMode(TcpIpAddress.TRANSPORT_IDENTIFIER);
+		
+		/** 
+		 * Constant for Forwarding to ourself.
+		 * Client and Server is the same JAP Instance
+		 */
+		public final static TransportMode LOCAL = new TransportMode(LocalAddress.TRANSPORT_IDENTIFIER);
+		
+		/** Constant for an Unknown Transportmode. (Fallback) */
+		public final static TransportMode UNKNOWN = new TransportMode("");
+		
+		/** 
+		 * The Identifier for an Transportmode.
+		 * <p>
+		 * This String is always intern.
+		 * @see String#intern()
+		 */ 
+		private String m_identifier;
+		
+		/** New TransportMode for given identifier */
+		private TransportMode(String a_identifier) {
+			m_identifier = a_identifier.intern();
+		}
+		
+		/**
+		 * Gets the Identifier of an TransportMode.
+		 * @return The Identifer as an intern String.
+		 * 
+		 * @see String#intern()
+		 */
+		public String getIdentifier(){
+			return m_identifier;
+		}
+		
+		/**
+		 * Trys to map an given Identifier to an TransportMode.
+		 * 
+		 * @return The corresponding TransportMode to an Identifier or {@link #UNKNOWN}
+		 * if none could be found.
+		 */
+		public static TransportMode getByIdentifier(String a_identifier){
+			a_identifier = a_identifier.intern();
+			if (a_identifier == SKYPE.getIdentifier()) return SKYPE;
+			if (a_identifier == TCPIP.getIdentifier()) return TCPIP;
+			if (a_identifier == LOCAL.getIdentifier()) return LOCAL;
+			return UNKNOWN;
+		}
+	}
+	
+	
+	
+	
+	
 	/**
 	 * In this mode routing is disabled.
 	 */
@@ -113,6 +192,11 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 	 * at one infoservice.
 	 */
 	public static final int REGISTRATION_SUCCESS = 0;
+	
+	/**
+	 * The default Application Name to use, when working in Server Mode over Skype.
+	 */
+	public static final String DEFAULT_APP_NAME = "jap";
 
 	/**
 	 * This stores the current routing mode. See the constants in this class.
@@ -143,17 +227,20 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 	/**
 	 * Stores the forwarded client connection.
 	 */
-	private ProxyConnection m_forwardedConnection;
+	private IStreamConnection m_forwardedConnection;
 
+	
 	/**
 	 * Stores the hostname/IP of the current forwarder.
 	 */
-	private String m_forwarderHost;
+	//private String m_forwarderHost;
 
+	
 	/**
 	 * Stores the port of the current forwarder.
 	 */
-	private int m_forwarderPort;
+	//private int m_forwarderPort;
+	
 
 	/**
 	 * Stores, whether connections to the infoservice needs also forwarding. Also the instance
@@ -236,6 +323,39 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 	 */
 	private JAPRoutingRegistrationStatusObserver m_registrationStatusObserver;
 
+	
+	/**
+	 * Stores the Address of the forwarding Server.
+	 * This Address define the Transport Mode to use and all the necessary Informations
+	 * to determinate the unique Endpoint based on this Medium of Transport.
+	 */
+	private IAddress m_forwadingAddress;
+
+	/**
+	 * When acting as Server over Skype, this Field defines the Application Name
+	 * where we listen for incoming Requests.
+	 */
+	private String m_appName;
+	
+	/**
+	 * This Field determines the Transport to use by selecting one of the Constants
+	 * of {@link #SUPORTED_TRANSPORTMODES}.
+	 * 
+	 * When acting as Server, this Field defines the Medium of Transport where we want
+	 * to listen for incoming Request.
+	 * When  acting as Client, it has no use at the moment, as the InfoService only 
+	 * propagate TCP/IP Forwarding Server and directly provided Addresses already
+	 * determinate the Transport Mode. 
+	 */
+	private TransportMode m_transportMode;
+	
+	/**
+	 * Stores the Address of an forwarding Server, directly provided by the User.
+	 */
+	private IAddress m_userForwarder;
+
+	
+	private final static String DEFAULT_SKYPE_ADDRESS_URN="urn:endpoint:skype:user(japforwarder):application("+DEFAULT_APP_NAME+")";
 	/**
 	 * This creates a new instance of JAPRoutingSettings. We are doing some initialization here.
 	 */
@@ -245,6 +365,7 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 		/* random value for the forwarding server port between 1025 and 65535 */
 		m_serverPort = ( (int) (Math.round(Math.abs(Math.random() *
 			( (double) 65535 - (double) 1025 + (double) 1))))) + 1025;
+		m_appName = DEFAULT_APP_NAME;
 		/* set default values for bandwidth, ... */
 		m_connectionClassSelector = new JAPRoutingConnectionClassSelector();
 		JAPRoutingConnectionClass currentConnectionClass = m_connectionClassSelector.
@@ -254,8 +375,9 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 		m_forwardedConnection = null;
 		m_forwardInfoService = false;
 		m_connectViaForwarder = false;
-		m_forwarderHost = null;
-		m_forwarderPort = -1;
+		//m_forwarderHost = null;
+		//m_forwarderPort = -1;
+		m_forwadingAddress = null;
 		m_waitForShutdownCall = false;
 		m_protocolHandler = null;
 		m_maxDummyTrafficInterval = -1;
@@ -263,6 +385,9 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 		m_startPropagandaThread = null;
 		m_propagandaStarted = false;
 		m_currentServerManagerId = null;
+//		m_transportMode = TransportMode.SKYPE;
+		m_transportMode = TransportMode.TCPIP;
+		//m_userForwarder = new SkypeAddress("japforwarder",DEFAULT_APP_NAME);
 		m_registrationInfoServicesStore = new JAPRoutingRegistrationInfoServices();
 		/* add the registration infoservices store to the observers of JAPRoutingSettings */
 		addObserver(m_registrationInfoServicesStore);
@@ -322,8 +447,18 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 						JAPController.getInstance().applyProxySettingsToInfoService(JAPModel.getInstance().isProxyAuthenticationUsed());
 					}
 					JAPController.getInstance().setAnonMode(false);
+					
+					// if we used localForwarder also remove the server 
+					// local is not an official supported Transport Mode and only used for testing
+					if (m_forwadingAddress.getTransportIdentifier().equals("local"))
+						LocalForwarder.unregisterLocalForwarder();
+					
 					/* client was running, close the connection */
-					m_forwardedConnection.close();
+					try {
+						m_forwardedConnection.close();
+					} catch (IOException e) {
+						// to nothing, maybe a warning
+					}
 					m_forwardedConnection = null;
 					m_protocolHandler = null;
 				}
@@ -345,9 +480,22 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 						LogHolder.log(LogLevel.ERR, LogType.NET,
 									  "Could not start forwarding server on port 443! Trying port " +
 							getServerPort() + "...");*/
-						m_currentServerManagerId = ForwardServerManager.getInstance().addListenSocket(
-							getServerPort());
-					//}
+					
+					// should never happen
+					
+					
+					// Multiple Transport Modes
+					if(m_transportMode!=null){
+					if(m_transportMode.equals(TransportMode.TCPIP))
+								{
+						m_currentServerManagerId = ForwardServerManager.getInstance().addListenSocket(getServerPort());
+								}
+					else if(m_transportMode.equals(TransportMode.SKYPE)){
+						m_currentServerManagerId = ForwardServerManager.getInstance().addServerManager(
+								new SkypeServerManager(getApplicationName()));}
+					}
+					
+
 					if (m_currentServerManagerId == null)
 					{
 						/* error while binding the socket -> shutdown the server */
@@ -362,6 +510,7 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 				}
 				if (a_routingMode == ROUTING_MODE_CLIENT)
 				{
+					LogHolder.log(LogLevel.DEBUG, LogType.NET,"JAPRountingSettings:setRoutingMode() start the client");
 					/* close an existing anon connection, if there is one */
 					if (JAPController.getInstance().getAnonMode() == true)
 					{
@@ -377,9 +526,15 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 						/* the shutdown from the existing connection is done */
 						m_waitForShutdownCall = false;
 					}
+					// if we use local Forwarder, we first need to start the server 
+					// local is not an official supported Transport Mode and only used for testing
+					if (m_forwadingAddress.getTransportIdentifier().equals("local"))
+						LocalForwarder.registerLocalForwarder(getBandwidth());
+					
 					/* try to connect to a forwarder */
-					m_forwardedConnection = ForwardUtils.getInstance().createProxyConnection(m_forwarderHost,
-						m_forwarderPort);
+					LogHolder.log(LogLevel.DEBUG, LogType.NET,"JAPRountingSettings:setRoutingMode() tryto connect to forwarder");
+
+					m_forwardedConnection = ForwardUtils.getInstance().createForwardingConnection(m_forwadingAddress);
 					if (m_forwardedConnection != null)
 					{
 						/* update the infoservice proxy settings, if it needs forwarding too */
@@ -423,6 +578,48 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 	public int getServerPort()
 	{
 		return m_serverPort;
+	}
+	
+	/**
+	 * Returns the currently configured Application Name for a forwarding
+	 * Server listing over Skype.
+	 */
+	public String getApplicationName(){
+		return m_appName;
+	}
+	
+	/**
+	 * Sets the Application Name to use when listening for request over Skype.
+	 * <p>
+	 * The Method takes care of the currently running Server and tries to change it,
+	 * when we already using Skype.
+	 * 
+	 * @param a_value The new Application Name to use
+	 * @return true if the changing was successful. Otherwise false.
+	 */
+	public boolean setApplicationName(String a_value){
+		synchronized (this) {
+			
+			// is there a change
+			if (m_appName.equals(a_value)) return true;
+			
+			// are we currently server and are we using Skype
+			if ((m_routingMode != ROUTING_MODE_SERVER) ||
+						(m_transportMode != TransportMode.SKYPE)){
+					m_appName = a_value;
+					return true;
+			}
+			
+			// OK now comes the hard part
+			Object newServerID = ForwardServerManager.getInstance().addServerManager(new SkypeServerManager(a_value));
+			
+			// Setting the new appName was not successful.
+			if (newServerID == null) return false;
+			ForwardServerManager.getInstance().removeServerManager(m_currentServerManagerId);
+			m_currentServerManagerId = newServerID;
+			m_appName = a_value;
+			return true;
+		}
 	}
 
 	/**
@@ -588,37 +785,157 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 	 */
 	public void setForwarder(String a_forwarderHost, int a_forwarderPort)
 	{
+		setForwarderAddress(new TcpIpAddress(a_forwarderHost,a_forwarderPort));
+	}
+	
+
+	/**
+	 * Changes the forwarder for the client routing mode. If the routing mode is changed to the
+	 * client routing mode, we use this settings to connect to the forwarder. This settings can
+	 * only be changed, if the routing mode is not ROUTING_MODE_CLIENT, so this is only possible
+	 * when there is no connection to a forwarder.
+	 *
+	 *@param a_address The Address of the Forwarder
+	 */
+	public void setForwarderAddress(IAddress a_address){
 		synchronized (this)
 		{
 			if (m_routingMode != ROUTING_MODE_CLIENT)
 			{
-				m_forwarderHost = a_forwarderHost;
-				m_forwarderPort = a_forwarderPort;
+				m_forwadingAddress = a_address;
 			}
 		}
+		
 	}
 
 	/**
-	 * Returns a ListenerInterface with the information about the current forwarder. If there is no
+	 * Returns the Address of the current forwarder. If there is no
 	 * forwarder set (or an invalid one), null is returned.
 	 *
-	 * @return A ListenerInterface with the information about the current forwarder or null.
+	 * @return The Address of the current Forwarder.
 	 */
-	public ListenerInterface getForwarder()
+	public IAddress getForwarderAddress()
 	{
-		ListenerInterface forwarder = null;
 		synchronized (this)
 		{
 			try
 			{
-				forwarder = new ListenerInterface(m_forwarderHost, m_forwarderPort);
+				return m_forwadingAddress;
 			}
 			catch (Exception e)
 			{
 				/* forwarder not set */
 			}
 		}
-		return forwarder;
+		return null;
+		
+	}
+	
+	/**
+	 * Get the currently Address of an forwarding Server, as provided by the User
+	 * 
+	 * @return The Address to an forwarding Server or null when no one was declared.
+	 */
+	public IAddress getUserProvidetForwarder(){
+		return m_userForwarder;
+	}
+	
+	/**
+	 * Sets the Address of an forwarding Server to prefer when using Client Routing Mode.
+	 * 
+	 * @param a_uri The URI of the Forwarding Server or null when no spezial Forwader
+	 * should be used
+
+	 */
+	public void setUserProvidetForwarder(String a_uri) throws ConnectionException{
+		if (a_uri == null) {
+			m_userForwarder = null;
+			return;
+		}
+		Endpoint endpoint = new Endpoint(a_uri);		
+		// should never happen, but we are careful
+		if (endpoint == null) throw new MalformedURNException("Unable to parse URN");
+		IAddress result = null;	
+		
+		TransportMode requestedMode = TransportMode.getByIdentifier(endpoint.getTransportIdentifier());
+		
+		if (requestedMode == TransportMode.UNKNOWN)
+			throw new AddressMappingException("Transportmode is not Supported");
+		if (requestedMode == TransportMode.SKYPE)
+			result =  new SkypeAddress(endpoint);
+		else if (requestedMode == TransportMode.TCPIP)
+			result =  new TcpIpAddress(endpoint);
+		/*
+		// local forwarding is not official supported 
+		if (identifier.equals("local"))
+			result = new LocalAddress();
+		*/
+		m_userForwarder = result;
+	}
+	
+	/**
+	 * Returns the currently used Transport Mode i.e. the
+	 * Medium to use for transporting the Data. 
+	 */
+	public TransportMode getTransportMode(){
+		return m_transportMode;
+	}
+	
+	/**
+	 * Sets the Transport Mode i.e the Medium to use for transporting Data.
+	 * <p>
+	 * The Method will take care of the currently Routing Mode while updating the value.
+	 * This means that when acting as Server, we will try to add a new Listener for the selected
+	 * Transport Mode and when successful, remove the old one.
+	 * <p>
+	 * When in Client Mode, there no changes, as the Transport mode is determinate by the Address.
+	 * 
+	 * @return True when changing the Transport Mode was successful. Otherwise false.
+	 */
+	public boolean setTransportMode(TransportMode a_value){
+		synchronized (this) {
+			// we do not allow UNKNOWN
+			if (a_value == TransportMode.UNKNOWN) return false;
+			// are there changes
+			if (a_value == m_transportMode) return true;
+			if (m_routingMode == ROUTING_MODE_DISABLED || m_routingMode == ROUTING_MODE_CLIENT){
+				// as we ignore this setting in client mode, it's easy
+				m_transportMode = a_value;
+				///@todo make skype address configurable
+				if(m_transportMode.equals(TransportMode.SKYPE))
+					{
+						try
+							{
+								setUserProvidetForwarder(DEFAULT_SKYPE_ADDRESS_URN);
+							}
+						catch (ConnectionException e)
+							{
+							}
+					}
+				return true;
+			}
+			if (m_routingMode == ROUTING_MODE_SERVER){
+				// try to start the new server
+				Object newServerID = null;
+				
+				if (a_value == TransportMode.TCPIP)
+					newServerID = ForwardServerManager.getInstance().addListenSocket(m_serverPort);
+				
+				else if (a_value == TransportMode.SKYPE)
+					newServerID = ForwardServerManager.getInstance().addServerManager(
+							new SkypeServerManager(m_appName));				
+				
+				if (newServerID == null) return false;
+				// remove the old one
+				ForwardServerManager.getInstance().removeServerManager(m_currentServerManagerId);
+				// save changes
+				m_currentServerManagerId = newServerID;
+				m_transportMode = a_value;
+				return true;
+			}
+			// unknown routing mode
+			return false;
+		}
 	}
 
 	/**
@@ -1179,6 +1496,7 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 		japForwardingSettingsNode.appendChild(forwardingServerNode);
 
 		Element forwardingClientNode = a_doc.createElement("ForwardingClient");
+		XMLUtil.setAttribute(forwardingClientNode, "type",getTransportMode().getIdentifier());
 		Element connectViaForwarderNode = a_doc.createElement("ConnectViaForwarder");
 		Element forwardInfoServiceNode = a_doc.createElement("ForwardInfoService");
 		XMLUtil.setValue(connectViaForwarderNode, isConnectViaForwarder());
@@ -1347,6 +1665,8 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 			else
 			{
 				/* read the connect-via-forwarder client setting */
+				String type=XMLUtil.parseAttribute(forwardingClientNode, "type", getTransportMode().getIdentifier());
+				setTransportMode(TransportMode.getByIdentifier(type));
 				setConnectViaForwarder(XMLUtil.parseValue(connectViaForwarderNode, false));
 			}
 			/* get the option, whether the InfoService can reached directly or not */

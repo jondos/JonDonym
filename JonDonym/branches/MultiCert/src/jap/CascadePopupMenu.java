@@ -49,6 +49,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.NewCascadeIDEntry;
 import gui.GUIUtils;
 import gui.PopupMenu;
+import gui.JAPMessages;
 
 /**
  *
@@ -56,10 +57,13 @@ import gui.PopupMenu;
  */
 public class CascadePopupMenu extends PopupMenu
 {
+	private static final String MSG_EDIT_FILTER = JAPConfAnon.class.getName() + "_editFilter";
+	
 	private static final int MAX_CASCADE_NAME_LENGTH = 30;
 	private final Color m_newCascadeColor = new Color(255, 255, 170);
 
 	private Hashtable m_menuItems;
+	private JMenuItem m_editFilter;
 	private ActionListener m_cascadeItemListener;
 	private TrustModel m_trustModel;
 	private int m_headerHeight = 0;
@@ -122,8 +126,7 @@ public class CascadePopupMenu extends PopupMenu
 
 			removeAll();
 			m_menuItems.clear();
-
-
+			
 			JPanel panel = new JPanel(new GridBagLayout());
 			GridBagConstraints constraints = new GridBagConstraints();
 			constraints.gridx = 0;
@@ -131,11 +134,21 @@ public class CascadePopupMenu extends PopupMenu
 			constraints.anchor = GridBagConstraints.CENTER;
 			panel.add(new JLabel(m_trustModel.getName()), constraints);
 			add(panel);
+			
 			JSeparator separator = new JSeparator();
 			addSeparator(separator);
 			m_headerHeight = panel.getPreferredSize().height + separator.getPreferredSize().height;
 			//m_headerHeight = m_popup.getPreferredSize().height;
 
+			if(a_trustModel == TrustModel.getCustomFilter())
+			{
+				m_editFilter = new JMenuItem(JAPMessages.getString(MSG_EDIT_FILTER));
+				m_editFilter.addActionListener(m_cascadeItemListener);
+				m_editFilter.setIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_CASCADE_MANUELL, true));
+				add(m_editFilter);
+				addSeparator(new JSeparator());
+			}			
+			
 			while (cascades.hasMoreElements())
 			{
 				cascade = (MixCascade) cascades.nextElement();
@@ -171,7 +184,8 @@ public class CascadePopupMenu extends PopupMenu
 				{
 					menuItem.setFont(new Font(menuItem.getFont().getName(), Font.BOLD,
 											  menuItem.getFont().getSize()));
-					insert(menuItem, 2);
+					//insert(menuItem, 3);
+					add(menuItem);
 				}
 				else
 				{
@@ -218,12 +232,20 @@ public class CascadePopupMenu extends PopupMenu
 	{
 		public void actionPerformed(ActionEvent a_event)
 		{
-			MixCascade cascade = (MixCascade)m_menuItems.get(a_event.getSource());
-			if (cascade != null)
+			if(a_event.getSource() == m_editFilter)
 			{
-				TrustModel.setCurrentTrustModel(m_trustModel);
-				JAPController.getInstance().setCurrentMixCascade(cascade);
+				JAPController.getInstance().getView().showConfigDialog(JAPConf.ANON_TAB, Boolean.TRUE);
 				setVisible(false);
+			}
+			else
+			{
+				MixCascade cascade = (MixCascade)m_menuItems.get(a_event.getSource());
+				if (cascade != null)
+				{
+					TrustModel.setCurrentTrustModel(m_trustModel);
+					JAPController.getInstance().setCurrentMixCascade(cascade);
+					setVisible(false);
+				}
 			}
 		}
 	}

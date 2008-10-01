@@ -46,6 +46,8 @@ import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Calendar;
+import java.util.Observer;
+import java.util.Observable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,6 +59,7 @@ import anon.ErrorCodes;
 import anon.client.AnonClient;
 import anon.client.DummyTrafficControlChannel;
 import anon.crypto.SignatureVerifier;
+import anon.infoservice.DatabaseMessage;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.PerformanceEntry;
@@ -88,10 +91,11 @@ import logging.LogType;
  *
  * @author Christian Banse
  */
-public class PerformanceMeter implements Runnable 
+public class PerformanceMeter implements Runnable, Observer
 {	
 	private Object SYNC_METER = new Object();
 	private Object SYNC_SOCKET = new Object();
+	private Object SYNC_TEST = new Object();
 	
 	private String m_proxyHost;
 	private int m_proxyPort;
@@ -163,7 +167,7 @@ public class PerformanceMeter implements Runnable
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
 		
 		readOldPerformanceData(m_currentWeek);
-		if(m_cal.get(Calendar.DAY_OF_WEEK) != 6)
+		if(m_cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY)
 		{
 			readOldPerformanceData(m_currentWeek - 1);
 		}
@@ -178,6 +182,8 @@ public class PerformanceMeter implements Runnable
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
 		}
+		
+		Database.getInstance(MixCascade.class).addObserver(this);
 	}
 	
 	private void readOldPerformanceData(int week) 
@@ -208,19 +214,29 @@ public class PerformanceMeter implements Runnable
 				{
 					long timestamp = Long.parseLong(line.substring(0, firstTab));
 					String id = line.substring(firstTab + 1, secondTab);
-					long delay = Long.parseLong(line.substring(secondTab + 1, thirdTab));
+					long lDelay = Integer.parseInt(line.substring(secondTab + 1, thirdTab));
+					int delay = Integer.MAX_VALUE;
+					if (lDelay < Integer.MAX_VALUE)
+					{
+						delay = (int)lDelay;
+					}
 					
 					// old format without users
-					long speed = 0;
-					long users = -1;
+					long lSpeed;
+					int speed = Integer.MAX_VALUE;
+					int users = -1;
 					if(fourthTab == -1)
 					{
-						speed = Long.parseLong(line.substring(thirdTab + 1));
+						lSpeed = Integer.parseInt(line.substring(thirdTab + 1));
 					}
 					else
 					{
-						speed = Long.parseLong(line.substring(thirdTab + 1, fourthTab));
-						users = Long.parseLong(line.substring(fourthTab +1));
+						lSpeed = Integer.parseInt(line.substring(thirdTab + 1, fourthTab));
+						users = Integer.parseInt(line.substring(fourthTab +1));
+					}
+					if (lSpeed < Integer.MAX_VALUE)
+					{
+						speed = (int)lSpeed;
 					}
 						
 					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(id);
@@ -252,11 +268,11 @@ public class PerformanceMeter implements Runnable
 	
 	public void run() 
 	{
-		Thread performTestThread;
 		try
 		{
 			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
 			m_proxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
+			m_proxy.setJonDoFoxHeaderEnabled(false);
 		} 
 		catch (UnknownHostException e1) 
 		{
@@ -283,100 +299,28 @@ public class PerformanceMeter implements Runnable
 			m_lastUpdateRuntime = 0;
 			m_nextUpdate = updateBegin + m_majorInterval;
 			
-			Vector knownMixCascades = Database.getInstance(MixCascade.class).getEntryList();		
+			Vector knownMixCascades;
+			synchronized(SYNC_TEST)
+			{
+				knownMixCascades = Database.getInstance(MixCascade.class).getEntryList();		
+			}
 			
 			m_lastTotalUpdates = 0;
 			while(knownMixCascades.size() > 0) 
 			{
-				LogHolder.log(LogLevel.WARNING, LogType.THREAD, "Cascades left to test: " + knownMixCascades.size());
-				intRandom = Math.abs(random.nextInt()) % knownMixCascades.size();
-				final MixCascade cascade = (MixCascade) knownMixCascades.elementAt(intRandom);		
-				knownMixCascades.removeElementAt(intRandom);
+				synchronized(SYNC_TEST)
+				{
+					LogHolder.log(LogLevel.WARNING, LogType.THREAD, "Cascades left to test: " + knownMixCascades.size());
+					intRandom = Math.abs(random.nextInt()) % knownMixCascades.size();
+					final MixCascade cascade = (MixCascade) knownMixCascades.elementAt(intRandom);		
+					knownMixCascades.removeElementAt(intRandom);
 				
-				loadAccountFiles();
-				m_accUpdater.update();
-				performTestThread = new Thread(new Runnable()
-				{
-					public void run()
+					startTest(cascade);
+				
+					if (m_lastTotalUpdates > 0)
 					{
-						try
-						{					
-							if (performTest(cascade))
-							{
-								m_lastTotalUpdates++;
-							}
-						}
-						catch (InterruptedException a_e)
-						{
-						}
+						m_lastUpdateRuntime = System.currentTimeMillis() - updateBegin;
 					}
-				});	
-				performTestThread.start();
-				try
-				{
-					performTestThread.join(m_maxWaitForTest);						
-				}
-				catch (InterruptedException e)
-				{
-					// test is finished
-				}
-									
-				// interrupt the test if it is not finished yet
-				if (m_proxy.isConnected())
-				{
-					m_proxy.stop();
-				}
-				try
-				{
-					performTestThread.join(500);						
-				}
-				catch (InterruptedException e)
-				{
-					// test is finished
-				}					
-				int iWait = 0;
-				while (performTestThread.isAlive())
-				{	
-					iWait++;
-					performTestThread.interrupt();
-					
-					if (iWait > 5)
-					{	
-						closeMeterSocket();
-						if (iWait > 20)
-						{
-							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
-								"Using deprecated stop method to finish meter thread!");
-							performTestThread.stop();
-						}
-						else if (iWait > 5)
-						{
-							LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
-								"Problems finishing meter thread!");
-						}
-
-						try
-						{
-							performTestThread.join(1000);
-						}
-						catch (InterruptedException e)
-						{	
-						}
-					}
-					else
-					{
-						try
-						{
-							performTestThread.join(500);
-						}
-						catch (InterruptedException e)
-						{								
-						}
-					}
-				}
-				if (m_lastTotalUpdates > 0)
-				{
-					m_lastUpdateRuntime = System.currentTimeMillis() - updateBegin;
 				}
 			}			
 			
@@ -395,6 +339,92 @@ public class PerformanceMeter implements Runnable
 		    			//break;
 		    		}	    		
 	    		}
+			}
+		}
+	}
+
+	private void startTest(final MixCascade a_cascade) 
+	{
+		Thread performTestThread;
+		loadAccountFiles();
+		m_accUpdater.update();
+		performTestThread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{					
+					if (performTest(a_cascade))
+					{
+						m_lastTotalUpdates++;
+					}
+				}
+				catch (InterruptedException a_e)
+				{
+				}
+			}
+		});	
+		performTestThread.start();
+		try
+		{
+			performTestThread.join(m_maxWaitForTest);						
+		}
+		catch (InterruptedException e)
+		{
+			// test is finished
+		}
+						
+		// interrupt the test if it is not finished yet
+		if (m_proxy.isConnected())
+		{
+			m_proxy.stop();
+		}
+		try
+		{
+			performTestThread.join(500);						
+		}
+		catch (InterruptedException e)
+		{
+			// test is finished
+		}					
+		int iWait = 0;
+		while (performTestThread.isAlive())
+		{	
+			iWait++;
+			performTestThread.interrupt();
+		
+			if (iWait > 5)
+			{	
+				closeMeterSocket();
+				if (iWait > 20)
+				{
+					LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
+						"Using deprecated stop method to finish meter thread!");
+					performTestThread.stop();
+				}
+				else if (iWait > 5)
+				{
+				LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
+					"Problems finishing meter thread!");
+				}
+
+				try
+				{
+					performTestThread.join(1000);
+				}
+				catch (InterruptedException e)
+				{	
+				}
+			}
+			else
+			{
+				try
+				{
+					performTestThread.join(500);
+				}
+				catch (InterruptedException e)
+				{								
+				}
 			}
 		}
 	}
@@ -607,12 +637,12 @@ public class PerformanceMeter implements Runnable
 		Hashtable vSpeed = new Hashtable();
 		Hashtable vUsers = new Hashtable();
 		
-		for(int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
+		for (int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
 			m_proxy.isConnected(); i++)
 		{
-    		long delay = -1;
-    		long speed = -1;
-    		long users = -1;
+    		int delay = -1;
+    		int speed = -1;
+    		int users = -1;
     		long timestamp;
     		
 			try 
@@ -718,7 +748,14 @@ public class PerformanceMeter implements Runnable
 		        long responseStartTime = System.currentTimeMillis();
 		        
 		        //	delay in ms
-        		delay = responseStartTime - transferInitiatedTime;
+		        if (responseStartTime - transferInitiatedTime > Integer.MAX_VALUE)
+		        {
+		        	delay = Integer.MAX_VALUE;
+		        }
+		        else
+		        {
+		        	delay = (int)(responseStartTime - transferInitiatedTime);
+		        }
 		        
 		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Downloading bytes for performance test...");
 		        reader.reset();
@@ -780,7 +817,15 @@ public class PerformanceMeter implements Runnable
         		}        		        		
         		
         		// speed in bit/s;
-        		speed = (bytesRead * 8) / (responseEndTime - responseStartTime);
+        		long lSpeed = (bytesRead * 8) / (responseEndTime - responseStartTime);
+        		if (lSpeed <= 0 || lSpeed > Integer.MAX_VALUE)
+        		{
+        			speed = Integer.MAX_VALUE;
+        		}
+        		else
+        		{
+        			speed = (int)lSpeed;
+        		}
         		
         		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/s.");
         		
@@ -800,9 +845,9 @@ public class PerformanceMeter implements Runnable
         	
     		timestamp = System.currentTimeMillis();
     		
-    		vDelay.put(new Long(timestamp), new Long(delay));
-    		vSpeed.put(new Long(timestamp), new Long(speed));
-    		vUsers.put(new Long(timestamp), new Long(users));
+    		vDelay.put(new Long(timestamp), new Integer(delay));
+    		vSpeed.put(new Long(timestamp), new Integer(speed));
+    		vUsers.put(new Long(timestamp), new Integer(users));
     		
     		try
     		{
@@ -825,9 +870,9 @@ public class PerformanceMeter implements Runnable
     		}
 		}
 		
-		long lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
-		long lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
-		long lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
+		int lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
+		int lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
+		int lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
 		
 		Database.getInstance(PerformanceEntry.class).update(entry);
 		
@@ -1007,6 +1052,38 @@ public class PerformanceMeter implements Runnable
 		}
 		
 		return null;
+	}
+	
+	public void update(Observable a_observable, Object a_message)
+	{
+		if(a_message != null && a_message instanceof DatabaseMessage)
+		{
+			DatabaseMessage msg = (DatabaseMessage) a_message;
+			
+			if(msg.getMessageCode() == DatabaseMessage.ENTRY_ADDED)
+			{
+				try
+				{
+					MixCascade cascade = (MixCascade) msg.getMessageData();
+					
+					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(cascade.getId());
+					
+					if(entry == null)
+					{
+						// new cascade, let's start our performance test immediately
+						LogHolder.log(LogLevel.INFO, LogType.MISC, "Found new cascade, starting performance test immediately.");
+						synchronized(SYNC_TEST)
+						{
+							startTest(cascade);
+						}
+					}
+				}
+				catch(Exception ex)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Error while starting performance test for new cascade: ", ex);
+				}
+			}
+		}
 	}
 		
 	private class HTTPResponse

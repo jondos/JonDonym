@@ -835,31 +835,28 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 
 		//TODO:change this?
 		//the cert is verified, too, if the public key is the same as the test key
-		if (getPublicKey().equals(a_publicKey))
+		/*if (getPublicKey().equals(a_publicKey))
 		{
 			return true;
-		}
+		}*/
 		
 		AlgorithmIdentifier aid1 = a_publicKey.getSignatureAlgorithm().getIdentifier();
 		AlgorithmIdentifier aid2 = this.m_bcCertificate.getSignatureAlgorithm();
-		if(!aid1.equals(aid2))
+		if(aid1.equals(aid2))
 		{
-			return false;
+			try
+			{
+				ByteArrayOutputStream bArrOStream = new ByteArrayOutputStream();
+				(new DEROutputStream(bArrOStream)).writeObject(m_bcCertificate.getTBSCertificate());
+	
+				return ByteSignature.verify(bArrOStream.toByteArray(),
+											m_bcCertificate.getSignature().getBytes(), a_publicKey);
+			}
+			catch (IOException a_e)
+			{
+				// should not happen
+			}
 		}
-		
-		try
-		{
-			ByteArrayOutputStream bArrOStream = new ByteArrayOutputStream();
-			(new DEROutputStream(bArrOStream)).writeObject(m_bcCertificate.getTBSCertificate());
-
-			return ByteSignature.verify(bArrOStream.toByteArray(),
-										m_bcCertificate.getSignature().getBytes(), a_publicKey);
-		}
-		catch (IOException a_e)
-		{
-			// should not happen
-		}
-
 		return false;
 	}
 

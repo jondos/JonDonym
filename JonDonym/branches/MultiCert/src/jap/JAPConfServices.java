@@ -303,12 +303,17 @@ public class JAPConfServices extends AbstractJAPConfModule
 		return m_anonGeneralModule;
 	}
 
-	public synchronized void selectAnonTab(MixCascade a_cascade)
+	public synchronized void selectAnonTab(MixCascade a_cascade, boolean a_bShowFilter)
 	{
 		if (JAPModel.getDefaultView() != JAPConstants.VIEW_SIMPLIFIED)
 		{
 			m_tabsAnon.setSelectedIndex(0);
 		}
 		m_anonModule.setSelectedCascade(a_cascade);
+		
+		if(a_bShowFilter)
+		{
+			m_anonModule.showFilter();
+		}
 	}
 }

@@ -26,14 +26,19 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 import jap.JAPController;
+import jap.MacOSXLib;
+
 import com.apple.eawt.Application;
 import com.apple.eawt.ApplicationAdapter;
 import com.apple.eawt.ApplicationEvent;
 
-public class JAPMacintosh extends JAP {
+public class JAPMacintosh extends JAP 
+{
 
-	JAPMacintosh(String[] argv) {
+	JAPMacintosh(String[] argv) 
+	{
 		super(argv);
+
 	}
 
 	protected void registerMRJHandlers() {
@@ -83,11 +88,11 @@ public class JAPMacintosh extends JAP {
 			JAPController.aboutJAP();
 		}
 	}
-
-	public static void main(String[] argv) {
+	
+	public static void main(String[] argv)
+	{
 		JAPMacintosh japOnMac = new JAPMacintosh(argv);
 		japOnMac.registerMRJHandlers();
 		japOnMac.startJAP();
 	}
-
 }

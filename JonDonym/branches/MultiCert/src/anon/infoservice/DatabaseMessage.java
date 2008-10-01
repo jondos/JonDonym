@@ -43,7 +43,7 @@ public class DatabaseMessage extends AbstractMessage {
   public static final int ENTRY_ADDED = 1;
 
   /**
-   * This message is sent after an entry was renewed in the databse. The appended object in this
+   * This message is sent after an entry was renewed in the database. The appended object in this
    * message will be the entry after the update.
    */
   public static final int ENTRY_RENEWED = 2;
@@ -61,7 +61,7 @@ public class DatabaseMessage extends AbstractMessage {
   public static final int ALL_ENTRIES_REMOVED = 4;
 
   /**
-   * This message is sent, if an observer registrates at the database. The appended object will be
+   * This message is sent, if an observer registers at the database. The appended object will be
    * a Vector of all database entries. This will be always the first message after the
    * registration.
    */

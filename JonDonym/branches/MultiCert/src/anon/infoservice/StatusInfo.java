@@ -530,16 +530,20 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			long delayBound;
 			if (perfEntry == null)
 			{
-				delayBound = -1;
+				delayBound = 0;
 			}
 			else
 			{
 				delayBound = perfEntry.getBound(PerformanceEntry.DELAY);
 			}
 		
-			if(delayBound == Long.MAX_VALUE)
+			if (delayBound == Integer.MAX_VALUE)
 			{
-				htmlTableLine += "> " + PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2];
+				htmlTableLine += ">" + PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2];
+			}
+			else if (delayBound <= 0)
+			{
+				htmlTableLine += "?";
 			}
 			else
 			{
@@ -558,7 +562,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			long speedBound;
 			if (perfEntry == null)
 			{
-				speedBound = -1;
+				speedBound = Integer.MAX_VALUE;
 			}
 			else
 			{
@@ -568,7 +572,11 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			
 			if(speedBound == 0)
 			{
-				htmlTableLine += "< " + PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1];
+				htmlTableLine += "<" + PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1];
+			}
+			else if (speedBound < 0 || speedBound == Integer.MAX_VALUE)
+			{
+				htmlTableLine += "?";
 			}
 			else
 			{

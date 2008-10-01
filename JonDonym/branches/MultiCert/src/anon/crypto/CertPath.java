@@ -199,7 +199,9 @@ public class CertPath implements IXMLEncodable
 					if(m_pathError != NO_ERRORS)
 					{
 						m_errorPosition = pathPosition;
-						if(m_pathError == ERROR_VERIFICATION || m_pathError == ERROR_REVOCATION || m_pathError == ERROR_UNKNOWN_CRITICAL_EXTENSION)
+						if(m_pathError == ERROR_VERIFICATION 
+								|| m_pathError == ERROR_REVOCATION 
+								|| m_pathError == ERROR_UNKNOWN_CRITICAL_EXTENSION)
 						{
 							return false;
 						}
@@ -356,15 +358,15 @@ public class CertPath implements IXMLEncodable
 			//TODO usages ok like this?
 			if(a_position == 0)
 			{
-				if(!keyUsage.allowsKeyEncipherment()
-						|| 	!keyUsage.allowsNonRepudiation())
+				if(!keyUsage.allowsDigitalSignature())
 				{
 					return ERROR_KEY_USAGE;
 				}
 			}
 			else
 			{
-				if(!keyUsage.allowsKeyCertSign())
+				if(!keyUsage.allowsDigitalSignature() 
+						|| !keyUsage.allowsKeyCertSign())
 				{
 					return ERROR_KEY_USAGE;
 				}
@@ -634,17 +636,27 @@ public class CertPath implements IXMLEncodable
 		}
 		
 		m_valid = buildAndValidate(null);
+		m_verificationTime = System.currentTimeMillis();
 		System.out.println("Doing fresh verification of " + this.getFirstCertificate().getSubject().getCommonName() + "...");
 			
 		if(m_rootFound)
 		{
-			m_verificationTime = System.currentTimeMillis();
 			rootCert = SignatureVerifier.getInstance().getVerificationCertificateStore().
 				getCertificateInfoStructure(this.getLastCertificate());
-			if(rootCert.isAvailable())
+			if(rootCert != null)
 			{
-				m_verified = true;
-				return true;
+				if(rootCert.isAvailable() && m_valid)
+				{
+					m_verified = true;
+					return true;
+				}
+			} //maybe root cert was deleted?
+			else
+			{
+				this.removeLastCertificate();
+				m_rootFound = false;
+				this.resetVerification();
+				return verify();
 			}
 		}
 		m_verified = false;
@@ -739,9 +751,11 @@ public class CertPath implements IXMLEncodable
 		JAPCertificate first = null, second = null, root = null;
 		Vector subCAs = null;
 		int len;
+		boolean verified;
 		
 		synchronized (m_certificates)
 		{
+			verified = this.verify();
 			len = length();
 			first = getFirstCertificate();
 			if(len > 1)
@@ -767,7 +781,7 @@ public class CertPath implements IXMLEncodable
 		}
 		
 		info = new CertPathInfo(first, second, root, subCAs, 1);
-		info.setVerified(verify());
+		info.setVerified(verified);
 		return info;
 	}
 	
