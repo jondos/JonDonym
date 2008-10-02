@@ -143,6 +143,7 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 	{
 		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
 		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
+		XMLUtil.setAttribute(elem, XML_ATTR_PAYMENT, m_bPayment);
 		
 		Enumeration e = m_tblAddresses.keys();
 		
@@ -153,7 +154,6 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 			
 			Element el = a_doc.createElement(XML_ELEMENT_ADDRESS_NAME);
 			XMLUtil.setAttribute(el, XML_ATTR_LAST_UPDATE, timestamp.longValue());
-			XMLUtil.setAttribute(el, XML_ATTR_PAYMENT, m_bPayment);
 			XMLUtil.setValue(el, addr.getHostAddress());
 			elem.appendChild(el);
 		}
