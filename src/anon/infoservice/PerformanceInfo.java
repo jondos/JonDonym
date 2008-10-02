@@ -88,15 +88,14 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	public PerformanceInfo(Element a_info) throws XMLParseException
 	{
 		super(System.currentTimeMillis() + PERFORMANCE_INFO_TTL);
-
+		
 		if(a_info == null)
 		{
 			throw new XMLParseException("Could not parse PerformanceInfo. Invalid document element.");
 		}
 		
 		NodeList list = a_info.getElementsByTagName("PerformanceEntry");
-		
-		
+				
 		/* try to get the certificate from the Signature node */
 		try
 		{
