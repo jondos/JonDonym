@@ -1054,7 +1054,7 @@ public class PerformanceMeter implements Runnable, Observer
 		        		
 		        			if(exit == null)
 		        			{
-		        				exit = new MixCascadeExitAddresses(a_cascade.getId());
+		        				exit = new MixCascadeExitAddresses(a_cascade);
 		        			}
 		        		
 		        			if(exit.addInetAddress(addr))
