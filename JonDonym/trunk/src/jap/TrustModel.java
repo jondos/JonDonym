@@ -538,6 +538,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000));
 		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100));
+		model.setAttribute(NumberOfMixesAttribute.class, TRUST_IF_AT_LEAST, new Integer(3));
+		
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);

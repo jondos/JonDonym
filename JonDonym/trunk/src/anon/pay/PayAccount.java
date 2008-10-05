@@ -891,6 +891,13 @@ public class PayAccount implements IXMLEncodable
 	public XMLAccountInfo fetchAccountInfo(IMutableProxyInterface a_proxys, boolean a_bForce)
 		throws SecurityException, Exception
 	{
+		return fetchAccountInfo(a_proxys, a_bForce, 0);
+	}
+	
+	public XMLAccountInfo fetchAccountInfo(IMutableProxyInterface a_proxys, boolean a_bForce,
+			int a_connectionTimeout)
+		throws SecurityException, Exception
+	{
 		if (!a_bForce && !PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled())
 		{
 			return null;
@@ -912,7 +919,14 @@ public class PayAccount implements IXMLEncodable
 		try
 		{
 			biConn = new BIConnection(m_theBI);
-			biConn.connect(a_proxys);
+			if (a_connectionTimeout > 0)
+			{
+				biConn.connect(a_proxys, a_connectionTimeout);
+			}
+			else
+			{
+				biConn.connect(a_proxys);
+			}
 			biConn.authenticate(m_accountCertificate, m_privateKey);
 			info = biConn.getAccountInfo();
 			biConn.disconnect();

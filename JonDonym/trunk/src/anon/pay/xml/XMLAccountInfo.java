@@ -161,16 +161,15 @@ public class XMLAccountInfo implements IXMLEncodable //extends XMLDocument
 		XMLEasyCC cc;
 		synchronized (m_costConfirmations)
 		{
-			cc = (XMLEasyCC)m_costConfirmations.get(a_cc.getConcatenatedPriceCertHashes());
-			m_costConfirmations.put(a_cc.getConcatenatedPriceCertHashes(), a_cc);
+			cc = (XMLEasyCC)m_costConfirmations.get(a_cc.getConcatenatedPriceCertHashes());			
 			if (cc != null)
 			{
 				oldBytes = cc.getTransferredBytes();
-				if (oldBytes > a_cc.getTransferredBytes())
-				{
-					// This is an old CC! Restore the previous one...
-					//m_costConfirmations.put(cc.getConcatenatedPriceCertHashes(), cc);
-				}
+			}
+			if (a_cc.getTransferredBytes() >= oldBytes)
+			{
+				// do not add old cost confirmations
+				m_costConfirmations.put(a_cc.getConcatenatedPriceCertHashes(), a_cc);
 			}
 		}
 		return a_cc.getTransferredBytes() - oldBytes;

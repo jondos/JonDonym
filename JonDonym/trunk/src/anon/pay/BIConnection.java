@@ -78,6 +78,7 @@ public class BIConnection implements ICaptchaSender
 {
 	public static final int TIMEOUT_DEFAULT = 30000;
 	public static final int TIMEOUT_MAX = 100000;
+	public static final int TIMEOUT_MIN = 1000;
 
 	public static final String XML_ATTR_CONNECTION_TIMEOUT = "timeout";
 
@@ -114,7 +115,7 @@ public class BIConnection implements ICaptchaSender
 
 	public static void setConnectionTimeout(int a_timeout)
 	{
-		if (a_timeout >= 0)
+		if (a_timeout > TIMEOUT_MIN)
 		{
 			if (a_timeout > TIMEOUT_MAX)
 			{
@@ -127,7 +128,7 @@ public class BIConnection implements ICaptchaSender
 		}
 		else
 		{
-			ms_connectionTimeout = 0;
+			ms_connectionTimeout = TIMEOUT_MIN;
 		}
 	}
 
@@ -136,13 +137,18 @@ public class BIConnection implements ICaptchaSender
 		return ms_connectionTimeout;
 	}
 
+	public void connect(IMutableProxyInterface a_proxyInterface) throws IOException
+	{
+		connect(a_proxyInterface, ms_connectionTimeout);
+	}
+	
 	/**
 	 * Connects to the Payment Instance via TCP and inits the HttpClient.
 	 *
 	 * @throws IOException if an error occured while connection
 	 * @throws ForbiddenIOException if it is assumed that the local provider forbids the connection
 	 */
-	public void connect(IMutableProxyInterface a_proxyInterface) throws IOException
+	public void connect(IMutableProxyInterface a_proxyInterface, int a_connectionTimeout) throws IOException
 	{
 		IOException exception = new IOException("No valid proxy available");
 
@@ -171,7 +177,7 @@ public class BIConnection implements ICaptchaSender
 			try
 			{
 				//Try to connect to BI...
-				connect_internal(proxyInterfaceGetter.getProxyInterface());
+				connect_internal(proxyInterfaceGetter.getProxyInterface(), a_connectionTimeout);
 				return;
 			}
 			catch (IOException a_t)
@@ -184,7 +190,7 @@ public class BIConnection implements ICaptchaSender
 		throw exception;
 	}
 
-	private void connect_internal(ImmutableProxyInterface a_proxy) throws IOException
+	private void connect_internal(ImmutableProxyInterface a_proxy, int a_connectionTimeout) throws IOException
 	{
 		boolean bForbidden = false;
 
@@ -212,7 +218,14 @@ public class BIConnection implements ICaptchaSender
 					tls = new TinyTLS(li.getHost(), li.getPort(), a_proxy);
 				}
 				m_socket = tls;
-				tls.setSoTimeout(ms_connectionTimeout);
+				if (a_connectionTimeout < TIMEOUT_MIN || a_connectionTimeout > TIMEOUT_MAX)
+				{
+					tls.setSoTimeout(ms_connectionTimeout);
+				}
+				else
+				{
+					tls.setSoTimeout(a_connectionTimeout);
+				}
 				tls.setRootKey(m_theBI.getCertificate().getPublicKey());
 				tls.startHandshake();
 
