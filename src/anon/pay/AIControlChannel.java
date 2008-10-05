@@ -286,7 +286,7 @@ public class AIControlChannel extends XmlControlChannel
     }
   }
 
-  private void updateBalance(final PayAccount currentAccount, boolean a_bSynchronous)
+  private void updateBalance(final PayAccount currentAccount, final boolean a_bSynchronous)
   {
 	  Runnable runUpdate;
 	  if (currentAccount == null)
@@ -300,7 +300,15 @@ public class AIControlChannel extends XmlControlChannel
 		  {
 			  try
 			  {
-				  currentAccount.fetchAccountInfo(m_proxys, false);
+				  if (a_bSynchronous)
+				  {
+					  /* set a short connection timeout as this update blocks connection to a Cascade */
+					  currentAccount.fetchAccountInfo(m_proxys, false, 2000); 
+				  }
+				  else
+				  {
+					  currentAccount.fetchAccountInfo(m_proxys, false);
+				  }
 			  }
 			  catch (Exception ex)
 			  {
@@ -736,6 +744,7 @@ public class AIControlChannel extends XmlControlChannel
 
 				if (currentAccount.addCostConfirmation(a_cc) < 0)
 				{
+					confirmedbytes = 0;
 					/*
 					a_cc.setTransferredBytes(currentAccount.getAccountInfo().getCC(
 									   a_cc.getConcatenatedPriceCertHashes()).getTransferredBytes());*/

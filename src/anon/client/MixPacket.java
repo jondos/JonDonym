@@ -97,6 +97,28 @@ public class MixPacket {
     	LogHolder.log(LogLevel.WARNING, LogType.NET, Thread.currentThread().getName()+": received a truncated packet from a mix: ", eofe);
     	throw eofe;
     }
+    catch (IOException a_e)
+    {
+    	try
+		{
+			Class classSocketTimeoutException = Class.forName("java.net.SocketTimeoutException");
+			if (classSocketTimeoutException.isAssignableFrom(a_e.getClass()))
+			{
+				// make another try to evade timeout
+				sourceStream.readFully(rawPacket);
+			}
+			else
+			{
+				throw a_e;
+			}
+		}
+		catch (ClassNotFoundException e)
+		{
+			// TODO Automatisch erstellter Catch-Block
+			throw a_e;
+		}
+    	//java.net.SocketTimeoutException
+    }
     	/* do stream-decryption */
     if (a_inputStreamCipher != null) {
       a_inputStreamCipher.encryptAES(rawPacket, 0, rawPacket, 0, 16);
