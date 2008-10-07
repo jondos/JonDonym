@@ -58,6 +58,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
+import anon.infoservice.TermsAndConditionsFramework;
 import anon.infoservice.PerformanceEntry;
 import anon.pay.PayAccount;
 import anon.pay.PaymentInstanceDBEntry;
@@ -122,6 +123,13 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		public Class getDatabaseClass()
 		{
 			return MixCascadeExitAddresses.class;
+		}
+	};
+	private final HTTPResponseGetter m_tcFrameworksResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return TermsAndConditionsFramework.class;
 		}
 	};
 
@@ -1899,6 +1907,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: "Ubermittlung von Statusinformationen der Kaskade (Nutzerzahl, Verkehrssituation etc.)
 			 */
 			httpResponse = cascadePostStatus(postData);
+		}
+		else if((command.equals("/tcframeworks")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = m_tcFrameworksResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals("/status")) && (method == Constants.REQUEST_METHOD_GET))
 		{

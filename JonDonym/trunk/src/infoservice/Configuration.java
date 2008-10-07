@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -41,6 +42,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import anon.util.XMLParseException;
+
 import anon.crypto.JAPCertificate;
 import anon.crypto.PKCS12;
 import anon.crypto.X509SubjectKeyIdentifier;
@@ -49,6 +52,7 @@ import anon.crypto.SignatureVerifier;
 import anon.infoservice.Constants;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.Database;
+import anon.infoservice.TermsAndConditionsFramework;
 import infoservice.tor.TorDirectoryAgent;
 import infoservice.tor.TorDirectoryServer;
 import infoservice.tor.TorDirectoryServerUrl;
@@ -249,6 +253,7 @@ final public class Configuration
 		IS_PROP_NAME_PERFORMANCE_MONITORING + ".server";
 	public final static String IS_PROP_VALUE_PERF_SERVER = "true";
 	
+	public final static String IS_PROP_VALUE_TERMS_AND_CONDITIONS_DIR = "terms";
 	
 	public Configuration(Properties a_properties) throws Exception
 	{
@@ -1136,7 +1141,7 @@ final public class Configuration
 	{
 		return JAPCertificate.getInstance(new File(a_x509FileName));
 	}
-
+	
 	public Object[] getPerformanceMeterConfig() 
 	{
 		return m_aPerfMeterConf;
@@ -1175,6 +1180,11 @@ final public class Configuration
 	public Vector getHostList()
 	{
 		return m_hostList;
+	}
+	
+	public File getTermsAndConditionsDir()
+	{
+		return new File(IS_PROP_VALUE_TERMS_AND_CONDITIONS_DIR);
 	}
 
 }

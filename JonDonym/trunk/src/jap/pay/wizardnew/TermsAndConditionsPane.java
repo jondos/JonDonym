@@ -74,20 +74,45 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 	private JCheckBox m_accepted;
 	private JEditorPane m_termsPane;
 	private JScrollPane m_scrollingTerms;
-	private boolean m_bCheckAccept;
+	private boolean m_bShowCheckAccept;
 	//private JapHtmlPane m_termsPane;
+	private boolean m_bWizard;
 
 	public TermsAndConditionsPane(JAPDialog a_parentDialog, WorkerContentPane a_previousContentPane,
-		boolean a_bCheckAccept)
+		boolean a_bShowCheckAccept)
 	{
 		super(a_parentDialog,
 			  new Layout(JAPMessages.getString(MSG_HEADING), MESSAGE_TYPE_PLAIN),
 			  new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
-		setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG | ON_YESOK_SHOW_NEXT_CONTENT |
-								  ON_NO_SHOW_PREVIOUS_CONTENT);
 
-		m_bCheckAccept = a_bCheckAccept;
 		m_fetchTermsPane = a_previousContentPane;
+		m_bWizard = true;
+		
+		init(a_bShowCheckAccept);
+		//getButtonCancel().setVisible(false);
+	}
+	
+	public TermsAndConditionsPane(JAPDialog a_parentDialog, boolean a_bAccepted)
+	{
+		super(a_parentDialog,
+				new Layout(JAPMessages.getString(MSG_HEADING), MESSAGE_TYPE_PLAIN),
+				new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL));
+		
+		m_bWizard = false;
+		
+		init(true);
+		
+		m_accepted.setSelected(a_bAccepted);
+		/**@todo make this dynamic */
+		m_scrollingTerms.setPreferredSize(new Dimension(600, 200));
+	}
+
+	private void init(boolean a_bShowCheckAccept) 
+	{
+		setDefaultButtonOperation(ON_CLICK_DISPOSE_DIALOG | ON_YESOK_SHOW_NEXT_CONTENT |
+				  ON_NO_SHOW_PREVIOUS_CONTENT);
+		
+		m_bShowCheckAccept = a_bShowCheckAccept;
 		m_rootPanel = this.getContentPane();
 		m_c = new GridBagConstraints();
 		m_rootPanel.setLayout(new GridBagLayout());
@@ -114,11 +139,10 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		m_c.weighty = 0.0;
 		m_c.gridy++;
 		m_c.fill = GridBagConstraints.BOTH;
-		if (m_bCheckAccept)
+		if (m_bShowCheckAccept)
 		{
 			m_rootPanel.add(m_accepted, m_c);
 		}
-		//getButtonCancel().setVisible(false);
 	}
 
 	public boolean isTermsAccepted()
@@ -144,11 +168,17 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		m_termsPane.setText(termsHtml);
 		m_scrollingTerms.revalidate();
 	}
+	
+	public void setText(String a_text)
+	{
+		m_termsPane.setText(a_text);
+		m_scrollingTerms.revalidate();
+	}
 
 	public CheckError[] checkYesOK()
 	{
 		CheckError[] errors = super.checkYesOK();
-		if (m_bCheckAccept)
+		if (m_bShowCheckAccept)
 		{
 			if ( (errors == null || errors.length == 0) && !isTermsAccepted())
 			{
@@ -161,13 +191,18 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 
 	}
 
-	public void resetSelection(){
+	public void resetSelection()
+	{
 		m_accepted.setSelected(false);
 	}
 
     public CheckError[] checkUpdate()
 	{
-		showTerms();
+    	if(m_bWizard)
+    	{
+    		showTerms();
+    	}
+    	
 		resetSelection();
 		return null;
 	}
