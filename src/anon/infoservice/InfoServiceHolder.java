@@ -128,6 +128,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 
 	private static final int GET_STATUSINFO_TIMEOUT = 19;
 	private static final int GET_PERFORMANCE_INFO = 20;
+	
+	private static final int GET_TC_FRAMEWORKS = 21;
 
 	/**
 	 * This defines, whether there is an automatic change of infoservice after failure as default.
@@ -381,7 +383,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				|| functionNumber == GET_INFOSERVICE_SERIALS || functionNumber == GET_MIXCASCADE_SERIALS ||
 				functionNumber == GET_CASCADEINFO || functionNumber == GET_LATEST_JAVA_SERIALS ||
 				functionNumber == GET_LATEST_JAVA || functionNumber == GET_MESSAGES ||
-				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES || functionNumber == GET_PERFORMANCE_INFO)
+				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES || functionNumber == GET_PERFORMANCE_INFO || functionNumber == GET_TC_FRAMEWORKS)
 			{
 				result = new Hashtable();
 				//if (functionNumber == GET_CASCADEINFO)
@@ -459,6 +461,10 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_LATEST_JAVA_SERIALS)
 					{
 						tempHashtable = currentInfoService.getLatestJavaSerials();
+					}
+					else if (functionNumber == GET_TC_FRAMEWORKS)
+					{
+						tempHashtable = currentInfoService.getTCFrameworks();
 					}
 					else if (functionNumber == GET_PERFORMANCE_INFO)
 					{
@@ -706,6 +712,15 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	{
 		return (Hashtable) (fetchInformation(GET_MIXCASCADE_SERIALS, null));
 	}
+	
+	/**
+	 * from preferred info service
+	 * @return
+	 */
+	public Hashtable getTCFrameworks()
+	{
+		return (Hashtable) (fetchInformation(GET_TC_FRAMEWORKS, null));
+	}
 
 	/*
 	 * Retrieves the PerformanceInfo object of ALL inforservices!
@@ -714,6 +729,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	{
 		return (Hashtable) (fetchInformation(GET_PERFORMANCE_INFO, null));
 	}
+	
 
 	/**
 	 * Get a Vector of all payment instances the preferred infoservice knows. If we can't get a the

@@ -44,6 +44,7 @@ import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
 import anon.infoservice.ListenerInterface;
+import anon.infoservice.TermsAndConditionsFramework;
 import anon.util.ThreadPool;
 import anon.util.TimedOutputStream;
 import logging.LogHolder;
@@ -146,7 +147,30 @@ public class InfoService implements Observer
 			model.allowUpdateViaDirectConnection(true);
 			model.setAnonConnectionChecker(JAPController.getInstance().new AnonConnectionChecker());
 			model.setAutoReConnect(true);
-			model.setCascadeAutoSwitch(false);										
+			model.setCascadeAutoSwitch(false);
+			
+			Thread tacLoader = new Thread()
+			{
+				public void run()
+				{
+					while(true)
+					{
+						TermsAndConditionsFramework.loadFromDirectory(
+							Configuration.getInstance().getTermsAndConditionsDir());
+						
+						try
+						{
+							Thread.sleep(TermsAndConditionsFramework.TERMS_AND_CONDITIONS_UPDATE_INTERVAL);	
+						}
+						catch(InterruptedException ex)
+						{
+							break;
+						}
+					}
+				}
+			};
+			
+			tacLoader.start();
 		}
 		catch (Exception e)
 		{
