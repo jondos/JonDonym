@@ -11,6 +11,7 @@ import logging.LogType;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
@@ -23,6 +24,7 @@ import anon.util.XMLUtil;
 public class TermsAndConditionsOperatorData extends AbstractDistributableCertifiedDatabaseEntry 
 {
 	private Element m_xmlData;
+	private Document m_doc;
 	
 	public static int TERMS_AND_CONDITIONS_TTL = 1000*60*60*24;
 	
@@ -44,9 +46,30 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 
 	private CertPath m_certPath = null;
 	
-	public TermsAndConditionsOperatorData()
+	public TermsAndConditionsOperatorData(Document a_doc)
 	{
-		super(0);
+		super(System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
+		
+		m_doc = a_doc;
+		m_xmlData = a_doc.getDocumentElement();
+		
+		m_serial = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_SERIAL, -1);
+		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
+		m_strId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_ID, "");
+		
+		m_lastUpdate = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, -1L);
+		
+		// verify the signature
+		m_signature = SignatureVerifier.getInstance().getVerifiedXml(m_xmlData,
+			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+		if (m_signature != null)
+		{
+			m_certPath = m_signature.getCertPath();
+			if (m_certPath != null)
+			{
+				m_certificate = m_certPath.getFirstCertificate();
+			}
+		}
 	}
 
 	public String getId() 
@@ -72,6 +95,11 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 	public String getPostFile()
 	{
 		return "/posttcopdata";
+	}
+	
+	public Document getDocument()
+	{
+		return m_doc;
 	}
 	
 	public boolean isVerified()
@@ -101,13 +129,15 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 	{
 		super(System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
 		
-		m_xmlData = XMLUtil.readXMLDocument(a_file).getDocumentElement();
+		m_doc = XMLUtil.readXMLDocument(a_file);
+		m_xmlData = m_doc.getDocumentElement();
 		
 		m_serial = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_SERIAL, -1);
 		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
 		m_strId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_ID, "");
 		
 		m_lastUpdate = System.currentTimeMillis();
+		XMLUtil.setAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, m_lastUpdate);
 		
 		SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, m_xmlData);
 		

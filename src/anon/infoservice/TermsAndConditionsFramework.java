@@ -68,7 +68,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	public String m_type = null;
 	
 	public long m_lastUpdate;
-	public long m_serial;
+	public long m_date;
 	
 	public Document m_doc;
 	public Element m_xmlData;
@@ -87,13 +87,13 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		m_doc = a_doc;
 		m_xmlData = a_doc.getDocumentElement();
 		
-		m_serial = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
+		m_date = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
 		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
 		m_type = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
 		
-		m_strId = m_type + "_" + m_locale + "_" + m_serial;
+		m_strId = m_type + "_" + m_locale + "_" + m_date;
 		
-		m_lastUpdate = System.currentTimeMillis();
+		m_lastUpdate = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, -1L);
 		
 		// verify the signature
 		m_signature = SignatureVerifier.getInstance().getVerifiedXml(m_xmlData,
@@ -117,13 +117,14 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		
 		m_xmlData = m_doc.getDocumentElement();
 		
-		m_serial = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
+		m_date = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
 		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
 		m_type = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
 		
-		m_strId = m_type + "_" + m_locale + "_" + m_serial;
+		m_strId = m_type + "_" + m_locale + "_" + m_date;
 		
 		m_lastUpdate = System.currentTimeMillis();
+		XMLUtil.setAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, m_lastUpdate);
 		
 		SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, m_xmlData);
 		
@@ -140,21 +141,38 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}
 	
-	public void importData(Document a_import)
+	public void importData(TermsAndConditionsOperatorData a_data)
 	{
+		Document doc = a_data.getDocument();
+		
 		try
 		{
 			// replace Operator 
-			replaceNode(a_import.getDocumentElement(), XML_ELEMENT_OPERATOR);
+			replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATOR);
 			
 			// replace OperatorCountry
-			replaceNode(a_import.getDocumentElement(), XML_ELEMENT_OPERATOR_COUNTRY);
+			replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATOR_COUNTRY);
 			
 			// replace PrivacyPolicyUrl
-			replaceNode(a_import.getDocumentElement(), XML_ELEMENT_PRIVACY_POLICY_URL);
+			replaceNode(doc.getDocumentElement(), XML_ELEMENT_PRIVACY_POLICY_URL);
+			
+			// replace LegalOpinionsUrl
+			replaceNode(doc.getDocumentElement(), "LegalOpinionsUrl");
+			
+			// replace OperationalAgreementUrl
+			replaceNode(doc.getDocumentElement(), "OperationalAgreementUrl");
+
+			// replace Location
+			replaceNode(doc.getDocumentElement(), "Location");
+
+			// replace Venue
+			replaceNode(doc.getDocumentElement(), "Venue");
+
+			// replace Date
+			replaceNode(doc.getDocumentElement(), "Date");
 			
 			// loop through all Paragraph nodes in our import document
-			NodeList paragraphs = a_import.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
+			NodeList paragraphs = doc.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
 			for(int i = 0; i < paragraphs.getLength(); i++)
 			{
 				Node importParagraph = XMLUtil.importNode(m_doc, paragraphs.item(i), true);
@@ -291,7 +309,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	
 	public long getVersionNumber()
 	{
-		return m_serial;
+		return m_date;
 	}
 	
 	public Element getXmlStructure()
