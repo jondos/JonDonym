@@ -32,7 +32,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 
-public class TermsAndConditionsFramework extends AbstractDistributableCertifiedDatabaseEntry implements IXMLEncodable 
+public class TermsAndConditionsFramework extends AbstractDistributableCertifiedDatabaseEntry
 {
 	private static final String XML_ELEMENT_SECTION = "Section";
 	
@@ -56,9 +56,9 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	
 	public static int TERMS_AND_CONDITIONS_UPDATE_INTERVAL = 1000*60*60;
 	
-	public static String TERMS_AND_CONDITIONS_TYPE_COMMON_LAW = "common_law";
-	public static String TERMS_AND_CONDITIONS_TYPE_GERMAN_LAW = "german_law";
-	public static String TERMS_AND_CONDITIONS_TYPE_GENERAL_LAW = "general_law";
+	public static String TERMS_AND_CONDITIONS_TYPE_COMMON_LAW = "CommonLaw";
+	public static String TERMS_AND_CONDITIONS_TYPE_GERMAN_LAW = "GermanLaw";
+	public static String TERMS_AND_CONDITIONS_TYPE_GENERAL_LAW = "GeneralLaw";
 	
 	public static String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsFrameworks";
 	public static String XML_ELEMENT_NAME = "TermsAndConditionsFramework";
@@ -71,7 +71,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	public long m_serial;
 	
 	public Document m_doc;
-	public Element m_root;
+	public Element m_xmlData;
 	
 	private JAPCertificate m_certificate = null;
 
@@ -85,18 +85,18 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		super(System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
 		
 		m_doc = a_doc;
-		m_root = a_doc.getDocumentElement();
+		m_xmlData = a_doc.getDocumentElement();
 		
-		m_serial = XMLUtil.parseAttribute(m_root, XML_ATTR_DATE, -1);
-		m_locale = new Locale(XMLUtil.parseAttribute(m_root, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
-		m_type = XMLUtil.parseAttribute(m_root, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
+		m_serial = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
+		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
+		m_type = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
 		
 		m_strId = m_type + "_" + m_locale + "_" + m_serial;
 		
 		m_lastUpdate = System.currentTimeMillis();
 		
 		// verify the signature
-		m_signature = SignatureVerifier.getInstance().getVerifiedXml(m_root,
+		m_signature = SignatureVerifier.getInstance().getVerifiedXml(m_xmlData,
 			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		if (m_signature != null)
 		{
@@ -115,20 +115,20 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		
 		m_doc = XMLUtil.readXMLDocument(a_file);
 		
-		m_root = m_doc.getDocumentElement();
+		m_xmlData = m_doc.getDocumentElement();
 		
-		m_serial = XMLUtil.parseAttribute(m_root, XML_ATTR_DATE, -1);
-		m_locale = new Locale(XMLUtil.parseAttribute(m_root, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
-		m_type = XMLUtil.parseAttribute(m_root, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
+		m_serial = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
+		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
+		m_type = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
 		
 		m_strId = m_type + "_" + m_locale + "_" + m_serial;
 		
 		m_lastUpdate = System.currentTimeMillis();
 		
-		SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, m_root);
+		SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, m_xmlData);
 		
 		// verify the signature
-		m_signature = SignatureVerifier.getInstance().getVerifiedXml(m_root,
+		m_signature = SignatureVerifier.getInstance().getVerifiedXml(m_xmlData,
 			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		if (m_signature != null)
 		{
@@ -291,12 +291,12 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	
 	public long getVersionNumber()
 	{
-		return m_lastUpdate;
+		return m_serial;
 	}
 	
 	public Element getXmlStructure()
 	{
-		return m_root;
+		return m_xmlData;
 	}
 	
 	public String getPostFile()
@@ -343,7 +343,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			return;
 		}
 			
-		/* Loop through all files in the directory to find xml files */
+		/* Loop through all files in the directory to find XML files */
 		for (int i = 0; i < files.length; i++)
 		{
 			try

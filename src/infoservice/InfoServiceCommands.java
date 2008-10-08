@@ -1908,6 +1908,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 */
 			httpResponse = cascadePostStatus(postData);
 		}
+		else if((command.equals("/tcframeworkserials")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = m_tcFrameworksResponseGetter.fetchResponse(a_supportedEncodings, true);
+		}
 		else if((command.equals("/tcframeworks")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			httpResponse = m_tcFrameworksResponseGetter.fetchResponse(a_supportedEncodings, false);
