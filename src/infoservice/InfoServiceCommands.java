@@ -59,6 +59,7 @@ import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsOperatorData;
 import anon.infoservice.PerformanceEntry;
 import anon.pay.PayAccount;
 import anon.pay.PaymentInstanceDBEntry;
@@ -130,6 +131,13 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		public Class getDatabaseClass()
 		{
 			return TermsAndConditionsFramework.class;
+		}
+	};
+	private final HTTPResponseGetter m_tcOpDataResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return TermsAndConditionsOperatorData.class;
 		}
 	};
 
@@ -453,10 +461,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 							m_cachedCompressedResponse = new HttpResponseStructure(
 								HttpResponseStructure.HTTP_TYPE_TEXT_XML,
 								HttpResponseStructure.HTTP_ENCODING_ZLIB,
-								//ZLibTools.compress(XMLUtil.toByteArray(doc)));
-								ZLibTools.compress(XMLSignature.toCanonical(doc)));
+								ZLibTools.compress(XMLUtil.toByteArray(doc)));
+								//ZLibTools.compress(XMLSignature.toCanonical(doc)));
 						}
-						catch (XMLParseException ex)
+						catch (/*XMLParse*/Exception ex)
 						{
 							m_cachedCompressedResponse = new HttpResponseStructure(HttpResponseStructure.
 								HTTP_RETURN_INTERNAL_SERVER_ERROR);
@@ -470,7 +478,9 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				}
 			}
 
+			// WIEDER EINSCHALTEN NACHHER!
 			if ( (a_supportedEncodings & HttpResponseStructure.HTTP_ENCODING_ZLIB) > 0)
+				
 			{
 				httpResponse = m_cachedCompressedResponse;
 			}
@@ -1915,6 +1925,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		else if((command.equals("/tcframeworks")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			httpResponse = m_tcFrameworksResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if((command.equals("/tcopdataserials")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = m_tcOpDataResponseGetter.fetchResponse(a_supportedEncodings, true);
+		}
+		else if((command.equals("/tcopdata")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = m_tcOpDataResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals("/status")) && (method == Constants.REQUEST_METHOD_GET))
 		{
