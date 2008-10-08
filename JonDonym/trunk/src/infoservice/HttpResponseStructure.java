@@ -27,6 +27,7 @@
  */
 package infoservice;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 import org.w3c.dom.Document;
@@ -189,8 +190,18 @@ public final class HttpResponseStructure
 		}
 		else
 		{
-			m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, HTTP_TYPE_TEXT_XML,
-												 a_supportedEncodings, xmlString.getBytes(), false);
+			try
+			{
+				// try UTF8
+				m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, HTTP_TYPE_TEXT_XML,
+												 a_supportedEncodings, xmlString.getBytes("UTF8"), false);
+			}
+			catch(UnsupportedEncodingException ex)
+			{
+				m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, HTTP_TYPE_TEXT_XML,
+						 a_supportedEncodings, xmlString.getBytes(), false);
+				
+			}
 		}
 	}
 
@@ -356,18 +367,39 @@ public final class HttpResponseStructure
 		httpHeader.append(HTTP_CRLF_STRING);
 		byte[] createdHttpResponse = null;
 		/* now add the data, if there are any, else return only the header */
+
 		if ( (a_httpData != null) && (!a_onlyHeader))
 		{
-			byte[] headerData = httpHeader.toString().getBytes();
+			byte[] headerData;
+
+			// try UTF8
+			try
+			{
+				 headerData = httpHeader.toString().getBytes("UTF8");
+			}
+			catch(UnsupportedEncodingException ex)
+			{
+				headerData = httpHeader.toString().getBytes();
+			}
 			createdHttpResponse = new byte[headerData.length + a_httpData.length];
 			System.arraycopy(headerData, 0, createdHttpResponse, 0, headerData.length);
 			System.arraycopy(a_httpData, 0, createdHttpResponse, headerData.length, a_httpData.length);
 		}
 		else
 		{
-			createdHttpResponse = httpHeader.toString().getBytes();
+			// try UTF8
+			try
+			{
+				createdHttpResponse = httpHeader.toString().getBytes("UTF8");
+			}
+			catch(UnsupportedEncodingException ex)
+			{
+				createdHttpResponse = httpHeader.toString().getBytes();
+			}
 		}
+		
 		return createdHttpResponse;
+		
 	}
 
 }
