@@ -21,7 +21,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 		
 		java.util.Hashtable tc = InfoServiceHolder.getInstance().getTCFrameworks();
 		TermsAndConditionsFramework fr =
-			(TermsAndConditionsFramework) tc.get("common_law_en_20081007");
+			(TermsAndConditionsFramework) tc.get("CommonLaw_en_20081007");
 		
 		TermsAndConditionsPane contentPane =
 			new TermsAndConditionsPane(this, false);
