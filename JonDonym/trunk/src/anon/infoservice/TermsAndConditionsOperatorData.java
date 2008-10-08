@@ -26,6 +26,9 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 	
 	public static int TERMS_AND_CONDITIONS_TTL = 1000*60*60*24;
 	
+	public static String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsOperatorDataList";
+	public static String XML_ELEMENT_NAME = "TermsAndConditionsOperatorData";
+	
 	private static final String XML_ATTR_LOCALE = "locale";
 
 	public String m_strId;
@@ -144,17 +147,17 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 			try
 			{
 				file = new File(a_dir.getAbsolutePath() + File.separator + files[i]);
-				TermsAndConditionsFramework tac = new TermsAndConditionsFramework(file);
+				TermsAndConditionsOperatorData tac = new TermsAndConditionsOperatorData(file);
 				 
-				Database.getInstance(TermsAndConditionsFramework.class).update(tac);
+				Database.getInstance(TermsAndConditionsOperatorData.class).update(tac);
 			}
 			catch(XMLParseException ex)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "XMLParseException while loading Terms & Conditions: ", ex);
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "XMLParseException while loading Terms & Conditions Operator Data: ", ex);
 			}
 			catch(IOException ex)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "IOException while loading Terms & Conditions: ", ex);
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "IOException while loading Terms & Conditions Operator Data: ", ex);
 			}
 		}
 	}
