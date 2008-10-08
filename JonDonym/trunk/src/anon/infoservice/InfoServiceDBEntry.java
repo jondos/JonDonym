@@ -1108,11 +1108,6 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return getMixCascades(true);
 	}
 
-	public Hashtable getTCFrameworks() throws Exception
-	{
-		return getTCFrameworks(true);
-	}
-	
 	/**
 	 * Get a Vector of all payment instances the infoservice knows. If we can't get a connection with
 	 * the infoservice, an Exception is thrown.
@@ -1186,6 +1181,15 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 					d.appendChild(node);
 					
 					currentEntry = new TermsAndConditionsFramework(d);
+				}
+				else if(a_getter.m_dbEntryClass == TermsAndConditionsOperatorData.class)
+				{
+					// the t&c operator data needs his own document to find and transform nodes
+					Document d = XMLUtil.createDocument();
+					Node node = d.importNode(entryNode, true);
+					d.appendChild(node);
+					
+					currentEntry = new TermsAndConditionsOperatorData(d);
 				}
 				else if (a_getter.m_dbEntryClass == MixCascade.class)
 				{
@@ -1262,13 +1266,22 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return getEntries(getter);
 	}
 	
-	public Hashtable getTCFrameworks(boolean a_bJAPClientContext) throws Exception
+	public Hashtable getTCFrameworks() throws Exception
 	{
 		EntryGetter getter = new EntryGetter();
-		getter.m_bJAPContext = a_bJAPClientContext;
+		getter.m_bJAPContext = true;
 		getter.m_dbEntryClass = TermsAndConditionsFramework.class;
 		getter.m_postFile = "/tcframeworks";
 		return getEntries(getter);
+	}
+	
+	public Hashtable getTCOperatorData() throws Exception
+	{
+		EntryGetter getter = new EntryGetter();
+		getter.m_bJAPContext = true;
+		getter.m_dbEntryClass = TermsAndConditionsOperatorData.class;
+		getter.m_postFile = "/tcopdata";
+		return getEntries(getter);		
 	}
 
 	public Hashtable getPaymentInstances(boolean a_bJAPClientContext) throws Exception
