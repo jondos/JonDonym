@@ -1,107 +1,63 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<title>JonDo-Hilfe: Proxyeinstellungen (Firefox 2.x - 3.x)</title>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo-Hilfe: Proxyeinstellungen (Firefox 2.x - 3.x)</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
+
 <body>
 <!--#include virtual="/header.html"-->
 
-<p class="navipar">
-<span class="prevlink"><a href="browser.html"><img src="prev.gif" alt="<-"> Browsereinstellungen</a></span> 
-<span class="midlink"><a name="doctop" href="index.html#mi_toc">Inhalt </a><a href="index.html#mi_browser"> <img src="next.gif" alt="->"> Browservorbereitung </a><a href="browser.html"> <img src="next.gif" alt="->"> andere Browser </a><a href="browser_firefox.html"> <img src="next.gif" alt="->"> Firefox </a></span>
-<span class="nextlink"><a href="noactive_firefox.html">Vermeiden von Datenspuren <img src="next.gif" alt="->"></a></span> 
-</p>
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative Browser</a></span> <span
+class="midlink"><a name="doctop" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;">
+Browservorbereitung </a><a href="browser.html"><img src="next.gif" alt="-&gt;">
+Alternative Browser</a><a href="browser_firefox2.html"></a></span> <span
+class="nextlink"><a href="browser.html">Alternative Browser <img src="next.gif"
+alt="-&gt;"></a></span> </p>
 <hr>
+
 <h2>Proxy Einstellungen f&uuml;r Browser: Mozilla Firefox 2.x und 3.x </h2>
 
-<p>
-Um JonDo in Mozilla-Firefox einzurichten gehen Sie folgenderma&szlig;en vor :
-</p>
+<p>JonDos empfiehlt den bereits fertig konfigurierten <a
+href="http://www.jondos.de/de/jondofox">JonDoFox</a> zum sicheren, anonymen
+Websurfen. Er ist als vollst&auml;ndiger Browser oder als Firefox-Profil
+f&uuml;r alle Betriebssysteme verf&uuml;gbar.</p>
+
+<p>Um JonDo in Mozilla-Firefox ohne JonDoFox einzurichten gehen Sie
+folgenderma&szlig;en vor : </p>
 <ol>
-<li>
-<p>
-W&auml;hlen Sie im Men&uuml; <i>Extras</i> (Windows), bzw. <i>Firefox</i> (Mac OS X) das Untermen&uuml; <i>Einstellungen...</i>. Danach &ouml;ffnet sich das Einstellungsfenster. W&auml;hlen Sie in diesem den Punkt <i>Erweitert</i> und dort den Tab <i>Netzwerk</i>:
-</p>
-<img src="firefox3.gif" alt="Firefox21">
-</li>
-
-<li>
-<p>
-Um den Proxyserver einzustellen, klicken Sie auf die Schaltfl&auml;che <i>Einstellungen...</i>. In dem Fenster, das sich nun &ouml;ffnet, w&auml;hlen Sie <i>Manuelle Proxy-Konfiguration</i> aus. W&auml;hlen Sie <i>F&uuml;r alle Protokolle diesen Proxyserver verwenden</i> und tragen sie nun <i>127.0.0.1</i> als Server und <i>4001</i> als Port ein:
-</p>
-<img src="firefox2.gif" alt="Firefox22">
-<p>
-Wollen Sie Adressen festlegen, f&uuml;r die JonDo nicht verwendet werden soll, so k&ouml;nnen Sie im Feld <i>Kein Proxy f&uuml;r:</i> Ausnahmen festlegen, jeweils durch ein normales Komma getrennt.
-</p>
-
-<p><b>Hinweis:</b><br>
-Falls Sie im JonDo einen anderen <a href="portlistener.html">Listenerport</a> eingestellt haben, m&uuml;ssen Sie diesen anstatt <i>4001</i> eintragen.
-</p>
-</li>
+  <li><p>W&auml;hlen Sie im Men&uuml; <i>Extras</i> (Windows), bzw.
+    <i>Firefox</i> (Mac OS X) das Untermen&uuml; <i>Einstellungen...</i>.
+    Danach &ouml;ffnet sich das Einstellungsfenster. W&auml;hlen Sie in diesem
+    den Punkt <i>Erweitert</i> und dort den Tab <i>Netzwerk</i>: </p>
+    <img src="firefox3.gif" alt="Firefox21"> </li>
+  <li><p>Um den Proxyserver einzustellen, klicken Sie auf die Schaltfl&auml;che
+    <i>Einstellungen...</i>. In dem Fenster, das sich nun &ouml;ffnet,
+    w&auml;hlen Sie <i>Manuelle Proxy-Konfiguration</i> aus. W&auml;hlen Sie
+    <i>F&uuml;r alle Protokolle diesen Proxyserver verwenden</i> und tragen sie
+    nun <i>127.0.0.1</i> als Server und <i>4001</i> als Port ein: </p>
+    <img src="firefox2.gif" alt="Firefox22"> 
+    <p>Wollen Sie Adressen festlegen, f&uuml;r die JonDo nicht verwendet werden
+    soll, so k&ouml;nnen Sie im Feld <i>Kein Proxy f&uuml;r:</i> Ausnahmen
+    festlegen, jeweils durch ein normales Komma getrennt. </p>
+    <p><b>Hinweis:</b><br>
+    Falls Sie im JonDo einen anderen <a
+    href="portlistener.html">Listenerport</a> eingestellt haben, m&uuml;ssen
+    Sie hier diesen anstatt <i>4001</i> eintragen. </p>
+  </li>
 </ol>
-
-<h3>Empfohlene Extensions f&uuml;r Mozilla-Firefox</h3>
-
-<p>
-F&uuml;r Firefox wird die Extension <i>SwitchProxy</i> empfohlen. Diese Erweiterung installiert eine Toolbar in Firefox, welche das schnelle Umschalten zwischen Proxies erm&ouml;glicht. So kann schnell zwischen dem Gebrauch von JonDo und nicht-anonymen Surfen umgestellt werden.
-</p>
-
-<p>
-<b>Hinweis</b>:<br>
-Offiziell wird die SwitchProxy-Extension noch nicht von <span class="nowrap">Firefox 3</span> unterst&uuml;tzt. Eine (inoffiziell) angepasste aber voll funktionsf&auml;hige Version ist jedoch im <a href="http://www.jondos.de/de/jondofox">JonDoFox-Profil</a> f&uuml;r <span class="nowrap">Firefox 3</span> enthalten.
-</p>
-
-
-<p>
-<b>Installation:</b><br>
-<p>Es gibt zwei M&ouml;glichkeiten, um auf die Installationsseite der Extension zu gelangen:
-</p>
-
-<ol>
-<li>
-&Ouml;ffnen Sie <a href="https://addons.mozilla.org/firefox/125/">diesen Link</a>, um direkt zur Installationsseite der Extension zu gelangen.
-</li>
-
-<li>
-<p>
-Klicken Sie im Men&uuml; <i>Extras</i> auf <i>Erweiterungen</i>. Ein Fenster mit allen installierten Extensions &ouml;ffnet sich. Klicken Sie auf <i>Erweiterungen herunterladen</i>, um auf die Extensions-Seite f&uuml;r Firefox zu gelangen. Suchen sie dort nach dem <i>SwitchProxy-Tool</i>.
-</p>
-<p>
-Klicken Sie dann auf den Link <i>Install Now</i>. Best&auml;tigen Sie die Installation und starten Sie ihren Browser neu.
-</p>
-</li>
-</ol>
-
-<p>
-<b>Einrichtung</b><br>
-Sie sollten jetzt eine neue Toolbar sehen:
-</p>
-<p>
-<img src="switchproxy.gif" alt="SwitchProxy1">
-</p>
-<p>
-Klicken Sie in der Toolbar auf <i>Add</i>, um einen neuen Proxy einzurichten. W&auml;hlen Sie die den Proxytyp <i>Standard</i> und klicken Sie auf <i>Next</i>. Den Namem f&uuml;r die Proxyeinstellung k&ouml;nnen Sie im Feld <i>Proxy Label</i> angegeben, wobei Sie den Namen frei w&auml;hlen d&uuml;rfen. Geben Sie nun f&uuml;r jeden Proxytyp au&szlig;er SOCKS (HTTP, SSL, FTP, Gopher) die Adresse <i>127.0.0.1</i> und den Port <i>4001</i> an:
-</p>
-<p>
-<img src="switchproxy2.gif" alt="SwitchProxy2">
-</p>
-<p>
-Best&auml;tigen Sie mit <i>OK</i>.
-</p>
-<p>
-<b>Optionale Einstellungen</b><br>
-Sie k&ouml;nnen die SwitchProxy Toolbar ausblenden, damit Sie keinen Platz wegnimmt. S&auml;mtliche Funktionalit&auml;t bleibt erreichbar &uuml;ber das Kontextmen&uuml; (Rechtsklick) sowie &uuml;ber den Men&uuml;punkt <i>Extras</i> -> <i>SwitchProxy</i>. Um die Toolbar auszublenden, klicken Sie auf <i>Preferences</i> in der Toolbar <b>oder</b> &ouml;ffnen Sie &uuml;ber <i>Extras</i> -> <i>Erweiterungen</i> das Fenster mit allen Erweiterungen, w&auml;hlen das Plugin <i>SwitchProxy</i> aus und klicken auf <i>Einstellungen</i>.  Haken Sie <i>Show toolbar</i> ab, lassen Sie <i>Show Context Menu</i> und <i>Show in Status Bar</i> aktiviert.
-</p>
 <!--#include virtual="/footer.html"-->
 <hr>
-<p class="navipar">
-<span class="prevlink"><a href="browser.html"><img src="prev.gif" alt="<-"> Browsereinstellungen</a></span> 
-<span class="midlink">
-<a name="docbottom" href="index.html#mi_toc">Inhalt </a><a href="index.html#mi_browser"> <img src="next.gif" alt="->"> Browservorbereitung </a><a href="browser.html"> <img src="next.gif" alt="->"> andere Browser </a><a href="browser_firefox.html"> <img src="next.gif" alt="->"> Firefox </a>
-</span>
-<span class="nextlink"><a href="noactive_firefox.html">Vermeiden von Datenspuren <img src="next.gif" alt="->"></a></span> 
-</p>
 
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative Browser</a></span> <span
+class="midlink"><a name="docbottom" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;">
+Browservorbereitung </a><a href="browser.html"><img src="next.gif" alt="-&gt;">
+Alternative Browser</a><a href="browser_firefox2.html"></a> </span> <span
+class="nextlink"><a href="browser.html">Alternative Browser <img src="next.gif"
+alt="-&gt;"></a></span> </p>
 </body>
 </html>
