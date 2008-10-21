@@ -140,6 +140,8 @@ public class HTTPProxyCallback implements ProxyCallback
 		{
 			throw new NullPointerException("AnonProxyRequest must not be null!");
 		}
+		int headerEndIndex = indexOfHTTPHeaderEnd(chunk);
+		
 		Hashtable unfinishedMessages =
 			(a_messageType == MESSAGE_TYPE_REQUEST) ? 
 				m_unfinishedRequests : m_unfinishedResponses;
@@ -164,7 +166,7 @@ public class HTTPProxyCallback implements ProxyCallback
 		
 		if( hasAlignedHTTPStartLine(chunkData, a_messageType) )
 		{
-			contentBytes = len - (indexOfHTTPHeaderEnd(chunk)+HTTP_HEADER_END.length());
+			contentBytes = len - (headerEndIndex+HTTP_HEADER_END.length());
 			
 			boolean finished = extractHeaderParts(anonRequest, chunkData, a_messageType);
 			if(!finished)
