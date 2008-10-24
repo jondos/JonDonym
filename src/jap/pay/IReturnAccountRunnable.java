@@ -1,7 +1,7 @@
 package jap.pay;
 
-import gui.dialog.IReturnRunnable;
 import anon.pay.PayAccount;
+import anon.util.IReturnRunnable;
 
 interface IReturnAccountRunnable extends IReturnRunnable
 {

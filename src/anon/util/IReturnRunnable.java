@@ -1,4 +1,4 @@
-package gui.dialog;
+package anon.util;
 
 /**
  * Implement this interface if you want your runnable object to return some kind of value.

@@ -405,7 +405,7 @@ public class PerformanceMeter implements Runnable, Observer
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not read "+ PERFORMANCE_LOG_FILE + ". No previous performanace date for this week found.");
 		}
 		
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "Added previous performance data for week" + week);
+		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Added previous performance data for week" + week);
 	}
 	
 	/**
@@ -462,7 +462,7 @@ public class PerformanceMeter implements Runnable, Observer
 			{
 				synchronized(SYNC_TEST)
 				{
-					LogHolder.log(LogLevel.WARNING, LogType.THREAD, "Cascades left to test: " + knownMixCascades.size());
+					LogHolder.log(LogLevel.INFO, LogType.THREAD, "Cascades left to test: " + knownMixCascades.size());
 
 					// randomly choose the next mix cascade					
 					intRandom = Math.abs(ms_rnd.nextInt()) % knownMixCascades.size();
@@ -828,7 +828,7 @@ public class PerformanceMeter implements Runnable, Observer
 			return bUpdated;
 		}
 		
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
+		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
 		
 		// hashtable that holds the delay, speed and users value from this test
 		Hashtable vDelay = new Hashtable();
@@ -880,7 +880,7 @@ public class PerformanceMeter implements Runnable, Observer
 			       	doc = XMLUtil.toSignedXMLDocument(tokenRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 			       	xml = XMLUtil.toString(doc);
 			       	
-			       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance token");
+			       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Requesting performance token");
 			       	
 			       	// open HTTP connection
 			       	HTTPConnection conn = new HTTPConnection(host, port);
@@ -912,7 +912,7 @@ public class PerformanceMeter implements Runnable, Observer
 		        	doc = XMLUtil.toXMLDocument(httpResponse.getData());
 		        	token = new PerformanceToken(doc.getDocumentElement());
 		        	
-		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Received Token " + token.getId() + ".");
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Received Token " + token.getId() + ".");
 		        }
 		        catch(XMLParseException ex)
 		        {
@@ -920,7 +920,7 @@ public class PerformanceMeter implements Runnable, Observer
 		        	return bUpdated;
 		        }
 		       	
-		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
+		       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
 		       	
 		       	// open the socket connection to the AnonProxy
 		       	synchronized (SYNC_SOCKET)
@@ -936,7 +936,7 @@ public class PerformanceMeter implements Runnable, Observer
 		       	doc = XMLUtil.toSignedXMLDocument(perfRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		       	xml = XMLUtil.toString(doc);
 		       	
-		       	LogHolder.log(LogLevel.WARNING, LogType.NET, "Requesting performance data");
+		       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Requesting performance data");
 		       	
 		       	stream.write(("POST http://" + host + ":" + port + "/requestperformance HTTP/1.0\r\n").getBytes());
 		       	stream.write(("Content-Length: " + xml.length() + "\r\n\r\n").getBytes());
@@ -945,7 +945,7 @@ public class PerformanceMeter implements Runnable, Observer
 				// read first byte for delay
 		        long transferInitiatedTime = System.currentTimeMillis();
 		        
-		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Reading first byte for performance test...");
+		        LogHolder.log(LogLevel.INFO, LogType.NET, "Reading first byte for performance test...");
 		        
 		        // set a mark at the beginning
 		        reader.mark(2);
@@ -966,7 +966,7 @@ public class PerformanceMeter implements Runnable, Observer
 		        	delay = (int)(responseStartTime - transferInitiatedTime);
 		        }
 		        
-		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Downloading bytes for performance test...");
+		        LogHolder.log(LogLevel.INFO, LogType.NET, "Downloading bytes for performance test...");
 		        
 		        // reset the mark
 		        reader.reset();
@@ -993,7 +993,7 @@ public class PerformanceMeter implements Runnable, Observer
 		        	}
 		        	throw new Exception("Error while reading from mix cascade");  	
 		        }
-		        LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance meter parsed server header.");
+		        LogHolder.log(LogLevel.DEBUG, LogType.NET, "Performance meter parsed server header.");
 		        
 		        // check if the content length is supposed to be the same as the requested data size
 		        if(resp.m_contentLength != m_dataSize)
@@ -1093,7 +1093,7 @@ public class PerformanceMeter implements Runnable, Observer
         			speed = (int)lSpeed;
         		}
         		
-        		LogHolder.log(LogLevel.WARNING, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/s.");
+        		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/s.");
         		
         		m_lBytesRecvd += bytesRead;        		        		
         		bUpdated = true;
@@ -1146,7 +1146,7 @@ public class PerformanceMeter implements Runnable, Observer
 		
 		Database.getInstance(PerformanceEntry.class).update(entry);
 		
-    	LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers);
+    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers);
 		
     	if (m_proxy.isConnected())
 		{

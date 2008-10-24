@@ -27,6 +27,7 @@
  */
 package jap;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -1956,19 +1957,49 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		if(lookForConfigFile(a_strJapConfFile))
 		{
+			String line ="";
 			try
 			{
 				BufferedReader br = new BufferedReader(new FileReader(m_Model.getConfigFile()));
+				int index;
 				
 				// skip the <?xml part
-				br.readLine();
-				Document doc = XMLUtil.toXMLDocument(br.readLine() + "</JAP>");
+				while ((line = br.readLine()) != null && line.indexOf("<JAP") < 0);				
+				
+				if (line == null)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
+							"Unable to pre-load config file " + m_Model.getConfigFile() + ".");
+					return;
+				}
+				
+				index = line.indexOf("?>");
+				if (index >= 0)
+				{
+					line = line.substring(index + 2, line.length());
+				}
+				
+				if (line.indexOf("</JAP>") < 0)
+				{
+					index = line.indexOf(">");
+					if (index <= 0 || line.length() < index + 1)
+					{
+						LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
+								"Unable to pre-load config file " + m_Model.getConfigFile() + 
+								". Invalid XML structure.");
+						return;
+					}
+					line = line.substring(0, index + 1);
+					line += "</JAP>";
+				}
+				Document doc = XMLUtil.toXMLDocument(line);
 				
 				m_Model.setShowSplashScreen(XMLUtil.parseAttribute(doc, XML_ATTR_SHOW_SPLASH_SCREEN, true));
 			}
 			catch(Exception ex)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Unable to pre-load config file " + m_Model.getConfigFile() + ".");
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Unable to pre-load config file " + 
+						m_Model.getConfigFile() + ".", ex);
 			}
 		}
 	}
@@ -2303,10 +2334,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 			else
 			{
 				/* JAPModel.getModel().getConfigFile() should always point to a valid configuration file */
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				XMLUtil.write(sb, out);
 				FileOutputStream f = new FileOutputStream(JAPModel.getInstance().getConfigFile());
 				//XMLUtil.formatHumanReadable(doc);
 				//return XMLUtil.toString(doc);
-				XMLUtil.write(sb, f);
+				f.write(out.toByteArray());
 				//((XmlDocument)doc).write(f);
 
 				//f.write(sb.getBytes());
@@ -3719,8 +3752,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						getInstance().getViewWindow().setEnabled(false);
 						JAPViewIconified viewiconified=getInstance().m_View.getViewIconified();
-						if(viewiconified!=null)
+						if (viewiconified!=null)
+						{
 							viewiconified.setEnabled(false);
+						}
 					}
 
 					getInstance().m_finishSplash.setText(JAPMessages.getString(MSG_SAVING_CONFIG));
@@ -3751,12 +3786,46 @@ public final class JAPController extends Observable implements IProxyListener, O
 						((ProgramExitListener)exitListeners.elementAt(i)).programExiting();
 					}
 
-					boolean error = m_Controller.m_restarter.isConfigFileSaved() ? 
-							m_Controller.saveConfigFile() : false;
-					if (error && bDoNotRestart && !getInstance().m_restarter.hideWarnings())
+					int result = JAPDialog.RETURN_VALUE_NO;
+					while ((m_Controller.m_restarter.isConfigFileSaved() ? 
+							m_Controller.saveConfigFile() : false) && bDoNotRestart && 
+							!getInstance().m_restarter.hideWarnings() &&
+							result == JAPDialog.RETURN_VALUE_NO)
 					{
-						JAPDialog.showErrorDialog(parent, JAPMessages.getString(MSG_ERROR_SAVING_CONFIG,
-							JAPModel.getInstance().getConfigFile() ), LogType.MISC);
+						result = JAPDialog.showConfirmDialog(parent, 
+									JAPMessages.getString(MSG_ERROR_SAVING_CONFIG, JAPModel.getInstance().getConfigFile()), 
+									new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL){
+							public String getYesOKText()
+							{
+								return JAPMessages.getString(DialogContentPane.MSG_OK);
+							}
+							public String getNoText()
+							{
+								return JAPMessages.getString(JAPDialog.MSG_BTN_RETRY);
+							}
+						}, 
+									JAPDialog.MESSAGE_TYPE_ERROR);	
+						if (result == JAPDialog.RETURN_VALUE_OK)
+						{
+							break;
+						}
+						else if (result == JAPDialog.RETURN_VALUE_CANCEL)
+						{
+							if (getInstance().getViewWindow() != null)
+							{
+								getInstance().getViewWindow().setEnabled(true);
+								JAPViewIconified viewiconified=getInstance().m_View.getViewIconified();
+								if (viewiconified!=null)
+								{
+									viewiconified.setEnabled(true);
+								}
+							}
+							if (getInstance().m_finishSplash instanceof JAPSplash)
+							{
+								((JAPSplash)getInstance().m_finishSplash).setVisible(false);
+							}
+							return;
+						}
 					}
 
 					// disallow new connections

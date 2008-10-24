@@ -58,6 +58,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 import anon.util.ClassUtil;
+import anon.util.IReturnRunnable;
 import gui.GUIUtils;
 import gui.JAPDll;
 import gui.JAPMessages;
@@ -65,7 +66,6 @@ import gui.LanguageMapper;
 import gui.TitledGridBagPanel;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
-import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;

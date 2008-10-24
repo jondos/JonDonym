@@ -77,10 +77,10 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.FontUIResource;
 
 import anon.util.ClassUtil;
+import anon.util.IReturnRunnable;
 import anon.util.JobQueue;
 import anon.util.ResourceLoader;
 import anon.infoservice.ServiceLocation;
-import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import logging.LogHolder;
 import logging.LogLevel;

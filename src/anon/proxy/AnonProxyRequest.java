@@ -105,6 +105,7 @@ public final class AnonProxyRequest implements Runnable
 	public void run()
 	{
 		ms_nrOfRequests++;
+		//System.out.println("test: " + ms_nrOfRequests);
 		m_bRequestIsAlive = true;
 		AnonChannel newChannel = null;
 		// Check for type
@@ -369,6 +370,7 @@ public final class AnonProxyRequest implements Runnable
 		if (m_bRequestIsAlive)
 		{
 			ms_nrOfRequests--;
+			//System.out.println("closed:" + ms_nrOfRequests);
 			m_bRequestIsAlive = false;
 		}
 		try
