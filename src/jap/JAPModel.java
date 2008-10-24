@@ -1376,10 +1376,10 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	public synchronized void setHelpPath(File hpFile)
 	{
-		setHelpPath(hpFile, false);
+		setHelpPath(hpFile, false, false);
 	}
 	
-	public synchronized void setHelpPath(File hpFile, boolean a_bPortable)
+	public synchronized void setHelpPath(File hpFile, boolean a_bPortable, boolean a_bForce)
 	{	
 		String strCheck;
 		
@@ -1390,50 +1390,53 @@ public final class JAPModel extends Observable implements IHelpModel
 		else
 		{
 			hpFile = new File(hpFile.getAbsolutePath());
-			if (hpFile.isFile())
+			if (a_bPortable && a_bForce)
 			{
-				/* This is for backwards compatibility with old portable
-				 * launchers for Windows. The xml file check is disabled for this
-				 * kind of installation. 
-				 */				
-				int index;
-				if ((index = hpFile.getPath().toUpperCase().indexOf((
-						AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "de" + 
-						File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0 ||
-						(index = hpFile.getPath().toUpperCase().indexOf((
-								AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "en" +
-								File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0)
+				if (hpFile.isFile())
 				{
-					if (index > 0)
+					/* This is for backwards compatibility with old portable
+					 * launchers for Windows. The xml file check is disabled for this
+					 * kind of installation. 
+					 */				
+					int index;
+					if ((index = hpFile.getPath().toUpperCase().indexOf((
+							AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "de" + 
+							File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0 ||
+							(index = hpFile.getPath().toUpperCase().indexOf((
+									AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "en" +
+									File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0)
 					{
-						hpFile = new File(hpFile.getPath().substring(0, index));
+						if (index > 0)
+						{
+							hpFile = new File(hpFile.getPath().substring(0, index));
+						}
+						else
+						{
+							hpFile = null;
+						}
 					}
 					else
 					{
-						hpFile = null;
-					}
+	//					get the parent directory as help path
+						String tmp = hpFile.getParent();
+						if (tmp != null)
+						{
+							hpFile = new File(tmp);
+						}
+						else
+						{
+							hpFile = null;
+						}
+					}	
 				}
-				else
-				{
-//					get the parent directory as help path
-					String tmp = hpFile.getParent();
-					if (tmp != null)
-					{
-						hpFile = new File(tmp);
-					}
-					else
-					{
-						hpFile = null;
-					}
-				}			
 				
 				if (hpFile != null && hpFile.isDirectory())										
-				{			LogHolder.log(LogLevel.EMERG, LogType.MISC, hpFile.getPath());					
+				{				
 					strCheck = m_helpFileStorageManager.helpPathValidityCheck(hpFile.getPath(), true);
 					if (strCheck.equals(AbstractHelpFileStorageManager.HELP_VALID) ||
 						strCheck.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 					{						
-						//deletes old help directory if it exists and create a new one
+						//delete old help directory if it exists and create a new one
 						if (m_helpFileStorageManager.handleHelpPathChanged(
 								m_helpPath, hpFile.getPath(), true))
 						{
@@ -1445,13 +1448,11 @@ public final class JAPModel extends Observable implements IHelpModel
 						}
 						else
 						{
-							LogHolder.log(LogLevel.EMERG, LogType.MISC, "reset1");
 							resetHelpPath();
 						}
 					}
 					else
-					{
-						LogHolder.log(LogLevel.EMERG, LogType.MISC, "reset2");		
+					{	
 						resetHelpPath();
 					}
 				}
@@ -1475,7 +1476,7 @@ public final class JAPModel extends Observable implements IHelpModel
 			}
 		}
 		
-		if (a_bPortable && m_helpPath != null)
+		if (hasChanged() && a_bPortable && m_helpPath != null && hpFile != null)
 		{
 			m_bPortableHelp = true;
 		}
@@ -1592,7 +1593,7 @@ public final class JAPModel extends Observable implements IHelpModel
 			if (m_bPortableHelp)
 			{
 				m_bPortableHelp = false;
-				JAPModel.getInstance().setHelpPath(new File(m_helpPath), true);
+				JAPModel.getInstance().setHelpPath(new File(m_helpPath), true, false);
 				helpInstallationExists = m_helpPath != null;
 			}
 			else
