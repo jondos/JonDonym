@@ -70,6 +70,7 @@ import jap.SystrayPopupMenu;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+import logging.SystemErrLog;
 import platform.AbstractOS;
 import platform.WindowsOS;
 import platform.MacOS;
@@ -179,6 +180,13 @@ public class JAP
 							   "/" + vendor + "/" + os +
 							   (mrjVersion != null ? "/" + mrjVersion : "") + ")");
 		}
+		
+		SystemErrLog templog = new SystemErrLog();
+		LogHolder.setLogInstance(templog);
+		templog.setLogType(LogType.ALL);
+		templog.setLogLevel(LogLevel.WARNING);		
+		
+		
 		//Macintosh Runtime for Java (MRJ) on Mac OS
 		// Test (part 1) for right JVM
 		if (javaVersion.compareTo("1.0.2") <= 0)

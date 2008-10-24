@@ -104,6 +104,7 @@ import anon.pay.xml.XMLTransCert;
 import anon.pay.xml.XMLTransactionOverview;
 import anon.pay.xml.XMLVolumePlan;
 import anon.pay.xml.XMLVolumePlans;
+import anon.util.IReturnRunnable;
 import anon.util.SingleStringPasswordReader;
 import anon.util.XMLUtil;
 import anon.util.captcha.ICaptchaSender;
@@ -114,7 +115,6 @@ import gui.dialog.CaptchaContentPane;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.IDialogOptions;
-import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.PasswordContentPane;
 import gui.dialog.SimpleWizardContentPane;
@@ -3259,7 +3259,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		{
 			public String getYesOKText()
 			{
-				return JAPMessages.getString(JAPDialog.MSG_PROCEED);
+				return JAPMessages.getString(JAPDialog.MSG_BTN_PROCEED);
 			}
 		}, JAPDialog.MESSAGE_TYPE_WARNING, null))
 		{

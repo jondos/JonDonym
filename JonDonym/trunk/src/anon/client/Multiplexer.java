@@ -186,6 +186,7 @@ public class Multiplexer extends Observable implements Runnable
 		{
 			m_outputStream.write(packetData);
 			m_outputStream.flush();
+
 			synchronized (m_internalEventSynchronization)
 			{
 				setChanged();
@@ -296,6 +297,7 @@ public class Multiplexer extends Observable implements Runnable
 
 				Thread.yield();
 				/** @todo this should shortly pause downloads when new requests are sent; check if needed or harmful! */
+				/*
 				synchronized (m_waitQueueObject)
 				{
 					if (m_controlMessageQueue.size() > 0 || m_sendJobQueue.size() > 0)
@@ -310,7 +312,7 @@ public class Multiplexer extends Observable implements Runnable
 							throw new InterruptedIOException(e.getMessage());
 						}
 					}
-				}
+				}*/
 			}
 		}
 		catch (IOException e)

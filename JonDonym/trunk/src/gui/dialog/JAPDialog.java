@@ -154,7 +154,9 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	public static final String MSG_TITLE_ERROR = JAPDialog.class.getName() + "_titleError";
 	public static final String MSG_ERROR_UNDISPLAYABLE = JAPDialog.class.getName() + "_errorUndisplayable";
 
-	public static final String MSG_PROCEED = JAPDialog.class.getName() + "_proceed";
+	public static final String MSG_BTN_PROCEED = JAPDialog.class.getName() + "_proceed";
+	public static final String MSG_BTN_RETRY = JAPDialog.class.getName() + "_retry";
+	
 
 	private static final int NUMBER_OF_HEURISTIC_ITERATIONS = 6;
 	private static int m_optimizedFormat = FORMAT_WIDE_SCREEN;

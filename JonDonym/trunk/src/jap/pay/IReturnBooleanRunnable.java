@@ -1,6 +1,6 @@
 package jap.pay;
 
-import gui.dialog.IReturnRunnable;
+import anon.util.IReturnRunnable;
 
 interface IReturnBooleanRunnable extends IReturnRunnable
 {
