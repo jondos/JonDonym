@@ -26,6 +26,13 @@ href="jondonym.html">JonDonym</a> optimiert ist. </p>
 
 <h3><a name="ffprofile" id="ffprofile">Profil-Installation</a></h3>
 
+<p>Diese Installationsoption integriert das JonDoFox-Profil in einen lokal
+installierten Firefox, so dass JonDoFox nahtlos mit Ihrem System
+zusammenarbeitet. Eine eventuell von Ihnen vorher angelegte "normale"
+Firefox-Konfiguration wird durch die Profil-Installation nicht angetastet. Sie
+k&ouml;nnen nach der Installation bei jedem Start von Firefox zwischen Ihrer
+und der JonDoFox-Konfiguration ausw&auml;hlen. </p>
+
 <p>Installieren Sie zun&auml;chst <a
 href="http://www.mozilla-europe.org/de/firefox/">Firefox</a> auf Ihrem System,
 falls noch nicht geschehen<a
@@ -72,14 +79,18 @@ k&ouml;nnen Sie die Installation von JonDoFox wie folgt durchf&uuml;hren:</p>
   </li>
 </ul>
 
-<p>Eine eventuell von Ihnen vorher angelegte "normale" Firefox-Konfiguration
-wird dadurch nicht angetastet. Sie k&ouml;nnen nach der Installation beim Start
-von Firefox dann zwischen beiden Konfigurationen w&auml;hlen. Wenn eine neue
-Version von JonDoFox erscheint, k&ouml;nnen Sie die neue Version jeweils
-"&uuml;ber" die alte Installieren, also ins gleiche Verzeichnis. Ihre Bookmarks
-bleiben dabei erhalten. </p>
+<p>Wenn eine neue Version von JonDoFox erscheint, k&ouml;nnen Sie die neue
+Version jeweils "&uuml;ber" die alte Installieren, also ins gleiche
+Verzeichnis. Ihre Bookmarks bleiben dabei erhalten. </p>
 
-<h3>Installation "zum Mitnehmen" unter Windows (2000, XP, Vista)</h3>
+<h3>Installation "zum Mitnehmen"</h3>
+
+<p>Die Version "zum Mitnehmen" wird f&uuml;r Wechseldatentr&auml;ger empfohlen.
+Sie integriert sich nicht in Ihr System. Falls Sie Programmverkn&uuml;pfungen
+zu JonDoFox ben&ouml;tigen, m&uuml;ssen Sie diese bei der Version "zum
+Mitnehmen" selber anlegen.</p>
+
+<h4>f&uuml;r Windows (2000, XP, Vista)</h4>
 
 <p>Das <a
 href="https://www.jondos.de/downloads/JonDoFox.paf.exe">JonDoFox-Installationsprogramm</a>
@@ -90,14 +101,15 @@ bereits auf Ihrem Rechner vorhandene Firefox- oder JonDoFox-Installation wird
 davon nicht beeinflusst, sofern Sie JonDoFox nicht ins gleiche Verzeichnis
 installieren und eine vorhandene Installation dadurch aktualisieren. Beim
 Aktualisieren von fr&uuml;heren JonDoFox-Versionen bleiben Ihre Bookmarks
-erhalten. JonDoFox "zum Mitnehmen" ist kompatibel zum <a
+erhalten. JonDoFox "zum Mitnehmen" integriert sich automatisch in das <a
 href="http://portableapps.com/">PortableApps</a>-Men&uuml; f&uuml;r das auch
 viele <a href="http://portableapps.com/apps">andere Anwendungen erh&auml;ltlich
 sind</a>.</p>
 
-<h3>Installation "zum Mitnehmen" unter Mac OS X (10.4 oder h&ouml;her)</h3>
+<h4>f&uuml;r Mac OS X (10.4 oder h&ouml;her)</h4>
 
-<p>Eine Version des JonDoFox "zum Mitnehmen" f&uuml;r Mac OS X erhalten Sie <!-- TODO -->
+<p>(in Vorbereitung)</p>
+<!-- <p>Eine Version des JonDoFox "zum Mitnehmen" f&uuml;r Mac OS X erhalten Sie
 <a
 href="https://www.jondos.de/de/downloads/JonDoFox_OS_X_portable.dmg">hier</a>
 (alternativ hier die <a
@@ -106,7 +118,7 @@ Diese Version kann sowohl von einem Wechseldatentr&auml;ger als auch von Ihrer
 Festplatte gestartet werden. Zur Installation klicken Sie bitte doppelt auf die
 heruntergeladene Datei. Kopieren Sie dann einfach die Firefox-Datei auf einen
 Datentr&auml;ger Ihrer Wahl. Von dort aus k&ouml;nnen Sie das Programm einfach
-durch einen weiteren Doppelklick starten. </p>
+durch einen weiteren Doppelklick starten.</p> -->
 
 <h3><a name="critical_addons">Sicherheitskritische
 Firefox-Erweiterungen</a></h3>
@@ -170,8 +182,7 @@ Web verfolgen.</p>
 
 <h3>Werbung filtern mit AdblockPlus</h3>
 
-<p>AdblockPlus <img alt="AdblockPlus" src="img_jondofox/abp-enabled-16.png"
-width="16"> arbeitet als Werbefilter im Hintergrund. Normalerweise m&uuml;ssen
+<p>AdblockPlus <img alt="AdblockPlus" src="img_jondofox/abp-enabled-16.png"> arbeitet als Werbefilter im Hintergrund. Normalerweise m&uuml;ssen
 Sie dessen Einstellungen nicht ver&auml;ndern, k&ouml;nnen aber jederzeit
 eigene Filterlisten erg&auml;nzen.</p>
 
@@ -182,8 +193,9 @@ Ihnen eine komfortable Kontrolle dar&uuml;ber, welche der potentiell
 gef&auml;hrlichen Scripte oder Plugin-Inhalte einer Webseite Ihr Browser
 ausf&uuml;hren darf und welche nicht.</p>
 
-<p><b>Kontrolle der installierten Plugins</b><br>
-Wenn Sie eine Webseite besuchen, die Plugin-Inhalte wie Flash-Movies oder
+<h4>Kontrolle der installierten Plugins</h4>
+
+<p>Wenn Sie eine Webseite besuchen, die Plugin-Inhalte wie Flash-Movies oder
 Java-Applets enth&auml;lt, werden diese von NoScript grunds&auml;tzlich
 blockiert. Anstelle des aktiven Inhalts erscheint ein NoScript-Platzhalter
 (linkes Bild): </p>
@@ -319,7 +331,7 @@ aktivieren und ihn auf <strong><em>Host:127.0.0.1</em></strong> und
 <strong><em>Port: 4001</em></strong> setzen:</p>
 
 <p><img alt="aTube Catcher Connection settings: HTTP proxy 127.0.0.1:4001"
-src="img_jondofox/aTubeCatcherConnection.png" width="338"></p>
+src="img_jondofox/aTubeCatcherConnection.png"></p>
 
 <p>Als Abspielprogramm f&uuml;r alle Betriebssysteme und alle Formate eignet
 sich der kostenlose <a href="http://www.videolan.org">VideoLAN Media Player</a>

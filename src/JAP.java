@@ -928,7 +928,6 @@ public class JAP
 		String pFFExecutable = null;
 		String pFFHelpPath = null;
 
-		
 		if (!isArgumentSet("--portable") )
 		{
 			return null;
@@ -955,7 +954,7 @@ public class JAP
 			if (isArgumentSet("--portable-help-path"))
 			{
 				pFFHelpPath = getArgumentValue("--portable-help-path");
-			}	
+			}
 			
 			if (pFFHelpPath == null && isArgumentSet("--jar-path"))
 			{				
@@ -989,7 +988,7 @@ public class JAP
 				{
 					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
 				}
-			}			
+			}
 			
 //			if no path was found, set the help directory to the path where the JAP.jar is located
 			if (pFFHelpPath == null)
@@ -999,17 +998,17 @@ public class JAP
 				{
 					pFFHelpPath = new File(jar.getName()).getParent();
 				}
-			}			
+			}
 			
 	
 			if(pFFHelpPath != null)
 			{
 				String messageText = a_splash.getText();
 				a_splash.setText(JAPMessages.getString(JAPController.MSG_UPDATING_HELP));
-				JAPModel.getInstance().setHelpPath(new File(pFFHelpPath), true, true);
+				JAPModel.getInstance().setHelpPath(new File(pFFHelpPath), true);
 				a_splash.setText(messageText);				
 			}
-		}			
+		}
 		
 		return pFFExecutable;
 	}

@@ -46,9 +46,10 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 		m_applicationName = a_applicationName;
 	}
 	
-	public void ensureMostRecentVersion(String helpPath)
+	public boolean ensureMostRecentVersion(String helpPath)
 	{
 		// do nothing
+		return true;
 	}
 
 	public Observable getStorageObservable()
