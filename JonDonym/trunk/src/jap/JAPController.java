@@ -1108,7 +1108,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						JAPModel.getInstance().setHelpPath(new File(
 								AbstractOS.getInstance().getDefaultHelpPath(
-										JAPConstants.APPLICATION_NAME)), false);
+										JAPConstants.APPLICATION_NAME)));
 					}
 					a_splash.setText(messageText);
 				}
