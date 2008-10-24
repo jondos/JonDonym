@@ -1307,7 +1307,7 @@ public final class JAPModel extends Observable implements IHelpModel
 
 	public synchronized String getHelpPath()
 	{
-		return m_helpPath != null ?
+		return (m_helpPath != null || m_bPortableHelp) ?
 				m_helpPath : AbstractOS.getInstance().getDefaultHelpPath(
 						JAPConstants.APPLICATION_NAME);
 		
@@ -1316,10 +1316,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	public synchronized URL getHelpURL(String a_startDoc)
 	{
 		URL helpURL = null;
-		if(isHelpPathDefined())
+		if(isHelpPathDefined() && m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath))
 		{
-			m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath);
-			
 			try 
 			{
 				helpURL = new URL("file://" + m_helpPath + "/" +
@@ -1376,12 +1374,17 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	public synchronized void setHelpPath(File hpFile)
 	{
-		setHelpPath(hpFile, false, false);
+		setHelpPath(hpFile, false);
 	}
 	
-	public synchronized void setHelpPath(File hpFile, boolean a_bPortable, boolean a_bForce)
+	public synchronized void setHelpPath(File hpFile, boolean a_bPortable)
 	{	
 		String strCheck;
+		
+		if (m_bPortableHelp && !a_bPortable)
+		{
+			return;
+		}
 		
 		if(hpFile == null)
 		{
@@ -1390,8 +1393,9 @@ public final class JAPModel extends Observable implements IHelpModel
 		else
 		{
 			hpFile = new File(hpFile.getAbsolutePath());
-			if (a_bPortable && a_bForce)
+			if (a_bPortable)
 			{
+				m_bPortableHelp = true;
 				if (hpFile.isFile())
 				{
 					/* This is for backwards compatibility with old portable
@@ -1476,10 +1480,6 @@ public final class JAPModel extends Observable implements IHelpModel
 			}
 		}
 		
-		if (hasChanged() && a_bPortable && m_helpPath != null && hpFile != null)
-		{
-			m_bPortableHelp = true;
-		}
 		notifyObservers(CHANGED_HELP_PATH);		
 	}
 	
@@ -1589,22 +1589,14 @@ public final class JAPModel extends Observable implements IHelpModel
 		
 		if(helpPathExists && !helpInstallationExists)
 		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path "+m_helpPath+" configured but no valid help could be found!");
-			if (m_bPortableHelp)
-			{
-				m_bPortableHelp = false;
-				JAPModel.getInstance().setHelpPath(new File(m_helpPath), true, false);
-				helpInstallationExists = m_helpPath != null;
-			}
-			else
-			{
-				m_helpPath = null;
-				m_bPortableHelp = false;
-				setChanged();
-			}
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path " + m_helpPath + 
+					" configured but no valid help could be found!");
+			m_helpPath = null;
+			setChanged();
 		}
 		
-		if (m_helpPath == null && m_helpFileStorageManager.helpInstallationExists(
+		if (!m_bPortableHelp && m_helpPath == null 
+				&& m_helpFileStorageManager.helpInstallationExists(
 				AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME)) &&
 				helpPathValidityCheck(AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME)).equals(
 						AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))

@@ -204,14 +204,36 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 					else
 					{
 						//help directory already exists in specified folder
-						File jondoHelpFileVersion =
-							new File(hpFile.getPath()+
-									File.separator+
-									HELP_FOLDER+
-									File.separator+
-									HELP_VERSION_FILE);
+						File jondoHelpFileVersion = new File(helpDir.getPath()+ HELP_VERSION_FILE);
 						if(a_bIgnoreExistingHelpDir || jondoHelpFileVersion.exists())
 						{
+							try
+							{
+								if (//helpDir.setLastModified(System.currentTimeMillis()) &&
+									!helpDir.canWrite())
+								{
+									return HELP_INVALID_NOWRITE;	
+								}
+							}
+							catch (SecurityException a_e)
+							{
+								LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+								return HELP_INVALID_NOWRITE;	
+							}
+							
+							try
+							{
+								if (!helpDir.canRead() || helpDir.list() == null)
+								{
+									return HELP_INVALID_NOREAD;	
+								}
+							}
+							catch (SecurityException a_e)
+							{
+								LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+								return HELP_INVALID_NOREAD;	
+							}														
+							
 							return HELP_JONDO_EXISTS;
 						}
 						else
@@ -270,7 +292,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 				removeOldHelp(m_helpPath, a_bIgnoreExistingHelpDir);
 				if(helpFolder.exists())
 				{
-					LogHolder.log(LogLevel.EMERG, LogType.MISC, "Could not delete old help directory!");
+					LogHolder.log(LogLevel.EMERG, LogType.MISC, "Could not delete old help directory!", new Exception());
 					return false;
 				}
 			}
@@ -326,11 +348,20 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 		File helpVersionFile = 
 			new File(parentPath+File.separator+HELP_FOLDER+File.separator+HELP_VERSION_FILE);
 		
-		if(!helpFolder.exists() || 
-			(!a_bIgnoreExistingHelpDir && !helpVersionFile.exists()))
+		try
 		{
-			LogHolder.log(LogLevel.INFO, LogType.MISC, "No old help found in "+helpFolder.getPath());
-			return true;
+			if(!helpFolder.exists() || 
+				(!a_bIgnoreExistingHelpDir && !helpVersionFile.exists() &&
+						helpFolder.list().length > 0))
+			{
+				LogHolder.log(LogLevel.INFO, LogType.MISC, "No old help found in " + helpFolder.getPath());
+				return true;
+			}
+		}
+		catch (SecurityException a_e)
+		{
+			LogHolder.log(LogLevel.INFO, LogType.MISC, "No old help found in " + helpFolder.getPath(), a_e);
+			return false;
 		}
 		
 		/* Make sure that there will be never the wrong directory as parameter!!! */
@@ -413,13 +444,19 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 		return new File(m_helpPath+File.separator + HELP_FOLDER + File.separator);
 	}
 	
-	public void ensureMostRecentVersion(String helpPath) 
+	public boolean ensureMostRecentVersion(String helpPath) 
 	{
 		setHelpPath(helpPath);
 		if(helpVersionMismatch() || !isHelpInstalled())
 		{
-			installHelp(false);
+			if (m_helpPath != null && m_helpPath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
+			{
+				// this is definitely a JonDo application folder
+				return installHelp(true);
+			}
+			return installHelp(false);
 		}
+		return true;
 	}
 	public boolean helpInstallationExists(String helpPath) {
 		

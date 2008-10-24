@@ -59,6 +59,7 @@ import javax.swing.filechooser.FileFilter;
 
 import anon.util.ClassUtil;
 import anon.util.IReturnRunnable;
+import anon.util.ProgressCapsule;
 import gui.GUIUtils;
 import gui.JAPDll;
 import gui.JAPMessages;
@@ -897,7 +898,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 			{
 				public void run()
 				{
-	//				When we set the path: the file storage manager does the rest (if the path is valid) */
+	//				When we set the path, the file storage manager does the rest (if the path is valid) */
 					model.setHelpPath(new File(m_helpPathField.getText()));
 				}
 			};
@@ -909,6 +910,11 @@ final class JAPConfUI extends AbstractJAPConfModule
 			workerPane.updateDialog();
 			dialog.setResizable(false);
 			dialog.setVisible(true);
+			if(workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
+			{			
+				JAPDialog.showErrorDialog(JAPConf.getInstance(), 
+						JAPMessages.getString(JAPExternalHelpViewer.MSG_HELP_INSTALL_FAILED), LogType.MISC);
+			}
 		}
 	}
 
