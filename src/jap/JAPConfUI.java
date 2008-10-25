@@ -912,6 +912,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 			dialog.setVisible(true);
 			if(workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
 			{			
+				resetHelpPath();
 				JAPDialog.showErrorDialog(JAPConf.getInstance(), 
 						JAPMessages.getString(JAPExternalHelpViewer.MSG_HELP_INSTALL_FAILED), LogType.MISC);
 			}
@@ -925,8 +926,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 	
 	private void updateHelpPath()
 	{
-		if(JAPModel.getInstance().isHelpPathDefined() && 
-			JAPModel.getInstance().isHelpPathChangeable())
+		if(JAPModel.getInstance().isHelpPathDefined() && JAPModel.getInstance().isHelpPathChangeable())
 		{
 			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
 		}

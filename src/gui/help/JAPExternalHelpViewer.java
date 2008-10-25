@@ -137,7 +137,6 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		
 		URL helpURL = m_helpModel.getHelpURL(context.getHelpContext() + ".html");
 		boolean bBrowserAvailable = true;
-		LogHolder.log(LogLevel.ALERT, LogType.MISC, (helpURL == null)? null : helpURL.toString());
 		if(helpURL == null || !(bBrowserAvailable = AbstractOS.getInstance().openURL(helpURL)))				
 		{
 			if (container != null && showInstallDialog(container) &&

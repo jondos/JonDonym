@@ -23,18 +23,14 @@
 */
 package gui.help;
 
-import jap.JAPConstants;
-
 import java.util.Observable;
 
 import anon.util.ClassUtil;
 
-import platform.AbstractOS;
 
 public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 {
 	private final Observable DUMMY = new Observable();
-	private String m_applicationName;
 	private final String LOCAL_HELP_PATH = ClassUtil.getClassDirectory(this.getClass()).getParent(); 
 
 	public LocalHelpFileStorageManager(String a_applicationName)
@@ -43,7 +39,6 @@ public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 		{
 			throw new IllegalArgumentException("Application name is null!");
 		}
-		m_applicationName = a_applicationName;
 	}
 	
 	public boolean ensureMostRecentVersion(String helpPath)
