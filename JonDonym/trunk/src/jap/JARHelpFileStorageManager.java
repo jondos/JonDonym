@@ -232,7 +232,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 							{
 								LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
 								return HELP_INVALID_NOREAD;	
-							}														
+							}								
 							
 							return HELP_JONDO_EXISTS;
 						}
@@ -292,7 +292,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 				removeOldHelp(m_helpPath, a_bIgnoreExistingHelpDir);
 				if(helpFolder.exists())
 				{
-					LogHolder.log(LogLevel.EMERG, LogType.MISC, "Could not delete old help directory!", new Exception());
+					LogHolder.log(LogLevel.EMERG, LogType.MISC, "Could not delete old help directory!");
 					return false;
 				}
 			}
