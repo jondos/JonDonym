@@ -1177,7 +1177,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				{
 					// the t&c framework needs his own document to find and transform nodes
 					Document d = XMLUtil.createDocument();
-					Node node = d.importNode(entryNode, true);
+
+					Node node = XMLUtil.importNode(d, entryNode, true);
 					d.appendChild(node);
 					
 					currentEntry = new TermsAndConditionsFramework(d);
@@ -1186,7 +1187,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				{
 					// the t&c operator data needs his own document to find and transform nodes
 					Document d = XMLUtil.createDocument();
-					Node node = d.importNode(entryNode, true);
+					Node node = XMLUtil.importNode(d, entryNode, true);
 					d.appendChild(node);
 					
 					currentEntry = new TermsAndConditionsOperatorData(d);
@@ -1281,7 +1282,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		getter.m_bJAPContext = true;
 		getter.m_dbEntryClass = TermsAndConditionsOperatorData.class;
 		getter.m_postFile = "/tcopdata";
-		return getEntries(getter);		
+		return getEntries(getter);
 	}
 
 	public Hashtable getPaymentInstances(boolean a_bJAPClientContext) throws Exception
@@ -1543,9 +1544,9 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	/**
 	 * Sends a /performanceinfo request to the Info Service, retrieves the data
 	 * and creates a new PerformanceInfo object.
-	 * 
+	 *
 	 * @return a PerformanceInfo object
-	 * 
+	 *
 	 * @throws Exception if the Signature can't be verified, the Info Service doesn't have
 	 * the information available or can't be reached.
 	 */
@@ -1562,9 +1563,9 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			// signature could not be verified
 			throw new SignatureException("Document could not be verified!");
 		}
-		
-		
-		
+
+
+
 		return info;
 	}
 

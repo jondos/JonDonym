@@ -221,6 +221,7 @@ public class JAP
 		if (isArgumentSet("-console") || isArgumentSet("--console"))
 		{
 			bConsoleOnly = true;
+			JAPDialog.setConsoleOnly(true);
 		}
 	
 
@@ -380,8 +381,7 @@ public class JAP
 		}
 		
 		if (bConsoleOnly)
-		{
-			JAPDialog.setConsoleOnly(true);
+		{			
 			splash = new ConsoleSplash();
 			splash.setText(splashText);
 		}

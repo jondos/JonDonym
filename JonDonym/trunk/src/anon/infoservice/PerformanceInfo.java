@@ -228,6 +228,8 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				}
 			}
 		}
+		vInfoServices.clear();
+		vInfoServices = null; // for garbage collection
 		
 		Util.sort(vSpeedBoundaries, new IntegerSortDesc());
 		Util.sort(vSpeedBestBoundaries, new IntegerSortDesc());
