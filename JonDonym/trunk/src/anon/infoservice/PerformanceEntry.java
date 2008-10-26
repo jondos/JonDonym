@@ -718,14 +718,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		public static final String XML_ELEMENT_VALUE = "Value";
 		
 		/**
-		 * The min value XML attribute name.
-		 */
-		public static final String XML_ATTR_MIN = "min";
-		
-		/**
 		 * The max value XML attribute name.
 		 */
-		public static final String XML_ATTR_MAX = "max";
+		public static final String XML_ATTR_BEST = "best";
 		
 		/**
 		 * The bound value XML attribute name.
@@ -754,6 +749,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * {@link #getBound(boolean)}
 		 */
 		private int m_lBoundValue = -1;
+		
+		private int m_lBestBoundValue = -1;
 		
 		/**
 		 * True, if the object is created by the info service 
@@ -933,33 +930,126 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			{
 				int value = ((Integer) vec.elementAt(0)).intValue();
 			
-				if (a_bLow)
-				{
-					for (int i = BOUNDARIES[m_attribute].length -1 ; i >= 0; i--)
-					{
-						if (value >= BOUNDARIES[m_attribute][i])
-						{
-							return BOUNDARIES[m_attribute][i];
-						}
-					}
-				}
-				else
-				{
-					for (int i = 0; i < BOUNDARIES[m_attribute].length; i++)
-					{
-						if (value <= BOUNDARIES[m_attribute][i])
-						{
-							return BOUNDARIES[m_attribute][i];
-						}
-					}
-					
-					return BOUNDARIES[m_attribute][BOUNDARIES[m_attribute].length - 1];
-				}
-				
-				return BOUNDARIES[m_attribute][0];
+				return calculateBoundary(a_bLow, value);
 			}
 			
 			return -1;
+		}
+		
+		public int getBestBound(boolean a_bLow)
+		{
+			// if it is invoked by the client, just return the stored bound value
+			if(!m_bInfoService)
+			{
+				return m_lBoundValue;
+			}
+			
+			int values = 0;
+			long errors = 0;
+			Long timestamp;
+			
+			Vector vec = new Vector();
+			int bestValue;
+			
+			if(a_bLow)
+			{
+				bestValue = 0;
+			}
+			else
+			{
+				bestValue = Integer.MAX_VALUE;
+			}
+			
+			synchronized (m_Values)
+			{
+				Enumeration e = m_Values.keys();
+				
+				while(e.hasMoreElements())
+				{
+					timestamp = (Long) e.nextElement();
+					// value is too old, remove it
+					if(System.currentTimeMillis() - timestamp.longValue() > DEFAULT_TIMEFRAME)
+					{
+						continue;
+					}
+
+					// get the value
+					Integer value = ((Integer) m_Values.get(timestamp));
+					if(value.intValue() < 0)
+					{
+						// value is an error
+						errors++;
+					}
+					else
+					{
+						values++;
+						if(a_bLow)
+						{
+							if(value.intValue() > bestValue)
+							{
+								bestValue = value.intValue();
+							}
+						}
+						else
+						{
+							if(value.intValue() < bestValue)
+							{
+								bestValue = value.intValue();
+							}
+						}
+					}
+				}
+			}
+			
+			// we don't seem to have any values
+			if (values == 0)
+			{
+				// but we have errors
+				if(errors > 0)
+				{
+					return -1;
+				}
+				else if (a_bLow)
+				{
+					return Integer.MAX_VALUE;
+				}
+				else 
+				{
+					return 0;
+				}
+			}
+			else
+			{
+				return calculateBoundary(a_bLow, bestValue);
+			}
+		}
+		
+		private int calculateBoundary(boolean a_bLow, int value) 
+		{
+			if (a_bLow)
+			{
+				for (int i = BOUNDARIES[m_attribute].length -1 ; i >= 0; i--)
+				{
+					if (value >= BOUNDARIES[m_attribute][i])
+					{
+						return BOUNDARIES[m_attribute][i];
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i < BOUNDARIES[m_attribute].length; i++)
+				{
+					if (value <= BOUNDARIES[m_attribute][i])
+					{
+						return BOUNDARIES[m_attribute][i];
+					}
+				}
+				
+				return BOUNDARIES[m_attribute][BOUNDARIES[m_attribute].length - 1];
+			}
+			
+			return BOUNDARIES[m_attribute][0];
 		}
 		
 		/**
@@ -1092,10 +1182,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			if(this.m_attribute == SPEED)
 			{
 				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getBound(true));
+				XMLUtil.setAttribute(elem, XML_ATTR_BEST, getBestBound(true));
 			}
 			else if(this.m_attribute == DELAY)
 			{
 				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getBound(false));
+				XMLUtil.setAttribute(elem, XML_ATTR_BEST, getBestBound(false));
 			}
 			
 			return elem;
