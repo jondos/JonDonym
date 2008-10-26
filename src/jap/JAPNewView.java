@@ -2916,10 +2916,12 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(currentMixCascade.getId());
 			
 			int value = 0;
+			int best = 0;
 			
 			if(entry != null)
 			{
-				value = entry.getBound(PerformanceEntry.SPEED);						
+				value = entry.getBound(PerformanceEntry.SPEED);
+				best = entry.getBestBound(PerformanceEntry.SPEED);
 				if (value < 0 || value == Integer.MAX_VALUE)
 				{
 					m_labelSpeed.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
@@ -2930,10 +2932,18 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				else
 				{
-					m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+					if(best == value)
+					{
+						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+					}
+					else
+					{
+						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value) + " - " + JAPUtil.formatKbitPerSecValueWithUnit(best));
+					}
 				}
 				
 				value = entry.getBound(PerformanceEntry.DELAY);
+				best = entry.getBestBound(PerformanceEntry.DELAY);
 				if (value <= 0)
 				{
 					m_labelDelay.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
@@ -2946,7 +2956,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				else
 				{
-					m_labelDelay.setText(value + " ms");
+					if(best == value)
+					{
+						m_labelDelay.setText(value + " ms");
+					}
+					else
+					{
+						m_labelDelay.setText(value + " - " + best + " ms");
+					}
 				}
 			}
 			else

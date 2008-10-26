@@ -1964,13 +1964,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
 					int value;
+					int best;
 					
 					DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
 					df.applyPattern("#,####0.00");
 					
 					if(entry != null)
 					{
-						value = entry.getBound(PerformanceEntry.SPEED);						
+						value = entry.getBound(PerformanceEntry.SPEED);
+						best = entry.getBestBound(PerformanceEntry.SPEED);
 						if (value < 0 || value == Integer.MAX_VALUE)
 						{
 							m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
@@ -1981,11 +1983,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else
 						{
-							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+							if(best == value)
+							{
+								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+							}
+							else
+							{
+								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value) + " - " + JAPUtil.formatKbitPerSecValueWithUnit(best));
+							}
 						}
 						
-													
 						value = entry.getBound(PerformanceEntry.DELAY);
+						best = entry.getBestBound(PerformanceEntry.DELAY);
 						if (value <= 0)
 						{
 							m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
@@ -1998,7 +2007,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else
 						{
-							m_lblDelay.setText(value + " ms");
+							if(best == value)
+							{
+								m_lblDelay.setText(value + " ms");
+							}
+							else
+							{
+								m_lblDelay.setText(value + " - " + best + " ms");
+							}
 						}
 					}
 					else
