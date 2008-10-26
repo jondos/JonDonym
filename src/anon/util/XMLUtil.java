@@ -986,8 +986,8 @@ public class XMLUtil
 
 		try
 		{
-			bytes = toByteArrayOutputStream(a_inputNode).toByteArray();
-			//bytes = XMLSignature.toCanonical(a_inputNode, true);
+			//bytes = toByteArrayOutputStream(a_inputNode).toByteArray();
+			bytes = XMLSignature.toCanonical(a_inputNode, true);
 		}
 		catch (Exception a_e)
 		{
