@@ -215,8 +215,17 @@ public final class HttpResponseStructure
 	 */
 	public HttpResponseStructure(int a_httpDataType, int a_httpEncoding, String a_httpData)
 	{
-		m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, a_httpDataType, a_httpEncoding,
-											 a_httpData.getBytes(), false);
+		try
+		{
+			// try UTF8
+			m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, a_httpDataType, a_httpEncoding,
+									a_httpData.getBytes("UTF-8"), false);
+		}
+		catch(UnsupportedEncodingException ex)
+		{
+			m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, a_httpDataType, a_httpEncoding,
+					a_httpData.getBytes(), false);
+		}
 	}
 
 	/**
@@ -249,6 +258,7 @@ public final class HttpResponseStructure
 	public HttpResponseStructure(int a_httpDataType, int a_httpEncoding, String a_httpData,
 								 boolean a_onlyHeader)
 	{
+		// TODO: this might need UTF-8 support
 		m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, a_httpDataType, a_httpEncoding,
 											 a_httpData.getBytes(), a_onlyHeader);
 	}
