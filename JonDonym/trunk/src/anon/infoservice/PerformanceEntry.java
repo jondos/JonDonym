@@ -837,8 +837,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			
 			long lBestBoundValue = XMLUtil.parseAttribute(a_node, XML_ATTR_BEST, -2l);
-			// if for some reason we can't parse the best bound values (like old infoservices)
-			// use the bound value
 			if(lBestBoundValue == -2)
 			{
 				if(a_attribute == SPEED)

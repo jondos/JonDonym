@@ -44,6 +44,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Vector;
+import java.util.Hashtable;
 
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -244,6 +245,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	private BigInteger m_iDialogVersion=new BigInteger("-1");
 
 	private AbstractHelpFileStorageManager m_helpFileStorageManager;
+	
+	private Hashtable m_acceptedTCs = new Hashtable();
 	
 	private JAPModel()
 	{
@@ -1856,4 +1859,9 @@ public final class JAPModel extends Observable implements IHelpModel
 		{
 			m_iDialogVersion = dialogVersion;
 		}
+		
+	public Hashtable getAcceptedTCs()
+	{
+		return m_acceptedTCs;
+	}
 }
