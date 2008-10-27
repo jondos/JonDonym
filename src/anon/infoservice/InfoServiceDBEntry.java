@@ -1183,14 +1183,14 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 					
 					currentEntry = new TermsAndConditionsFramework(d);
 				}
-				else if(a_getter.m_dbEntryClass == TermsAndConditionsOperatorData.class)
+				else if(a_getter.m_dbEntryClass == TermsAndConditions.class)
 				{
 					// the t&c operator data needs his own document to find and transform nodes
 					Document d = XMLUtil.createDocument();
 					Node node = XMLUtil.importNode(d, entryNode, true);
 					d.appendChild(node);
 					
-					currentEntry = new TermsAndConditionsOperatorData(d);
+					currentEntry = new TermsAndConditions(d);
 				}
 				else if (a_getter.m_dbEntryClass == MixCascade.class)
 				{
@@ -1280,7 +1280,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	{
 		EntryGetter getter = new EntryGetter();
 		getter.m_bJAPContext = true;
-		getter.m_dbEntryClass = TermsAndConditionsOperatorData.class;
+		getter.m_dbEntryClass = TermsAndConditions.class;
 		getter.m_postFile = "/tcopdata";
 		return getEntries(getter);
 	}

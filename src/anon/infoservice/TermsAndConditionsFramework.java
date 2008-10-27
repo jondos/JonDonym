@@ -6,11 +6,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
-import java.util.Properties;
 import java.util.Locale;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -18,7 +16,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
@@ -26,7 +23,6 @@ import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.XMLParseException;
-import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -125,6 +121,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		
 		m_lastUpdate = System.currentTimeMillis();
 		XMLUtil.setAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, m_lastUpdate);
+		XMLUtil.setAttribute(m_xmlData, XML_ATTR_ID, m_strId);
 		
 		SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, m_xmlData);
 		
@@ -141,17 +138,25 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}
 	
-	public void importData(TermsAndConditionsOperatorData a_data)
+	public void importData(TermsAndConditions a_data)
 	{
 		Document doc = a_data.getDocument();
 		
 		try
 		{
+			// find the ServiceOperator object to our T&C
+			ServiceOperator op = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(a_data.getSKI());
+			
+			if(op == null)
+			{
+				return;
+			}
+			
 			// replace Operator 
-			replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATOR);
+			replaceNode(op.getXML(), XML_ELEMENT_OPERATOR);
 			
 			// replace OperatorCountry
-			replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATOR_COUNTRY);
+			//replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATOR_COUNTRY);
 			
 			// replace PrivacyPolicyUrl
 			replaceNode(doc.getDocumentElement(), XML_ELEMENT_PRIVACY_POLICY_URL);
@@ -163,13 +168,13 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			replaceNode(doc.getDocumentElement(), "OperationalAgreementUrl");
 
 			// replace Location
-			replaceNode(doc.getDocumentElement(), "Location");
+			//replaceNode(doc.getDocumentElement(), "Location");
 
 			// replace Venue
-			replaceNode(doc.getDocumentElement(), "Venue");
+			replaceNode(op.getXML().getFirstChild(), "Venue");
 
 			// replace Date
-			replaceNode(doc.getDocumentElement(), "Date");
+			//replaceNode(doc.getDocumentElement(), "Date");
 			
 			// loop through all Paragraph nodes in our import document
 			NodeList paragraphs = doc.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
@@ -368,7 +373,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			{
 				file = new File(a_dir.getAbsolutePath() + File.separator + files[i]);
 				TermsAndConditionsFramework tac = new TermsAndConditionsFramework(file);
-				 
+				
 				Database.getInstance(TermsAndConditionsFramework.class).update(tac);
 			}
 			catch(XMLParseException ex)

@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
 import anon.crypto.CertPath;
@@ -21,7 +21,7 @@ import anon.crypto.XMLSignature;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
-public class TermsAndConditionsOperatorData extends AbstractDistributableCertifiedDatabaseEntry 
+public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEntry 
 {
 	private Element m_xmlData;
 	private Document m_doc;
@@ -32,8 +32,11 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 	public static String XML_ELEMENT_NAME = "TermsAndConditionsOperatorData";
 	
 	private static final String XML_ATTR_LOCALE = "locale";
+	
+	public static String POST_FILE = "tcopdata";
 
 	public String m_strId;
+	public String m_ski;
 	
 	public Locale m_locale;
 	
@@ -46,7 +49,7 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 
 	private CertPath m_certPath = null;
 	
-	public TermsAndConditionsOperatorData(Document a_doc)
+	public TermsAndConditions(Document a_doc)
 	{
 		super(System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
 		
@@ -57,11 +60,25 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
 		m_strId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_ID, "");
 		
+		StringTokenizer token = new StringTokenizer("_");
+		if(token.countTokens() >= 2)
+		{
+			// skip the locale
+			token.nextToken();
+			
+			// extract the ski
+			m_ski = token.nextToken();
+		}
+		else
+		{
+			m_ski = null;
+		}
+		
 		m_lastUpdate = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, -1L);
 		
 		// verify the signature
 		m_signature = SignatureVerifier.getInstance().getVerifiedXml(m_xmlData,
-			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+			SignatureVerifier.DOCUMENT_CLASS_MIX);
 		if (m_signature != null)
 		{
 			m_certPath = m_signature.getCertPath();
@@ -77,6 +94,11 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 		return m_strId;
 	}
 
+	public String getSKI()
+	{
+		return m_ski;
+	}
+	
 	public long getLastUpdate()
 	{
 		return m_lastUpdate;
@@ -94,7 +116,7 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 	
 	public String getPostFile()
 	{
-		return "/posttcopdata";
+		return POST_FILE;
 	}
 	
 	public Document getDocument()
@@ -125,7 +147,7 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 		return m_certificate;
 	}
 	
-	public TermsAndConditionsOperatorData(File a_file) throws XMLParseException, IOException
+	public TermsAndConditions(File a_file) throws XMLParseException, IOException
 	{
 		super(System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
 		
@@ -177,9 +199,9 @@ public class TermsAndConditionsOperatorData extends AbstractDistributableCertifi
 			try
 			{
 				file = new File(a_dir.getAbsolutePath() + File.separator + files[i]);
-				TermsAndConditionsOperatorData tac = new TermsAndConditionsOperatorData(file);
+				TermsAndConditions tac = new TermsAndConditions(file);
 				 
-				Database.getInstance(TermsAndConditionsOperatorData.class).update(tac);
+				Database.getInstance(TermsAndConditions.class).update(tac);
 			}
 			catch(XMLParseException ex)
 			{

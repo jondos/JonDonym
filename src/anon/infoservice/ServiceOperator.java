@@ -44,7 +44,7 @@ import java.net.URL;
 public class ServiceOperator extends AbstractDatabaseEntry
 {
 	private static final String XML_ELEM_EMAIL = "EMail";
-
+	
 	/**
 	 * This is the name of the operator or organization.
 	 */
@@ -59,7 +59,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 * This is the EMail address of the operator.
 	 */
 	private String m_strEmail;
-
+	
 	/**
 	 * The last update time.
 	 */
@@ -69,6 +69,11 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 * The operators certificate
 	 */
 	private JAPCertificate m_certificate;
+	
+	/**
+	 * The XML data.
+	 */
+	private Node m_node;
 
 	/**
 	 * Creates a new ServiceOperator an operator certificate or
@@ -85,6 +90,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		Node node;
 		X509DistinguishedName subject;
 
+		m_node = a_node;
 		m_certificate = a_certificate;
 		m_lastUpdate = a_lastUpdate;
 
@@ -161,7 +167,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 			m_strUrl = XMLUtil.parseValue(node, null);
 		}
 	}
-
+	
 	/**
 	 * Returns version number which is used to determine the more recent infoservice entry, if two
 	 * entries are compared (higher version number -> more recent entry).
@@ -237,6 +243,14 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	public String getUrl()
 	{
 		return m_strUrl;
+	}
+	
+	/**
+	 * Returns the XML data.
+	 */
+	public Node getXML()
+	{
+		return m_node;
 	}
 	
 	public boolean equals(Object a_obj)

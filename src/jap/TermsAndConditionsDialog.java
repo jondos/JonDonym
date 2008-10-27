@@ -8,7 +8,7 @@ import jap.pay.wizardnew.TermsAndConditionsPane;
 import gui.dialog.JAPDialog;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.TermsAndConditionsFramework;
-import anon.infoservice.TermsAndConditionsOperatorData;
+import anon.infoservice.TermsAndConditions;
 
 public class TermsAndConditionsDialog extends JAPDialog
 {
@@ -28,8 +28,8 @@ public class TermsAndConditionsDialog extends JAPDialog
 			new TermsAndConditionsPane(this, false);
 		
 		java.util.Hashtable tcop = InfoServiceHolder.getInstance().getTCOperatorData();
-		TermsAndConditionsOperatorData op = 
-			(TermsAndConditionsOperatorData) tcop.get("en_15A1D8B31B5360225EB26B98D10F37C269E3DEED");
+		TermsAndConditions op = 
+			(TermsAndConditions) tcop.get("en_15A1D8B31B5360225EB26B98D10F37C269E3DEED");
 		
 		fr.importData(op);
 		

@@ -4953,10 +4953,24 @@ public final class JAPController extends Observable implements IProxyListener, O
 		return true;
 		//return m_bPayCascadeNoAsk;
 	}
-
+	
 	public void setDontAskPayment(boolean a_payCascadeNoAsk)
 	{
 		m_bPayCascadeNoAsk = a_payCascadeNoAsk;
+	}
+	
+	public void acceptTermsAndConditions(String a_ski)
+	{
+		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();
+		
+		tcs.put(a_ski, new Long(System.currentTimeMillis()));
+	}
+	
+	public void revokeTermsAndConditions(String a_ski)
+	{
+		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();
+		
+		tcs.remove(a_ski);
 	}
 
 	/**
