@@ -69,7 +69,6 @@ import jap.JAPSplash;
 import jap.JAPViewIconified;
 import jap.MacOSXLib;
 import logging.FileLog;
-import jap.TermsAndConditionsDialog;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -222,7 +221,6 @@ public class JAP
 		if (isArgumentSet("-console") || isArgumentSet("--console"))
 		{
 			bConsoleOnly = true;
-			JAPDialog.setConsoleOnly(true);
 		}
 	
 
@@ -382,7 +380,8 @@ public class JAP
 		}
 		
 		if (bConsoleOnly)
-		{			
+		{
+			JAPDialog.setConsoleOnly(true);
 			splash = new ConsoleSplash();
 			splash.setText(splashText);
 		}
@@ -871,10 +870,41 @@ public class JAP
 		if(AbstractOS.getInstance() instanceof MacOS)
 		{
 			MacOSXLib.init();
+			
+			/*final SystrayPopupMenu systray = new SystrayPopupMenu(
+					new SystrayPopupMenu.MainWindowListener()
+				{
+					public void onShowMainWindow()
+					{
+						// do nothing
+					}
+
+					public void onShowSettings(String card, Object a_value)
+					{
+						
+					}
+
+					public void onShowHelp()
+					{
+
+					}
+				});
+			
+			javax.swing.JPopupMenu popup = systray.getPopup();
+			
+			javax.swing.JMenu menu = new javax.swing.JMenu();
+			
+			for(int i = 0; i < popup.getComponentCount(); i++)
+			{
+				java.awt.Component c = popup.getComponent(i);
+				if(c instanceof javax.swing.JMenuItem)
+				{
+					menu.add(c);
+				}
+			}
+			
+			JAPMacOSXLib.setMenu(menu);*/
 		}
-		
-		JAPDialog dlg = new jap.TermsAndConditionsDialog(JAPController.getInstance().getViewWindow());
-		dlg.setVisible(true);
 	}
 
 	private String getArgumentValue(String a_argument)
