@@ -734,7 +734,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			{
 				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_XML,
 					HttpResponseStructure.HTTP_ENCODING_PLAIN,
-					XMLUtil.toString(mixEntry.getXmlStructure()));
+					XMLUtil.toString(mixEntry.getXmlStructure()).getBytes("UTF-8"));
 			}
 		}
 		catch (Exception e)
