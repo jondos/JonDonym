@@ -133,7 +133,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			return TermsAndConditionsFramework.class;
 		}
 	};
-	private final HTTPResponseGetter m_tcOpDataResponseGetter = new HTTPResponseGetter()
+	private final HTTPResponseGetter m_tcResponseGetter = new HTTPResponseGetter()
 	{
 		public Class getDatabaseClass()
 		{
@@ -1987,13 +1987,13 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			String id = command.substring(13);
 			httpResponse = japGetTCFramework(id);
 		}
-		else if((command.equals("/tcopdataserials")) && (method == Constants.REQUEST_METHOD_GET))
+		else if((command.equals(TermsAndConditions.HTTP_SERIALS_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			httpResponse = m_tcOpDataResponseGetter.fetchResponse(a_supportedEncodings, true);
+			httpResponse = m_tcResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
-		else if((command.equals("/tcopdata")) && (method == Constants.REQUEST_METHOD_GET))
+		else if((command.equals(TermsAndConditions.HTTP_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			httpResponse = m_tcOpDataResponseGetter.fetchResponse(a_supportedEncodings, false);
+			httpResponse = m_tcResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if ( (command.equals("/status")) && (method == Constants.REQUEST_METHOD_GET))
 		{

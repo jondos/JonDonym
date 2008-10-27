@@ -1,6 +1,5 @@
 package jap;
 
-
 import java.awt.Component;
 import javax.swing.JEditorPane;
 
@@ -20,16 +19,15 @@ public class TermsAndConditionsDialog extends JAPDialog
 		
 		setResizable(false);
 		
-		java.util.Hashtable tc = InfoServiceHolder.getInstance().getTCFrameworks();
-		TermsAndConditionsFramework fr =
-			(TermsAndConditionsFramework) tc.get("CommonLaw_en_20081007");
 		
 		TermsAndConditionsPane contentPane =
 			new TermsAndConditionsPane(this, false);
 		
-		java.util.Hashtable tcop = InfoServiceHolder.getInstance().getTCOperatorData();
+		java.util.Hashtable tcop = InfoServiceHolder.getInstance().getTermsAndConditions();
 		TermsAndConditions op = 
-			(TermsAndConditions) tcop.get("en_15A1D8B31B5360225EB26B98D10F37C269E3DEED");
+			(TermsAndConditions) tcop.get("de_ED:97:C9:1B:EC:5D:ED:6A:9B:67:32:C8:3E:51:9A:38:A4:89:12:B6");
+		
+		TermsAndConditionsFramework fr = InfoServiceHolder.getInstance().getTCFramework(op.getReferenceId());
 		
 		fr.importData(op);
 		
