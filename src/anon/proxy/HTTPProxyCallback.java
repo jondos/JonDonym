@@ -59,7 +59,20 @@ public class HTTPProxyCallback implements ProxyCallback
 	final static String HTTP_HEADER_DELIM = ": ";
 	final static String HTTP_START_LINE_KEY = "start-line";
 	final static String HTTP_VERSION_PREFIX = "HTTP/";
+	final static byte[] HTTP_VERSION_PREFIX_BYTES = HTTP_VERSION_PREFIX.getBytes();
+	
 	final static String[] HTTP_REQUEST_METHODS = { "GET", "POST", "CONNECT", "HEAD" , "PUT", "OPTIONS", "DELETE", "TRACE"};
+	final static byte[][] HTTP_REQUEST_METHODS_BYTES;
+	
+	static 
+	{
+		HTTP_REQUEST_METHODS_BYTES = new byte[HTTP_REQUEST_METHODS.length][];
+		for (int i = 0; i < HTTP_REQUEST_METHODS.length; i++) 
+		{
+			byte [] currentMethodBytes = HTTP_REQUEST_METHODS[i].getBytes();
+			HTTP_REQUEST_METHODS_BYTES[i] = currentMethodBytes;
+		}
+	}
 	
 	public final static String HTTP_CONTENT_LENGTH = "Content-Length";
 	public final static String HTTP_HOST = "Host";
@@ -141,6 +154,9 @@ public class HTTPProxyCallback implements ProxyCallback
 			throw new NullPointerException("AnonProxyRequest must not be null!");
 		}
 		int headerEndIndex = indexOfHTTPHeaderEnd(chunk);
+		int endLen = (headerEndIndex == -1) ? len : Math.min((headerEndIndex+HTTP_HEADER_END.length()), len);
+		int contentBytes = len;
+		String chunkData = null;
 		
 		Hashtable unfinishedMessages =
 			(a_messageType == MESSAGE_TYPE_REQUEST) ? 
@@ -156,17 +172,10 @@ public class HTTPProxyCallback implements ProxyCallback
 			unfinishedHeaderPart = (String) unfinishedMessages.get(anonRequest);
 		}
 		
-		String chunkData = new String(chunk, 0, len);
-		
-		int contentBytes = len;
-		if (unfinishedHeaderPart != null)
+		if( (unfinishedHeaderPart != null) || hasAlignedHTTPStartLine(chunk, endLen, a_messageType) )
 		{
-			chunkData = unfinishedHeaderPart + chunkData;
-		}
-		
-		if( hasAlignedHTTPStartLine(chunkData, a_messageType) )
-		{
-			contentBytes = len - (headerEndIndex+HTTP_HEADER_END.length());
+			contentBytes = len - endLen;
+			chunkData = ( (unfinishedHeaderPart == null) ? "" : unfinishedHeaderPart) + new String(chunk, 0, endLen );
 			
 			boolean finished = extractHeaderParts(anonRequest, chunkData, a_messageType);
 			if(!finished)
@@ -177,7 +186,7 @@ public class HTTPProxyCallback implements ProxyCallback
 				 */
 				return null;
 			}
-			HTTPConnectionHeader connHeader;
+			HTTPConnectionHeader connHeader = null;
 			synchronized (this)
 			{
 				connHeader = (HTTPConnectionHeader) m_connectionHTTPHeaders.get(anonRequest);
@@ -346,6 +355,11 @@ public class HTTPProxyCallback implements ProxyCallback
 		return (messageType == MESSAGE_TYPE_REQUEST) ? isRequest(chunkData) : isResponse(chunkData);
 	}
 	
+	private boolean hasAlignedHTTPStartLine(byte[] chunk, int len, int messageType)
+	{
+		return (messageType == MESSAGE_TYPE_REQUEST) ? isRequest(chunk, len) : isResponse(chunk, len);
+	}
+	
 	private boolean isRequest(String chunkData)
 	{
 		for (int i = 0; i < HTTP_REQUEST_METHODS.length; i++) {
@@ -357,9 +371,56 @@ public class HTTPProxyCallback implements ProxyCallback
 		return false;
 	}
 	
+	/**
+	 * this method makes a bytewise comparison so we don't have 
+	 * to turn the whole chunk into a string for header detection.
+	 * @param chunk
+	 * @param len
+	 * @return
+	 */
+	private boolean isRequest(byte[] chunk, int len)
+	{
+		boolean match = true;
+		for (int i = 0; i < HTTP_REQUEST_METHODS_BYTES.length; i++) {
+			//the bytes encoding of the header data is the same as the default
+			//Java byte encoding since we don't have any special characters 
+			//in the header data
+			int compLen = Math.min(len, HTTP_REQUEST_METHODS_BYTES[i].length);
+			for (int j = 0; j < compLen; j++) 
+			{
+				if(chunk[j] != HTTP_REQUEST_METHODS_BYTES[i][j])
+				{
+					match = false;
+					break;
+				}
+			}
+			if(!match)
+			{
+				match = true;
+				continue;
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	private boolean isResponse(String chunkData)
 	{
 		return chunkData.startsWith(HTTP_VERSION_PREFIX);
+	}
+	
+	private boolean isResponse(byte[] chunk, int len)
+	{
+		
+		int compLen = Math.min(len, HTTP_VERSION_PREFIX_BYTES.length);
+		for (int i = 0; i < compLen; i++) 
+		{
+			if(chunk[i] != HTTP_VERSION_PREFIX_BYTES[i])
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/*protected long getLengthOfPayloadBytes(byte[] chunkData, int l)
