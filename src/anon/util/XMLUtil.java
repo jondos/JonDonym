@@ -1181,7 +1181,7 @@ public class XMLUtil
 	public static void write(Document a_doc, OutputStream a_outputStream) throws IOException
 	{
 		XMLUtil.formatHumanReadable(a_doc);
-		a_outputStream.write(toString(a_doc).getBytes());
+		a_outputStream.write(toString(a_doc).getBytes("UTF-8"));
 		a_outputStream.flush();
 	}
 
