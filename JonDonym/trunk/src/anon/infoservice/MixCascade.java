@@ -254,7 +254,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					m_mixCascadeCertificate = m_certPath.getFirstCertificate();
 				}
 				else
-				{System.out.println("test");
+				{
 					LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 								  "No appended certificates in the MixCascade structure.");
 				}
