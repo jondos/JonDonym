@@ -2932,7 +2932,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				else
 				{
-					if(best == value)
+					if(best == value || best == Integer.MAX_VALUE)
 					{
 						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
 					}
@@ -2956,13 +2956,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				else
 				{
-					if(best == value)
+					if(best == value || best == 0)
 					{
 						m_labelDelay.setText(value + " ms");
 					}
 					else
 					{
-						m_labelDelay.setText(value + " - " + best + " ms");
+						m_labelDelay.setText(best + " - " + value + " ms");
 					}
 				}
 			}

@@ -271,16 +271,17 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			}
 		}
 		perfEntry.setBound(PerformanceEntry.SPEED, value);
-		if(a_cascadeId.equals("51A502E2B1739208BA59918531E4C434D577D27C"))
-		{
-			System.out.print("test cascade");
-		}
+		
 		// best bound speed
 		value = Integer.MAX_VALUE;
 		for(int i = 0; i < vSpeedBestBoundaries.size(); i++)
 		{
 			agreeing = 0;
 			int bound = ((Integer) vSpeedBestBoundaries.elementAt(i)).intValue();
+			if(bound == Integer.MAX_VALUE)
+			{
+				continue;
+			}
 			value = bound;
 			
 			for(int j = 0; j < vPerfEntries.size(); j++)
@@ -305,6 +306,11 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		{
 			agreeing = 0;
 			int bound = ((Integer) vDelayBoundaries.elementAt(i)).intValue();
+			if(bound == 0)
+			{
+				continue;
+			}
+			
 			value = bound;
 			
 			for(int j = 0; j < vPerfEntries.size(); j++)
