@@ -1983,7 +1983,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else
 						{
-							if(best == value)
+							if(best == value || best == Integer.MAX_VALUE)
 							{
 								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
 							}
@@ -2007,13 +2007,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else
 						{
-							if(best == value)
+							if(best == value || best == 0)
 							{
 								m_lblDelay.setText(value + " ms");
 							}
 							else
 							{
-								m_lblDelay.setText(value + " - " + best + " ms");
+								m_lblDelay.setText(best + " - " + value + " ms");
 							}
 						}
 					}
