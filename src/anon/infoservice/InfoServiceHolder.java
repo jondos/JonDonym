@@ -129,9 +129,9 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	private static final int GET_STATUSINFO_TIMEOUT = 19;
 	private static final int GET_PERFORMANCE_INFO = 20;
 	
-	private static final int GET_TC_FRAMEWORKS = 21;
+	private static final int GET_TC_FRAMEWORK = 21;
 	
-	private static final int GET_TC_OPERATOR_DATA = 22;
+	private static final int GET_TCS = 22;
 
 	/**
 	 * This defines, whether there is an automatic change of infoservice after failure as default.
@@ -386,8 +386,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				functionNumber == GET_CASCADEINFO || functionNumber == GET_LATEST_JAVA_SERIALS ||
 				functionNumber == GET_LATEST_JAVA || functionNumber == GET_MESSAGES ||
 				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES ||
-				functionNumber == GET_PERFORMANCE_INFO || functionNumber == GET_TC_FRAMEWORKS ||
-				functionNumber == GET_TC_OPERATOR_DATA)
+				functionNumber == GET_PERFORMANCE_INFO || 
+				functionNumber == GET_TCS)
 			{
 				result = new Hashtable();
 				//if (functionNumber == GET_CASCADEINFO)
@@ -466,13 +466,13 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					{
 						tempHashtable = currentInfoService.getLatestJavaSerials();
 					}
-					else if (functionNumber == GET_TC_FRAMEWORKS)
+					else if (functionNumber == GET_TC_FRAMEWORK)
 					{
-						tempHashtable = currentInfoService.getTCFrameworks();
+						result = currentInfoService.getTCFramework((String) (arguments.elementAt(0)));
 					}
-					else if (functionNumber == GET_TC_OPERATOR_DATA)
+					else if (functionNumber == GET_TCS)
 					{
-						tempHashtable = currentInfoService.getTCOperatorData();
+						tempHashtable = currentInfoService.getTermsAndConditions();
 					}
 					else if (functionNumber == GET_PERFORMANCE_INFO)
 					{
@@ -725,14 +725,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	 * from preferred info service
 	 * @return
 	 */
-	public Hashtable getTCFrameworks()
+	public TermsAndConditionsFramework getTCFramework(String a_id)
 	{
-		return (Hashtable) (fetchInformation(GET_TC_FRAMEWORKS, null));
+		return (TermsAndConditionsFramework) (fetchInformation(GET_TC_FRAMEWORK, Util.toVector(a_id)));
 	}
-
-	public Hashtable getTCOperatorData()
+	
+	public Hashtable getTermsAndConditions()
 	{
-		return (Hashtable) (fetchInformation(GET_TC_OPERATOR_DATA, null));
+		return (Hashtable) (fetchInformation(GET_TCS, null));
 	}
 	
 	/*

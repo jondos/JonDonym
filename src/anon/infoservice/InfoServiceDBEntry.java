@@ -53,6 +53,7 @@ import anon.crypto.XMLSignature;
 import anon.util.ClassUtil;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
+import anon.util.ZLibTools;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -1173,16 +1174,6 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				{
 					currentEntry = new InfoServiceDBEntry(entryNode, a_getter.m_bJAPContext);
 				}
-				else if(a_getter.m_dbEntryClass == TermsAndConditionsFramework.class)
-				{
-					// the t&c framework needs his own document to find and transform nodes
-					Document d = XMLUtil.createDocument();
-
-					Node node = XMLUtil.importNode(d, entryNode, true);
-					d.appendChild(node);
-					
-					currentEntry = new TermsAndConditionsFramework(d);
-				}
 				else if(a_getter.m_dbEntryClass == TermsAndConditions.class)
 				{
 					// the t&c operator data needs his own document to find and transform nodes
@@ -1266,22 +1257,47 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		getter.m_postFile = "/cascades";
 		return getEntries(getter);
 	}
-	
-	public Hashtable getTCFrameworks() throws Exception
+
+	/**
+	 * Get the MixInfo for the mix with the given ID. If we can't get a connection with the
+	 * infoservice, an Exception is thrown.
+	 *
+	 * @param mixId The ID of the mix to get the MixInfo for.
+	 *
+	 * @return The MixInfo for the mix with the given ID.
+	 */
+	public TermsAndConditionsFramework getTCFramework(String a_id) throws Exception
 	{
-		EntryGetter getter = new EntryGetter();
-		getter.m_bJAPContext = true;
-		getter.m_dbEntryClass = TermsAndConditionsFramework.class;
-		getter.m_postFile = "/tcframeworks";
-		return getEntries(getter);
+		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest("/tcframework/" + a_id), 
+				HTTPConnectionFactory.HTTP_ENCODING_ZLIB);
+		
+		NodeList nodes = doc.getElementsByTagName("TermsAndConditionsFramework");
+		if (nodes.getLength() == 0)
+		{
+			throw (new Exception("Error in XML structure for mix with ID " + a_id));
+		}
+		
+		Document d = XMLUtil.createDocument();
+
+		Node node = XMLUtil.importNode(d, nodes.item(0), true);
+		d.appendChild(node);
+		TermsAndConditionsFramework framework = new TermsAndConditionsFramework(d);
+		/* check the signature */
+		if (!framework.isVerified())
+		{
+			/* signature is invalid -> throw an exception */
+			throw (new Exception("Cannot verify the signature for Mix entry: " + XMLUtil.toString(node)));
+		}
+		/* signature was valid */
+		return framework;
 	}
 	
-	public Hashtable getTCOperatorData() throws Exception
+	public Hashtable getTermsAndConditions() throws Exception
 	{
 		EntryGetter getter = new EntryGetter();
 		getter.m_bJAPContext = true;
 		getter.m_dbEntryClass = TermsAndConditions.class;
-		getter.m_postFile = "/tcopdata";
+		getter.m_postFile = TermsAndConditions.HTTP_REQUEST_STRING;
 		return getEntries(getter);
 	}
 

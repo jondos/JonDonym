@@ -44,8 +44,6 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	
 	private static final String XML_ELEMENT_PRIVACY_POLICY_URL = "PrivacyPolicyUrl";
 	
-	private static final String XML_ELEMENT_OPERATOR_COUNTRY = "OperatorCountry";
-
 	private static final String XML_ELEMENT_OPERATOR = "Operator";
 	
 	public static int TERMS_AND_CONDITIONS_TTL = 1000*60*60*24;
