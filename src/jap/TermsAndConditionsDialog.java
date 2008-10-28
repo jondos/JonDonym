@@ -13,7 +13,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 {
 	JEditorPane m_panel;
 	
-	public TermsAndConditionsDialog(Component a_parent)
+	public TermsAndConditionsDialog(Component a_parent, String a_ski)
 	{
 		super(a_parent, "T&C");
 		
@@ -27,7 +27,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 		TermsAndConditions op = 
 			(TermsAndConditions) tcop.get("de_ED:1E:83:EF:A1:D5:84:58:AC:7D:AE:D8:E9:32:29:38:90:9F:15:81");*/
 		
-		TermsAndConditions tc = TermsAndConditions.getById("de_ED:1E:83:EF:A1:D5:84:58:AC:7D:AE:D8:E9:32:29:38:90:9F:15:81");
+		TermsAndConditions tc = TermsAndConditions.getById("de_" + a_ski);
 		
 		java.util.Hashtable test = InfoServiceHolder.getInstance().getTermsAndConditionsSerials();
 		
