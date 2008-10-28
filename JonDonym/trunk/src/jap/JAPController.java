@@ -4980,6 +4980,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 		tcs.put(a_ski, new Long(System.currentTimeMillis()));
 	}
 	
+	public boolean hasAcceptedTermsAndConditions(String a_ski)
+	{
+		return JAPModel.getInstance().getAcceptedTCs().containsKey(a_ski);
+	}
+	
 	public void revokeTermsAndConditions(String a_ski)
 	{
 		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();

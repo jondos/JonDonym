@@ -53,7 +53,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	private static final String XML_ELEMENT_OPERATOR_STREET = "Street";
 	private static final String XML_ELEMENT_OPERATOR_POSTAL_CODE = "PostalCode";
 	private static final String XML_ELEMENT_OPERATOR_CITY = "City";
-	private static final String XML_ELEMENT_OPERATOR_COUNTRY = "Country";
+	private static final String XML_ELEMENT_OPERATOR_COUNTRY = "OperatorCountry";
 	private static final String XML_ELEMENT_OPERATOR_VAT = "VAT";
 	private static final String XML_ELEMENT_OPERATOR_FAX = "Fax";
 	private static final String XML_ELEMENT_OPERATOR_EMAIL = "eMail";
@@ -179,7 +179,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			replaceNode(operator, XML_ELEMENT_OPERATOR);
 			
 			// replace OperatorCountry
-			replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATOR_COUNTRY);
+			replaceNode(importNodeFromTC(a_data, XML_ELEMENT_OPERATOR_COUNTRY), XML_ELEMENT_OPERATOR_COUNTRY);
 			
 			// replace PrivacyPolicyUrl
 			replaceNode(doc.getDocumentElement(), XML_ELEMENT_PRIVACY_POLICY_URL);
@@ -196,8 +196,11 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			// replace Venue
 			replaceNode(importNodeFromTC(a_data, "Venue"), "Venue");
 
+			Element date = doc.createElement("Date");
+			XMLUtil.setValue(date, a_data.getVersionNumber());
+			
 			// replace Date
-			replaceNode(doc.getDocumentElement(), "Date");
+			replaceNode(date, "Date");
 			
 			// loop through all Paragraph nodes in our import document
 			NodeList paragraphs = doc.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
@@ -257,7 +260,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	private Node importNodeFromTC(TermsAndConditions a_tc, String a_nodeName)
 	{
 		// look for node
-		Node node = XMLUtil.getFirstChildByName(a_tc.getDocument(), a_nodeName);
+		Node node = XMLUtil.getFirstChildByName(a_tc.getDocument().getDocumentElement(), a_nodeName);
 		if(node != null)
 		{
 			return node;
