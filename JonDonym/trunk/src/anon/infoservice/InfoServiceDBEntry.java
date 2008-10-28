@@ -1292,15 +1292,6 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return framework;
 	}
 	
-	public Hashtable getTermsAndConditions() throws Exception
-	{
-		EntryGetter getter = new EntryGetter();
-		getter.m_bJAPContext = true;
-		getter.m_dbEntryClass = TermsAndConditions.class;
-		getter.m_postFile = TermsAndConditions.HTTP_REQUEST_STRING;
-		return getEntries(getter);
-	}
-
 	public Hashtable getPaymentInstances(boolean a_bJAPClientContext) throws Exception
 	{
 		EntryGetter getter = new EntryGetter();
@@ -1555,6 +1546,30 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	public Hashtable getMessageSerials() throws Exception
 	{
 		return getUpdateEntries(MessageDBEntry.class, true);
+	}
+	
+	public Hashtable getTermsAndConditions() throws Exception
+	{
+		EntryGetter getter = new EntryGetter();
+		getter.m_bJAPContext = true;
+		getter.m_dbEntryClass = TermsAndConditions.class;
+		getter.m_postFile = TermsAndConditions.HTTP_REQUEST_STRING;
+		return getEntries(getter);
+	}
+	
+	public Hashtable getTermsAndConditionSerials() throws Exception
+	{
+		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest(TermsAndConditions.HTTP_SERIALS_REQUEST_STRING),
+				  HTTPConnectionFactory.HTTP_ENCODING_ZLIB);
+
+		if (!SignatureVerifier.getInstance().verifyXml(doc, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+		{
+			/* signature is invalid -> throw an exception */
+			throw (new SignatureException("Cannot verify the signature: " + XMLUtil.toString(doc)));
+		}
+
+		return new AbstractDistributableDatabaseEntry.Serials(TermsAndConditions.class).parse(
+				doc.getDocumentElement());
 	}
 	
 	/**

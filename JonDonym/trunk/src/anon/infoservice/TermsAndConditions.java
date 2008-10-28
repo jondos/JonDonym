@@ -1,5 +1,8 @@
 package anon.infoservice;
 
+import jap.TermsAndConditionsUpdater;
+import jap.JAPController;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -44,7 +47,7 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	
 	public String m_referenceId;
 	
-	public Locale m_locale;
+	public String m_locale;
 	
 	public long m_lastUpdate;
 	public long m_serial;
@@ -70,14 +73,14 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		if(token.countTokens() >= 2)
 		{
 			// extract the locale
-			m_locale = new Locale(token.nextToken(), Locale.ENGLISH.toString());
+			m_locale = token.nextToken();
 			
 			// extract the ski
 			m_ski = token.nextToken();
 		}
 		else
 		{
-			m_locale = Locale.ENGLISH;
+			m_locale = "en";
 			m_ski = null;
 		}
 		
@@ -109,6 +112,11 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	public String getSKI()
 	{
 		return m_ski;
+	}
+	
+	public String getLocale()
+	{
+		return m_locale;
 	}
 	
 	public long getLastUpdate()
@@ -157,5 +165,22 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	public JAPCertificate getCertificate()
 	{
 		return m_certificate;
+	}
+	
+	public static TermsAndConditions getById(String a_id)
+	{
+		// first look if it's in our database
+		TermsAndConditions tc = (TermsAndConditions) Database.getInstance(TermsAndConditions.class).getEntryById(a_id);
+		
+		if(tc != null)
+		{
+			return tc;
+		}
+		
+		// not found, force an update and try again
+		JAPController.getInstance().getTermsUpdater().update();
+		
+		// return the entry if found, otherwise null
+		return (TermsAndConditions) Database.getInstance(TermsAndConditions.class).getEntryById(a_id);
 	}
 }

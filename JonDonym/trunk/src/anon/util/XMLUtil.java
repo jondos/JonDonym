@@ -775,6 +775,23 @@ public class XMLUtil
 			return null;
 		}
 	}
+	
+	public static Element createChildElementWithValue(Element a_parent, String a_nodeName, String a_value)
+	{
+		Element el = a_parent.getOwnerDocument().createElement(a_nodeName);
+		XMLUtil.setValue(el, a_value);
+		a_parent.appendChild(el);
+		
+		return el;
+	}
+	
+	public static Element createChildElement(Element a_parent, String a_nodeName)
+	{
+		Element el = a_parent.getOwnerDocument().createElement(a_nodeName);
+		a_parent.appendChild(el);
+		
+		return el;
+	}
 
 	/**
 	 * Returns a copy of the source node with the given document as owner document

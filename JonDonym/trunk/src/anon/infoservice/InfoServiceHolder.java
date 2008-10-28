@@ -132,6 +132,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	private static final int GET_TC_FRAMEWORK = 21;
 	
 	private static final int GET_TCS = 22;
+	private static final int GET_TC_SERIALS = 23;
 
 	/**
 	 * This defines, whether there is an automatic change of infoservice after failure as default.
@@ -387,7 +388,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				functionNumber == GET_LATEST_JAVA || functionNumber == GET_MESSAGES ||
 				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES ||
 				functionNumber == GET_PERFORMANCE_INFO || 
-				functionNumber == GET_TCS)
+				functionNumber == GET_TCS || functionNumber == GET_TC_SERIALS)
 			{
 				result = new Hashtable();
 				//if (functionNumber == GET_CASCADEINFO)
@@ -473,6 +474,10 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_TCS)
 					{
 						tempHashtable = currentInfoService.getTermsAndConditions();
+					}
+					else if (functionNumber == GET_TC_SERIALS)
+					{
+						tempHashtable = currentInfoService.getTermsAndConditionSerials();
 					}
 					else if (functionNumber == GET_PERFORMANCE_INFO)
 					{
@@ -733,6 +738,11 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	public Hashtable getTermsAndConditions()
 	{
 		return (Hashtable) (fetchInformation(GET_TCS, null));
+	}
+	
+	public Hashtable getTermsAndConditionsSerials()
+	{
+		return (Hashtable) (fetchInformation(GET_TC_SERIALS, null));
 	}
 	
 	/*

@@ -124,6 +124,7 @@ import platform.MacOS;
 import proxy.DirectProxy;
 import update.JAPUpdateWizard;
 import jap.pay.AccountUpdater;
+import jap.TermsAndConditionsUpdater;
 import anon.infoservice.ClickedMessageIDDBEntry;
 import anon.client.TrustException;
 
@@ -251,6 +252,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private JavaVersionUpdater m_javaVersionUpdater;
 	private MessageUpdater m_messageUpdater;
 	private PerformanceInfoUpdater m_perfInfoUpdater;
+	private TermsAndConditionsUpdater m_termsUpdater;
 	
 	private Object LOCK_VERSION_UPDATE = new Object();
 	private boolean m_bShowingVersionUpdate = false;
@@ -360,6 +362,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_minVersionUpdater = new MinVersionUpdater();
 		m_javaVersionUpdater = new JavaVersionUpdater();
 		m_messageUpdater = new MessageUpdater();
+		m_termsUpdater = new TermsAndConditionsUpdater();
 
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
@@ -626,7 +629,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 					m_MixCascadeUpdater.start(false);
 					m_minVersionUpdater.start(false);
 					m_javaVersionUpdater.start(false);
-					m_messageUpdater.start(false);					
+					m_messageUpdater.start(false);	
+					m_termsUpdater.start(false);
 				}
 				else
 				{
@@ -657,7 +661,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (!m_messageUpdater.isFirstUpdateDone())
 					{
 						m_messageUpdater.updateAsync();
-					}					
+					}
+					if (!m_termsUpdater.isFirstUpdateDone())
+					{
+						m_termsUpdater.updateAsync();
+					}
 				}
 
 				m_AccountUpdater.start(false);
@@ -3859,6 +3867,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							m_Controller.m_javaVersionUpdater.stop();
 							m_Controller.m_messageUpdater.stop();
 							m_Controller.m_perfInfoUpdater.stop();
+							m_Controller.m_termsUpdater.stop();
 						}
 					}, "Finish IS threads");
 					finishIS.start();
@@ -4315,6 +4324,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 			}
 			return null;
 		}
+	}
+	
+	public TermsAndConditionsUpdater getTermsUpdater()
+	{
+		return m_termsUpdater;
 	}
 
 	public IJAPMainView getView()

@@ -23,13 +23,26 @@ public class TermsAndConditionsDialog extends JAPDialog
 		TermsAndConditionsPane contentPane =
 			new TermsAndConditionsPane(this, false);
 		
-		java.util.Hashtable tcop = InfoServiceHolder.getInstance().getTermsAndConditions();
+		/*java.util.Hashtable tcop = InfoServiceHolder.getInstance().getTermsAndConditions();
 		TermsAndConditions op = 
-			(TermsAndConditions) tcop.get("de_ED:97:C9:1B:EC:5D:ED:6A:9B:67:32:C8:3E:51:9A:38:A4:89:12:B6");
+			(TermsAndConditions) tcop.get("de_ED:1E:83:EF:A1:D5:84:58:AC:7D:AE:D8:E9:32:29:38:90:9F:15:81");*/
 		
-		TermsAndConditionsFramework fr = InfoServiceHolder.getInstance().getTCFramework(op.getReferenceId());
+		TermsAndConditions tc = TermsAndConditions.getById("de_ED:1E:83:EF:A1:D5:84:58:AC:7D:AE:D8:E9:32:29:38:90:9F:15:81");
 		
-		fr.importData(op);
+		java.util.Hashtable test = InfoServiceHolder.getInstance().getTermsAndConditionsSerials();
+		
+		if(tc == null)
+		{
+			return;
+		}
+		TermsAndConditionsFramework fr = InfoServiceHolder.getInstance().getTCFramework(tc.getReferenceId());
+		
+		if(fr == null)
+		{
+			return;
+		}
+		
+		fr.importData(tc);
 		
 		contentPane.setText(fr.transform());
 		

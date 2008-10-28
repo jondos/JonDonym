@@ -30,6 +30,10 @@ import logging.LogType;
 
 public class TermsAndConditionsFramework extends AbstractDistributableCertifiedDatabaseEntry
 {
+	private static final String XML_ELEMENT_OPERATIONAL_AGREEMENT_URL = "OperationalAgreementUrl";
+
+	private static final String XML_ELEMENT_LEGAL_OPINIONS_URL = "LegalOpinionsUrl";
+
 	private static final String XML_ELEMENT_SECTION = "Section";
 	
 	private static final String XML_ATTR_ID = "id";
@@ -45,6 +49,14 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	private static final String XML_ELEMENT_PRIVACY_POLICY_URL = "PrivacyPolicyUrl";
 	
 	private static final String XML_ELEMENT_OPERATOR = "Operator";
+	private static final String XML_ELEMENT_OPERATOR_NAME = "Name";
+	private static final String XML_ELEMENT_OPERATOR_STREET = "Street";
+	private static final String XML_ELEMENT_OPERATOR_POSTAL_CODE = "PostalCode";
+	private static final String XML_ELEMENT_OPERATOR_CITY = "City";
+	private static final String XML_ELEMENT_OPERATOR_COUNTRY = "Country";
+	private static final String XML_ELEMENT_OPERATOR_VAT = "VAT";
+	private static final String XML_ELEMENT_OPERATOR_FAX = "Fax";
+	private static final String XML_ELEMENT_OPERATOR_EMAIL = "eMail";
 	
 	public static int TERMS_AND_CONDITIONS_TTL = 1000*60*60*24;
 	
@@ -150,29 +162,42 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 				return;
 			}
 			
-			// replace Operator 
-			replaceNode(op.getXML(), XML_ELEMENT_OPERATOR);
+			// create the operator node
+			Element operator = doc.createElement(XML_ELEMENT_OPERATOR);
+			
+			XMLUtil.createChildElementWithValue(operator, XML_ELEMENT_OPERATOR_NAME, op.getOrganization());
+			XMLUtil.createChildElementWithValue(operator, XML_ELEMENT_OPERATOR_EMAIL, op.getEMail());
+			
+			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_STREET);
+			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_POSTAL_CODE);
+			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_CITY);
+			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_COUNTRY);
+			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_VAT);
+			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_FAX);
+			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_EMAIL);
+			
+			replaceNode(operator, XML_ELEMENT_OPERATOR);
 			
 			// replace OperatorCountry
-			//replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATOR_COUNTRY);
+			replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATOR_COUNTRY);
 			
 			// replace PrivacyPolicyUrl
 			replaceNode(doc.getDocumentElement(), XML_ELEMENT_PRIVACY_POLICY_URL);
 			
 			// replace LegalOpinionsUrl
-			replaceNode(doc.getDocumentElement(), "LegalOpinionsUrl");
+			replaceNode(doc.getDocumentElement(), XML_ELEMENT_LEGAL_OPINIONS_URL);
 			
 			// replace OperationalAgreementUrl
-			replaceNode(doc.getDocumentElement(), "OperationalAgreementUrl");
-
+			replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
+			
 			// replace Location
-			//replaceNode(doc.getDocumentElement(), "Location");
+			replaceNode(importNodeFromTC(a_data, "Location"), "Location");
 
 			// replace Venue
-			replaceNode(op.getXML().getFirstChild(), "Venue");
+			replaceNode(importNodeFromTC(a_data, "Venue"), "Venue");
 
 			// replace Date
-			//replaceNode(doc.getDocumentElement(), "Date");
+			replaceNode(doc.getDocumentElement(), "Date");
 			
 			// loop through all Paragraph nodes in our import document
 			NodeList paragraphs = doc.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
@@ -211,11 +236,48 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 					section.replaceChild(importParagraph, para);
 				}
 			}
+			
+			System.out.println(XMLUtil.toString(m_doc));
 		}
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
+	}
+
+	private void appendChildNodeFromTC(TermsAndConditions a_tc, Element a_elem, String a_nodeName) 
+	{
+		Node node = importNodeFromTC(a_tc, a_nodeName);
+		if(node != null)
+		{
+			a_elem.appendChild(node);
+		}
+	}
+	
+	private Node importNodeFromTC(TermsAndConditions a_tc, String a_nodeName)
+	{
+		// look for node
+		Node node = XMLUtil.getFirstChildByName(a_tc.getDocument(), a_nodeName);
+		if(node != null)
+		{
+			return node;
+		}
+		else if(!a_tc.getLocale().equals("en"))
+		{
+			// look in the English version of this T&C
+			TermsAndConditions tcDefault = TermsAndConditions.getById("en_" + a_tc.getSKI());
+			
+			if(tcDefault != null)
+			{
+				node = XMLUtil.getFirstChildByName(tcDefault.getDocument().getDocumentElement(), a_nodeName);
+				if(node != null)
+				{
+					return a_tc.getDocument().importNode(node, true);
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	public Node findSectionById(String a_id)
@@ -255,7 +317,19 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		
 		if(node == null)
 		{
-			return;
+			// try the node itself
+			if(a_src.getNodeName() == null)
+			{
+				return;
+			}
+			else if(a_src.getNodeName().equals(a_elementToReplace))
+			{
+				node = a_src;
+			}
+			else
+			{
+				return;
+			}
 		}
 		
 		// import it in to our document
@@ -292,7 +366,11 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			transformer.transform(xmlSource, new StreamResult(writer));
 			writer.close();
 			
-			return writer.toString();
+			String s = writer.toString();
+			
+			// this is needed on some older java versions (mainly 1.5)
+			// otherwise breaks will not be displayed correctly
+			return anon.util.Util.replaceAll(s, "<br/>", "<br>");
 		}
 		catch(Exception ex)
 		{
