@@ -404,6 +404,10 @@ public final class AnonProxyRequest implements Runnable
 		catch (Throwable t)
 		{
 		}
+		if(m_callbackHandler != null)
+		{
+			m_callbackHandler.closeRequest(this);
+		}
 	}
 
 	final class Response implements Runnable
