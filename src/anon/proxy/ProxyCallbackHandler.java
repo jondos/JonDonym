@@ -75,6 +75,20 @@ public class ProxyCallbackHandler
 		return chunk;
 	}
 	
+	public synchronized void closeRequest(AnonProxyRequest anonRequest)
+	{
+		if(anonRequest == null)
+		{
+			throw new NullPointerException("AnonProxyRequest must not be null!");
+		}
+		for (Enumeration enumeration = callbacks.elements(); enumeration.hasMoreElements();) 
+		{
+			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();
+			callback.closeRequest(anonRequest);
+		}
+		
+	}
+	
 	public synchronized void registerProxyCallback(ProxyCallback callback)
 	{
 		if(! callbacks.contains(callback))

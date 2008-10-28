@@ -153,7 +153,11 @@ public class HTTPProxyCallback implements ProxyCallback
 		{
 			throw new NullPointerException("AnonProxyRequest must not be null!");
 		}
+		/* get the startindex of the CRLFCRLF end delimiter header */		
 		int headerEndIndex = indexOfHTTPHeaderEnd(chunk);
+		/* this specifies how many bytes of the chunk may contain header data 
+		 * (if the chunk contain header data at all)
+		 */
 		int endLen = (headerEndIndex == -1) ? len : Math.min((headerEndIndex+HTTP_HEADER_END.length()), len);
 		int contentBytes = len;
 		String chunkData = null;
@@ -166,12 +170,13 @@ public class HTTPProxyCallback implements ProxyCallback
 		Hashtable byteCounter = 
 			(a_messageType == MESSAGE_TYPE_REQUEST) ? 
 					m_upstreamBytes : m_downstreamBytes;
-		/* check if header parsing already started but hasn't finished yet for this AnonRequest */
+		/* check if header parsing has already started but hasn't finished yet for this AnonRequest */
 		synchronized(this)
 		{
 			unfinishedHeaderPart = (String) unfinishedMessages.get(anonRequest);
 		}
 		
+		/* only if header data is contained by this chunk, we need to turn it into a string */
 		if( (unfinishedHeaderPart != null) || hasAlignedHTTPStartLine(chunk, endLen, a_messageType) )
 		{
 			contentBytes = len - endLen;
@@ -562,6 +567,20 @@ public class HTTPProxyCallback implements ProxyCallback
 			{
 				listener.upstreamContentBytesReceived(event);
 			}
+		}
+	}
+	
+	public synchronized void closeRequest(AnonProxyRequest anonRequest)
+	{
+		HTTPConnectionHeader connHeader = (HTTPConnectionHeader) 
+		m_connectionHTTPHeaders.get(anonRequest);
+	
+		if( (connHeader != null) )
+		{
+			connHeader.clearRequest();
+			connHeader.clearResponse();
+			m_upstreamBytes.remove(anonRequest);
+			m_downstreamBytes.remove(anonRequest);
 		}
 	}
 	
