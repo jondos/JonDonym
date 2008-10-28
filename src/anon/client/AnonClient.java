@@ -33,7 +33,6 @@ package anon.client;
 
 import gui.dialog.JAPDialog;
 import jap.JAPController;
-import jap.JAPNewView;
 import jap.TermsAndConditionsDialog;
 
 import java.io.InterruptedIOException;
@@ -44,7 +43,6 @@ import java.net.SocketException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
