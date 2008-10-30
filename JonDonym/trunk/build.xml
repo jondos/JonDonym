@@ -263,7 +263,7 @@
   <target name="compile" depends="dist-pre-compile, init" description="compile the source">
     <!-- Compile the java code from ${src} into ${build} -->
     <javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-    destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
+    destdir="${build}"  classpathref="classpath_all" 
     	fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
     <include name="**/*.java"/>
     </javac>
@@ -272,7 +272,7 @@
   <target name="compile-force" depends="init" description="compile the source with whatever compiler">
     <!-- Compile the java code without checking the version of the compiler -->
 	<javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-	   destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2" fork="yes">
+	   destdir="${build}"  classpathref="classpath_all" fork="yes">
 	  <include name="**/*.java"/>
 	</javac>
   </target>	

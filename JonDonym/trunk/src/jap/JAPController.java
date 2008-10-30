@@ -3115,6 +3115,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to start AN.ON service...");
 					}
 					//JAPExtension.doIt();
+					//System.out.println("Try to start AN.ON service...");
 					ret = m_proxyAnon.start(cascadeContainer);
 
 
