@@ -635,7 +635,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		notificationThread.start();
 
 		Socket connectedSocket = null;
-		HTTPConnection connction;
+		HTTPConnection connection;
 		int i = 0;
 		while ( (i < a_mixCascade.getNumberOfListenerInterfaces()) && (connectedSocket == null) &&
 			   (!Thread.currentThread().isInterrupted()))
@@ -643,10 +643,13 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			/* try out all interfaces of the mixcascade until we have a connection */
 			try
 			{
-				connction = HTTPConnectionFactory.getInstance().createHTTPConnection(a_mixCascade.
+				connection = HTTPConnectionFactory.getInstance().createHTTPConnection(a_mixCascade.
 					getListenerInterface(i), a_proxyInterface);
-				connction.setTimeout(CONNECT_TIMEOUT);
-				connectedSocket = connction.Connect();
+				connection.setTimeout(CONNECT_TIMEOUT);
+				connectedSocket = connection.Connect();
+				/*connectedSocket = new Socket(a_mixCascade.
+						getListenerInterface(i).getHost(), a_mixCascade.
+						getListenerInterface(i).getPort());*/
 			}
 			catch (InterruptedIOException e)
 			{

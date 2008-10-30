@@ -167,7 +167,11 @@ public class JAP
 		String listenHost = null;
 		int listenPort = 0;
 		MixCascade commandlineCascade = null;
-
+		
+		/* system wide socks settings should not not apply to JAP */
+		System.getProperties().remove("socksProxyHost");
+		System.getProperties().remove("socksProxyPort");
+		
 		if (isArgumentSet("--version") || isArgumentSet("-v"))
 		{
 			System.out.println("JAP/JonDo version: " + JAPConstants.aktVersion + "\n" +
