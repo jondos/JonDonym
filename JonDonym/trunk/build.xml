@@ -1,93 +1,97 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="AN.ON" default="dist" basedir=".">
-  <description>Ant Build file for the various compontens of the AN.ON project</description>
-  <!-- set global properties for this build -->
-  <property name="javac1.3.exe" value="/usr/bin/javac" />
-  <property name="src" location="src"/>
-  <property name="certificates" location="certificates"/>
-  
-  <property name="excludesSrcJap" value="jpi/** infoservice/** misc/** anon/crypto/tinytls/test/** platform/signal/**/*"/>
-  <property name="infoservice-excludes" value="jpi/** infoservice/performance/** misc/**"/>
-  <property name="build" location="build"/>
-  <property name="build.libs" location="lib"/>
-  <property name="dist" location="dist"/>
-  <property name="japrelease.jnlp" location="/home/infoservice/japRelease.jnlp"/>
-  <property name="japtomcat" location="/home/tomcat/webapps/jap/"/>
-  <property name="japweb" location="/var/www/JapWeb/"/>
-  <property name="japkeystore" location="/home/compile/.keystore"/>
-  
-  <property name="classpath_httplib_file_name" location="${build.libs}/HTTPClient.jar"/>
-  <property name="classpath_xmllib_file_name" location="${build.libs}/xml.jar"/>
-  <property name="classpath_ftplib_file_name" location="${build.libs}/ApacheFTPClient.jar"/>
-  <property name="classpath_log4j_file_name" location="${build.libs}/log4j.jar"/>
-  <property name="classpath_mail_file_name" location="${build.libs}/mail.jar"/>
-  <property name="classpath_jama_file_name" location="${build.libs}/jama.jar"/>
-  <property name="classpath_bouncy_file_name" location="${build.libs}/BouncyCastleLightForJAP.jar"/>
-  <property name="classpath_xmlrpc_file_name" location="${build.libs}/apache-xml-rpc-1.1.jar"/>
-  <property name="classpath_jaf_file_name" location="${build.libs}/activation.jar"/>
-  <property name="classpath_skype_file_name" location="${build.libs}/skype.jar"/>
+	<description>Ant Build file for the various compontens of the AN.ON project</description>
+
+	<taskdef name="jarbundler" 
+	         classname="net.sourceforge.jarbundler.JarBundler"/>
 	
-  <path id="classpath_httplib" location="${classpath_httplib_file_name}"/>
-  <path id="classpath_ftplib" location="${classpath_ftplib_file_name}"/>
-  <path id="classpath_xml-rpc" location="${classpath_xmlrpc_file_name}"/>
-  <path id="classpath_java_mail" location="${build.libs}/mail.jar"/>
-  <path id="classpath_mrj" location="${build.libs}/MRJClasses.zip"/>
-  <path id="classpath_aje" location="${build.libs}/AppleJavaExtensions.jar"/>
-  <path id="classpath_jama" location="${build.libs}/jama.jar"/>
-  <path id="classpath_swing" location="${build.libs}/swingall.jar"/>
-  <path id="classpath_log4j" location="${classpath_log4j_file_name}"/>
-  <path id="classpath_bouncycastle_jap" location="${classpath_bouncy_file_name}"/>
-  <path id="classpath_jaf" location="${classpath_jaf_file_name}"/>
-  <path id="classpath_skype" location="${classpath_skype_file_name}"/>
+	<!-- set global properties for this build -->
+	<property name="AppName" value="JAP"/>
+	<property name="MainClass" value="JAP"/>
+	<property name="MainClass.osx" value="JAPMacintosh"/>
+	<property name="Mac_bundle_id" value="de.jondos.JonDo"/>
+	<property name="JAP_args" value=""/>
+	<property name="src" location="src"/>
+	<property name="certificates" location="certificates"/>
+  
+	<property name="excludesSrcJap" value="jpi/** infoservice/** misc/** anon/crypto/tinytls/test/** platform/signal/**/*"/>
+	<property name="infoservice-excludes" value="jpi/** infoservice/performance/** misc/**"/>
+	<property name="build" location="build"/>
+	<property name="build.libs" location="lib"/>
+	<property name="dist" location="dist"/>
+	<property name="dist.osx" location="${dist}/MacOsX"/>
 	
-  <path id="classpath_all">
-    <path refid="classpath_swing"/>
-    <path refid="classpath_httplib"/>
-    <path refid="classpath_ftplib"/>
-    <path refid="classpath_xml-rpc"/>
-    <path refid="classpath_java_mail"/>
-    <path refid="classpath_jama"/>
-    <path refid="classpath_log4j"/>
-    <path refid="classpath_mrj"/>
-    <path refid="classpath_aje"/>
-    <path refid="classpath_bouncycastle_jap"/>
-  	<path refid="classpath_jaf"/>
-  	<path refid="classpath_skype"/>
-  </path>
-  <path id="java_1_1_boot_classes" location="${build.libs}/java_1_1_classes.zip"/>
+	<property name="classpath_httplib_file_name" location="${build.libs}/HTTPClient.jar"/>
+	<property name="classpath_xmllib_file_name" location="${build.libs}/xml.jar"/>
+	<property name="classpath_ftplib_file_name" location="${build.libs}/ApacheFTPClient.jar"/>
+	<property name="classpath_log4j_file_name" location="${build.libs}/log4j.jar"/>
+	<property name="classpath_mail_file_name" location="${build.libs}/mail.jar"/>
+	<property name="classpath_jama_file_name" location="${build.libs}/jama.jar"/>
+	<property name="classpath_bouncy_file_name" location="${build.libs}/BouncyCastleLightForJAP.jar"/>
+	<property name="classpath_xmlrpc_file_name" location="${build.libs}/apache-xml-rpc-1.1.jar"/>
+	<property name="classpath_jaf_file_name" location="${build.libs}/activation.jar"/>
+	<property name="classpath_skype_file_name" location="${build.libs}/skype.jar"/>
+	
+	<path id="classpath_httplib" location="${classpath_httplib_file_name}"/>
+	<path id="classpath_ftplib" location="${classpath_ftplib_file_name}"/>
+	<path id="classpath_xml-rpc" location="${classpath_xmlrpc_file_name}"/>
+	<path id="classpath_java_mail" location="${build.libs}/mail.jar"/>
+	<path id="classpath_mrj" location="${build.libs}/MRJClasses.zip"/>
+	<path id="classpath_aje" location="${build.libs}/AppleJavaExtensions.jar"/>
+	<path id="classpath_jama" location="${build.libs}/jama.jar"/>
+	<path id="classpath_swing" location="${build.libs}/swingall.jar"/>
+	<path id="classpath_log4j" location="${classpath_log4j_file_name}"/>
+	<path id="classpath_bouncycastle_jap" location="${classpath_bouncy_file_name}"/>
+	<path id="classpath_jaf" location="${classpath_jaf_file_name}"/>
+	<path id="classpath_skype" location="${classpath_skype_file_name}"/>
+	
+	<path id="classpath_all">
+		<path refid="classpath_swing"/>
+		<path refid="classpath_httplib"/>
+		<path refid="classpath_ftplib"/>
+		<path refid="classpath_xml-rpc"/>
+		<path refid="classpath_java_mail"/>
+		<path refid="classpath_jama"/>
+		<path refid="classpath_log4j"/>
+		<path refid="classpath_mrj"/>
+		<path refid="classpath_aje"/>
+		<path refid="classpath_bouncycastle_jap"/>
+		<path refid="classpath_jaf"/>
+		<path refid="classpath_skype"/>
+	</path>
  
-  <target name="init-dirs">
-    <!-- Create the time stamp -->
-    <tstamp/>
-    <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${build}"/>
-    <mkdir dir="${build.libs}"/>
-  </target>
+	<target name="init-dirs">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}"/>
+		<mkdir dir="${build.libs}"/>
+	</target>
  
-  <target name="init-libs" depends="init-dirs">
-    <get src="http://anon.inf.tu-dresden.de/develop/java_1_1_classes.zip" 
-    	 verbose="true" 
-    	 usetimestamp="true"
-    	 ignoreerrors="true"
-    	 dest="${build.libs}/java_1_1_classes.zip"/>    
+	<target name="init-libs" depends="init-dirs">
+		<get src="http://anon.inf.tu-dresden.de/develop/java_1_1_classes.zip" 
+			verbose="true" 
+			usetimestamp="true"
+			ignoreerrors="true"
+			dest="${build.libs}/java_1_1_classes.zip"/>    
     
-  	<get src="http://anon.inf.tu-dresden.de/develop/swingall.jar" 
-    	 verbose="true" 
-    	 usetimestamp="true"
-    	 ignoreerrors="true"
-    	 dest="${build.libs}/swingall.jar"/>    
+		<get src="http://anon.inf.tu-dresden.de/develop/swingall.jar" 
+			verbose="true" 
+			usetimestamp="true"
+			ignoreerrors="true"
+			dest="${build.libs}/swingall.jar"/>    
   
-    <get src="http://anon.inf.tu-dresden.de/develop/http.jar" 
-   	  	verbose="true"
-   		usetimestamp="true"
-   	    ignoreerrors="true"
-   		dest="${classpath_httplib_file_name}"/>
+		<get src="http://anon.inf.tu-dresden.de/develop/http.jar" 
+			verbose="true"
+			usetimestamp="true"
+			ignoreerrors="true"
+			dest="${classpath_httplib_file_name}"/>
   	
-    <get src="http://anon.inf.tu-dresden.de/develop/xml.jar" 
-    	 verbose="true" 
-    	 usetimestamp="true"
-    	 ignoreerrors="true"
-    	 dest="${classpath_xmllib_file_name}"/>
+		<get src="http://anon.inf.tu-dresden.de/develop/xml.jar" 
+			verbose="true" 
+			usetimestamp="true"
+			ignoreerrors="true"
+			dest="${classpath_xmllib_file_name}"/>
   	
    <get src="http://anon.inf.tu-dresden.de/develop/BouncyCastleLightForJAP.jar" 
     	 verbose="true" 
@@ -198,88 +202,17 @@
   
   <target name="init" depends="init-libs"/>
 
-  <target name="dist-pre-compile">
-  <!-- Use javac from Java1.3, because this compiler (at the moment) is the only one know
-      to produce byte codes which could be processed by all java 1.1 compatible implementation
-      Note: Java 1.4 and 1.5 are know to prodcue "bad" bytecode even if target="1.1" is specified!
-      -->
-    <property name="mycompilerversion" value="javac1.3"/>
-    <property name="mycompilerexecutable" value="${javac1.3.exe}"/>
-  </target>
- 
-  <target name="release-pre-compile" depends="init,dist-pre-compile" description="set things so that we can compile a release version of JAP">
-    <!-- Check whether the release flag was set to true ==> if this is not the case set it to relase and
-    increment the version nubmer by one and set the date to the current date
-    -->
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="bIsReleaseVersion">
-      <filterchain>
-        <linecontains>
-          <contains value="m_bReleasedVersion"/>
-        </linecontains>
-        <containsregex pattern="(.*)m_bReleasedVersion( )*=( )*([falsetru]*)(.*)" replace="\4"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <echo message="Is Current Version as Release version: ${bIsReleaseVersion}"/>
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="tmpCurrentVersion_LastValue">
-      <filterchain>
-        <linecontains>
-          <contains value="static final String aktVersion"/>
-        </linecontains>
-        <containsregex pattern="(.*)[0-9][0-9][\.][0-9][0-9][\.]([0-9][0-9][0-9])(.*)" replace="\2"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="tmpCurrentVersion_FirstPart">
-      <filterchain>
-        <linecontains>
-          <contains value="static final String aktVersion"/>
-        </linecontains>
-        <containsregex pattern="(.*)([0-9][0-9][\.][0-9][0-9][\.])[0-9][0-9][0-9](.*)" replace="\2"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <!-- Calculate current Date and new Version number with the help of a property file -->
-    <delete file="${src}/build.number">
-    </delete>
-    <propertyfile file="${src}/build.number">
-    <entry key="currentVersion_LastPart" value="1" operation="+" type="int" pattern="000" default="${tmpCurrentVersion_LastValue}"/>
-    <entry key="releaseDate" default="now" type="date" pattern="yyyy/MM/dd HH:mm:ss">
-    </entry>
-    </propertyfile>
-    <loadproperties srcfile="${src}/build.number">
-    </loadproperties>
-    <property name="currentVersion" value="${tmpCurrentVersion_FirstPart}${currentVersion_LastPart}">
-    </property>
-    <echo message="Current Version is: ${currentVersion}"/>
-    <echo message="Current ReleaseDate is: ${releaseDate}"/>
-    <!-- Replace the values in JAPConstant.java -->
-    <replaceregexp file="${src}/jap/JAPConstants.java" byline="true" match="m_bReleasedVersion( )*=( )*false" replace="m_bReleasedVersion = true"></replaceregexp>
-    <replaceregexp file="${src}/jap/JAPConstants.java" byline="true" match="static final String aktVersion( )*=( )*&quot;[0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9]&quot;" replace="static final String aktVersion = &quot;${currentVersion}&quot;"/>
-    <replaceregexp file="${src}/jap/JAPConstants.java" byline="true" match="private static final String RELEASE_DATE = &quot;.*&quot;" replace="private static final String RELEASE_DATE = &quot;${releaseDate}&quot;"></replaceregexp>
-    <touch file="${src}/jap/JAPConstants.java">    </touch>
-  </target>
-	
-  <target name="compile" depends="dist-pre-compile, init" description="compile the source">
+  <target name="compile" depends="init" description="compile the source">
     <!-- Compile the java code from ${src} into ${build} -->
     <javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}" 
-    	destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
-    	fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
+    	destdir="${build}"  classpathref="classpath_all" fork="yes">
     <include name="**/*.java"/>
     </javac>
   </target>
   
-  <target name="compile-force" depends="init" description="compile the source with whatever compiler">
-    <!-- Compile the java code without checking the version of the compiler -->
-	<javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-	   destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2" fork="yes">
-	  <include name="**/*.java"/>
-	</javac>
-  </target>	
-	
-  <target name="dist" depends="compile, make-only-jap-jar" description="generate the distribution">  </target>
+  <target name="dist" depends="jar" description="generate the distribution">  </target>
 
-  <target name="make-only-jap-jar" depends="getcurrentjapdllversion,getcurrentmacosxlibversion">
+  <target name="jar" depends="getcurrentjapdllversion,getcurrentmacosxlibversion, compile">
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}"/>
     <jar jarfile="${dist}/JAP.jar" manifest="MANIFEST.MF" index="true" duplicate="preserve">
@@ -305,94 +238,85 @@
       <zipfileset file="${build.libs}/libMacOSX.jnilib" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
     </jar>
   </target>
-	
-  <target name="signJAP.jar" description="sings JAP.jar">
-  <input message="Enter passwd for JAP signing key:" addproperty="japkeypass">
-  </input>
-  <signjar jar="${dist}/JAP.jar" verbose="true" alias="jap" storepass="useruser" keypass="useruser"
-     sigfile="JAP-TEAM" keystore="/home/compile/.keystore">
-  </signjar>
-  </target>
-	
-  <target name="dist-release" depends="clean,release-pre-compile,dist,signJAP.jar" description="Generates a release version of JAP.jar(this mainly means that the JAP internal release flag is set to 'release'">  </target>
- 
-  <target name="getcurrentversion" description="Sets the property 'currentVersion', 'releaseDate' to the value provided in JAPConstants.java">
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="currentVersion">
-      <filterchain>
-        <linecontains>
-          <contains value="static final String aktVersion"/>
-        </linecontains>
-        <containsregex pattern="(.*)([0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9])(.*)" replace="\2"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <echo message="Current Version is: ${currentVersion}"/>
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="releaseDate">
-      <filterchain>
-        <linecontains>
-          <contains value="private static final String RELEASE_DATE"/>
-        </linecontains>
-        <containsregex pattern="(.*&quot;)(.*)(&quot;.*)" replace="\2"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <echo message="Release Date is: ${releaseDate}"/>
-  </target>
-	
-  <target name="getcurrentjapdllversion" description="Sets the property 'currentJAPDllVersion' to the value provided on the Web">
-    <loadfile srcfile="${build.libs}/japdllversion.txt" property="currentJAPDllVersion">
-      <filterchain>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <echo message="Current JAPDLL Version is: ${currentJAPDllVersion}"/>
-  </target>
-	
-  <target name="getcurrentmacosxlibversion" description="Sets the protpery 'currentMacOSXLibVersion' to the value provided on the Web">
-	<loadfile property="currentMacOSXLibVersion" srcfile="${build.libs}/macosxlibversion.txt">
-		<filterchain>
-			<deletecharacters chars="\r\n" />
-		</filterchain>
-	</loadfile>
-	<echo message="Current MacOSXLib Version is: ${currentMacOSXLibVersion}"/>
-  </target>
 
-  <target name="sign-setup-files" description="Signes the setup files on the Web">
-    <input message="Enter passwd for JAP setup files signing key:" addproperty="japsetupfileskeypass"/>
-    <exec executable="/home/www/make_sig.bat">
-      <arg value="${japsetupfileskeypass}"/>
-    </exec>
+	<target name="getcurrentversion" description="Sets the property 'currentVersion', 'releaseDate' to the value provided in JAPConstants.java">
+	    <loadfile srcfile="${src}/jap/JAPConstants.java" property="currentVersion">
+	      <filterchain>
+	        <linecontains>
+	          <contains value="static final String aktVersion"/>
+	        </linecontains>
+	        <containsregex pattern="(.*)([0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9])(.*)" replace="\2"/>
+	        <deletecharacters chars="\r\n" />
+	      </filterchain>
+	    </loadfile>
+	    <echo message="Current Version is: ${currentVersion}"/>
+	    <loadfile srcfile="${src}/jap/JAPConstants.java" property="releaseDate">
+	      <filterchain>
+	        <linecontains>
+	          <contains value="private static final String RELEASE_DATE"/>
+	        </linecontains>
+	        <containsregex pattern="(.*&quot;)(.*)(&quot;.*)" replace="\2"/>
+	        <deletecharacters chars="\r\n" />
+	      </filterchain>
+	    </loadfile>
+    	<echo message="Release Date is: ${releaseDate}"/>
+ 	</target>
+  
+	<target name="getcurrentjapdllversion" description="Sets the property 'currentJAPDllVersion' to the value provided on the Web">
+	    <loadfile srcfile="${build.libs}/japdllversion.txt" property="currentJAPDllVersion">
+	      <filterchain>
+	        <deletecharacters chars="\r\n" />
+	      </filterchain>
+	    </loadfile>
+    	<echo message="Current JAPDLL Version is: ${currentJAPDllVersion}"/>
+	</target>
+	
+	<target name="getcurrentmacosxlibversion" description="Sets the protpery 'currentMacOSXLibVersion' to the value provided on the Web">
+		<loadfile property="currentMacOSXLibVersion" srcfile="${build.libs}/macosxlibversion.txt">
+			<filterchain>
+				<deletecharacters chars="\r\n" />
+			</filterchain>
+		</loadfile>
+		<echo message="Current MacOSXLib Version is: ${currentMacOSXLibVersion}"/>
+	</target>
+
+  
+  <target name="mac-dist" depends="jar, getcurrentversion" description="creates a JonDo Mac OS X bundle">
+  	<mkdir dir="${dist.osx}"/>
+  	<!-- 
+  	<mkdir dir="${dist.osx}/help/JonDo Help"/>
+  	<copy todir="${dist.osx}/help/JonDo Help">
+  		<fileset dir="help/de/help"/>
+  	</copy> 
+  	-->
+  		<jarbundler dir="${dist.osx}"
+  	            name="${AppName}"
+  	            mainclass="${MainClass.osx}" 
+  	            bundleid="${Mac_bundle_id}"
+  				jar="${dist}/${AppName}.jar"
+  				icon="images/${AppName}.icns"
+  				signature="JAPp"
+  				version="${currentVersion}"
+  				shortname="${AppName}"
+  				arguments="${JAP_args}">
+  				
+  				<javaproperty name="apple.awt.brushMetalLook" value="false"/>
+  				<javaproperty name="apple.awt.showGrowBox" value="false"/>
+				<javaproperty name="com.apple.hwaccel" value="true"/>
+				<javaproperty name="com.apple.mrj.application.growbox.intrudes" value="false"/>
+
+  		</jarbundler>
   </target>
 	
-  <target name="copy-jap-release-files-to-web">
-    <!-- Copies the newly created JAP.jar to the Web-Server -->
-    <copy file="${dist}/JAP.jar" todir="${japweb}/jap/">    </copy>
-    <!-- Sets the new release version number according to JAPConstants.java -->
-    <echo message="${currentVersion}" file="${japweb}/japversionstable.txt"/>
-    <!-- Copy JAP.jar to the Tomcat directory for JAP Update functionality -->
-    <copy file="${dist}/JAP.jar" tofile="${japtomcat}/signedJAP__V${currentVersion}.jar">
-    </copy>
-    <!-- Touch version.xml to make tomcat reread the JAP web-app -->
-    <touch file="${japtomcat}/version.xml">
-    </touch>
-    <!-- Sets the new version number in the JavaWebStart/JAP Update japRelease.jnlp -->
-    <replaceregexp file="${japrelease.jnlp}"
-    match="version=&quot;([0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9])&quot;"
-    replace="version=&quot;${currentVersion}&quot;" byline="true">
-    </replaceregexp>
-    <!-- Sets the new release date in the JavaWebStart/JAP Update japRelease.jnlp -->
-    <replaceregexp file="${japrelease.jnlp}"
-    match="releaseDate=&quot;([^&quot;]*)&quot;"
-    replace="releaseDate=&quot;${releaseDate}&quot;" byline="true">
-    </replaceregexp>
-  </target>
-	
-  <target name="make-relase-jap-dmg">
-    <exec executable="/home/compile/generation/test.japmac.dofinal"/>
-  </target>
-	
-  <target name="new-jap-release-anon" depends="clean,dist-release,getcurrentversion,copy-jap-release-files-to-web,make-relase-jap-dmg,sign-setup-files" description="Makes a new release of JAP. Note: This target needs to be started on anon.inf.tu-dresden.de as root...">
-  </target>
+	<target name="mac-diskimage" depends="mac-dist" 
+			description="creates a compressed dmg image of the JonDo Mac OS X bundle (needs Mac OS X)">
+	  <exec executable="hdiutil">
+	    <arg value="create"/>
+	    <arg value="-srcfolder"/>
+	    <arg value="${dist.osx}/${AppName}.app"/>
+	  	<arg value="${dist.osx}/${AppName}.dmg"/>
+	  </exec>
+	</target>
 	
   <target name="clean" description="clean up">
     <!-- Delete the ${build} and ${dist} directory trees -->
@@ -407,8 +331,10 @@
     <delete dir="${src}/anon/crypto/tinytls/test"/>
     <delete dir="${src}/misc"/>    
   </target>
-
-	<target name="infoservice-init" depends="infoservice-clean" 
+	
+<!-- InfoService targets -->
+	
+  <target name="infoservice-init" depends="infoservice-clean" 
 			description="initializes folder structure for infoservice distribution">
 		<mkdir dir="${build}" />
 		<mkdir dir="${build}/infoservice" />
