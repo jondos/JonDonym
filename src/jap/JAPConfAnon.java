@@ -1979,17 +1979,23 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else if(value == 0)
 						{
-							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1]));
+							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
+									PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1],
+									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 						}
 						else
 						{
 							if(best == value || best == Integer.MAX_VALUE)
 							{
-								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value,
+										JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 							}
 							else
 							{
-								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value) + " - " + JAPUtil.formatKbitPerSecValueWithUnit(best));
+								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithoutUnit(value,
+										JAPUtil.MAX_FORMAT_KBIT_PER_SEC) + 
+										"-" + JAPUtil.formatKbitPerSecValueWithUnit(best,
+												JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 							}
 						}
 						
@@ -2013,7 +2019,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							}
 							else
 							{
-								m_lblDelay.setText(best + " - " + value + " ms");
+								m_lblDelay.setText(value + "-" + best + " ms");
 							}
 						}
 					}
