@@ -2928,17 +2928,22 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				else if(value == 0)
 				{
-					m_labelSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1]));
+					m_labelSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
+							PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1], 
+							JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 				}
 				else
 				{
 					if(best == value || best == Integer.MAX_VALUE)
 					{
-						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value, 
+								JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 					}
 					else
 					{
-						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value) + " - " + JAPUtil.formatKbitPerSecValueWithUnit(best));
+						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithoutUnit(
+								value, JAPUtil.MAX_FORMAT_KBIT_PER_SEC) + "-" + 
+								JAPUtil.formatKbitPerSecValueWithUnit(best, JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 					}
 				}
 				
@@ -2962,7 +2967,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					}
 					else
 					{
-						m_labelDelay.setText(best + " - " + value + " ms");
+						m_labelDelay.setText(value + "-" + best + " ms");
 					}
 				}
 			}
