@@ -94,7 +94,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		m_xmlData = a_doc.getDocumentElement();
 		
 		m_date = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
-		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
+		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()), "");
 		m_type = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
 		
 		m_strId = m_type + "_" + m_locale + "_" + m_date;
@@ -124,7 +124,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		m_xmlData = m_doc.getDocumentElement();
 		
 		m_date = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
-		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()));
+		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()), "");
 		m_type = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
 		
 		m_strId = m_type + "_" + m_locale + "_" + m_date;
@@ -275,7 +275,15 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 				node = XMLUtil.getFirstChildByName(tcDefault.getDocument().getDocumentElement(), a_nodeName);
 				if(node != null)
 				{
-					return a_tc.getDocument().importNode(node, true);
+					try
+					{
+						return XMLUtil.importNode(a_tc.getDocument(), node, true);
+					}
+					catch (XMLParseException a_e)
+					{
+						LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+						return null;
+					}
 				}
 			}
 		}
