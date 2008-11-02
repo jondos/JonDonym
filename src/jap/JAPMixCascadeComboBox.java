@@ -35,6 +35,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.IllegalComponentStateException;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -51,7 +52,9 @@ import javax.swing.border.EmptyBorder;
 
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixInfo;
 import anon.infoservice.NewCascadeIDEntry;
+import gui.CountryMapper;
 import gui.GUIUtils;
 import gui.JAPMessages;
 import javax.swing.ImageIcon;
@@ -182,6 +185,11 @@ public class JAPMixCascadeComboBox extends JComboBox
 		private JLabel m_componentAvailableServer;
 		private JLabel m_componentUserServer;
 		private JLabel m_componentAvailableCascade;
+		private JLabel m_flags[];
+		private JLabel m_names[];
+		
+		private JPanel m_componentPanel;
+		private GridBagConstraints m_componentConstraints;
 
 		private JLabel m_lblCascadePopupMenu;
 		private JLabel m_lblMenuArrow;
@@ -190,6 +198,15 @@ public class JAPMixCascadeComboBox extends JComboBox
 
 		public JAPMixCascadeComboBoxListCellRender()
 		{
+			m_componentPanel = new JPanel(new GridBagLayout());
+			m_componentPanel.setOpaque(true);
+			
+			m_componentConstraints = new GridBagConstraints();
+			m_componentConstraints.anchor = GridBagConstraints.WEST;
+			m_componentConstraints.gridy = 0;
+			m_componentConstraints.insets = new Insets(0,0,0,0);
+			m_componentConstraints.fill = GridBagConstraints.HORIZONTAL;
+			
 			m_componentNoServer = new JLabel(JAPMessages.getString("ngMixComboNoServers"));
 			m_componentNoServer.setIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_ERROR, true));
 			m_componentNoServer.setBorder(new EmptyBorder(0, 3, 0, 3));
@@ -209,6 +226,19 @@ public class JAPMixCascadeComboBox extends JComboBox
 			m_componentAvailableCascade.setHorizontalAlignment(SwingConstants.LEFT);
 			m_componentAvailableCascade.setOpaque(true);
 			m_componentAvailableCascade.setBorder(new EmptyBorder(1, 3, 1, 3));
+			
+			m_flags = new JLabel[3];
+			m_names = new JLabel[3];
+			for (int i = 0; i < m_flags.length; i++)
+			{
+				m_flags[i] = new JLabel();				
+				m_flags[i].setHorizontalAlignment(SwingConstants.LEFT);
+				m_flags[i].setOpaque(true);
+				m_flags[i].setBorder(new EmptyBorder(0, 1, 0, 2));
+				m_names[i] = new JLabel();
+				m_names[i].setHorizontalAlignment(SwingConstants.LEFT);
+				m_names[i].setOpaque(true);
+			}
 
 
 			m_lblCascadePopupMenu = new JLabel();
@@ -425,12 +455,13 @@ public class JAPMixCascadeComboBox extends JComboBox
 				icon = GUIUtils.combine(icon, GUIUtils.loadImageIcon("socks_icon.gif", true));
 			}
 			l = m_componentAvailableCascade;
-			l.setIcon(icon);
-			l.setText(GUIUtils.trim(cascade.getName()));
+			l.setIcon(icon);			
+			
+			Color background, foreground;
 			if (isSelected)
 			{
-				l.setBackground(list.getSelectionBackground());
-				l.setForeground(list.getSelectionForeground());
+				background = list.getSelectionBackground();
+				foreground = list.getSelectionForeground();
 			}
 			else
 			{
@@ -439,16 +470,85 @@ public class JAPMixCascadeComboBox extends JComboBox
 					 Database.getInstance(NewCascadeIDEntry.class).getEntryById(
 									   cascade.getMixIDsAsString()) != null)
 				{
-					l.setBackground(m_newCascadeColor);
+					background = m_newCascadeColor;
 				}
 				else
 				{
-					l.setBackground(list.getBackground());
+					background = list.getBackground();
 				}
-				l.setForeground(list.getForeground());
+				foreground = list.getForeground();
+			}
+			setSelectionColors(background, foreground);
+			
+			
+			Vector cascadeName = cascade.getDecomposedCascadeName();
+			MixInfo mixInfo;	
+			
+			m_componentConstraints.gridx = 0;
+			m_componentConstraints.weightx = 0.0;
+			m_componentPanel.add(l, m_componentConstraints);
+			
+			while (cascadeName.size() != 0 && cascadeName.size() > cascade.getNumberOfOperators())
+			{
+				cascadeName.removeElementAt(cascadeName.size() - 1);
+			}
+							
+			for (int i = 0; i < m_flags.length; i++)
+			{
+				m_flags[i].setIcon(null);
+				m_flags[i].setText("");
+				m_names[i].setText("");
 			}
 
-			return l;
+			for (int i = 0; i < cascadeName.size() && i < m_flags.length; i++)
+			{
+				m_componentConstraints.gridx++;
+				m_names[i].setText((String)cascadeName.elementAt((i)));
+				m_componentPanel.add(m_names[i], m_componentConstraints);
+				
+				if (i + 1 == cascade.getNumberOfOperators())
+				{
+					m_componentConstraints.weightx = 1.0;
+				}
+				else
+				{
+					m_flags[i].setText("-");
+				}
+				
+				m_componentConstraints.gridx++;
+				
+				mixInfo = cascade.getMixInfo(i);				
+				if (mixInfo != null && mixInfo.getCertificate() != null && 
+					mixInfo.getCertificate().getSubject() != null) 
+				{
+					String mixCountry = mixInfo.getCertificate().getSubject().getCountryCode();
+					m_flags[i].setIcon(GUIUtils.loadImageIcon("flags/" + mixCountry + ".png"));
+				}
+				else
+				{
+					m_flags[i].setIcon(null);
+				}				
+				
+				m_componentPanel.add(m_flags[i], m_componentConstraints);
+			}
+			
+			return m_componentPanel;
 		}
+		
+		private void setSelectionColors(Color a_background, Color a_foreground)
+		{
+			m_componentAvailableCascade.setBackground(a_background);
+			m_componentAvailableCascade.setForeground(a_foreground);
+			for (int i = 0; i < m_flags.length; i++)
+			{
+				m_names[i].setBackground(a_background);
+				m_names[i].setForeground(a_foreground);
+				m_flags[i].setBackground(a_background);
+				m_flags[i].setForeground(a_foreground);
+			}
+			m_componentPanel.setBackground(a_background);
+			m_componentPanel.setForeground(a_foreground);
+		}
+		
 	}
 }

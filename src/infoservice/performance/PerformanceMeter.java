@@ -121,6 +121,11 @@ public class PerformanceMeter implements Runnable, Observer
 	private Object SYNC_TEST = new Object();
 	
 	/**
+	 * Protects certain commands from being interrupted.
+	 */
+	private Object SYNC_INTERRUPT = new Object();
+	
+	/**
 	 * The size of data to be requested.
 	 */
 	private int m_dataSize;
@@ -563,10 +568,13 @@ public class PerformanceMeter implements Runnable, Observer
 		// for some reason the test thread is still alive, try various methods to stop it
 		int iWait = 0;
 		while (performTestThread.isAlive())
-		{	
-			iWait++;
+		{							
+			iWait++;			
 			// try to interrupt it
-			performTestThread.interrupt();
+			synchronized (SYNC_INTERRUPT)
+			{
+				performTestThread.interrupt();
+			}
 		
 			if (iWait > 5)
 			{	
@@ -575,7 +583,10 @@ public class PerformanceMeter implements Runnable, Observer
 				{
 					LogHolder.log(LogLevel.EMERG, LogType.THREAD, 
 						"Using deprecated stop method to finish meter thread!");
-					performTestThread.stop();
+					synchronized (SYNC_INTERRUPT)
+					{
+						performTestThread.stop();
+					}
 				}
 				else if (iWait > 5)
 				{
@@ -762,15 +773,8 @@ public class PerformanceMeter implements Runnable, Observer
 	private boolean performTest(MixCascade a_cascade) throws InterruptedException
 	{
 		boolean bUpdated = false;
-		int errorCode = ErrorCodes.E_UNKNOWN; 
-		boolean bRetry = true;
+		int errorCode = ErrorCodes.E_UNKNOWN; 		
 		Hashtable hashBadInfoServices = new Hashtable();
-		HTTPResponse httpResponse;
-		
-		Document doc;
-		String host;
-		int port;
-		String xml;
 		
 		// skip cascades on the same host as the infoservice
 		// and skip blacklisted cascades
@@ -796,10 +800,7 @@ public class PerformanceMeter implements Runnable, Observer
 		if(entry == null)
 		{
 			entry = new PerformanceEntry(a_cascade.getId());
-		}
-		
-		// allocate the recv buff
-		char[] recvBuff = new char[m_dataSize];				
+		}					
 		
 		while(!Thread.currentThread().isInterrupted())
 		{			
@@ -835,290 +836,366 @@ public class PerformanceMeter implements Runnable, Observer
 		Hashtable vSpeed = new Hashtable();
 		Hashtable vUsers = new Hashtable();
 		
-		for (int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() &&
-			m_proxy.isConnected(); i++)
+//		 allocate the recv buff
+		char[] recvBuff = new char[m_dataSize];	
+		for (int i = 0; i < m_requestsPerInterval && !Thread.currentThread().isInterrupted() && m_proxy.isConnected(); i++)
 		{
-    		int delay = -1;
-    		int speed = -1;
-    		int users = -1;
-    		long timestamp;
+			try
+			{
+				if (performSingleTest(a_cascade, vDelay, vSpeed, vUsers, hashBadInfoServices, recvBuff))
+				{
+					bUpdated = true;
+				}
+			}
+			catch (InterruptedException a_e)
+			{
+				break;
+			}
+			catch (InfoServiceException a_e)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.NET, a_e);
+				break;
+			}
+		}
+		
+		// add the data hashtable to the PerformanceEntry 
+		synchronized (SYNC_INTERRUPT)
+		{
+			int lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
+			int lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
+			int lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
+		
+			Database.getInstance(PerformanceEntry.class).update(entry);
+		
+	    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers);
+			
+	    	if (m_proxy.isConnected())
+			{
+	    		m_proxy.stop();
+			}
+			
+			if (bUpdated)
+			{
+				m_lastUpdate = System.currentTimeMillis();
+				m_lastCascadeUpdated = a_cascade.getName();
+			}
+		}
+    	
+		return bUpdated;
+	}
+	
+	private boolean performSingleTest(MixCascade a_cascade, Hashtable a_vDelay,
+	Hashtable a_vSpeed, Hashtable a_vUsers, Hashtable a_hashBadInfoServices, char[] a_recvBuff) 
+		throws InterruptedException, InfoServiceException
+	{		
+		HTTPResponse httpResponse;
+		
+		Document doc;
+		String host;
+		int port;
+		String xml;
+		
+		int delay = -1;
+		int speed = -1;
+		int users = -1;
+		long timestamp;
+		
+		boolean bUpdated = false;
+		boolean bRetry = true;
+		
+		try 
+    	{
+    		OutputStream stream;
+    		BufferedReader reader;
+	       	
+	       	InfoServiceDBEntry infoservice = null;
+	       	
+	       	// fetch cascade status
+    		a_cascade.fetchCurrentStatus(m_maxWaitForTest);
+    		StatusInfo info = a_cascade.getCurrentStatus();
     		
-			try 
-        	{
-        		OutputStream stream;
-        		BufferedReader reader;
-		       	
-		       	InfoServiceDBEntry infoservice;
-		       	
-		       	// fetch cascade status
-	    		a_cascade.fetchCurrentStatus(m_maxWaitForTest);
-	    		StatusInfo info = a_cascade.getCurrentStatus();
-	    		
-	    		if(info != null)
-	    		{
-	    			// and store the amount of users
-	    			users = info.getNrOfActiveUsers();
-	    		}
-		       	
-	    		// loop until we have a valid token from an info service
-		       	while (true)
-		       	{
-		       		// choose a random info service for our performance test
-		       		infoservice = chooseRandomInfoService(hashBadInfoServices);
-			       	if(infoservice == null)
-			       	{
-			       		LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not find any info services that are running a performance server.");
-			       		return bUpdated;
-			       	}
-			        
-			       	// get the host and port from the chosen info service
-			       	host = ((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getHost();
-			       	port = ((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getPort();
-	        		
-			       	// request token from info service directly
-			       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
-			       	doc = XMLUtil.toSignedXMLDocument(tokenRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
-			       	xml = XMLUtil.toString(doc);
-			       	
-			       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Requesting performance token");
-			       	
-			       	// open HTTP connection
-			       	HTTPConnection conn = new HTTPConnection(host, port);
-			       	httpResponse = conn.Post("/requestperformancetoken", xml);
-			       	
-			       	if(httpResponse.getStatusCode() != 200 || Thread.currentThread().isInterrupted())
-			       	{			       		
-			        	LogHolder.log(LogLevel.WARNING, LogType.NET, 
-			        			"Token request to performance server failed. Status Code: " + httpResponse.getStatusCode());
-			        	httpResponse = null;
-			        	if (!Thread.currentThread().isInterrupted())
-			        	{
-			        		hashBadInfoServices.put(infoservice.getId(), infoservice);			        		
-			        		continue;
-			        	}
-			       	}
-			       	break;
+    		if(info != null)
+    		{
+    			// and store the amount of users
+    			users = info.getNrOfActiveUsers();
+    		}
+	       	
+    		// loop until we have a valid token from an info service
+	       	while (true)
+	       	{
+	       		// choose a random info service for our performance test
+	       		infoservice = chooseRandomInfoService(a_hashBadInfoServices);
+		       	if(infoservice == null)
+		       	{		       		
+		       		throw new InfoServiceException("Could not find any info services that are running a performance server.");
 		       	}
-		       	
-		       	if (httpResponse == null)
-		       	{
-		       		throw new Exception("Error while reading from infoservice");
-		       	}
-		       	
-		       	// fetch the token from the response data
-		       	PerformanceToken token = null;
-		        try
-		        {
-		        	doc = XMLUtil.toXMLDocument(httpResponse.getData());
-		        	token = new PerformanceToken(doc.getDocumentElement());
-		        	
-		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Received Token " + token.getId() + ".");
-		        }
-		        catch(XMLParseException ex)
-		        {
-		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Error while parsing performance token: " + ex.getMessage());
-		        	return bUpdated;
-		        }
-		       	
-		       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
-		       	
-		       	// open the socket connection to the AnonProxy
-		       	synchronized (SYNC_SOCKET)
-		       	{
-		       		m_meterSocket = new Socket(m_proxyHost, m_proxyPort);	
-		       		m_meterSocket.setSoTimeout(m_maxWaitForTest);			       	
-			       	stream = m_meterSocket.getOutputStream();
-			       	reader = new BufferedReader(new InputStreamReader(m_meterSocket.getInputStream()));
-		       	}
-		       	
-		       	// send a PerformanceRequest to the info service while using the anonproxy
-		       	PerformanceRequest perfRequest = new PerformanceRequest(token.getId(), m_dataSize);
-		       	doc = XMLUtil.toSignedXMLDocument(perfRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+		        
+		       	// get the host and port from the chosen info service
+		       	host = ((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getHost();
+		       	port = ((ListenerInterface)infoservice.getListenerInterfaces().elementAt(0)).getPort();
+        		
+		       	// request token from info service directly
+		       	PerformanceTokenRequest tokenRequest = new PerformanceTokenRequest(Configuration.getInstance().getID());
+		       	doc = XMLUtil.toSignedXMLDocument(tokenRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		       	xml = XMLUtil.toString(doc);
 		       	
-		       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Requesting performance data");
+		       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Requesting performance token");
 		       	
-		       	stream.write(("POST http://" + host + ":" + port + "/requestperformance HTTP/1.0\r\n").getBytes());
-		       	stream.write(("Content-Length: " + xml.length() + "\r\n\r\n").getBytes());
-		       	stream.write((xml + "\r\n").getBytes());
+		       	// open HTTP connection
+		       	HTTPConnection conn = new HTTPConnection(host, port);
+		       	httpResponse = conn.Post("/requestperformancetoken", xml);
 		       	
-				// read first byte for delay
-		        long transferInitiatedTime = System.currentTimeMillis();
-		        
-		        LogHolder.log(LogLevel.INFO, LogType.NET, "Reading first byte for performance test...");
-		        
-		        // set a mark at the beginning
-		        reader.mark(2);
-		        if (reader.read() < 0)
-		        {
-		        	closeMeterSocket();
-		        	throw new Exception("Error while reading from socket");
-		        }
-		        long responseStartTime = System.currentTimeMillis();
-		        
-		        //	delay in ms
-		        if (responseStartTime - transferInitiatedTime > Integer.MAX_VALUE)
-		        {
-		        	delay = Integer.MAX_VALUE;
-		        }
-		        else
-		        {
-		        	delay = (int)(responseStartTime - transferInitiatedTime);
-		        }
-		        
-		        LogHolder.log(LogLevel.INFO, LogType.NET, "Downloading bytes for performance test...");
-		        
-		        // reset the mark
-		        reader.reset();
-		        
-		        HTTPResponseHeader resp = null;
-		        
-		        // read HTTP header from PerformanceServer
-		        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
-		        {       
-		        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
-		        	closeMeterSocket();
-		        	if (bRetry)
+		       	if(httpResponse.getStatusCode() != 200 || Thread.currentThread().isInterrupted())
+		       	{			       		
+		        	LogHolder.log(LogLevel.WARNING, LogType.NET, 
+		        			"Token request to performance server failed. Status Code: " + httpResponse.getStatusCode());
+		        	httpResponse = null;
+		        	if (!Thread.currentThread().isInterrupted())
 		        	{
-		        		bRetry = false;
-		        		if (m_proxy.isConnected())
-		        		{
-		        			m_proxy.stop();
-		        		}
-		        		errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
-		    		    if (errorCode == ErrorCodes.E_SUCCESS && m_proxy.isConnected())
-		    		    {
-		    		    	bRetry = true;
-		    		    }
+		        		a_hashBadInfoServices.put(infoservice.getId(), infoservice);			        		
+		        		continue;
 		        	}
-		        	throw new Exception("Error while reading from mix cascade");  	
-		        }
-		        LogHolder.log(LogLevel.DEBUG, LogType.NET, "Performance meter parsed server header.");
-		        
-		        // check if the content length is supposed to be the same as the requested data size
-		        if(resp.m_contentLength != m_dataSize)
-		        {
-        			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_contentLength + " of " + m_dataSize + " bytes.");
-        			closeMeterSocket();
-        			throw new Exception("Invalid Packet-Length");
-		        }
-		        
-		        int bytesRead = 0;
-		        int recvd = 0;
-		        int toRead = resp.m_contentLength;
-		        
-		        // read the whole packet
-		        while(bytesRead < m_dataSize) 
-		        {
-		        	recvd = reader.read(recvBuff, bytesRead, toRead);
-		        	
-		        	if(recvd == -1) break;
-		        	bytesRead += recvd;
-		        	toRead -= recvd;
-		        }
-		        
-		        byte[] ip;
-		        int ipSize = 0;
-		        
-		        if((byte) recvBuff[0] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[0] &&
-		           (byte) recvBuff[1] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[1] &&
-		           (byte) recvBuff[2] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[2] &&
-		           (byte) recvBuff[3] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[3])
-		        {
-		        	ipSize = 4;
-		        }
-		        else if((byte) recvBuff[0] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[0] &&
-		           (byte) recvBuff[1] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[1] &&
-		           (byte) recvBuff[2] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[2] &&
-		           (byte) recvBuff[3] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[3])
-		        {
-		        	ipSize = 16;
-		        }
-		        
-		        if(ipSize > 0)
-		        {
-		        	ip = new byte[ipSize];
-		        	for(int j = 0; j < ipSize; j++)
-		        	{
-		        		ip[j] = (byte) recvBuff[4 + j];
-		        	}
-		        
-		        	try
-		        	{
-		        		InetAddress addr = InetAddress.getByAddress(ip);
-		        		if(addr != null)
-		        		{
-		        			MixCascadeExitAddresses exit =
-		        				(MixCascadeExitAddresses) Database.getInstance(MixCascadeExitAddresses.class).
-		        				getEntryById(a_cascade.getId());
-		        		
-		        			if(exit == null)
-		        			{
-		        				exit = new MixCascadeExitAddresses(a_cascade);
-		        			}
-		        		
-		        			if(exit.addInetAddress(addr))
-		        			{
-		        				Database.getInstance(MixCascadeExitAddresses.class).update(exit);
-		        			}
-		        		}
-		        	}
-		        	catch(Exception ex)
-		        	{
-		        		LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not parse IP address", ex);
-		        	}
-		        }
-		        
-		        long responseEndTime = System.currentTimeMillis();
-		        
-		        // could not read all data
-        		if(bytesRead != m_dataSize)
-        		{
-        			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not get all requested bytes. Received " + bytesRead + " of " + m_dataSize + " bytes.");
-        			if (bytesRead < (1000))
-        			{
-        				// less than 1 kb was received; not enough for testing download performance
-        				bytesRead = 0;
-        			}
-        		}        		        		
-        		
-        		// speed in bit/s;
-        		long lSpeed = (bytesRead * 8) / (responseEndTime - responseStartTime);
-        		if (lSpeed <= 0 || lSpeed > Integer.MAX_VALUE)
-        		{
-        			speed = Integer.MAX_VALUE;
-        		}
-        		else
-        		{
-        			speed = (int)lSpeed;
-        		}
-        		
-        		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/s.");
-        		
-        		m_lBytesRecvd += bytesRead;        		        		
-        		bUpdated = true;
-        		
-        		closeMeterSocket();
-        	}
-        	catch (InterruptedIOException a_e)
-        	{
-        		LogHolder.log(LogLevel.WARNING, LogType.NET, a_e);
-        	}
-        	catch(Exception e)
-        	{
-	        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
+		       	}
+		       	break;
+	       	}
+	       	
+	       	if (httpResponse == null)
+	       	{
+	       		throw new Exception("Error while reading from infoservice");
+	       	}
+	       	
+	       	// fetch the token from the response data
+	       	PerformanceToken token = null;
+	        try
+	        {
+	        	doc = XMLUtil.toXMLDocument(httpResponse.getData());
+	        	token = new PerformanceToken(doc.getDocumentElement());
+	        	
+	        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Received Token " + token.getId() + ".");
 	        }
-        	
-        	// timestamp at which the test data was retrieved
-    		timestamp = System.currentTimeMillis();
-    		
-    		// put the values into the hashtable
-    		vDelay.put(new Long(timestamp), new Integer(delay));
-    		vSpeed.put(new Long(timestamp), new Integer(speed));
-    		vUsers.put(new Long(timestamp), new Integer(users));
-    		
-    		try
+	        catch(XMLParseException ex)
+	        {
+	        	LogHolder.log(LogLevel.ERR, LogType.NET, "Error while parsing performance token!", ex);
+	        	return bUpdated;
+	        }
+	       	
+	       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Trying to reach infoservice random data page at " + host + ":" + port + " through the mixcascade "+ a_cascade.getListenerInterface(0).getHost() +".");
+	       	
+	       	// open the socket connection to the AnonProxy
+	       	synchronized (SYNC_SOCKET)
+	       	{
+	       		m_meterSocket = new Socket(m_proxyHost, m_proxyPort);	
+	       		m_meterSocket.setSoTimeout(m_maxWaitForTest);			       	
+		       	stream = m_meterSocket.getOutputStream();
+		       	reader = new BufferedReader(new InputStreamReader(m_meterSocket.getInputStream()));
+	       	}
+	       	
+	       	// send a PerformanceRequest to the info service while using the anonproxy
+	       	PerformanceRequest perfRequest = new PerformanceRequest(token.getId(), m_dataSize);
+	       	doc = XMLUtil.toSignedXMLDocument(perfRequest, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+	       	xml = XMLUtil.toString(doc);
+	       	
+	       	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Requesting performance data");
+	       	
+	       	stream.write(("POST http://" + host + ":" + port + "/requestperformance HTTP/1.0\r\n").getBytes());
+	       	stream.write(("Content-Length: " + xml.length() + "\r\n\r\n").getBytes());
+	       	stream.write((xml + "\r\n").getBytes());
+	       	
+			// read first byte for delay
+	        long transferInitiatedTime = System.currentTimeMillis();
+	        
+	        LogHolder.log(LogLevel.INFO, LogType.NET, "Reading first byte for performance test...");
+	        
+	        // set a mark at the beginning
+	        reader.mark(2);
+	        if (reader.read() < 0)
+	        {
+	        	closeMeterSocket();
+	        	throw new Exception("Error while reading from socket");
+	        }
+	        long responseStartTime = System.currentTimeMillis();
+	        
+	        //	delay in ms
+	        if (responseStartTime - transferInitiatedTime > Integer.MAX_VALUE)
+	        {
+	        	delay = Integer.MAX_VALUE;
+	        }
+	        else
+	        {
+	        	delay = (int)(responseStartTime - transferInitiatedTime);
+	        }
+	        
+	        LogHolder.log(LogLevel.INFO, LogType.NET, "Downloading bytes for performance test...");
+	        
+	        // reset the mark
+	        reader.reset();
+	        
+	        HTTPResponseHeader resp = null;
+	        
+	        // read HTTP header from PerformanceServer
+	        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
+	        {       
+	        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
+	        	closeMeterSocket();
+	        	if (bRetry)
+	        	{
+	        		bRetry = false;
+	        		if (m_proxy.isConnected())
+	        		{
+	        			m_proxy.stop();
+	        		}
+	  
+	    		    if ( m_proxy.start(new SimpleMixCascadeContainer(a_cascade)) == 
+	    		    	ErrorCodes.E_SUCCESS && m_proxy.isConnected())
+	    		    {
+	    		    	bRetry = true;
+	    		    }
+	        	}
+	        	throw new Exception("Error while reading from mix cascade");  	
+	        }
+	        LogHolder.log(LogLevel.DEBUG, LogType.NET, "Performance meter parsed server header.");
+	        
+	        // check if the content length is supposed to be the same as the requested data size
+	        if(resp.m_contentLength != m_dataSize)
+	        {
+    			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_contentLength + " of " + m_dataSize + " bytes.");
+    			closeMeterSocket();
+    			throw new Exception("Invalid Packet-Length");
+	        }
+	        
+	        int bytesRead = 0;
+	        int recvd = 0;
+	        int toRead = resp.m_contentLength;
+	        
+	        // read the whole packet
+	        while(bytesRead < m_dataSize) 
+	        {
+	        	recvd = reader.read(a_recvBuff, bytesRead, toRead);
+	        	
+	        	if(recvd == -1) break;
+	        	bytesRead += recvd;
+	        	toRead -= recvd;
+	        }
+	        
+	        byte[] ip;
+	        int ipSize = 0;
+	        
+	        if((byte) a_recvBuff[0] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[0] &&
+	           (byte) a_recvBuff[1] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[1] &&
+	           (byte) a_recvBuff[2] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[2] &&
+	           (byte) a_recvBuff[3] == PerformanceRequestHandler.MAGIC_BYTES_IPV4[3])
+	        {
+	        	ipSize = 4;
+	        }
+	        else if((byte) a_recvBuff[0] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[0] &&
+	           (byte) a_recvBuff[1] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[1] &&
+	           (byte) a_recvBuff[2] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[2] &&
+	           (byte) a_recvBuff[3] == PerformanceRequestHandler.MAGIC_BYTES_IPV6[3])
+	        {
+	        	ipSize = 16;
+	        }
+	        
+	        if(ipSize > 0)
+	        {
+	        	ip = new byte[ipSize];
+	        	for(int j = 0; j < ipSize; j++)
+	        	{
+	        		ip[j] = (byte) a_recvBuff[4 + j];
+	        	}
+	        
+	        	try
+	        	{
+	        		InetAddress addr = InetAddress.getByAddress(ip);
+	        		if(addr != null)
+	        		{
+	        			MixCascadeExitAddresses exit =
+	        				(MixCascadeExitAddresses) Database.getInstance(MixCascadeExitAddresses.class).
+	        				getEntryById(a_cascade.getId());
+	        		
+	        			if(exit == null)
+	        			{
+	        				exit = new MixCascadeExitAddresses(a_cascade);
+	        			}
+	        		
+	        			if(exit.addInetAddress(addr))
+	        			{
+	        				Database.getInstance(MixCascadeExitAddresses.class).update(exit);
+	        			}
+	        		}
+	        	}
+	        	catch(Exception ex)
+	        	{
+	        		LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not parse IP address", ex);
+	        	}
+	        }
+	        
+	        long responseEndTime = System.currentTimeMillis();
+	        
+	        // could not read all data
+    		if(bytesRead != m_dataSize)
     		{
+    			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not get all requested bytes. Received " + bytesRead + " of " + m_dataSize + " bytes.");
+    			if (bytesRead < (1000))
+    			{
+    				// less than 1 kb was received; not enough for testing download performance
+    				bytesRead = 0;
+    			}
+    		}        		        		
+    		
+    		// speed in bit/s;
+    		long lSpeed = (bytesRead * 8) / (responseEndTime - responseStartTime);
+    		if (lSpeed <= 0 || lSpeed > Integer.MAX_VALUE)
+    		{
+    			speed = Integer.MAX_VALUE;
+    		}
+    		else
+    		{
+    			speed = (int)lSpeed;
+    		}
+    		
+    		LogHolder.log(LogLevel.INFO, LogType.NET, "Verified incoming package. Delay: " + delay + " ms - Speed: " + speed + " kbit/s.");
+    		
+    		m_lBytesRecvd += bytesRead;        		        		
+    		bUpdated = true;
+    		
+    		closeMeterSocket();
+    	}
+    	catch (InterruptedIOException a_e)
+    	{
+    		LogHolder.log(LogLevel.WARNING, LogType.NET, a_e);
+    	}
+    	catch (InterruptedException a_e)
+    	{
+    		// ignore
+    	}
+    	catch (InfoServiceException a_e)
+    	{
+    		throw a_e;
+    	}
+    	catch(Exception e)
+    	{
+        	LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
+        }
+    	
+    	// timestamp at which the test data was retrieved
+		timestamp = System.currentTimeMillis();
+		
+		// put the values into the hashtable
+		a_vDelay.put(new Long(timestamp), new Integer(delay));
+		a_vSpeed.put(new Long(timestamp), new Integer(speed));
+		a_vUsers.put(new Long(timestamp), new Integer(users));
+		
+		logPerftestData(timestamp, a_cascade, delay, speed, users);
+		
+		return bUpdated;
+	}
+	
+	private void logPerftestData(long a_timestamp, MixCascade a_cascade, int a_delay, int a_speed, int a_users)
+	{
+		try
+		{
+			synchronized (SYNC_INTERRUPT)
+			{
     			m_cal.setTimeInMillis(System.currentTimeMillis());
     			// check if we're still in the same week, if not open a new performance log file
     			if(m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
@@ -1131,35 +1208,14 @@ public class PerformanceMeter implements Runnable, Observer
     						m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
     			}
     			
-    			m_stream.write((timestamp + "\t" + a_cascade.getId() + "\t" + delay + "\t" + speed + "\t" + users + "\n").getBytes());
-    		}
-    		catch(IOException ex)
-    		{
-    			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, ex);
-    		}
+    			m_stream.write((a_timestamp + "\t" + a_cascade.getId() + "\t" + a_delay + 
+    					"\t" + a_speed + "\t" + a_users + "\n").getBytes());
+			}
 		}
-		
-		// add the data hashtable to the PerformanceEntry 
-		int lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
-		int lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
-		int lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
-		
-		Database.getInstance(PerformanceEntry.class).update(entry);
-		
-    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers);
-		
-    	if (m_proxy.isConnected())
+		catch(IOException ex)
 		{
-    		m_proxy.stop();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, ex);
 		}
-		
-		if (bUpdated)
-		{
-			m_lastUpdate = System.currentTimeMillis();
-			m_lastCascadeUpdated = a_cascade.getName();
-		}
-    	
-		return bUpdated;
 	}
 	
 	/**
@@ -1464,6 +1520,14 @@ public class PerformanceMeter implements Runnable, Observer
 			// the password must be specified in the InfoService config and it must be the
 			// same for all pay account files.
 			return m_infoServiceConfig.getPerfAccountPassword();
+		}
+	}
+	
+	private final class InfoServiceException extends Exception
+	{
+		public InfoServiceException(String a_message)
+		{
+			super(a_message);
 		}
 	}
 }

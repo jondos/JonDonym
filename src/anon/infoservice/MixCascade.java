@@ -28,6 +28,7 @@
 package anon.infoservice;
 
 import java.util.Enumeration;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.Date;
 
@@ -88,6 +89,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 * The name of the mixcascade.
 	 */
 	private String m_strName;
+	
+	private Vector m_decomposedCascadeName;
 
 	/**
 	 * Holds the information about the interfaces (IP, Port) the mixcascade (first mix) is listening
@@ -677,6 +680,60 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return getName();
 	}
 
+	/**
+	 * @todo remove this when the operator short name is certified
+	 * @return
+	 */
+	public Vector getDecomposedCascadeName()
+	{
+		synchronized (m_strName)
+		{
+			if (m_decomposedCascadeName == null)
+			{			
+				StringTokenizer tokenizer = new StringTokenizer(m_strName,"-");
+				StringTokenizer tempTokenizer;
+				String token;
+				
+				m_decomposedCascadeName = new Vector();
+				
+				if (tokenizer.countTokens() == getNumberOfMixes())
+				{
+					while (tokenizer.hasMoreTokens())
+					{
+						token = tokenizer.nextToken().trim();
+						tempTokenizer = new StringTokenizer(token);
+						if (!tempTokenizer.hasMoreTokens())
+						{
+//							cannot decompose this name
+							m_decomposedCascadeName.removeAllElements();
+							break;
+						}
+						token = tempTokenizer.nextToken().trim();						
+						
+						if (token.length() == 0)
+						{
+//							cannot decompose this name
+							m_decomposedCascadeName.removeAllElements();
+							break;
+						}
+						if (token.length() > 15)
+						{
+							token = token.substring(0, 15);
+						}
+						m_decomposedCascadeName.addElement(token);
+					}
+				}
+				
+				if (m_decomposedCascadeName.size() == 0)
+				{
+					// cannot decompose this name
+					m_decomposedCascadeName.addElement(m_strName);
+				}			
+			}
+		}
+		return m_decomposedCascadeName;
+	}
+	
 	/**
 	 * Compares this object to another one. This method returns only true, if the other object is
 	 * also a MixCascade and has the same ID as this MixCascade.
