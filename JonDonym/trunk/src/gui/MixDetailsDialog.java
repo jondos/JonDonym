@@ -27,6 +27,7 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 {
 	private MixInfo m_mixInfo;
 	private JLabel m_lblOperator;
+	private JLabel m_lblEMail;
 	
 	private static String MSG_MIX_NAME = MixDetailsDialog.class.getName() + "_mixName";
 	private static String MSG_TITLE = MixDetailsDialog.class.getName() + "_title";
@@ -81,7 +82,6 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 		c.gridx = 0;
 		c.gridy = 2;
 		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(0, 15, 15, 15);
 		p.add(lbl, c);
 		
 		m_lblOperator = new JLabel(op.getOrganization());
@@ -95,6 +95,20 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 		}
 		c.gridx = 1;
 		p.add(m_lblOperator, c);
+		
+		lbl = new JLabel(JAPMessages.getString("eMail:"));
+		c.gridx = 0;
+		c.gridy = 3;
+		p.add(lbl, c);
+		
+		m_lblEMail = new JLabel(op.getEMail());
+		m_lblEMail.setToolTipText(op.getEMail());
+		m_lblEMail.setForeground(Color.blue);
+		m_lblEMail.addMouseListener(this);
+		m_lblEMail.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+		c.gridx = 1;
+		p.add(m_lblEMail, c);
 		
 		this.pack();
 		this.setResizable(false);

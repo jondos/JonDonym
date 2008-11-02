@@ -88,7 +88,6 @@ import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.NewCascadeIDEntry;
-import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
 import anon.pay.IMessageListener;
 import anon.pay.PayAccountsFile;
@@ -104,7 +103,6 @@ import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPProgressBar;
 import gui.MixDetailsDialog;
-import gui.OperatorDetailsDialog;
 import gui.PopupMenu;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
@@ -239,12 +237,12 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JLabel m_labelAnonService, m_labelAnonymity, m_labelAnonymitySmall, m_labelAnonymityOnOff;
 	private JLabel m_labelAnonMeter, m_labelAnonymityLow, m_labelAnonymityHigh;
 
-	private JLabel m_labelSpeed, m_labelDelay, m_labelSpeedLabel, m_labelDelayLabel, m_labelMixCountries, m_labelOperatorCountries;
-	private JLabel m_lblUsers;
+	private JLabel m_labelSpeed, m_labelDelay, m_labelSpeedLabel, m_labelDelayLabel, m_labelOperatorCountries;
+	private JLabel m_lblUsers, m_lblUsersLabel;
 	
-	private JLabel m_labelMixFlags[], m_labelOperatorFlags[];
+	private JLabel m_labelOperatorFlags[];
 	private MixMouseAdapter m_adapterMix[];
-	private OperatorMouseAdapter m_adapterOperator[];
+	private MixMouseAdapter m_adapterOperator[];
 	
 	private JLabel m_labelOwnTraffic, m_labelOwnTrafficSmall;
 	private JLabel m_labelOwnActivity, m_labelForwarderActivity;
@@ -767,19 +765,19 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.insets = new Insets(0, 5, 0, 0);
 		p.add(m_labelAnonymity, c1);		
 		
-		m_labelSpeedLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_speed") + ":");
+		m_lblUsersLabel = new JLabel(JAPMessages.getString(MSG_USERS) + ":");
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(5, 15, 0, 10);
+		p.add(m_lblUsersLabel, c1);
+		
+		m_labelSpeedLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_speed") + ":");
+		c1.gridy = 2;
 		p.add(m_labelSpeedLabel, c1);
 		
 		m_labelDelayLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_latency") + ":");
-		c1.gridy = 2;
-		p.add(m_labelDelayLabel, c1);
-		
-		m_labelMixCountries = new JLabel(JAPMessages.getString("ngMixCountries"));
 		c1.gridy = 3;
-		p.add(m_labelMixCountries, c1);
+		p.add(m_labelDelayLabel, c1);
 		
 		m_labelOperatorCountries = new JLabel(JAPMessages.getString("ngOperatorCountries"));
 		c1.gridy = 4;
@@ -790,7 +788,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
 		c1.fill = GridBagConstraints.HORIZONTAL;
-		c1.gridy = 0;
+		c1.gridy = 1;
 		c1.gridx = 1;
 		c1.gridwidth = 3;
 		p.add(m_lblUsers, c1);
@@ -798,39 +796,29 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_labelSpeed = new JLabel("", SwingConstants.LEFT);
 		c1.insets = new Insets(5, 0, 0, 10);
 		c1.weightx = 0;
-		c1.gridy = 1;
+		c1.gridy = 2;
 		p.add(m_labelSpeed, c1);
 		
 		m_labelDelay = new JLabel("", SwingConstants.LEFT);
 		c1.weightx = 0;
-		c1.gridy = 2;
+		c1.gridy = 3;
 		p.add(m_labelDelay, c1);
 
-		m_labelMixFlags = new JLabel[3];
 		m_labelOperatorFlags = new JLabel[3];
 		m_adapterMix = new MixMouseAdapter[3];
-		m_adapterOperator = new OperatorMouseAdapter[3];
+		m_adapterOperator = new MixMouseAdapter[3];
 		
 		c1.gridwidth = 1;
 		c1.insets = new Insets(5, 2, 0, 5);
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < m_labelOperatorFlags.length; i++)
 		{
 			c1.gridx = i + 1;
-			
-			m_labelMixFlags[i] = new JLabel("");
-			c1.gridy = 3;
-			p.add(m_labelMixFlags[i], c1);
-			
-			m_labelMixFlags[i].addMouseListener(m_adapterMix[i] = 
-				new MixMouseAdapter(null, i));
-			m_labelMixFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			
 			c1.gridy = 4;
 			m_labelOperatorFlags[i] = new JLabel("");
 			p.add(m_labelOperatorFlags[i], c1);
 			
 			m_labelOperatorFlags[i].addMouseListener(m_adapterOperator[i] =
-				new OperatorMouseAdapter(null));
+				new MixMouseAdapter(null, i));
 			m_labelOperatorFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		}
 		
@@ -2785,8 +2773,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			if (currentStatus.getNrOfActiveUsers() > -1)
 			{
 				m_lblUsers.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
-						(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : "") + 
-						" " + JAPMessages.getString(MSG_USERS));
+						(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : ""));
 			}
 			else
 			{
@@ -2873,24 +2860,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				numMixes = 1;
 			}
 			
-			for(int i = 0; i < numMixes; i++)
+			for(int i = 0; i < numMixes && i < m_labelOperatorFlags.length; i++)
 			{
 				MixInfo mixInfo = currentMixCascade.getMixInfo(i);
-				
-				if(mixInfo != null && mixInfo.getCertificate() != null && 
-						mixInfo.getCertificate().getSubject() != null) 
-				{
-					String mixCountry = mixInfo.getCertificate().getSubject().getCountryCode();
-					CountryMapper country = new CountryMapper(mixCountry, JAPMessages.getLocale());
-					m_labelMixFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + mixCountry + ".png"));
-					m_labelMixFlags[i].setToolTipText(country.toString());
-					m_adapterMix[i].setMixInfo(mixInfo);
-				}
-				else
-				{
-					m_labelMixFlags[i].setIcon(null);
-				}
-				
+
 				if(mixInfo != null && mixInfo.getOperatorCertificate() != null && 
 						mixInfo.getOperatorCertificate().getSubject() != null) 
 				{
@@ -2898,7 +2871,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					CountryMapper country = new CountryMapper(operatorCountry, JAPMessages.getLocale());
 					m_labelOperatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + operatorCountry + ".png"));
 					m_labelOperatorFlags[i].setToolTipText(country.toString());
-					m_adapterOperator[i].setOperator(mixInfo.getServiceOperator());
+					m_adapterOperator[i].setMixInfo(mixInfo);
 				}
 				else
 				{
@@ -2907,9 +2880,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			
 			// clear the unused labels
-			for(int i = numMixes; i < 3; i++)
+			for(int i = numMixes; i < m_labelOperatorFlags.length; i++)
 			{
-				m_labelMixFlags[i].setIcon(null);
 				m_labelOperatorFlags[i].setIcon(null);
 			}
 			
@@ -3442,28 +3414,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		public void setMixInfo(MixInfo a_mixInfo)
 		{
 			m_mixInfo = a_mixInfo;
-		}
-	}
-	
-	private final class OperatorMouseAdapter extends MouseAdapter
-	{
-		private ServiceOperator m_operator;
-		
-		public OperatorMouseAdapter(ServiceOperator a_operator)
-		{
-			m_operator = a_operator;
-		}
-		
-		public void mouseClicked(MouseEvent a_event)
-		{
-			OperatorDetailsDialog dialog = new OperatorDetailsDialog(JAPNewView.this, m_operator);
-			dialog.pack();
-			dialog.setVisible(true);
-		}
-		
-		public void setOperator(ServiceOperator a_operator)
-		{
-			m_operator = a_operator;
 		}
 	}
 }

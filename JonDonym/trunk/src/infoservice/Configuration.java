@@ -206,6 +206,11 @@ final public class Configuration
 	 * Stores if the performance monitoring is enabled
 	 */
 	private boolean m_bPerfEnabled;
+	
+	/**
+	 * If InfoService is in passive (listen/poll) mode.
+	 */
+	private boolean m_bPassive;
 
 	/** Stores 7 configuration values for cascade performance monitoring.
 	 * <ul>
@@ -755,6 +760,8 @@ final public class Configuration
 				System.err.println("Exception: " + e2.toString());
 			}
 			
+			m_bPassive = Boolean.valueOf(a_properties.getProperty("modePassive", "false")).booleanValue();
+			
 			m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "true")).booleanValue();
 			
 			if(m_bPerfEnabled)
@@ -1140,6 +1147,18 @@ final public class Configuration
 	private JAPCertificate loadX509Certificate(String a_x509FileName)
 	{
 		return JAPCertificate.getInstance(new File(a_x509FileName));
+	}
+	
+	/**
+	 * Returns if this InfoService does not propagate any information to
+	 * other InfoServices, but only passively collects some data (e.g. Mixes, Cascades, Status, Performance)
+	 * from other InfoServices. This passively stored information is kept as long as a JonDo client would 
+	 * do.
+	 * @return
+	 */
+	public boolean isPassive()
+	{
+		return m_bPassive;
 	}
 	
 	public Object[] getPerformanceMeterConfig() 

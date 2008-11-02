@@ -40,6 +40,7 @@ import gui.JAPMessages;
 import jap.pay.AccountUpdater;
 import jap.JAPModel;
 import jap.JAPController;
+import jap.MixCascadeUpdater;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
@@ -58,7 +59,9 @@ public class InfoService implements Observer
 
 	private static int m_connectionCounter;
 	private static PerformanceMeter ms_perfMeter;
-	private static AccountUpdater ms_accountUpdater; 
+	private static AccountUpdater ms_accountUpdater;
+	//private static MixCascadeUpdater ms_cascadeUpdater;
+	//private static MixCascadeUpdater ms_cascadeUpdater;
 	
 	private String m_configFileName;
 	
@@ -128,6 +131,11 @@ public class InfoService implements Observer
 			else
 			{
 				InfoService.ms_perfMeter = null;
+			}
+			
+			if(Configuration.getInstance().isPassive())
+			{
+				
 			}
 			
 			// start info service server
@@ -273,7 +281,10 @@ public class InfoService implements Observer
 		/* initialize internal commands of InfoService */
 		oicHandler = new InfoServiceCommands();
 		/* initialize propagandist for our infoservice */
-		InfoServicePropagandist.generateInfoServicePropagandist(ms_perfMeter);
+		if(!Configuration.getInstance().isPassive())
+		{
+			InfoServicePropagandist.generateInfoServicePropagandist(ms_perfMeter);
+		}
 		// start server
 		LogHolder.log(LogLevel.EMERG, LogType.MISC, "InfoService -- Version " + Constants.INFOSERVICE_VERSION);
 		LogHolder.log(LogLevel.EMERG, LogType.MISC, System.getProperty("java.version"));
