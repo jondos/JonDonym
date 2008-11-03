@@ -333,7 +333,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			return -1;
 		}
 		
-		int lAverageFromLastTest = -1;
+		int lAverageFromLastTest = 0;
 		
 		Long timestamp = null;
 		Enumeration e = a_data.keys();
@@ -393,8 +393,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			// if the value is valid, consider it for the average value
 			if(value > 0)
 			{
-				lAverageFromLastTest += value;
-				values++;
+				if (value < Integer.MAX_VALUE)
+				{
+					lAverageFromLastTest += value;
+					values++;
+				}
+			}
+			else if (values == 0)
+			{
+				// this was an error
+				lAverageFromLastTest = -1;
 			}
 		}
 		
