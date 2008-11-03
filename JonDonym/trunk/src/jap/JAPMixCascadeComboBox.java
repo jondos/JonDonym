@@ -455,7 +455,7 @@ public class JAPMixCascadeComboBox extends JComboBox
 				icon = GUIUtils.combine(icon, GUIUtils.loadImageIcon("socks_icon.gif", true));
 			}
 			l = m_componentAvailableCascade;
-			l.setIcon(icon);			
+			l.setIcon(icon);
 			
 			Color background, foreground;
 			if (isSelected)

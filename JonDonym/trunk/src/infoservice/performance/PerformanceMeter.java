@@ -782,6 +782,9 @@ public class PerformanceMeter implements Runnable, Observer
 		int a_requestsPerInterval = m_requestsPerInterval;
 		int errorCode = ErrorCodes.E_UNKNOWN; 		
 		Hashtable hashBadInfoServices = new Hashtable();
+		Hashtable vDelay = new Hashtable();
+		Hashtable vSpeed = new Hashtable();
+		Hashtable vUsers = new Hashtable();
 		
 		// skip cascades on the same host as the infoservice
 		// and skip blacklisted cascades
@@ -849,35 +852,35 @@ public class PerformanceMeter implements Runnable, Observer
 		{
 			// interrupted or any other not recoverable error 
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not start performance test. Connection to cascade " + a_cascade.getMixNames() + " failed.");
-			return iUpdates;
+			//return iUpdates;
 		}
-				
-		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting performance test on cascade " + a_cascade.getMixNames() + " with " + a_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
-		
-		// hashtable that holds the delay, speed and users value from this test
-		Hashtable vDelay = new Hashtable();
-		Hashtable vSpeed = new Hashtable();
-		Hashtable vUsers = new Hashtable();
-		
-//		 allocate the recv buff
-		char[] recvBuff = new char[dataSize];	
-		for (int i = 0; i < a_requestsPerInterval && !Thread.currentThread().isInterrupted() && m_proxy.isConnected(); i++)
+		else
 		{
-			try
+				
+			LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting performance test on cascade " + a_cascade.getMixNames() + " with " + a_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
+			
+			// hashtable that holds the delay, speed and users value from this test			
+			
+	//		 allocate the recv buff
+			char[] recvBuff = new char[dataSize];	
+			for (int i = 0; i < a_requestsPerInterval && !Thread.currentThread().isInterrupted() && m_proxy.isConnected(); i++)
 			{
-				if (performSingleTest(a_cascade, vDelay, vSpeed, vUsers, hashBadInfoServices, recvBuff))
+				try
 				{
-					iUpdates++;
+					if (performSingleTest(a_cascade, vDelay, vSpeed, vUsers, hashBadInfoServices, recvBuff))
+					{
+						iUpdates++;
+					}
 				}
-			}
-			catch (InterruptedException a_e)
-			{
-				break;
-			}
-			catch (InfoServiceException a_e)
-			{
-				LogHolder.log(LogLevel.WARNING, LogType.NET, a_e);
-				break;
+				catch (InterruptedException a_e)
+				{
+					break;
+				}
+				catch (InfoServiceException a_e)
+				{
+					LogHolder.log(LogLevel.WARNING, LogType.NET, a_e);
+					break;
+				}
 			}
 		}
 		
@@ -1250,7 +1253,8 @@ public class PerformanceMeter implements Runnable, Observer
     			}
     			
     			m_stream.write((a_timestamp + "\t" + a_cascade.getId() + "\t" + a_delay + 
-    					"\t" + a_speed + "\t" + a_users + "\t" + a_ip.getHostAddress() + "\n").getBytes());
+    					"\t" + a_speed + "\t" + a_users + 
+    					(a_ip == null ? "" : "\t" + a_ip.getHostAddress()) + "\n").getBytes());
 			}
 		}
 		catch(IOException ex)
