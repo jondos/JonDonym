@@ -816,7 +816,7 @@ public class PerformanceMeter implements Runnable, Observer
 		    	if (errorCode != ErrorCodes.E_SUCCESS)
 		    	{
 		    		LogHolder.log(LogLevel.WARNING, LogType.NET, 
-		    				"Error connecting to cascade " + a_cascade.getName() + ": " + errorCode);
+		    				"Error connecting to cascade " + a_cascade.getMixNames() + ": " + errorCode);
 		    	}
 		    	break;
 		    }
@@ -825,11 +825,11 @@ public class PerformanceMeter implements Runnable, Observer
 		if (errorCode != ErrorCodes.E_SUCCESS || !m_proxy.isConnected())
 		{
 			// interrupted or any other not recoverable error 
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not start performance test. Connection to cascade " + a_cascade.getName() + " failed.");
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not start performance test. Connection to cascade " + a_cascade.getMixNames() + " failed.");
 			return bUpdated;
 		}
 		
-		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting performance test on cascade " + a_cascade.getName() + " with " + m_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
+		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting performance test on cascade " + a_cascade.getMixNames() + " with " + m_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
 		
 		// hashtable that holds the delay, speed and users value from this test
 		Hashtable vDelay = new Hashtable();
@@ -867,7 +867,7 @@ public class PerformanceMeter implements Runnable, Observer
 		
 			Database.getInstance(PerformanceEntry.class).update(entry);
 		
-	    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + a_cascade.getName() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers);
+	    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + a_cascade.getMixNames() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers);
 			
 	    	if (m_proxy.isConnected())
 			{
@@ -877,7 +877,7 @@ public class PerformanceMeter implements Runnable, Observer
 			if (bUpdated)
 			{
 				m_lastUpdate = System.currentTimeMillis();
-				m_lastCascadeUpdated = a_cascade.getName();
+				m_lastCascadeUpdated = a_cascade.getMixNames();
 			}
 		}
     	

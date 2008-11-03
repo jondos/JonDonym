@@ -488,7 +488,7 @@ public class JAPMixCascadeComboBox extends JComboBox
 			m_componentConstraints.weightx = 0.0;
 			m_componentPanel.add(l, m_componentConstraints);
 			
-			while (cascadeName.size() != 0 && cascadeName.size() > cascade.getNumberOfOperators())
+			while (cascadeName.size() > 1 && cascadeName.size() > cascade.getNumberOfOperators())
 			{
 				cascadeName.removeElementAt(cascadeName.size() - 1);
 			}
@@ -506,7 +506,7 @@ public class JAPMixCascadeComboBox extends JComboBox
 				m_names[i].setText((String)cascadeName.elementAt((i)));
 				m_componentPanel.add(m_names[i], m_componentConstraints);
 				
-				if (i + 1 == cascade.getNumberOfOperators())
+				if (i + 1 == cascade.getNumberOfOperators() || i + 1 == cascadeName.size())
 				{
 					m_componentConstraints.weightx = 1.0;
 				}

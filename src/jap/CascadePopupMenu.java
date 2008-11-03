@@ -175,7 +175,7 @@ public class CascadePopupMenu extends PopupMenu
 					icon = GUIUtils.combine(icon, GUIUtils.loadImageIcon("socks_icon.gif", true));
 				}
 
-				menuItem = new JMenuItem(GUIUtils.trim(cascade.toString(), MAX_CASCADE_NAME_LENGTH), icon);
+				menuItem = new JMenuItem(GUIUtils.trim(cascade.getName(), MAX_CASCADE_NAME_LENGTH), icon);
 				if (isNewCascade(cascade))
 				{
 					menuItem.setBackground(m_newCascadeColor);
