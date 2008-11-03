@@ -1892,7 +1892,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: "Ubermittlung einer Beschreibung der Kaskade (Erreichbarkeit, beteiligte Mixe etc.)
 			 */
 //			httpResponse = cascadePostHelo(postData, a_supportedEncodings);
-			httpResponse = m_dynamicExtension.cascadePostHelo(postData, a_supportedEncodings);
+			httpResponse = DynamicCommandsExtension.cascadePostHelo(postData, a_supportedEncodings);
 		}
 		else if ( (command.equals("/cascadeserials")) && (method == Constants.REQUEST_METHOD_GET))
 		{
@@ -2310,7 +2310,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			httpResponse = m_dynamicExtension.mixPostConnectivityTest(a_sourceAddress, postData);
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.mixPostConnectivityTest(a_sourceAddress, postData);
+			}
 		}
 		else if (command.startsWith("/dynacascade") && (method == Constants.REQUEST_METHOD_POST))
 		{
@@ -2319,7 +2322,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			httpResponse = m_dynamicExtension.lastMixPostDynaCascade(postData);
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.lastMixPostDynaCascade(postData);
+			}
 		}
 		else if ( (command.startsWith("/newcascadeinformationavailable/"))
 				 && (method == Constants.REQUEST_METHOD_GET))
@@ -2330,7 +2336,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: 
 			 */
 			String piID = command.substring(32);
-			httpResponse = m_dynamicExtension.isNewCascadeAvailable(piID);
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.isNewCascadeAvailable(piID);
+			}
 		}
 		else if ( (command.startsWith("/reconfigure/"))
 				 && (method == Constants.REQUEST_METHOD_GET))
@@ -2341,7 +2350,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: 
 			 */
 			String piID = command.substring(13);
-			httpResponse = m_dynamicExtension.reconfigureMix(piID);
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.reconfigureMix(piID);
+			}
 		}
 		else if (command.startsWith("/agreement") && (method == Constants.REQUEST_METHOD_POST))
 		{
@@ -2350,7 +2362,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			httpResponse = m_agreementAdapter.handleMessage(postData);
+			if (m_agreementAdapter != null)
+			{
+				httpResponse = m_agreementAdapter.handleMessage(postData);
+			}
 
 		}
 		else if (command.startsWith("/startagreement")
@@ -2361,8 +2376,11 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			m_agreementAdapter.startProtocolByOperator();
-			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
+			if (m_agreementAdapter != null)
+			{
+				m_agreementAdapter.startProtocolByOperator();
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
+			}
 		}
 		else if (command.startsWith("/virtualcascades")
 				 && (method == Constants.REQUEST_METHOD_GET))
@@ -2372,7 +2390,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			httpResponse = m_dynamicExtension.virtualCascadeStatus();
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.virtualCascadeStatus();
+			}
 		}
 		else if(command.startsWith("/requestperformancetoken") 
 				&& (method == Constants.REQUEST_METHOD_POST))

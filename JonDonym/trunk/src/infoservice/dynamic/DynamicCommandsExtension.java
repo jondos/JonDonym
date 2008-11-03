@@ -77,7 +77,7 @@ public class DynamicCommandsExtension
 	 * 
 	 * @return The HTTP response for the client.
 	 */
-	public HttpResponseStructure cascadePostHelo(byte[] a_postData, int a_encoding)
+	public static HttpResponseStructure cascadePostHelo(byte[] a_postData, int a_encoding)
 	{
 		HttpResponseStructure httpResponse = new HttpResponseStructure(
 				HttpResponseStructure.HTTP_RETURN_OK);
@@ -132,7 +132,7 @@ public class DynamicCommandsExtension
 			else if (a_encoding == HttpResponseStructure.HTTP_ENCODING_PLAIN)
 			{
 				/**
-				 * @todo WORKAROUND FIX for a bug, there the IS reported that
+				 * @todo WORKAROUND FIX for a bug, where the IS reported that
 				 *       the message is PLAIN but in fact it is ZLIB encoded!
 				 */
 				if (a_postData[0] != '<')
@@ -150,7 +150,7 @@ public class DynamicCommandsExtension
 			{
 				throw new Exception("Unsupported post encoding:" + a_encoding);
 			}
-			// remove temporary cascades if existig
+			// remove temporary cascades if existing
 			VirtualCascade temporaryCascade = (VirtualCascade) Database.getInstance(
 					VirtualCascade.class).getEntryById(mixCascadeEntry.getId());
 			if (temporaryCascade != null)
@@ -162,12 +162,19 @@ public class DynamicCommandsExtension
 
 				}
 			}
-
-			Database.getInstance(MixCascade.class).update(mixCascadeEntry);
+			
+			if (Database.getInstance(MixCascade.class).update(mixCascadeEntry))
+			{
+				LogHolder.log(LogLevel.ALERT, LogType.DB, "Updated Cascade " + mixCascadeEntry + " LastUpdate: " + mixCascadeEntry.getLastUpdate()  + " Expires: " + mixCascadeEntry.getExpireTime());
+			}
+			else
+			{
+				LogHolder.log(LogLevel.ALERT, LogType.DB, "Cascade " + mixCascadeEntry + "should have been updated... LastUpdate: " + mixCascadeEntry.getLastUpdate()  + " Expires: " + mixCascadeEntry.getExpireTime());
+			}
 		}
 		catch (Exception e)
 		{
-			LogHolder.log(LogLevel.ERR, LogType.NET, e);
+			LogHolder.log(LogLevel.ERR, LogType.NET, "Error while receiving Cascade info!!", e);
 			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST);
 		}
 		return httpResponse;
