@@ -2773,7 +2773,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			if (currentStatus.getNrOfActiveUsers() > -1)
 			{
 				m_lblUsers.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
-						(currentMixCascade.getMaxUsers() > 0 ? "  / " + currentMixCascade.getMaxUsers() : ""));
+						(currentMixCascade.getMaxUsers() > 0 ? " / " + currentMixCascade.getMaxUsers() : ""));
 			}
 			else
 			{

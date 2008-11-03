@@ -2032,17 +2032,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));
 					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
 					
-					//System.out.println(m_numOfUsersLabel.getText());
-					//m_reachableLabel.setFont(m_numOfUsersLabel.getFont());
-					//m_lblHosts.setFont(m_numOfUsersLabel.getFont());
-					//m_reachableLabel.setText(m_infoService.getHosts(cascadeId));
-					/*m_cascadesPanel.remove(m_lblHosts);
-					m_cascadesPanel.add(m_lblHosts, m_constrHosts);*/
-					//m_portsLabel.setFont(m_numOfUsersLabel.getFont());
-					//m_lblPorts.setFont(m_numOfUsersLabel.getFont());
-					//m_portsLabel.setText(m_infoService.getPorts(cascadeId));
-					/*m_cascadesPanel.remove(m_lblPorts);
-					m_cascadesPanel.add(m_lblPorts, m_constrPorts);*/
 					setPayLabel(cascade);
 					m_lblSocks.setVisible(cascade.isSocks5Supported());
 				}
@@ -2354,7 +2343,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	 * Temporary image of relevant infoservice entries. For better response time
 	 * of the GUI.
 	 */
-	final class InfoServiceTempLayer
+	private final class InfoServiceTempLayer
 	{
 		private Hashtable m_Cascades;
 		private boolean m_isFilled = false;
@@ -2499,16 +2488,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					}
 					// update hosts and ports
 					updateCascade(cascade);
-				}
-				for (int j = 0; j < c.size(); j++)
-				{
-					
-					// update MixInfo for each mix in cascade
-					/** @todo really needed?
-					MixCascade cascade = (MixCascade) c.elementAt(j);
-					update(Database.getInstance(MixCascade.class),
-						   new DatabaseMessage(DatabaseMessage.ENTRY_ADDED, cascade));
-					*/
 				}
 
 				m_isFilled = true;

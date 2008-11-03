@@ -107,6 +107,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private String m_piid = "";
 
 	private MixInfo[] m_mixInfos;
+	private String m_strMixNames;
 	private int m_nrPriceCerts = 0;
 
 	private Vector m_mixNodes;
@@ -281,7 +282,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		m_bStudy = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_STUDY, false);
 		
 		m_maxUsers = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_MAX_USERS, 0);
-		
+		m_maxUsers = Math.min(m_maxUsers, 9999); // 10000 is seen as unlimited
 
 		/* get the ID */
 		if (a_mixCascadeNode == null || !a_mixCascadeNode.getNodeName().equals(XML_ELEMENT_NAME))
@@ -651,12 +652,49 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	}
 
 	/**
+	 * Gets the concatenated names of the Mixes in this Cascade.
+	 * @return
+	 */
+	public String getMixNames()
+	{
+		synchronized (m_mixInfos)
+		{
+			if (m_strMixNames == null)
+			{
+				m_strMixNames = "";
+				for (int i = 0; i < m_mixInfos.length; i++)
+				{
+					if (m_mixInfos[i] == null)
+					{						
+						continue;
+					}
+					if (m_strMixNames.length() > 0)
+					{
+						m_strMixNames += "-";
+					}
+					m_strMixNames += m_mixInfos[i].getName();					
+				}
+				if (m_strMixNames.length() == 0)
+				{
+					m_strMixNames = m_strName;
+				}
+				else if (!m_strName.equals(m_strMixNames))
+				{
+					m_strMixNames = m_strName + "|" + m_strMixNames; 
+				}
+			}			
+		}
+		return m_strMixNames;
+	}
+	
+	/**
 	 * Returns the name of the mixcascade.
 	 *
 	 * @return The name of this mixcascade.
 	 */
 	public String getName()
 	{
+		getDecomposedCascadeName();
 		return m_strName;
 	}
 
@@ -677,6 +715,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	public String toString()
 	{
+		//return getMixNames();
 		return getName();
 	}
 
@@ -690,11 +729,17 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			if (m_decomposedCascadeName == null)
 			{			
+				m_decomposedCascadeName = new Vector();
+				
+				if (isUserDefined())
+				{
+					m_decomposedCascadeName.addElement(m_strName);
+					return m_decomposedCascadeName;
+				}					
+				
 				StringTokenizer tokenizer = new StringTokenizer(m_strName,"-");
 				StringTokenizer tempTokenizer;
-				String token;
-				
-				m_decomposedCascadeName = new Vector();
+				String token;								
 				
 				if (tokenizer.countTokens() == getNumberOfMixes())
 				{
@@ -704,16 +749,14 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 						tempTokenizer = new StringTokenizer(token);
 						if (!tempTokenizer.hasMoreTokens())
 						{
-//							cannot decompose this name
-							m_decomposedCascadeName.removeAllElements();
+//							cannot further decompose this name
 							break;
 						}
 						token = tempTokenizer.nextToken().trim();						
 						
 						if (token.length() == 0)
 						{
-//							cannot decompose this name
-							m_decomposedCascadeName.removeAllElements();
+//							cannot futher decompose this name
 							break;
 						}
 						if (token.length() > 15)
@@ -728,7 +771,19 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				{
 					// cannot decompose this name
 					m_decomposedCascadeName.addElement(m_strName);
-				}			
+				}	
+				else
+				{
+					m_strName = "";					
+					for (int i = 0; i < m_decomposedCascadeName.size() && i < getNumberOfOperators(); i++)
+					{
+						m_strName += m_decomposedCascadeName.elementAt(i);
+						if (i + 1 < m_decomposedCascadeName.size() && i + 1 < getNumberOfOperators())
+						{
+							m_strName += "-";
+						}
+					}
+				}
 			}
 		}
 		return m_decomposedCascadeName;
@@ -943,6 +998,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		if (m_userDefined && a_oldMixCascade != null && a_oldMixCascade.getId().equals(getId()))
 		{
 			m_strName = a_oldMixCascade.m_strName;
+			m_decomposedCascadeName = new Vector();
+			m_decomposedCascadeName.addElement(m_strName);
+			
 			m_listenerInterfaces = a_oldMixCascade.m_listenerInterfaces;
 			/* set the lastUpdate time */
 			m_lastUpdate = System.currentTimeMillis();

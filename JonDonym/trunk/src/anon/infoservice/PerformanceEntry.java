@@ -585,9 +585,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	{
 		MixCascade cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(m_strCascadeId);
 		
-		String htmlData = 
-				(cascade != null ? cascade.getName() : "") +
-				"<h2>" + m_strCascadeId + "</h2>";
+		String htmlData = (cascade != null ? cascade.getName() : "") + "<h2>" + m_strCascadeId + "</h2>";
 		
 		m_current.setTime(new Date(System.currentTimeMillis()));
 		int dayOfWeek = m_current.get(Calendar.DAY_OF_WEEK);

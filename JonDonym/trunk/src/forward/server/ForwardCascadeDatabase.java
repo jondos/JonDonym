@@ -122,7 +122,7 @@ public class ForwardCascadeDatabase {
     synchronized (m_allowedCascades) {
       if (m_allowedCascades.containsKey(a_cascade.getId()) == false) {
         /* only log, if there was a new entry added and not an old one updated */
-        LogHolder.log(LogLevel.INFO, LogType.MISC, "ForwardCascadeDatabase: addCascade: The mixcascade " + a_cascade.getName() + " was added to the list of useable cascades for the clients.");
+        LogHolder.log(LogLevel.INFO, LogType.MISC, "ForwardCascadeDatabase: addCascade: The mixcascade " + a_cascade.getMixNames() + " was added to the list of useable cascades for the clients.");
       }
       m_allowedCascades.put(a_cascade.getId(), a_cascade);
     }
@@ -137,7 +137,7 @@ public class ForwardCascadeDatabase {
     synchronized (m_allowedCascades) {
       MixCascade cascadeToRemove = (MixCascade)(m_allowedCascades.get(a_id));
       if (cascadeToRemove != null) {
-        LogHolder.log(LogLevel.INFO, LogType.MISC, "ForwardCascadeDatabase: removeCascade: The mixcascade " + cascadeToRemove.getName() + " was removed from the list of useable cascades for the clients.");
+        LogHolder.log(LogLevel.INFO, LogType.MISC, "ForwardCascadeDatabase: removeCascade: The mixcascade " + cascadeToRemove.getMixNames() + " was removed from the list of useable cascades for the clients.");
       }
       m_allowedCascades.remove(a_id);
     }
