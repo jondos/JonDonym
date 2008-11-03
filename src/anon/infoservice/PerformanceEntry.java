@@ -620,7 +620,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				"<th>Max</th>" +
 				"<th>Bound</th>" +
 				"<th>% Std. Deviation</th>" +
-				"<th>Errors</th></tr>";
+				"<th>Err/Try/Total</th></tr>";
 
 		long dayTimestamp = getDayTimestamp(a_attribute, a_selectedDay);
 		
@@ -694,13 +694,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 				
 				double errorPercentage = 0;
+				double tryPercentage = 0;
 				
 				if(entry.getValueSize() != 0)
 				{
 					errorPercentage = (double) entry.getErrors() / entry.getValueSize() * 100.0;
+					tryPercentage = (double) entry.getUnknown() / entry.getValueSize() * 100.0;
 				}
 				
-				htmlData += "<td>" + entry.getErrors() + " / " + entry.getValueSize() + " (" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(errorPercentage) +" %)</td>";				
+				htmlData += "<td>" + entry.getErrors() + " / " + entry.getUnknown()  + " / " + entry.getValueSize() + " (" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(errorPercentage) +" % / " + 
+					NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(tryPercentage) + " %)</td>";				
 			}
 			
 			htmlData += "</tr>";
@@ -962,6 +965,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 						// value is an error
 						errors++;
 					}
+					else if (value.intValue() == Integer.MAX_VALUE)
+					{
+						// TODO
+					}
 					else
 					{
 						values++;
@@ -1065,6 +1072,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					{
 						// value is an error
 						errors++;
+					}
+					else if (value.intValue() == Integer.MAX_VALUE)
+					{
+						// TODO
 					}
 					else
 					{
@@ -1175,6 +1186,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					{
 						errors++;
 					}
+					else if (value == Integer.MAX_VALUE)
+					{
+						// TODO
+					}
 					else
 					{
 						values++;
@@ -1235,6 +1250,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					if(value < 0)
 					{
 						errors++;
+					}
+					else if (value == Integer.MAX_VALUE)
+					{
+						// TODO
 					}
 					else
 					{
@@ -1327,6 +1346,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 */
 		private int m_iErrors = 0;
 		
+		private int m_iUnknown = 0;
+		
 		/**
 		 * The performance attribute.
 		 */
@@ -1352,9 +1373,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			m_lastUpdate = a_lTimeStamp;
 			
-			if(a_lValue < 0)
+			if (a_lValue < 0 || a_lValue == Integer.MAX_VALUE)
 			{
-				m_iErrors++;
+				if (a_lValue < 0)
+				{
+					m_iErrors++;
+				}	
+				else if (a_lValue == Integer.MAX_VALUE)
+				{
+					m_iUnknown++;
+				}
 				
 				// we have at least one error and no values
 				if(m_Values.size() == 0)
@@ -1536,13 +1564,27 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		/**
+		 * The umount of attempts that should have been made but were not.
+		 * @return
+		 */
+		public int getUnknown()
+		{
+			return m_iUnknown;
+		}
+		
+		public int getSuccess()
+		{
+			return m_Values.size();
+		}
+		
+		/**
 		 * Returns the amount of values and errors.
 		 * 
 		 * @return The amount of values and errors.
 		 */
 		public int getValueSize()
 		{
-			return m_Values.size() + m_iErrors;
+			return m_Values.size() + m_iErrors + m_iUnknown;
 		}
 		
 		/**

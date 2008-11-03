@@ -63,11 +63,6 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 	private String m_strCascadeId = null;
 	
 	/**
-	 * Specifies whether this is a paycascade or not
-	 */
-	private boolean m_bPayment = false;
-	
-	/**
 	 * The list of addresses.
 	 */
 	private Hashtable m_tblAddresses = new Hashtable();
@@ -78,12 +73,11 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 	 * 
 	 * @param a_strCascadeId The mix cascade id.
 	 */
-	public MixCascadeExitAddresses(MixCascade a_cascade)
+	public MixCascadeExitAddresses(String a_cascadeID)
 	{
 		super(System.currentTimeMillis() + EXIT_ADDRESS_TTL);
 		
-		m_strCascadeId = a_cascade.getId();
-		m_bPayment = a_cascade.isPayment();
+		m_strCascadeId = a_cascadeID;
 		
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
@@ -143,7 +137,7 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 	{
 		Element elem = a_doc.createElement(XML_ELEMENT_NAME);
 		XMLUtil.setAttribute(elem, XML_ATTR_ID, getId());
-		XMLUtil.setAttribute(elem, XML_ATTR_PAYMENT, m_bPayment);
+		//XMLUtil.setAttribute(elem, XML_ATTR_PAYMENT, m_bPayment);
 		
 		Enumeration e = m_tblAddresses.keys();
 		

@@ -84,7 +84,7 @@ public class PerformanceRequestHandler
 			return new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST);
 		}
 		
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "InfoService " + request.getInfoServiceId() + " is requesting a performance token.");
+		LogHolder.log(LogLevel.INFO, LogType.NET, "InfoService " + request.getInfoServiceId() + " is requesting a performance token.");
 	
 		// generate a new token
 		PerformanceToken token = new PerformanceToken();
@@ -96,7 +96,7 @@ public class PerformanceRequestHandler
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
 				HttpResponseStructure.HTTP_ENCODING_PLAIN, XMLUtil.toString(doc));
 		
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "Token " + token.getId() + " issued.");
+		LogHolder.log(LogLevel.INFO, LogType.NET, "Token " + token.getId() + " issued.");
 		
 		return httpResponse;
 	}
@@ -135,27 +135,50 @@ public class PerformanceRequestHandler
 		
 		// generate random data
 		byte[] data = new byte[request.getDataSize()];
-		new java.util.Random().nextBytes(data);
-		
-		if(a_address instanceof Inet4Address)
+		//new java.util.Random().nextBytes(data);
+		for (int i = 0; i < data.length; i++)
 		{
-			System.arraycopy(MAGIC_BYTES_IPV4, 0, data, 0, 4);
-		
-			byte[] ip = a_address.getAddress();
-			System.arraycopy(ip, 0, data, 4, 4);
-		} 
-		else if(a_address instanceof Inet6Address)
-		{
-			System.arraycopy(MAGIC_BYTES_IPV6, 0, data, 0, 4);
-			
-			byte[] ip = a_address.getAddress();
-			System.arraycopy(ip, 0, data, 4, 16);			
+			data[i] = (byte)5;
 		}
+		
+		
+		byte[] magicBytes = null;
+		if (a_address instanceof Inet4Address)
+		{
+			magicBytes = MAGIC_BYTES_IPV4;
+			LogHolder.log(LogLevel.ALERT, LogType.NET, "IP: " + a_address.getHostAddress());
+		} 
+		else if (a_address instanceof Inet6Address)
+		{
+			magicBytes = MAGIC_BYTES_IPV6;					
+		}
+		if (magicBytes != null)
+		{
+			byte[] ip = a_address.getAddress();
+			byte[] ip_translated = new byte[ip.length * 2];
+			for (int i = 0, j = ip.length; i < ip.length; i++, j++)
+			{
+				if (ip[i] > 0)
+				{
+					ip_translated[i] = ip[i];
+					ip_translated[j] = 0;										
+				}
+				else
+				{
+					ip_translated[i] = (byte)(ip[i] ^ (byte)128);
+					ip_translated[j] = 1;
+				}
+			}
+			
+			System.arraycopy(magicBytes, 0, data, 0, magicBytes.length);
+			System.arraycopy(ip_translated, 0, data, magicBytes.length, ip_translated.length);
+		}
+		
 		
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
 				HttpResponseStructure.HTTP_ENCODING_PLAIN, data);
 		
-		LogHolder.log(LogLevel.WARNING, LogType.NET, data.length + " bytes sent. Removed token.");
+		LogHolder.log(LogLevel.INFO, LogType.NET, data.length + " bytes sent. Removed token.");
 		
 		// remove the token from the database
 		Database.getInstance(PerformanceToken.class).remove(request.getTokenId());

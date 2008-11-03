@@ -211,6 +211,8 @@ final public class Configuration
 	 * If InfoService is in passive (listen/poll) mode.
 	 */
 	private boolean m_bPassive;
+	
+	private String m_lastPassword = "";
 
 	/** Stores 7 configuration values for cascade performance monitoring.
 	 * <ul>
@@ -322,11 +324,10 @@ final public class Configuration
 				PKCS12 infoServiceMessagesPrivateKey = null;
 				try
 				{
-					String lastPassword = "";
 					do
 					{
 						infoServiceMessagesPrivateKey = loadPkcs12PrivateKey(privatePkcs12KeyFile,
-							lastPassword);
+							m_lastPassword);
 						if (infoServiceMessagesPrivateKey == null)
 						{
 							/* file was found, but the private key could not be loaded -> maybe wrong password */
@@ -336,7 +337,7 @@ final public class Configuration
 							System.out.print("Password: ");
 							BufferedReader passwordReader = new BufferedReader(new InputStreamReader(System.
 								in));
-							lastPassword = passwordReader.readLine();
+							m_lastPassword = passwordReader.readLine();
 						}
 					}
 					while (infoServiceMessagesPrivateKey == null);
@@ -750,14 +751,18 @@ final public class Configuration
 							  "Could not read 'maxNrOfConcurrentConnections' setting - default to: " +
 							  m_NrOfThreads);
 			}
-			try
+			
+			if (Boolean.valueOf(a_properties.getProperty("enableDynamicConfiguration", "false")).booleanValue())
 			{
-				DynamicConfiguration.getInstance().readConfiguration(a_properties);
-			}
-			catch (Exception e2)
-			{
-				System.err.println("Error reading the configurastion information related to Dynamic Cascades");
-				System.err.println("Exception: " + e2.toString());
+				try
+				{
+					DynamicConfiguration.getInstance().readConfiguration(a_properties);
+				}
+				catch (Exception e2)
+				{
+					System.err.println("Error reading the configuration information related to Dynamic Cascades");
+					System.err.println("Exception: " + e2.toString());
+				}
 			}
 			
 			m_bPassive = Boolean.valueOf(a_properties.getProperty("modePassive", "false")).booleanValue();
