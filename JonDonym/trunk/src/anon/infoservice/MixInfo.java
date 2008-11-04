@@ -41,7 +41,11 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.crypto.IVerifyable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Vector;
+
 import anon.pay.xml.XMLPriceCertificate;
 import anon.pay.AIControlChannel;
 
@@ -74,7 +78,14 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
     private boolean m_dynamic = false;
 
 	private boolean m_bSocks = false;
+	
+	/**
+	 * Stores all exit IP addresses of this mix.
+	 */
+	private final Vector m_vecVisibleAdresses = new Vector();
 
+	private final Vector m_vecListenerAdresses = new Vector();
+	
   /**
    * This is the ID of the mix.
    */
@@ -325,6 +336,9 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  }
 	  }
 
+	  parseVisibleAdresses(a_mixNode);
+	  parseListenerAdresses(a_mixNode);
+	  
 	  if (!a_bFromCascade) //info from cascade does not contain these infos, so no use parsing them
 	  {
 		  /* Parse the MixType */
@@ -424,6 +438,58 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 
 
   }
+  
+  private void parseListenerAdresses(Node nodeMix) 
+  {
+	  parseVisibleAdresses(nodeMix, "ListenerInterfaces", "ListenerInterface", m_vecListenerAdresses);
+  }
+  private void parseVisibleAdresses(Node nodeMix)
+  {
+		Node nodeTmp = XMLUtil.getFirstChildByName(nodeMix, "Proxies");
+		if (nodeTmp == null)
+		{
+			return;
+		}
+		nodeTmp = XMLUtil.getFirstChildByName(nodeTmp, "Proxy");
+		while (nodeTmp != null)
+		{
+			if (nodeTmp.getNodeName().equals("Proxy"))
+			{
+				parseVisibleAdresses(nodeTmp, "VisibleAddresses", "VisibleAddress", m_vecVisibleAdresses);
+			}
+			nodeTmp=nodeTmp.getNextSibling();
+		}
+  }
+  
+  private void parseVisibleAdresses(Node nodeMix, String a_containerName, String a_nodeName, Vector a_storage)
+  {
+		Node nodeVisibleAddresses = XMLUtil.getFirstChildByName(nodeMix, a_containerName);
+		Node nodeVisibleAddress = XMLUtil.getFirstChildByName(nodeVisibleAddresses, a_nodeName);
+		while (nodeVisibleAddress != null)
+		{
+			if (nodeVisibleAddress.getNodeName().equals(a_nodeName))
+			{
+				Node nodeHost = XMLUtil.getFirstChildByName(nodeVisibleAddress, "Host");
+				String strHost = XMLUtil.parseValue(nodeHost, null);
+				if (strHost != null)
+				{
+					try
+					{							
+						InetAddress address = InetAddress.getByName(strHost);
+						if (!MixCascadeExitAddresses.isLocalAddress(address) && !a_storage.contains(address))
+						{
+							a_storage.addElement(address);
+						}												
+					}
+					catch (Exception e)
+					{
+						LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
+					}
+				}
+			}
+			nodeVisibleAddress = nodeVisibleAddress.getNextSibling();
+		}
+  }
 
   /**
    * LERNGRUPPE
@@ -445,6 +511,16 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
       throw new XMLParseException("MixType", "Unkonwn type: " + nodeValue);
   }
 
+  public Vector getVisibleAddresses()
+  {
+	  return (Vector)m_vecVisibleAdresses.clone();
+  }
+  
+  public Vector getListenerAddresses()
+  {
+	  return (Vector)m_vecListenerAdresses.clone();
+  }
+  
   /**
    * Returns the ID of the mix.
    *

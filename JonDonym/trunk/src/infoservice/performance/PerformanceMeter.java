@@ -377,8 +377,9 @@ public class PerformanceMeter implements Runnable, Observer
 						// this is the new format, speed and then users
 						lSpeed = Integer.parseInt(line.substring(thirdTab + 1, fourthTab));
 						if(fifthTab != -1)
-						{
-							addIPAddress(id, InetAddress.getByName(line.substring(fifthTab + 1)));
+						{							
+							MixCascadeExitAddresses.addInetAddress(id, 
+									InetAddress.getByName(line.substring(fifthTab + 1)));
 							users = Integer.parseInt(line.substring(fourthTab +1, fifthTab));
 						}
 						else
@@ -829,7 +830,7 @@ public class PerformanceMeter implements Runnable, Observer
 		    	//	try to recover from this error; maybe a temporary problem
 				try
 				{
-					Thread.sleep(2000);
+					Thread.sleep(500);
 				}
 				catch (InterruptedException e)
 				{
@@ -1161,7 +1162,7 @@ public class PerformanceMeter implements Runnable, Observer
 	        	try
 	        	{
 	        		addr = InetAddress.getByAddress(ip);
-	        		addIPAddress(a_cascade.getId(), addr);
+	        		MixCascadeExitAddresses.addInetAddress(a_cascade.getId(), addr);	        		
 	        	}
 	        	catch(Exception ex)
 	        	{
@@ -1531,26 +1532,6 @@ public class PerformanceMeter implements Runnable, Observer
 				{
 					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Error while starting performance test for new cascade: ", ex);
 				}
-			}
-		}
-	}
-	
-	private void addIPAddress(String a_cascadeID, InetAddress a_IPAddress)
-	{
-		if(a_IPAddress != null)
-		{
-			MixCascadeExitAddresses exit =
-				(MixCascadeExitAddresses) Database.getInstance(MixCascadeExitAddresses.class).
-				getEntryById(a_cascadeID);
-		
-			if(exit == null)
-			{
-				exit = new MixCascadeExitAddresses(a_cascadeID);
-			}
-		
-			if(exit.addInetAddress(a_IPAddress))
-			{
-				Database.getInstance(MixCascadeExitAddresses.class).update(exit);
 			}
 		}
 	}

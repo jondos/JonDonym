@@ -27,6 +27,7 @@
  */
 package anon.infoservice;
 
+import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -409,6 +410,21 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			catch (XMLParseException a_e)
 			{
 				m_mixInfos[i] = null;
+			}
+		}
+		
+		if (a_expireTime == 0 && m_mixInfos.length > 0)
+		{
+			// this seems to be InfoService context
+			Vector visibleAddresses = m_mixInfos[m_mixInfos.length - 1].getVisibleAddresses();
+			if (visibleAddresses.size() == 0)
+			{
+				// take the last mix IP addresses
+				visibleAddresses = m_mixInfos[m_mixInfos.length - 1].getListenerAddresses();
+			}
+			for (int i = 0; i < visibleAddresses.size(); i++)
+			{
+				MixCascadeExitAddresses.addInetAddress(getId(), (InetAddress)visibleAddresses.elementAt(i));
 			}
 		}
 		

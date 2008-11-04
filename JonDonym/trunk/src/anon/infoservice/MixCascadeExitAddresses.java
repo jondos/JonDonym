@@ -73,7 +73,7 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 	 * 
 	 * @param a_strCascadeId The mix cascade id.
 	 */
-	public MixCascadeExitAddresses(String a_cascadeID)
+	private MixCascadeExitAddresses(String a_cascadeID)
 	{
 		super(System.currentTimeMillis() + EXIT_ADDRESS_TTL);
 		
@@ -98,13 +98,53 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 		return m_serial;
 	}
 	
+	public static void addInetAddress(String a_cascadeID, InetAddress a_IPAddress)
+	{
+		synchronized (Database.getInstance(MixCascadeExitAddresses.class))
+		{
+			if(a_cascadeID != null && a_cascadeID.trim().length() > 0 && a_IPAddress != null)
+			{
+				MixCascadeExitAddresses exit =
+					(MixCascadeExitAddresses) Database.getInstance(MixCascadeExitAddresses.class).
+					getEntryById(a_cascadeID);
+			
+				if(exit == null)
+				{
+					exit = new MixCascadeExitAddresses(a_cascadeID);
+				}
+			
+				if(exit.addInetAddress(a_IPAddress))
+				{
+					Database.getInstance(MixCascadeExitAddresses.class).update(exit);
+				}
+			}
+		}
+	}
+	
+	public static boolean isLocalAddress(InetAddress a_address)
+	{
+		try
+		{
+			return ((Boolean)InetAddress.class.getMethod("isAnyLocalAddress", 
+					(Class[])null).invoke(a_address, (Object[])null)).booleanValue() ||
+				((Boolean)InetAddress.class.getMethod("isLoopbackAddress", 
+						(Class[])null).invoke(a_address, (Object[])null)).booleanValue();
+		}
+		catch (Exception a_e)
+		{
+//			 maybe java too old
+			return false;
+		}
+	}
+	
+	
 	/**
 	 * Adds an address to the list.
 	 * 
 	 * @param a_addr The address to add.
 	 * @return True, if the list has changed, false otherwise.
 	 */
-	public boolean addInetAddress(InetAddress a_addr)
+	private boolean addInetAddress(InetAddress a_addr)
 	{
 		boolean bChanged = false;
 		

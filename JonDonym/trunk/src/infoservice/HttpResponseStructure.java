@@ -48,6 +48,8 @@ public final class HttpResponseStructure
 	 * This constant is used, when HTTP OK (200) shall be returned.
 	 */
 	public static final int HTTP_RETURN_OK = 200;
+	
+	public static final int HTTP_RETURN_ACCEPTED = 202;
 
 	/**
 	 * This constant is used, when HTTP BAD REQUEST (400) shall be returned.
@@ -98,6 +100,7 @@ public final class HttpResponseStructure
 	private static final String HTTP_CRLF_STRING = "\r\n";
 
 	private static final String HTTP_RETURN_OK_STRING = "200 OK";
+	private static final String HTTP_RETURN_ACCEPTED_STRING = "202 Accepted";
 	private static final String HTTP_RETURN_BAD_REQUEST_STRING = "400 Bad Request";
 	private static final String HTTP_RETURN_NOT_FOUND_STRING = "404 Not Found";
 	private static final String HTTP_RETURN_INTERNAL_SERVER_ERROR_STRING = "500 Internal Server Error";
@@ -142,6 +145,10 @@ public final class HttpResponseStructure
 		if (a_returnCode == HTTP_RETURN_OK)
 		{
 			m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, HTTP_TYPE_NO_TYPE, HTTP_ENCODING_PLAIN, null, false);
+		}
+		else if (a_returnCode == HTTP_RETURN_ACCEPTED)
+		{
+			m_httpReturnData = createHttpMessage(HTTP_RETURN_ACCEPTED, HTTP_TYPE_NO_TYPE, HTTP_ENCODING_PLAIN, null, false);
 		}
 		else if (a_returnCode == HTTP_RETURN_BAD_REQUEST)
 		{
@@ -305,6 +312,10 @@ public final class HttpResponseStructure
 		if (a_httpReturnCode == HTTP_RETURN_OK)
 		{
 			httpHeader.append(HTTP_RETURN_OK_STRING);
+		}
+		else if (a_httpReturnCode == HTTP_RETURN_ACCEPTED)
+		{
+			httpHeader.append(HTTP_RETURN_ACCEPTED_STRING);
 		}
 		else if (a_httpReturnCode == HTTP_RETURN_BAD_REQUEST)
 		{
