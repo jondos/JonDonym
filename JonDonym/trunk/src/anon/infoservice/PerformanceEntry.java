@@ -36,6 +36,10 @@ import java.util.Hashtable;
 import java.util.Calendar;
 import java.util.Vector;
 
+import logging.LogHolder;
+import logging.LogType;
+import logging.LogLevel;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
@@ -58,7 +62,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	/**
 	 * Remove the worst x% results.
 	 */
-	private static final double BOUND_ROUNDING = 0.15d;
+	private static final double BOUND_ROUNDING = 0.10d;
 	
 	/**
 	 * The entry's container XML element name.
@@ -630,7 +634,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				"<th>% Std. Deviation</th>" +
 				"<th>Err/Try/Total</th></tr>";
 
-		long dayTimestamp = getDayTimestamp(a_attribute, a_selectedDay);
+		//long dayTimestamp = getDayTimestamp(a_attribute, a_selectedDay);		
+		
+		//LogHolder.log(LogLevel.WARNING, LogType.MISC, "GOOD: Performance day: " + a_selectedDay + " timestamp: " + dayTimestamp + " ID: " + cascade.getId());
 		
 		for (int hour = 0; hour < 24; hour++)
 		{
@@ -638,12 +644,22 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					"<td CLASS=\"name\">" + hour + ":00 - " + ((hour + 1) % 24) + ":00</td>";
 			
 			PerformanceAttributeEntry entry = m_entries[a_attribute][a_selectedDay][hour];
+			long dayTimestamp = 0;
+			if (entry != null)
+			{
+				dayTimestamp = entry.getDayTimestamp();
+			}
 			
 			Calendar calLastTest = Calendar.getInstance();
 			calLastTest.setTime(new Date(m_lastTestTime));
 			
 			if (entry == null || System.currentTimeMillis() - dayTimestamp > 7 * 24 * 60 * 60 * 1000 )
 			{
+				if (entry != null)
+				{
+					LogHolder.log(LogLevel.WARNING, LogType.MISC, "BAD: Performance day: " + a_selectedDay + " timestamp: " + dayTimestamp + " ID: " + cascade.getId());
+				}
+				
 				htmlData += "<td colspan=\"6\" align=\"center\">No data available</td>";
 			}
 			else
