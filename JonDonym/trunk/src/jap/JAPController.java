@@ -74,6 +74,7 @@ import anon.infoservice.AbstractMixCascadeContainer;
 import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.CascadeIDEntry;
 import anon.infoservice.Database;
+import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
@@ -1280,6 +1281,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				if (nodeCascades != null)
 				{
 					Node nodeCascade = nodeCascades.getFirstChild();
+					String currentCascadeContext = null;
 					while (nodeCascade != null)
 					{
 						if (nodeCascade.getNodeName().equals(MixCascade.XML_ELEMENT_NAME))
@@ -1287,15 +1289,31 @@ public final class JAPController extends Observable implements IProxyListener, O
 							try
 							{
 								currentCascade = new MixCascade( (Element) nodeCascade, Long.MAX_VALUE);
-								try
+								
+								currentCascadeContext = currentCascade.getContext();
+								/* JonDonym is the defult service context */
+								if(currentCascadeContext == null)
 								{
-									Database.getInstance(MixCascade.class).update(currentCascade);
+									currentCascadeContext = IServiceContextContainer.CONTEXT_JONDONYM;
 								}
-								catch (Exception e)
-								{}
-								/* register loaded cascades as known cascades */
-								Database.getInstance(CascadeIDEntry.class).update(
-									new CascadeIDEntry(currentCascade));
+								/* only add to database when the service context matches */
+								if(currentCascadeContext.equals(m_Model.getContext()))
+								{
+									try
+									{
+										Database.getInstance(MixCascade.class).update(currentCascade);
+									}
+									catch (Exception e)
+									{}
+									/* register loaded cascades as known cascades */
+									Database.getInstance(CascadeIDEntry.class).update(
+										new CascadeIDEntry(currentCascade));
+								}
+								else
+								{
+									LogHolder.log(LogLevel.NOTICE, LogType.MISC, 
+											"No service context match "+currentCascadeContext+"."+currentCascade.getName());
+								}
 							}
 							catch (Exception a_e)
 							{

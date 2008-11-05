@@ -94,6 +94,8 @@ public abstract class AbstractDistributableDatabaseEntry extends AbstractDatabas
 			String id;
 			long serial, lastUpdate;
 			boolean bVerified, bValid;
+			String context = null;
+			
 			Hashtable hashSerials;
 			NodeList serialNodes =
 				a_elemSerials.getElementsByTagName(XMLUtil.getXmlElementName(m_thisDBEntryClass));
@@ -116,13 +118,16 @@ public abstract class AbstractDistributableDatabaseEntry extends AbstractDatabas
 					lastUpdate = XMLUtil.parseAttribute(serialNodes.item(i), XML_ATTR_LAST_UPDATE, 0L);
 					bVerified = XMLUtil.parseAttribute(serialNodes.item(i), XML_ATTR_VERIFIED, false);
 					bValid = XMLUtil.parseAttribute(serialNodes.item(i), XML_ATTR_VALID, false);
+					context = XMLUtil.parseAttribute(serialNodes.item(i), 
+												IServiceContextContainer.XML_ATTR_CONTEXT, 
+												IServiceContextContainer.CONTEXT_JONDONYM);
 				}
 				else
 				{
 					continue;
 				}
 
-				hashSerials.put(id, new SerialDBEntry(id, serial, lastUpdate, bVerified, bValid));
+				hashSerials.put(id, new SerialDBEntry(id, serial, lastUpdate, bVerified, bValid, context));
 			}
 
 			return hashSerials;
@@ -165,21 +170,31 @@ public abstract class AbstractDistributableDatabaseEntry extends AbstractDatabas
 										 ((IVerifyable)currentEntry).isVerified() &&
 						((IVerifyable)currentEntry).getCertPath().verify());
 				}
+				if (currentEntry instanceof IServiceContextContainer)
+				{
+					String context = ((IServiceContextContainer)currentEntry).getContext();
+					if(context != null)
+					{
+						XMLUtil.setAttribute(nodeASerial, IServiceContextContainer.XML_ATTR_CONTEXT, context);
+					}
+				}
 			}
 			return nodeSerials;
 		}
 	}
 
-	public static class SerialDBEntry extends AbstractDatabaseEntry
+	public static class SerialDBEntry extends AbstractDatabaseEntry 
+		implements IServiceContextContainer
 	{
 		private String m_id;
 		private long m_version;
 		private long m_lastUpdate;
 		private boolean m_bVerified;
 		private boolean m_bValid;
+		private String m_context;
 
 		public SerialDBEntry(String a_id, long a_version, long a_lastUpdate,
-							 boolean a_bVerified, boolean a_bValid)
+							 boolean a_bVerified, boolean a_bValid, String context)
 		{
 			super(0);
 
@@ -188,6 +203,7 @@ public abstract class AbstractDistributableDatabaseEntry extends AbstractDatabas
 			m_lastUpdate = a_lastUpdate;
 			m_bVerified = a_bVerified;
 			m_bValid = a_bValid;
+			m_context = context;
 		}
 
 		public boolean isVerified()
@@ -213,6 +229,15 @@ public abstract class AbstractDistributableDatabaseEntry extends AbstractDatabas
 		public long getVersionNumber()
 		{
 			return m_version;
+		}
+
+		public String getContext() 
+		{
+			return m_context;
+		}
+
+		public void setContext(String context) {
+			this.m_context = context;
 		}
 	}
 

@@ -119,7 +119,8 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 
 	protected Hashtable getEntrySerials()
 	{
-		Hashtable result = InfoServiceHolder.getInstance().getMixCascadeSerials();
+		Hashtable result = 
+			InfoServiceHolder.getInstance().getMixCascadeSerials(JAPModel.getInstance().getContext());
 		if (result == null)
 		{
 			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
@@ -155,7 +156,7 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 		Hashtable result;
 		if (a_entriesToUpdate == null)
 		{
-			result = InfoServiceHolder.getInstance().getMixCascades();
+			result = InfoServiceHolder.getInstance().getMixCascades(JAPModel.getInstance().getContext());
 		}
 		else if (a_entriesToUpdate.size() == 0)
 		{

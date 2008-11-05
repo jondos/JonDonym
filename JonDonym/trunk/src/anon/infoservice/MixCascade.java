@@ -56,7 +56,7 @@ import anon.pay.AIControlChannel;
  * Holds the information for a mixcascade.
  */
 public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
-	implements AnonServerDescription, IVerifyable
+	implements AnonServerDescription, IVerifyable, IServiceContextContainer
 {
 	public static final String SUPPORTED_PAYMENT_PROTOCOL_VERSION = "2.0";
 
@@ -167,6 +167,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 * If this MixCascade has been received directly from a cascade connection.
 	 */
 	private boolean m_bFromCascade;
+	private String m_context;
 
 	
 	/**
@@ -282,6 +283,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		
 		m_bStudy = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_STUDY, false);
 		
+		m_context = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_CONTEXT, CONTEXT_JONDONYM);
 		m_maxUsers = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_MAX_USERS, 0);
 		m_maxUsers = Math.min(m_maxUsers, 9999); // 10000 is seen as unlimited
 
@@ -1372,5 +1374,15 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			m_strMixIds += m_mixIds.elementAt(i);
 		}
+	}
+
+	public String getContext() 
+	{
+		return m_context;
+	}
+
+	public void setContext(String context) 
+	{
+		m_context = context;
 	}
 }
