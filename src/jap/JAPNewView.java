@@ -132,7 +132,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	public static final String MSG_NO_REAL_PAYMENT = JAPNewView.class.getName() + "_noRealPayment";
 	public static final String MSG_UNKNOWN_PERFORMANCE = JAPNewView.class.getName() + "_unknownPerformance";
 
-	private static final String MSG_USERS = JAPNewView.class.getName() + "_users";
+	public static final String MSG_USERS = JAPNewView.class.getName() + "_users";
 	private static final String MSG_ANONYMETER_TOOL_TIP = JAPNewView.class.getName() + "_anonymeterToolTip";
 	private static final String MSG_SERVICE_NAME = JAPNewView.class.getName() + "_ngAnonymisierungsdienst";
 	private static final String MSG_ERROR_DISCONNECTED = JAPNewView.class.getName() + "_errorDisconnected";
@@ -215,7 +215,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private final JLabel DEFAULT_LABEL = new JLabel();
 
 	//private JLabel meterLabel;
-	private JLabel m_lblPrice;
 	private JLabel m_labelVersion;
 	private JPanel m_pnlVersion;
 	private JButton m_bttnHelp, m_bttnQuit, m_bttnIconify, m_bttnConf, m_btnAssistant, m_btnAbout;
@@ -402,6 +401,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
+				
 				boolean bUpdated = false;
 				Vector vecVersions = new Vector();
 				JAPVersionInfo viTemp;
@@ -468,6 +469,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
+				
 				if (JAPModel.isInfoServiceDisabled())
 				{
 					if (JAPDialog.showConfirmDialog(JAPNewView.this,
@@ -500,6 +503,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
+				
 				JAPDialog.showMessageDialog(JAPNewView.this,
 											JAPMessages.getString(MSG_NEW_SERVICES_FOUND_EXPLAIN,
 					JAPMessages.getString(MSG_SERVICE_NAME)));
@@ -578,6 +583,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				public void actionPerformed(ActionEvent e)
 				{
+					m_comboAnonServices.closeCascadePopupMenu();
 					AbstractOS.getInstance().openBrowser();	
 				}
 			});
@@ -607,32 +613,18 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.fill = GridBagConstraints.NONE;
 		m_panelAnonService.add(m_labelAnonService, c1);
 		m_comboAnonServices = new JAPMixCascadeComboBox();
+		addComponentListener(new ComponentAdapter()
+		{
+			public void componentMoved(ComponentEvent a_event)
+			{
+				m_comboAnonServices.closeCascadePopupMenu();
+			}
+		});
 		m_comboAnonServices.addItemListener(new ItemListener()
 		{
 			public void itemStateChanged(ItemEvent e)
 			{
 				final MixCascade cascade = (MixCascade) m_comboAnonServices.getSelectedItem();
-				if (cascade != null)
-				{
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							if (cascade.isPayment())
-							{
-								m_lblPrice.setText(JAPMessages.getString(MSG_WITH_COSTS));
-								m_lblPrice.setForeground(Color.blue);
-								m_lblPrice.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-							}
-							else
-							{
-								m_lblPrice.setText(JAPMessages.getString(MSG_NO_COSTS));
-								m_lblPrice.setForeground(new JLabel().getForeground());
-								m_lblPrice.setCursor(Cursor.getDefaultCursor());
-							}
-						}
-					});
-				}
 
 				if (m_bIgnoreAnonComboEvents)
 				{
@@ -673,6 +665,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
 				fetchMixCascadesAsync(true);
 			}
 		});
@@ -719,22 +712,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(5, 5, 0, 0);
-		//c1.fill = GridBagConstraints.HORIZONTAL;
-		m_lblPrice = new JLabel(JAPMessages.getString(MSG_NO_COSTS));
-		m_lblPrice.addMouseListener(new MouseAdapter()
-		{
-			public void mouseClicked(MouseEvent a_event)
-			{
-				if (m_lblPrice.getCursor() == Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
-				{
-					JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
-												JAPMessages.getString(MSG_NO_REAL_PAYMENT));
-				}
-			}
-		});
-		//m_panelAnonService.add(m_lblPrice, c1);
-
-
 
 
 		c1.insets = new Insets(5, 20, 0, 0);
@@ -1268,6 +1245,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void windowClosing(WindowEvent e)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
 				if (isEnabled())
 				{
 					JAPController.goodBye(true);
@@ -1276,12 +1254,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 			public void windowDeiconified(WindowEvent e)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
 				m_bIsIconified = false;
 				updateValues(false);
 			}
 
 			public void windowIconified(WindowEvent e)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
 				hideWindowInTaskbar();
 				m_bIsIconified = true;
 				updateValues(false);
@@ -1331,10 +1311,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_mainMovedAdapter = new ComponentMovedAdapter();
 		m_helpMovedAdapter = new ComponentMovedAdapter();
 		m_configMovedAdapter = new ComponentMovedAdapter();
-		addComponentListener(m_mainMovedAdapter);
+		addComponentListener(m_mainMovedAdapter);		
+		
 		if(JAPHelp.getHelpDialog() != null)
 		{
-			JAPHelp.getHelpDialog().addComponentListener(m_helpMovedAdapter);
+			JAPHelp.getHelpDialog().addComponentListener(m_helpMovedAdapter);			
 		}
 		//new GUIUtils.WindowDocker(this);
 
@@ -2217,6 +2198,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	public void showIconifiedView()
 	{
+		m_comboAnonServices.closeCascadePopupMenu();
 		synchronized (SYNC_ICONIFIED_VIEW)
 		{
 			if (m_ViewIconified != null)
@@ -2309,6 +2291,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	{
 		//		LogHolder.log(LogLevel.DEBUG,LogType.MISC,"GetEvent: "+event.getSource());
 		final JAPNewView view = this;
+		m_comboAnonServices.closeCascadePopupMenu();
 		synchronized (SYNC_ACTION)
 		{
 			if (m_bActionPerformed)
@@ -2348,6 +2331,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				else if (source == m_btnAbout)
 				{
 					//JAPController.getInstance().simuateProxyError();
+					m_comboAnonServices.closeCascadePopupMenu();
 					JAPController.aboutJAP();
 				}
 				else if (source == m_btnAssistant)
@@ -2504,6 +2488,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
+		m_comboAnonServices.closeCascadePopupMenu();
 		JAPHelp help = JAPHelp.getInstance();
 		help.setContext(
 				JAPHelpContext.createHelpContext("index", this));
@@ -2556,6 +2541,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	public void showConfigDialog(final String card, final Object a_value)
 	{
+		m_comboAnonServices.closeCascadePopupMenu();
 		if (m_bConfigActive)
 		{
 			return;
@@ -3187,6 +3173,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showJavaUpdateDialog(JavaVersionDBEntry a_entry)
 	{
+		m_comboAnonServices.closeCascadePopupMenu();
 		Object[] args = new Object[5];
 		args[0] = JavaVersionDBEntry.CURRENT_JAVA_VERSION;
 		args[1] = JavaVersionDBEntry.CURRENT_JAVA_VENDOR;
