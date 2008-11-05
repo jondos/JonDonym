@@ -36,6 +36,8 @@ import anon.util.ThreadPool;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import anon.infoservice.AbstractDistributableDatabaseEntry.SerialDBEntry;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.IXMLEncodable;
 import anon.util.Util;
@@ -450,6 +452,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					if (functionNumber == GET_MIXCASCADES)
 					{
 						tempHashtable = currentInfoService.getMixCascades();
+						if(arguments != null)
+						{
+							/* a service context (service environment) is specified 
+							 * remove all elements which does not match our context 
+							 */
+							String context = (String) arguments.firstElement();
+							filterServiceContext(tempHashtable, context);
+						}
 					}
 					else if (functionNumber == GET_INFOSERVICES)
 					{
@@ -508,6 +518,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_MIXCASCADE_SERIALS)
 					{
 						tempHashtable = currentInfoService.getMixCascadeSerials();
+						if(arguments != null)
+						{
+							/* a service context (service environment) is specified 
+							 * remove all elements which does not match our context 
+							 */
+							String context = (String) arguments.firstElement();
+							filterServiceContext(tempHashtable, context);
+						}
 					}
 					else if (functionNumber == GET_INFOSERVICE_SERIALS)
 					{
@@ -597,7 +615,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 										 */
 										currentSerialEntry = new AbstractDistributableDatabaseEntry.SerialDBEntry(
 											currentSerialEntry.getId(), 0, Long.MAX_VALUE, // force update of hash
-											currentSerialEntry.isVerified(), currentSerialEntry.isValid());
+											currentSerialEntry.isVerified(), currentSerialEntry.isValid(), 
+											currentSerialEntry.getContext());
 									}
 
 									if (currentSerialEntry.isVerified() != hashedSerialEntry.isVerified())
@@ -612,7 +631,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 										 */
 										currentSerialEntry = new AbstractDistributableDatabaseEntry.SerialDBEntry(
 											currentSerialEntry.getId(), currentSerialEntry.getVersionNumber(),
-											Long.MAX_VALUE, true, currentSerialEntry.isValid());
+											Long.MAX_VALUE, true, currentSerialEntry.isValid(), 
+											currentSerialEntry.getContext());
 									}
 
 									if (currentSerialEntry.isValid() != hashedSerialEntry.isValid())
@@ -627,7 +647,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 										 */
 										currentSerialEntry = new AbstractDistributableDatabaseEntry.SerialDBEntry(
 											currentSerialEntry.getId(), currentSerialEntry.getVersionNumber(),
-											Long.MAX_VALUE, currentSerialEntry.isVerified(), true);
+											Long.MAX_VALUE, currentSerialEntry.isVerified(), true, 
+											currentSerialEntry.getContext());
 									}
 									currentEntry = currentSerialEntry;
 								}
@@ -721,9 +742,43 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 		return (Hashtable) (fetchInformation(GET_MIXCASCADES, null));
 	}
 	
+	/** 
+	 * same as getMixCascades but a service context that the cascades must match can be specfied.
+	 * If null is specified the method returns all service objects
+	 * @param context service context that the returned cascades must match
+	 * @return all cascades that match the specified service context.
+	 */
+	public Hashtable getMixCascades(String context)
+	{
+		if(context == null)
+		{
+			return getMixCascades();
+		}
+		Vector args = new Vector();
+		args.addElement(context); 
+		return (Hashtable) (fetchInformation(GET_MIXCASCADES, args));
+	}
+	
 	public Hashtable getMixCascadeSerials()
 	{
 		return (Hashtable) (fetchInformation(GET_MIXCASCADE_SERIALS, null));
+	}
+	
+	/** 
+	 * same as getMixCascadesSerials but a service context that the serials must match can be specified.
+	 * If null is specified the method returns all service serials
+	 * @param context service context that the returned cascades must match
+	 * @return all cascade serials that match the specified service context.
+	 */
+	public Hashtable getMixCascadeSerials(String context)
+	{
+		if(context == null)
+		{
+			return getMixCascadeSerials();
+		}
+		Vector args = new Vector();
+		args.addElement(context); 
+		return (Hashtable) (fetchInformation(GET_MIXCASCADE_SERIALS, args));
 	}
 	
 	/**
@@ -1034,6 +1089,43 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					(Element) (XMLUtil.getFirstChildByName(a_infoServiceManagementNode,
 					XML_ELEM_CHANGE_INFO_SERVICES));
 				setChangeInfoServices(XMLUtil.parseValue(changeInfoServicesNode, isChangeInfoServices()));
+			}
+		}
+	}
+	
+	/**
+	 * helper function that filters service objects matching the specified
+	 * service context. In case of a mismatch the service object will be removed
+	 * from the specified serviceObjects table.
+	 * @param serviceObjects table of service objects to be filtered
+	 * @param context the service context that the service objects must match 
+	 */
+	private static void filterServiceContext(Hashtable serviceObjects, String context)
+	{
+		boolean removeEntry = false;
+		if(context != null && serviceObjects != null)
+		{
+			String currentContext = null;
+			try
+			{
+				for(Enumeration keys = serviceObjects.keys(); keys.hasMoreElements();)
+				{
+					Object currentKey = keys.nextElement();	
+					IServiceContextContainer currentEntry = 
+						(IServiceContextContainer) serviceObjects.get(currentKey);
+					
+					currentContext = currentEntry.getContext();
+					removeEntry = (currentContext == null) ? 
+									true : !currentContext.equals(context);
+					if(removeEntry)
+					{
+						serviceObjects.remove(currentKey);
+					}
+				}
+			}
+			catch(ClassCastException cce)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.MISC, "Wrong type for filter specified", cce);
 			}
 		}
 	}

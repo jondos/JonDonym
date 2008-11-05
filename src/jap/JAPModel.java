@@ -56,6 +56,7 @@ import platform.AbstractOS;
 import anon.crypto.JAPCertificate;
 import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.IProxyInterfaceGetter;
+import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.ProxyInterface;
 import anon.mixminion.mmrdescription.MMRList;
@@ -65,7 +66,7 @@ import anon.util.ResourceLoader;
 import anon.util.Util;
 
 /* This is the Model of All. It's a Singelton!*/
-public final class JAPModel extends Observable implements IHelpModel
+public final class JAPModel extends Observable implements IHelpModel, IServiceContextContainer
 {
 	public static final String MACOSX_LIB_NEEDS_UPDATE = "macOSXLibNeedsUpdate";
 	public static final String DLL_VERSION_UPDATE = "dllVersionUpdate";
@@ -167,6 +168,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	private boolean m_bAnonymizedHttpHeaders = JAPConstants.ANONYMIZED_HTTP_HEADERS;
 
+	private String m_context = CONTEXT_JONDONYM;
+	
 	private int m_fontSize = 0;
 
 	private GUIUtils.IIconResizer m_resizer = new GUIUtils.IIconResizer()
@@ -1863,5 +1866,15 @@ public final class JAPModel extends Observable implements IHelpModel
 	public Hashtable getAcceptedTCs()
 	{
 		return m_acceptedTCs;
+	}
+
+	public String getContext() 
+	{
+		return m_context;
+	}
+
+	public void setContext(String context) 
+	{
+		this.m_context = context;
 	}
 }

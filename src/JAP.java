@@ -46,6 +46,7 @@ import java.awt.Frame;
 import java.awt.Window;
 
 import anon.client.crypto.KeyPool;
+import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;
@@ -106,6 +107,7 @@ public class JAP
 		JAP.class.getName() + "_useDefaultBrowser";
 	
 	private final static String WHITESPACE_ENCODED = "%20";
+	private static final String OPTION_MANIOQ = "--manioq";
 	
 	private JAPController m_controller;
 	
@@ -333,6 +335,10 @@ public class JAP
 		// Set path to Firefox for portable JAP
 		boolean bPortable = isArgumentSet("--portable");
 		m_controller.setPortableMode(bPortable);
+		if(isArgumentSet(OPTION_MANIOQ))
+		{
+			JAPModel.getInstance().setContext(IServiceContextContainer.CONTEXT_MANIOQ);
+		}
 		
 		String configFileName = null;
 		/* check, whether there is the -config parameter, which means the we use userdefined config
