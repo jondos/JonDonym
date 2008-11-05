@@ -4,6 +4,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import jap.JAPController;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -472,5 +475,30 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "IOException while loading Terms & Conditions: ", ex);
 			}
 		}
+	}
+	
+	public static TermsAndConditionsFramework getById(String a_id)
+	{
+		// first look if it's in our database
+		TermsAndConditionsFramework tc = (TermsAndConditionsFramework) Database.getInstance(TermsAndConditionsFramework.class).getEntryById(a_id);
+		
+		if(tc != null)
+		{
+		return tc;
+		}
+		
+		// not found, force an update and try again
+		JAPController.getInstance().getTermsUpdater().update();
+		
+		tc = InfoServiceHolder.getInstance().getTCFramework(a_id);
+		
+		if(tc != null)
+		{
+			Database.getInstance(TermsAndConditionsFramework.class).update(tc);
+		}
+		
+		// return the entry if found, otherwise null
+		return tc;
+		
 	}
 }

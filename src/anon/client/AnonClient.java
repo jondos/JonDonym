@@ -66,6 +66,7 @@ import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
+import anon.infoservice.ServiceOperator;
 import anon.pay.AIControlChannel;
 import anon.pay.Pay;
 import anon.util.XMLParseException;
@@ -176,7 +177,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 		m_serviceContainer = a_serviceContainer;
 
-		/******************* start terms and conditions check ***********************
 		int cascadeLength = mixCascade.getNumberOfMixes();
 		JAPController controller = JAPController.getInstance();
 		
@@ -188,30 +188,28 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				return ErrorCodes.E_CONNECT;
 			}
 			
-			JAPCertificate opCert = info.getOperatorCertificate();
-			if(opCert == null)
+			ServiceOperator op = info.getServiceOperator();
+			if(!controller.hasAcceptedTermsAndConditions(op) && op != null)
 			{
-				return ErrorCodes.E_CONNECT;
-			}
-			
-			String opSki = opCert.getSubjectKeyIdentifier();
-			if(! controller.hasAcceptedTermsAndConditions(opSki) )
-			{
-				boolean accept = 
-					JAPDialog.showYesNoDialog(controller.getViewWindow(), "Accept the T&Cs?"); //replace with T&C Dialog
-				if(!accept)
+				TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(controller.getViewWindow(), op.getId());
+				
+				if(dlg.hasFoundTC())
 				{
-					controller.revokeTermsAndConditions(opSki);
-					return ErrorCodes.E_INTERRUPTED;
-				}
-				else
-				{
-					controller.acceptTermsAndConditions(opSki);
+					dlg.setVisible(true);
+					
+					if(!dlg.isTermsAccepted())
+					{
+						controller.revokeTermsAndConditions(op);
+						return ErrorCodes.E_INTERRUPTED;
+					}
+					else
+					{
+						controller.acceptTermsAndConditions(op);
+					}
 				}
 			}
 		}
-		********************  end terms and conditions check **************************/
-		
+			
 		StatusThread run = new StatusThread()
 		{
 			int status;

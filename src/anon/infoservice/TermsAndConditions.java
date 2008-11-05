@@ -31,6 +31,8 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	
 	public static int TERMS_AND_CONDITIONS_TTL = 1000*60*60*24;
 	
+	public static final String XML_ATTR_TIME_ACCEPTED = "timeAccepted";
+	
 	public static String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsList";
 	public static String XML_ELEMENT_NAME = "TermsAndConditions";
 	

@@ -66,6 +66,8 @@ public class JAPConfServices extends AbstractJAPConfModule
 	 * Stores the module for the general tab.
 	 */
 	private JAPConfAnonGeneral m_anonGeneralModule;
+	
+	private JAPConfTC m_tcModule;
 
 	/** Stores the tabbed pane  **/
 	private JTabbedPane m_tabsAnon;
@@ -94,6 +96,7 @@ public class JAPConfServices extends AbstractJAPConfModule
 		JAPConfTor torModule = getTorModule();
 		JAPConfMixminion mixminionModule = getMixminionModule();
 		JAPConfAnonGeneral anonGeneralModule = getAnonGeneralModule();
+		JAPConfTC tcModule = getTCModule();
 
 		synchronized (this)
 		{
@@ -118,6 +121,8 @@ public class JAPConfServices extends AbstractJAPConfModule
 			{
 				m_tabsAnon.addTab(anonModule.getTabTitle(), anonModule.getRootPanel());
 				m_tabbedModules.addElement(anonModule);
+				//m_tabsAnon.addTab(tcModule.getTabTitle(), tcModule.getRootPanel());
+				//m_tabbedModules.addElement(tcModule);
 				if (!JAPConstants.m_bReleasedVersion)
 				{
 					m_tabsAnon.addTab(torModule.getTabTitle(), torModule.getRootPanel());
@@ -168,7 +173,8 @@ public class JAPConfServices extends AbstractJAPConfModule
 		boolean resultValue2 = m_torModule.okPressed();
 		boolean resultValue3 = m_mixminionModule.okPressed();
 		boolean resultValue4 = m_anonGeneralModule.okPressed();
-		return (resultValue1 && resultValue2 && resultValue3 && resultValue4);
+		boolean resultValue5 = m_tcModule.okPressed();
+		return (resultValue1 && resultValue2 && resultValue3 && resultValue4 && resultValue5);
 	}
 
 	/**
@@ -181,6 +187,7 @@ public class JAPConfServices extends AbstractJAPConfModule
 		m_torModule.cancelPressed();
 		m_mixminionModule.cancelPressed();
 		m_anonGeneralModule.cancelPressed();
+		m_tcModule.cancelPressed();
 	}
 
 	public String getHelpContext()
@@ -221,6 +228,7 @@ public class JAPConfServices extends AbstractJAPConfModule
 		m_torModule.resetToDefaultsPressed();
 		m_mixminionModule.resetToDefaultsPressed();
 		m_anonGeneralModule.resetToDefaultsPressed();
+		m_tcModule.resetToDefaultsPressed();
 	}
 
 	/**
@@ -233,6 +241,7 @@ public class JAPConfServices extends AbstractJAPConfModule
 		m_torModule.updateValues(false);
 		m_mixminionModule.updateValues(false);
 		m_anonGeneralModule.updateValues(false);
+		m_tcModule.updateValues(false);
 	}
 
 	/**
@@ -303,6 +312,18 @@ public class JAPConfServices extends AbstractJAPConfModule
 		return m_anonGeneralModule;
 	}
 
+	private JAPConfTC getTCModule()
+	{
+		synchronized (this)
+		{
+			if (m_tcModule == null)
+			{
+				m_tcModule = new JAPConfTC(null);
+			}
+		}
+		return m_tcModule;
+	}
+	
 	public synchronized void selectAnonTab(MixCascade a_cascade, boolean a_bShowFilter)
 	{
 		if (JAPModel.getDefaultView() != JAPConstants.VIEW_SIMPLIFIED)
