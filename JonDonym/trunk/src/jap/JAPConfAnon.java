@@ -105,6 +105,7 @@ import anon.util.Util;
 import anon.util.Util.Comparable;
 import gui.CertDetailsDialog;
 import gui.GUIUtils;
+import gui.OperatorsCellRenderer;
 import gui.JAPHelpContext;
 import gui.JAPJIntField;
 import gui.JAPMessages;
@@ -4032,34 +4033,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public Vector getBlacklist()
 		{
 			return m_vecBlacklist;
-		}
-	}
-	
-	class OperatorsCellRenderer extends DefaultTableCellRenderer
-	{
-		/**
-		 * serial version UID
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public void setValue(Object value)
-		{
-			if(value == null)
-			{
-				setText("");
-				return;
-			}
-			else if(value instanceof ServiceOperator)
-			{
-				ServiceOperator op = (ServiceOperator) value;
-				setForeground(Color.black);
-				
-				if(op.getCertificate() == null)
-				{
-					setForeground(Color.gray);
-				}
-				setText(op.getOrganization());
-			}
 		}
 	}
 }

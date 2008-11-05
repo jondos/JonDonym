@@ -11,31 +11,26 @@ import anon.infoservice.TermsAndConditions;
 
 public class TermsAndConditionsDialog extends JAPDialog
 {
-	JEditorPane m_panel;
+	TermsAndConditionsPane m_panel;
+	boolean m_foundTC;
 	
 	public TermsAndConditionsDialog(Component a_parent, String a_ski)
 	{
 		super(a_parent, "T&C");
 		
+		m_foundTC = false;
+		
 		setResizable(false);
 		
-		
-		TermsAndConditionsPane contentPane =
-			new TermsAndConditionsPane(this, false);
-		
-		/*java.util.Hashtable tcop = InfoServiceHolder.getInstance().getTermsAndConditions();
-		TermsAndConditions op = 
-			(TermsAndConditions) tcop.get("de_ED:1E:83:EF:A1:D5:84:58:AC:7D:AE:D8:E9:32:29:38:90:9F:15:81");*/
+		m_panel = new TermsAndConditionsPane(this, false);
 		
 		TermsAndConditions tc = TermsAndConditions.getById("de_" + a_ski);
-		
-		java.util.Hashtable test = InfoServiceHolder.getInstance().getTermsAndConditionsSerials();
 		
 		if(tc == null)
 		{
 			return;
 		}
-		TermsAndConditionsFramework fr = InfoServiceHolder.getInstance().getTCFramework(tc.getReferenceId());
+		TermsAndConditionsFramework fr = TermsAndConditionsFramework.getById(tc.getReferenceId());
 		
 		if(fr == null)
 		{
@@ -44,9 +39,21 @@ public class TermsAndConditionsDialog extends JAPDialog
 		
 		fr.importData(tc);
 		
-		contentPane.setText(fr.transform());
+		m_panel.setText(fr.transform());
 		
-		contentPane.updateDialog();
+		m_panel.updateDialog();
 		pack();
+		
+		m_foundTC = true;
+	}
+	
+	public boolean isTermsAccepted()
+	{
+		return m_panel.isTermsAccepted();
+	}
+	
+	public boolean hasFoundTC()
+	{
+		return m_foundTC;
 	}
 }
