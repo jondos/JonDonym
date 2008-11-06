@@ -7,6 +7,7 @@
 	
 	<!-- set global properties for this build -->
 	<property name="mainclass" value="JAP"/>
+	<property name="mainclass.osx" value="JAPMacintosh"/>
 	<property name="appname" value="JAP"/>
 	<property name="bundleid" value="de.jondos.JonDo"/>
 	<property name="JAP_args" value=""/>
@@ -99,49 +100,34 @@
 	<target name="init-libs" depends="init-dirs">
 		<get src="${lib.java1_1_classes.url}" dest="${lib.java1_1_classes}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>    
-    
 		<get src="${lib.swing.url}" dest="${lib.swing}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>    
-  
 		<get src="${lib.http.url}" dest="${lib.http}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-  	
 		<get src="${lib.xml.url}" dest="${lib.xml}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-  	
 		<get src="${lib.bouncyCastle.url}" dest="${lib.bouncyCastle}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-    
 		<get src="${lib.ftp.url}" dest="${lib.ftp}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/> 
-    
 		<get src="${lib.xmlrpc.url}" dest="${lib.xmlrpc}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-    
 		<get src="${lib.mail.url}" dest="${lib.mail}"
 			verbose="true"  usetimestamp="true" ignoreerrors="true"/>    
-  
 		<get src="${lib.jama.url}" dest="${lib.jama}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-  	
 		<get src="${lib.log4j.url}" dest="${lib.log4j}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-  	
 		<get src="${lib.mrj_classes.url}" dest="${lib.mrj_classes}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-  	
 		<get src="${lib.appleJavaExtensions.url}" dest="${lib.appleJavaExtensions}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>    
-  
 		<get src="${lib.japdll.url}" dest="${lib.japdll}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-  	
 		<get src="${lib.macOSX.url}" dest="${lib.macOSX}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-  	
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>  	
 		<get src="${lib.jaf.url}" dest="${lib.jaf}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-  	
 		<get src="${lib.skype4J.url}" dest="${lib.skype4J}"
   	  		 verbose="true" usetimestamp="true" ignoreerrors="true"/> 
   	 
@@ -178,25 +164,6 @@
 		</javac>
 	</target>
   
-	<target name="jar-core"
-		depends="compile"	
-		description="generates the core jarfile for without any libraries">
-		
-		<jar jarfile="${jap.jarfile}" manifest="MANIFEST.MF" duplicate="preserve">
-			<fileset dir="${build}" includes="**/*.class">
-				<exclude name="jpi/**/*"/>
-				<exclude name="infoservice/**/*"/>
-				<exclude name="misc/**/*"/>
-				<exclude name="captcha/**/*"/>
-				<exclude name="platform/signal/**/*"/>
-			</fileset>
-			<zipfileset dir="src" includes="JAPM*.properties"/>
-			<zipfileset dir="." includes="help/**/*"/>
-			<zipfileset dir="." includes="images/**/*"/>
-			<zipfileset dir="." includes="certificates/**/*"/>
-		</jar>
-	</target>
-	
 	<target name="getcurrentversion" description="Sets the property 'currentVersion', 'releaseDate' to the value provided in JAPConstants.java">
 		<loadfile srcfile="${src}/jap/JAPConstants.java" property="currentVersion">
 			<filterchain>
@@ -254,7 +221,27 @@
 		<echo message="Current MacOSXLib Version is: ${currentMacOSXLibVersion}"/>
 	</target>
 	
-	<target name="jar" depends="getcurrentjapdllversion, getcurrentmacosxlibversion">
+	<target name="jar-core"
+		depends="compile"	
+		description="generates the core jarfile for without any libraries">
+		
+		<jar jarfile="${jap.jarfile}" manifest="MANIFEST.MF" duplicate="preserve">
+			<fileset dir="${build}" includes="**/*.class">
+				<exclude name="jpi/**/*"/>
+				<exclude name="infoservice/**/*"/>
+				<exclude name="misc/**/*"/>
+				<exclude name="captcha/**/*"/>
+				<exclude name="platform/signal/**/*"/>
+			</fileset>
+			<zipfileset dir="src" includes="JAPM*.properties"/>
+			<zipfileset dir="." includes="help/**/*"/>
+			<zipfileset dir="." includes="images/**/*"/>
+			<zipfileset dir="." includes="certificates/**/*"/>
+		</jar>
+	</target>
+	
+	<target name="jar-full"
+		description="creates a jar with all os-independent libraries">
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}"/>
   	
@@ -275,11 +262,30 @@
 			<zipfileset src="${lib.bouncyCastle}"/>
 			<zipfileset src="${lib.xmlrpc}"/>
 			<zipfileset src="${lib.skype4J}"/>
-			<zipfileset file="${lib.japdll}" fullpath="japdll.dll.${currentJAPDllVersion}"/>
-			<zipfileset file="${lib.macOSX}" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
 		</jar>
 	</target>
 
+	<target name="jar-mac" depends="getcurrentmacosxlibversion"
+			description="creates a jar for Mac OS X distributions containing the libMacOSX.jnilib">
+		
+		<antcall target="jar-full">
+			<param name="mainclass" value="${mainclass.osx}"/>
+		</antcall>
+		
+		<jar jarfile="${jap.jarfile}" update="true"> 
+			<zipfileset file="${lib.macOSX}" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
+		</jar>
+	</target>
+	
+	<target name="jar-windows" depends="getcurrentjapdllversion"
+				description="creates a jar for Windows distributions containing the japdll.dll">
+		
+		<antcall target="jar-full"/>
+		<jar jarfile="${jap.jarfile}" update="true"> 
+			<zipfileset file="${lib.japdll}" fullpath="japdll.dll.${currentJAPDllVersion}"/>
+		</jar>
+	</target>
+	
 	<target name="jar-with-external-libs" depends="getcurrentjapdllversion,getcurrentmacosxlibversion, compile"
 		description="alternative jar target, which does not copy the required libs to the jar-file">
 	    <!-- 
@@ -298,7 +304,7 @@
 		<antcall target="jar-core"/>
 	</target>
 	
-	<target name="dist" depends="jar" description="generate the distribution"/>
+	<target name="dist" depends="jar-full" description="generate an os-independent distribution"/>
 	
 	<target name="debian-dist">
 		<antcall target="jar-with-external-libs" inheritAll="false">
@@ -306,17 +312,13 @@
 		</antcall>
 	</target>
 	
-	<target name="mac-dist" description="creates a JonDo Mac OS X bundle">
+	<target name="mac-dist" description="creates a JonDo Mac OS X bundle" depends="getcurrentversion, jar-mac">
   		
   		<!-- First build a jar file with JAPMacintosh as MainClass -->
-  		<antcall target="jar" inheritAll="false">
-  			<param name="mainclass" value="JAPMacintosh"/>
-  		</antcall>
-  		
   		<mkdir dir="${dist.osx}"/>
   		<jarbundler dir="${dist.osx}"
   	            name="${appname}"
-  	            mainclass="${mainclass}" 
+  	            mainclass="${mainclass.osx}" 
   	            bundleid="${bundleid}"
   				jar="${dist}/${appname}.jar"
   				icon="images/${appname}.icns"
@@ -343,10 +345,36 @@
 	  </exec>
 	</target>
 	
+	<target name="manioq-for-mac-dist">
+		<antcall target="mac-diskimage">
+		  	<param name="JAP_args" value="--manioq"/>
+			<param name="dist.osx" value="${dist.osx}/manioq"/>
+		</antcall>
+	</target>
+	
+	<target name="manioq-for-linux-dist" depends="jar-full">
+		<mkdir dir="${dist}/manioq/JonDo"/>
+		<copy file="${jap.jarfile}" todir="${dist}/manioq/JonDo"/>
+		<copy file="jondo_manioq" tofile="${dist}/manioq/JonDo/jondo"/>
+		<zip destfile="JonDo.zip" basedir="${dist}/manioq/"/>
+	</target>
+	
+	
+	
 	<!-- JAP cleanup targets -->
 	<target name="clean" 
-  		depends="cleanup-tests, cleanup-certificates, cleanup-dist" 
+  		depends="cleanup-tests, cleanup-certificates, cleanup-dist, cleanup-libs" 
   		description="the whole cleanup procedure"/>
+	
+	<target name="cleanup-libs"
+			description="cleans up the downloaded libs">
+		<delete dir="${lib}"/>
+	</target>
+	
+	<target name="cleanup-debian"
+		description="cleans up the external libs for the debian distribution">
+		<delete dir="${lib.debianDist}"/>
+	</target>
 	
 	<target name="cleanup-tests" description="deletes unwanted source files (aka tests etc.)">
 		<delete dir="${src}/anon/tor/test"/>
