@@ -8,8 +8,8 @@
 	<!-- set global properties for this build -->
 	<property name="mainclass" value="JAP"/>
 	<property name="mainclass.osx" value="JAPMacintosh"/>
-	<property name="appname" value="JAP"/>
-	<property name="bundleid" value="de.jondos.JonDo"/>
+	<property name="appname" value="JonDo"/>
+	<property name="bundleid" value="de.jondos.${appname}"/>
 	<property name="JAP_args" value=""/>
 	<property name="src" location="src"/>
 	<property name="certificates" location="certificates"/>
@@ -20,11 +20,12 @@
 	<property name="lib" location="lib"/>
 	<property name="dist" location="dist"/>
 	<property name="dist.osx" location="${dist}/MacOsX"/>
-	<property name="jap.jarfile" location="${dist}/${appname}.jar"/>
+	<property name="dist.linux" location="${dist}/linux"/>
+	<property name="jap.jarfile.name" value="JAP"/>
+	<property name="jap.jarfile" location="${dist}/${jap.jarfile.name}.jar"/>
 	<property name="extlibs" location="/Users/simon/lib/jap"/>
 
 	<property name="lib" location="lib"/>
-	<property name="lib.debianDist" location="/usr/share/lib/jap"/>
 	
 	<!-- required libs for jap and infoservice -->
 	<property name="lib.java1_1_classes.url" value="http://anon.inf.tu-dresden.de/develop/java_1_1_classes.zip"/>    
@@ -320,7 +321,7 @@
   	            name="${appname}"
   	            mainclass="${mainclass.osx}" 
   	            bundleid="${bundleid}"
-  				jar="${dist}/${appname}.jar"
+  				jar="${jap.jarfile}"
   				icon="images/${appname}.icns"
   				signature="JAPp"
   				version="${currentVersion}"
@@ -335,7 +336,7 @@
 		</jarbundler>
 	</target>
 	
-	<target name="mac-diskimage" depends="mac-dist" 
+	<target name="mac-dist-archive" depends="mac-dist" 
 			description="creates a compressed dmg image of the JonDo Mac OS X bundle (needs Mac OS X)">
 	  <exec executable="hdiutil">
 	    <arg value="create"/>
@@ -345,21 +346,49 @@
 	  </exec>
 	</target>
 	
-	<target name="manioq-for-mac-dist">
-		<antcall target="mac-diskimage">
-		  	<param name="JAP_args" value="--manioq"/>
+	<target name="linux-dist" depends="jar-full">
+		<mkdir dir="${dist.linux}/${appname}"/>
+		<copy file="${jap.jarfile}" todir="${dist.linux}/${appname}"/>
+		
+		<filter token="ARGS" value="${JAP_args}"/>
+		<filter token="APPNAME" value="${appname}"/>
+		<filter token="JARNAME" value="${jap.jarfile.name}"/>
+		<copy file="install_jondo" todir="${dist.linux}/${appname}" filtering="true"/>
+		
+		<!-- Copying with Ant doesn't preserve file permissions !?! -->
+		<exec executable="chmod">
+			<arg value="755"/>
+			<arg value="${dist.linux}/${appname}/install_jondo"/>
+		</exec>
+	</target>
+	
+	<target name="linux-dist-archive" depends="linux-dist">
+		<!--<zip destfile="${dist.linux}/${appname}.zip" basedir="${dist.linux}"/>-->
+		
+		<!-- 
+		better than the corresponding ant target,
+		because it preserves file permissions 
+		-->
+		<exec executable="zip" dir="${dist.linux}">
+			<arg value="-r"/>
+			<arg value="${appname}.zip"/>
+			<arg value="${appname}"/>
+		</exec>
+	</target>
+	
+	<target name="manioq-for-mac-dist-archive">
+		<antcall target="mac-dist-archive">
+			<param name="JAP_args" value="--manioq"/>
 			<param name="dist.osx" value="${dist.osx}/manioq"/>
 		</antcall>
 	</target>
 	
-	<target name="manioq-for-linux-dist" depends="jar-full">
-		<mkdir dir="${dist}/manioq/JonDo"/>
-		<copy file="${jap.jarfile}" todir="${dist}/manioq/JonDo"/>
-		<copy file="jondo_manioq" tofile="${dist}/manioq/JonDo/jondo"/>
-		<zip destfile="JonDo.zip" basedir="${dist}/manioq/"/>
+	<target name="manioq-for-linux-dist-archive">
+		<antcall target="linux-archive">
+			<param name="JAP_args" value="--manioq"/>
+			<param name="dist.linux" value="${dist.linux}/manioq"/>
+		</antcall>
 	</target>
-	
-	
 	
 	<!-- JAP cleanup targets -->
 	<target name="clean" 
@@ -369,11 +398,6 @@
 	<target name="cleanup-libs"
 			description="cleans up the downloaded libs">
 		<delete dir="${lib}"/>
-	</target>
-	
-	<target name="cleanup-debian"
-		description="cleans up the external libs for the debian distribution">
-		<delete dir="${lib.debianDist}"/>
 	</target>
 	
 	<target name="cleanup-tests" description="deletes unwanted source files (aka tests etc.)">
