@@ -31,15 +31,13 @@
  */
 package anon.client;
 
-import gui.dialog.JAPDialog;
-import jap.JAPController;
-import jap.TermsAndConditionsDialog;
+//import jap.JAPController;
+//import jap.TermsAndConditionsDialog;
 
 import java.io.InterruptedIOException;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.Enumeration;
@@ -77,7 +75,6 @@ import HTTPClient.HTTPConnection;
 import anon.infoservice.IMutableProxyInterface;
 import anon.IServiceContainer;
 import anon.client.TrustException;
-import anon.crypto.JAPCertificate;
 /**
  * @author Stefan Lieske
  */
@@ -178,7 +175,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		m_serviceContainer = a_serviceContainer;
 
 		int cascadeLength = mixCascade.getNumberOfMixes();
-		JAPController controller = JAPController.getInstance();
+		//JAPController controller = JAPController.getInstance();
 				
 		/* When connecting InfoServices must not be contacted */
 		for (int i = 0; i < cascadeLength; i++) 
@@ -189,6 +186,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				return ErrorCodes.E_CONNECT;
 			}
 			
+			/*
 			ServiceOperator op = info.getServiceOperator();
 			if(!controller.hasAcceptedTermsAndConditions(op) && op != null)
 			{
@@ -208,7 +206,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 						controller.acceptTermsAndConditions(op);
 					}
 				}
-			}
+			}*/
 		}
 		
 		StatusThread run = new StatusThread()
