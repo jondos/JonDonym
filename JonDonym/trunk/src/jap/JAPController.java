@@ -492,6 +492,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		JAPModel.getInstance().getRoutingSettings().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().getServerStatisticsListener().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().getRegistrationStatusObserver().addObserver(this);
+		m_Model.addObserver(this);
 		m_iStatusPanelMsgIdForwarderServerStatus = -1;
 	}
 
@@ -3117,6 +3118,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 								JAPModel.getInstance().getPaymentProxyInterface());
 						}
 					}
+					if(m_proxyAnon != null)
+					{
+						m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+						m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());	
+					}
 					if (!JAPModel.isInfoServiceDisabled())
 					{
 						m_feedback.updateAsync();
@@ -4565,6 +4571,18 @@ public final class JAPController extends Observable implements IProxyListener, O
 						}
 					}
 				}).start();
+			} 
+			else if (a_notifier == m_Model && a_message != null)
+			{
+				if (a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
+				{
+					if(m_proxyAnon != null)
+					{
+						m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+						m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+						
+					}
+				}
 			}
 		}
 		catch (Exception e)

@@ -179,7 +179,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 		int cascadeLength = mixCascade.getNumberOfMixes();
 		JAPController controller = JAPController.getInstance();
-		
+				
+		/* When connecting InfoServices must not be contacted */
 		for (int i = 0; i < cascadeLength; i++) 
 		{
 			MixInfo info = mixCascade.getMixInfo(i);
@@ -209,7 +210,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				}
 			}
 		}
-			
+		
 		StatusThread run = new StatusThread()
 		{
 			int status;
