@@ -3118,11 +3118,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 								JAPModel.getInstance().getPaymentProxyInterface());
 						}
 					}
-					if(m_proxyAnon != null)
-					{
-						m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-						m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());	
-					}
+					
+					m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+					m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());	
+					
 					if (!JAPModel.isInfoServiceDisabled())
 					{
 						m_feedback.updateAsync();
@@ -3565,9 +3564,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		m_Model.setDummyTraffic(msIntervall);
 		ForwardServerManager.getInstance().setDummyTrafficInterval(msIntervall);
-		if (m_proxyAnon != null)
+		synchronized (PROXY_SYNC)
 		{
-			m_proxyAnon.setDummyTraffic(msIntervall);
+			if (m_proxyAnon != null)
+			{
+				m_proxyAnon.setDummyTraffic(msIntervall);
+			}
 		}
 	}
 
@@ -4576,11 +4578,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 			{
 				if (a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
 				{
-					if(m_proxyAnon != null)
+					synchronized (PROXY_SYNC)
 					{
-						m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-						m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-						
+						if(m_proxyAnon != null)
+						{
+							m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+							m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+							
+						}
 					}
 				}
 			}
