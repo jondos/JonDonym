@@ -428,7 +428,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		catch (Exception e)
 		{
-			LogHolder.log(LogLevel.ERR, LogType.NET, e);
+			if (a_postData != null && a_postData.length > 0)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.NET, new String(a_postData), e);
+			}
+			else
+			{
+				LogHolder.log(LogLevel.ERR, LogType.NET, e);
+			}
 			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST);
 		}
 		return httpResponse;
