@@ -384,7 +384,7 @@
 	</target>
 	
 	<target name="manioq-for-linux-dist-archive">
-		<antcall target="linux-archive">
+		<antcall target="linux-dist-archive">
 			<param name="JAP_args" value="--manioq"/>
 			<param name="dist.linux" value="${dist.linux}/manioq"/>
 		</antcall>
