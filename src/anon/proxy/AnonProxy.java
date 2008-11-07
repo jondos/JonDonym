@@ -27,7 +27,6 @@
  */
 package anon.proxy;
 
-import jap.JAPModel;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -35,8 +34,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Vector;
 
 import anon.AnonChannel;
@@ -72,7 +69,7 @@ import anon.client.TrustException;
  * portNumberOfMixCascade)); theProxy.start(); }
  */
 
-final public class AnonProxy implements Runnable, AnonServiceEventListener, Observer
+final public class AnonProxy implements Runnable, AnonServiceEventListener
 {
 	public static final int UNLIMITED_REQUESTS = Integer.MAX_VALUE;
 	public static final int MIN_REQUESTS = 5;
@@ -203,10 +200,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
 		// SOCKS\uFFFD
-		
-		JAPModel.getInstance().addObserver(this);
-		setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 	}
 
 	/**
@@ -241,11 +234,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		setDummyTraffic(a_maxDummyTrafficInterval);
 		m_anonServiceListener = new Vector();
 		m_Anon.removeEventListeners();
-		m_Anon.addEventListener(this);
-		
-		JAPModel.getInstance().addObserver(this);
-		setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-		setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());		
+		m_Anon.addEventListener(this);	
 	}
 	
 	public void setHTTPHeaderProcessingEnabled(boolean enable)
@@ -1194,18 +1183,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener, Obse
 		{
 			/** @todo reconnect is not yet supported with forwarded connections */
 			return!m_forwardedConnection && m_mixCascadeContainer.isReconnectedAutomatically();
-		}
-	}
-	
-	public void update(Observable a_notifier, Object a_message)
-	{
-		if (a_message != null)
-		{
-			if (a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
-			{
-				setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-				setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-			}
 		}
 	}
 }
