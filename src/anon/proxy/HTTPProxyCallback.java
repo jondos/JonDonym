@@ -746,24 +746,24 @@ public class HTTPProxyCallback implements ProxyCallback
 		private String getStartLine(Hashtable headerMap)
 		{
 			Vector valueContainer = (Vector) headerMap.get(HTTP_START_LINE_KEY.toLowerCase());
-			String[] startlineRet = valuesToArray(valueContainer);
-			if (startlineRet == null)
+			if (valueContainer == null || valueContainer.size() == 0)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.NET, "Invalid request because it contains no startline");
 				return null;
 			}
-			if(startlineRet.length > 1)
+		
+			if(valueContainer.size() > 1)
 			{
 				String errOutput = "";
-				for (int i = 0; i < startlineRet.length; i++) 
+				for (int i = 0; i < valueContainer.size(); i++) 
 				{
-					errOutput+= startlineRet[i]+"\n";
+					errOutput+= valueContainer.elementAt(i) + "\n";
 				}
 				LogHolder.log(LogLevel.ERR, LogType.NET, 
 						"This HTTP message seems to be invalid, because it has multiple start lines:\n"
 					+errOutput);
 			}
-			return startlineRet[0];
+			return (String)valueContainer.elementAt(0);
 		}
 		
 		private String[] valuesToArray(Vector valueContainer)
