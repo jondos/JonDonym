@@ -1,25 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo Help: Browser setup</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>Proxy settings for browsers</H2>
+<p class="navipar"><span class="prevlink"><a href="jondofox.html"><img
+src="prev.gif" alt="&lt;-"> JonDoFox</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">Table of contents </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser setup
+</a></span> <span class="nextlink"><a href="interface.html">JonDo's main
+interface <img src="next.gif" alt="-&gt;"></a></span> </p>
+<hr>
 
-To use JonDo with your browser, a few special settings must first be changed.  Choose your browser from the following list to get instructions:
+<h2>Alternative browser configuration</h2>
 
-<UL>
-	<LI><A HREF="browser_ie.html">Internet Explorer</A>
-	<LI><A HREF="browser_firefox.html">Mozilla Firefox</A>
-	<LI><A HREF="browser_seamonkey.html">SeaMonkey</A>
-	<LI><A HREF="browser_opera.html">Opera</A>
-	<LI><A HREF="browser_konqueror.html">Konqueror</A>
-	<LI><A HREF="browser_safari.html">Safari</A>
-	<LI><A HREF="browser_unknown.html">other browsers</A>
-</UL>
+<p>For an optimal usage of <b>JonDonym</b> we recommend the portable <a
+href="jondofox.html">JonDoFox</a>. This will save you the configuration
+effort, since <b>JonDoFox</b> already contains all necessary settings to surf
+anonymously with <b>JonDonym</b> on the Web. Further information on
+<b>JonDoFox</b> may be found <a href="jondofox.html">here </a> or on the <a
+href="https://www.jondos.de/en/jondofox">JonDoFox homepage</a>. If you prefer
+to use JonDonym with another browser it is necessary that you set it up
+yourself.</p>
 
+<p><b>Please beware:</b><br>
+False or incomplete configuration causes browsers to leave a lot of traces
+while surfing, even if you use JonDonym. Configuring the browser yourself is
+quite elaborate and requires a deeper understanding of web technologies.</p>
 
+<h3>Proxy settings</h3>
+
+<p>By the means of proxy settings you configure your browser to not send
+requests directly over the Internet, but through JonDo. This anonymizes the
+data. For that you need to enter the following in the proxy settings for
+HTTP, HTTPS, FTP, and if required GOPHER proxies of your browser:</p>
+<ul>
+  <li>Hostname/IP address: <i><b>127.0.0.1</b></i></li>
+  <li>Port: <i><b>4001</b></i> (<b>Attention</b>: If you have setup a
+    different <a href="portlistener.html">listen port</a> than <i>4001</i> in
+    JonDo you need to input it here instead of <i>4001</i> too.)</li>
+</ul>
+
+<p><!--<br>Please remember that such exceptions can be made more flexibly in a filter-proxy 
+like <a href="noactive_proxomitron.html">Proxomitron.</a><BR><BR>
+<BR>-->
+For some browsers there are step-by-step tutorials available:</p>
+<ul>
+  <li><a href="browser_ie.html">Internet Explorer</a></li>
+  <li><a href="browser_firefox2.html">Mozilla Firefox</a></li>
+  <li><a href="browser_opera.html">Opera</a></li>
+  <li><a href="browser_konqueror.html">Konqueror</a></li>
+  <li><a href="browser_safari.html">Safari</a></li>
+</ul>
+
+<p>In any case, please check your browser settings with the <a
+href="https://www.jondos.de/en/anontest">anonymity test</a>. If your
+configuration is correct, the IP has to be shown in green color. Otherwise,
+please go through the tutorial once more.</p>
+
+<h3>Avoiding data traces</h3>
+
+<p>Websites can offer special (active) content that can reveal your identity
+or even damage your PC, although you are apparently surfing anonymously over
+JonDonym. This can happen by JavaScript, Java, Flash, Silverlight and Active
+Scripting. Basically, every type of dynamic webcontent that is run on the PC
+of the web surfer is potentially dangerous. Most browsers offer the
+possibility of blocking such content but are usually quite inflexible at it,
+so that the type of content can either be flatly denied or flatly allowed.
+This is problematic though since some web applications will then only be used
+after editing the configuration: e.g. chat rooms, Flash menus and animations,
+or online games. At the same time, these changes will also compromise
+security when surfing on other websites that do not require active content at
+all. Depending on the browser in use, it may be very complicated to
+completely deactivate active content in the configuration. Most of the time,
+this will only be possible to experienced computer users. Therefore,
+user-friendly and flexible settings, just as in <a
+href="jondofox.html">JonDoFox</a>, are a great convenience. </p>
+
+<p>Moreover, the browser sends so-called HTTP headers. They aid communication
+with the web server in order to load pages or use web services. But they can
+also be used to identify you or create a profile of what your doing on the
+Net. From the HTTP header the browser type may be obtained, the language or
+the so-called <i>referer</i> which gives away your last visited page. Also,
+the data contained in <a href="wwwprivacy.html#cookies">cookies</a> is being
+send by HTTP headers. Although JonDo filters these HTTP headers, for
+technical reasons it does so only for unencrypted websites. If an
+eavesdropper should forward you to a presumably secure HTTPS site you will
+again be left without filter protection. The options for adapting HTTP
+headers are unfortunately very limited in most browsers. For these reasons,
+we recommend relying on <a href="jondofox.html">JonDoFox</a> since critical
+HTTP headers are already modified for maximum anonymity with it.</p>
+
+<p>Much of the information your browser gives away can be reviewed in the <a
+href="https://www.jondos.de/en/anontest">anonymity test</a>.</p>
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="jondofox.html"><img
+src="prev.gif" alt="&lt;-"> JonDoFox</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">Table of contents </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser setup
+</a></span> <span class="nextlink"><a href="interface.html">JonDo's main
+interface <img src="next.gif" alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer_en.html"-->
 </body>
 </html>
