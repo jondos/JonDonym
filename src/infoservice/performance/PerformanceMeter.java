@@ -1517,8 +1517,9 @@ public class PerformanceMeter implements Runnable, Observer
 					
 					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(cascade.getId());
 					
-					// we don't have a PerformanceEntry for this cascade yes
-					if(entry == null)
+					// we don't have a PerformanceEntry for this cascade yet
+					if (entry == null || 
+						(System.currentTimeMillis() - entry.getLastUpdate()) >= m_majorInterval)
 					{
 						// let's start our performance test immediately
 						LogHolder.log(LogLevel.INFO, LogType.MISC, "Found new cascade, starting performance test immediately.");
