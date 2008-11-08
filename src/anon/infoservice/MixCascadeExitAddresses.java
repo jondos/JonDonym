@@ -121,19 +121,26 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 		}
 	}
 	
-	public static boolean isLocalAddress(InetAddress a_address)
+	public static boolean isValidAddress(InetAddress a_address)
+	{
+		return isValidAddress(a_address, "isAnyLocalAddress") ||
+			isValidAddress(a_address, "isLoopbackAddress") ||
+			isValidAddress(a_address, "isLinkLocalAddress") ||
+			isValidAddress(a_address, "isMulticastAddress") ||
+			isValidAddress(a_address, "isSiteLocalAddress");
+	}
+	
+	private static boolean isValidAddress(InetAddress a_address, String a_methodName)
 	{
 		try
 		{
-			return ((Boolean)InetAddress.class.getMethod("isAnyLocalAddress", 
-					(Class[])null).invoke(a_address, (Object[])null)).booleanValue() ||
-				((Boolean)InetAddress.class.getMethod("isLoopbackAddress", 
-						(Class[])null).invoke(a_address, (Object[])null)).booleanValue();
+			return !((Boolean)InetAddress.class.getMethod(a_methodName, 
+					(Class[])null).invoke(a_address, (Object[])null)).booleanValue();
 		}
 		catch (Exception a_e)
 		{
 //			 maybe java too old
-			return false;
+			return true;
 		}
 	}
 	

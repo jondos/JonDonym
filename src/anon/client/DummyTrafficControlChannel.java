@@ -92,7 +92,7 @@ public class DummyTrafficControlChannel extends AbstractControlChannel implement
    */
   public void run() 
   {
-	  LogHolder.log(LogLevel.WARNING, LogType.NET, "Dummy traffic interval: " + m_interval + "ms");
+	  LogHolder.log(LogLevel.NOTICE, LogType.NET, "Dummy traffic interval: " + m_interval + "ms");
 	  while (m_bRun) 
 	  {
 		  try 

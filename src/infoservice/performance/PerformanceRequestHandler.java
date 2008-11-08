@@ -131,7 +131,7 @@ public class PerformanceRequestHandler
 		}
 		
 		// we seem to have a valid token
-		LogHolder.log(LogLevel.WARNING, LogType.NET, "Token " + request.getTokenId() + " is requesting " + request.getDataSize() + " bytes of random data.");
+		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Token " + request.getTokenId() + " is requesting " + request.getDataSize() + " bytes of random data.");
 		
 		// generate random data
 		byte[] data = new byte[request.getDataSize()];
@@ -146,7 +146,7 @@ public class PerformanceRequestHandler
 		if (a_address instanceof Inet4Address)
 		{
 			magicBytes = MAGIC_BYTES_IPV4;
-			LogHolder.log(LogLevel.ALERT, LogType.NET, "IP: " + a_address.getHostAddress());
+			LogHolder.log(LogLevel.INFO, LogType.NET, "IP sent to performance test: " + a_address.getHostAddress());
 		} 
 		else if (a_address instanceof Inet6Address)
 		{

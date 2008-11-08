@@ -779,7 +779,7 @@ final public class Configuration
 				if(value != null)
 					m_aPerfMeterConf[1] = Integer.valueOf(value);
 
-				value = a_properties.getProperty("perf.dataSize", "200000");
+				value = a_properties.getProperty("perf.dataSize", "250000");
 				if(value != null)
 				{
 					m_aPerfMeterConf[2] = new Integer(Math.min(512*1024*2, Integer.parseInt(value)));

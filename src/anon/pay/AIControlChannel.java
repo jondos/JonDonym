@@ -167,7 +167,7 @@ public class AIControlChannel extends XmlControlChannel
 
 
 				  updateBalance(PayAccountsFile.getInstance().getActiveAccount(), false); // show that account is empty
-				  PayAccount currentAccount = PayAccountsFile.getInstance().getAlternativeNonEmptyAccount(
+				  PayAccount currentAccount = PayAccountsFile.getInstance().getAlternativeChargedAccount(
 								  m_connectedCascade.getPIID());
 
 				  if (currentAccount != null)

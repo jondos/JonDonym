@@ -453,6 +453,24 @@ public class PayAccount implements IXMLEncodable
 		}
 	}
 
+	public boolean equals(Object a_account)
+	{
+		PayAccount account;
+		if (a_account == null || !(a_account instanceof PayAccount))
+		{
+			return false;
+		}
+		account = (PayAccount)a_account;
+		
+		return account.getAccountNumber() == this.getAccountNumber() &&
+			account.m_strBiID.equals(this.m_strBiID);
+	}
+	
+	public int hashCode()
+	{
+		return (this.getAccountNumber() + this.m_strBiID).hashCode();
+	}
+	
 	/**
 	 * Returns the account's accountnumber
 	 *
