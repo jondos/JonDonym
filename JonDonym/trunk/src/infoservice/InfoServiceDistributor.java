@@ -155,7 +155,7 @@ public class InfoServiceDistributor implements IDistributor
 							if (!sendToInfoService(entry, job))
 							{
 								LogHolder.log(LogLevel.ERR, LogType.NET, "Could not send entry "
-										+ job + "to InfoService " + entry + "!");
+										+ job + " to InfoService " + entry + "!");
 							}
 						}
 						/*

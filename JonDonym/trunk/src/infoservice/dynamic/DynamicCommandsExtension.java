@@ -162,15 +162,16 @@ public class DynamicCommandsExtension
 
 				}
 			}
-			
+			Database.getInstance(MixCascade.class).update(mixCascadeEntry);
+			/*
 			if (Database.getInstance(MixCascade.class).update(mixCascadeEntry))
 			{
 				LogHolder.log(LogLevel.ALERT, LogType.DB, "Updated Cascade " + mixCascadeEntry + " LastUpdate: " + mixCascadeEntry.getLastUpdate()  + " Expires: " + mixCascadeEntry.getExpireTime());
 			}
 			else
 			{
-				LogHolder.log(LogLevel.ALERT, LogType.DB, "Cascade " + mixCascadeEntry + "should have been updated... LastUpdate: " + mixCascadeEntry.getLastUpdate()  + " Expires: " + mixCascadeEntry.getExpireTime());
-			}
+				LogHolder.log(LogLevel.ALERT, LogType.DB, "Cascade " + mixCascadeEntry + " should have been updated... LastUpdate: " + mixCascadeEntry.getLastUpdate()  + " Expires: " + mixCascadeEntry.getExpireTime());
+			}*/
 		}
 		catch (Exception e)
 		{

@@ -62,7 +62,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	/**
 	 * Remove the worst x% results.
 	 */
-	private static final double BOUND_ROUNDING = 0.10d;
+	private static final double BOUND_ROUNDING = 0.15d;
 	
 	/**
 	 * The entry's container XML element name.
@@ -108,11 +108,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	 * Current users attribute.
 	 */
 	public static final int USERS = 2;
+	
+	/**
+	 * Current users attribute.
+	 */
+	public static final int PACKETS = 3;
 
 	/**
 	 * Text representation of the performance attributes.
 	 */
-	private static final String[] ATTRIBUTES = new String[]{ "Speed", "Delay", "Users" };
+	private static final String[] ATTRIBUTES = new String[]{ "Speed", "Delay", "Users", "Packets"};
 	
 	/**
 	 * The boundaries used to calculate the speed and delay bounds.
@@ -120,7 +125,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public static final int[][] BOUNDARIES = new int[][] { 
 		{ 0, 50, 100, 200, 300, 400, 500, 750, 1000, 1500 },
 		{ 500, 750, 1000, 2000, 2500, 3000, 4000, 8000, Integer.MAX_VALUE },
-		{ 0 } };
+		{ 0 },
+		{ 0 }};
 	
 	/**
 	 * The id of the associated cascade.
@@ -162,7 +168,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	/**
 	 * The average entries of the last test.
 	 */
-	private int m_lastTestAverage[] = new int[3];
+	private int m_lastTestAverage[] = new int[4];
 	
 	/**
 	 * Constructs a new <code>PerformanceEntry</code> for the given <code>MixCascade</code>.
@@ -193,7 +199,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			new PerformanceAttributeFloatingTimeEntry[] { 
 				new PerformanceAttributeFloatingTimeEntry(SPEED, a_bInfoService),
 				new PerformanceAttributeFloatingTimeEntry(DELAY, a_bInfoService),
-				new PerformanceAttributeFloatingTimeEntry(USERS, a_bInfoService) };
+				new PerformanceAttributeFloatingTimeEntry(USERS, a_bInfoService),
+				new PerformanceAttributeFloatingTimeEntry(PACKETS, a_bInfoService)};
 	}
 	
 	/**
@@ -340,15 +347,22 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int lAverageFromLastTest = 0;
 		
 		Long timestamp = null;
-		Enumeration e = a_data.keys();
+		Enumeration enumKeys = a_data.keys();
+		Vector vecKeys = new Vector();
+		while (enumKeys.hasMoreElements())
+		{
+			vecKeys.addElement(enumKeys.nextElement());
+		}
+		Util.sort(vecKeys, new Util.LongSortAsc());
+		enumKeys = vecKeys.elements();
 		
 		int values = 0;
 		
 		// enumerate through the data hashtable
-		while(e.hasMoreElements())
+		while(enumKeys.hasMoreElements())
 		{
 			// get the timestamp
-			timestamp = (Long) e.nextElement();
+			timestamp = (Long) enumKeys.nextElement();
 			int value = ((Integer) a_data.get(timestamp)).intValue();
 			
 			// timestamp is older than 7 days, ignore it
@@ -483,6 +497,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			return 0;
 		}
+	}
+	
+	public StabilityAttributes getStabilityAttributes()
+	{
+		return m_floatingTimeEntries[PACKETS].getStabilityAttributes();
 	}
 	
 	/**
@@ -632,7 +651,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				"<th>Max</th>" +
 				"<th>Bound</th>" +
 				"<th>% Std. Deviation</th>" +
-				"<th>Err/Try/Total</th></tr>";
+				"<th>Err/Try/Total</th>" +
+				"<th>Resets</th></tr>";
 
 		//long dayTimestamp = getDayTimestamp(a_attribute, a_selectedDay);		
 		
@@ -650,9 +670,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				dayTimestamp = entry.getDayTimestamp();
 			}
 			
-			Calendar calLastTest = Calendar.getInstance();
-			calLastTest.setTime(new Date(m_lastTestTime));
-			
 			if (entry == null || System.currentTimeMillis() - dayTimestamp > 7 * 24 * 60 * 60 * 1000 )
 			{
 				if (entry != null)
@@ -660,7 +677,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					LogHolder.log(LogLevel.WARNING, LogType.MISC, "BAD: Performance day: " + a_selectedDay + " timestamp: " + dayTimestamp + " ID: " + cascade.getId());
 				}
 				
-				htmlData += "<td colspan=\"6\" align=\"center\">No data available</td>";
+				htmlData += "<td colspan=\"7\" align=\"center\">No data available</td>";
 			}
 			else
 			{
@@ -727,7 +744,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 				
 				htmlData += "<td>" + entry.getErrors() + " / " + entry.getUnknown()  + " / " + entry.getValueSize() + " (" + NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(errorPercentage) +" % / " + 
-					NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(tryPercentage) + " %)</td>";				
+					NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(tryPercentage) + " %)</td>";		
+				
+				entry = m_entries[PACKETS][a_selectedDay][hour];
+				if (entry != null)
+				{
+					htmlData += "<td>" + entry.getResets() + "</td>";									
+				}
+				else
+				{
+					htmlData += "<td></td>";
+				}
 			}
 			
 			htmlData += "</tr>";
@@ -750,6 +777,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		
 		Element elemSpeed = m_floatingTimeEntries[SPEED].toXmlElement(a_doc);
 		elemCurrent.appendChild(elemSpeed);
+		
+		Element elemStability = getStabilityAttributes().toXmlElement(a_doc);
+		elemCurrent.appendChild(elemStability);
 		
 		elem.appendChild(elemCurrent);
 		
@@ -819,6 +849,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * {@link #getBound(boolean)}
 		 */
 		private int m_lBestBoundValue = -1;
+		
+		private int m_iLastValue = -1;
+		private int m_iResets = 0;
+		private int m_iErrors = 0;
+		private int m_iUnknown = 0;
 		
 		/**
 		 * True, if the object is created by the info service 
@@ -904,8 +939,41 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			synchronized (m_Values)
 			{
 				Enumeration e = m_Values.keys();
+				Vector keysToDelete = new Vector();
+				boolean bReset = false;
+												
+				if (a_lValue < 0 || a_lValue == Integer.MAX_VALUE)
+				{
+					if (a_lValue < 0)
+					{
+						m_iErrors++;
+					}	
+					else if (a_lValue == Integer.MAX_VALUE)
+					{
+						m_iUnknown++;
+					}
+				}
+				else if (m_attribute == PACKETS)
+				{				
+					if (a_lValue < m_iLastValue)
+					{
+						// this service has been restarted since the last test
+						m_iResets++;
+						bReset = true;
+					}
+					m_iLastValue = a_lValue;
+					if (bReset)
+					{
+						a_lValue = 1; // this is a reset; the concrete packets are not important
+					}
+					else
+					{
+						a_lValue = 0;
+					}
+				}
 				
 				m_Values.put(new Long(a_lTimeStamp), new Integer(a_lValue));
+				
 				
 				// loop through all values
 				while (e.hasMoreElements())
@@ -914,9 +982,31 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					// value is too old, remove it
 					if (System.currentTimeMillis() - timestamp.longValue() > DEFAULT_TIMEFRAME)
 					{
-						m_Values.remove(timestamp);
+						keysToDelete.addElement(timestamp);						
 					}
 				}
+				for (int i = 0; i < keysToDelete.size(); i++)
+				{
+					// do not delete from enumeration, as this might give weired results!
+					a_lValue = ((Integer)m_Values.get(keysToDelete.elementAt(i))).intValue();
+					if (a_lValue < 0 || a_lValue == Integer.MAX_VALUE)
+					{
+						if (a_lValue < 0)
+						{
+							m_iErrors--;
+						}	
+						else if (a_lValue == Integer.MAX_VALUE)
+						{
+							m_iUnknown--;
+						}
+					}
+					else if (m_attribute == PACKETS && a_lValue == 1)
+					{
+						m_iResets--;
+					}
+					m_Values.remove(keysToDelete.elementAt(i));
+				}
+				keysToDelete.removeAllElements();
 			}
 		}
 		
@@ -1174,6 +1264,26 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		/**
+		 * Most useful for PACKETS attribute. Otherwise, you won't get resets.
+		 * @return
+		 */
+		public StabilityAttributes getStabilityAttributes()
+		{
+			StabilityAttributes attributes;
+			synchronized (m_Values)
+			{
+				synchronized (m_floatingTimeEntries[SPEED].m_Values)
+				{
+					attributes = new StabilityAttributes(m_Values.size(), 
+							m_floatingTimeEntries[SPEED].m_iUnknown, // speed values are the worst 
+							m_floatingTimeEntries[SPEED].m_iErrors, // speed values are the worst
+							m_iResets);
+				}
+			}
+			return attributes;
+		}
+		
+		/**
 		 * Calculates and return the average value. 
 		 * 
 		 * @return The average value.
@@ -1364,11 +1474,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * The values.
 		 */
 		private Hashtable m_Values = new Hashtable();
+		private int m_iLastValue = -1; // value last added
 		
 		/**
 		 * The amount of errors occurred.
 		 */
 		private int m_iErrors = 0;
+		
+		private int m_iResets = 0;
 		
 		private int m_iUnknown = 0;
 		
@@ -1395,7 +1508,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 */
 		public void addValue(long a_lTimeStamp, int a_lValue)
 		{
-			m_lastUpdate = a_lTimeStamp;
+			m_lastUpdate = a_lTimeStamp;						
 			
 			if (a_lValue < 0 || a_lValue == Integer.MAX_VALUE)
 			{
@@ -1418,9 +1531,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					m_lBound = -1;
 				}
 				return;
-			}
+			}			
 			
-			m_Values.put(new Long(a_lTimeStamp), new Integer(a_lValue));
+			
+			m_Values.put(new Long(a_lTimeStamp), new Integer(a_lValue));			
+			if (m_attribute == PACKETS && a_lValue < m_iLastValue)
+			{
+				// this service has been restarted since the last test
+				m_iResets++;				
+			}
+			m_iLastValue = a_lValue;
+			
 			
 			int lValues = 0;
 			Enumeration e = m_Values.elements();
@@ -1458,8 +1579,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			Vector vec = new Vector();
 			synchronized (m_Values)
 			{
-				e = m_Values.keys();
-				
 				e = m_Values.elements();
 				while(e.hasMoreElements())
 				{
@@ -1588,6 +1707,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		/**
+		 * Only useful for PACKETS attribute. Tells how often the service has been reset/restarted.
+		 * @return how often the service has been reset/restarted
+		 */
+		public int getResets()
+		{
+			return m_iResets;
+		}
+		
+		/**
 		 * The umount of attempts that should have been made but were not.
 		 * @return
 		 */
@@ -1624,6 +1752,78 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			return m_lastUpdate - cal.get(Calendar.HOUR_OF_DAY) * 60 * 60 * 1000 -
 				cal.get(Calendar.MINUTE) * 60 * 1000 - cal.get(Calendar.SECOND) * 1000 -
 				cal.get(Calendar.MILLISECOND); 
+		}
+	}
+	
+	public class StabilityAttributes
+	{
+		private int m_iSize;
+		private int m_iErrors;
+		private int m_iResets;
+		private int m_iUnknown;
+		
+		public static final String XML_ELEMENT_NAME = "Stability";
+		private static final String XML_ATTR_TOTAL = "total";
+		private static final String XML_ATTR_UNKNOWN = "unknown";
+		private static final String XML_ATTR_ERRORS = "errors";
+		private static final String XML_ATTR_RESETS = "resets";
+		
+		private StabilityAttributes(int a_iSize, int a_iUnknown, int a_iErrors, int a_iResets)
+		{
+			m_iSize = a_iSize;
+			m_iUnknown = a_iUnknown;
+			m_iErrors = a_iErrors;
+			m_iResets = a_iResets;
+		}
+		
+		/**
+		 * Returns the amount of errors.
+		 * 
+		 * @return The amounts of errors.
+		 */
+		public int getErrors()
+		{
+			return m_iErrors;
+		}
+		
+		/**
+		 * Only useful for PACKETS attribute. Tells how often the service has been reset/restarted.
+		 * @return how often the service has been reset/restarted
+		 */
+		public int getResets()
+		{
+			return m_iResets;
+		}
+		
+		/**
+		 * The umount of attempts that should have been made but were not.
+		 * @return
+		 */
+		public int getUnknown()
+		{
+			return m_iUnknown;
+		}
+		
+		/**
+		 * Returns the amount of values and errors.
+		 * 
+		 * @return The amount of values and errors.
+		 */
+		public int getValueSize()
+		{
+			return m_iSize;
+		}
+		
+		public Element toXmlElement(Document a_doc)
+		{
+			Element elem = a_doc.createElement(XML_ELEMENT_NAME);
+			
+			XMLUtil.setAttribute(elem, XML_ATTR_TOTAL, m_iSize);
+			XMLUtil.setAttribute(elem, XML_ATTR_UNKNOWN, m_iUnknown);
+			XMLUtil.setAttribute(elem, XML_ATTR_ERRORS, m_iErrors);
+			XMLUtil.setAttribute(elem, XML_ATTR_RESETS, m_iResets);
+			
+			return elem;
 		}
 	}
 }

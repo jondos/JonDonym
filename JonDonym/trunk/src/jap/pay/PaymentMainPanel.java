@@ -597,7 +597,7 @@ public class PaymentMainPanel extends FlippingPanel
 					if (a_bWarnIfNearlyEmpty && //a_bWarnIfNearlyEmpty means warnings are not to be suppressed
 						activeAccount.getCertifiedCredit() <= WARNING_AMOUNT && !m_notifiedEmpty &&
 						activeAccount.isCharged(now) &&
-						PayAccountsFile.getInstance().getAlternativeNonEmptyAccount(
+						PayAccountsFile.getInstance().getAlternativeChargedAccount(
 							JAPController.getInstance().getCurrentMixCascade().getPIID()) == null)
 					{
 						m_notifiedEmpty = true;
@@ -618,7 +618,7 @@ public class PaymentMainPanel extends FlippingPanel
 					Timestamp warningTime = new Timestamp(System.currentTimeMillis() + WARNING_TIME);
 					if (a_bWarnIfNearlyEmpty && //a_bWarnIfNearlyEmpty means warnings are not to be suppressed
 						!m_notifiedEmpty && activeAccount.isCharged(now) && !activeAccount.isCharged(warningTime) &&
-						PayAccountsFile.getInstance().getAlternativeNonEmptyAccount(
+						PayAccountsFile.getInstance().getAlternativeChargedAccount(
 							JAPController.getInstance().getCurrentMixCascade().getPIID()) == null)
 					{
 						m_notifiedEmpty = true;

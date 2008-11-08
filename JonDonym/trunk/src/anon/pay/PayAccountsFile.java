@@ -530,19 +530,30 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 		}
 	}
 
-	public synchronized PayAccount getAlternativeNonEmptyAccount(String a_piid)
+	public synchronized PayAccount getAlternativeChargedAccount(String a_piid)
+	{	
+		return getChargedAccount(a_piid, getActiveAccount());
+	}
+	
+	public synchronized PayAccount getChargedAccount(String a_piid, PayAccount a_excludeAccount)
 	{
 		Vector accounts = PayAccountsFile.getInstance().getAccounts(a_piid);
 		Timestamp now = new Timestamp(System.currentTimeMillis());
-		PayAccount activeAccount = getActiveAccount();
 		PayAccount currentAccount = null;
+		
+		if (a_excludeAccount != null && !accounts.contains(a_excludeAccount))
+		{
+			// good, we can choose the first account we will find
+			a_excludeAccount = null;
+		}
 
 		if (accounts.size() > 0)
 		{
 			for (int i = 0; i < accounts.size(); i++)
 			{
 				currentAccount = (PayAccount) accounts.elementAt(i);
-				if (activeAccount != currentAccount && currentAccount.isCharged(now))
+				if (currentAccount.isCharged(now) &&
+					(a_excludeAccount == null || a_excludeAccount != currentAccount))
 				{
 					break;
 				}

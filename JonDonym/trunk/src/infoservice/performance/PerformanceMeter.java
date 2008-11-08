@@ -72,6 +72,7 @@ import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.StatusInfo;
 import anon.pay.PayAccount;
 import anon.pay.PayAccountsFile;
+import anon.pay.PaymentInstanceDBEntry;
 import anon.proxy.AnonProxy;
 import anon.util.IMiscPasswordReader;
 import anon.util.XMLParseException;
@@ -185,6 +186,8 @@ public class PerformanceMeter implements Runnable, Observer
 	 * Estimated time of the next update. 
 	 */
 	private long m_nextUpdate = 0;
+	
+	private boolean m_bUpdate = false;
 	
 	/**
 	 * The number of total successful updates.
@@ -342,6 +345,7 @@ public class PerformanceMeter implements Runnable, Observer
 				int thirdTab = line.indexOf('\t', secondTab + 1);
 				int fourthTab = line.indexOf('\t', thirdTab + 1);
 				int fifthTab = line.indexOf('\t', fourthTab + 1);
+				int sixthTab = line.indexOf('\t', fifthTab + 1);
 				
 				// we have found at list 3 tabs (timestamp, cascade id, speed, delay)
 				if(firstTab != -1 && secondTab != -1 && thirdTab != -1)
@@ -367,6 +371,8 @@ public class PerformanceMeter implements Runnable, Observer
 					// default users to -1.  used if we are import from the old format
 					int users = -1;
 					
+					int packets = -1;
+					
 					// we might be importing performance data without the users entry (old format)
 					if(fourthTab == -1)
 					{
@@ -376,10 +382,23 @@ public class PerformanceMeter implements Runnable, Observer
 					{
 						// this is the new format, speed and then users
 						lSpeed = Integer.parseInt(line.substring(thirdTab + 1, fourthTab));
-						if(fifthTab != -1)
-						{							
-							MixCascadeExitAddresses.addInetAddress(id, 
-									InetAddress.getByName(line.substring(fifthTab + 1)));
+						if (fifthTab != -1 && sixthTab != -1)							
+						{					
+							// format with packets
+							String strAddr = line.substring(sixthTab + 1);
+							if (!strAddr.equals("0.0.0.0"))
+							{
+								InetAddress addr = InetAddress.getByName(strAddr);
+								/*
+								LogHolder.log(LogLevel.WARNING, LogType.NET, 
+				        				"Adding IP address from file: " + addr.getHostAddress() + " from " + line.substring(sixthTab + 1));*/
+								MixCascadeExitAddresses.addInetAddress(id, addr);
+							}
+							packets = Integer.parseInt(line.substring(fifthTab +1, sixthTab));
+							users = Integer.parseInt(line.substring(fourthTab +1, fifthTab));
+						}
+						else if (fifthTab != -1)
+						{
 							users = Integer.parseInt(line.substring(fourthTab +1, fifthTab));
 						}
 						else
@@ -411,6 +430,11 @@ public class PerformanceMeter implements Runnable, Observer
 					if(users != -1)
 					{
 						entry.importValue(PerformanceEntry.USERS, timestamp, users);
+					}
+					
+					if(packets != -1)
+					{
+						entry.importValue(PerformanceEntry.PACKETS, timestamp, packets);
 					}
 					
 					Database.getInstance(PerformanceEntry.class).update(entry);
@@ -458,7 +482,7 @@ public class PerformanceMeter implements Runnable, Observer
 		m_accUpdater.update();
 		
 		while(true)
-		{
+		{			
 			long updateBegin = System.currentTimeMillis();
 			int intRandom;
 			
@@ -502,19 +526,23 @@ public class PerformanceMeter implements Runnable, Observer
 			synchronized (SYNC_METER)
 			{
 				// all tests in the current interval are done, wait for the specified time
-				long sleepFor = m_nextUpdate - System.currentTimeMillis();    			
-				if (sleepFor > 0)
+				if (!m_bUpdate)
 				{
-					LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sleeping for " + sleepFor + "ms.");
-		    		try 
-		    		{	    			    			
-	    				SYNC_METER.wait(sleepFor);	    				
+					long sleepFor = m_nextUpdate - System.currentTimeMillis();    			
+					if (sleepFor > 0)
+					{
+						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sleeping for " + sleepFor + "ms.");
+			    		try 
+			    		{	    			    			
+		    				SYNC_METER.wait(sleepFor);	    				
+			    		}
+			    		catch (InterruptedException e)
+			    		{
+			    			//break;
+			    		}	    		
 		    		}
-		    		catch (InterruptedException e)
-		    		{
-		    			//break;
-		    		}	    		
-	    		}
+				}
+				m_bUpdate = false;
 			}
 		}
 	}
@@ -532,6 +560,21 @@ public class PerformanceMeter implements Runnable, Observer
 		// update the account files again
 		loadAccountFiles();
 		m_accUpdater.update();
+		
+		// check if we have the payment instance and a valid account file
+		if (a_cascade.isPayment() && a_cascade.getPIID() != null)
+		{			
+			// check account file for validity
+			PayAccount account = PayAccountsFile.getInstance().getChargedAccount(
+					a_cascade.getPIID(), null);
+			if (account == null)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.PAY, 
+						"Could not start test because no valid account was available for PI " + a_cascade.getPIID() + "!");
+//				 this test is useless
+				return;
+			}
+		}
 		
 		// create the test thread
 		performTestThread = new Thread(new Runnable()
@@ -628,6 +671,7 @@ public class PerformanceMeter implements Runnable, Observer
 	{
 		synchronized (SYNC_METER)
 		{
+			m_bUpdate = true;
 			m_nextUpdate = System.currentTimeMillis();
 			SYNC_METER.notify();
 		}
@@ -786,6 +830,7 @@ public class PerformanceMeter implements Runnable, Observer
 		Hashtable vDelay = new Hashtable();
 		Hashtable vSpeed = new Hashtable();
 		Hashtable vUsers = new Hashtable();
+		Hashtable vPackets = new Hashtable();
 		
 		// skip cascades on the same host as the infoservice
 		// and skip blacklisted cascades
@@ -818,7 +863,7 @@ public class PerformanceMeter implements Runnable, Observer
 				PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2])
 		{
 			// this service is very slow; make a shorter test
-			dataSize /= 4;
+			//dataSize /= 4;
 		}		
 		
 		while(!Thread.currentThread().isInterrupted())
@@ -868,7 +913,8 @@ public class PerformanceMeter implements Runnable, Observer
 			{
 				try
 				{
-					if (performSingleTest(a_cascade, vDelay, vSpeed, vUsers, hashBadInfoServices, recvBuff))
+					if (performSingleTest(a_cascade, vDelay, vSpeed, vUsers, vPackets, 
+							hashBadInfoServices, recvBuff))
 					{
 						iUpdates++;
 					}
@@ -892,6 +938,7 @@ public class PerformanceMeter implements Runnable, Observer
 			int lastDelay;
 			int lastSpeed;
 			int lastUsers;
+			int lastPackets;
 			
 			if (iUpdates > 0)
 			{
@@ -906,25 +953,42 @@ public class PerformanceMeter implements Runnable, Observer
 				timestamp += 1;
 				iUpdates++;
 				
-				lastDelay = Integer.MAX_VALUE;
-				lastSpeed = Integer.MAX_VALUE;
-				lastUsers = Integer.MAX_VALUE;
-				
 				// put the values into the hashtable
-				vDelay.put(new Long(timestamp), new Integer(lastDelay));
-				vSpeed.put(new Long(timestamp), new Integer(lastSpeed));
-				vUsers.put(new Long(timestamp), new Integer(lastUsers));
+				vDelay.put(new Long(timestamp), new Integer(Integer.MAX_VALUE));
+				vSpeed.put(new Long(timestamp), new Integer(Integer.MAX_VALUE));
 				
-				logPerftestData(timestamp, a_cascade, lastDelay, lastSpeed, lastUsers, null);				
+				StatusInfo info = a_cascade.getCurrentStatus();	    
+				int packets = Integer.MAX_VALUE;
+	    		if(info != null)
+	    		{
+	    			// and store the amount of users	   
+	    			long lPackets = info.getMixedPackets();
+	    			if (lPackets >= Integer.MAX_VALUE)
+	    			{
+	    				packets = Integer.MAX_VALUE - 1;
+	    			}
+	    			else if (lPackets >= 0)
+	    			{
+	    				packets = (int)lPackets;
+	    			}
+	    		}
+				
+				vUsers.put(new Long(timestamp), new Integer(info.getNrOfActiveUsers()));
+				vPackets.put(new Long(timestamp), new Integer(packets));
+				
+				logPerftestData(timestamp, a_cascade, Integer.MAX_VALUE, Integer.MAX_VALUE, 
+						info.getNrOfActiveUsers(), packets, null);				
 			}									
 			
 			lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
 			lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);
 			lastUsers = entry.addData(PerformanceEntry.USERS, vUsers);
+			lastPackets = entry.addData(PerformanceEntry.PACKETS, vPackets);
 		
 			Database.getInstance(PerformanceEntry.class).update(entry);
 		
-	    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + a_cascade.getMixNames() + " done. Last Delay: " + lastDelay + " ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers);
+	    	LogHolder.log(LogLevel.INFO, LogType.NET, "Performance test for cascade " + a_cascade.getMixNames() + " done. Last Delay: " + lastDelay + 
+	    			" ms; Last Throughput: " + lastSpeed + " kb/s; Last Users:" + lastUsers + "; Last Packets: " + lastPackets);
 			
 	    	if (m_proxy.isConnected())
 			{
@@ -936,7 +1000,8 @@ public class PerformanceMeter implements Runnable, Observer
 	}
 	
 	private boolean performSingleTest(MixCascade a_cascade, Hashtable a_vDelay,
-			Hashtable a_vSpeed, Hashtable a_vUsers, Hashtable a_hashBadInfoServices, char[] a_recvBuff) 
+			Hashtable a_vSpeed, Hashtable a_vUsers, Hashtable a_vPackets, 
+			Hashtable a_hashBadInfoServices, char[] a_recvBuff) 
 		throws InterruptedException, InfoServiceException
 	{		
 		HTTPResponse httpResponse;
@@ -948,7 +1013,9 @@ public class PerformanceMeter implements Runnable, Observer
 		
 		int delay = -1;
 		int speed = -1;
-		int users = -1;
+		int users = Integer.MAX_VALUE;
+		int packets = Integer.MAX_VALUE;
+		long lPackets;
 		long timestamp;
 		InetAddress addr = null;
 		
@@ -970,6 +1037,15 @@ public class PerformanceMeter implements Runnable, Observer
     		{
     			// and store the amount of users
     			users = info.getNrOfActiveUsers();
+    			lPackets = info.getMixedPackets();
+    			if (lPackets >= Integer.MAX_VALUE)
+    			{
+    				packets = Integer.MAX_VALUE - 1;
+    			}
+    			else if (lPackets >= 0)
+    			{
+    				packets = (int)lPackets;
+    			}
     		}
 	       	
     		// loop until we have a valid token from an info service
@@ -1162,6 +1238,8 @@ public class PerformanceMeter implements Runnable, Observer
 	        	try
 	        	{
 	        		addr = InetAddress.getByAddress(ip);
+	        		/*LogHolder.log(LogLevel.WARNING, LogType.NET, 
+	        				"Adding IP address: " + addr.getHostAddress());*/
 	        		MixCascadeExitAddresses.addInetAddress(a_cascade.getId(), addr);	        		
 	        	}
 	        	catch(Exception ex)
@@ -1175,13 +1253,15 @@ public class PerformanceMeter implements Runnable, Observer
 	        // could not read all data
     		if(bytesRead != a_recvBuff.length)
     		{
-    			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not get all requested bytes. Received " + bytesRead + " of " + a_recvBuff.length + " bytes.");
-    			if (bytesRead < (1000))
-    			{
-    				// less than 1 kb was received; not enough for testing download performance
-    				bytesRead = 0;
-    			}
-    		}        		        		
+    			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not get all requested bytes. Received " + bytesRead + " of " + a_recvBuff.length + " bytes.");    			
+    		}
+    		
+    		if (bytesRead < (100000))
+			{
+				// less than 100 kb was received; not enough for testing download performance
+    			LogHolder.log(LogLevel.WARNING, LogType.NET, "Too few bytes for measuring speed: " + bytesRead + " bytes.");
+				bytesRead = 0;
+			}
     		
     		// speed in bit/s;
     		long lSpeed = (bytesRead * 8) / (responseEndTime - responseStartTime);
@@ -1228,14 +1308,17 @@ public class PerformanceMeter implements Runnable, Observer
 			a_vDelay.put(new Long(timestamp), new Integer(delay));
 			a_vSpeed.put(new Long(timestamp), new Integer(speed));
 			a_vUsers.put(new Long(timestamp), new Integer(users));
+			a_vPackets.put(new Long(timestamp), new Integer(packets));
 			
-			logPerftestData(timestamp, a_cascade, delay, speed, users, addr);
+			
+			logPerftestData(timestamp, a_cascade, delay, speed, users, packets, addr);
 		}
 		
 		return bUpdated;
 	}
 	
-	private void logPerftestData(long a_timestamp, MixCascade a_cascade, int a_delay, int a_speed, int a_users, InetAddress a_ip)
+	private void logPerftestData(long a_timestamp, MixCascade a_cascade, int a_delay, 
+			int a_speed, int a_users, int a_packets, InetAddress a_ip)
 	{
 		try
 		{
@@ -1254,8 +1337,8 @@ public class PerformanceMeter implements Runnable, Observer
     			}
     			
     			m_stream.write((a_timestamp + "\t" + a_cascade.getId() + "\t" + a_delay + 
-    					"\t" + a_speed + "\t" + a_users + 
-    					(a_ip == null ? "" : "\t" + a_ip.getHostAddress()) + "\n").getBytes());
+    					"\t" + a_speed + "\t" + a_users + "\t" + a_packets + "\t" +
+    					(a_ip == null ? "0.0.0.0" : a_ip.getHostAddress()) + "\n").getBytes());
 			}
 		}
 		catch(IOException ex)
@@ -1513,20 +1596,30 @@ public class PerformanceMeter implements Runnable, Observer
 			{
 				try
 				{
-					MixCascade cascade = (MixCascade) msg.getMessageData();
-					
-					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(cascade.getId());
+					final MixCascade cascade = (MixCascade) msg.getMessageData();					
+					final PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(cascade.getId());
 					
 					// we don't have a PerformanceEntry for this cascade yet
 					if (entry == null || 
 						(System.currentTimeMillis() - entry.getLastUpdate()) >= m_majorInterval)
 					{
 						// let's start our performance test immediately
-						LogHolder.log(LogLevel.INFO, LogType.MISC, "Found new cascade, starting performance test immediately.");
-						synchronized(SYNC_TEST)
+						new Thread(new Runnable()
 						{
-							startTest(cascade);
-						}
+							public void run()
+							{
+								synchronized(SYNC_TEST)
+								{
+									if (entry == null || 
+											(System.currentTimeMillis() - entry.getLastUpdate()) >= m_majorInterval)
+									{
+										LogHolder.log(LogLevel.INFO, LogType.MISC, 
+												"Found new cascade, starting performance test immediately.");
+										startTest(cascade);
+									}
+								}
+							}
+						}).start();
 					}
 				}
 				catch(Exception ex)

@@ -476,7 +476,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 					try
 					{							
 						InetAddress address = InetAddress.getByName(strHost);
-						if (!MixCascadeExitAddresses.isLocalAddress(address) && !a_storage.contains(address))
+						if (MixCascadeExitAddresses.isValidAddress(address) && 
+							!a_storage.contains(address))
 						{
 							a_storage.addElement(address);
 						}												

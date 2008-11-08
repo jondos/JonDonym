@@ -37,7 +37,6 @@ import anon.util.ThreadPool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import anon.infoservice.AbstractDistributableDatabaseEntry.SerialDBEntry;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.IXMLEncodable;
 import anon.util.Util;
