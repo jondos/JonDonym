@@ -287,6 +287,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		PerformanceAttributeEntry entry = null;
+		PerformanceAttributeEntry previousEntry;
 		
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date(a_timestamp));
@@ -302,8 +303,21 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute);
 		}
 		
+		if (hour > 0)
+		{
+			previousEntry = m_entries[a_attribute][day][hour-1];
+		}
+		else if (day == Calendar.SUNDAY)
+		{
+			previousEntry = m_entries[a_attribute][Calendar.SATURDAY][23];
+		}
+		else
+		{
+			previousEntry = m_entries[a_attribute][day][23];
+		}
+		
 		// add the value to the entry
-		entry.addValue(a_timestamp, a_value);
+		entry.addValue(a_timestamp, a_value, previousEntry);
 		// add the value to the floating time entry
 		m_floatingTimeEntries[a_attribute].addValue(a_timestamp, a_value);
 		
@@ -337,10 +351,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public int addData(int a_attribute, Hashtable a_data) 
 	{
 		PerformanceAttributeEntry entry = null;
+		PerformanceAttributeEntry previousEntry;
 		
 		// this _SHOULD_ never become true
 		if(a_data.isEmpty())
 		{
+			LogHolder.log(LogLevel.ALERT, LogType.MISC, "Empty performance data!");
 			return -1;
 		}
 		
@@ -402,8 +418,21 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute);
 			}
 			
+			if (hour > 0)
+			{
+				previousEntry = m_entries[a_attribute][day][hour-1];
+			}
+			else if (day == Calendar.SUNDAY)
+			{
+				previousEntry = m_entries[a_attribute][Calendar.SATURDAY][23];
+			}
+			else
+			{
+				previousEntry = m_entries[a_attribute][day][23];
+			}
+			
 			// add the value
-			entry.addValue(timestamp.longValue(), value);
+			entry.addValue(timestamp.longValue(), value, previousEntry);
 			
 			// add the value to the floating time entry
 			m_floatingTimeEntries[a_attribute].addValue(timestamp.longValue(), value);
@@ -499,9 +528,24 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 	}
 	
+	/**
+	 * Returns errors resets, unkown requests and total requests for floating entries.
+	 * @return
+	 */
 	public StabilityAttributes getStabilityAttributes()
 	{
-		return m_floatingTimeEntries[PACKETS].getStabilityAttributes();
+		StabilityAttributes attributes;
+		synchronized (m_floatingTimeEntries[PACKETS].m_Values)
+		{
+			synchronized (m_floatingTimeEntries[SPEED].m_Values)
+			{
+				attributes = new StabilityAttributes(m_floatingTimeEntries[PACKETS].m_Values.size(), 
+						m_floatingTimeEntries[SPEED].m_iUnknown, // speed values are the worst 
+						m_floatingTimeEntries[SPEED].m_iErrors, // speed values are the worst
+						m_floatingTimeEntries[PACKETS].m_iResets);
+			}
+		}
+		return attributes;
 	}
 	
 	/**
@@ -725,9 +769,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				
 				htmlData += " " + a_unit + "</td>";
 								
-				if(entry.getStdDeviation() == -1)
+				if(entry == null || entry.getStdDeviation() == -1)
 				{
-					htmlData += "<td>0 %</td>";
+					htmlData += "<td></td>";
 				}
 				else
 				{
@@ -737,7 +781,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				double errorPercentage = 0;
 				double tryPercentage = 0;
 				
-				if(entry.getValueSize() != 0)
+				if(entry != null && entry.getValueSize() != 0)
 				{
 					errorPercentage = (double) entry.getErrors() / entry.getValueSize() * 100.0;
 					tryPercentage = (double) entry.getUnknown() / entry.getValueSize() * 100.0;
@@ -747,7 +791,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(tryPercentage) + " %)</td>";		
 				
 				entry = m_entries[PACKETS][a_selectedDay][hour];
-				if (entry != null)
+				if (entry != null && entry.getResets() > 0)
 				{
 					htmlData += "<td>" + entry.getResets() + "</td>";									
 				}
@@ -792,7 +836,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	 * 
 	 * @author Christian Banse
 	 */
-	class PerformanceAttributeFloatingTimeEntry implements IXMLEncodable
+	private static class PerformanceAttributeFloatingTimeEntry implements IXMLEncodable
 	{
 		/**
 		 * The time frame of this floating time entry.
@@ -818,6 +862,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * The bound value XML attribute name.
 		 */
 		public static final String XML_ATTR_BOUND = "bound";
+		
+		/**
+		 * The last value that has been added. This is only useful for PACKETS.
+		 */
+		private int m_iLastValue = -1;
+		private long m_iLastTimestamp = -1;
 		
 		/**
 		 * The performance attribute.
@@ -849,8 +899,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * {@link #getBound(boolean)}
 		 */
 		private int m_lBestBoundValue = -1;
-		
-		private int m_iLastValue = -1;
+				
 		private int m_iResets = 0;
 		private int m_iErrors = 0;
 		private int m_iUnknown = 0;
@@ -955,13 +1004,24 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 				else if (m_attribute == PACKETS)
 				{				
-					if (a_lValue < m_iLastValue)
+					if (m_iLastTimestamp < a_lTimeStamp)
 					{
-						// this service has been restarted since the last test
-						m_iResets++;
-						bReset = true;
+						if (a_lValue < m_iLastValue)
+						{
+							// this service has been restarted since the last test
+							m_iResets++;
+							bReset = true;
+						}
+						m_iLastValue = a_lValue;
+						m_iLastTimestamp = a_lTimeStamp;
 					}
-					m_iLastValue = a_lValue;
+					else
+					{
+						LogHolder.log(LogLevel.WARNING, LogType.MISC, 
+								"Unordered timestamps for floating PACKETS. " +
+								"Timestamp new: " + a_lTimeStamp + " Timestamp old: " + m_iLastTimestamp +
+								" Value: " + a_lValue);
+					}
 					if (bReset)
 					{
 						a_lValue = 1; // this is a reset; the concrete packets are not important
@@ -1264,26 +1324,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		
 		/**
-		 * Most useful for PACKETS attribute. Otherwise, you won't get resets.
-		 * @return
-		 */
-		public StabilityAttributes getStabilityAttributes()
-		{
-			StabilityAttributes attributes;
-			synchronized (m_Values)
-			{
-				synchronized (m_floatingTimeEntries[SPEED].m_Values)
-				{
-					attributes = new StabilityAttributes(m_Values.size(), 
-							m_floatingTimeEntries[SPEED].m_iUnknown, // speed values are the worst 
-							m_floatingTimeEntries[SPEED].m_iErrors, // speed values are the worst
-							m_iResets);
-				}
-			}
-			return attributes;
-		}
-		
-		/**
 		 * Calculates and return the average value. 
 		 * 
 		 * @return The average value.
@@ -1438,8 +1478,14 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	 * 
 	 * @author Christian Banse
 	 */
-	class PerformanceAttributeEntry
+	private static class PerformanceAttributeEntry
 	{
+		/**
+		 * The last value added. This is only useful for PACKETS.
+		 */
+		private int m_iLastValue = -1;
+		private long m_iLastTimestamp = -1;
+		
 		/**
 		 * The max value.
 		 */
@@ -1473,8 +1519,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		/**
 		 * The values.
 		 */
-		private Hashtable m_Values = new Hashtable();
-		private int m_iLastValue = -1; // value last added
+		private Hashtable m_Values = new Hashtable();		
 		
 		/**
 		 * The amount of errors occurred.
@@ -1506,7 +1551,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * @param a_lTimeStamp The timestamp.
 		 * @param a_lValue The value.
 		 */
-		public void addValue(long a_lTimeStamp, int a_lValue)
+		public void addValue(long a_lTimeStamp, int a_lValue, PerformanceAttributeEntry a_previousEntry)
 		{
 			m_lastUpdate = a_lTimeStamp;						
 			
@@ -1531,17 +1576,35 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					m_lBound = -1;
 				}
 				return;
-			}			
+			}						
 			
-			
-			m_Values.put(new Long(a_lTimeStamp), new Integer(a_lValue));			
-			if (m_attribute == PACKETS && a_lValue < m_iLastValue)
+			m_Values.put(new Long(a_lTimeStamp), new Integer(a_lValue));
+			if (m_attribute == PACKETS)
 			{
-				// this service has been restarted since the last test
-				m_iResets++;				
+				if (m_iLastTimestamp < 0 && a_previousEntry != null)
+				{
+					m_iLastTimestamp = a_previousEntry.m_iLastTimestamp;
+					m_iLastValue = a_previousEntry.m_iLastValue;
+				}
+				
+				if (m_iLastTimestamp < a_lTimeStamp)
+				{
+					if (m_attribute == PACKETS && a_lValue < m_iLastValue)
+					{
+						// this service has been restarted since the last test
+						m_iResets++;				
+					}
+					m_iLastValue = a_lValue;
+					m_iLastTimestamp = a_lTimeStamp;
+				}
+				else
+				{
+					LogHolder.log(LogLevel.WARNING, LogType.MISC, 
+							"Unordered timestamps for hourly attribute " + m_attribute + "." +
+							"Timestamp new: " + a_lTimeStamp + " Timestamp old: " + m_iLastTimestamp +
+							" Value: " + a_lValue);
+				}
 			}
-			m_iLastValue = a_lValue;
-			
 			
 			int lValues = 0;
 			Enumeration e = m_Values.elements();
