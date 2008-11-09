@@ -258,7 +258,7 @@ public abstract class AbstractX509AlternativeName extends AbstractX509Extension
 
 		values = new DEREncodableVector();
 
-		if (a_values != null || a_values.size() != 0)
+		if (a_values != null && a_values.size() != 0)
 		{
 			if (a_tags == null || a_values.size() != a_tags.size())
 			{

@@ -186,12 +186,16 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	{
 		// loop through all PerformanceInfo objects (from the different Info Services)
 		PerformanceEntry perfEntry = new PerformanceEntry(a_cascadeId, false);
+		PerformanceEntry.StabilityAttributes attributes;
 		
 		Vector vPerfEntries = new Vector();
 		Vector vSpeedBoundaries = new Vector();
 		Vector vSpeedBestBoundaries = new Vector();
 		Vector vDelayBoundaries = new Vector();
 		Vector vDelayBestBoundaries = new Vector();
+		Vector vErrorBoundaries = new Vector();
+		Vector vUnknownBoundaries = new Vector();
+		Vector vResetsBoundaries = new Vector();
 		
 		Vector vInfoServices = Database.getInstance(PerformanceInfo.class).getEntryList();
 		for (int i = 0; i < vInfoServices.size(); i++)
@@ -201,33 +205,42 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				vPerfEntries.addElement(entry);
 				// extract the bound value for speed
 				Integer value = new Integer(entry.getBound(PerformanceEntry.SPEED));
-				if (value.intValue() != Integer.MAX_VALUE && !vSpeedBoundaries.contains(value))
+				if (value.intValue() != Integer.MAX_VALUE && value.intValue() >= 0)
 				{
 					vSpeedBoundaries.addElement(value);
 				}
 				
 				// extract the bound value for delay
 				value = new Integer(entry.getBound(PerformanceEntry.DELAY));
-				if (value.intValue() != 0 && !vDelayBoundaries.contains(value))
+				if (value.intValue() > 0)
 				{
 					vDelayBoundaries.addElement(value);
 				}
 				
 				// extract the best bound value for speed
 				value = new Integer(entry.getBestBound(PerformanceEntry.SPEED));
-				if (value.intValue() != Integer.MAX_VALUE && !vSpeedBestBoundaries.contains(value))
+				if (value.intValue() != Integer.MAX_VALUE && value.intValue() >= 0)
 				{
 					vSpeedBestBoundaries.addElement(value);
 				}
 				
 				// extract the best delay value for delay
 				value = new Integer(entry.getBestBound(PerformanceEntry.DELAY));
-				if (value.intValue() != 0 && !vDelayBestBoundaries.contains(value))
+				if (value.intValue() > 0)
 				{
 					vDelayBestBoundaries.addElement(value);
 				}
+				
+				attributes = entry.getStabilityAttributes();
+				if (attributes.getValueSize() > 0)
+				{
+					vErrorBoundaries.addElement(new Integer(attributes.getBoundErrors()));
+					vUnknownBoundaries.addElement(new Integer(attributes.getBoundUnknown()));
+					vResetsBoundaries.addElement(new Integer(attributes.getBoundResets()));
+				}
 			}
 		}
+		
 		vInfoServices.removeAllElements();
 		vInfoServices = null; // for garbage collection
 		
@@ -235,127 +248,50 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		Util.sort(vSpeedBestBoundaries, new IntegerSortDesc());
 		Util.sort(vDelayBoundaries, new IntegerSortAsc());
 		Util.sort(vDelayBestBoundaries, new IntegerSortAsc());
+		Util.sort(vErrorBoundaries, new IntegerSortAsc());
+		Util.sort(vUnknownBoundaries, new IntegerSortAsc());
+		Util.sort(vResetsBoundaries, new IntegerSortAsc());
 		
-		if(vPerfEntries.size() == 0)
+		if (vPerfEntries.size() == 0)
 		{
 			perfEntry.setBound(PerformanceEntry.SPEED, Integer.MAX_VALUE);
 			perfEntry.setBestBound(PerformanceEntry.SPEED, Integer.MAX_VALUE);
 			perfEntry.setBound(PerformanceEntry.DELAY, 0);
 			perfEntry.setBestBound(PerformanceEntry.DELAY, 0);
+			perfEntry.setStabilityAttributes(new PerformanceEntry.StabilityAttributes(0, 0, 0, 0));
 			return perfEntry;
 		}
 		
-		int agreeing;
-		int value;
+		attributes = new PerformanceEntry.StabilityAttributes(100, 
+				getMajorityBoundFromSortedBounds(vUnknownBoundaries, 0),
+				getMajorityBoundFromSortedBounds(vErrorBoundaries, 0),
+				getMajorityBoundFromSortedBounds(vResetsBoundaries, 0));
 		
-		// bound speed
-		value = Integer.MAX_VALUE;
-		for(int i = 0; i < vSpeedBoundaries.size(); i++)
-		{
-			agreeing = 0;
-			int bound = ((Integer) vSpeedBoundaries.elementAt(i)).intValue();
-			value = bound;
-			
-			for(int j = 0; j < vPerfEntries.size(); j++)
-			{
-				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
-				if(entry.getBound(PerformanceEntry.SPEED) >= bound)
-				{
-					agreeing++;
-				}
-			}
-			
-			if((double)agreeing / (double)vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
-			{
-				break;
-			}
-		}
-		perfEntry.setBound(PerformanceEntry.SPEED, value);
-		
-		// best bound speed
-		value = Integer.MAX_VALUE;
-		for(int i = 0; i < vSpeedBestBoundaries.size(); i++)
-		{
-			agreeing = 0;
-			int bound = ((Integer) vSpeedBestBoundaries.elementAt(i)).intValue();
-			if(bound == Integer.MAX_VALUE)
-			{
-				continue;
-			}
-			value = bound;
-			
-			for(int j = 0; j < vPerfEntries.size(); j++)
-			{
-				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
-				if(entry.getBestBound(PerformanceEntry.SPEED) >= bound)
-				{
-					agreeing++;
-				}
-			}
-			
-			if((double)agreeing / (double)vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
-			{
-				break;
-			}
-		}
-		perfEntry.setBestBound(PerformanceEntry.SPEED, value);
-		
-		// bound delay
-		value = 0;
-		for(int i = 0; i< vDelayBoundaries.size(); i++)
-		{
-			agreeing = 0;
-			int bound = ((Integer) vDelayBoundaries.elementAt(i)).intValue();
-			if(bound == 0)
-			{
-				continue;
-			}
-			
-			value = bound;
-			
-			for(int j = 0; j < vPerfEntries.size(); j++)
-			{
-				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
-				if(entry.getBound(PerformanceEntry.DELAY) <= bound)
-				{
-					agreeing++;
-				}
-			}
-			
-			if((double) agreeing / vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
-			{
-				break;
-			}
-		}
-		perfEntry.setBound(PerformanceEntry.DELAY, value);
-		
-		// best bound delay
-		value = 0;
-		for(int i = 0; i< vDelayBestBoundaries.size(); i++)
-		{
-			agreeing = 0;
-			int bound = ((Integer) vDelayBestBoundaries.elementAt(i)).intValue();
-			value = bound;
-			
-			for(int j = 0; j < vPerfEntries.size(); j++)
-			{
-				PerformanceEntry entry = (PerformanceEntry) vPerfEntries.elementAt(j);
-				if(entry.getBestBound(PerformanceEntry.DELAY) <= bound)
-				{
-					agreeing++;
-				}
-			}
-			
-			if((double) agreeing / vPerfEntries.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
-			{
-				break;
-			}
-		}
-		perfEntry.setBestBound(PerformanceEntry.DELAY, value);
+		perfEntry.setStabilityAttributes(attributes);
+		perfEntry.setBound(PerformanceEntry.SPEED, getMajorityBoundFromSortedBounds(vSpeedBoundaries, Integer.MAX_VALUE));
+		perfEntry.setBestBound(PerformanceEntry.SPEED, getMajorityBoundFromSortedBounds(vSpeedBestBoundaries, Integer.MAX_VALUE));
+		perfEntry.setBound(PerformanceEntry.DELAY, getMajorityBoundFromSortedBounds(vDelayBoundaries, 0));
+		perfEntry.setBestBound(PerformanceEntry.DELAY, getMajorityBoundFromSortedBounds(vDelayBestBoundaries, 0));
 		
 		return perfEntry;
 	}
 
+	private static int getMajorityBoundFromSortedBounds(Vector a_vecSortedIntegers, int a_default)
+	{
+		// bound error
+		int bound = a_default;
+		for(int i = 0; i< a_vecSortedIntegers.size(); i++)
+		{
+			bound = ((Integer) a_vecSortedIntegers.elementAt(i)).intValue();
+			if ((double)(i+1) / (double)a_vecSortedIntegers.size() >= PERFORMANCE_INFO_MIN_PERCENTAGE_OF_VALID_ENTRIES)
+			{
+				// found the bound!
+				break;
+			}
+		}
+		return bound;
+	}
+	
 	/**
 	 * Returns an XML Node of the current PerformanceInfo using the stored XML data
 	 * 

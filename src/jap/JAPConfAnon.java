@@ -27,7 +27,6 @@
  */
 package jap;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -176,6 +175,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_AT_LEAST = JAPConfAnon.class.getName() + "_atLeast";
 	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
+	
+	private static final String MSG_LBL_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityLbl";
+	private static final String MSG_USER_LIMIT = JAPConfAnon.class.getName() + "_availabilityUserLimit";
+	private static final String MSG_UNSTABLE = JAPConfAnon.class.getName() + "_availabilityUnstable";
+	private static final String MSG_HARDLY_REACHABLE = JAPConfAnon.class.getName() + "_availabilityHardlyReachabl";
+	private static final String MSG_UNREACHABLE = JAPConfAnon.class.getName() + "_availabilityUnreachable";
+	private static final String MSG_BAD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityBad";
+	private static final String MSG_GOOD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityGood";
 
 	private static final int FILTER_SPEED_MAJOR_TICK = 100;
 	private static final int FILTER_SPEED_MAX = 400;
@@ -788,9 +795,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_cascadesPanel.add(m_lblDelay, c);
 		
 		c.insets = new Insets(5, 20, 0, 5);
+		l = new JLabel(JAPMessages.getString(MSG_LBL_AVAILABILITY) + ":");
 		c.gridx = 2;
+		c.gridy = 5;
+		c.weightx = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		m_cascadesPanel.add(l, c);
+		
+		c.insets = new Insets(5, 5, 0, 0);
+		c.gridx = 3;
 		c.gridy = 5;		
-		c.gridwidth = 2;
 		m_payLabel = new JLabel("");
 		m_payLabel.addMouseListener(new MouseAdapter()
 		{
@@ -886,9 +900,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		drawServerInfoPanel();
 	}
 
-	private void setPayLabel(MixCascade cascade)
+	private void setPayLabel(MixCascade cascade, PerformanceEntry a_entry)
 	{
 		StringBuffer buff = new StringBuffer();
+		PerformanceEntry.StabilityAttributes attributes = a_entry.getStabilityAttributes();		
 		
 		if (!TrustModel.getCurrentTrustModel().isTrusted(cascade, buff))
 		{
@@ -913,7 +928,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 			else
 			{
-				m_payLabel.setText(JAPMessages.getString(MSG_NOT_TRUSTWORTHY) + " (" + buff.toString() + ")");
+				//m_payLabel.setText(JAPMessages.getString(MSG_NOT_TRUSTWORTHY) + " (" + buff.toString() + ")");
+				m_payLabel.setText(buff.toString());
 				m_payLabel.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 					TrustModel.getCurrentTrustModel().getName()));
 				m_blacklist = false;
@@ -921,19 +937,49 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 
 		}
-		else if (m_infoService.isPay(cascade.getId()))
+		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 75)
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			//m_payLabel.setForeground(m_anonLevelLabel.getForeground());
+			m_payLabel.setForeground(Color.red);
+			m_payLabel.setText(JAPMessages.getString(MSG_UNREACHABLE));
+			m_payLabel.setToolTipText(null);
+		}
+		else if (m_infoService.isUserLimitReached(cascade.getId()))
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			m_payLabel.setForeground(Color.red);
+			m_payLabel.setText(JAPMessages.getString(MSG_USER_LIMIT));
+			m_payLabel.setToolTipText(null);
+		}
+		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 25)
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			//m_payLabel.setForeground(m_anonLevelLabel.getForeground());
+			m_payLabel.setForeground(Color.red);
+			m_payLabel.setText(JAPMessages.getString(MSG_HARDLY_REACHABLE));
+			m_payLabel.setToolTipText(null);
+		}
+		else if (attributes.getBoundResets() > 5 || attributes.getBoundErrors() > 10)
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			m_payLabel.setForeground(Color.red);
+			m_payLabel.setText(JAPMessages.getString(MSG_UNSTABLE));
+			m_payLabel.setToolTipText(null);
+		}
+		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 5)
 		{
 			m_payLabel.setCursor(Cursor.getDefaultCursor());
 			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
-			m_payLabel.setText(JAPMessages.getString(MSG_PAYCASCADE));
-			//m_payLabel.setToolTipText(JAPMessages.getString(JAPNewView.MSG_NO_REAL_PAYMENT));
+			m_payLabel.setText(JAPMessages.getString(MSG_BAD_AVAILABILITY));
 			m_payLabel.setToolTipText(null);
 		}
 		else
 		{
 			m_payLabel.setCursor(Cursor.getDefaultCursor());
-			m_payLabel.setToolTipText("");
-			m_payLabel.setText("");
+			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
+			m_payLabel.setToolTipText(null);
+			m_payLabel.setText(JAPMessages.getString(MSG_GOOD_AVAILABILITY));
 		}
 	}
 
@@ -2042,7 +2088,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));
 					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
 					
-					setPayLabel(cascade);
+					setPayLabel(cascade, entry);
 					m_lblSocks.setVisible(cascade.isSocks5Supported());
 				}
 				if(m_filterPanel == null || !m_filterPanel.isVisible())
@@ -2559,6 +2605,28 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				return "" + statusInfo.getNrOfActiveUsers() + (maxUsers != 0 ? " / " + maxUsers : "");
 			}
 			return "N/A";
+		}
+		
+		public boolean isUserLimitReached(String a_cascadeId)
+		{
+			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
+			TempCascade cascade = (TempCascade) m_Cascades.get(a_cascadeId);
+			if (statusInfo != null)
+			{
+				int maxUsers = 0;
+				if (cascade != null)
+				{
+					maxUsers = cascade.getMaxUsers();
+				}
+				if (maxUsers > 0)
+				{
+					if (maxUsers - statusInfo.getNrOfActiveUsers() <= 3)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		/**
@@ -3900,8 +3968,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				Database.getInstance(BlacklistedCascadeIDEntry.class).remove(
 								cascade.getMixIDsAsString());
 			}
-			setPayLabel(cascade);
-			m_lblSocks.setVisible(cascade.isSocks5Supported());
+			//setPayLabel(cascade);
+			//m_lblSocks.setVisible(cascade.isSocks5Supported());
 			fireTableCellUpdated(rowIndex, 1);
 		}
 	}
