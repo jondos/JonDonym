@@ -409,9 +409,13 @@ final public class InfoServiceCommands implements JWSInternalCommands
 	private HttpResponseStructure tcopdataPost(byte[] a_postData)
 	{
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
+		if (1==1)
+		{
+			return httpResponse;
+		}
 		try
 		{
-			LogHolder.log(LogLevel.DEBUG, LogType.NET, "TCOpData recvd XML: " + (new String(a_postData)));
+			//LogHolder.log(LogLevel.DEBUG, LogType.NET, "TCOpData recvd XML: " + (new String(a_postData)));
 			TermsAndConditions entry = new TermsAndConditions(XMLUtil.toXMLDocument(a_postData));
 			/* verify the signature */
 			if (entry.isVerified())
@@ -1864,7 +1868,6 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: "Ubermittlung einer Beschreibung der Kaskade (Erreichbarkeit, beteiligte Mixe etc.)
 			 */
 //			httpResponse = cascadePostHelo(postData, a_supportedEncodings);
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "Got /cascade info.");
 			httpResponse = DynamicCommandsExtension.cascadePostHelo(postData, a_supportedEncodings);
 		}
 		else if ( (command.equals("/cascadeserials")) && (method == Constants.REQUEST_METHOD_GET))
@@ -1957,8 +1960,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		else if((command.startsWith("/tcframework/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
-			String id = command.substring(13);
-			httpResponse = japGetTCFramework(id);
+			httpResponse = japGetTCFramework(command.substring(13));
 		}
 		else if((command.equals(TermsAndConditions.HTTP_SERIALS_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
 		{
