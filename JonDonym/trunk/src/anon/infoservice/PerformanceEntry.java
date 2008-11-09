@@ -153,6 +153,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	 */
 	private long m_lastTestTime;
 	
+	private StabilityAttributes m_stabilityAttributes;
+	
 	/**
 	 * The attribute entries.
 	 */
@@ -240,6 +242,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		// fill the floating time entry with the XML data
 		Node elemSpeed = XMLUtil.getFirstChildByName(elemCurrentData, ATTRIBUTES[SPEED]);
 		m_floatingTimeEntries[SPEED] = new PerformanceAttributeFloatingTimeEntry(SPEED, elemSpeed);
+		
+		Node elemStability = 
+			XMLUtil.getFirstChildByName(elemCurrentData, StabilityAttributes.XML_ELEMENT_NAME);
+		if (elemStability != null)
+		{
+			m_stabilityAttributes = new StabilityAttributes((Element)elemStability);
+		}
+		else
+		{
+			m_stabilityAttributes = new StabilityAttributes(0, 0, 0, 0);
+		}
 		
 		m_lastUpdate = System.currentTimeMillis();
 		m_serial = System.currentTimeMillis();
@@ -477,6 +490,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		return m_lastTestAverage[a_attribute];
 	}
 	
+	public void setStabilityAttributes(StabilityAttributes a_attributes)
+	{
+		m_stabilityAttributes = a_attributes;
+	}
+	
 	/**
 	 * Sets the bound value. This should only be used by 
 	 * the PerformanceInfo class in the JAP client.
@@ -529,11 +547,16 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	}
 	
 	/**
-	 * Returns errors resets, unkown requests and total requests for floating entries.
+	 * Returns errors resets, unknown requests and total requests for floating entries.
 	 * @return
 	 */
 	public StabilityAttributes getStabilityAttributes()
 	{
+		if (m_stabilityAttributes != null)
+		{
+			return m_stabilityAttributes;
+		}
+		
 		StabilityAttributes attributes;
 		synchronized (m_floatingTimeEntries[PACKETS].m_Values)
 		{
@@ -987,7 +1010,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			synchronized (m_Values)
 			{
-				Enumeration e = m_Values.keys();
+				Enumeration e;
 				Vector keysToDelete = new Vector();
 				boolean bReset = false;
 												
@@ -1036,6 +1059,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				
 				
 				// loop through all values
+				e = m_Values.keys();
 				while (e.hasMoreElements())
 				{
 					timestamp = (Long) e.nextElement();
@@ -1047,7 +1071,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 				for (int i = 0; i < keysToDelete.size(); i++)
 				{
-					// do not delete from enumeration, as this might give weired results!
+					// do not delete from enumeration, as this might give weird results!
 					a_lValue = ((Integer)m_Values.get(keysToDelete.elementAt(i))).intValue();
 					if (a_lValue < 0 || a_lValue == Integer.MAX_VALUE)
 					{
@@ -1818,25 +1842,66 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 	}
 	
-	public class StabilityAttributes
-	{
-		private int m_iSize;
-		private int m_iErrors;
-		private int m_iResets;
-		private int m_iUnknown;
-		
+	public static class StabilityAttributes
+	{		
 		public static final String XML_ELEMENT_NAME = "Stability";
 		private static final String XML_ATTR_TOTAL = "total";
 		private static final String XML_ATTR_UNKNOWN = "unknown";
 		private static final String XML_ATTR_ERRORS = "errors";
 		private static final String XML_ATTR_RESETS = "resets";
+		private static final String XML_ATTR_BOUND_UNKNOWN = "boundUnknown";
+		private static final String XML_ATTR_BOUND_ERRORS = "boundErrors";
+		private static final String XML_ATTR_BOUND_RESETS = "boundResets";
 		
-		private StabilityAttributes(int a_iSize, int a_iUnknown, int a_iErrors, int a_iResets)
+		private static final double BOUND = 5.0;
+		
+		private int m_iSize;
+		private int m_iErrors;
+		private int m_iResets;
+		private int m_iUnknown;
+		
+		private int m_boundUnknown;
+		private int m_boundErrors;
+		private int m_boundResets;
+		
+		private StabilityAttributes(Element a_entry) throws XMLParseException
 		{
+			XMLUtil.assertNodeName(a_entry, XML_ELEMENT_NAME);
+			
+			m_iSize = XMLUtil.parseAttribute(a_entry, XML_ATTR_TOTAL, 0);
+			m_iUnknown = XMLUtil.parseAttribute(a_entry, XML_ATTR_UNKNOWN, 0);
+			m_iErrors = XMLUtil.parseAttribute(a_entry, XML_ATTR_ERRORS, 0);
+			m_iResets = XMLUtil.parseAttribute(a_entry, XML_ATTR_RESETS, 0);
+			m_boundUnknown = XMLUtil.parseAttribute(a_entry, XML_ATTR_BOUND_UNKNOWN, 0);
+			m_boundErrors = XMLUtil.parseAttribute(a_entry, XML_ATTR_BOUND_ERRORS, 0);
+			m_iResets = XMLUtil.parseAttribute(a_entry, XML_ATTR_BOUND_RESETS, 0);			
+		}
+		
+		public StabilityAttributes(int a_iSize, int a_iUnknown, int a_iErrors, int a_iResets)
+		{
+			double percentageOne, percentageTwo;
+			
 			m_iSize = a_iSize;
 			m_iUnknown = a_iUnknown;
 			m_iErrors = a_iErrors;
 			m_iResets = a_iResets;
+			
+			if (a_iSize == 0)
+			{
+				m_boundUnknown = 0;
+				m_boundErrors = 0;
+				m_boundResets = 0;
+				return;
+			}
+			
+			// calculate percentage bounds
+			percentageOne = (100.0d * (double)m_iUnknown) / (double)m_iSize;
+			percentageTwo = (100.0d * (double)a_iErrors) / (double)m_iSize;
+
+			// upper bounds for percentage
+			m_boundUnknown = (int)Math.ceil(percentageOne / BOUND) * (int)BOUND;
+			m_boundErrors = (int)Math.ceil(percentageTwo / BOUND) * (int)BOUND;
+			m_boundResets = (int)Math.ceil(100.0d * (double)a_iResets / (double)a_iSize / BOUND) * (int)BOUND;
 		}
 		
 		/**
@@ -1844,27 +1909,27 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * 
 		 * @return The amounts of errors.
 		 */
-		public int getErrors()
+		public int getBoundErrors()
 		{
-			return m_iErrors;
+			return m_boundErrors;
 		}
 		
 		/**
 		 * Only useful for PACKETS attribute. Tells how often the service has been reset/restarted.
 		 * @return how often the service has been reset/restarted
 		 */
-		public int getResets()
+		public int getBoundResets()
 		{
-			return m_iResets;
+			return m_boundResets;
 		}
 		
 		/**
-		 * The umount of attempts that should have been made but were not.
+		 * The amount of attempts that should have been made but were not.
 		 * @return
 		 */
-		public int getUnknown()
+		public int getBoundUnknown()
 		{
-			return m_iUnknown;
+			return m_boundUnknown;
 		}
 		
 		/**
@@ -1885,6 +1950,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			XMLUtil.setAttribute(elem, XML_ATTR_UNKNOWN, m_iUnknown);
 			XMLUtil.setAttribute(elem, XML_ATTR_ERRORS, m_iErrors);
 			XMLUtil.setAttribute(elem, XML_ATTR_RESETS, m_iResets);
+			
+			XMLUtil.setAttribute(elem, XML_ATTR_BOUND_UNKNOWN, m_boundUnknown);
+			XMLUtil.setAttribute(elem, XML_ATTR_BOUND_ERRORS, m_boundErrors);
+			XMLUtil.setAttribute(elem, XML_ATTR_BOUND_RESETS, m_boundResets);
 			
 			return elem;
 		}
