@@ -50,7 +50,6 @@ import logging.LogType;
  */
 public class Multiplexer extends Observable implements Runnable
 {
-
 	private Vector m_sendJobQueue;
 	private Vector m_controlMessageQueue;
 
@@ -67,6 +66,8 @@ public class Multiplexer extends Observable implements Runnable
 	private SymCipher m_outputStreamCipher;
 
 	private Object m_internalEventSynchronization;
+	
+	private boolean m_bClosed = false;
 
 	public Multiplexer(InputStream a_inputStream, OutputStream a_outputStream,
 					   KeyExchangeManager a_keyExchangeManager, SecureRandom a_channelIdGenerator)
@@ -91,7 +92,7 @@ public class Multiplexer extends Observable implements Runnable
 	{
 		Object ownSynchronizationObject = new Object();
 		boolean coChPacket = m_channelTable.isControlChannelId(a_mixPacket.getChannelId());
-		Vector waitQueue = coChPacket ? m_controlMessageQueue : m_sendJobQueue;;
+		Vector waitQueue = coChPacket ? m_controlMessageQueue : m_sendJobQueue;
 		
 		synchronized (ownSynchronizationObject)
 		{
@@ -118,8 +119,7 @@ public class Multiplexer extends Observable implements Runnable
 						 * can be delivered on time in case of data congestion.
 						 */
 						waitForAccess = true;
-						LogHolder.log(LogLevel.WARNING, LogType.NET,
-								  "Control channel congestion");
+						LogHolder.log(LogLevel.WARNING, LogType.NET, "Control channel congestion");
 					}
 				}
 				waitQueue.addElement(ownSynchronizationObject);
@@ -240,6 +240,11 @@ public class Multiplexer extends Observable implements Runnable
 			}
 		}
 	}
+	
+	protected void close()
+	{
+		m_bClosed = true;
+	}
 
 	public void run()
 	{
@@ -318,7 +323,14 @@ public class Multiplexer extends Observable implements Runnable
 		catch (IOException e)
 		{
 			/* end of input stream handling */
-			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, Thread.currentThread().getName()+": terminated!", e);
+			if (m_bClosed)
+			{
+				LogHolder.log(LogLevel.NOTICE, LogType.NET, Thread.currentThread().getName()+": terminated!", e);
+			}
+			else
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.NET, Thread.currentThread().getName()+": terminated!", e);
+			}
 		}
 	
 		/* close the channel-table (notifies also all open channels) */

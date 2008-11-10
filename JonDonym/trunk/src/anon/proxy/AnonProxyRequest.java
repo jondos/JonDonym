@@ -115,7 +115,7 @@ public final class AnonProxyRequest implements Runnable
 			firstByte = m_InSocket.read();
 		}
 		catch (InterruptedIOException ex)
-		{ // no request received so fare - asume
+		{ // no request received so fare - assume
 			// SMTP, where we have to sent something
 			// first
 			try
@@ -498,7 +498,7 @@ mainLoop:		do
 			{
 				m_threadRequest.interrupt();
 			}
+			buff = null;
 		}
-
 	}
 }

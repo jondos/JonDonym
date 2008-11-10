@@ -385,7 +385,22 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		{
 			if (m_socketHandler != null)
 			{
-				m_socketHandler.deleteObserver(this);
+				m_socketHandler.deleteObservers();
+			}
+		}
+		
+		synchronized (m_internalSynchronization)
+		{
+			if (m_multiplexer != null)
+			{
+				m_multiplexer.close();
+			}
+		}
+		
+		synchronized (m_internalSynchronizationForSocket)
+		{
+			if (m_socketHandler != null)
+			{
 				m_socketHandler.closeSocket();
 				m_socketHandler = null;
 			}
@@ -399,6 +414,10 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		}
 		synchronized (m_internalSynchronization)
 		{
+			if (m_multiplexer != null)
+			{
+				m_multiplexer.deleteObservers();
+			}
 			m_multiplexer = null;
 			m_connected = false;
 
@@ -708,6 +727,10 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				
 				synchronized (m_internalSynchronizationForSocket)
 				{
+					if (m_socketHandler != null)
+					{
+						m_socketHandler.deleteObservers();
+					}
 					m_socketHandler = new SocketHandler(a_connectionToMixCascade);
 				}				
 
