@@ -147,7 +147,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	private byte[] handleStreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len, 
 			int a_messageType, IHTTPHelper a_helper)
 	{
-		LogHolder.log(LogLevel.ERR, LogType.FILTER, "Handle chunk!");
+		
 		/* Does only work with a valid AnonProxy reference */
 		if(anonRequest == null)
 		{

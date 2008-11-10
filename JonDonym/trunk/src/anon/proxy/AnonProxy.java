@@ -234,7 +234,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		setDummyTraffic(a_maxDummyTrafficInterval);
 		m_anonServiceListener = new Vector();
 		m_Anon.removeEventListeners();
-		m_Anon.addEventListener(this);	
+		m_Anon.addEventListener(this);
 	}
 	
 	public void setHTTPHeaderProcessingEnabled(boolean enable)
