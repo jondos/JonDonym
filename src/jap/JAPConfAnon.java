@@ -179,7 +179,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_LBL_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityLbl";
 	private static final String MSG_USER_LIMIT = JAPConfAnon.class.getName() + "_availabilityUserLimit";
 	private static final String MSG_UNSTABLE = JAPConfAnon.class.getName() + "_availabilityUnstable";
-	private static final String MSG_HARDLY_REACHABLE = JAPConfAnon.class.getName() + "_availabilityHardlyReachabl";
+	private static final String MSG_HARDLY_REACHABLE = JAPConfAnon.class.getName() + "_availabilityHardlyReachable";
 	private static final String MSG_UNREACHABLE = JAPConfAnon.class.getName() + "_availabilityUnreachable";
 	private static final String MSG_BAD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityBad";
 	private static final String MSG_GOOD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityGood";

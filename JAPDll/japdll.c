@@ -612,16 +612,16 @@ JNIEXPORT void JNICALL Java_gui_JAPDll_showWindowFromTaskbar_1dll
 	 JNIEnv *env, jclass c, jstring command, jstring parameters , jboolean a_bAsAdmin)
 
 {
-	const char *cmd = (*env)->GetStringUTFChars( env, command, NULL ) ;
-	const char *param = (*env)->GetStringUTFChars( env, parameters, NULL ) ;
+	const char *cmd = (*env)->GetStringUTFChars( env, command, JNI_FALSE ) ;
+	const char *param = (*env)->GetStringUTFChars( env, parameters, JNI_FALSE ) ;
 
 	SHELLEXECUTEINFO shExecInfo;
-	BOOL result;
+	jboolean res=JNI_FALSE;
 
-    shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-    shExecInfo.fMask = 0;
-    shExecInfo.hwnd = NULL;
-	if (a_bAsAdmin)
+	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+  shExecInfo.fMask = 0;
+  shExecInfo.hwnd = NULL;
+	if (a_bAsAdmin==JNI_TRUE)
 	{
 		shExecInfo.lpVerb = "runas";
 	}
@@ -629,17 +629,17 @@ JNIEXPORT void JNICALL Java_gui_JAPDll_showWindowFromTaskbar_1dll
 	{
 		shExecInfo.lpVerb = NULL;
 	}
-    shExecInfo.lpFile = (*env)->GetStringUTFChars(env, command, NULL );
-    shExecInfo.lpParameters = (*env)->GetStringUTFChars(env, parameters, NULL );
-    shExecInfo.lpDirectory = NULL;
-    shExecInfo.nShow = SW_NORMAL;
+  shExecInfo.lpFile = cmd;
+  shExecInfo.lpParameters = param;
+  shExecInfo.lpDirectory = NULL;
+  shExecInfo.nShow = SW_NORMAL;
 
-	result = ShellExecuteEx(&shExecInfo);
+	if( ShellExecuteEx(&shExecInfo) == TRUE )
+		 res=JNI_TRUE;
 
 	(*env)->ReleaseStringUTFChars(env, command, cmd);
 	(*env)->ReleaseStringUTFChars(env, parameters, param);
-
-     return (jboolean)result;
+	 return res;
 }
 #pragma warning(default:4100)
 
