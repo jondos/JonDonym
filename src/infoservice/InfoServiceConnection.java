@@ -162,7 +162,7 @@ final public class InfoServiceConnection implements Runnable
 				}
 				catch (SocketException a_e)
 				{
-					LogHolder.log(LogLevel.WARNING, LogType.NET, "No client request received. " + a_e.getMessage());						
+					LogHolder.log(LogLevel.NOTICE, LogType.NET, "No client request received. " + a_e.getMessage());						
 					requestLine = null;
 				}
 				catch (SocketTimeoutException a_e)
@@ -313,7 +313,7 @@ final public class InfoServiceConnection implements Runnable
 				
 				if (response == null)
 				{
-					LogHolder.log(LogLevel.ERR, LogType.NET,
+					LogHolder.log(LogLevel.WARNING, LogType.NET,
 								  "InfoServiceConnection (" + Integer.toString(m_connectionId) +
 //								  ", " + m_socket.getInetAddress() +
 								  "): Response could not be generated: Request: " + requestMethod +

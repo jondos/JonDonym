@@ -617,7 +617,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void componentMoved(ComponentEvent a_event)
 			{
+				/* TODO temporarily disable as this, in Linux, the move event is thrown when clicking on the combo box 
 				m_comboAnonServices.closeCascadePopupMenu();
+				*/
 			}
 		});
 		m_comboAnonServices.addItemListener(new ItemListener()
