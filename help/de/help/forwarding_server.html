@@ -16,13 +16,19 @@
 <h2>Forwarding-Server</h2>
 
 <p>
-Dieses Panel steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung. Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i> und w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Forwarding-Server</i>.
+<em class="jconf">
+Dieses Panel steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung. Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <code class="jconf">Einstellungen</code> und w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <code class="jconf">Forwarding-Server</code>.
+</em>
 </p>
+
 <p>
 Ein Forwarding-Server dient zur Umgehung von Zugangssperren zu JonDonym-Diensten. Durch Zensur oder andere restriktive Ma&szlig;nahmen ist es manchen JonDo-Nutzern nicht m&ouml;glich, eine direkte Verbindung zu JonDonym-Diensten herzustellen. Aus diesem Grund kann ein JonDo, dem dies m&ouml;glich ist, als Forwarding-Server agieren, &uuml;ber den andere JonDo-Nutzern sich mit Mixkaskaden verbinden k&ouml;nnen. Wenn Sie Ihren JonDo als Forwarding-Server freischalten m&ouml;chten, nehmen Sie in diesem Fenster die entsprechenden Einstellungen vor. 
 </p>
 <p>
-<b>Bitte beachten Sie</b>:<br> 
+Mit der Option <code class="jconf">Forwarding Server EIN</code> k&ouml;nnen Sie den Forwarding-Server aktivieren.
+</p>
+<p>
+<b>Bitte beachten Sie</b><br> 
 Wenn Sie den Forwarding-Server aktivieren, kann jeder JonDonym-Nutzer Ihren JonDo als Zugangspunkt verwenden. Sie gehen auch das Risiko ein, dass Nutzer Ihren JonDo verwenden k&ouml;nnen, um strafbare Handlungen im Internet durchzuf&uuml;hren.
 </p>
 
@@ -30,28 +36,28 @@ Wenn Sie den Forwarding-Server aktivieren, kann jeder JonDonym-Nutzer Ihren JonD
 <ul>
     <li>
 	<p>
-	<b>Portnummer:</b><br>
+	<b>Portnummer</b><br>
     Tragen Sie hier den Port ein, auf dem Ihr JonDo Forwarding-Verbindungen annimmt. Dazu ist es erforderlich, dass Sie diesen Port in Ihrer Firewall f&uuml;r eingehende Verbindungen freischalten.
 	</p>
 	</li>
     
     <li>
 	<p>
-	<b>Meine Internetverbindung:</b><br>
-    W&auml;hlen Sie hier die Art und Geschwindigkeit Ihrer Internetverbindung aus. Dadurch wird der Wert im Feld "Max. Bandbreite" automatisch gesetzt.
+	<b>Meine Internetverbindung</b><br>
+    W&auml;hlen Sie hier die Art und Geschwindigkeit Ihrer Internetverbindung aus. Dadurch wird der Wert im Feld <code class="jconf">Max. Bandbreite</code> automatisch gesetzt.
     </p>
 	</li>
 	
     <li>
 	<p>
-	<b>Anteil f&uuml;r Forwarding:</b><br>
+	<b>Anteil f&uuml;r Forwarding</b><br>
     W&auml;hlen Sie in diesem Feld den Prozentsatz aus, der von Ihrer gesamten Upload-Bandbreite f&uuml;r das Forwarding zur Verf&uuml;gung stehen soll.
     </p>
 	</li>
 	
     <li>
 	<p>
-	<b>Max. benutzte Bandbreite:</b><br>
+	<b>Max. benutzte Bandbreite</b><br>
     Hier wird Ihnen angezeigt, wie viel Bandbreite tats&auml;chlich gem&auml;&szlig; den obigen Einstellungen f&uuml;r das Forwarding genutzt wird.
 	</p>
 	</li>
@@ -59,7 +65,7 @@ Wenn Sie den Forwarding-Server aktivieren, kann jeder JonDonym-Nutzer Ihren JonD
 
 <h3>Erlaubte Mixkaskaden</h3>
 <p>
-In diesem Abschnitt haben Sie grunds&auml;tzlich zwei Einstellungsm&ouml;glichkeiten. Entweder, Sie erlauben allen Clients, die Ihren JonDo als Forwarder benutzen, den Zugriff auf alle Ihrem JonDo bekannten Kaskaden ("Erlaube Client-Zugriff auf alle verf&uuml;gbaren Mixkaskaden" ist markiert) oder Sie erlauben den Zugriff nur auf bestimmte Kaskaden. Auf welche Kaskaden zugegriffen werden darf, legen Sie mit den Schaltfl&auml;chen "Zu erlaubten Kaskaden hinzuf&uuml;gen" und "Von erlaubten Kaskaden entfernen" fest. Der Zugriff ist dann nur auf Kaskaden m&ouml;glich, die sich im Feld "Erlaubte Mixkaskaden" befinden.
+In diesem Abschnitt haben Sie grunds&auml;tzlich zwei Einstellungsm&ouml;glichkeiten. Entweder, Sie erlauben allen Clients, die Ihren JonDo als Forwarder benutzen, den Zugriff auf alle Ihrem JonDo bekannten Kaskaden (<code class="jconf">Erlaube Client-Zugriff auf alle verf&uuml;gbaren Mixkaskaden</code> ist markiert) oder Sie erlauben den Zugriff nur auf bestimmte Kaskaden. Auf welche Kaskaden zugegriffen werden darf, legen Sie mit den Schaltfl&auml;chen <code class="jconf">Zu erlaubten Kaskaden hinzuf&uuml;gen</code> und <code class="jconf">Von erlaubten Kaskaden entfernen</code> fest. Der Zugriff ist dann nur auf Kaskaden m&ouml;glich, die sich im Feld <code class="jconf">Erlaubte Mixkaskaden</code> befinden.
 </p>
 
 <h3>InfoService Anmeldung</h3>

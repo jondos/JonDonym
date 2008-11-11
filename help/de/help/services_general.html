@@ -8,7 +8,7 @@
 <body>
 <!--#include virtual="/header.html"-->
 <p class="navipar">
-<span class="prevlink"><a href="services_mixminion.html"><img src="prev.gif" alt="<-"> Mixminion</a></span> 
+<span class="prevlink"><a href="services_anon.html"><img src="prev.gif" alt="<-"> AN.ON/JonDonym</a></span>
 <span class="midlink"><a name="doctop" href="index.html#mi_toc">Inhalt </a><a href="index.html#mi_config"> <img src="next.gif" alt="->"> Konfiguration </a><a href="anon.html"> <img src="next.gif" alt="->"> Anonymit&auml;t </a><a href="services.html"><img src="next.gif" alt="->"> Dienste</a></span>
 <span class="nextlink"><a href="infoservice.html">InfoService <img src="next.gif" alt="->"></a></span> 
 </p>
@@ -16,7 +16,9 @@
 
 <h2>Dienste: Erweiterte Einstellungen</h2>
 <p>
-Dieses Panel steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung. Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i>, w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Dienste</i> und &ouml;ffnen anschlie&szlig;end den Tab <i>Erweiterte Einstellungen</i>.
+<em class="jconf">
+Dieses Panel steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung. Um zu diesem Einstellungsfenster zu kommen, klicken Sie im Hauptfenster von JonDo auf <code class="jconf">Einstellungen</code>, w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <code class="jconf">Dienste</code> und &ouml;ffnen anschlie&szlig;end den Tab <code class="jconf">Erweiterte Einstellungen</code>.
+</em>
 </p>
 <p>
 Folgende Allgemeine Einstellungen, die alle Dienste betreffen, k&ouml;nnen Sie hier vornehmen: 
@@ -25,72 +27,77 @@ Folgende Allgemeine Einstellungen, die alle Dienste betreffen, k&ouml;nnen Sie h
 <ul>
 	<li>
 	<p>
-	<b>Zuordnung von Internetdiensten zu Anonymisierungsdiensten</b>:<br>
-	Diese &Uuml;bersicht zeigt an, welche Internetdienste momentan von welchem Anonymisierungsdienst behandelt werden. In sp&auml;teren Versionen des JonDo werden Sie hier Ihre eigenen Zuordnungen vornehmen k&ouml;nnen, bisher dient es nur Ihrer Information.
+	<b>Anonymisiere HTTP-Header</b><br>
+	Wenn diese Option aktiviert ist, setzt der JonDo die vom Browser &uuml;bertragenen HTTP-Header auf Standardwerte, die auch von <a href="jondofox.html">JonDoFox</a> gesetzt werden. Dadurch sind Nutzer von anderen Browsern nicht unterscheidbar von JonDoFox-Nutzern oder solchen, die die HTTP-Filterung ebenfalls aktiviert haben. Dies verbessert den Schutz der Privatsph&auml;re.
+	</p>
+	<p>
+	<b>Hinweis</b><br>
+	Diese Funktion steht nur f&uuml;r unverschl&uuml;sselte Verbindungen zur Verf&uuml;gung. Eine entsprechende Filterung bei verschl&uuml;sselten Verbindungen kann von <a href="jondofox.html">JonDoFox</a> vorgenommen werden. 
 	</p>
 	</li>
-	
+
     <li>
 	<p>
-	<b>Gesamten Datenverkehr ohne R&uuml;ckfrage blockieren, wenn Anonymit&auml;tsmodus aus</b>:<br>
-    Ist dieses Feld markiert, leitet JonDo nicht-anonymen Verkehr nicht durch. Im Browser erscheint ein Hinweis, dass Surfen momentan nicht m&ouml;glich ist.
-Aktivieren Sie dieses Feld hingegen nicht, zeigt JonDo ein Hinweisfenster mit der M&ouml;glichkeit, das nicht-anonyme Surfen kurzzeitig zu erlauben.
-    <br><A href="jap.JAPController_allowunprotected.html">Weitere Informationen</A>
+	<b>Jede Webseite einzeln best&auml;tigen wenn Anonymit&auml;tsmodus aus</b><br>
+    Ist dieses Feld markiert, fragt JonDo bei deaktiviertem Anonymit&auml;tsmodus f&uuml;r jede angeforderte Webseite nach einer Best&auml;tigung, um zu vermeiden, dass unbemerkt Seiten ohne Schutz aufgerufen werden k&ouml;nnen. Wenn diese Option deaktiviert ist, kann
+	der JonDo sich auch im nicht-anonymen Modus direkt mit einem Webserver verbinden, ohne st&auml;ndig eine Best&auml;tigung vom Nutzer zu fordern. Eine einmalige Best&auml;tigung ist aber weiterhin erforderlich. <br>
+	<a href="jap.JAPController_allowunprotected.html">Weitere Informationen zum nicht-anonymen Weiterleiten von Daten</a>
 	</p>
+	
 	</li>
 	
 	<li>
 	<p>
-	<b> Nur mit explizit freigeschalteten Kaskaden verbinden (Whitelist)</b>:<br>
-    Bei Aktivierung wird JonDo nur Verbindungen zu Kaskaden erlauben, die Sie explizit &uuml;berpr&uuml;ft und freigeschaltet haben. Dadurch sind Sie optimal davor gesch&uuml;tzt, sich versehentlich mit nicht-vertrauensw&uuml;rdigen JonDonym-Diensten zu verbinden. Allerdings profitieren Sie nicht automatisch davon, wenn neue Dienste verf&uuml;gbar sind, sondern m&uuml;ssen diese jeweils einzeln in der <a href="services_anon.html">JonDonym-Dienst-Ansicht</a> freischalten.
-    </p>
-	</li>
-	
-	<li>
-	<p>
-	<b>Anonymit&auml;tsservice sofort nach Programmstart aktivieren</b>:<br>
+	<b>Anonymit&auml;tsservice sofort nach Programmstart aktivieren</b><br>
 	Ist dieses Feld markiert, so baut der JonDo gleich nach dem Start eine Verbindung zum Anonymisierungsdienst auf.
     </p>
 	</li>
 	
 	<li>
 	<p>
-	<b>Automatisch wieder verbinden nach Verbindungsabbruch</b>:<br>
+	<b>Automatisch wieder verbinden nach Verbindungsabbruch</b><br>
     Setzen Sie hier einen Haken, wenn Sie wollen, dass der JonDo automatisch die Verbindung zum Anonymiserungsdienst wieder herstellt, wenn diese unterbrochen wurde.
 	</p>
 	</li>
 	
 	<li>
 	<p>
-	<b>Mix-Kaskaden automatisch wechseln</b>:<br>
+	<b>Mix-Kaskaden automatisch wechseln</b><br>
 	Bei dieser Option wird beim Start von JonDo eine zuf&auml;llige Kaskade aus den durch Ihren <a href="services_anon.html#filter">Dienstfilter </a>festgelegten Kaskaden ausgew&auml;hlt. W&auml;hrend des Betriebs wird die Kaskade nur dann automatisch gewechselt, wenn die aktive Kaskade ausf&auml;llt.
 	</p>
 	</li>
   
 	<li>
 	<p>
-	<b>auch beim Start von JAP/JonDo</b>:<br>
+	<b>auch beim Start von JAP/JonDo</b><br>
 	Wird diese Option deaktiviert, verbindet sich JonDo beim Start mit derselben Kaskade mit der er vor dem letzten Beenden verbunden war.
 	</p>
 	</li>
   
 	<li>
 	<p>
-	<b>Sende Dummy-Daten</b>:<br>
+	<b> Nur mit explizit freigeschalteten Kaskaden verbinden (Whitelist)</b><br>
+    Bei Aktivierung wird JonDo nur Verbindungen zu Kaskaden erlauben, die Sie explizit &uuml;berpr&uuml;ft und freigeschaltet haben. Dadurch sind Sie optimal davor gesch&uuml;tzt, sich versehentlich mit nicht-vertrauensw&uuml;rdigen JonDonym-Diensten zu verbinden. Allerdings profitieren Sie nicht automatisch davon, wenn neue Dienste verf&uuml;gbar sind, sondern m&uuml;ssen diese jeweils einzeln in der <a href="services_anon.html">JonDonym-Dienst-Ansicht</a> freischalten.
+    </p>
+	</li>
+	  
+	<li>
+	<p>
+	<b>Sende Dummy-Daten</b><br>
 	Hier k&ouml;nnen Sie festlegen, wie h&auml;ufig Pakete ohne Nutzinhalt verschickt werden, um f&uuml;r einen Beobachter eine laufende Kommunikation vorzut&auml;uschen.        
 	</p>
 	</li>
   
 	<li>    
 	<p>
-	<b>Anmelde-Timeout</b>:<br>
+	<b>Anmelde-Timeout</b><br>
 Sollte Ihre Internetverbindung zu langsam sein, so kann ein zu geringes Timeout beim Anmelden an den Dienst  dazu f&uuml;hren, dass JonDo keine anonyme Verbindung aufbauen kann. Ein zu hohes Timeout f&uuml;hrt unter Umst&auml;nden zu hohen Wartezeiten beim Verbinden, wenn der aktuell gew&auml;hlte Dienst zu langsam oder nicht verf&uuml;gbar ist. Stellen Sie das Timeout deshalb je nach Bedarf h&ouml;her oder niedriger ein.
 	</p>
 	</li>
 </ul>
 <hr>
 <p class="navipar">
-<span class="prevlink"><a href="services_mixminion.html"><img src="prev.gif" alt="<-"> Mixminion</a></span> 
+<span class="prevlink"><a href="services_anon.html"><img src="prev.gif" alt="<-"> AN.ON/JonDonym</a></span>
 <span class="midlink"><a name="docbottom" href="index.html#mi_toc">Inhalt </a><a href="index.html#mi_config"> <img src="next.gif" alt="->"> Konfiguration </a><a href="anon.html"> <img src="next.gif" alt="->"> Anonymit&auml;t </a><a href="services.html"><img src="next.gif" alt="->"> Dienste</a></span>
 <span class="nextlink"><a href="infoservice.html">InfoService <img src="next.gif" alt="->"></a></span> 
 </p>
