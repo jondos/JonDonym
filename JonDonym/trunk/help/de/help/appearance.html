@@ -16,11 +16,14 @@
 
 <h2>Ver&auml;ndern des Erscheinungsbildes</h2>
 <p>
-Um zu diesem Einstellungsfenster zu gelangen, klicken Sie im Hauptfenster von JonDo auf <i>Einstellungen</i> und w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <i>Erscheinungsbild</i>.<br>
+<em class="jconf">Um zu diesem Einstellungsfenster zu gelangen, klicken Sie im Hauptfenster von JonDo auf <code class="jconf">Einstellungen</code> und w&auml;hlen anschlie&szlig;end aus der linken Liste den Eintrag <code class="jconf">Erscheinungsbild</code>.
+</em>
+</p>
+
+<p>
 In diesem Dialog k&ouml;nnen Sie Einstellungen vornehmen, die die grafische
 Erscheinung, die Sprache und das Anzeigeverhalten nach dem Starten von JonDo
 festlegen.
-
 </p>
 <h3>Erscheinungsbild</h3>
 	<p>
@@ -60,7 +63,7 @@ festlegen.
 			
 		</ul>
 		<p>
-		<b>Hinweis:</b><br>
+		<b>Hinweis</b><br>
 		 Die &Auml;nderungen an den LookAndFeel-Einstellungen werden erst nach einem Neustart des JonDos aktiv.
 		</p>
 		</li>
@@ -77,7 +80,7 @@ festlegen.
 <ul>
     <li>
 	<p>
-	<b>Erweiterte Ansicht:</b><br>
+	<b>Erweiterte Ansicht</b><br>
     In der erweiterten Ansicht werden alle Optionen im Hauptfenster sowie in 
     den Konfigurationsdialogen angezeigt.
     </p>
@@ -85,7 +88,7 @@ festlegen.
     
 	<li>
 	<p>
-	<b>Vereinfachte Ansicht:</b><br>
+	<b>Vereinfachte Ansicht</b><br>
     In der vereinfachten Ansicht werden einige fortgeschrittene Optionen nicht
     angezeigt. Die Grundfunktionalit&auml;t des JonDo &auml;ndert sich dadurch nicht.
 	</p>
@@ -97,9 +100,17 @@ festlegen.
     Schiebt die <a href="miniwindow.html">Mini-Ansicht</a> von JonDo immer vor alle anderen Fenster des Betriebssystems, auch wenn diese aktiv sind. Wenn die Option abgew&auml;hlt ist, wird die <a href="miniwindow.html">Mini-Ansicht </a>hinter anderen Fenstern versteckt. 
 	</p>
 	</li>
+	
+	<li>
+	<p>
+	<b>DLL-Update-Warnungen ignorieren</b><br>
+    Wenn diese Option aktiviert ist, wird kein Hinweis mehr angezeigt, dass eine aktuellere JapDLL-Version als die von Ihnen verwendete verf&uuml;gbar ist.<br>
+	Die JapDLL ist eine Bibliothek die Windows-Nutzern die Verwendung des <a href="miniwindow.html#contextmenu">Kontextmen&uuml;s</a> erm&ouml;glicht. 
+	</p>
+	</li>
 </ul>
 <p>
-<b>Hinweis:</b><br>
+<b>Hinweis</b><br>
 Diese &Auml;nderungen erfordern einen sofortigen Neustart von JonDo.
 </p>
 
@@ -108,7 +119,7 @@ Diese &Auml;nderungen erfordern einen sofortigen Neustart von JonDo.
 <ul>
     <li>
 	<p>
-	<b>Gehe nach dem Start...:</b><br>
+	<b>Gehe nach dem Start...</b><br>
     Wenn Sie diese Option aktivieren, haben Sie zwei weitere
     Auswahlm&ouml;glichkeiten:
     </p>
@@ -116,14 +127,14 @@ Diese &Auml;nderungen erfordern einen sofortigen Neustart von JonDo.
     <ul>
         <li>
 		<p>
-		<b>...in die Minimalansicht:</b><br>
+		<b>...in die Minimalansicht</b><br>
         Diese Option minimiert das Hauptfenster des JonDo sofort nach dem Start.
         </p>
 		</li>
         
 		<li>
 		<p>
-		<b>...in den Systray:</b><br>
+		<b>...in den Systray</b><br>
         Wenn diese Einstellung gew&auml;hlt wurde, verschwindet das Hauptfenster
         des JonDo gleich nach dem Start im Systray von Windows.
 		</p>
@@ -133,51 +144,64 @@ Diese &Auml;nderungen erfordern einen sofortigen Neustart von JonDo.
 	
 	<li>
 	<p>
-	<b>Splash-Screen anzeigen:</b><br>
+	<b>Splash-Screen anzeigen</b><br>
 	Falls Sie nicht m&ouml;chten, dass unmittelbar nach dem Start des JonDos der Splash-Screen erscheint, k&ouml;nnen Sie diese Option aktivieren. Dadurch wird beim n&auml;chsten Start des JonDos der Splash-Screen dann nicht mehr angezeigt. Sofern Sie diese Option wieder deaktivieren wird der Splash-Screen wieder erscheinen.
 	</p>
 	</li>
 		
 	<li>
 	<p>
-	<b>Firefox starten (nur JonDo-Portable):</b><br>
-	Sollten Sie das JonDo-Portable-Paket oder Ihren JonDo mit der Kommandozeilenoption <code>--portable &lt;Pfad zum Firefox&gt; </code> gestartet haben, wird auch der Firefox automatisch ausgef&uuml;hrt, wenn diese Option aktiviert ist. Allerdings erfolgt der Start des Firefox erst dann, wenn nach dem Start des JonDos eine Verbindung mit einem Anonymisierungsdienst zustande gekommen ist. Falls Sie nicht w&uuml;nschen, dass der Firefox automatisch gestartet wird, deaktivieren Sie diese Option. 
+	<b>Beim Verbinden Browser starten (nur JonDo-Portable)</b><br>
+	Sollten Sie das JonDo-Portable-Paket oder Ihren JonDo mit der Kommandozeilenoption <code>--portable &lt;Pfad zum Browser&gt; </code> gestartet haben, wird auch der angegebene Browser automatisch gestartet, wenn die Option aktiviert ist. Allerdings erfolgt der Browserstart erst dann, wenn nach dem Start des JonDos eine Verbindung mit einem Anonymisierungsdienst zustande gekommen ist. Falls Sie nicht w&uuml;nschen, dass ein automatischer Browserstart erfolgt wird, deaktivieren Sie diese Option.
 	</p>
 	</li>
 </ul>
 
-<h3>Fensterposition merken</h3>
+<h3>Pfad zur Hilfe</h3>
 <p>
-<i>Diese Einstellung steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.</i>
+Um die Hilfsfunktion von JonDo optimal nutzen zu k&ouml;nnen, wird Ihr Standardbrowser verwendet, um die Hilfe anzuzeigen. Dazu werden die Hilfe-Dateien auf Ihrer Festplatte oder einem anderen Datentr&auml;ger abgelegt. Diese Einstellung erm&ouml;glicht Ihnen den Pfad anzugeben, in dem die Hilfe-Dateien gespeichert werden sollen.
 </p>
 <p>
-	Wenn Sie bei einem der folgenden K&auml;stchen einen Haken setzen, dann erscheint das
-	entsprechende Fenster von JonDo bei jedem Start an der gleichen Stelle, an der
-	es sich beim vorherigen Beenden befand. Sie haben die M&ouml;glichkeit, folgende Fenster wieder an der gleichen Position beim n&auml;chsten Programmstart erscheinen zu lassen: 
+<em class="jconf">
+Wenn Sie auf den Button <code class="jconf">Verschieben</code> klicken, &ouml;ffnet sich ein Dialog, der Ihnen erm&ouml;glicht einen Pfad zur Hilfe-Datei-Installation auszuw&auml;hlen.
+</em>
+</p>
+
+<h3>Fensterposition merken</h3>
+<p>
+<em class="jconf">
+Diese Einstellung steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.
+</em>
+</p>
+<p>
+Wenn Sie bei einem der folgenden K&auml;stchen einen Haken setzen, dann erscheint dasentsprechende Fenster von JonDo bei jedem Start an der gleichen Stelle, an deres sich beim vorherigen Beenden befand. Sie haben die M&ouml;glichkeit, folgende Fenster wieder an der gleichen Position beim n&auml;chsten Programmstart erscheinen zu lassen: 
 </p>
 <ul>
 	<li>Hauptfenster</li>
 	<li>Einstellungsfenster</li>
 	<li>Mini-Fenster</li>
-	<li>Hilfefenster</li>
 </ul>
 
 <h3>Fenstergr&ouml;&szlig;e merken</h3>
 <p>
-<i>Diese Einstellung steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.</i>
+<em class="jconf">
+Diese Einstellung steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.
+</em>
 </p>
 <ul>
 	<li>
 	<p>
-	<b>Hilfefenster</b><br> 
-	Wenn Sie diese Option aktivieren, wird JonDo das Hilfefenster in der gleichen Gr&ouml;&szlig;e wie beim letzten Aufruf anzeigen.
+	<b>Einstellungsfenster</b><br> 
+	Wenn Sie diese Option aktivieren, wird JonDo das Einstellungsfenster in der gleichen Gr&ouml;&szlig;e wie beim letzten Aufruf anzeigen.
 	</p>
 	</li>
 </ul>
 
 <h3>Programmende</h3>
 <p>
-<i>Diese Einstellung steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.</i>
+<em class="jconf">
+Diese Einstellung steht Ihnen in der <a href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.
+</em>
 </p>
 
 <ul>
@@ -188,6 +212,7 @@ Diese &Auml;nderungen erfordern einen sofortigen Neustart von JonDo.
     </p>
 	</li>
 </ul>
+
 <hr>
 <p class="navipar">
 <span class="prevlink"><a href="JAP_commandline.html"><img src="prev.gif" alt="<-"> Kommandozeilenargumente</a></span> 
