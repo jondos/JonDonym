@@ -67,7 +67,11 @@ alt="-&gt;"></a></span> </p>
           </li>
           <li><p><a href="#forwarder">Forwarder</a><br>
             enth&auml;lt Informationen &uuml;ber den Status des
-            Forwarding-Server, wenn dieser aktiviert ist. </p>
+            Forwarding-Server, wenn dieser aktiviert ist &ndash;<br>
+			<em class="jconf">
+			(nur in der <a href="appearance.html#expertView">erweiterten Ansicht</a> verf√ºgbar).
+			</em>
+			</p>
           </li>
           <li><p><a href="#statuspanel">Statusleiste</a><br>
             Zeigt aktuelle JonDonym-Meldungen an. </p>
@@ -95,15 +99,15 @@ dazu finden sie im <a href="#otherbuttons">letzten Abschnitt</a>. </p>
     den Button <i>Ein</i> aktiviert hatten. Der Button <img src="refresh.gif"
     alt="Aktualisieren"> aktualisiert die Liste. Die Schaltfl&auml;che
     <i>Details</i> bringt Sie in das <a
-    href="services_anon.html">Einstellungsfenster</a> von JonDo, wo sie
-    Genaueres zu den verf&uuml;gbaren Diensten erfahren k&ouml;nnen. </p>
+    href="services_anon.html">Einstellungsfenster</a> von JonDo, wo Sie
+    <a href="services_anon.html#serviceinfos">genauere Informationen</a> zu den verf&uuml;gbaren Diensten erhalten k&ouml;nnen.</p>
   </li>
   <li><a name="anonymity"><b>Anonymit&auml;t</b></a>
 
     <div style="float:left; padding-top: 10px; padding-right: 20px; padding-bottom:20px;">
     <img src="anonymity.gif" alt="Anonymit&auml;tsfeld"> </div>
-    <p>Aktivieren Sie das K&auml;stchen <i>Ein</i> unter
-    <i>Anonymit&auml;t</i>, um sich mit dem JonDonym-Dienst Ihrer Wahl zu
+    <p>Aktivieren Sie das K&auml;stchen <code class="jconf">Ein</code> unter
+    <code class="jconf">Anonymit&auml;t</code>, um sich mit dem JonDonym-Dienst Ihrer Wahl zu
     verbinden. Wenn der Verbindungsaufbau erfolgreich war, erscheint kurz
     danach ein Zeiger im <a
     href="jap.JAPNewView_anonymometer.html">Anonym-O-Meter</a>. Au&szlig;erdem
@@ -144,15 +148,27 @@ Rechts daneben sehen Sie die aktuelle Versionsnummer. Ein Klick darauf zeigt Ihn
     href="jap.JAPNewView_anonymometer.html">hier</a>, um eine Beschreibung
     f&uuml;r die einzelnen Zust&auml;nde des Anonym-O-Meters zu bekommen.</p>
   </li>
+  
+  <li><p><a name="actservice"><b>Aktueller Dienst</b></a><br>
+   <!-- TODO: Simon: hier ändert sich ja bei jeder beta-Version etwas, deswegen ist es sinnlos hier immer
+   neu anzupassen. Also eine endgültige Version erst dann, wenn sich zum nächsten Release nichts mehr ändert. -->
+   Informationen zum aktuellen Dienst: <i>unvollst&auml;ndig, da noch &Auml;nderungen kommen?</i></p>
+    <ul>
+      <li>Nutzer</li>
+      <li>Geschwindigkeit</li>
+	  <li>Antwortzeit</li>
+	  <li>Betreiber</li>
+    </ul>
+  </li>  
   <li><p><a name="restvolume"><b>Restvolumen</b></a><br>
     Diese Anzeige gibt an, wieviel Guthaben an Datenvolumen sich noch auf Ihrem
     Konto befindet. Ein g&uuml;ltiges Konto ist notwendig f&uuml;r die Nutzung
     der <a href="jondonym.html#premiumservices">Premiumdienste</a>. Mehr
     &uuml;ber die Verwendung von Konten im JonDo erfahren Sie <a
-    href="payment.html">hier</a>. Um die <a
-    href="appearance.html#expertView">erweiterte Ansicht</a> zu &ouml;ffnen,
-    klicken sie auf den Pfeil links neben der Restvolumensanzeige. Hierdurch
-    erhalten sie weitere Informationen zu ihrem Kontostand:</p>
+    href="payment.html">hier</a>.<br>
+	Wenn Sie die <a href="appearance.html#expertView">erweiterte Ansicht</a> gew&auml;hlt haben, k&ouml;nnen
+    Sie auf den Pfeil links neben der Restvolumensanzeige klicken und erhalten hierdurch
+    folgende genauere Informationenen zu ihrem Kontostand:</p>
     <ul>
       <li>Wann die G&uuml;ltigkeitsdauer Ihres Tarifs abl&auml;uft und</li>
       <li>wieviel von Ihrem Konto Sie insgesamt verbraucht haben.</li>
@@ -163,15 +179,14 @@ Rechts daneben sehen Sie die aktuelle Versionsnummer. Ein Klick darauf zeigt Ihn
     Zur Information des Nutzers und zur &Uuml;berpr&uuml;fung der
     Funktionalit&auml;t wird von JonDo angezeigt, wie viele Daten der Nutzer in
     der aktuellen Sitzung bereits &uuml;ber den Anonymit&auml;tsdienst
-    &uuml;bertragen hat. Mit dem Pfeil links neben der Datenanzeige k&ouml;nnen
-    Sie die <a href="appearance.html#expertView">erweiterte Ansicht</a>
-    &ouml;ffnen. Hier sind die anonymisierten Daten weiter unterteilt in: </p>
+    &uuml;bertragen hat.<br>
+	In der <a href="appearance.html#expertView">erweiterten Ansicht</a> k&ouml;nnen Sie durch einen Klick auf den Pfeil links neben der Datenanzeige die anonymisierten Daten weiter unterteilen in:</p>
     <ul>
-      <li><i>World Wide Web</i> und</li>
-      <li><i>anderen Internetdienste</i></li>
+      <li><code class="jconf">World Wide Web</code></li>
+      <li><code class="jconf">andere Internetdienste</code></li>
     </ul>
   </li>
-  <li><p><a name="forwarder"><b>Forwarder:</b></a><br>
+  <li><p><a name="forwarder"><b>Forwarder</b></a> <em class="jconf">(nur in der <a href="appearance.html#expertView">erweiterten Ansicht</a> verf√ºgbar)</em><br>
     Durch die <a href="forwarding_server.html">Forwarding-Funktion</a>
     k&ouml;nnen andere JonDo-Benutzer &uuml;ber Ihr System eine Verbindung zu
     einem Anonymisierungsdienst aufbauen. Dies ist hilfreich, wenn der
@@ -191,19 +206,24 @@ Rechts daneben sehen Sie die aktuelle Versionsnummer. Ein Klick darauf zeigt Ihn
       ist</li>
       <li>Welche <b>Bandbreite</b> daf&uuml;r verwendet wird.</li>
     </ul>
-    <p><b>Achtung:</b><br>
+    <p><b>Achtung</b><br>
     Durch Aktivieren des Forwarders gew&auml;hren Sie Unbekannten Nutzern
     Zugriff zu Ihrem JonDo. Dabei besteht auch die Gefahr von Mi&szlig;brauch.
     Au&szlig;erdem m&uuml;ssen Sie dabei Einbu&szlig;en bei Ihrer
     Internetgeschwindigkeit in Kauf nehmen. Aktivieren Sie den Forwarder also
     nur, wenn Sie sich wirklich sicher sind. </p>
   </li>
+  <li><p>
+	<a name="statuspanel"><b>Statusleiste</b></a><br>
+	In diesem Bereich erscheinen aktuelle Nachrichten zu den verf&uuml;gbaren JonDonym-Diensten.
+    </p>
+  </li>
 </ul>
 
 <h3><a name="otherbuttons" id="otherbuttons">Weitere Buttons</a></h3>
 <ul>
-  <li>Die Schaltfl&auml;che "Minimieren" (Symbol: <img
-    src="miniwindow_button1.gif" alt="Miniwindow-Button"> ) l&auml;sst JonDo
+  <li>Die Schaltfl&auml;che <code class="jconf">Minimieren</code> <img
+    src="miniwindow_button1.gif" alt="Miniwindow-Button"> l&auml;sst JonDo
     auf ein Fenster schrumpfen, das nur noch die wichtigsten Informationen
     anzeigt. Dieses Fenster dockt automatisch am Bildschirmrand an. Dort
     k&ouml;nnen Sie durch einen Klick auf das JonDo-Icon die Anonymit&auml;t
