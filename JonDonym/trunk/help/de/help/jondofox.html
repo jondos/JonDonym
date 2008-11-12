@@ -55,6 +55,12 @@ Installation von JonDoFox wie folgt durchf&uuml;hren:</p>
         anschlie&szlig;end <em>JonDoFox_Install</em> ebenfalls durch einen
         Doppelklick.</li>
     </ol>
+    <p>
+    	<b>Hinweis</b><br>
+        Der Installer kann auch verwendet werden, um das von ihm installierte Profil wieder zu entfernen, doch <b>beachten Sie:</b><br>
+        Bitte ver&auml;ndern Sie die Eintr&auml;ge nicht, die der Installer vornimmt. Andernfalls kann keine saubere Deinstallation mehr gew&auml;hrleistet werden!
+        Nehmen Sie ebenso die Deinstallation mit dem Installer <b>nur dann vor</b>, wenn Sie diesen auch f&uuml;r die JonDoFox-Installation verwendet haben.
+      </p>
   </li>
   <li><a name="ffplinux"><b>Linux</b></a> 
     <ol>
@@ -63,28 +69,26 @@ Installation von JonDoFox wie folgt durchf&uuml;hren:</p>
         herunter (auch als <a
         href="https://www.jondos.de/de/downloads/profile_lite.zip">Minimal-Version</a>
         mit nur den sicherheitsrelevanten Erweiterungen erh&auml;ltlich)</li>
-      <li>Entpacken Sie die Datei, z.B. von der Kommandozeile mit dem Befehl
-        <code>unzip profile.zip</code>.</li>
-      <li>Starten Sie nun den Firefox-Profilmanager von der Kommandozeile mit
-        dem Befehl <code>firefox -P</code>.</li>
-      <li>W&auml;hlen Sie im Profilmanager nun <i>Profil erstellen</i> und
-        klicken Sie anschlie&szlig;end auf <em>Fortsetzen</em>.</li>
-      <li>Geben Sie als Profil-Ordner bitte das Verzeichnis an, in das Sie
-        den Inhalt der Datei <i>profile.zip</i> entpackt haben. Den Namen
-        f&uuml;r das JonDoFox-Profil k&ouml;nnen Sie frei w&auml;hlen.</li>
-      <li>Indem sie auf <i>Fertigstellen</i> klicken beenden Sie die
-        Installation.</li>
+      <li>Entpacken Sie die Datei, z.B. von der Kommandozeile mit: <code>user@computer#:/&gt; unzip profile.zip -d <i>Zielordner</i> </code>
+      <li>Wechseln Sie in das Verzeichnis, in das Sie die Zip-Datei entpackt haben: <code>user@computer#:/&gt; cd <i>Zielordner</i></code><br>
+      </li>
+      <li>
+      Sie finden in diesem Ordner das Skript <code>install_linux.sh</code>. F&uuml;hren Sie es aus, um JonDoFox zu installieren: <code>user@computer#:/<i>Zielordner</i>&gt; ./install_linux.sh</code>
+      </li>
     </ol>
   </li>
 </ul>
 
-<p>Wenn eine neue Version von JonDoFox erscheint, k&ouml;nnen Sie die neue
-Version jeweils "&uuml;ber" die alte installieren, also ins gleiche
-Verzeichnis. Ihre Bookmarks bleiben dabei erhalten.</p>
+<p>
+<b>Hinweis</b><br>
+Wenn eine neue Version von JonDoFox erscheint, k&ouml;nnen Sie die neue
+Version jeweils &quot;&uuml;ber&quot; die alte installieren, also ins gleiche
+Verzeichnis. Ihre Bookmarks bleiben dabei erhalten.
+</p>
 
-<h3>Installation "zum Mitnehmen"</h3>
+<h3>Installation &quot;zum Mitnehmen&quot;</h3>
 
-<p>Die Version "zum Mitnehmen" wird f&uuml;r Wechseldatentr&auml;ger
+<p>Die Version &quot;zum Mitnehmen&quot; wird f&uuml;r Wechseldatentr&auml;ger
 empfohlen. Sie integriert sich nicht in Ihr System. Falls Sie
 Programmverkn&uuml;pfungen zu JonDoFox ben&ouml;tigen, m&uuml;ssen Sie diese
 bei der Version "zum Mitnehmen" selber anlegen.</p>
