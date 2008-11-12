@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="AN.ON" default="dist" basedir=".">
 	<description>Ant Build file for the various compontens of the AN.ON project</description>
-
+<!--
 	<taskdef name="jarbundler" 
 	         classname="net.sourceforge.jarbundler.JarBundler"/>
-	
+-->	
 	<!-- set global properties for this build -->
 	<property name="mainclass" value="JAP"/>
 	<property name="mainclass.osx" value="JAPMacintosh"/>
