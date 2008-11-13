@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="JonDonym for Mac" default="mac-dist" basedir=".">
+	<description>Ant Build file containing the targets for building Mac OS X Distributions of JonDo</description>
+
+	<taskdef name="jarbundler" 
+	         classname="net.sourceforge.jarbundler.JarBundler"/>
+	
+	<property file="build_properties/global.properties"/>
+	<property file="build_properties/jondo-global.properties"/>	
+	<property file="build_properties/global-libs.properties"/>	
+	
+	<property name="mainclass.osx" value="JAPMacintosh"/>
+
+	<property name="bundleid" value="de.jondos.${appname}"/>
+	<property name="JAP_args" value=""/>
+	
+	<property name="excludesSrcJap" value="${jondoExcludes}"/>
+	
+	<property name="dist" location="dist"/>
+	<property name="jarfile" location="${dist}/${jarfile.name}.jar"/>
+	<property name="dist.osx" location="${dist}/MacOsX"/>
+	
+	<!--<path id="classpath.mrj" location="${lib.mrj_classes}"/>
+	<path id="classpath.aje" location="${lib.appleJavaExtensions}"/>
+	
+	<target name="init-mac-libs">
+		<ant antfile="${buildfile.core}" target="init-dirs"/>
+		
+		<get src="${lib.mrj_classes.url}" dest="${lib.mrj_classes}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/> 
+		
+		<get src="${lib.appleJavaExtensions.url}" dest="${lib.appleJavaExtensions}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		
+		<get src="${lib.macOSX.url}" dest="${lib.macOSX}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+	</target>-->
+	
+	<target name="getcurrentmacosxlibversion" 
+			description="Sets the property 'currentMacOSXLibVersion' to the value provided on the Web">	
+			
+		<get src="http://anon.inf.tu-dresden.de/develop/macosxlibversion.txt" 
+			verbose="true" 
+			usetimestamp="true"
+			ignoreerrors="true"
+			dest="macosxlibversion.txt"/> 
+				
+		<loadfile property="currentMacOSXLibVersion" srcfile="macosxlibversion.txt">
+			<filterchain>
+				<deletecharacters chars="\r\n" />
+			</filterchain>
+		</loadfile>
+		<echo message="Current MacOSXLib Version is: ${currentMacOSXLibVersion}"/>
+	</target>
+	
+	<target name="getcurrentversion" description="Sets the property 'currentVersion', 'releaseDate' to the value provided in JAPConstants.java">
+		<loadfile srcfile="${src}/jap/JAPConstants.java" property="currentVersion">
+			<filterchain>
+		        <linecontains>
+					<contains value="static final String aktVersion"/>
+				</linecontains>
+				<containsregex pattern="(.*)([0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9])(.*)" replace="\2"/>
+				<deletecharacters chars="\r\n" />
+			</filterchain>
+		</loadfile>
+		<echo message="Current Version is: ${currentVersion}"/>
+		<loadfile srcfile="${src}/jap/JAPConstants.java" property="releaseDate">
+		<filterchain>
+			<linecontains>
+				<contains value="private static final String RELEASE_DATE"/>
+			</linecontains>
+			<containsregex pattern="(.*&quot;)(.*)(&quot;.*)" replace="\2"/>
+			<deletecharacters chars="\r\n" />
+		</filterchain>
+		</loadfile>
+		<echo message="Release Date is: ${releaseDate}"/>
+	</target>
+	
+	<target name="jar-mac" depends="getcurrentmacosxlibversion"
+			description="creates a jar for Mac OS X distributions containing the libMacOSX.jnilib">
+		
+		<ant antfile="${buildfile.core}" target="${buildfile.core.target.jar}">
+			<property name="mainclass" value="${mainclass.osx}"/>
+		</ant>
+		
+		<jar jarfile="${jarfile}" update="true"> 
+			<zipfileset file="${lib.macOSX}" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
+		</jar>
+	</target>
+	
+	<target name="mac-dist" description="creates a JonDo Mac OS X bundle" depends="jar-mac, getcurrentversion">
+  		
+  		<!-- First build a jar file with JAPMacintosh as MainClass -->
+  		<mkdir dir="${dist.osx}"/>
+  		<jarbundler dir="${dist.osx}"
+  	            name="${appname}"
+  	            mainclass="${mainclass.osx}" 
+  	            bundleid="${bundleid}"
+  				jar="${jarfile}"
+  				icon="images/${appname}.icns"
+  				signature="JAPp"
+  				version="${currentVersion}"
+  				shortname="${appname}"
+  				arguments="${JAP_args}">
+  				
+  				<javaproperty name="apple.awt.brushMetalLook" value="false"/>
+  				<javaproperty name="apple.awt.showGrowBox" value="false"/>
+				<javaproperty name="com.apple.hwaccel" value="true"/>
+				<javaproperty name="com.apple.mrj.application.growbox.intrudes" value="false"/>
+
+		</jarbundler>
+	</target>
+	
+	<target name="mac-dist-archive" depends="mac-dist" 
+			description="creates a compressed dmg image of the JonDo Mac OS X bundle (needs Mac OS X)">
+	  <exec executable="hdiutil">
+	    <arg value="create"/>
+	    <arg value="-srcfolder"/>
+	    <arg value="${dist.osx}/${appname}.app"/>
+	  	<arg value="${dist.osx}/${appname}.dmg"/>
+	  </exec>
+	</target>
+	
+	<target name="manioq-for-mac-dist-archive">
+		<antcall target="mac-dist-archive">
+			<param name="JAP_args" value="--manioq"/>
+			<param name="dist.osx" value="${dist.osx}/manioq"/>
+		</antcall>
+	</target>
+	
+	<target name="clean">
+		<ant antfile="${buildfile.core}" target="clean"/>
+	</target>	
+</project>
