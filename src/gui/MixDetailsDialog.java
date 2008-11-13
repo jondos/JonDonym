@@ -27,10 +27,12 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 {
 	private MixInfo m_mixInfo;
 	private JLabel m_lblOperator;
+	private JLabel m_lblNationality;;
 	private JLabel m_lblEMail;
 	
 	private static String MSG_MIX_NAME = MixDetailsDialog.class.getName() + "_mixName";
 	private static String MSG_TITLE = MixDetailsDialog.class.getName() + "_title";
+	private static String MSG_NATIONALITY = MixDetailsDialog.class.getName() + "_nationality";
 	
 	public MixDetailsDialog(Component a_parent, MixInfo a_mixInfo, int a_mixType)
 	{
@@ -74,13 +76,13 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 		
 		lbl = new JLabel(GUIUtils.getCountryFromServiceLocation(loc));
 		c.gridy = 1;
-		c.gridx = 1;
+		c.gridx++;
 		lbl.setIcon(GUIUtils.loadImageIcon("flags/" + loc.getCountry() + ".png"));
 		p.add(lbl, c);
 		
 		lbl = new JLabel(JAPMessages.getString("mixOperator"));
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy++;
 		c.anchor = GridBagConstraints.WEST;
 		p.add(lbl, c);
 		
@@ -89,16 +91,26 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 		m_lblOperator.setForeground(Color.blue);
 		m_lblOperator.addMouseListener(this);
 		m_lblOperator.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		if(op.getCertificate() != null && op.getCertificate().getSubject() != null)
-		{
-			m_lblOperator.setIcon(GUIUtils.loadImageIcon("flags/" + op.getCertificate().getSubject().getCountryCode() + ".png"));
-		}
 		c.gridx = 1;
 		p.add(m_lblOperator, c);
 		
+		if(op.getCertificate() != null && op.getCertificate().getSubject() != null)
+		{
+			lbl = new JLabel(JAPMessages.getString(MSG_NATIONALITY) + ":");
+			c.gridx = 0;
+			c.gridy++;
+			p.add(lbl, c);
+			m_lblNationality = new JLabel(new CountryMapper(
+					op.getCertificate().getSubject().getCountryCode(), 
+					JAPMessages.getLocale()).toString());
+			m_lblNationality.setIcon(GUIUtils.loadImageIcon("flags/" + op.getCertificate().getSubject().getCountryCode() + ".png"));
+			c.gridx = 1;
+			p.add(m_lblNationality, c);
+		}
+		
 		lbl = new JLabel(JAPMessages.getString("eMail:"));
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy++;
 		p.add(lbl, c);
 		
 		m_lblEMail = new JLabel(op.getEMail());
