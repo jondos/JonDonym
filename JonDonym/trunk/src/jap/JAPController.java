@@ -4071,6 +4071,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 
+	public boolean updatePaymentInstances(boolean a_bDoOnlyIfNotYetUpdated)
+	{
+		if (a_bDoOnlyIfNotYetUpdated && m_paymentInstanceUpdater.isFirstUpdateDone())
+		{
+			return true;
+		}
+		return m_paymentInstanceUpdater.update();
+	}
+	
 	/**
 	 * Updates the list of known InfoServices.
 	 * @param a_bDoOnlyIfNotYetUpdated only updates the infoservices if not at least one successful

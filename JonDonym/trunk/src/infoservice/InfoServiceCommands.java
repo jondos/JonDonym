@@ -409,10 +409,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 	private HttpResponseStructure tcopdataPost(byte[] a_postData)
 	{
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
-		if (1==1)
-		{
-			return httpResponse;
-		}
+
 		try
 		{
 			//LogHolder.log(LogLevel.DEBUG, LogType.NET, "TCOpData recvd XML: " + (new String(a_postData)));
