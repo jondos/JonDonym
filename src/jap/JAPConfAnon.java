@@ -1886,6 +1886,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	protected void onRootPanelShown()
 	{
+		boolean bUpdateValues = false;
 		synchronized (LOCK_OBSERVABLE)
 		{
 			if (!m_observablesRegistered)
@@ -1897,13 +1898,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				Database.getInstance(MixCascade.class).addObserver(this);
 				Database.getInstance(StatusInfo.class).addObserver(this);
 				Database.getInstance(MixInfo.class).addObserver(this);
+				m_cmbCascadeFilter.setSelectedItem(TrustModel.getCurrentTrustModel());
 				TrustModel.addModelObserver(this);
 				m_observablesRegistered = true;
+				bUpdateValues = true;
 			}
 		}
 
 		if (!m_infoService.isFilled())
 		{
+			bUpdateValues = true;			
+		}
+		if (bUpdateValues)
+		{
+			updateValues(false);
+			/*
 			new Thread(new Runnable()
 			{
 				public void run()
@@ -1911,10 +1920,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					m_infoService.fill(true);
 					updateValues(false);
 				}
-			}).start();
+			}).start();*/
 			//fetchCascades(false, false, true);
 		}
-
 
 		if (m_tableMixCascade.getRowCount() > 0 && m_tableMixCascade.getSelectedRow() < 0)
 		{

@@ -43,9 +43,9 @@ public final class JAPConstants
 
 	//Warning: This is a little bit tricky,
 	//because CVS will expand the $Date: 2008-09-03 12:31:14 $
-	//to the date of the last commmit of this file
+	//to the date of the last commit of this file
 
-	//Never change the layout of the next two lines as serveal automated tools use these lines to do fancy things...
+	//Never change the layout of the next two lines as several automated tools use these lines to do fancy things...
 	public final static boolean m_bReleasedVersion = false; //Set to true if this is a stable (release) Version
 	private static final String RELEASE_DATE = "2008/08/06 12:11:16"; // Set only to a Value, if m_bReleaseVersion=true
 
@@ -57,7 +57,7 @@ public final class JAPConstants
 	//the update dialog
 	static
 	{ //This will set the strRealeaseDate to the correct Value
-		//This is ether the CVS_GENERATED_RELEASE_DATE or the RELEASE_DATE, if m_bReleasedVersion==true;
+		//This is either the CVS_GENERATED_RELEASE_DATE or the RELEASE_DATE, if m_bReleasedVersion==true;
 		if (m_bReleasedVersion)
 		{
 			strReleaseDate = RELEASE_DATE;

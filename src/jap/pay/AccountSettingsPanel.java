@@ -1258,9 +1258,18 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			}
 			else
 			{
+				long deposit;
 				m_labelStatementDate.setText(JAPUtil.formatTimestamp(balance.getTimestamp(), true,
 					JAPMessages.getLocale().getLanguage()));
-				m_labelDeposit.setText(JAPUtil.formatEuroCentValue(balance.getDeposit()));
+				deposit = balance.getDeposit();
+				if (deposit <= 0)
+				{
+					m_labelDeposit.setText(JAPMessages.getString(MSG_COUPON));
+				}
+				else
+				{
+					m_labelDeposit.setText(JAPUtil.formatEuroCentValue(deposit));
+				}
 				m_labelSpent.setText(JAPUtil.formatBytesValueWithUnit(balance.getSpent()));
 				//m_labelBalance.setText(JAPUtil.formatEuroCentValue(balance.getBalance()));
 
@@ -1340,7 +1349,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				else
 				{
 					//long dep = balance.getVolumeBytesLeft()*1000 + balance.getSpent();
-					long deposit = PaymentMainPanel.FULL_AMOUNT * 1000;
+					deposit = PaymentMainPanel.FULL_AMOUNT * 1000;
 					long credit = balance.getCredit() * 1000;
 					double percent = (double) credit / (double) deposit;
 
