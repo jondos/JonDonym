@@ -1,93 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project name="AN.ON" default="dist" basedir=".">
-	<description>Ant Build file for the various compontens of the AN.ON project</description>
-<!--
-	<taskdef name="jarbundler" 
-	         classname="net.sourceforge.jarbundler.JarBundler"/>
--->	
-	<!-- set global properties for this build -->
-	<property name="mainclass" value="JAP"/>
-	<property name="mainclass.osx" value="JAPMacintosh"/>
-	<property name="appname" value="JonDo"/>
-	<property name="bundleid" value="de.jondos.${appname}"/>
-	<property name="JAP_args" value=""/>
-	<property name="src" location="src"/>
-	<property name="certificates" location="certificates"/>
-  
-	<property name="excludesSrcJap" value="jpi/** infoservice/** misc/** anon/crypto/tinytls/test/** platform/signal/**/*"/>
-	<property name="infoservice-excludes" value="jpi/** infoservice/performance/** misc/**"/>
-	<property name="build" location="build"/>
-	<property name="lib" location="lib"/>
-	<property name="dist" location="dist"/>
-	<property name="dist.osx" location="${dist}/MacOsX"/>
-	<property name="dist.linux" location="${dist}/linux"/>
-	<property name="jap.jarfile.name" value="JAP"/>
-	<property name="jap.jarfile" location="${dist}/${jap.jarfile.name}.jar"/>
-	<property name="extlibs" location="/Users/simon/lib/jap"/>
+<project name="JonDonym" default="dist" basedir=".">
+	<description>Ant Build file for the various compontens of the JonDonym project</description>
 
-	<property name="lib" location="lib"/>
+	<!-- set global properties for this build -->
+	<property file="build_properties/global.properties"/>
+	<property file="build_properties/jondo-global.properties"/>	
+	<property file="build_properties/global-libs.properties"/>	
 	
-	<!-- required libs for jap and infoservice -->
-	<property name="lib.java1_1_classes.url" value="http://anon.inf.tu-dresden.de/develop/java_1_1_classes.zip"/>    
-	<property name="lib.swing.url" value="http://anon.inf.tu-dresden.de/develop/swingall.jar"/>    
-	<property name="lib.http.url" value="http://anon.inf.tu-dresden.de/develop/http.jar"/>
-	<property name="lib.xml.url" value="http://anon.inf.tu-dresden.de/develop/xml.jar"/>	
-	<property name="lib.bouncyCastle.url" value="http://anon.inf.tu-dresden.de/develop/BouncyCastleLightForJAP.jar"/>
-	<property name="lib.ftp.url" value="http://anon.inf.tu-dresden.de/develop/ApacheFTPClient.jar"/> 
-	<property name="lib.xmlrpc.url" value="http://anon.inf.tu-dresden.de/develop/apache-xmlrpc-1.1.jar"/>
-	<property name="lib.mail.url" value="http://anon.inf.tu-dresden.de/develop/mail.jar"/>    
-	<property name="lib.jama.url" value="http://anon.inf.tu-dresden.de/develop/Jama.jar"/>
-	<property name="lib.log4j.url" value="http://anon.inf.tu-dresden.de/develop/log4j.jar"/>
-	<property name="lib.mrj_classes.url" value="http://anon.inf.tu-dresden.de/develop/MRJClasses.zip"/>
-	<property name="lib.appleJavaExtensions.url" value="http://anon.inf.tu-dresden.de/develop/AppleJavaExtensions.jar"/>    
-	<property name="lib.japdll.url" value="http://anon.inf.tu-dresden.de/develop/japdll.dll"/>
-	<property name="lib.macOSX.url" value="http://anon.inf.tu-dresden.de/develop/libMacOSX.jnilib"/>
-	<property name="lib.jaf.url" value="http://anon.inf.tu-dresden.de/develop/activation.jar"/>
-	<property name="lib.skype4J.url" value="http://anon.inf.tu-dresden.de/develop/skype.jar"/> 
+	<property name="mainclass" value="JAP"/>
+	<property name="JAP_args" value=""/>
+	<property name="dist" location="dist"/>
+	<property name="jarfile" location="${dist}/${jarfile.name}.jar"/>
 	
-	<property name="lib.http" location="${lib}/HTTPClient.jar"/>
-	<property name="lib.xml" location="${lib}/xml.jar"/>
-	<property name="lib.ftp" location="${lib}/ApacheFTPClient.jar"/>
-	<property name="lib.log4j" location="${lib}/log4j.jar"/>
-	<property name="lib.mail" location="${lib}/mail.jar"/>
-	<property name="lib.jama" location="${lib}/jama.jar"/>
-	<property name="lib.bouncyCastle" location="${lib}/BouncyCastleLightForJAP.jar"/>
-	<property name="lib.xmlrpc" location="${lib}/apache-xml-rpc-1.1.jar"/>
-	<property name="lib.jaf" location="${lib}/activation.jar"/>
-	<property name="lib.skype4J" location="${lib}/skype.jar"/>
-	<property name="lib.java1_1_classes" location="${lib}/java_1_1_classes.zip"/>	
-	<property name="lib.swing" location="${lib}/swingall.jar"/>
-	<property name="lib.mrj_classes" location="${lib}/MRJClasses.zip"/>
-	<property name="lib.appleJavaExtensions" location="${lib}/AppleJavaExtensions.jar"/>
-	<property name="lib.japdll" location="${lib}/japdll.dll"/>
-	<property name="lib.macOSX" location="${lib}/libMacOSX.jnilib"/>
+	<property name="dist.linux" location="${dist}/linux"/>
+	
+	
+	<property name="excludesSrcJap" value="${jondoExcludes} JAPMacintosh.java"/>
 	
 	<path id="classpath.httplib" location="${lib.http}"/>
 	<path id="classpath.ftplib" location="${lib.ftp}"/>
 	<path id="classpath.xml-rpc" location="${lib.xmlrpc}"/>
-	<path id="classpath.java_mail" location="${lib.mail}"/>
-	<path id="classpath.mrj" location="${lib.mrj_classes}"/>
-	<path id="classpath.aje" location="${lib.appleJavaExtensions}"/>
-	<path id="classpath.jama" location="${lib.jama}"/>
-	<path id="classpath.swing" location="${lib.swing}"/>
 	<path id="classpath.log4j" location="${lib.log4j}"/>
 	<path id="classpath.bouncycastle_jap" location="${lib.bouncyCastle}"/>
-	<path id="classpath.jaf" location="${lib.jaf}"/>
 	<path id="classpath.skype" location="${lib.skype4J}"/>
+	
+	<!--<path id="classpath.java_mail" location="${lib.mail}"/>
+	<path id="classpath.jaf" location="${lib.jaf}"/>
+	<path id="classpath.jama" location="${lib.jama}"/>
+	<path id="classpath.swing" location="${lib.swing}"/> -->
+	
 		
 	<path id="classpath.all">
-		<path refid="classpath.swing"/>
 		<path refid="classpath.httplib"/>
 		<path refid="classpath.ftplib"/>
 		<path refid="classpath.xml-rpc"/>
-		<path refid="classpath.java_mail"/>
-		<path refid="classpath.jama"/>
 		<path refid="classpath.log4j"/>
-		<path refid="classpath.mrj"/>
-		<path refid="classpath.aje"/>
 		<path refid="classpath.bouncycastle_jap"/>
-		<path refid="classpath.jaf"/>
 		<path refid="classpath.skype"/>
+		<!--<path refid="classpath.jama"/>-->
 	</path>
 	
 	<target name="init-dirs">
@@ -98,11 +48,18 @@
 		<mkdir dir="${lib}"/>
 	</target>
 	
-	<target name="init-libs" depends="init-dirs">
+	<target name="init-global-libs" depends="init-dirs">
+		
+		<!-- 
 		<get src="${lib.java1_1_classes.url}" dest="${lib.java1_1_classes}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>    
 		<get src="${lib.swing.url}" dest="${lib.swing}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>    
+			verbose="true" usetimestamp="true" ignoreerrors="true"/> 
+		<get src="${lib.jama.url}" dest="${lib.jama}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<get src="${lib.japdll.url}" dest="${lib.japdll}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/> -->    
+		
 		<get src="${lib.http.url}" dest="${lib.http}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
 		<get src="${lib.xml.url}" dest="${lib.xml}"
@@ -113,81 +70,41 @@
 			verbose="true" usetimestamp="true" ignoreerrors="true"/> 
 		<get src="${lib.xmlrpc.url}" dest="${lib.xmlrpc}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-		<get src="${lib.mail.url}" dest="${lib.mail}"
-			verbose="true"  usetimestamp="true" ignoreerrors="true"/>    
-		<get src="${lib.jama.url}" dest="${lib.jama}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
 		<get src="${lib.log4j.url}" dest="${lib.log4j}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-		<get src="${lib.mrj_classes.url}" dest="${lib.mrj_classes}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-		<get src="${lib.appleJavaExtensions.url}" dest="${lib.appleJavaExtensions}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>    
-		<get src="${lib.japdll.url}" dest="${lib.japdll}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-		<get src="${lib.macOSX.url}" dest="${lib.macOSX}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>  	
-		<get src="${lib.jaf.url}" dest="${lib.jaf}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>	
 		<get src="${lib.skype4J.url}" dest="${lib.skype4J}"
   	  		 verbose="true" usetimestamp="true" ignoreerrors="true"/> 
   	 
+		<!--<available file="${lib.jama}" property="lib.jama.available"/>-->
 		<available file="${lib.http}" property="lib.http.available"/>
 		<available file="${lib.xml}" property="lib.xml.available"/>
 		<available file="${lib.ftp}" property="lib.ftp.available"/>
 		<available file="${lib.log4j}" property="lib.log4j.available"/>
-		<available file="${lib.mail}" property="lib.mail.available"/>
-		<available file="${lib.jama}" property="lib.jama.available"/>
 		<available file="${lib.bouncyCastle}" property="lib.bouncyCastle.available"/>
 		<available file="${lib.xmlrpc}" property="lib.xmlrpc.available"/>
-		<available file="${lib.jaf}" property="lib.jaf.available"/>
 		<available file="${lib.skype4J}" property="lib.skype4J.available"/>
   	
+		<!--<fail unless="lib.jama.available" message="Java Matrix not available"/>-->
 		<fail unless="lib.http.available" message="HTTP lib not available"/>
 		<fail unless="lib.xml.available" message="XML lib not available"/>
 		<fail unless="lib.ftp.available" message="FTP lib not available"/>
 		<fail unless="lib.log4j.available" message="Log4J not available"/>
-		<fail unless="lib.mail.available" message="Java Mail not available"/>
-		<fail unless="lib.jama.available" message="Java Matrix not available"/>
 		<fail unless="lib.bouncyCastle.available" message="Bouncy Castle not available"/>
 		<fail unless="lib.xmlrpc.available" message="XML RPC not available"/>
-		<fail unless="lib.jaf.available" message="Java Activation not available"/>
 		<fail unless="lib.skype4J.available" message="Skype4Java not available"/>
 	</target>
   
-	<target name="init" depends="init-libs"/>
+	<target name="init" depends="init-global-libs"/>
 
 	<target name="compile" depends="init" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}" 
-    	destdir="${build}"  classpathref="classpath.all" fork="yes">
+		<javac debug="true" debuglevel="lines,source" sourcepath="" 
+			classpathref="classpath.all" srcdir="${src}" excludes="${excludesSrcJap}" 
+    		destdir="${build}" fork="yes">
 			<include name="**/*.java"/>
 		</javac>
 	</target>
   
-	<target name="getcurrentversion" description="Sets the property 'currentVersion', 'releaseDate' to the value provided in JAPConstants.java">
-		<loadfile srcfile="${src}/jap/JAPConstants.java" property="currentVersion">
-			<filterchain>
-		        <linecontains>
-					<contains value="static final String aktVersion"/>
-				</linecontains>
-				<containsregex pattern="(.*)([0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9])(.*)" replace="\2"/>
-				<deletecharacters chars="\r\n" />
-			</filterchain>
-		</loadfile>
-		<echo message="Current Version is: ${currentVersion}"/>
-		<loadfile srcfile="${src}/jap/JAPConstants.java" property="releaseDate">
-		<filterchain>
-			<linecontains>
-				<contains value="private static final String RELEASE_DATE"/>
-			</linecontains>
-			<containsregex pattern="(.*&quot;)(.*)(&quot;.*)" replace="\2"/>
-			<deletecharacters chars="\r\n" />
-		</filterchain>
-		</loadfile>
-		<echo message="Release Date is: ${releaseDate}"/>
-	</target>
-	  
 	<target name="getcurrentjapdllversion" 
 		description="Sets the property 'currentJAPDllVersion' to the value provided on the Web">
 			  
@@ -205,28 +122,11 @@
 		<echo message="Current JAPDLL Version is: ${currentJAPDllVersion}"/>
 	</target>
 		
-	<target name="getcurrentmacosxlibversion" 
-		description="Sets the protpery 'currentMacOSXLibVersion' to the value provided on the Web">	
-		
-		<get src="http://anon.inf.tu-dresden.de/develop/macosxlibversion.txt" 
-			verbose="true" 
-			usetimestamp="true"
-			ignoreerrors="true"
-			dest="macosxlibversion.txt"/> 
-			
-		<loadfile property="currentMacOSXLibVersion" srcfile="macosxlibversion.txt">
-			<filterchain>
-				<deletecharacters chars="\r\n" />
-			</filterchain>
-		</loadfile>
-		<echo message="Current MacOSXLib Version is: ${currentMacOSXLibVersion}"/>
-	</target>
-	
 	<target name="jar-core"
 		depends="compile"	
 		description="generates the core jarfile for without any libraries">
 		
-		<jar jarfile="${jap.jarfile}" manifest="MANIFEST.MF" duplicate="preserve">
+		<jar jarfile="${jarfile}" manifest="MANIFEST.MF" duplicate="preserve">
 			<fileset dir="${build}" includes="**/*.class">
 				<exclude name="jpi/**/*"/>
 				<exclude name="infoservice/**/*"/>
@@ -255,7 +155,7 @@
 		<antcall target="jar-core"/>
   	
 		<!-- append the necessary libraries -->
-		<jar jarfile="${jap.jarfile}" update="true"> 
+		<jar jarfile="${jarfile}" update="true"> 
 			<zipfileset src="${lib.http}"/>
 			<zipfileset src="${lib.xml}"/>
 			<zipfileset src="${lib.ftp}"/>
@@ -266,28 +166,16 @@
 		</jar>
 	</target>
 
-	<target name="jar-mac" depends="getcurrentmacosxlibversion"
-			description="creates a jar for Mac OS X distributions containing the libMacOSX.jnilib">
-		
-		<antcall target="jar-full">
-			<param name="mainclass" value="${mainclass.osx}"/>
-		</antcall>
-		
-		<jar jarfile="${jap.jarfile}" update="true"> 
-			<zipfileset file="${lib.macOSX}" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
-		</jar>
-	</target>
-	
 	<target name="jar-windows" depends="getcurrentjapdllversion"
 				description="creates a jar for Windows distributions containing the japdll.dll">
 		
 		<antcall target="jar-full"/>
-		<jar jarfile="${jap.jarfile}" update="true"> 
+		<jar jarfile="${jarfile}" update="true"> 
 			<zipfileset file="${lib.japdll}" fullpath="japdll.dll.${currentJAPDllVersion}"/>
 		</jar>
 	</target>
 	
-	<target name="jar-with-external-libs" depends="getcurrentjapdllversion,getcurrentmacosxlibversion, compile"
+	<target name="jar-with-external-libs" depends="compile"
 		description="alternative jar target, which does not copy the required libs to the jar-file">
 	    <!-- 
 	    Note: when calling this target: make sure the lib-property is set properly to the 
@@ -307,52 +195,21 @@
 	
 	<target name="dist" depends="jar-full" description="generate an os-independent distribution"/>
 	
+	<!-- still not usable
 	<target name="debian-dist">
 		<antcall target="jar-with-external-libs" inheritAll="false">
 			<param name="lib" value="${extlibs}"/>
 		</antcall>
 	</target>
-	
-	<target name="mac-dist" description="creates a JonDo Mac OS X bundle" depends="getcurrentversion, jar-mac">
-  		
-  		<!-- First build a jar file with JAPMacintosh as MainClass -->
-  		<mkdir dir="${dist.osx}"/>
-  		<jarbundler dir="${dist.osx}"
-  	            name="${appname}"
-  	            mainclass="${mainclass.osx}" 
-  	            bundleid="${bundleid}"
-  				jar="${jap.jarfile}"
-  				icon="images/${appname}.icns"
-  				signature="JAPp"
-  				version="${currentVersion}"
-  				shortname="${appname}"
-  				arguments="${JAP_args}">
-  				
-  				<javaproperty name="apple.awt.brushMetalLook" value="false"/>
-  				<javaproperty name="apple.awt.showGrowBox" value="false"/>
-				<javaproperty name="com.apple.hwaccel" value="true"/>
-				<javaproperty name="com.apple.mrj.application.growbox.intrudes" value="false"/>
-
-		</jarbundler>
-	</target>
-	
-	<target name="mac-dist-archive" depends="mac-dist" 
-			description="creates a compressed dmg image of the JonDo Mac OS X bundle (needs Mac OS X)">
-	  <exec executable="hdiutil">
-	    <arg value="create"/>
-	    <arg value="-srcfolder"/>
-	    <arg value="${dist.osx}/${appname}.app"/>
-	  	<arg value="${dist.osx}/${appname}.dmg"/>
-	  </exec>
-	</target>
+	-->
 	
 	<target name="linux-dist" depends="jar-full">
 		<mkdir dir="${dist.linux}/${appname}"/>
-		<copy file="${jap.jarfile}" todir="${dist.linux}/${appname}"/>
+		<copy file="${jarfile}" todir="${dist.linux}/${appname}"/>
 		
 		<filter token="ARGS" value="${JAP_args}"/>
 		<filter token="APPNAME" value="${appname}"/>
-		<filter token="JARNAME" value="${jap.jarfile.name}"/>
+		<filter token="JARNAME" value="${jarfile.name}"/>
 		<copy file="install_jondo" todir="${dist.linux}/${appname}" filtering="true"/>
 		
 		<!-- Copying with Ant doesn't preserve file permissions !?! -->
@@ -376,12 +233,7 @@
 		</exec>
 	</target>
 	
-	<target name="manioq-for-mac-dist-archive">
-		<antcall target="mac-dist-archive">
-			<param name="JAP_args" value="--manioq"/>
-			<param name="dist.osx" value="${dist.osx}/manioq"/>
-		</antcall>
-	</target>
+	
 	
 	<target name="manioq-for-linux-dist-archive">
 		<antcall target="linux-dist-archive">
@@ -420,48 +272,4 @@
 			<delete dir="${build}"/>
 	</target>
 	
-	<!-- InfoService targets -->
-	<target name="infoservice-init" depends="infoservice-clean" 
-			description="initializes folder structure for infoservice distribution">
-		<mkdir dir="${build}" />
-		<mkdir dir="${build}/infoservice" />
-		<mkdir dir="${dist}" />
-		<mkdir dir="${dist}/infoservice" />
-	</target>
-	
-	<target name="infoservice-compile" depends="infoservice-init, init-libs"
-			description="compiles infoservices sources">
-		
-		<javac debug="true" debuglevel="lines,source"
-				srcdir="${src}" 
-				destdir="${build}" 
-				excludes="${infoservice-excludes}" 
-				classpathref="classpath.all">
-			
-			<include name="**/*.java"/>
-		</javac>
-	</target>
-	
-	<target name="infoservice-dist" depends="infoservice-compile"
-			description="creates infoservice binary distribution">
-			
-		<jar jarfile="${dist}/InfoService.jar" manifest="manifest_info.mf">
-			<fileset dir="${build}" includes="**/*.class">
-			        
-			</fileset>
-			<zipfileset src="${lib.http}"/>
-			<zipfileset src="${lib.xml}"/>
-			<zipfileset src="${lib.ftp}"/>
-			<zipfileset src="${lib.log4j}"/>
-			<zipfileset src="${lib.jama}"/>
-			<zipfileset src="${lib.bouncyCastle}"/>
-			<zipfileset src="${lib.xmlrpc}"/>
-			<zipfileset src="${lib.skype4J}"/>
-		</jar>
-	</target>
-	
-	 <target name="infoservice-clean" description="clean up inforvice compiled units">
-	 	<delete dir="${build}/infoservice" />
-	 	<delete file="${dist}/InfoService.jar"/>
-	 </target>
 </project>
