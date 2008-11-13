@@ -617,9 +617,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void componentMoved(ComponentEvent a_event)
 			{
-				System.out.println("moved event start");
-				new Exception().printStackTrace();
-				System.out.println("moved event stop");
 				/* TODO temporarily disable as this, in Linux, the move event is thrown when clicking on the combo box 
 				m_comboAnonServices.closeCascadePopupMenu();
 				*/
@@ -3171,30 +3168,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		return m_StatusPanel.addStatusMsg(msg, type, bAutoRemove);
 	}
 
-	public void setLocationByPlatform(boolean locationByPlatform)
-	{
-		new Exception().printStackTrace();
-		super.setLocationByPlatform(locationByPlatform);		
-	}
-	
-	public void setLocation(Point p)
-	{
-		new Exception().printStackTrace();
-		super.setLocation(p);
-	}
-	
-	public void setLocation(int x, int y)
-	{
-		new Exception().printStackTrace();
-		super.setLocation(x, y);
-	}
-	
-	public void setLocationRelativeTo(Component c)
-	{
-		new Exception().printStackTrace();
-		super.setLocationRelativeTo(c);
-	}
-	
 	public void removeStatusMsg(int id)
 	{
 		m_StatusPanel.removeStatusMsg(id);

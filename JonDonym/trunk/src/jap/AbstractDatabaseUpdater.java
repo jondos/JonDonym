@@ -90,7 +90,7 @@ public abstract class AbstractDatabaseUpdater extends Updater
 	{
 		Hashtable serials = getEntrySerials();
 		Hashtable hashEntriesToUpdate;
-		Hashtable hashEntriesKept;
+		Hashtable hashEntriesNotToUpdate;
 		String key;
 		AbstractDatabaseEntry entry;
 		Enumeration enumSerials;
@@ -111,12 +111,12 @@ public abstract class AbstractDatabaseUpdater extends Updater
 		if (serials.size() > 0)
 		{
 			hashEntriesToUpdate = new Hashtable(serials.size());
-			hashEntriesKept = new Hashtable(serials.size());
+			hashEntriesNotToUpdate = new Hashtable(serials.size());
 		}
 		else
 		{
 			hashEntriesToUpdate = new Hashtable();
-			hashEntriesKept = new Hashtable();
+			hashEntriesNotToUpdate = new Hashtable();
 		}
 
 		enumSerials = serials.keys();
@@ -129,7 +129,7 @@ public abstract class AbstractDatabaseUpdater extends Updater
 			{
 				// do not update this entry
 				entry.resetCreationTime();
-				hashEntriesKept.put(entry.getId(), entry);
+				hashEntriesNotToUpdate.put(entry.getId(), entry);
 			}
 			else
 			{
@@ -147,7 +147,7 @@ public abstract class AbstractDatabaseUpdater extends Updater
 
 		// get the entries
 		Hashtable newEntries;
-		if (hashEntriesKept.size() == 0)
+		if (hashEntriesNotToUpdate.size() == 0)
 		{
 			newEntries = getUpdatedEntries(null);
 		}
@@ -159,11 +159,11 @@ public abstract class AbstractDatabaseUpdater extends Updater
 		// add the entries that have not changed
 		if (newEntries != null)
 		{
-			Enumeration enumEntriesKept = hashEntriesKept.keys();
+			Enumeration enumEntriesKept = hashEntriesNotToUpdate.keys();
 			while (enumEntriesKept.hasMoreElements())
 			{
 				key = (String) enumEntriesKept.nextElement();
-				newEntries.put(key, hashEntriesKept.get(key));
+				newEntries.put(key, hashEntriesNotToUpdate.get(key));
 			}
 		}
 
@@ -230,9 +230,9 @@ public abstract class AbstractDatabaseUpdater extends Updater
 
 
 	/**
-	 * Does some cleaup operations of the database. All old entries that were not updated by
+	 * Does some cleanup operations of the database. All old entries that were not updated by
 	 * the new entries are removed. Subclasses may overwrite this method to suppress or alter this
-	 * behaviour. This method is called by updateInternal().
+	 * behavior. This method is called by updateInternal().
 	 * @param a_newEntries the list of new entries
 	 * @return boolean
 	 */
@@ -247,7 +247,8 @@ public abstract class AbstractDatabaseUpdater extends Updater
 		while (knownDBEntries.hasMoreElements())
 		{
 			AbstractDatabaseEntry currentEntry = (AbstractDatabaseEntry) (knownDBEntries.nextElement());
-			if (!currentEntry.isUserDefined() && !a_newEntries.contains(currentEntry) &&
+			if (!protectFromCleanup(currentEntry) && !currentEntry.isUserDefined() && 
+					!a_newEntries.contains(currentEntry) &&
 				(currentEntry.getCreationTime() +  KEEP_ENTRY_FACTOR * getUpdateInterval().getUpdateInterval()) <
 				System.currentTimeMillis())
 			{
@@ -270,6 +271,11 @@ public abstract class AbstractDatabaseUpdater extends Updater
 		return m_bFirstUpdateDone;
 	}
 
+	protected boolean protectFromCleanup(AbstractDatabaseEntry a_currentEntry)
+	{
+		return false;
+	}
+	
 	protected  AbstractDatabaseEntry getPreferredEntry()
 	{
 		return null;
