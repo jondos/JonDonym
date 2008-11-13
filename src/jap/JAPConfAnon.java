@@ -1911,8 +1911,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 		if (bUpdateValues)
 		{
-			updateValues(false);
-			/*
+			//updateValues(false); // deadlock in MacOS
 			new Thread(new Runnable()
 			{
 				public void run()
@@ -1920,7 +1919,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					m_infoService.fill(true);
 					updateValues(false);
 				}
-			}).start();*/
+			}).start();
 			//fetchCascades(false, false, true);
 		}
 
