@@ -9,7 +9,7 @@
 <!--#include virtual="/header.html"-->
 
 <p class="navipar"><span class="prevlink"><a href="miniwindow.html"><img
-src="prev.gif" alt="&lt;-"> Minifenster</a></span> <span class="midlink"><a
+src="prev.gif" alt="&lt;-"> Mini-Fenster</a></span> <span class="midlink"><a
 name="doctop" href="index.html#mi_toc">Inhalt </a><a
 href="index.html#mi_bedienung"><img src="next.gif" alt="-&gt;"> Bedienung
 </a></span> <span class="nextlink"><a href="appearance.html">Ver&auml;ndern des
@@ -41,16 +41,25 @@ Sie dazu die Datei <code>JAP.jar</code> mit dem folgenden Befehl aus: </p>
     vorzubereiten, und anschlie&szlig;end auf jene Umgebung zu kopieren, auf
     der JonDo im Konsolenmodus gestartet werden soll.</p>
   </li>
-  <li><p><b>--cascade {[host][:port]}</b></p>
+  <li><p><b>--cascade {[host][:port][:id]}</b></p>
     <p>Stellt eine Verbindung zur angegebenen Mixkaskade her. </p>
   </li>
   <li><p><b>--minimized, -m </b></p>
-    <p>JonDo minimiert sein Fenster direkt beim Start. </p>
+    <p>JonDo zeigt nach dem Start das <a href="miniwindow.html">Mini-Fenster</a> an. </p>
   </li>
   <li><p><b>--noSplash, -s</b></p>
     <p>Unterdr&uuml;ckt das Wartefenster (Splash-Screen) beim Start von JonDo.
     Der Start wird dadurch etwas l&auml;nger erscheinen, da es einige Zeit
     dauert, bis das Hauptfenster von JonDo initialisiert ist. </p>
+  </li>
+  <li><p><b>--allow-multiple, -a</b></p>
+    <p>Erlaubt den Start von JonDo auch wenn bereits eine andere Instanz der
+    Programms l&auml;uft. </p>
+  </li>
+  <li><p><b>--listen, -l {[host][:port]}</b></p>
+    <p>Legt das Interface fest, auf dem JonDo auf Verbindungen lauscht. Die
+    entsprechende Einstellung in der Konfiguration von JonDo wird dadurch
+    &uuml;berschrieben. </p>
   </li>
   <li><p><b>--portable [Pfad_zum_Browser]</b></p>
     <p>Teilt JonDo mit, dass es in einer portablen Umgebung l&auml;uft. Wenn
@@ -64,6 +73,11 @@ Sie dazu die Datei <code>JAP.jar</code> mit dem folgenden Befehl aus: </p>
   <li><p><b>--portable-jre</b></p>
     <p>Sollte gesetzt werden, wenn JonDo mit einem portablen JRE l&auml;uft.
     Unterdr&uuml;ckt Update-Nachrichten f&uuml;r Java. </p>
+  </li>
+  <li><p><b>--uninstall, -u</b></p>
+    <p>L&ouml;scht alle vom Programm angelegten Dateien. <strong>Achtung:
+    Pseudonymkonten, die nicht von Ihnen in separate Dateien gespeichert
+    wurden, gehen dadurch verloren!</strong></p>
   </li>
   <li><p><b>--version, -v </b></p>
     <p>Auf der Konsole werden Versionsinformationen zu JonDo und Java
@@ -81,9 +95,9 @@ Um JonDo im minimierten Fenster zu starten, &ouml;ffnen Sie eine
 Eingabeaufforderung, wechseln Sie in das Verzeichnis in der die Datei
 <code>JAP.jar</code> liegt und geben Sie folgenden Befehl ein: </p>
 
-<p><code>java -jar JAP.jar -minimized</code> </p>
+<p><code>java -jar JAP.jar --minimized</code> </p>
 
-<p>Sie k&ouml;nnen diese Argumente auch in Windows-Verkn&uuml;pfungen
+<p>Sie k&ouml;nnen diese Argumente auch in <em>Windows-Verkn&uuml;pfungen</em>
 verwenden. Klicken Sie daf&uuml;r einfach mit der rechten Maustaste auf die
 JonDo-Verkn&uuml;pfung, w&auml;hlen Sie <em>Einstellungen</em> und editieren
 Sie die Verkn&uuml;pfung wie folgt: </p>
@@ -101,7 +115,7 @@ Argumente. </p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="miniwindow.html"><img
-src="prev.gif" alt="&lt;-"> Minifenster</a></span> <span class="midlink"><a
+src="prev.gif" alt="&lt;-"> Mini-Fenster</a></span> <span class="midlink"><a
 name="docbottom" href="index.html#mi_toc">Inhalt </a><a
 href="index.html#mi_bedienung"><img src="next.gif" alt="-&gt;"> Bedienung
 </a></span> <span class="nextlink"><a href="appearance.html">Ver&auml;ndern des
