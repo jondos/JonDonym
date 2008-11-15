@@ -167,6 +167,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	private static final String MSG_ALLOWUNPROTECTED = JAPController.class.getName() + "_allowunprotected";
 	private static final String MSG_ALLOWUNPROTECTED_ALL = JAPController.class.getName() + "_allowunprotectedAll";
+	private static final String MSG_EXPLAIN_ALLOWUNPROTECTED_ALL = JAPController.class.getName() + "_allowunprotectedAllExplain";
+	
 	public static final String MSG_IS_NOT_ALLOWED = JAPController.class.getName() + "_isNotAllowed";
 	public static final String MSG_ASK_SWITCH = JAPController.class.getName() + "_askForSwitchOnError";
 	public static final String MSG_ASK_RECONNECT = JAPController.class.getName() + "_askForReconnectOnError";
@@ -396,15 +398,31 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}		
 					
 					boolean bShowHtmlWarning;
-					JAPDialog.LinkedCheckBox cb = new JAPDialog.LinkedCheckBox(
-									   JAPMessages.getString(JAPDialog.LinkedCheckBox.MSG_REMEMBER_ANSWER), false,
-									   MSG_ALLOWUNPROTECTED)
+					JAPDialog.LinkedInformationAdapter dHelpContext;
+					JAPDialog.LinkedCheckBox cb = null;
+					
+					if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
 					{
-						public boolean isOnTop()
+						cb = new JAPDialog.LinkedCheckBox(
+							   JAPMessages.getString(JAPDialog.LinkedCheckBox.MSG_DO_NOT_SHOW_AGAIN), false)
 						{
-							return true;
-						}
-					};
+							public boolean isOnTop()
+							{
+								return true;
+							}
+						};
+						dHelpContext = cb;
+					}
+					else
+					{
+						dHelpContext = new JAPDialog.LinkedInformationAdapter()
+						{
+							public boolean isOnTop()
+							{
+								return true;
+							}
+						};
+					}
 					
 					uri = a_requestInfo.getURI() + (a_requestInfo.getPort() != 80 ? ":" + a_requestInfo.getPort() : "");
 					if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
@@ -419,9 +437,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 					
 					
 					bShowHtmlWarning = !(JAPDialog.showYesNoDialog(
-									   JAPController.getInstance().getViewWindow(), message, headline, cb));
+									   JAPController.getInstance().getViewWindow(), message, headline, dHelpContext));
 					
-					return new Answer(!bShowHtmlWarning, cb.getState());
+					if (cb != null)
+					{
+						return new Answer(!bShowHtmlWarning, cb.getState());
+					}
+					else
+					{
+						return new Answer(!bShowHtmlWarning, true);
+					}
 				}
 			};
 

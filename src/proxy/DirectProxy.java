@@ -298,7 +298,8 @@ final public class DirectProxy implements Runnable, AnonService
 			{
 				rememberedDomains.clear();
 			}
-			if (requestRight != null && (requestRight.isTimedOut() || JAPModel.getInstance().isAskForAnyNonAnonymousRequest()))
+			if (requestRight != null && //(requestRight.isTimedOut() || JAPModel.getInstance().isAskForAnyNonAnonymousRequest()))
+				requestRight.isTimedOut())
 			{
 				rememberedDomains.remove(GENERAL_RULE);
 				requestRight = null;
@@ -326,16 +327,16 @@ final public class DirectProxy implements Runnable, AnonService
 				}
 				
 				
-				if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
+				if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest() && !answer.isRemembered())
 				{
 					requestRight = new RememberedRequestRight(requestInfo.getURI(), 
-							!answer.isAllowed(), !answer.isRemembered());
+							!answer.isAllowed(), false);
 					rememberedDomains.put(requestInfo.getURI(), requestRight);
 				}
 				else
 				{
 					requestRight = new RememberedRequestRight(GENERAL_RULE, 
-							!answer.isAllowed(), !answer.isRemembered());
+							!answer.isAllowed(), false);
 					rememberedDomains.clear();
 					rememberedDomains.put(GENERAL_RULE, requestRight);					
 				}
@@ -503,13 +504,15 @@ final public class DirectProxy implements Runnable, AnonService
 					}
 					else
 					{
-						blockedMessage = JAPMessages.getString(MSG_BLOCKED_DOMAIN, m_requestRight.getURI());
+						blockedMessage = JAPMessages.getString(MSG_BLOCKED_DOMAIN, 
+								"<code>" + m_requestRight.getURI() + "</code>");
 					}
 					
 					if (countDown == Long.MAX_VALUE)
 					{
 						addedMessage = new String[]{blockedMessage, 
-								JAPMessages.getString(MSG_BLOCKED_PERMANENTLY)};
+								JAPMessages.getString(MSG_BLOCKED_PERMANENTLY) + 
+								"<BR>" + JAPMessages.getString(MSG_RELOAD)};
 					}
 					else if (countDown / 1000 == 0)
 					{
@@ -521,7 +524,7 @@ final public class DirectProxy implements Runnable, AnonService
 						addedMessage = new String[]{blockedMessage, 
 								JAPMessages.getString(MSG_COUNTDOWN, 
 										new String[]{"" + (countDown / 1000),
-											JAPMessages.getString(MSG_RELOAD)})};
+											"<BR>" + JAPMessages.getString(MSG_RELOAD)})};
 					}
 					toClient.write(JAPMessages.getString(MSG_BLOCKED, addedMessage));
 				}
