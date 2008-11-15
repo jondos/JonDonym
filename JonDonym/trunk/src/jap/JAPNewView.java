@@ -240,7 +240,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JLabel m_lblUsers, m_lblUsersLabel;
 	
 	private JLabel m_labelOperatorFlags[];
-	private MixMouseAdapter m_adapterMix[];
 	private MixMouseAdapter m_adapterOperator[];
 	
 	private JLabel m_labelOwnTraffic, m_labelOwnTrafficSmall;
@@ -784,7 +783,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		p.add(m_labelDelay, c1);
 
 		m_labelOperatorFlags = new JLabel[3];
-		m_adapterMix = new MixMouseAdapter[3];
 		m_adapterOperator = new MixMouseAdapter[3];
 		
 		c1.gridwidth = 1;

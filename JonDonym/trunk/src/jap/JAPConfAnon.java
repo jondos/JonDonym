@@ -2583,11 +2583,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public String getAnonLevel(String a_cascadeId)
 		{
 			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
-			if (statusInfo != null)
+			if (statusInfo != null && statusInfo.getAnonLevel() >= 0)
 			{
 				return "" + statusInfo.getAnonLevel() + " / " + StatusInfo.ANON_LEVEL_MAX;
 			}
-			return "N/A";
+					
+			//return "N/A";
+			return "? / " + StatusInfo.ANON_LEVEL_MAX;
 		}
 
 
