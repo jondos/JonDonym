@@ -1258,18 +1258,11 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			}
 			else
 			{
-				long deposit;
+				long deposit = balance.getDeposit();
+				boolean bTransaction = true;
 				m_labelStatementDate.setText(JAPUtil.formatTimestamp(balance.getTimestamp(), true,
 					JAPMessages.getLocale().getLanguage()));
-				deposit = balance.getDeposit();
-				if (deposit <= 0)
-				{
-					m_labelDeposit.setText(JAPMessages.getString(MSG_COUPON));
-				}
-				else
-				{
-					m_labelDeposit.setText(JAPUtil.formatEuroCentValue(deposit));
-				}
+				
 				m_labelSpent.setText(JAPUtil.formatBytesValueWithUnit(balance.getSpent()));
 				//m_labelBalance.setText(JAPUtil.formatEuroCentValue(balance.getBalance()));
 
@@ -1303,10 +1296,11 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 										   (expired ? ")" : "")));
 					m_labelVolume.setForeground(m_labelValid.getForeground());
 					m_labelVolume.setToolTipText(null);
-					m_labelVolume.setCursor(Cursor.getDefaultCursor());
+					m_labelVolume.setCursor(Cursor.getDefaultCursor());					
 				}
 				else if (balance.getSpent() == 0 && !expired)
 				{
+					bTransaction = false;
 					m_labelVolume.setText(JAPMessages.getString(MSG_NO_TRANSACTION));
 					if (selectedAccount.getTransCerts().size() > 0 && !selectedAccount.isTransactionExpired() )
 					{
@@ -1328,6 +1322,16 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					m_labelVolume.setForeground(m_labelValid.getForeground());
 					m_labelVolume.setCursor(Cursor.getDefaultCursor());
 				}
+				
+				if (deposit <= 0 && bTransaction)
+				{
+					m_labelDeposit.setText(JAPMessages.getString(MSG_COUPON));
+				}
+				else
+				{
+					m_labelDeposit.setText(JAPUtil.formatEuroCentValue(deposit));
+				}
+				
 				/*
 				   m_labelValid.setText(JAPUtil.formatTimestamp(balance.getValidTime(), true,
 					JAPController.getInstance().getLocale().getLanguage()));
