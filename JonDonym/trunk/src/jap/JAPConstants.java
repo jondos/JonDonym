@@ -319,7 +319,7 @@ public final class JAPConstants
 	 */
 	public static final long TIME_RESTART_AFTER_SOCKET_ERROR = 1000 * 60;
 
-	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr", "ru"}; // "zh", "ca", "es", "ru"}; //pt
+	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr"}; // "zh", "ca", "es", "ru"}; //pt
 
 	public static String[] getSupportedLanguages()
 	{
