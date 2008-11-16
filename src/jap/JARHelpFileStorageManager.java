@@ -41,7 +41,7 @@ import org.w3c.dom.Node;
 import platform.AbstractOS;
 
 import anon.util.ClassUtil;
-import anon.util.RecursiveCopyTool;
+import anon.util.RecursiveFileTool;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.ZipArchiver;
@@ -365,12 +365,12 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 		}
 		
 		/* Make sure that there will be never the wrong directory as parameter!!! */
-		if (!RecursiveCopyTool.deleteRecursion(helpFolder))
+		if (!RecursiveFileTool.deleteRecursion(helpFolder))
 		{
 			// try again
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, 
 					"Failed to delete old help at first try - try again!");
-			RecursiveCopyTool.deleteRecursion(helpFolder);
+			RecursiveFileTool.deleteRecursion(helpFolder);
 		}
 		
 		if (!helpFolder.exists())

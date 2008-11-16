@@ -30,6 +30,7 @@ package jap;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -107,6 +108,7 @@ import anon.util.ClassUtil;
 import anon.util.IMiscPasswordReader;
 import anon.util.IPasswordReader;
 import anon.util.JobQueue;
+import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.XMLUtil;
 import forward.server.ForwardServerManager;
@@ -981,10 +983,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 *  @param a_strJapConfFile - file containing the Configuration. If null $(user.home)/jap.conf or ./jap.conf is used.
 	 *  @param loadPay does this JAP support Payment ?
 	 */
-	public synchronized void loadConfigFile(String a_strJapConfFile, boolean loadPay,
-											final ISplashResponse a_splash)
+	public synchronized void loadConfigFile(String a_strJapConfFile, 
+			final ISplashResponse a_splash)
+		throws FileNotFoundException
 	{
-		// @todo: remove since we already looked for the confing file in preLoadConfigFile
+		// @todo: remove since we already looked for the config file in preLoadConfigFile
 		boolean success = lookForConfigFile(a_strJapConfFile);
 		
 		if (a_strJapConfFile != null)
@@ -1660,7 +1663,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				/* load Payment settings */
 				try
 				{
-					if (loadPay)
+					//if (loadPay)
 					{
 						Element elemPay = (Element) XMLUtil.getFirstChildByName(root,
 							JAPConstants.CONFIG_PAYMENT);
@@ -2021,10 +2024,90 @@ public final class JAPController extends Observable implements IProxyListener, O
 		// fire event
 		notifyJAPObservers();
 	}
-
-	public void preLoadConfigFile(String a_strJapConfFile) 
+	
+	public void uninstall(String a_strConfigFileName) throws IOException
 	{
-		if(lookForConfigFile(a_strJapConfFile))
+		File configFile;
+		File dataDir;
+		File classdir;
+		Document doc;
+		String strDataPath;
+		
+		try
+		{
+			while (lookForConfigFile(a_strConfigFileName))
+			{
+				if (JAPModel.getInstance().getConfigFile() == null)
+				{
+					LogHolder.log(LogLevel.ALERT, LogType.MISC, 
+							"Config file found, but path was not set in model!");
+					break;
+				}
+				configFile = new File(JAPModel.getInstance().getConfigFile());
+				if (configFile.exists())
+				{
+					try
+					{
+						doc = XMLUtil.readXMLDocument(configFile);
+						if (doc == null)
+						{
+							throw new IOException("Error while loading the configuration file!");
+						}
+					}
+					catch (Exception a_e)
+					{
+						throw new IOException(a_e.getMessage());
+					}
+										
+					Element root = doc.getDocumentElement();					
+					JAPModel.getInstance().initHelpPath(
+							XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
+					JAPModel.getInstance().resetHelpPath();					
+					
+					try
+					{
+						configFile.delete();
+					}
+					catch (SecurityException a_e)
+					{
+						throw new IOException(a_e.getMessage());
+					}					
+				}
+				else
+				{
+					LogHolder.log(LogLevel.ALERT, LogType.MISC, "Config file found but does not exist!");
+					break;
+				}
+			}
+		}
+		catch (FileNotFoundException a_e)
+		{
+			// ok, there is no (more) such a config file
+		}
+		/* Now remove the application data directory at its default path if it exists */
+		strDataPath = AbstractOS.getInstance().getAppdataDefaultDirectory(JAPConstants.APPLICATION_NAME);
+		if (strDataPath != null)
+		{
+			dataDir = new File(strDataPath);
+			classdir = ClassUtil.getClassDirectory(JAPController.class);
+			if (dataDir.exists() && dataDir.isDirectory() &&
+					dataDir.getPath().indexOf(JAPConstants.APPLICATION_NAME) >= 0 &&
+				(classdir == null || !classdir.equals(dataDir)))
+			{
+				/* the above checks should be sufficient to safely delete this directory now */
+				RecursiveFileTool.deleteRecursion(dataDir);
+			}
+			else
+			{
+				LogHolder.log(LogLevel.ALERT, LogType.MISC,
+					"There was a problem while deleting the app data directory: " + dataDir);
+			}
+		}
+	}
+
+	public void preLoadConfigFile(String a_strJapConfFile) throws FileNotFoundException
+	{
+		if (lookForConfigFile(a_strJapConfFile))
 		{
 			String line ="";
 			try
@@ -2073,12 +2156,19 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 
-	public boolean lookForConfigFile(String a_strJapConfFile) {
+	private boolean lookForConfigFile(String a_strJapConfFile) throws
+		FileNotFoundException 
+	{
 		boolean success = false;
 		if (a_strJapConfFile != null)
 		{
 			/* try the config file from the command line */
 			success = this.loadConfigFileCommandLine(a_strJapConfFile);
+			if (!success)
+			{
+				throw new FileNotFoundException(
+						"Could not initialise with specified config file: " + a_strJapConfFile);
+			}
 		}
 		if (!success)
 		{

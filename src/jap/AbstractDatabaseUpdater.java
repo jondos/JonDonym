@@ -248,9 +248,9 @@ public abstract class AbstractDatabaseUpdater extends Updater
 		{
 			AbstractDatabaseEntry currentEntry = (AbstractDatabaseEntry) (knownDBEntries.nextElement());
 			if (!protectFromCleanup(currentEntry) && !currentEntry.isUserDefined() && 
-					!a_newEntries.contains(currentEntry) &&
+				!a_newEntries.contains(currentEntry) /*&&  immediate cleanup
 				(currentEntry.getCreationTime() +  KEEP_ENTRY_FACTOR * getUpdateInterval().getUpdateInterval()) <
-				System.currentTimeMillis())
+				System.currentTimeMillis() */)
 			{
 				/* the db entry was fetched from the Internet earlier, but it is not
 				 * in the list fetched from the Internet this time

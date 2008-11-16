@@ -10,7 +10,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 
-public class RecursiveCopyTool {
+public class RecursiveFileTool {
 	
 	private final static int INIT_DEPTH = 0;
 	private final static int MAX_DEPTH_IGNORE = -2;
