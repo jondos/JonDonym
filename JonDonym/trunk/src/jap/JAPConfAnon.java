@@ -1898,6 +1898,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				Database.getInstance(MixCascade.class).addObserver(this);
 				Database.getInstance(StatusInfo.class).addObserver(this);
 				Database.getInstance(MixInfo.class).addObserver(this);
+				Database.getInstance(PerformanceInfo.class).addObserver(this);
 				m_cmbCascadeFilter.setSelectedItem(TrustModel.getCurrentTrustModel());
 				TrustModel.addModelObserver(this);
 				m_observablesRegistered = true;
@@ -2333,6 +2334,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							bDatabaseChanged = true;
 						}
 					}
+				}
+				else if (message.getMessageData() instanceof PerformanceInfo)
+				{
+					bDatabaseChanged = true;
 				}
 			}
 			else if (a_notifier == JAPController.getInstance() && a_message != null)

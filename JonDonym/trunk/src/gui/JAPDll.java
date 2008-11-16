@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.SwingUtilities;
 
 import anon.util.ClassUtil;
-import anon.util.RecursiveCopyTool;
+import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.Util;
 import gui.dialog.JAPDialog;
@@ -174,7 +174,7 @@ final public class JAPDll {
 						tempFile = new File(tempDir + DLL_LIBRARY_NAME);
 						if (tempFile.exists())
 						{
-							if (!RecursiveCopyTool.deleteRecursion(tempFile))
+							if (!RecursiveFileTool.deleteRecursion(tempFile))
 							{
 								throw new Exception("Delete recursive");
 							}

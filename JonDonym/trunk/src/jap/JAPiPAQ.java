@@ -27,6 +27,7 @@
  */
 package jap;
 
+import java.io.FileNotFoundException;
 import java.util.Locale;
 
 import gui.JAPMessages;
@@ -57,7 +58,15 @@ final public class JAPiPAQ
 		JAPDebug.getInstance().setLogType(LogType.NET + LogType.GUI + LogType.THREAD + LogType.MISC);
 		JAPDebug.getInstance().setLogLevel(LogLevel.WARNING);
 		// load settings from config file
-		m_controller.loadConfigFile(strJapConfFile, false, null);
+		try 
+		{
+			m_controller.loadConfigFile(strJapConfFile, null);
+		} 
+		catch (FileNotFoundException a_e) 
+		{
+			LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e);
+			System.exit(-1);
+		}
 		// Output some information about the system
 		// Create the view object
 		view = new JAPNewView(JAPConstants.TITLE, m_controller);

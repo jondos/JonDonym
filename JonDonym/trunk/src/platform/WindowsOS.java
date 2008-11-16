@@ -119,8 +119,7 @@ public class WindowsOS extends AbstractOS
 	{
 		//String dir = getEnvPath(a_applicationName, "ALLUSERSPROFILE"); 
 //		 ALLUSERSPROFILE has become virtual in Vista
-		String dir = getEnvPath(a_applicationName, "APPDATA");
-		
+		String dir = getAppdataDefaultDirectory(a_applicationName);
 		if (dir == null)
 		{
 			dir = super.getDefaultHelpPath(a_applicationName);
@@ -166,7 +165,7 @@ public class WindowsOS extends AbstractOS
 		}
 		else
 		{
-			dir = getEnvPath(a_applicationName, "APPDATA");
+			dir = getAppdataDefaultDirectory(a_applicationName);
 			if (dir == null)
 			{
 				dir = System.getProperty("user.home");
@@ -174,6 +173,11 @@ public class WindowsOS extends AbstractOS
 		}
 
 		return dir + File.separator;
+	}
+	
+	public String getAppdataDefaultDirectory(String a_applicationName)
+	{
+		return getEnvPath(a_applicationName, "APPDATA");
 	}
 	
 	public String getTempPath()
@@ -210,8 +214,7 @@ public class WindowsOS extends AbstractOS
 	
 		path = getenv(a_envPath);
 	
-		if (path != null && path.trim().length() > 0 &&
-			new File(path).exists())
+		if (path != null && path.trim().length() > 0 && new File(path).exists())
 		{
 			//dirAllUsers += "\\Application Data\\" + a_applicationName;
 			path += File.separator + a_applicationName;

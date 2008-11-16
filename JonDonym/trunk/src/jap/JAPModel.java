@@ -61,7 +61,7 @@ import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.ProxyInterface;
 import anon.mixminion.mmrdescription.MMRList;
 import anon.util.ClassUtil;
-import anon.util.RecursiveCopyTool;
+import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.Util;
 
@@ -1352,13 +1352,13 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 			return;
 		}
 		
-		/** @todo remove after some months; created on 2008-08-17 */
+		/** TODO remove after some months; created on 2008-08-17 */
 		blockedPath = AbstractOS.getInstance().getenv("ALLUSERSPROFILE");
 		if (blockedPath != null && helpPath != null && helpPath.startsWith(blockedPath))
 		{
 			if (helpPath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
 			{
-				RecursiveCopyTool.deleteRecursion(new File(helpPath));
+				RecursiveFileTool.deleteRecursion(new File(helpPath));
 			}
 			
 			helpPath = null;
@@ -1527,7 +1527,7 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		}
 	}
 	
-	private synchronized void resetHelpPath()
+	protected synchronized void resetHelpPath()
 	{
 		String oldHelpPath = m_helpPath;
 		
