@@ -2084,7 +2084,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			// ok, there is no (more) such a config file
 		}
-		/* Now remove the application data directory at its default path if it exists */
+		/* Now remove the application data directory at its default path if it exists. */
 		strDataPath = AbstractOS.getInstance().getAppdataDefaultDirectory(JAPConstants.APPLICATION_NAME);
 		if (strDataPath != null)
 		{
