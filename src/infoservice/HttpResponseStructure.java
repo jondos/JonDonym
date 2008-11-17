@@ -420,7 +420,6 @@ public final class HttpResponseStructure
 		}
 		
 		return createdHttpResponse;
-		
 	}
 
 }

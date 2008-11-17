@@ -427,8 +427,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			for (int i = 0; i < visibleAddresses.size(); i++)
 			{
 				InetAddress addr = (InetAddress)visibleAddresses.elementAt(i);
-				/*LogHolder.log(LogLevel.WARNING, LogType.NET, 
-        				"Adding IP address from file: " + addr.getHostAddress());*/
 				MixCascadeExitAddresses.addInetAddress(getId(), addr);
 			}
 		}
@@ -736,7 +734,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	public String toString()
 	{
-		//return getMixNames();
 		return getName();
 	}
 

@@ -71,14 +71,14 @@ public class JAPMixCascadeComboBox extends JComboBox
 	{
 		super();
 		setModel(new JAPMixCascadeComboBoxModel());
-		m_renderer = new JAPMixCascadeComboBoxListCellRender(); 
+		m_renderer = new JAPMixCascadeComboBoxListCellRender();
 		setRenderer(m_renderer);
 		setEditable(false);
 		removeAllItems();
 	}
 
 	public void addItem(Object o)
-	{		
+	{
 	}
 
 

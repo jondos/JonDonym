@@ -73,7 +73,7 @@ public class PaymentInstanceUpdater extends AbstractDatabaseUpdater
 		else
 		{
 			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
-		}		
+		}
 
 		if (pis != null && pis.size() == 0)
 		{
