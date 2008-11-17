@@ -70,6 +70,7 @@
 			<fileset dir="${build}" includes="**/*.class">
 			        
 			</fileset>
+			<zipfileset dir="." includes="certificates/**/*"/>
 			<zipfileset src="${lib.http}"/>
 			<zipfileset src="${lib.xml}"/>
 			<zipfileset src="${lib.ftp}"/>
@@ -78,7 +79,7 @@
 			<zipfileset src="${lib.bouncyCastle}"/>
 			<zipfileset src="${lib.xmlrpc}"/>
 			<zipfileset src="${lib.skype4J}"/>
-			<zipfileset src="${lib.mail}"/>
+			<!--<zipfileset src="${lib.mail}"/>-->
 		</jar>
 	</target>
 	

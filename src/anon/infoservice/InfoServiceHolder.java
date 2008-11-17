@@ -419,7 +419,6 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				 */
 				currentInfoService = null;
 			}
-
 			while ( ( (infoServiceList.size() > 0) || (currentInfoService != null)) &&
 				   !Thread.currentThread().isInterrupted())
 			{

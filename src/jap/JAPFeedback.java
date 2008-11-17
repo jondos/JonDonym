@@ -31,7 +31,7 @@ import java.util.Hashtable;
 
 import anon.infoservice.StatusInfo;
 
-final class JAPFeedback extends AbstractDatabaseUpdater
+public final class JAPFeedback extends AbstractDatabaseUpdater
 {
 	public static final long UPDATE_INTERVAL_MS = 70000l;
 	private static final long MIN_UPDATE_INTERVAL_MS = 20000l;

@@ -1588,15 +1588,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		
 		Element nodePerf = (Element) XMLUtil.getFirstChildByName(doc, PerformanceInfo.XML_ELEMENT_NAME);
 		PerformanceInfo info = new PerformanceInfo(nodePerf);
-		
 		if (!info.isVerified())
 		{
 			// signature could not be verified
 			throw new SignatureException("Document could not be verified!");
 		}
-
-
-
 		return info;
 	}
 
