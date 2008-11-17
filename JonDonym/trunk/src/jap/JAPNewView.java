@@ -1729,13 +1729,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					cascade.getMixIDsAsString()) != null)
 				{
 					m_bTrustChanged = true;
-					synchronized (SYNC_NEW_SERVICES)
+					if (!JAPController.getInstance().getCurrentMixCascade().isPayment())
 					{
-						if (m_newServicesID < 0)
+						synchronized (SYNC_NEW_SERVICES)
 						{
-							m_newServicesID = m_StatusPanel.addStatusMsg(
-								JAPMessages.getString(MSG_LBL_NEW_SERVICES_FOUND),
-								JOptionPane.INFORMATION_MESSAGE, false, m_listenerNewServices);
+							if (m_newServicesID < 0)
+							{
+								m_newServicesID = m_StatusPanel.addStatusMsg(
+									JAPMessages.getString(MSG_LBL_NEW_SERVICES_FOUND),
+									JOptionPane.INFORMATION_MESSAGE, false, m_listenerNewServices);
+							}
 						}
 					}
 				}

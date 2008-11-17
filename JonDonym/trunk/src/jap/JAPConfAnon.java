@@ -551,19 +551,20 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 
 		JLabel l;
-		
+		/*
 		l = new JLabel(JAPMessages.getString(MSG_FILTER) + ":");
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(-5, 0, 0, 5);
-		m_cascadesPanel.add(l, c);
+		m_cascadesPanel.add(l, c);*/
 
-		c.gridx = 1;
+		c.gridx = 0;
 		c.gridy = 0;
-		c.gridwidth = 1;
-		c.insets = new Insets(0, 0, 0, 0);
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 5, 0, 0);
 		c.anchor = GridBagConstraints.NORTHEAST;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weighty = 0.2;
