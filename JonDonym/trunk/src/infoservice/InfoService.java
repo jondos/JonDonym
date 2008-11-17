@@ -35,6 +35,7 @@ import java.util.Observer;
 import java.util.Observable;
 import platform.signal.SignalHandler;
 
+import infoservice.PullServiceInitializer;
 import infoservice.performance.PerformanceMeter;
 import gui.JAPMessages;
 import jap.pay.AccountUpdater;
@@ -276,14 +277,20 @@ public class InfoService implements Observer
 	{
 		HTTPConnectionFactory.getInstance().setTimeout(Constants.COMMUNICATION_TIMEOUT);
 		/* initialize Distributor */
-		InfoServiceDistributor.getInstance();
-		Database.registerDistributor(InfoServiceDistributor.getInstance());
+		
+		
 		/* initialize internal commands of InfoService */
 		oicHandler = new InfoServiceCommands();
 		/* initialize propagandist for our infoservice */
 		if(!Configuration.getInstance().isPassive())
 		{
 			InfoServicePropagandist.generateInfoServicePropagandist(ms_perfMeter);
+			Database.registerDistributor(InfoServiceDistributor.getInstance());
+		}
+		else
+		{
+			//in passive mode we obtain our information by requesting it from other services
+			PullServiceInitializer.init();
 		}
 		// start server
 		LogHolder.log(LogLevel.EMERG, LogType.MISC, "InfoService -- Version " + Constants.INFOSERVICE_VERSION);

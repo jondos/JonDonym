@@ -191,7 +191,6 @@ public abstract class AbstractDatabaseUpdater extends Updater
 			Enumeration entries = newEntries.elements();
 			while (entries.hasMoreElements())
 			{
-
 				AbstractDatabaseEntry currentEntry = (AbstractDatabaseEntry) (entries.nextElement());
 				if (Database.getInstance(getUpdatedClass()).update(currentEntry))
 				{

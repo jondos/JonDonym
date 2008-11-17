@@ -151,7 +151,7 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 		return getUpdatedEntries_internal(a_entriesToUpdate);
 	}
 
-	private Hashtable getUpdatedEntries_internal(Hashtable a_entriesToUpdate)
+	protected Hashtable getUpdatedEntries_internal(Hashtable a_entriesToUpdate)
 	{
 		Hashtable result;
 		if (a_entriesToUpdate == null)

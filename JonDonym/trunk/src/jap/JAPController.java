@@ -288,7 +288,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static JAPController m_Controller = null;
 	private static JAPModel m_Model = null;
 	private static JAPFeedback m_feedback = null;
-	private Vector observerVector = null;
+	private Vector observerVector = new Vector();
 	private Vector m_anonServiceListener;
 	private IPasswordReader m_passwordReader;
 	private Object m_finishSync = new Object();
@@ -377,8 +377,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 		queueFetchAccountInfo = new JobQueue("FetchAccountInfoJobQueue");
 
-		// Create observer object
-		observerVector = new Vector();
 		// create service listener object
 		m_anonServiceListener = new Vector();
 
