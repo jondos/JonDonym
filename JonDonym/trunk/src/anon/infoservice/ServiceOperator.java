@@ -167,7 +167,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 			m_strUrl = XMLUtil.parseValue(node, null);
 		}
 	}
-	
+
 	/**
 	 * Returns version number which is used to determine the more recent infoservice entry, if two
 	 * entries are compared (higher version number -> more recent entry).

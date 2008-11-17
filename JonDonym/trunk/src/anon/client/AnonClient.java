@@ -633,7 +633,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 		Thread notificationThread = new Thread(new Runnable()
 		{
-			
 			public void run()
 			{
 				synchronized (m_eventListeners)
