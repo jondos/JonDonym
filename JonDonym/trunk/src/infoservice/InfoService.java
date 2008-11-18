@@ -35,7 +35,7 @@ import java.util.Observer;
 import java.util.Observable;
 import platform.signal.SignalHandler;
 
-import infoservice.PullServiceInitializer;
+import infoservice.PassiveInfoServiceInitializer;
 import infoservice.performance.PerformanceMeter;
 import gui.JAPMessages;
 import jap.pay.AccountUpdater;
@@ -290,7 +290,7 @@ public class InfoService implements Observer
 		else
 		{
 			//in passive mode we obtain our information by requesting it from other services
-			PullServiceInitializer.init();
+			PassiveInfoServiceInitializer.init();
 		}
 		// start server
 		LogHolder.log(LogLevel.EMERG, LogType.MISC, "InfoService -- Version " + Constants.INFOSERVICE_VERSION);

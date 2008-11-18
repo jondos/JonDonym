@@ -16,6 +16,11 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 		super(new DynamicUpdateInterval(UPDATE_INTERVAL));
 	}
 	
+	public PerformanceInfoUpdater(long interval)
+	{
+		super(new DynamicUpdateInterval(interval));
+	}
+	
 	protected Hashtable getEntrySerials() 
 	{
 		return new Hashtable();

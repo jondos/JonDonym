@@ -134,6 +134,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	
 	private static final int GET_TCS = 22;
 	private static final int GET_TC_SERIALS = 23;
+	
+	private static final int GET_EXIT_ADDRESSES = 24;
 
 	/**
 	 * This defines, whether there is an automatic change of infoservice after failure as default.
@@ -389,7 +391,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				functionNumber == GET_LATEST_JAVA || functionNumber == GET_MESSAGES ||
 				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES ||
 				functionNumber == GET_PERFORMANCE_INFO || 
-				functionNumber == GET_TCS || functionNumber == GET_TC_SERIALS)
+				functionNumber == GET_TCS || functionNumber == GET_TC_SERIALS ||
+				functionNumber == GET_EXIT_ADDRESSES)
 			{
 				result = new Hashtable();
 				//if (functionNumber == GET_CASCADEINFO)
@@ -557,6 +560,10 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_PAYMENT_INSTANCE)
 					{
 						result = currentInfoService.getPaymentInstance( (String) arguments.firstElement());
+					}
+					else if (functionNumber == GET_EXIT_ADDRESSES)
+					{
+						currentInfoService.getExitAddresses();
 					}
 					else if (functionNumber == GET_CASCADEINFO)
 					{
@@ -804,6 +811,11 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	public Hashtable getPerformanceInfos()
 	{
 		return (Hashtable) (fetchInformation(GET_PERFORMANCE_INFO, null));
+	}
+	
+	public void getExitAddresses()
+	{
+		fetchInformation(GET_EXIT_ADDRESSES, null);
 	}
 	
 
