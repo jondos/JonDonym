@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InterruptedIOException;
 import java.net.ConnectException;
+import java.net.InetAddress;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -1394,6 +1395,45 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return getStatusInfo(a_cascade, -1);
 	}
 
+	public void getExitAddresses() throws Exception
+	{
+		Document doc =
+			getXmlDocument(HttpRequestStructure.createGetRequest("/exitaddresses/"));
+		if(doc == null)
+		{
+			return;
+		}
+		Element parent = doc.getDocumentElement();
+		if(parent == null)
+		{
+			return;
+		}
+		
+		Node exitAddressesNode = XMLUtil.getFirstChildByName(parent, MixCascadeExitAddresses.XML_ELEMENT_NAME);
+		Node currentAddress = null;
+		String currentID = null;
+		String currentIP = null;
+		while(exitAddressesNode != null)
+		{
+			currentID = XMLUtil.parseAttribute(exitAddressesNode, MixCascadeExitAddresses.XML_ATTR_ID,"");
+			if(!currentID.equals(""))
+			{
+				currentAddress = XMLUtil.getFirstChildByName(exitAddressesNode, MixCascadeExitAddresses.XML_ELEMENT_ADDRESS_NAME);
+				while(currentAddress != null)
+				{
+					currentIP = XMLUtil.parseValue(currentAddress, "");
+					if(!currentIP.equals(""))
+					{
+						MixCascadeExitAddresses.addInetAddress(currentID, InetAddress.getByName(currentIP));
+					}
+					currentAddress = XMLUtil.getNextSiblingByName(currentAddress, MixCascadeExitAddresses.XML_ELEMENT_ADDRESS_NAME);
+				}
+			}
+			exitAddressesNode = XMLUtil.getNextSiblingByName(exitAddressesNode, MixCascadeExitAddresses.XML_ELEMENT_NAME);
+			//System.out.println("");
+		}
+	}
+	
 	/**
 	 * Get the StatusInfo for the cascade with the given ID. If we can't get a connection with the
 	 * infoservice, an Exception is thrown.

@@ -1251,7 +1251,68 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		return httpResponse;
 	}
-
+	
+	/**
+	 * Sends a generated HTML file with all status entrys to the client. This function is not used
+	 * by the JAP client. It's intended to use with a webbrowser to see the status of all cascades.
+	 *
+	 * @return The HTTP response for the client.
+	 */
+	private HttpResponseStructure infoServiceIndexPage()
+	{
+		/* this is only the default, if something is going wrong */
+		HttpResponseStructure httpResponse;
+		
+		String htmlData = "<HTML>\n" +
+		"  <HEAD>\n" +
+		"    <TITLE>JonDonym - InfoService</TITLE>\n" +
+		"    <STYLE TYPE=\"text/css\">\n" +
+		"      <!--\n" +
+		"        h1 {color:blue; text-align:center;}\n" +
+		"        b,h3,h4,h5 {font-weight:bold; color:maroon;}\n" +
+		"        body {margin-top:0px; margin-left:5px; margin-width:0px; margin-height:0px; background-color:white; color:black;}\n" +
+		"        h1,h2,h3,h4,h5,p,address,ol,ul,tr,td,th,blockquote,body,.smalltext,.leftcol {font-family:geneva,arial,helvetica,sans-serif;}\n" +
+		"        p,address,ol,ul,tr,td,th,blockquote {font-size:11pt;}\n" +
+		"        .leftcol,.smalltext {font-size: 10px;}\n" +
+		"        h1 {font-size:17px;}\n" +
+		"        h2 {font-size:16px;}\n" +
+		"        h3 {font-size:15px;}\n" +
+		"        h4 {font-size:14px;}\n" +
+		"        h5 {font-size:13px;}\n" +
+		"        address {font-style:normal;}\n" +
+		"        hr {color:#cccccc;}\n" +
+		"        h2,.leftcol {font-weight:bold; color:#006699;}\n" +
+		"        a:link {color:#006699; font-weight:normal; text-decoration:none;}\n" +
+		"        a:visited {color:#666666; font-weight:normal; text-decoration:none;}\n" +
+		"        a:active {color:#006699; font-weight:normal; text-decoration:none;}\n" +
+		"        a:hover {color:#006699; font-weight:normal; text-decoration:underline;}\n" +
+		"        th {color:white; background:#006699; font-weight:bold; text-align:left;}\n" +
+		"        td.name {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699; background:#eeeeff;}\n" +
+		"        td.status {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699;}\n" +
+		"      -->\n" +
+		"    </STYLE>\n" +
+		"    <META HTTP-EQUIV=\"refresh\" CONTENT=\"25\">\n" +
+		"  </HEAD>\n" +
+		"  <BODY BGCOLOR=\"#FFFFFF\">\n" +
+		"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n";
+		
+		htmlData += 
+		"    <H2>InfoService Name: " + Configuration.getInstance().getOwnName() + "</H2>\n"+
+		"    <P>Infoservice [" + Constants.INFOSERVICE_VERSION + "] Startup Time: " +
+			Configuration.getInstance().getStartupTime() +
+		"</P>\n" +
+		"    <HR noShade SIZE=\"1\">\n" +
+		"    <ADDRESS>&copy; 2000 - 2008 The JAP Team - JonDos GmbH</ADDRESS>\n" +
+		"  </BODY>\n" +
+		"</HTML>\n";
+	
+		/* send content */
+		httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_HTML,
+			HttpResponseStructure.HTTP_ENCODING_PLAIN, htmlData);
+		
+		return httpResponse;
+	}
+	
 	/**
 	 * Sends the complete list of all known mixes to the client. This command is not used by
 	 * the JAP client. It's just a comfort function to see all currently working mixes.
@@ -1976,6 +2037,16 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 */
 			ISRuntimeStatistics.ms_lNrOfGetStatus++;
 			httpResponse = humanGetStatus();
+		}
+		else if ( (command.equals("/")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			/** Full Command: GET /
+			 * Source: Browser
+			 * Description: get an index page
+			 * Description_de: 
+			 */
+			ISRuntimeStatistics.ms_lNrOfGetStatus++;
+			httpResponse = infoServiceIndexPage();
 		}
 		else if ( (command.equals("/perfstatus")) && (method == Constants.REQUEST_METHOD_GET))
 		{

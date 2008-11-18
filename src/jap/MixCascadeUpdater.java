@@ -55,6 +55,11 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
 	}
 
+	public MixCascadeUpdater(long interval)
+	{
+		super(new DynamicUpdateInterval(interval));
+	}
+	
 	public Class getUpdatedClass()
 	{
 		return MixCascade.class;

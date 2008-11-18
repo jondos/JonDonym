@@ -7,24 +7,24 @@ import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.MixCascade;
 import anon.infoservice.StatusInfo;
 
-public class PullServiceStatusUpdater extends AbstractDatabaseUpdater 
+public class PassiveInfoServiceStatusUpdater extends AbstractDatabaseUpdater 
 {
 	public static final long UPDATE_INTERVAL_MS = 7000l;
 	
 	private DynamicUpdateInterval m_updateInterval;
 	
-	public PullServiceStatusUpdater(long interval) 
+	public PassiveInfoServiceStatusUpdater(long interval) 
 	{
 		super(interval);
 	}
 
-	public PullServiceStatusUpdater(IUpdateInterval interval) 
+	public PassiveInfoServiceStatusUpdater(IUpdateInterval interval) 
 	{
 		super(interval);
 	}
 
 	
-	public PullServiceStatusUpdater() 
+	public PassiveInfoServiceStatusUpdater() 
 	{
 		
 		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
