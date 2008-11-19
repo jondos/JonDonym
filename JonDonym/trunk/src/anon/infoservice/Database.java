@@ -43,9 +43,10 @@ import anon.crypto.MyRandom;
 import anon.util.Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
-import org.w3c.dom.NodeList;
 
 /**
  * This class is the generic implementation of a database. It is used by the database
@@ -59,6 +60,8 @@ import org.w3c.dom.NodeList;
  */
 public final class Database extends Observable implements Runnable, IXMLEncodable
 {
+	
+	private static String XML_ALL_DB_NAME = "InfoServiceDB";
 	/**
 	 * The registered databases.
 	 */
@@ -167,6 +170,63 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		return database;
 	}
 
+	public static void restoreFromXML(Document xmlAllDBs, Class[] classesToRestore)
+	{
+		
+		if( (xmlAllDBs == null) || (classesToRestore == null) )
+		{
+			return;
+		}
+		
+		Element allDBRoot = xmlAllDBs.getDocumentElement();
+		if(allDBRoot == null)
+		{
+			return;
+		}
+		if(!allDBRoot.getNodeName().equals(XML_ALL_DB_NAME))
+		{
+			return;
+		}
+		
+		Database currentDB = null;
+		for (int i = 0; i < classesToRestore.length; i++) 
+		{
+			currentDB = getInstance(classesToRestore[i]);
+			if(currentDB != null)
+			{
+				currentDB.loadFromXml(allDBRoot);
+			}
+		}
+	}
+	
+	public static Document dumpToXML(Class[] classesToDump)
+	{
+		if(classesToDump == null)
+		{
+			return null;
+		}
+		
+		Document doc = XMLUtil.createDocument();
+		Element root = doc.createElement(XML_ALL_DB_NAME);
+		Database currentDB = null;
+		Element currentDBRoot = null;
+		
+		synchronized (Database.class)
+		{
+			for (int i = 0; i < classesToDump.length; i++) 
+			{		
+				currentDB = getInstance(classesToDump[i]);
+				currentDBRoot = currentDB.toXmlElement(doc);
+				if(currentDBRoot != null)
+				{
+					root.appendChild(currentDBRoot);
+				}
+			}
+		}
+		doc.appendChild(root);
+		return doc;
+	}
+	
 	public static void shutdownDatabases()
 	{
 		synchronized (Database.class)
@@ -547,7 +607,6 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		{
 			return updatedEntries;
 		}
-
 		NodeList dbNodes = a_dbNode.getElementsByTagName(xmlElementName);
 		for (int i = 0; i < dbNodes.getLength(); i++)
 		{
