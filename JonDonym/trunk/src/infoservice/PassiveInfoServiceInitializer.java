@@ -82,6 +82,10 @@ public class PassiveInfoServiceInitializer
 			LogHolder.log(LogLevel.INFO, LogType.MISC, PARSE_ERROR, e);
 			e.printStackTrace();
 		}
+		
+		/* activate querying of all InfoServices */
+		InfoServiceHolder.getInstance().setNumberOfAskedInfoServices(InfoServiceHolder.MAXIMUM_OF_ASKED_INFO_SERVICES);
+		
 		infoServiceUpdater = new InfoServiceUpdater(); /** Handler of infoservice entries */
 		statusUpdater = new PassiveInfoServiceStatusUpdater(); /** Handler of status entries */
 		globalUpdater = new PassiveInfoServiceGlobalUpdater();
@@ -144,7 +148,7 @@ public class PassiveInfoServiceInitializer
 					mainUpdater.update();
 					/* wait short amount of time for asynchronous information fetcher operations ...*/
 					Thread.sleep(UPDATE_SYNC_INTERVAL); 
-					/* ... so it is likeyl that all informations are fetched when caching the DB */
+					/* ... so it is likely that all informations are fetched when caching the DB */
 					cacheDB();
 					Thread.sleep(GLOBAL_UPDATE_INTERVAL);
 				}
