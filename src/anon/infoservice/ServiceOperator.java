@@ -50,6 +50,8 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 */
 	private String m_strOrganization;
 
+	private String m_strOrgUnit;
+
 	/**
 	 * This is the URL of the operators home page.
 	 */
@@ -60,6 +62,8 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 */
 	private String m_strEmail;
 	
+	private String m_countryCode;
+
 	/**
 	 * The last update time.
 	 */
@@ -104,7 +108,9 @@ public class ServiceOperator extends AbstractDatabaseEntry
 				// if no organization is given, use the common name
 				m_strOrganization = subject.getCommonName();
 			}
-
+			m_countryCode = subject.getCountryCode();
+			m_strOrgUnit = subject.getOrganisationalUnit();
+			
 			/* get the e-mail address */
 			m_strEmail = subject.getE_EmailAddress();
 			if(m_strEmail == null || m_strEmail.trim().length() == 0)
@@ -224,6 +230,11 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	{
 		return m_strOrganization;
 	}
+	
+	public String getOrganizationUnit() 
+	{
+		return m_strOrgUnit;
+	}
 
 	/**
 	 * Returns the operator certificate.
@@ -243,6 +254,11 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	public String getUrl()
 	{
 		return m_strUrl;
+	}
+	
+	public String getCountryCode() 
+	{
+		return m_countryCode;
 	}
 	
 	/**
