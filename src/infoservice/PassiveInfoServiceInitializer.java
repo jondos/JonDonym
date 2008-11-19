@@ -6,7 +6,12 @@ import java.io.IOException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import anon.infoservice.Database;
 import anon.infoservice.InfoServiceHolder;
+import anon.infoservice.MixCascade;
+import anon.infoservice.MixCascadeExitAddresses;
+import anon.infoservice.PerformanceInfo;
+import anon.infoservice.StatusInfo;
 import anon.util.Updater;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
@@ -36,6 +41,14 @@ public class PassiveInfoServiceInitializer
 {
 	private final static String LOAD_ERROR = "Could not load the cachefile for the passive InfoService";
 	private final static String PARSE_ERROR = "Could not parse the cachefile for the passive InfoService";
+	private final static String CACHE_ERROR = "DB caching failed.";
+	
+	/* contains all the classes that needs to be cached 
+	 * must implement IXMLEncodable*/
+	private final static Class[] CACHE_CLASSES = new Class[]
+	{                    
+		MixCascade.class, MixCascadeExitAddresses.class, PerformanceInfo.class, StatusInfo.class
+	};
 	
 	public static String CACHE_FILE_NAME = "cache.xml";
 	
@@ -45,6 +58,7 @@ public class PassiveInfoServiceInitializer
 	private static PassiveInfoServiceGlobalUpdater globalUpdater = null;
 	
 	private final static int GLOBAL_UPDATE_INTERVAL = 60000;
+	private static final long UPDATE_SYNC_INTERVAL = 4000;
 	
 	public static synchronized void init()
 	{
@@ -52,32 +66,21 @@ public class PassiveInfoServiceInitializer
 		try 
 		{
 			doc = XMLUtil.readXMLDocument(new File(CACHE_FILE_NAME));
-			Element infoServiceRoot = null;
 			if(doc != null)
 			{
-				infoServiceRoot = doc.getDocumentElement();
-				if(infoServiceRoot != null)
-				{
-					try 
-					{
-						InfoServiceHolder.getInstance().loadSettingsFromXml(infoServiceRoot, false);
-					} 
-					catch (Exception e) 
-					{
-						LogHolder.log(LogLevel.ERR, LogType.MISC, PARSE_ERROR, e);
-					}
-				}
+				Database.restoreFromXML(doc, CACHE_CLASSES);	
 			}
 		} 
 		catch (IOException e) 
 		{
 			LogHolder.log(LogLevel.INFO, LogType.MISC, LOAD_ERROR, e);
+			e.printStackTrace();
 			
 		} 
 		catch (XMLParseException e) 
 		{
 			LogHolder.log(LogLevel.INFO, LogType.MISC, PARSE_ERROR, e);
-			
+			e.printStackTrace();
 		}
 		infoServiceUpdater = new InfoServiceUpdater(); /** Handler of infoservice entries */
 		statusUpdater = new PassiveInfoServiceStatusUpdater(); /** Handler of status entries */
@@ -95,20 +98,27 @@ public class PassiveInfoServiceInitializer
 	
 	private static void cacheDB()
 	{
-		System.out.println("TODO: cache the DB");
-		/*Document doc = XMLUtil.createDocument();
-		InfoServiceHolder.getInstance().toXmlElement(doc);
+		Document doc = Database.dumpToXML(CACHE_CLASSES);
 		
-		File cacheFile = new File(PassiveInfoServiceInitializer.CACHE_FILE_NAME);
-		try 
+		if(doc != null)
 		{
-			XMLUtil.write(doc, cacheFile);
-		} 
-		catch (IOException e) 
+			File cacheFile = new File(PassiveInfoServiceInitializer.CACHE_FILE_NAME);
+			try 
+			{
+				XMLUtil.write(doc, cacheFile);
+			} 
+			catch (IOException ioe) 
+			{
+				
+				LogHolder.log(LogLevel.INFO, LogType.MISC, CACHE_ERROR, ioe);
+				// TODO Auto-generated catch block
+				ioe.printStackTrace();
+			}
+		}
+		else
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+			LogHolder.log(LogLevel.INFO, LogType.MISC, CACHE_ERROR);
+		}
 	}
 	
 	/**
@@ -117,6 +127,7 @@ public class PassiveInfoServiceInitializer
 	 */
 	static class PassiveInfoServiceGlobalUpdater extends Thread
 	{
+		
 		private static PassiveInfoServiceMainUpdater mainUpdater = null;
 		
 		PassiveInfoServiceGlobalUpdater()
@@ -128,12 +139,15 @@ public class PassiveInfoServiceInitializer
 		{
 			try
 			{
-			while(true)
-			{
-				mainUpdater.update();
-				cacheDB();
-				Thread.sleep(GLOBAL_UPDATE_INTERVAL);
-			}
+				while(true)
+				{
+					mainUpdater.update();
+					/* wait short amount of time for asynchronous information fetcher operations ...*/
+					Thread.sleep(UPDATE_SYNC_INTERVAL); 
+					/* ... so it is likeyl that all informations are fetched when caching the DB */
+					cacheDB();
+					Thread.sleep(GLOBAL_UPDATE_INTERVAL);
+				}
 			}
 			catch(InterruptedException ie)
 			{
