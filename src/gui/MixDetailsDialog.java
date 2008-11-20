@@ -77,7 +77,7 @@ public class MixDetailsDialog extends JAPDialog implements MouseListener
 		lbl = new JLabel(GUIUtils.getCountryFromServiceLocation(loc));
 		c.gridy = 1;
 		c.gridx++;
-		lbl.setIcon(GUIUtils.loadImageIcon("flags/" + loc.getCountry() + ".png"));
+		lbl.setIcon(GUIUtils.loadImageIcon("flags/" + loc.getCountryCode() + ".png"));
 		p.add(lbl, c);
 		
 		lbl = new JLabel(JAPMessages.getString("mixOperator"));

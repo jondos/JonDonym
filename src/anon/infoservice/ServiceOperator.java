@@ -27,12 +27,15 @@
  */
 package anon.infoservice;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import anon.crypto.JAPCertificate;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509SubjectAlternativeName;
 import anon.crypto.X509SubjectKeyIdentifier;
+import anon.util.Util;
 import anon.util.XMLUtil;
 import java.util.Vector;
 import anon.crypto.AbstractX509Extension;
@@ -43,7 +46,19 @@ import java.net.URL;
  */
 public class ServiceOperator extends AbstractDatabaseEntry
 {
-	private static final String XML_ELEM_EMAIL = "EMail";
+	
+
+	public static final String XML_ELEMENT_NAME = "Operator";
+	public static final String XML_ELEMENT_ORGANISATION = "Organisation";
+	public static final String XML_ELEMENT_COUNTRYCODE = "CountryCode";
+	public static final String XML_ELEMENT_URL = "URL"; 
+	public static final String XML_ELEMENT_ORG_UNIT = "OrganisationalUnit";
+	public static final String XML_ELEMENT_EMAIL = "EMail";
+	public static final String XML_ELEMENT_EMAIL_SPAMSAFE = "Liame";
+	
+	private static final  String AT_SUBSTITUTE = "[at]";
+	private static final  String DOT_SUBSTITUTE = "[dot]";
+	private static final boolean SPAM_SAFE = true;
 	
 	/**
 	 * This is the name of the operator or organization.
@@ -164,7 +179,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		if(m_strEmail == null || m_strEmail.trim().length() == 0 ||
 		   !X509SubjectAlternativeName.isValidEMail(m_strEmail))
 		{
-			node = XMLUtil.getFirstChildByName(a_node, XML_ELEM_EMAIL);
+			node = XMLUtil.getFirstChildByName(a_node, XML_ELEMENT_EMAIL);
 		    m_strEmail = XMLUtil.parseValue(node, null);
 		}
 		if (m_strUrl == null)
@@ -220,6 +235,17 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	{
 		return m_strEmail;
 	}
+	
+	
+	public String getEMailSpamSafe()
+	{
+		if(m_strEmail != null)
+		{
+			m_strEmail = Util.replaceAll(m_strEmail, "@", AT_SUBSTITUTE);
+			m_strEmail = Util.replaceAll(m_strEmail, ".", DOT_SUBSTITUTE);	
+		}
+		return m_strEmail;
+	}
 
 	/**
 	 * Returns the name of the operator or organization.
@@ -268,6 +294,93 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	{
 		return m_node;
 	}
+	
+	
+	public void setOrganization(String organization) 
+	{
+		m_strOrganization = organization;
+	}
+
+	public void setOrganizationUnit(String orgUnit) 
+	{
+		m_strOrgUnit = orgUnit;
+	}
+
+	public void setUrl(String url) 
+	{
+		m_strUrl = url;
+	}
+
+	public void setEMail(String email) 
+	{
+		m_strEmail = email;
+	}
+
+	public void setCountryCode(String code) 
+	{
+		m_countryCode = code;
+	}
+
+	public void setLastUpdate(long update) 
+	{
+		m_lastUpdate = update;
+	}
+
+	public Element toXMLElement(Document ownerDocument)
+	{
+		return toXMLElement(ownerDocument, SPAM_SAFE);
+	}
+	/* creates a DOM-Tree with the data which will be owned by
+	 * ownerDocument but not appended to it.
+	 * if spamSafe is true than the Email-Tag as well as the content are 
+	 * modified in a way to make it harder for Spam-parsers to evaluate the
+	 * email-address. 
+	 */
+	public Element toXMLElement(Document ownerDocument, boolean spamSafe)
+	{
+		if(ownerDocument == null)
+		{
+			return null;
+		}
+		Element mixOperatorElement = ownerDocument.createElement(XML_ELEMENT_NAME);
+		
+		if( m_strOrganization != null )
+		{
+			XMLUtil.createChildElementWithValue(mixOperatorElement, 
+					XML_ELEMENT_ORGANISATION, 
+					Util.filterXMLChars(m_strOrganization));
+		}
+		if( m_strUrl != null )
+		{
+			XMLUtil.createChildElementWithValue(mixOperatorElement, 
+					XML_ELEMENT_URL, 
+					Util.filterXMLChars(m_strUrl));
+		}
+		if( m_countryCode != null )
+		{
+			XMLUtil.createChildElementWithValue(mixOperatorElement, 
+					XML_ELEMENT_COUNTRYCODE, 
+					Util.filterXMLChars(m_countryCode));
+		}
+		if( m_strOrgUnit != null )
+		{
+			XMLUtil.createChildElementWithValue(mixOperatorElement, 
+					XML_ELEMENT_ORG_UNIT, 
+					Util.filterXMLChars(m_strOrgUnit));
+		}
+		if( m_strEmail != null )
+		{
+			XMLUtil.createChildElementWithValue(mixOperatorElement, 
+					spamSafe ? XML_ELEMENT_EMAIL_SPAMSAFE : XML_ELEMENT_EMAIL, 
+					spamSafe ? Util.filterXMLChars(getEMailSpamSafe()) : Util.filterXMLChars(getEMail()));
+		}
+		
+		return mixOperatorElement;
+	}
+	
+	
+	
+	
 	
 	public boolean equals(Object a_obj)
 	{

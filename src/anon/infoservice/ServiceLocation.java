@@ -30,6 +30,7 @@ package anon.infoservice;
 
 import java.util.Vector;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -46,6 +47,15 @@ import anon.util.Util;
 public class ServiceLocation
 {
 
+	public static final String XML_ELEMENT_NAME = "Location";
+	public static final String XML_ELEMENT_CITY = "City";
+	public static final String XML_ELEMENT_STATE = "State";
+	public static final String XML_ELEMENT_COUNTRY = "Country";
+	public static final String XML_ELEMENT_POSITION = "Position";
+	public static final String XML_ELEMENT_GEO = "Geo";
+	public static final String XML_ELEMENT_LONGITUDE ="Longitude";
+	public static final String XML_ELEMENT_LATITUDE = "Latitude";
+	
 	/**
 	 * This is the city where the service is located.
 	 */
@@ -200,7 +210,7 @@ public class ServiceLocation
 	 *
 	 * @return The country where the service is located.
 	 */
-	public String getCountry()
+	public String getCountryCode()
 	{
 		return country;
 	}
@@ -226,5 +236,54 @@ public class ServiceLocation
 	{
 		return latitude;
 	}
+	
+	/* creates a DOM-Tree with the data which will be woned by
+	 * ownerDocument but not appended to it.
+	 */
+	public Element toXMLElement(Document ownerDocument)
+	{
+		if(ownerDocument == null)
+		{
+			return null;
+		}
+		
+		Element locationElement = ownerDocument.createElement(XML_ELEMENT_NAME);
+		/* Mix location infos */
+		if( city != null )
+		{
+			XMLUtil.createChildElementWithValue(locationElement, 
+					XML_ELEMENT_CITY, 
+					Util.filterXMLChars(city));
+		}
+		
+		if( state != null )
+		{
+			XMLUtil.createChildElementWithValue(locationElement, 
+					XML_ELEMENT_STATE, 
+					Util.filterXMLChars(state));
+		}
+		if( country != null )
+		{
+			XMLUtil.createChildElementWithValue(locationElement, 
+					XML_ELEMENT_COUNTRY, 
+					Util.filterXMLChars(country));
+		}
+		if( longitude != null && 
+			latitude != null )
+		{
+			Element positionElement = XMLUtil.createChildElement(locationElement, XML_ELEMENT_POSITION);
+			Element geoElement = XMLUtil.createChildElement(positionElement, XML_ELEMENT_GEO);
+			
+			XMLUtil.createChildElementWithValue(geoElement, 
+					XML_ELEMENT_LONGITUDE, 
+					Util.filterXMLChars(longitude));
+			
+			XMLUtil.createChildElementWithValue(geoElement, 
+					XML_ELEMENT_LATITUDE, 
+					Util.filterXMLChars(latitude));
+		}
+		return locationElement;
+	}
+	
 
 }

@@ -1078,7 +1078,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				continue;
 			}
 			
-			if(!location.getCountry().equals(operator.getCertificate().getSubject().getCountryCode()))
+			if(!location.getCountryCode().equals(operator.getCertificate().getSubject().getCountryCode()))
 			{
 				m_serverList.updateFlag(i, location, false);
 				m_serverList.updateOperatorFlag(i, operator);
@@ -1140,7 +1140,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		ServiceLocation location = m_infoService.getServiceLocation(cascade, selectedMixId);
 		if (location != null)
 		{
-			m_locationLabel.setIcon(GUIUtils.loadImageIcon("flags/" + location.getCountry() + ".png"));
+			m_locationLabel.setIcon(GUIUtils.loadImageIcon("flags/" + location.getCountryCode() + ".png"));
 		}
 		else
 		{

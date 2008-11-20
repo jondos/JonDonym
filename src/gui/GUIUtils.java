@@ -2219,7 +2219,7 @@ public final class GUIUtils
 			strLocation += a_loc.getState().trim();
 		}
 
-		if (a_loc.getCountry() != null && a_loc.getCountry().trim().length() > 0)
+		if (a_loc.getCountryCode() != null && a_loc.getCountryCode().trim().length() > 0)
 		{
 			if (strLocation.length() > 0)
 			{
@@ -2229,11 +2229,11 @@ public final class GUIUtils
 			try
 			{
 				strLocation += new CountryMapper(
-						a_loc.getCountry(), JAPMessages.getLocale()).toString();
+						a_loc.getCountryCode(), JAPMessages.getLocale()).toString();
 			}
 			catch (IllegalArgumentException a_e)
 			{
-				strLocation += a_loc.getCountry().trim();
+				strLocation += a_loc.getCountryCode().trim();
 			}
 		}
 
