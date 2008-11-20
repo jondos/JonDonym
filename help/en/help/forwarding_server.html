@@ -1,25 +1,45 @@
 <html>
 <head>
-  <title>Forwarding server</title>
+  <title>JonDo Help: Forwarding server</title>
   <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
 
 <body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<h2>Forwarding server</h2>
-<i>This panel is only available in <a
-href="appearance.html#expertView">Extended View</a>.</i>
+<p class="navipar"><span class="prevlink"><a href="infoservice.html"><img
+src="prev.gif" alt="&lt;-"> InfoService</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_config"><img src="next.gif" alt="-&gt;"> Configuration
+</a><a href="anon.html"><img src="next.gif" alt="-&gt;"> Anonymity
+</a></span> <span class="nextlink"><a href="cert.html">Certification
+authorities <img src="next.gif" alt="-&gt;"></a></span> </p>
+<hr>
 
-<p>To get to this panel, press the button <i>Settings</i> in JonDo's main
-window, then choose the entry <i>Forwarding Server</i> from the list to the
-left.<br>
-In this window, you can define how JonDo performs as a forwarding server.
-With this function, other JonDo users who can not connect directly to the
-anonymization service can still get a connection using your JonDo as an
-access point. Please note, however, that there is a risk that you could be
-suspected of a crime that another JonDo user commits if your system was used
-as the forwarding system for that crime. </p>
+<h2>Forwarding server</h2>
+<em class="jconf">This panel is only available in <a
+href="appearance.html#expertView">Extended View</a>. To get to this panel,
+press the button <code class="jconf">Settings</code> in JonDo's main window,
+then choose the entry <code class="jconf">Forwarding Server</code> from the
+list to the left.</em><br>
+
+
+<p>A forwarding server is used to bypass any blocking of access to JonDo
+services. Because of censorship or other restrictive measures, a user may not
+be allowed to connect directly to the anonymization service. This is why
+JonDo includes the possibility of forwarding connections to the services. If
+you would like your JonDo to also forward connections, you can find the
+relevant settings in this window.</p>
+
+<p>The option <code class="jconf">Forwarding Server ON</code> activates the
+forwarding server. </p>
+
+<p><b>Beware</b><br>
+After activating forwarding, every JonDonym user can use your JonDo as an
+access point to the services. You are exposing yourself to the risk of users
+committing crimes on the Internet through your JonDo; however, you are still
+well protected from discovery of your own IP address by the anonymization
+services.</p>
 
 <h3>Forwarding server settings</h3>
 <ul>
@@ -31,7 +51,8 @@ as the forwarding system for that crime. </p>
   </li>
   <li><b>My Internet connection</b><br>
     Select the type and speed of your internet connection. The value in the
-    field "Max. bandwidth" is automatically set. 
+    field <code class="jconf">Max. bandwidth</code> is automatically set by
+    this. 
     <p></p>
   </li>
   <li><b>Percentage for forwarding</b><br>
@@ -44,18 +65,29 @@ as the forwarding system for that crime. </p>
     shown here. </li>
 </ul>
 
-<h3>Supported mix cascades</h3>
-This section allows you to make changes to two settings. Either you allow all
-clients that use your JonDo as a forwarding server to access all JonDo
-cascades known ("Allow client access to all available mix cascades"), or you
-only allow access to certain cascades. Cascade access is set with the buttons
-"Add to allowed cascades" and "Remove from allowed cascades". Access is
-allowed only for cascades found in the "Allowed mix cascades" list. 
+<h3>Allowed services</h3>
+This section allows for basically two settings. Either you allow all
+forwarded clients to access all JonDo services known (<code
+class="jconf">Allow client access to all known services</code> is checked),
+or you only allow access to certain services. Service access is set with the
+buttons <code class="jconf">Add to allowed services</code> and <code
+class="jconf">Remove from allowed services</code>. Access is allowed only to
+services found in the <code class="jconf">Allowed Services</code> list. 
 
 <h3>InfoService registration</h3>
 For JonDo users to find your JonDo forwarding server, your JonDo must be
-registered as a forwarder with at least one InfoService. You can register at
-all InfoServices or only at certain ones. The procedure is the same as for
-supported mix cascades.<!--#include virtual="/footer_en.html"-->
+registered as a forwarder with at least one InfoService. You can register
+with all InfoServices or only certain ones. The procedure is basically the
+same as above. 
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="infoservice.html"><img
+src="prev.gif" alt="&lt;-"> InfoService</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_config"><img src="next.gif" alt="-&gt;"> Configuration
+</a><a href="anon.html"><img src="next.gif" alt="-&gt;"> Anonymity
+</a></span> <span class="nextlink"><a href="cert.html">Certification
+authorities <img src="next.gif" alt="-&gt;"></a></span> </p>
+<!--#include virtual="/footer_en.html"-->
 </body>
 </html>
