@@ -1968,27 +1968,18 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			//ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
 			httpResponse = m_exitAddressListResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
-		else if( (command.startsWith("/jondonyminfo") && (method == Constants.REQUEST_METHOD_GET)))
+		else if( (command.startsWith(MixCascade.INFOSERVICE_COMMAND_WEBINFOS) && (method == Constants.REQUEST_METHOD_GET)))
 		{
-			Database db =Database.getInstance(MixCascade.class);
-			Vector vec = db.getEntryList();
-			MixCascade mc = null;
-			Document doc = XMLUtil.createDocument();
-			Element rootElement = doc.createElement("JonDonymCascadeInfos");
-			Element listItem = null;
-			doc.appendChild(rootElement);
-			
-			for (int i = 0; i < vec.size(); i++) 
-			{
-				mc = (MixCascade) vec.elementAt(i);
-				listItem = mc.getJonDonymStatus(doc);
-				if(listItem != null)
-				{
-					rootElement.appendChild(listItem);
-				}
-			}
-			
+			Document doc = MixCascade.getAllCascadeWebInfos();
 			httpResponse = new HttpResponseStructure(doc);
+		}
+		else if( (command.startsWith(MixCascade.INFOSERVICE_COMMAND_WEBINFO) && (method == Constants.REQUEST_METHOD_GET)))
+		{
+			String cascadeID = command.substring(MixCascade.INFOSERVICE_COMMAND_WEBINFO.length());
+			
+			Document doc = MixCascade.getCascadeWebInfo(cascadeID);
+			httpResponse = (doc == null) ? 
+					new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST) : new HttpResponseStructure(doc);
 		}
 		else if ( (command.equals("/helo")) && (method == Constants.REQUEST_METHOD_POST))
 		{
