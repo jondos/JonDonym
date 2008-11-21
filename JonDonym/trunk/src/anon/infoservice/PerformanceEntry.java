@@ -293,9 +293,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	public void importValue(int a_attribute, long a_timestamp, int a_value)
 	{
 		// check if entry is older than 7 days
-		if(System.currentTimeMillis() - a_timestamp > 7 * 24 * 60 * 60 * 1000 ||
-			a_timestamp > System.currentTimeMillis())
+		if(System.currentTimeMillis() - a_timestamp > 7 * 24 * 60 * 60 * 1000 )
 		{
+			return;
+		}
+		
+		if (a_timestamp > System.currentTimeMillis())
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, 
+					"Performance timestamp has future value and is ignored: " + a_timestamp);
 			return;
 		}
 		
@@ -1584,6 +1590,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				if (a_lValue < 0)
 				{
 					m_iErrors++;
+					if (a_lValue < -1)
+					{
+						LogHolder.log(LogLevel.WARNING, LogType.MISC, 
+								"Got negative performance value (" + a_lValue + ") for timestamp " + a_lTimeStamp + ".");
+					}
 				}	
 				else if (a_lValue == Integer.MAX_VALUE)
 				{

@@ -227,7 +227,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 		{
 			/* also if m_preferredInfoService.equals(a_preferredInfoService), there is the possibility
 			 * that some values of the infoservice, like listener interfaces or the name have been
-			 * changed, so we always update the internal stored pererred infoservice
+			 * changed, so we always update the internal stored preferred infoservice
 			 */
 			m_preferredInfoService = a_preferredInfoService;
 			setChanged();
@@ -1082,12 +1082,43 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			}
 		}
 
+		/* remove bootstrap entries is possible; at least three InfoServices have to be loaded, excluding default */
+		Vector currentEntries = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
+		Vector bootstrapIDs = new Vector();
+		int nrLoadedIS = 0;
+		InfoServiceDBEntry entry;
+		for (int i = 0; i < currentEntries.size(); i++)
+		{
+			entry = (InfoServiceDBEntry)currentEntries.elementAt(i);
+			if (entry.isBootstrap())
+			{
+				bootstrapIDs.addElement(entry.getId());
+			}
+			else if (!entry.isUserDefined())
+			{
+				nrLoadedIS++;
+			}
+		}
+		if (nrLoadedIS >= 3) // we need at least 3 InfoServices for some majority calculations
+		{
+			// remove all bootstrap entries
+			for (int i = 0; i < bootstrapIDs.size(); i++)
+			{
+				Database.getInstance(InfoServiceDBEntry.class).remove(bootstrapIDs.elementAt(i).toString());
+			}
+		}
+		
+		
 		synchronized (this)
 		{
 			/* we have collected all values -> set them */
 			if (preferredInfoService != null)
 			{
 				setPreferredInfoService(preferredInfoService);
+			}
+			else if (getPreferredInfoService() == null)
+			{
+				setPreferredInfoService((InfoServiceDBEntry)Database.getInstance(InfoServiceDBEntry.class).getRandomEntry());
 			}
 			if (a_bForceISChange)
 			{

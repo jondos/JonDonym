@@ -94,6 +94,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 * The name of the infoservice.
 	 */
 	private String m_strName;
+	
+	/**
+	 * Indicates if this is a temporary InfoService entry creates for bootstrapping.
+	 */
+	private boolean m_bTemp = false;
 
 	/**
 	 * Some information about the used infoservice software.
@@ -672,6 +677,16 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			m_infoserviceSoftware = new ServiceSoftware(Constants.INFOSERVICE_VERSION);
 		}
 		m_xmlDescription = generateXmlRepresentation();
+	}
+	
+	public void markAsBootstrap()
+	{
+		m_bTemp = true;
+	}
+	
+	public boolean isBootstrap()
+	{
+		return m_bTemp;
 	}
 
 	/**

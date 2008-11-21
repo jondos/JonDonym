@@ -67,8 +67,8 @@ import logging.LogType;
 import platform.AbstractOS;
 
 /**
- * This is some kind of isntallation and configuration assistant that helps the unexperienced
- * user to get the most out of JAP.
+ * This is some kind of installation and configuration assistant that helps the unexperienced
+ * user to get the most out of JAP/JonDo.
  *
  * @author Rolf Wendolsky
  */
@@ -96,10 +96,10 @@ public class ConfigAssistant extends JAPDialog
 
 	private static final String MSG_ERROR_NO_WARNING = ConfigAssistant.class.getName() + "_errorNoWarning";
 	private static final String MSG_EXPLAIN_NO_WARNING = ConfigAssistant.class.getName() + "_explainNoWarning";
-	private static final String MSG_ERROR_NO_WARNING_AND_SURFING = ConfigAssistant.class.getName() +
-		"_errorNoWarningAndSurfing";
 	private static final String MSG_EXPLAIN_NO_DIRECT_CONNECTION = ConfigAssistant.class.getName() +
 		"_explainNoDirectConnection";
+	private static final String MSG_EXPLAIN_FIREWALL = ConfigAssistant.class.getName() +
+	"_explainFirewall";
 	private static final String MSG_ERROR_WARNING_NO_SURFING = ConfigAssistant.class.getName() +
 		"_errorWarningNoSurfing";
 	private static final String MSG_SUCCESS_WARNING = ConfigAssistant.class.getName() + "_successWarning";
@@ -121,6 +121,8 @@ public class ConfigAssistant extends JAPDialog
 		"_explainNoConnection";
 	private static final String MSG_EXPLAIN_BAD_CONNECTION = ConfigAssistant.class.getName() +
 		"_explainBadConnection";
+	private static final String MSG_EXPLAIN_CHOOSE_OTHER_SERVICE = ConfigAssistant.class.getName() +
+	"_explainChooseOtherService";	
 	private static final String MSG_EXPLAIN_NO_SERVICE_AVAILABLE = ConfigAssistant.class.getName() +
 		"_explainNoServiceAvailable";
 	private static final String MSG_ERROR_WARNING_IN_BROWSER = ConfigAssistant.class.getName() +
@@ -129,12 +131,14 @@ public class ConfigAssistant extends JAPDialog
 		"_explainWarningInBrowser";
 	private static final String MSG_SELECT_VIEW = ConfigAssistant.class.getName() +
 		"_selectView";
-	private static final String MSG_SELECT_VIEW_RESTART = ConfigAssistant.class.getName() +
-		"_selectViewRestart";
+	private static final String MSG_SET_NEW_VIEW = ConfigAssistant.class.getName() + "_setNewView";
 	private static final String MSG_SET_NEW_LANGUAGE = ConfigAssistant.class.getName() +
 		"_setNewLanguage";
+	private static final String MSG_EXPLAIN_RESTART = ConfigAssistant.class.getName() +
+	"_explainRestart";
+	
 
-	private static final String PROXIES[] = {"HTTP(S)", "FTP"};
+	private static final String PROXIES[] = {"HTTP(S)", "SSL/FTP"};
 
 	private static final String IMG_ARROW = "arrow46.gif";
 	private static final String IMG_HELP_BUTTON = ConfigAssistant.class.getName() + "_en_help.gif";
@@ -143,13 +147,13 @@ public class ConfigAssistant extends JAPDialog
 	private JTextPane[] m_lblHostnames = new JTextPane[PROXIES.length];
 	private JTextPane[] m_lblPorts = new JTextPane[PROXIES.length];
 
-	private JRadioButton m_radioNoWarning, m_radioNoWarningAndSurfing, m_radioSuccessWarning,
+	private JRadioButton m_radioNoWarning, m_radioSuccessWarning,
 		m_radioErrorWarningNoSurfing, m_radioWarningInBrowser;
 	private ButtonGroup m_groupWarning;
 	private JRadioButton m_radioNoConnection, m_radioConnectionSlow, m_noSurfing, m_ConnectionOK,
 		m_radioNoServiceAvailable;
 	private ButtonGroup m_groupAnon;
-	JRadioButton m_radioSimpleView, m_radioAdvancedView;
+	private JRadioButton m_radioSimpleView, m_radioAdvancedView;
 	private ButtonGroup m_groupView;
 	private boolean m_bFinished = false;
 
@@ -214,9 +218,10 @@ public class ConfigAssistant extends JAPDialog
 		constraints.weightx = 1;
 		contentPane.add(new JLabel(), constraints);
 
-		final DialogContentPane paneSetLang = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_SET_NEW_LANGUAGE),
-			  layout, new DialogContentPaneOptions(paneWelcome))
+		
+		final DialogContentPane paneView = new SimpleWizardContentPane(
+				  this, JAPMessages.getString(MSG_SELECT_VIEW), layout,
+				  new DialogContentPaneOptions(paneWelcome))
 		{
 			public CheckError[] checkUpdate()
 			{
@@ -224,14 +229,98 @@ public class ConfigAssistant extends JAPDialog
 								 JAPConstants.MESSAGESFN);
 				getButtonCancel().setText(JAPMessages.getString(DialogContentPane.MSG_CANCEL));
 				getButtonNo().setText(JAPMessages.getString(DialogContentPane.MSG_PREVIOUS));
-				setText(JAPMessages.getString(MSG_SET_NEW_LANGUAGE));
+				getButtonYesOK().setText(JAPMessages.getString(DialogContentPane.MSG_NEXT));
+				setText(JAPMessages.getString(MSG_SELECT_VIEW));
+				
+				m_radioSimpleView.setText(JAPMessages.getString("ngSettingsViewSimplified"));
+				m_radioAdvancedView.setText(JAPMessages.getString("ngSettingsViewNormal"));
+				return super.checkUpdate();
+			}
+		
+			public CheckError[] checkYesOK()
+			{
+				CheckError[] errors = super.checkYesOK();
+				if (m_groupView.getSelection() == null)
+				{
+					return new CheckError[]{new CheckError(
+					   JAPMessages.getString(MSG_MAKE_SELECTION), LogType.GUI)};
+				}
 
+				return errors;
+			}
+		};
+		
+		contentPane = paneView.getContentPane();
+		contentPane.setLayout(new GridBagLayout());
+		constraints = new GridBagConstraints();
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.anchor = GridBagConstraints.WEST;
+		m_radioSimpleView = new JRadioButton(JAPMessages.getString("ngSettingsViewSimplified"));
+		m_radioAdvancedView = new JRadioButton(JAPMessages.getString("ngSettingsViewNormal"));
+		if (!JAPController.getInstance().isConfigAssistantShown())
+		{
+			// this is not the first start of JAP
+			if (JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
+			{
+				m_radioAdvancedView.setSelected(true);
+			}
+			else
+			{
+				m_radioSimpleView.setSelected(true);
+			}
+		}
+		m_groupView = new ButtonGroup();
+		m_groupView.add(m_radioSimpleView);
+		m_groupView.add(m_radioAdvancedView);
+		contentPane.add(m_radioSimpleView, constraints);
+		constraints.gridy++;
+		contentPane.add(m_radioAdvancedView, constraints);
+		
+		
+		final DialogContentPane paneRestart = new SimpleWizardContentPane(
+			  this, JAPMessages.getString(MSG_SET_NEW_LANGUAGE) + "<br><br>" +
+			  JAPMessages.getString(MSG_SET_NEW_VIEW, "ngSettingsViewNormal") + "<br><br>" + 
+			  JAPMessages.getString(MSG_EXPLAIN_RESTART),
+			  layout, new DialogContentPaneOptions(paneView))
+		{
+			public CheckError[] checkUpdate()
+			{
+				String strText = ""; 
+				
+				JAPMessages.init(((LanguageMapper)comboLang.getSelectedItem()).getLocale(),
+								 JAPConstants.MESSAGESFN);
+				getButtonCancel().setText(JAPMessages.getString(DialogContentPane.MSG_CANCEL));
+				getButtonNo().setText(JAPMessages.getString(DialogContentPane.MSG_PREVIOUS));
+				
+				if (!((LanguageMapper)comboLang.getSelectedItem()).getLocale().equals(locale))
+				{
+					strText = JAPMessages.getString(MSG_SET_NEW_LANGUAGE);
+				}
+				if ((m_radioSimpleView.isSelected() && JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL) ||
+					(m_radioAdvancedView.isSelected() && JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED))
+				{
+					String strView;
+					if (m_radioSimpleView.isSelected())
+					{
+						strView = JAPMessages.getString("ngSettingsViewSimplified");
+					}
+					else
+					{
+						strView = JAPMessages.getString("ngSettingsViewNormal");
+					}
+					strText += " " + JAPMessages.getString(MSG_SET_NEW_VIEW, strView);
+				}
+				setText(strText + "<br><br>" + JAPMessages.getString(MSG_EXPLAIN_RESTART));
+				
 				return super.checkUpdate();
 			}
 
 			public boolean isSkippedAsNextContentPane()
 			{
-				return ((LanguageMapper)comboLang.getSelectedItem()).getLocale().equals(locale);
+				return ((LanguageMapper)comboLang.getSelectedItem()).getLocale().equals(locale) &&
+					((m_radioSimpleView.isSelected() && JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED) ||
+					(m_radioAdvancedView.isSelected() && JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL));
 			}
 
 			public boolean isSkippedAsPreviousContentPane()
@@ -239,7 +328,7 @@ public class ConfigAssistant extends JAPDialog
 				return true;
 			}
 		};
-		paneSetLang.addComponentListener(new ComponentAdapter()
+		paneRestart.addComponentListener(new ComponentAdapter()
 		{
 			public void componentShown(ComponentEvent a_event)
 			{
@@ -248,8 +337,13 @@ public class ConfigAssistant extends JAPDialog
 			}
 		});
 
+		
+		
+		
+			
+		
 		DialogContentPane paneBrowserConf = new SimpleWizardContentPane(
-				  this, JAPMessages.getString(MSG_BROWSER_CONF), layout, new DialogContentPaneOptions(paneSetLang))
+				  this, JAPMessages.getString(MSG_BROWSER_CONF), layout, new DialogContentPaneOptions(paneRestart))
 		{
 			public CheckError[] checkUpdate()
 			{
@@ -262,7 +356,7 @@ public class ConfigAssistant extends JAPDialog
 			}
 			public boolean isMoveForwardAllowed()
 			{
-				return paneSetLang.isSkippedAsNextContentPane();
+				return paneRestart.isSkippedAsNextContentPane();
 			}
 		};
 		contentPane = paneBrowserConf.getContentPane();
@@ -304,14 +398,10 @@ public class ConfigAssistant extends JAPDialog
 		}
 
 		constraints.gridy = 0;
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_IE, "browser_ie", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_FIREFOX, "browser_firefox", true);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_SEA_MONKEY, "browser_seamonkey", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_OPERA, "browser_opera", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_KONQUEROR, "browser_konqueror", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_SAFARI, "browser_safari", false);
+		addBrowserInstallationInfo(contentPane, constraints, "JonDoFox", "jondofox", true);
+		addBrowserInstallationInfo(contentPane, constraints, BROWSER_FIREFOX, "jondofox", true);
 		addBrowserInstallationInfo(contentPane, constraints,
-								   JAPMessages.getString(MSG_OTHER_BROWSERS), "browser_unknown", false);
+								   JAPMessages.getString(MSG_OTHER_BROWSERS), "browser", false);
 
 
 		DialogContentPane paneBrowserTest = new SimpleWizardContentPane(
@@ -334,7 +424,7 @@ public class ConfigAssistant extends JAPDialog
 			public boolean isSkippedAsPreviousContentPane()
 			{
 				return m_groupWarning.getSelection() != null &&
-					(m_radioNoWarning.isSelected() || m_radioNoWarningAndSurfing.isSelected());
+					(m_radioNoWarning.isSelected());
 			}
 		};
 		contentPane = paneBrowserTest.getContentPane();
@@ -345,10 +435,6 @@ public class ConfigAssistant extends JAPDialog
 		constraints.anchor = GridBagConstraints.WEST;
 		m_radioNoWarning = new JRadioButton(JAPMessages.getString(MSG_ERROR_NO_WARNING));
 		contentPane.add(m_radioNoWarning, constraints);
-		m_radioNoWarningAndSurfing =
-			new JRadioButton(JAPMessages.getString(MSG_ERROR_NO_WARNING_AND_SURFING));
-		constraints.gridy++;
-		contentPane.add(m_radioNoWarningAndSurfing, constraints);
 		m_radioErrorWarningNoSurfing = new JRadioButton(JAPMessages.getString(MSG_ERROR_WARNING_NO_SURFING));
 		constraints.gridy++;
 		contentPane.add(m_radioErrorWarningNoSurfing, constraints);
@@ -361,7 +447,6 @@ public class ConfigAssistant extends JAPDialog
 		contentPane.add(m_radioSuccessWarning, constraints);
 		m_groupWarning = new ButtonGroup();
 		m_groupWarning.add(m_radioNoWarning);
-		m_groupWarning.add(m_radioNoWarningAndSurfing);
 		m_groupWarning.add(m_radioErrorWarningNoSurfing);
 		m_groupWarning.add(m_radioWarningInBrowser);
 		m_groupWarning.add(m_radioSuccessWarning);
@@ -374,7 +459,7 @@ public class ConfigAssistant extends JAPDialog
 			public boolean isSkippedAsNextContentPane()
 			{
 				return m_groupWarning.getSelection() != null &&
-					!(m_radioNoWarning.isSelected() || m_radioNoWarningAndSurfing.isSelected());
+					!(m_radioNoWarning.isSelected());
 			}
 			public boolean isSkippedAsPreviousContentPane()
 			{
@@ -414,10 +499,11 @@ public class ConfigAssistant extends JAPDialog
 
 
 		DialogContentPane paneExplainNoDirectConnection = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_EXPLAIN_NO_DIRECT_CONNECTION) + "<br><br>" +
+			  this, JAPMessages.getString(MSG_EXPLAIN_NO_DIRECT_CONNECTION)  + " " +
 			  JAPMessages.getString(JAPConf.MSG_READ_PANEL_HELP, new Object[]{
 									JAPMessages.getString("confButton"),
-									JAPMessages.getString("ngTreeNetwork")}), layout,
+									JAPMessages.getString("ngTreeNetwork")}) + "<br><br>" +
+									JAPMessages.getString(MSG_EXPLAIN_FIREWALL), layout,
 			  new DialogContentPaneOptions(paneExplainWarningInBrowser))
 		{
 
@@ -485,13 +571,15 @@ public class ConfigAssistant extends JAPDialog
 		m_groupAnon.add(m_ConnectionOK);
 
 		DialogContentPane paneExplainNoServiceAvailable = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_EXPLAIN_NO_SERVICE_AVAILABLE, new Object[]{
+			  this, JAPMessages.getString(MSG_EXPLAIN_FIREWALL) + "<br><br>" +
+			  JAPMessages.getString(MSG_EXPLAIN_NO_SERVICE_AVAILABLE, new Object[]{
 										  JAPMessages.getString("ngBttnAnonDetails"),
 										  JAPMessages.getString("ngAnonGeneralPanelTitle"),
 										  JAPMessages.getString(JAPConfAnonGeneral.MSG_CONNECTION_TIMEOUT),
 										  JAPMessages.getString("ngSettingsViewNormal"),
 										  JAPMessages.getString("confButton"),
-										  JAPMessages.getString("ngTreeNetwork")}),
+										  JAPMessages.getString("ngTreeNetwork")}) 
+										  ,
 			  layout, new DialogContentPaneOptions(paneAnonTest))
 		{
 			public boolean isSkippedAsNextContentPane()
@@ -512,7 +600,11 @@ public class ConfigAssistant extends JAPDialog
 
 
 		DialogContentPane paneExplainNoConnection = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_EXPLAIN_NO_CONNECTION), layout,
+			  this, JAPMessages.getString(MSG_EXPLAIN_NO_CONNECTION) + " " + 
+			  JAPMessages.getString(MSG_EXPLAIN_CHOOSE_OTHER_SERVICE, new String[]{
+					  JAPMessages.getString(JAPNewView.MSG_SERVICE_NAME),
+					  JAPMessages.getString("ngAnonymitaet"), JAPMessages.getString("ngAnonOn") 
+			  }), layout,
 			  new DialogContentPaneOptions(paneExplainNoServiceAvailable))
 		{
 			public CheckError[] checkUpdate()
@@ -541,7 +633,11 @@ public class ConfigAssistant extends JAPDialog
 
 
 		DialogContentPane paneExplainBadConnection = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_EXPLAIN_BAD_CONNECTION), layout,
+			  this, JAPMessages.getString(MSG_EXPLAIN_BAD_CONNECTION) + " " +
+			  JAPMessages.getString(MSG_EXPLAIN_CHOOSE_OTHER_SERVICE, new String[]{
+					  JAPMessages.getString(JAPNewView.MSG_SERVICE_NAME),
+					  JAPMessages.getString("ngAnonymitaet"), JAPMessages.getString("ngAnonOn") 
+			  }), layout,
 			  new DialogContentPaneOptions(paneExplainNoConnection))
 		{
 
@@ -583,53 +679,12 @@ public class ConfigAssistant extends JAPDialog
 								   JAPMessages.getString(MSG_OTHER_BROWSERS), "noactive_general", false);
 
 
-		final DialogContentPane paneView = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_SELECT_VIEW), layout,
-			  new DialogContentPaneOptions(paneDeactivateActiveContents))
-		{
-			public CheckError[] checkYesOK()
-			{
-				CheckError[] errors = super.checkYesOK();
-				if (m_groupView.getSelection() == null)
-				{
-					return new CheckError[]{new CheckError(
-					   JAPMessages.getString(MSG_MAKE_SELECTION), LogType.GUI)};
-				}
-
-				return errors;
-			}
-		};
-		contentPane = paneView.getContentPane();
-		contentPane.setLayout(new GridBagLayout());
-		constraints = new GridBagConstraints();
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.anchor = GridBagConstraints.WEST;
-		m_radioSimpleView = new JRadioButton(JAPMessages.getString("ngSettingsViewSimplified"));
-		m_radioAdvancedView = new JRadioButton(JAPMessages.getString("ngSettingsViewNormal"));
-		if (!JAPController.getInstance().isConfigAssistantShown())
-		{
-			// this is not the first start of JAP
-			if (JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
-			{
-				m_radioAdvancedView.setSelected(true);
-			}
-			else
-			{
-				m_radioSimpleView.setSelected(true);
-			}
-		}
-		m_groupView = new ButtonGroup();
-		m_groupView.add(m_radioSimpleView);
-		m_groupView.add(m_radioAdvancedView);
-		contentPane.add(m_radioSimpleView, constraints);
-		constraints.gridy++;
-		contentPane.add(m_radioAdvancedView, constraints);
+		///////
 
 
 		DialogContentPane paneHelp = new SimpleWizardContentPane(
 			  this, JAPMessages.getString(MSG_HELP),
-			  layout, new DialogContentPaneOptions(paneView))
+			  layout, new DialogContentPaneOptions(paneDeactivateActiveContents))
 		{
 			/*
 			public boolean isMoveForwardAllowed()
@@ -652,36 +707,8 @@ public class ConfigAssistant extends JAPDialog
 
 
 		final DialogContentPane paneFinish = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_FINISHED) + "<br><br>" +
-			  JAPMessages.getString(MSG_SELECT_VIEW_RESTART), layout,
-			  new DialogContentPaneOptions(paneHelp))
-		{
-			public CheckError[] checkUpdate()
-			{
-				if ((m_radioSimpleView.isSelected() && JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
-					|| (m_radioAdvancedView.isSelected() &&
-						JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED))
-				{
-					String view;
-					if (m_radioSimpleView.isSelected())
-					{
-						view = JAPMessages.getString("ngSettingsViewSimplified");
-					}
-					else
-					{
-						view = JAPMessages.getString("ngSettingsViewNormal");
-					}
-					setText(JAPMessages.getString(MSG_FINISHED) + "<br><br>" +
-							JAPMessages.getString(MSG_SELECT_VIEW_RESTART, view));
-				}
-				else
-				{
-					setText(JAPMessages.getString(MSG_FINISHED));
-				}
-
-				return super.checkUpdate();
-			}
-		};
+			  this, JAPMessages.getString(MSG_FINISHED), layout,
+			  new DialogContentPaneOptions(paneHelp));
 		paneFinish.getButtonCancel().setVisible(false);
 
 
@@ -709,30 +736,25 @@ public class ConfigAssistant extends JAPDialog
 			}
 			public void windowClosed(WindowEvent a_event)
 			{
-				if (paneSetLang.getButtonValue() == DialogContentPane.RETURN_VALUE_OK)
+				if (paneRestart.getButtonValue() == DialogContentPane.RETURN_VALUE_OK)
 				{
 					JAPMessages.setLocale(((LanguageMapper)comboLang.getSelectedItem()).getLocale());
+					if (m_radioSimpleView.isSelected() &&
+						JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
+					{
+						JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_SIMPLIFIED);
+					}
+					else if (m_radioAdvancedView.isSelected() &&
+							 JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED)
+					{
+						JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_NORMAL);
+					}
+					
 					JAPController.goodBye(false);
 				}
 				else
 				{
 					JAPController.getInstance().setConfigAssistantShown();
-					if (paneFinish.getButtonValue() == DialogContentPane.RETURN_VALUE_OK ||
-						m_bFinished)
-					{
-						if (m_radioSimpleView.isSelected() &&
-							JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
-						{
-							JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_SIMPLIFIED);
-							JAPController.goodBye(false);
-						}
-						else if (m_radioAdvancedView.isSelected() &&
-								 JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED)
-						{
-							JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_NORMAL);
-							JAPController.goodBye(false);
-						}
-					}
 				}
 			}
 		});

@@ -1265,7 +1265,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		
 		String htmlData = "<HTML>\n" +
 		"  <HEAD>\n" +
-		"    <TITLE>JonDonym - InfoService</TITLE>\n" +
+		"    <TITLE>InfoService</TITLE>\n" +
 		"    <STYLE TYPE=\"text/css\">\n" +
 		"      <!--\n" +
 		"        h1 {color:blue; text-align:center;}\n" +
@@ -1297,10 +1297,13 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n";
 		
 		htmlData += 
-		"    <H2>InfoService Name: " + Configuration.getInstance().getOwnName() + "</H2>\n"+
+		"    <H2>InfoService Name: " + Configuration.getInstance().getOwnName() + "</H2>\n" +
 		"    <P>Infoservice [" + Constants.INFOSERVICE_VERSION + "] Startup Time: " +
 			Configuration.getInstance().getStartupTime() +
 		"</P>\n" +
+		"   <P>This is an InfoService for AN.ON/JonDonym technology networks.<br>\n" +
+		"   It is a distributed storage for network information and does not harm anyone.<br>\n" + 
+		"   If you do not want your computer contacting it, please stop using AN.ON/JonDonym software and services.\n" +
 		"    <HR noShade SIZE=\"1\">\n" +
 		"    <ADDRESS>&copy; 2000 - 2008 The JAP Team - JonDos GmbH</ADDRESS>\n" +
 		"  </BODY>\n" +
