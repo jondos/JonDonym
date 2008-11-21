@@ -1968,7 +1968,9 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			//ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
 			httpResponse = m_exitAddressListResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
-		else if( (command.startsWith(MixCascade.INFOSERVICE_COMMAND_WEBINFOS) && (method == Constants.REQUEST_METHOD_GET)))
+		else if( ( command.equals(MixCascade.INFOSERVICE_COMMAND_WEBINFOS) || 
+				   command.equals(MixCascade.INFOSERVICE_COMMAND_WEBINFOS+"/") ) && 
+				 ( method == Constants.REQUEST_METHOD_GET ) )
 		{
 			Document doc = MixCascade.getAllCascadeWebInfos();
 			httpResponse = new HttpResponseStructure(doc);
