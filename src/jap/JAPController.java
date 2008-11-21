@@ -755,8 +755,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				public void run()
 				{
 					if (JAPController.getInstance().isConfigAssistantShown() &&
-						!(JAPDialog.isConsoleOnly()||JAPModel.isSmallDisplay()) &&
-						!isPortableMode())
+						!(JAPDialog.isConsoleOnly()||JAPModel.isSmallDisplay()))
 					{
 						showInstallationAssistant();
 					}

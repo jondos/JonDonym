@@ -74,18 +74,19 @@ import platform.AbstractOS;
  */
 public class ConfigAssistant extends JAPDialog
 {
-	private static final String BROWSER_IE = "Internet Explorer";
+	private static final String BROWSER_JONDOFOX = "JonDoFox";
 	private static final String BROWSER_FIREFOX = "Mozilla Firefox";
-	private static final String BROWSER_SEA_MONKEY = "Sea Monkey";
-	private static final String BROWSER_OPERA = "Opera";
-	private static final String BROWSER_KONQUEROR = "Konqueror";
-	private static final String BROWSER_SAFARI = "Safari";
 
 	private static final String MSG_WELCOME = ConfigAssistant.class.getName() + "_welcome";
 	private static final String MSG_HELP = ConfigAssistant.class.getName() + "_help";
 	private static final String MSG_ANON_HP = ConfigAssistant.class.getName() + "_anonHP";
 	private static final String MSG_TITLE = ConfigAssistant.class.getName() + "_title";
 	private static final String MSG_FINISHED = ConfigAssistant.class.getName() + "_finished";
+	private static final String MSG_FINISHED_ANONTEST = 
+		ConfigAssistant.class.getName() + "_menuFinishAnontest";
+	private static final String MSG_FINISHED_TROUBLESHOOTING = 
+		ConfigAssistant.class.getName() + "_menuFinishTroubleshooting";
+	
 	private static final String MSG_BROWSER_CONF = ConfigAssistant.class.getName() + "_browserConf";
 	private static final String MSG_RECOMMENDED = ConfigAssistant.class.getName() + "_recommended";
 	private static final String MSG_OTHER_BROWSERS = ConfigAssistant.class.getName() + "_otherBrowsers";
@@ -398,7 +399,7 @@ public class ConfigAssistant extends JAPDialog
 		}
 
 		constraints.gridy = 0;
-		addBrowserInstallationInfo(contentPane, constraints, "JonDoFox", "jondofox", true);
+		addBrowserInstallationInfo(contentPane, constraints, BROWSER_JONDOFOX, "jondofox", true);
 		addBrowserInstallationInfo(contentPane, constraints, BROWSER_FIREFOX, "jondofox", true);
 		addBrowserInstallationInfo(contentPane, constraints,
 								   JAPMessages.getString(MSG_OTHER_BROWSERS), "browser", false);
@@ -661,54 +662,20 @@ public class ConfigAssistant extends JAPDialog
 		paneExplainBadConnection.getContentPane().add(lblImage);
 
 
-		DialogContentPane paneDeactivateActiveContents = new SimpleWizardContentPane(
-			this, JAPMessages.getString(MSG_DEACTIVATE_ACTIVE), layout,
+		final DialogContentPane paneFinish = new SimpleWizardContentPane(
+			this, JAPMessages.getString(MSG_FINISHED), layout,
 			new DialogContentPaneOptions(paneExplainBadConnection));
-		contentPane = paneDeactivateActiveContents.getContentPane();
+		contentPane = paneFinish.getContentPane();
 		contentPane.setLayout(new GridBagLayout());
 		constraints = new GridBagConstraints();
 		constraints.gridx = 0;
 		constraints.gridy = -1;
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_IE, "noactive_ie", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_FIREFOX, "noactive_firefox", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_SEA_MONKEY, "noactive_seamonkey", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_OPERA, "noactive_opera", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_KONQUEROR, "noactive_konqueror", false);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_SAFARI, "noactive_safari", false);
-		addBrowserInstallationInfo(contentPane, constraints,
-								   JAPMessages.getString(MSG_OTHER_BROWSERS), "noactive_general", false);
+		addBrowserInstallationInfo(contentPane, constraints, 
+				JAPMessages.getString(MSG_FINISHED_ANONTEST), "security_test", false);
+		addBrowserInstallationInfo(contentPane, constraints, BROWSER_JONDOFOX, "jondofox", false);
+		addBrowserInstallationInfo(contentPane, constraints, 
+				JAPMessages.getString(MSG_FINISHED_TROUBLESHOOTING), "trouble", false);
 
-
-		///////
-
-
-		DialogContentPane paneHelp = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_HELP),
-			  layout, new DialogContentPaneOptions(paneDeactivateActiveContents))
-		{
-			/*
-			public boolean isMoveForwardAllowed()
-			{
-				return paneSetLang.isSkippedAsNextContentPane();
-			}*/
-		};
-		paneHelp.getContentPane().setLayout(new GridBagLayout());
-		constraints = new GridBagConstraints();
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		lblImage = new JLabel(JAPMessages.getString(MSG_ANON_HP));
-		registerLink(lblImage, JAPMessages.getString(MSG_ANON_HP), false);
-		paneHelp.getContentPane().add(lblImage, constraints);
-		lblImage = new JLabel(GUIUtils.loadImageIcon(JAPHelp.IMG_HELP));
-		lblImage.setBorder(border);
-		constraints.gridy++;
-		paneHelp.getContentPane().add(lblImage, constraints);
-
-
-
-		final DialogContentPane paneFinish = new SimpleWizardContentPane(
-			  this, JAPMessages.getString(MSG_FINISHED), layout,
-			  new DialogContentPaneOptions(paneHelp));
 		paneFinish.getButtonCancel().setVisible(false);
 
 

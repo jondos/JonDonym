@@ -222,7 +222,10 @@ final public class JAPDll {
 					{
 						try
 						{
-							hideSystray_dll();
+							if (getDllVersion() != null)
+							{
+								hideSystray_dll();
+							}
 						}
 						catch (Throwable a_e)
 						{
