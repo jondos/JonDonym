@@ -1410,16 +1410,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 	public String getHelpContext()
 	{
-		int index = 0;
-		index = this.m_infoServiceTabPane.getSelectedIndex();
-
-		switch (index)
-		{
-			case 1:
-				return "infoservice_advanced";
-			default:
-				return "infoservice_settings";
-		}
+		return "infoservice";
 	}
 
 	protected boolean onOkPressed()

@@ -3382,15 +3382,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 	public String getHelpContext()
 	{
-		int index = 0;
-		index = m_tabPane.getSelectedIndex();
-		switch (index)
-		{
-			case 1:
-				return "payment_extend";
-			default:
-				return "payment_account";
-		}
+		return "payment";
 	}
 
 	/**
