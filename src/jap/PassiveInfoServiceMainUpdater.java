@@ -1,20 +1,13 @@
 package jap;
 
-import infoservice.PassiveInfoServiceInitializer;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
-
-import org.w3c.dom.Document;
 
 import anon.infoservice.Database;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.MixCascade;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.PerformanceInfo;
-import anon.util.XMLUtil;
 
 public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 {
