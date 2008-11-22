@@ -41,7 +41,6 @@ import gui.JAPMessages;
 import jap.pay.AccountUpdater;
 import jap.JAPModel;
 import jap.JAPController;
-import jap.MixCascadeUpdater;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
@@ -61,8 +60,6 @@ public class InfoService implements Observer
 	private static int m_connectionCounter;
 	private static PerformanceMeter ms_perfMeter;
 	private static AccountUpdater ms_accountUpdater;
-	//private static MixCascadeUpdater ms_cascadeUpdater;
-	//private static MixCascadeUpdater ms_cascadeUpdater;
 	
 	private String m_configFileName;
 	
@@ -132,11 +129,6 @@ public class InfoService implements Observer
 			else
 			{
 				InfoService.ms_perfMeter = null;
-			}
-			
-			if(Configuration.getInstance().isPassive())
-			{
-				
 			}
 			
 			// start info service server
