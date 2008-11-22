@@ -1314,16 +1314,17 @@ public final class JAPController extends Observable implements IProxyListener, O
 						{
 							try
 							{
-								currentCascade = new MixCascade( (Element) nodeCascade, Long.MAX_VALUE);
-								
+								currentCascade = new MixCascade( (Element) nodeCascade, Long.MAX_VALUE);								
 								currentCascadeContext = currentCascade.getContext();
 								/* JonDonym is the defult service context */
 								if(currentCascadeContext == null)
 								{
 									currentCascadeContext = IServiceContextContainer.CONTEXT_JONDONYM;
 								}
+								
 								/* only add to database when the service context matches */
-								if(currentCascadeContext.equals(m_Model.getContext()))
+								if ((currentCascadeContext == null && m_Model.getContext() == null) || 
+									currentCascadeContext.equals(m_Model.getContext()))
 								{
 									try
 									{
@@ -3402,7 +3403,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 						{
 							LogHolder.log(LogLevel.DEBUG, LogType.NET, "AN.ON service started successfully");
 							adapter.connectionEstablished(proxyAnon.getMixCascade());
-
+							
+							/*
 							if (!mbActCntMessageNotRemind && !JAPModel.isSmallDisplay() &&
 								!m_bShowConfigAssistant && !getInstance().isPortableMode())
 							{
@@ -3426,7 +3428,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 										}
 									}
 								});
-							}
+							}*/
 						}
 						else
 						{

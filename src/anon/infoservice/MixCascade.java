@@ -1405,14 +1405,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			return null;
 		}
-		if(m_context != null)
-		{
-			/* only create Status for JonDonym Services */ 
-			if(!m_context.equals(CONTEXT_JONDONYM))
-			{
-				return null;
-			}
-		}
 		
 		Vector decomposedNames = getDecomposedCascadeName();
 		Vector namesToAdd = new Vector(decomposedNames.size());
