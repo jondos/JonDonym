@@ -57,7 +57,7 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 
 	public MixCascadeUpdater(long interval)
 	{
-		super(new DynamicUpdateInterval(interval));
+		super(interval);
 	}
 	
 	public Class getUpdatedClass()
@@ -126,13 +126,16 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 	{
 		Hashtable result = 
 			InfoServiceHolder.getInstance().getMixCascadeSerials(JAPModel.getInstance().getContext());
-		if (result == null)
+		if (getUpdateInterval() instanceof DynamicUpdateInterval)
 		{
-			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
-		}
-		else
-		{
-			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+			if (result == null)
+			{
+				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
+			}
+			else
+			{
+				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+			}
 		}
 		
 		return result;

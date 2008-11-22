@@ -519,9 +519,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				}
 			}
 
-			// WIEDER EINSCHALTEN NACHHER!
 			if ( (a_supportedEncodings & HttpResponseStructure.HTTP_ENCODING_ZLIB) > 0)
-				
 			{
 				httpResponse = m_cachedCompressedResponse;
 			}

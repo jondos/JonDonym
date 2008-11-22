@@ -11,25 +11,9 @@ public class PassiveInfoServiceStatusUpdater extends AbstractDatabaseUpdater
 {
 	public static final long UPDATE_INTERVAL_MS = 7000l;
 	
-	private DynamicUpdateInterval m_updateInterval;
-	
-	public PassiveInfoServiceStatusUpdater(long interval) 
-	{
-		super(interval);
-	}
-
-	public PassiveInfoServiceStatusUpdater(IUpdateInterval interval) 
-	{
-		super(interval);
-	}
-
-	
 	public PassiveInfoServiceStatusUpdater() 
 	{
-		
 		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
-		m_updateInterval = (DynamicUpdateInterval)getUpdateInterval();
-		
 	}
 
 	protected Hashtable getEntrySerials() 
@@ -65,7 +49,7 @@ public class PassiveInfoServiceStatusUpdater extends AbstractDatabaseUpdater
 			}
 		}
 		/*end new*/
-		m_updateInterval.setUpdateInterval(UPDATE_INTERVAL_MS);
+		((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
 		return statusTable;
 	}
 

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import anon.infoservice.Database;
 import anon.infoservice.InfoServiceHolder;
@@ -12,14 +11,9 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.StatusInfo;
-import anon.util.Updater;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import jap.InfoServiceUpdater;
-import jap.JAPController;
-import jap.JAPModel;
-import jap.PerformanceInfoUpdater;
-import jap.PassiveInfoServiceCascadeUpdater;
 import jap.PassiveInfoServiceMainUpdater;
 import jap.PassiveInfoServiceStatusUpdater;
 import logging.LogHolder;
@@ -27,7 +21,7 @@ import logging.LogLevel;
 import logging.LogType;
 
 /**
- * A wrapper class for InfoService that encapsules Updater threads 
+ * A wrapper class for InfoService that encapsulates Updater threads 
  * normally used by JonDo. 
  * This module is used by InfoServices in passive mode.
  * In this mode the InfoService does not propagate itself to other InfoServices and does not push 
@@ -54,7 +48,6 @@ public class PassiveInfoServiceInitializer
 	
 	private static InfoServiceUpdater infoServiceUpdater = null; /** Handler of infoservice entries */
 	private static PassiveInfoServiceStatusUpdater statusUpdater = null; /** Handler of status entries */
-	private static PassiveInfoServiceCascadeUpdater cascadeUpdater = null; /** Handler of mixcascade entries */
 	private static PassiveInfoServiceGlobalUpdater globalUpdater = null;
 	
 	private final static int GLOBAL_UPDATE_INTERVAL = 60000;
