@@ -73,8 +73,10 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	public static final String XML_ELEMENT_WEBINFO = "CascadeWebInfo";
 	public static final String XML_ELEMENT_WEBINFO_CASCADE_NAME = "CascadeName";
 	public static final String XML_ELEMENT_WEBINFO_NAME = "Name";
+	public static final String XML_ELEMENT_WEBINFO_COMPOSED_NAME = "ComposedName";
 	public static final String XML_ELEMENT_WEBINFO_CURR_USERS = "CurrentUsers";
 	public static final String XML_ATTR_WEBINFO_MIX_COUNTRY = "mixCountry";
+	public static final String XML_ATTR_WEBINFO_MIX_POSITION = "mixPosition";
 	public static final String XML_ATTR_WEBINFO_OP_COUNTRY = "operatorCountry";
 	
 	public static final String INFOSERVICE_COMMAND_WEBINFOS = "/cascadewebinfos";
@@ -1439,18 +1441,13 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		
 		Element currentNameElement = null;
 		String currentDecomposedNameComponent = null;
-		
 		MixInfo currentMixInfo = null;
-		
 		ServiceOperator currentMixOperator = null;
 		ServiceLocation currentMixLocation = null;
-		
 		Element currentMixElement = null;
 		Element currentMixOperatorElement = null;
 		Element currentMixLocationElement = null;
-	
 		String currentMixName = null;
-		
 		rootElement.appendChild(mixList);
 		for (int i = 0; i < getNumberOfMixes(); i++) 
 		{
@@ -1492,15 +1489,17 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 						XMLUtil.createChildElementWithValue(cascadeName, 
 								XML_ELEMENT_WEBINFO_NAME, 
 								currentDecomposedNameComponent);
-				}
-				if( currentMixLocation.getCountryCode() != null )
-				{
-					XMLUtil.setAttribute(currentNameElement, XML_ATTR_WEBINFO_MIX_COUNTRY, currentMixLocation.getCountryCode());
-				}
 				
-				if( currentMixOperator.getCountryCode() != null )
-				{
-					XMLUtil.setAttribute(currentNameElement, XML_ATTR_WEBINFO_OP_COUNTRY, currentMixOperator.getCountryCode());
+					if (currentMixLocation.getCountryCode() != null )
+					{
+						XMLUtil.setAttribute(currentNameElement, XML_ATTR_WEBINFO_MIX_COUNTRY, currentMixLocation.getCountryCode());
+					}
+					
+					if (currentMixOperator.getCountryCode() != null )
+					{
+						XMLUtil.setAttribute(currentNameElement, XML_ATTR_WEBINFO_OP_COUNTRY, currentMixOperator.getCountryCode());
+					}
+					XMLUtil.setAttribute(currentNameElement, XML_ATTR_WEBINFO_MIX_POSITION, i);
 				}
 				
 				/* now set the current Mix Attributes */ 
@@ -1526,6 +1525,34 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				}
 			}
 		}	
+		
+		currentNameElement = 
+			XMLUtil.createChildElementWithValue(cascadeName, 
+					XML_ELEMENT_WEBINFO_COMPOSED_NAME, getName());
+		
+		Element listenerInterfaces = 
+			XMLUtil.createChildElement(rootElement, ListenerInterface.XML_ELEMENT_CONTAINER_NAME);
+		ListenerInterface listenerInterface;
+		Element elemInterface;
+		Hashtable hashInterfaceHosts = new Hashtable();
+		for (int i = 0; i < getNumberOfListenerInterfaces(); i++)
+		{
+			listenerInterface = getListenerInterface(i);
+			if (hashInterfaceHosts.containsKey(listenerInterface.getHost()))
+			{
+				elemInterface = (Element)hashInterfaceHosts.get(listenerInterface.getHost());
+			}
+			else
+			{
+				elemInterface = XMLUtil.createChildElement(listenerInterfaces, 
+						ListenerInterface.XML_ELEMENT_NAME);
+				XMLUtil.setAttribute(elemInterface, "Host", listenerInterface.getHost());
+				hashInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
+			}
+			
+			XMLUtil.createChildElementWithValue(elemInterface, "Port", "" + listenerInterface.getPort());
+		}
+		
 		return rootElement;
 	}
 	

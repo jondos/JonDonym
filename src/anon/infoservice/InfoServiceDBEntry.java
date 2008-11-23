@@ -1410,18 +1410,19 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return getStatusInfo(a_cascade, -1);
 	}
 
-	public void getExitAddresses() throws Exception
+	public Object getExitAddresses() throws Exception
 	{
+		boolean bUpdated = false;
 		Document doc =
-			getXmlDocument(HttpRequestStructure.createGetRequest("/exitaddresses/"));
-		if(doc == null)
+			getXmlDocument(HttpRequestStructure.createGetRequest("/exitaddresses"));
+		if (doc == null)
 		{
-			return;
+			return null;
 		}
 		Element parent = doc.getDocumentElement();
-		if(parent == null)
+		if (parent == null)
 		{
-			return;
+			return null;
 		}
 		
 		Node exitAddressesNode = XMLUtil.getFirstChildByName(parent, MixCascadeExitAddresses.XML_ELEMENT_NAME);
@@ -1438,15 +1439,20 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				{
 					currentIP = XMLUtil.parseValue(currentAddress, "");
 					if(!currentIP.equals(""))
-					{
+					{						
 						MixCascadeExitAddresses.addInetAddress(currentID, InetAddress.getByName(currentIP));
+						bUpdated = true;
 					}
 					currentAddress = XMLUtil.getNextSiblingByName(currentAddress, MixCascadeExitAddresses.XML_ELEMENT_ADDRESS_NAME);
 				}
 			}
 			exitAddressesNode = XMLUtil.getNextSiblingByName(exitAddressesNode, MixCascadeExitAddresses.XML_ELEMENT_NAME);
-			//System.out.println("");
 		}
+		if (bUpdated)
+		{
+			return new Object(); // dummy to prevent InfoServiceHolder from throwing error messages
+		}
+		return null;
 	}
 	
 	/**

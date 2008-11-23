@@ -1195,24 +1195,30 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				
 				htmlData +="    <TABLE BORDER=\"0\">\n" +
 				"      <COLGROUP>\n" +
-				"        <COL WIDTH=\"20%\">\n" +
+				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				//"        <COL WIDTH=\"2%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				"        <COL WIDTH=\"15%\">\n" +				
-				"        <COL WIDTH=\"25%\">\n" +
-				"        <COL WIDTH=\"3%\">\n" +				
+				(Configuration.getInstance().isPassive() ?
+				"        <COL WIDTH=\"15%\">\n" +	
+				"        <COL WIDTH=\"15%\">\n" +
+				"        <COL WIDTH=\"10%\">\n" 	:
+				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"20%\">\n" +
+				"        <COL WIDTH=\"5%\">\n") +				
+				"        <COL WIDTH=\"5%\">\n" +
 				"      </COLGROUP>\n" +
 				"      <TR>\n" +
 				"        <TH>Cascade Name</TH>\n" +
 				"        <TH>Cascade ID</TH>\n" +
 				"        <TH>Active Users</TH>\n" +
-				//"        <TH>Current Risk</TH>\n" +
 				"        <TH>Traffic Situation</TH>\n" +
-				"        <TH>Delay (Avg) [Bound]</TH>\n" +
-				"        <TH>Speed (Avg) [Bound]</TH>\n" +
+				(Configuration.getInstance().isPassive() ? 
+				"        <TH>Delay Bound</TH>\n" : 
+				"        <TH>Delay (Avg) [Bound]</TH>\n") +
+				(Configuration.getInstance().isPassive() ? 
+				"        <TH>Speed Bound</TH>\n" :		
+				"        <TH>Speed (Avg) [Bound]</TH>\n") +
 				"        <TH>Mixed Packets</TH>\n" +
 				"        <TH>Last Notification</TH>\n" +
 				"      </TR>\n";
@@ -1223,8 +1229,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			{
 				info = (StatusInfo) (enumer.nextElement());
 				/* get the HTML table line */
-				htmlData = htmlData + "      " + (info).getHtmlTableLine() +
-					"\n";
+				htmlData = htmlData + "      " + 
+				(info).getHtmlTableLine(Configuration.getInstance().isPassive()) + "\n";
 			}
 			htmlData = htmlData + "    </TABLE><BR>";
 			
@@ -1233,7 +1239,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				htmlData += "<a href=\"/perfstatus\">Performance Monitoring enabled</a>";				
 			}
 			
-			htmlData += "<BR><BR><BR>\n" +
+			htmlData += "<BR>\n" +
 			ISRuntimeStatistics.getAsHTML();
 			
 			htmlData += getHumanStatusFooter();

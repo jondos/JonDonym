@@ -1,13 +1,20 @@
 package anon.infoservice;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import anon.util.IXMLEncodable;
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
 /**
@@ -53,11 +60,6 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 	private long m_lastUpdate;
 	
 	/**
-	 * The serial of the database entry.
-	 */
-	private long m_serial;
-	
-	/**
 	 * The cascade id.
 	 */
 	private String m_strCascadeId = null;
@@ -80,7 +82,39 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 		m_strCascadeId = a_cascadeID;
 		
 		m_lastUpdate = System.currentTimeMillis();
-		m_serial = System.currentTimeMillis();
+	}
+	
+	public MixCascadeExitAddresses(Element a_xmlElement) throws XMLParseException
+	{
+		super(System.currentTimeMillis() + EXIT_ADDRESS_TTL);
+		
+		InetAddress address;
+		long lTime;
+		
+		
+		XMLUtil.assertNodeName(a_xmlElement, XML_ELEMENT_NAME);
+		XMLUtil.assertNotNull(a_xmlElement, XML_ATTR_ID);
+		m_strCascadeId = XMLUtil.parseAttribute(a_xmlElement, XML_ATTR_ID, null);
+		m_lastUpdate = System.currentTimeMillis();
+		
+		NodeList lstAddresses = a_xmlElement.getElementsByTagName(XML_ELEMENT_ADDRESS_NAME);
+		for (int i = 0; i < lstAddresses.getLength(); i++)
+		{
+			lTime = XMLUtil.parseAttribute(lstAddresses.item(i), 
+					XML_ATTR_LAST_UPDATE, System.currentTimeMillis());
+			XMLUtil.assertNotNull(lstAddresses.item(i));
+			
+			try 
+			{
+				address = InetAddress.getByName(XMLUtil.parseValue(lstAddresses.item(i), null));
+			} 
+			catch (UnknownHostException e) 
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.NET, e);
+				continue;
+			}
+			addInetAddress(address, lTime);
+		}
 	}
 	
 	public String getId() 
@@ -95,7 +129,7 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 	
 	public long getVersionNumber() 
 	{
-		return m_serial;
+		return m_lastUpdate;
 	}
 	
 	public static void addInetAddress(String a_cascadeID, InetAddress a_IPAddress)
@@ -144,6 +178,10 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 		}
 	}
 	
+	private boolean addInetAddress(InetAddress a_addr)
+	{
+		return addInetAddress(a_addr, System.currentTimeMillis());
+	}
 	
 	/**
 	 * Adds an address to the list.
@@ -151,13 +189,12 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 	 * @param a_addr The address to add.
 	 * @return True, if the list has changed, false otherwise.
 	 */
-	private boolean addInetAddress(InetAddress a_addr)
+	private boolean addInetAddress(InetAddress a_addr, long a_timestamp)
 	{
 		boolean bChanged = false;
 		
 		// enumerate through all entries and remove obsolete ones
 		Enumeration e = m_tblAddresses.keys();
-		
 		while(e.hasMoreElements())
 		{
 			Long timestamp = (Long) e.nextElement();
@@ -170,10 +207,15 @@ public class MixCascadeExitAddresses extends AbstractDatabaseEntry implements IX
 			}
 		}
 		
+		if (a_timestamp < System.currentTimeMillis() - EXIT_ADDRESS_TTL)
+		{
+			return false;
+		}
+		
 		// add the address if it isn't already in the list
 		if(!m_tblAddresses.contains(a_addr))
 		{
-			m_tblAddresses.put(new Long(System.currentTimeMillis()), a_addr);
+			m_tblAddresses.put(new Long(a_timestamp), a_addr);
 			bChanged = true;
 		}
 		

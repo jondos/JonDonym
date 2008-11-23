@@ -46,8 +46,6 @@ import java.net.URL;
  */
 public class ServiceOperator extends AbstractDatabaseEntry
 {
-	
-
 	public static final String XML_ELEMENT_NAME = "Operator";
 	public static final String XML_ELEMENT_ORGANISATION = "Organisation";
 	public static final String XML_ELEMENT_COUNTRYCODE = "CountryCode";
@@ -56,8 +54,8 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	public static final String XML_ELEMENT_EMAIL = "EMail";
 	public static final String XML_ELEMENT_EMAIL_SPAMSAFE = "Liame";
 	
-	private static final  String AT_SUBSTITUTE = "[at]";
-	private static final  String DOT_SUBSTITUTE = "[dot]";
+	private static final String AT_SUBSTITUTE = "([at]";
+	private static final String DOT_SUBSTITUTE = "([dot]";
 	private static final boolean SPAM_SAFE = true;
 	
 	/**

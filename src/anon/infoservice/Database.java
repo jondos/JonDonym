@@ -306,7 +306,7 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 					else
 					{
 						/* the oldest entry in the database
-						 * has not reached expire time now, so there are not more old entrys
+						 * has not reached expire time now, so there are no more old entries
 						 */
 						moreOldEntrys = false;
 					}

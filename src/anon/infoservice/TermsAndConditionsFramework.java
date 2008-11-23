@@ -488,7 +488,10 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 		
 		// not found, force an update and try again
-		JAPController.getInstance().getTermsUpdater().update();
+		if (JAPController.getInstance().getTermsUpdater() != null)
+		{
+			JAPController.getInstance().getTermsUpdater().update();
+		}
 		
 		tc = InfoServiceHolder.getInstance().getTCFramework(a_id);
 		

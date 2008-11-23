@@ -341,7 +341,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	}
 	
 	public void start() {
-		// simulate database distributor
+		// simulate database distributor and suppress distributor warnings
 		Database.registerDistributor(new IDistributor()
 		{
 			public void addJob(IDistributable a_distributable)
@@ -369,7 +369,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_minVersionUpdater = new MinVersionUpdater();
 		m_javaVersionUpdater = new JavaVersionUpdater();
 		m_messageUpdater = new MessageUpdater();
-		m_termsUpdater = new TermsAndConditionsUpdater();
+		//m_termsUpdater = new TermsAndConditionsUpdater();
 
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
@@ -659,7 +659,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					m_minVersionUpdater.start(false);
 					m_javaVersionUpdater.start(false);
 					m_messageUpdater.start(false);	
-					m_termsUpdater.start(false);
+					//m_termsUpdater.start(false);
 				}
 				else
 				{
@@ -691,9 +691,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						m_messageUpdater.updateAsync();
 					}
-					if (!m_termsUpdater.isFirstUpdateDone())
+					//if (!m_termsUpdater.isFirstUpdateDone())
 					{
-						m_termsUpdater.updateAsync();
+						//m_termsUpdater.updateAsync();
 					}
 				}
 
@@ -4041,7 +4041,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							m_Controller.m_javaVersionUpdater.stop();
 							m_Controller.m_messageUpdater.stop();
 							m_Controller.m_perfInfoUpdater.stop();
-							m_Controller.m_termsUpdater.stop();
+							//m_Controller.m_termsUpdater.stop();
 						}
 					}, "Finish IS threads");
 					finishIS.start();

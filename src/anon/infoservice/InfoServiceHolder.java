@@ -38,6 +38,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import anon.pay.PaymentInstanceDBEntry;
+import anon.util.ClassUtil;
 import anon.util.IXMLEncodable;
 import anon.util.Util;
 import anon.util.XMLParseException;
@@ -563,7 +564,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					}
 					else if (functionNumber == GET_EXIT_ADDRESSES)
 					{
-						currentInfoService.getExitAddresses();
+						// TODO ask more than one infoservice
+						result = currentInfoService.getExitAddresses();
 					}
 					else if (functionNumber == GET_CASCADEINFO)
 					{
@@ -628,9 +630,11 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 									{
 										LogHolder.log(LogLevel.WARNING, LogType.NET,
 													  "InfoServices report different verification status for " +
+													  ClassUtil.getShortClassName(currentEntry.getClass()) + 
+													  " with id " +
 													  currentSerialEntry.getId() + "!");
 										/**
-										 * This may only be used for filtring if allInfoServices think this entry
+										 * This may only be used for filtering if allInfoServices think this entry
 										 * is unverified.
 										 * If at least one IS reports it as verified, it must not be filtered.
 										 */
@@ -646,7 +650,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 													  "InfoServices report different validity status for " +
 													  currentSerialEntry.getId() + "!");
 										/**
-										 * This may only be used for filtring if allInfoServices think this entry
+										 * This may only be used for filtering if allInfoServices think this entry
 										 * is invalid.
 										 * If at least one IS reports it as valid, it must not be filtered.
 										 */

@@ -44,6 +44,8 @@ import jap.JAPController;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
+import anon.infoservice.IDistributable;
+import anon.infoservice.IDistributor;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.util.ThreadPool;
@@ -281,6 +283,13 @@ public class InfoService implements Observer
 		}
 		else
 		{
+			// suppress distributor warnings
+			Database.registerDistributor(new IDistributor()
+			{
+				public void addJob(IDistributable a_distributable)
+				{
+				}
+			});
 			//in passive mode we obtain our information by requesting it from other services
 			PassiveInfoServiceInitializer.init();
 		}

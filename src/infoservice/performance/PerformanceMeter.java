@@ -265,7 +265,7 @@ public class PerformanceMeter implements Runnable, Observer
 		m_infoServiceConfig = Configuration.getInstance(); 
 		if(m_infoServiceConfig == null)
 		{
-			//@todo: throw something. Assert InfoServiceConfig is not null
+			// TODO throw something. Assert InfoServiceConfig is not null
 		}
 		
 		// get the performance meter config from the infoservice config
@@ -1144,9 +1144,9 @@ public class PerformanceMeter implements Runnable, Observer
 	        long responseStartTime = System.currentTimeMillis();
 	        
 	        //	delay in ms
-	        if (responseStartTime - transferInitiatedTime > Integer.MAX_VALUE)
+	        if (responseStartTime - transferInitiatedTime >= Integer.MAX_VALUE)
 	        {
-	        	delay = Integer.MAX_VALUE;
+	        	delay = Integer.MAX_VALUE - 1;
 	        }
 	        else
 	        {

@@ -488,7 +488,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 *
 	 * @return A HTML table line with the data of this status entry.
 	 */
-	public String getHtmlTableLine()
+	public String getHtmlTableLine(boolean a_bPassiveMode)
 	{
 		String htmlTableLine = "<TR><TD CLASS=\"name\">";
 		MixCascade ownMixCascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(getId());
@@ -514,19 +514,23 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		{
 			trafficString = " (high)";
 		}
-		htmlTableLine = htmlTableLine + "</TD><TD CLASS=\"name\">" + getId() +
-			"</TD><TD CLASS=\"status\" ALIGN=\"right\"><a href=\"/values/users/" + getId() + "\">" + 
+		htmlTableLine = htmlTableLine + "</TD><TD CLASS=\"name\"><a href=\"" + 
+		MixCascade.INFOSERVICE_COMMAND_WEBINFO + getId() + "\">" +  getId() +
+			"</a></TD><TD CLASS=\"status\" ALIGN=\"right\">" + 
+			(!a_bPassiveMode ? "<a href=\"/values/users/" + getId() + "\">" : "") + 
 			Integer.toString(getNrOfActiveUsers()) + (maxUsers > 0 ? " / " + maxUsers : "") +
 			//"</TD><TD CLASS=\"status\" ALIGN=\"right\">" + Integer.toString(getCurrentRisk()) +
-			"</a></TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
+			(!a_bPassiveMode ? "</a>" : "" ) + 
+			"</TD><TD CLASS=\"status\" ALIGN=\"center\">" + Integer.toString(getTrafficSituation()) +
 			trafficString +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			"<a href=\"/values/delay/" + getId() + "\">" + 
-			((perfEntry != null &&
+			(!a_bPassiveMode ? 
+			(((perfEntry != null &&
 					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
 					perfEntry.getLastTestAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getLastTestAverage(PerformanceEntry.DELAY)) : "?") +
-			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.DELAY)) : "?") + ") " +
-			"[";
+			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.DELAY)) : "?") + ") ") : "") +
+			(!a_bPassiveMode ? "[" : "");
 		
 			long delayBound;
 			if (perfEntry == null)
@@ -551,14 +555,16 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 				htmlTableLine += delayBound;
 			}
 		
-			htmlTableLine += "] ms</a>" +
+			htmlTableLine += (!a_bPassiveMode ? "]" :"") + " ms" +
+			"</a>" +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			"<a href=\"/values/speed/" + getId() + "\">" + 
-			((perfEntry != null  &&
+			(!a_bPassiveMode ? 
+			(((perfEntry != null  &&
 					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
 					perfEntry.getLastTestAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getLastTestAverage(PerformanceEntry.SPEED)) : "?") + 
-			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.SPEED)): "?") + ") " +
-					"[";
+			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.SPEED)): "?") + ") ") : "") +
+			(!a_bPassiveMode ? "[" : "");
 			
 			long speedBound;
 			if (perfEntry == null)
@@ -584,7 +590,8 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 				htmlTableLine += speedBound;
 			}
 
-			htmlTableLine += "] kbit/s</a>" +
+			htmlTableLine += (!a_bPassiveMode ? "]" :"") + " kbit/s" + 
+			"</a>"  +
 			"</TD><TD CLASS=\"status\" ALIGN=\"right\">" +
 			NumberFormat.getInstance(Constants.LOCAL_FORMAT).format(getMixedPackets()) +
 			"</TD><TD CLASS=\"status\">" + 

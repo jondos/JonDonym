@@ -2,12 +2,14 @@ package jap;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import anon.infoservice.Database;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.MixCascade;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.PerformanceInfo;
+import anon.infoservice.PerformanceEntry.StabilityAttributes;
 
 public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 {
@@ -49,23 +51,56 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		
 		if(cascadeInfos != null)
 		{
-			
 			Enumeration cascades = cascadeInfos.elements();
+			Vector updatedEntries;
 			
 			if(cascades != null)
 			{
 				Hashtable performanceEntries = new Hashtable();
 				String currentCascadeId = null;
 				PerformanceEntry currentPerformanceEntry = null;
+				PerformanceEntry dbPerformanceEntry = null;
+				PerformanceEntry.PerformanceAttributeEntry attributeEntry;
+				StabilityAttributes stabilityAttributeEntry;
 				
 				while(cascades.hasMoreElements())
 				{
 					currentCascadeId = ((MixCascade) cascades.nextElement()).getId();
 					currentPerformanceEntry = PerformanceInfo.getLowestCommonBoundEntry(currentCascadeId);
-					if(currentPerformanceEntry != null)
+					
+					synchronized (Database.getInstance(PerformanceEntry.class))
 					{
-						performanceEntries.put(currentCascadeId, currentPerformanceEntry);
+						dbPerformanceEntry = 
+							(PerformanceEntry)Database.getInstance(
+									PerformanceEntry.class).getEntryById(currentCascadeId);
+						if (dbPerformanceEntry == null)
+						{							
+							Database.getInstance(PerformanceEntry.class).update(currentPerformanceEntry);
+						}
+						else
+						{
+							currentPerformanceEntry = dbPerformanceEntry.update(currentPerformanceEntry);							
+						}
+					}					
+					
+					updatedEntries = 
+						currentPerformanceEntry.updateHourlyPerformanceAttributeEntries(System.currentTimeMillis());
+					for (int i = 0; i < updatedEntries.size(); i++)
+					{
+						stabilityAttributeEntry = 
+							currentPerformanceEntry.getStabilityAttributes();
+						attributeEntry = 
+							(PerformanceEntry.PerformanceAttributeEntry)updatedEntries.elementAt(i);
+						attributeEntry.setErrors(stabilityAttributeEntry.getBoundErrors());
+						attributeEntry.setUnknown(stabilityAttributeEntry.getBoundUnknown());
+						attributeEntry.setResets(stabilityAttributeEntry.getBoundResets());
+						attributeEntry.setSuccess(
+								stabilityAttributeEntry.getValueSize() - 
+								stabilityAttributeEntry.getBoundErrors() -
+								stabilityAttributeEntry.getBoundUnknown());
 					}
+
+					performanceEntries.put(currentCascadeId, currentPerformanceEntry);
 				}
 				return performanceEntries;
 			}
