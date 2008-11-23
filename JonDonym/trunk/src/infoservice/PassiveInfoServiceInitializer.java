@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.w3c.dom.Document;
 
 import anon.infoservice.Database;
+import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixCascadeExitAddresses;
@@ -41,7 +42,8 @@ public class PassiveInfoServiceInitializer
 	 * must implement IXMLEncodable*/
 	private final static Class[] CACHE_CLASSES = new Class[]
 	{                    
-		MixCascade.class, MixCascadeExitAddresses.class, PerformanceInfo.class, StatusInfo.class
+		MixCascade.class, MixCascadeExitAddresses.class, PerformanceInfo.class, StatusInfo.class,
+		InfoServiceDBEntry.class
 	};
 	
 	public static String CACHE_FILE_NAME = "cache.xml";
@@ -58,10 +60,14 @@ public class PassiveInfoServiceInitializer
 		Document doc = null;
 		try 
 		{
-			doc = XMLUtil.readXMLDocument(new File(CACHE_FILE_NAME));
-			if(doc != null)
+			File fileCache = new File(CACHE_FILE_NAME);
+			if (fileCache.exists())
 			{
-				Database.restoreFromXML(doc, CACHE_CLASSES);	
+				doc = XMLUtil.readXMLDocument(new File(CACHE_FILE_NAME));
+				if(doc != null)
+				{
+					Database.restoreFromXML(doc, CACHE_CLASSES);	
+				}
 			}
 		} 
 		catch (IOException e) 

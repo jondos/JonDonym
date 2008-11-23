@@ -68,23 +68,12 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		m_xmlData = a_doc.getDocumentElement();
 		
 		m_serial = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_SERIAL, -1);
-		m_strId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_ID, "");
+		m_strId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_ID, null);
 		m_referenceId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_REFERENCE_ID, "");
 		
-		StringTokenizer token = new StringTokenizer(m_strId, "_");
-		if(token.countTokens() >= 2)
-		{
-			// extract the locale
-			m_locale = token.nextToken();
-			
-			// extract the ski
-			m_ski = token.nextToken();
-		}
-		else
-		{
-			m_locale = "en";
-			m_ski = null;
-		}
+		
+		m_locale = "en";
+		
 		
 		m_lastUpdate = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, -1L);
 		
@@ -96,9 +85,10 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 			m_certPath = m_signature.getCertPath();
 			if (m_certPath != null)
 			{
-				m_certificate = m_certPath.getFirstCertificate();
+				m_certificate = m_certPath.getSecondCertificate();
 			}
 		}
+		checkId();
 	}
 
 	public String getId() 
@@ -180,7 +170,10 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		}
 		
 		// not found, force an update and try again
-		JAPController.getInstance().getTermsUpdater().update();
+		if (JAPController.getInstance().getTermsUpdater() != null)
+		{
+			JAPController.getInstance().getTermsUpdater().update();
+		}
 		
 		// return the entry if found, otherwise null
 		return (TermsAndConditions) Database.getInstance(TermsAndConditions.class).getEntryById(a_id);

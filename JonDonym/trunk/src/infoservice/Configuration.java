@@ -283,9 +283,10 @@ final public class Configuration
 			m_strOwnName = a_properties.getProperty("ownname").trim();
 			m_iMaxPostContentLength = Integer.parseInt(a_properties.getProperty("maxPOSTContentLength").trim());
 			String strHardwareListeners = a_properties.getProperty("HardwareListeners").trim();
-			String strVirtualListeners = a_properties.getProperty("VirtualListeners").trim();
+			String strVirtualListeners = a_properties.getProperty("VirtualListeners");
+			
 			StringTokenizer stHardware = new StringTokenizer(strHardwareListeners, ",");
-			StringTokenizer stVirtual = new StringTokenizer(strVirtualListeners, ",");
+			
 
 			/* create a list of all interfaces we are listening on */
 			m_hostList = new Vector();
@@ -301,16 +302,24 @@ final public class Configuration
 				}
 			}
 			
-			m_virtualListenerList = new Vector();
-			while (stVirtual.hasMoreTokens())
+			if (strVirtualListeners != null)
 			{
-				ListenerInterface iface = new ListenerInterface(stVirtual.nextToken());
-				m_virtualListenerList.addElement(iface);
-				
-				if(iface != null && !m_hostList.contains(iface.getHost()))
+				m_virtualListenerList = new Vector();
+				StringTokenizer stVirtual = new StringTokenizer(strVirtualListeners.trim(), ",");
+				while (stVirtual.hasMoreTokens())
 				{
-					m_hostList.addElement(iface.getHost());
+					ListenerInterface iface = new ListenerInterface(stVirtual.nextToken());
+					m_virtualListenerList.addElement(iface);
+					
+					if(iface != null && !m_hostList.contains(iface.getHost()))
+					{
+						m_hostList.addElement(iface.getHost());
+					}
 				}
+			}
+			else
+			{
+				m_virtualListenerList = (Vector)m_hardwareListenerList.clone();
 			}
 
 			/* only for compatibility */
@@ -767,7 +776,14 @@ final public class Configuration
 			
 			m_bPassive = Boolean.valueOf(a_properties.getProperty("modePassive", "false")).booleanValue();
 			
-			m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "true")).booleanValue();
+			if (m_bPassive)
+			{
+				m_bPerfEnabled = false;
+			}
+			else
+			{
+				m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "true")).booleanValue();
+			}
 			
 			if(m_bPerfEnabled)
 			{
@@ -1156,9 +1172,9 @@ final public class Configuration
 	
 	/**
 	 * Returns if this InfoService does not propagate any information to
-	 * other InfoServices, but only passively collects some data (e.g. Mixes, Cascades, Status, Performance)
-	 * from other InfoServices. This passively stored information is kept as long as a JonDo client would 
-	 * do.
+	 * other InfoServices, but only passively stores some data (e.g. Mixes, Cascades, Status, Performance)
+	 * collected from other InfoServices. This passively stored information is kept as long as a JonDo 
+	 * client would do.
 	 * @return
 	 */
 	public boolean isPassive()

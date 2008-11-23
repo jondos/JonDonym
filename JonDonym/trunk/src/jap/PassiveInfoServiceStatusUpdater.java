@@ -20,7 +20,6 @@ public class PassiveInfoServiceStatusUpdater extends AbstractDatabaseUpdater
 	{
 		return new Hashtable();
 	}
-
 	
 	protected Hashtable getUpdatedEntries(Hashtable toUpdate) 
 	{
