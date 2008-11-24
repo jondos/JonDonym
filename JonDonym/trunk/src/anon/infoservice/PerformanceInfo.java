@@ -266,12 +266,12 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 				getMajorityBoundFromSortedBounds(vUnknownBoundaries, 0),
 				getMajorityBoundFromSortedBounds(vErrorBoundaries, 0),
 				getMajorityBoundFromSortedBounds(vResetsBoundaries, 0));
-		
-		perfEntry.setStabilityAttributes(attributes);
+				
 		perfEntry.setBound(PerformanceEntry.SPEED, getMajorityBoundFromSortedBounds(vSpeedBoundaries, Integer.MAX_VALUE));
 		perfEntry.setBestBound(PerformanceEntry.SPEED, getMajorityBoundFromSortedBounds(vSpeedBestBoundaries, Integer.MAX_VALUE));
 		perfEntry.setBound(PerformanceEntry.DELAY, getMajorityBoundFromSortedBounds(vDelayBoundaries, 0));
-		perfEntry.setBestBound(PerformanceEntry.DELAY, getMajorityBoundFromSortedBounds(vDelayBestBoundaries, 0));		
+		perfEntry.setBestBound(PerformanceEntry.DELAY, getMajorityBoundFromSortedBounds(vDelayBestBoundaries, 0));
+		perfEntry.setStabilityAttributes(attributes);
 		
 		return perfEntry;
 	}

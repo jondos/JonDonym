@@ -44,6 +44,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
+import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Calendar;
@@ -322,9 +323,10 @@ public class PerformanceMeter implements Runnable, Observer
 	{
 		int year = m_cal.get(Calendar.YEAR);
 		
-		if(week < 0)
+		if (week == 0)
 		{
 			year--;
+			week = new GregorianCalendar(year, Calendar.DECEMBER, 31).get(Calendar.WEEK_OF_YEAR);
 		}
 		
 		try
@@ -417,22 +419,22 @@ public class PerformanceMeter implements Runnable, Observer
 					PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(id);
 					
 					// create one if necessary
-					if(entry == null)
+					if (entry == null)
 					{
 						entry = new PerformanceEntry(id);
 					}
 					
-					// import the extracted value into the performace entry
+					// import the extracted value into the performance entry
 					entry.importValue(PerformanceEntry.DELAY, timestamp, delay);
 					entry.importValue(PerformanceEntry.SPEED, timestamp, speed);
 					
 					// only import users if we have a valid value
-					if(users != -1)
+					if (users != -1)
 					{
 						entry.importValue(PerformanceEntry.USERS, timestamp, users);
 					}
 					
-					if(packets != -1)
+					if (packets != -1)
 					{
 						entry.importValue(PerformanceEntry.PACKETS, timestamp, packets);
 					}
@@ -443,7 +445,8 @@ public class PerformanceMeter implements Runnable, Observer
 		}
 		catch(IOException ex)
 		{
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not read "+ PERFORMANCE_LOG_FILE + ". No previous performanace date for this week found.");
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not read "+ PERFORMANCE_LOG_FILE + 
+					". No previous performance data for this week found: " + ex.getMessage());
 		}
 		
 		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Added previous performance data for week" + week);
@@ -1339,6 +1342,7 @@ public class PerformanceMeter implements Runnable, Observer
     			m_stream.write((a_timestamp + "\t" + a_cascade.getId() + "\t" + a_delay + 
     					"\t" + a_speed + "\t" + a_users + "\t" + a_packets + "\t" +
     					(a_ip == null ? "0.0.0.0" : a_ip.getHostAddress()) + "\n").getBytes());
+    			m_stream.flush();
 			}
 		}
 		catch(IOException ex)
