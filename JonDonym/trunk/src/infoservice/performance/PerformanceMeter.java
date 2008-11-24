@@ -942,6 +942,7 @@ public class PerformanceMeter implements Runnable, Observer
 			int lastSpeed;
 			int lastUsers;
 			int lastPackets;
+			int waitTime;
 			
 			if (iUpdates > 0)
 			{
@@ -950,6 +951,22 @@ public class PerformanceMeter implements Runnable, Observer
 			}
 			
 			timestamp = System.currentTimeMillis();
+			waitTime = a_requestsPerInterval - iUpdates;
+			while (waitTime > 0)
+			{
+				try 
+				{
+					//wait until 
+					Thread.sleep(waitTime);
+					waitTime = 0;
+				} 
+				catch (InterruptedException e) 
+				{
+					// should not be possible
+					LogHolder.log(LogLevel.EMERG, LogType.THREAD, e);
+					waitTime--;
+				}
+			}
 			while (iUpdates < a_requestsPerInterval)
 			{				
 		    	// timestamp at which the test data was retrieved
@@ -981,7 +998,7 @@ public class PerformanceMeter implements Runnable, Observer
 				
 				logPerftestData(timestamp, a_cascade, Integer.MAX_VALUE, Integer.MAX_VALUE, 
 						info.getNrOfActiveUsers(), packets, null);				
-			}									
+			}
 			
 			lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);
 			lastSpeed = entry.addData(PerformanceEntry.SPEED, vSpeed);

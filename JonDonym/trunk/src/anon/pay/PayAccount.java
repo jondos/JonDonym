@@ -463,7 +463,8 @@ public class PayAccount implements IXMLEncodable
 		account = (PayAccount)a_account;
 		
 		return account.getAccountNumber() == this.getAccountNumber() &&
-			account.m_strBiID.equals(this.m_strBiID);
+			(account.m_strBiID == this.m_strBiID || (account.m_strBiID != null && 
+			this.m_strBiID != null && account.m_strBiID.equals(this.m_strBiID)));
 	}
 	
 	public int hashCode()

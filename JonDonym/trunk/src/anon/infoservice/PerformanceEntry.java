@@ -370,7 +370,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		if (a_timestamp > System.currentTimeMillis())
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, 
-					"Performance timestamp has future value and is ignored: " + a_timestamp);
+					"Performance timestamp has future value and is ignored: " + 
+					a_timestamp + " , current: " + System.currentTimeMillis());
 			return null;
 		}
 		
@@ -801,10 +802,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			if (entry == null || System.currentTimeMillis() - dayTimestamp >= WEEK_SEVEN_DAYS_TIMEOUT)
 			{
+				/*
 				if (entry != null)
 				{
-					LogHolder.log(LogLevel.WARNING, LogType.MISC, "BAD: Performance day: " + a_selectedDay + " timestamp: " + dayTimestamp + " ID: " + cascade.getId());
-				}
+					LogHolder.log(LogLevel.WARNING, LogType.MISC, "BAD: Performance day: " + a_selectedDay + " timestamp: " + 
+							dayTimestamp + (cascade != null ?  " ID: " + cascade.getId() : ""));
+				}*/
 				
 				htmlData += "<td colspan=\"7\" align=\"center\">No data available</td>";
 			}
