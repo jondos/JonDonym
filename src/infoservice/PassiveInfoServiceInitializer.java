@@ -111,11 +111,8 @@ public class PassiveInfoServiceInitializer
 				XMLUtil.write(doc, cacheFile);
 			} 
 			catch (IOException ioe) 
-			{
-				
+			{	
 				LogHolder.log(LogLevel.INFO, LogType.MISC, CACHE_ERROR, ioe);
-				// TODO Auto-generated catch block
-				ioe.printStackTrace();
 			}
 		}
 		else
@@ -125,7 +122,7 @@ public class PassiveInfoServiceInitializer
 	}
 	
 	/**
-	 * invokes tghe Main updater and after that caches the Database
+	 * invokes the Main updater and after that caches the Database
 	 * this makes sure that the most recent data is cached.
 	 */
 	static class PassiveInfoServiceGlobalUpdater extends Thread

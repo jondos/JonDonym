@@ -1150,6 +1150,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascadeId);
 			
 			htmlData += "<a href=\"/status\">Back to Server Status</a><br /><br />";
+			htmlData += "<b>User numbers</b><br /><br />";
 			
 			if(entry == null)
 			{

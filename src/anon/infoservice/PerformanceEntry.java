@@ -59,6 +59,8 @@ import anon.util.IXMLEncodable;
  */
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
+	public static final long WEEK_SEVEN_DAYS_TIMEOUT = 7 * 24 * 60 * 60 * 1000l;
+	
 	/**
 	 * Remove the worst x% results.
 	 */
@@ -293,13 +295,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	 * @param a_timestamp The time stamp of the value.
 	 * @param a_value The value itself.
 	 */
-	public void importValue(int a_attribute, long a_timestamp, int a_value)
+	public PerformanceAttributeEntry importValue(int a_attribute, long a_timestamp, int a_value)
 	{
-		addPerformanceAttributeEntry(a_attribute, a_timestamp, a_value, true);
+		return addPerformanceAttributeEntry(a_attribute, a_timestamp, a_value, true);
 	}
 	
 	public PerformanceEntry update(PerformanceEntry a_entry)
 	{
+		boolean bUpdated = false;
+		
 		if (!m_bPassive)
 		{
 			// not allowed
@@ -310,9 +314,18 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			setBound(i, a_entry.getBound(i));
 			setBestBound(i, a_entry.getBestBound(i));
+			if ((i == DELAY && getBound(i) > 0) || (i != DELAY && getBound(i) >= 0))
+			{
+				bUpdated = true;
+			}
 		}
 		
 		setStabilityAttributes(a_entry.getStabilityAttributes());
+		
+		if (bUpdated)
+		{
+			m_lastUpdate = System.currentTimeMillis();
+		}
 		
 		return this;
 	}
@@ -349,7 +362,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		PerformanceAttributeEntry previousEntry;
 		
 		// if time stamp is older than 7 days, ignore it
-		if (System.currentTimeMillis() - a_timestamp >= 7 * 24 * 60 * 60 * 1000)
+		if (System.currentTimeMillis() - a_timestamp >= WEEK_SEVEN_DAYS_TIMEOUT)
 		{
 			return null;
 		}
@@ -381,6 +394,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			}
 			else
 			{
+				day -= 1;
 				hour = 23;
 			}
 		}
@@ -395,7 +409,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			// we've found at least one value in the entry that is older than 7 days
 			if (System.currentTimeMillis() - 
-					m_entries[a_attribute][day][i].getDayTimestamp() >= 7 * 24 * 60 * 60 * 1000)
+					m_entries[a_attribute][day][i].getDayTimestamp() >= WEEK_SEVEN_DAYS_TIMEOUT)
 			{
 				// invalidate the whole entry
 				m_entries[a_attribute][day][i] = null;
@@ -405,7 +419,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		// look for the attribute entry
 		entry = m_entries[a_attribute][day][hour];
 		// create one if necessary
-		if(entry == null)
+		if (entry == null)
 		{
 			m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute, m_bPassive);
 		}
@@ -425,7 +439,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		}
 		else
 		{
-			previousEntry = m_entries[a_attribute][day][23];
+			previousEntry = m_entries[a_attribute][day-1][23];
 		}
 		
 		// add the value to the entry
@@ -785,7 +799,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				dayTimestamp = entry.getDayTimestamp();
 			}
 			
-			if (entry == null || System.currentTimeMillis() - dayTimestamp > 7 * 24 * 60 * 60 * 1000 )
+			if (entry == null || System.currentTimeMillis() - dayTimestamp >= WEEK_SEVEN_DAYS_TIMEOUT)
 			{
 				if (entry != null)
 				{
