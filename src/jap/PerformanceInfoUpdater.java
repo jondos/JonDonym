@@ -34,7 +34,6 @@ public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 			if (hashtable == null)
 			{
 				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
-				return new Hashtable();
 			}
 			else
 			{

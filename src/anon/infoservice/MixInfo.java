@@ -482,6 +482,10 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 							a_storage.addElement(address);
 						}												
 					}
+					catch (UnknownHostException a_e)
+					{
+						LogHolder.log(LogLevel.INFO, LogType.NET, a_e);
+					}
 					catch (Exception e)
 					{
 						LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);

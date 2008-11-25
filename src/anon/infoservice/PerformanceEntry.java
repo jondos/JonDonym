@@ -503,7 +503,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		while(enumKeys.hasMoreElements())
 		{
 			timestamp = ((Long) enumKeys.nextElement()).longValue();
-			int value = ((Integer) a_data.get(timestamp)).intValue();
+			int value = ((Integer) a_data.get(new Long(timestamp))).intValue();
 			
 			if (addPerformanceAttributeEntry(a_attribute, timestamp, value, false) == null)
 			{

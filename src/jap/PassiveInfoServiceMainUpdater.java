@@ -2,11 +2,11 @@ package jap;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
@@ -31,6 +31,7 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 	
 	PerformanceInfoUpdater m_performanceInfoUpdater = null;
 	PassiveInfoServiceCascadeUpdater m_cascadeUpdater = null;
+	MixInfoUpdater m_mixUpdater = null;
 	
 	/**
 	 * Stream to the performance log file.
@@ -48,14 +49,16 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 	private final Calendar m_cal = Calendar.getInstance();
 	
 	
-	public PassiveInfoServiceMainUpdater(long interval) throws FileNotFoundException
+	public PassiveInfoServiceMainUpdater(long interval) throws IOException
 	{
 		super(interval);
 		m_performanceInfoUpdater = new PerformanceInfoUpdater(Long.MAX_VALUE);
 		m_cascadeUpdater = new PassiveInfoServiceCascadeUpdater(Long.MAX_VALUE);
+		m_mixUpdater = new MixInfoUpdater();
 		
 		// set calendar to current time
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_cal.setTime(new Date(System.currentTimeMillis()));
+
 		
 		// set the current week
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
@@ -66,7 +69,7 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		// performance data for the last 7 days.
 		if(m_cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY)
 		{
-			// if it's not saturday -> import last week, too
+			// if it's not Saturday -> import last week, too
 			readOldPerformanceData(m_currentWeek - 1);
 		}
 		
@@ -76,14 +79,14 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 				
 					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
 		}
-		catch(FileNotFoundException ex)
+		catch(IOException ex)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
 			throw ex;
 		}
 	}
 	
-	public PassiveInfoServiceMainUpdater() throws FileNotFoundException
+	public PassiveInfoServiceMainUpdater() throws IOException
 	{
 		this(Long.MAX_VALUE);
 	}
@@ -101,7 +104,10 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		m_performanceInfoUpdater.update();
 		/* 2. MixCascades Database update */
 		m_cascadeUpdater.update();
-		/* 3. Exit addresses Database update */
+		
+		m_mixUpdater.update();
+		
+		/* 4. Exit addresses Database update */
 		InfoServiceHolder.getInstance().getExitAddresses();
 		/* now calculate lowest bounds of the performance entries */
 		Enumeration enumCurrentPerEntries = Database.getInstance(PerformanceEntry.class).getEntrySnapshotAsEnumeration();
@@ -350,7 +356,7 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		{
 			StabilityAttributes attributes;
 			
-			m_cal.setTimeInMillis(System.currentTimeMillis());
+			m_cal.setTime(new Date(System.currentTimeMillis()));
 			// check if we're still in the same week, if not open a new performance log file
 			if (m_cal.get(Calendar.WEEK_OF_YEAR) != m_currentWeek)
 			{

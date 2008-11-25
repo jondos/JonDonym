@@ -6,7 +6,7 @@ public class PassiveInfoServiceCascadeUpdater extends MixCascadeUpdater {
 
 	public PassiveInfoServiceCascadeUpdater(long interval) 
 	{
-		super(interval);
+		super(interval, false);
 	}
 
 	public PassiveInfoServiceCascadeUpdater() 

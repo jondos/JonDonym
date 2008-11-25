@@ -11,6 +11,7 @@ import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixCascadeExitAddresses;
+import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.StatusInfo;
 import anon.util.XMLParseException;
@@ -44,7 +45,7 @@ public class PassiveInfoServiceInitializer
 	private final static Class[] CACHE_CLASSES = new Class[]
 	{                    
 		MixCascade.class, MixCascadeExitAddresses.class, PerformanceInfo.class, StatusInfo.class,
-		InfoServiceDBEntry.class
+		InfoServiceDBEntry.class, MixInfo.class
 	};
 	
 	public static String CACHE_FILE_NAME = "cache.xml";
@@ -56,7 +57,7 @@ public class PassiveInfoServiceInitializer
 	private final static int GLOBAL_UPDATE_INTERVAL = 60000;
 	private static final long UPDATE_SYNC_INTERVAL = 4000;
 	
-	public static synchronized void init() throws FileNotFoundException
+	public static synchronized void init() throws IOException
 	{
 		Document doc = null;
 		try 
@@ -131,7 +132,7 @@ public class PassiveInfoServiceInitializer
 		
 		private static PassiveInfoServiceMainUpdater mainUpdater = null;
 		
-		PassiveInfoServiceGlobalUpdater() throws FileNotFoundException
+		PassiveInfoServiceGlobalUpdater() throws IOException
 		{
 			mainUpdater = new PassiveInfoServiceMainUpdater();
 		}
