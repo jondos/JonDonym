@@ -574,54 +574,44 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			{
 				m_socketQueue.notify();
 			}
+
+
 		}
 
 		public void run()
 		{
-			Socket socket;
 			while (!Thread.currentThread().isInterrupted() && !m_bIsClosed)
 			{
-				synchronized (m_socketQueue)
-				{
-					while (m_socketQueue.getSize() == 0 )
-					{
-						try
-						{
-							m_socketQueue.wait();
-						}
-						catch (InterruptedException ex)
-						{
-							m_bIsClosed = true;							
-						}
-					}
-					if (m_bIsClosed)
-					{
-						break;
-					}
-					socket = (Socket)m_socketQueue.pop();					
-				}								 
-				
-				try
-				{
-					new AnonProxyRequest(m_proxy, socket, m_syncObject, m_callbackHandler);
-				}
-				catch (IOException e)
-				{
-					LogHolder.log(LogLevel.ERR, LogType.NET, e);
-				}					
-			}	
-			
-			synchronized (m_socketQueue)
-			{
-				while (m_socketQueue.getSize() > 0)
+				if (m_socketQueue.getSize() > 0 && AnonProxyRequest.getNrOfRequests() < m_maxRequests)
 				{
 					try
 					{
-						((Socket)m_socketQueue.pop()).close();
+						new AnonProxyRequest(m_proxy, (Socket)m_socketQueue.pop(), m_syncObject, m_callbackHandler);
 					}
-					catch (IOException e)
+					catch (Exception e)
 					{
-						LogHolder.log(LogLevel.NOTICE, LogType.NET, e);
+						LogHolder.log(LogLevel.ERR, LogType.NET, e);
+					}
+				}
+				else
+				{
+					try
+					{
+						synchronized (m_socketQueue)
+						{
+							if (AnonProxyRequest.getNrOfRequests() >= m_maxRequests)
+							{
+								m_socketQueue.wait(100);
+							}
+							else
+							{
+								m_socketQueue.wait();
+							}
+						}
+					}
+					catch (InterruptedException ex)
+					{
+						break;
 					}
 				}
 			}
@@ -681,6 +671,8 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 								  "Could not set non-Blocking mode for Channel-Socket!", soex);
 					continue;
 				}
+
+
 			}
 		}
 		catch (Exception e)
