@@ -431,7 +431,7 @@ public class PaymentMainPanel extends FlippingPanel
 
 	public static String translateBIError(XMLErrorMessage a_msg)
 	{
-		String error = JAPMessages.getString("aiErrorMessage"); // + "<br>";
+		String error = ""; //JAPMessages.getString("aiErrorMessage"); // + "<br>";
 		if (a_msg.getErrorCode() >= 0 && a_msg.getErrorCode() < MSG_PAYMENT_ERRORS.length)
 		{
 			error += JAPMessages.getString(MSG_PAYMENT_ERRORS[a_msg.getErrorCode()]);

@@ -48,7 +48,7 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 	private final Calendar m_cal = Calendar.getInstance();
 	
 	
-	public PassiveInfoServiceMainUpdater(long interval) 
+	public PassiveInfoServiceMainUpdater(long interval) throws FileNotFoundException
 	{
 		super(interval);
 		m_performanceInfoUpdater = new PerformanceInfoUpdater(Long.MAX_VALUE);
@@ -79,10 +79,11 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		catch(FileNotFoundException ex)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
+			throw ex;
 		}
 	}
 	
-	public PassiveInfoServiceMainUpdater() 
+	public PassiveInfoServiceMainUpdater() throws FileNotFoundException
 	{
 		this(Long.MAX_VALUE);
 	}
@@ -295,9 +296,12 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 				
 				
 				attrStability = new StabilityAttributes(100, errors, unknown, resets);
-	
 				
 				// import the extracted value into the performance entry
+				if (delay == 0)
+				{
+					delay = -1;
+				}
 				attrEntry = entry.importValue(PerformanceEntry.DELAY, timestamp, delay);
 				//entry.setStabilityAttributes(attrStability);
 				//entry.setBound(PerformanceEntry.DELAY, delay);
@@ -309,7 +313,11 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 					attrEntry.setResets(resets);
 					attrEntry.setSuccess(100 - errors - unknown);
 				}
-								
+				
+				if (speed== Integer.MAX_VALUE)
+				{
+					speed = -1;
+				}				
 				attrEntry = entry.importValue(PerformanceEntry.SPEED, timestamp, speed);
 				//entry.setStabilityAttributes(attrStability);
 				//entry.setBound(PerformanceEntry.SPEED, speed);

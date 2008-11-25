@@ -1,6 +1,7 @@
 package infoservice;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.w3c.dom.Document;
@@ -55,7 +56,7 @@ public class PassiveInfoServiceInitializer
 	private final static int GLOBAL_UPDATE_INTERVAL = 60000;
 	private static final long UPDATE_SYNC_INTERVAL = 4000;
 	
-	public static synchronized void init()
+	public static synchronized void init() throws FileNotFoundException
 	{
 		Document doc = null;
 		try 
@@ -130,7 +131,7 @@ public class PassiveInfoServiceInitializer
 		
 		private static PassiveInfoServiceMainUpdater mainUpdater = null;
 		
-		PassiveInfoServiceGlobalUpdater()
+		PassiveInfoServiceGlobalUpdater() throws FileNotFoundException
 		{
 			mainUpdater = new PassiveInfoServiceMainUpdater();
 		}
