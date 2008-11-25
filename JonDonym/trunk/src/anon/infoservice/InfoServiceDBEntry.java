@@ -1409,7 +1409,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	{
 		return getStatusInfo(a_cascade, -1);
 	}
-
+	// TODO give proper return values!!
 	public Object getExitAddresses() throws Exception
 	{
 		boolean bUpdated = false;

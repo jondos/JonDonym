@@ -137,6 +137,11 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	private static final int GET_TC_SERIALS = 23;
 	
 	private static final int GET_EXIT_ADDRESSES = 24;
+	
+	/**
+	 * Function number for fetchInformation() - getMixInfo().
+	 */
+	private static final int GET_MIXINFOS = 25;
 
 	/**
 	 * This defines, whether there is an automatic change of infoservice after failure as default.
@@ -387,6 +392,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			 * a lot of IS...
 			 */
 			if (functionNumber == GET_INFOSERVICES || functionNumber == GET_MIXCASCADES
+				|| functionNumber == GET_MIXINFOS 
 				|| functionNumber == GET_INFOSERVICE_SERIALS || functionNumber == GET_MIXCASCADE_SERIALS ||
 				functionNumber == GET_CASCADEINFO || functionNumber == GET_LATEST_JAVA_SERIALS ||
 				functionNumber == GET_LATEST_JAVA || functionNumber == GET_MESSAGES ||
@@ -466,6 +472,10 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_INFOSERVICES)
 					{
 						tempHashtable = currentInfoService.getInfoServices();
+					}
+					else if (functionNumber == GET_MIXINFOS)
+					{
+						tempHashtable = currentInfoService.getMixes(true);
 					}
 					else if (functionNumber == GET_MIXINFO)
 					{
@@ -821,7 +831,6 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	{
 		fetchInformation(GET_EXIT_ADDRESSES, null);
 	}
-	
 
 	/**
 	 * Get a Vector of all payment instances the preferred infoservice knows. If we can't get a the
@@ -880,6 +889,11 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	public MixInfo getMixInfo(String mixId)
 	{
 		return (MixInfo) (fetchInformation(GET_MIXINFO, Util.toVector(mixId)));
+	}
+	
+	public Hashtable getMixInfos()
+	{
+		return (Hashtable)(fetchInformation(GET_MIXINFOS, null));
 	}
 
 	/**

@@ -44,6 +44,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Random;
@@ -284,7 +285,7 @@ public class PerformanceMeter implements Runnable, Observer
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
 
 		// set calendar to current time
-		m_cal.setTimeInMillis(System.currentTimeMillis());
+		m_cal.setTime(new Date(System.currentTimeMillis()));
 		
 		// set the current week
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);

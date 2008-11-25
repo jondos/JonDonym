@@ -9,11 +9,11 @@ import anon.infoservice.StatusInfo;
 
 public class PassiveInfoServiceStatusUpdater extends AbstractDatabaseUpdater 
 {
-	public static final long UPDATE_INTERVAL_MS = 7000l;
+	private static final long UPDATE_INTERVAL_MS = 7000l;
 	
 	public PassiveInfoServiceStatusUpdater() 
 	{
-		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
+		super(UPDATE_INTERVAL_MS);
 	}
 
 	protected Hashtable getEntrySerials() 
@@ -47,8 +47,7 @@ public class PassiveInfoServiceStatusUpdater extends AbstractDatabaseUpdater
 				}
 			}
 		}
-		/*end new*/
-		((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+
 		return statusTable;
 	}
 
