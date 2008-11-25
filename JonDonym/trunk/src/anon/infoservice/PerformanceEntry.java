@@ -343,8 +343,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		int bound;
 		
 		for (int i = 0; i < ATTRIBUTES.length; i++)
-		{
+		{			
 			bound = getBound(i);
+			if (i == SPEED && bound == Integer.MAX_VALUE)
+			{
+				bound = -1;
+			}
+			else if (i == DELAY && bound == 0)
+			{
+				bound = -1;
+			}
+			
 			entry = addPerformanceAttributeEntry(i, a_timestamp, bound, false);
 			if (entry != null)
 			{
