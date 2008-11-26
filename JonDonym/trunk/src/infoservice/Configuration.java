@@ -605,6 +605,7 @@ final public class Configuration
 					new InfoServiceDBEntry(null, null,
 										   ( (ListenerInterface) m_initialNeighbourInfoServices.elementAt(i)).
 										   toVector(), false, false, System.currentTimeMillis(), 0, false);
+				entry.markAsBootstrap();
 
 				//entry.setNeighbour(true);
 				try

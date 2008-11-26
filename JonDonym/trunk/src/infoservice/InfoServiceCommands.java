@@ -48,6 +48,7 @@ import anon.infoservice.AbstractDatabaseEntry;
 import anon.infoservice.AbstractDistributableDatabaseEntry;
 import anon.infoservice.Constants;
 import anon.infoservice.Database;
+import anon.infoservice.IBoostrapable;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceIDEntry;
 import anon.infoservice.JAPMinVersion;
@@ -488,6 +489,12 @@ final public class InfoServiceCommands implements JWSInternalCommands
 					{
 						/* import the MixCascade XML structure in this document */
 						currentCascade = (IXMLEncodable) (knownMixCascades.nextElement());
+						if (currentCascade instanceof IBoostrapable && 
+							((IBoostrapable)currentCascade).isBootstrap())
+						{
+							// do not forward this entry, as it is for internal use only
+							continue;
+						}
 						node = currentCascade.toXmlElement(doc);
 						containerNode.appendChild(node);
 					}
@@ -1348,9 +1355,21 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				mixNode = mixInfo.getXmlStructure();
 				if (mixNode == null)
 				{
+					String hostName = "unknown";
+					try
+					{
+						hostName = mixInfo.getFirstHostName();
+					}
+					catch (Exception a_e)
+					{
+						// ignore:
+					}
+					
 					LogHolder.log(LogLevel.EMERG, LogType.MISC, 
 							"Mix node XML is null for Mix " + mixInfo.getId() + 
-							" (" + mixInfo.getName() + ")!");
+							" (" + mixInfo.getName() + ")! Hostname: " + hostName + 
+							" Operator: " + mixInfo.getServiceOperator().getOrganization() + ", " +
+							mixInfo.getServiceOperator().getEMail());
 					continue;
 				}
 				mixNode = (Element) XMLUtil.importNode(doc, mixNode, true);

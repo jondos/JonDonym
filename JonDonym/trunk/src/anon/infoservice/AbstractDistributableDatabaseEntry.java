@@ -150,6 +150,13 @@ public abstract class AbstractDistributableDatabaseEntry extends AbstractDatabas
 			while (knownEntries.hasMoreElements())
 			{
 				currentEntry = (AbstractDistributableDatabaseEntry) knownEntries.nextElement();
+				
+				if (currentEntry instanceof IBoostrapable && 
+					((IBoostrapable)currentEntry).isBootstrap())
+				{
+					// do not forward this entry, as it is for internal use only
+					continue;
+				}
 
 				if (currentEntry.getVersionNumber() <= 0)
 				{/*
