@@ -96,6 +96,44 @@ public class InfoServicePropagandist implements Runnable
 			Vector virtualListeners = Configuration.getInstance().getVirtualListeners();
 			if (virtualListeners.size() > 0)
 			{
+				InfoServiceDBEntry generatedOwnEntry =
+					new InfoServiceDBEntry(Configuration.getInstance().getOwnName(),
+										   Configuration.getInstance().getID(),
+										   virtualListeners, Configuration.getInstance().holdForwarderList(), false,
+										   System.currentTimeMillis(), ms_serialNumber, Configuration.getInstance().isPerfServerEnabled());
+				/* put the own entry in the database -> it is forwarded automatically to all neighbour
+				 * infoservices, which are also in the database
+				 */
+				if (!Database.getInstance(InfoServiceDBEntry.class).update(generatedOwnEntry))
+				{
+					LogHolder.log(LogLevel.ALERT, LogType.MISC, "Could not update own InfoService entry: " +
+								  generatedOwnEntry.getName() + ":" + generatedOwnEntry.getId() + 
+								  ":LastUpdate:" +
+								  generatedOwnEntry.getLastUpdate() + 
+								  ":VersionNumber:" + generatedOwnEntry.getVersionNumber());
+					/*
+					Enumeration entries =
+						Database.getInstance(InfoServiceDBEntry.class).getEntrySnapshotAsEnumeration();
+					InfoServiceDBEntry entry;
+					while (entries.hasMoreElements())
+					{
+						entry = (InfoServiceDBEntry) entries.nextElement();
+						LogHolder.log(LogLevel.ALERT, LogType.MISC,
+									  entry.getName() + ":" + entry.getId() + ":LastUpdate:" +
+									  entry.getLastUpdate() + ":VersionNumber:" + entry.getVersionNumber());
+					}*/
+					// reset serial number
+					ms_serialNumber = System.currentTimeMillis();
+				}
+
+				/* send it also to all initial neighbour infoservices -> they will always find us, after
+				 * they come up
+				 */
+				InfoServiceDistributor.getInstance().addJobToInititalNeighboursQueue(generatedOwnEntry);
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC,
+							  "Updating and propagating own InfoServerDBEntry.");
+				
+				
 				for (int i = 0; i < 4; i++)
 				{
 					if (i == 1 && !bInit)
@@ -189,44 +227,7 @@ public class InfoServicePropagandist implements Runnable
 						}
 					}
 				}
-				bInit = false;
-
-				InfoServiceDBEntry generatedOwnEntry =
-					new InfoServiceDBEntry(Configuration.getInstance().getOwnName(),
-										   Configuration.getInstance().getID(),
-										   virtualListeners, Configuration.getInstance().holdForwarderList(), false,
-										   System.currentTimeMillis(), ms_serialNumber, Configuration.getInstance().isPerfServerEnabled());
-				/* put the own entry in the database -> it is forwarded automatically to all neighbour
-				 * infoservices, which are also in the database
-				 */
-				if (!Database.getInstance(InfoServiceDBEntry.class).update(generatedOwnEntry))
-				{
-					LogHolder.log(LogLevel.ALERT, LogType.MISC, "Could not update own InfoService entry: " +
-								  generatedOwnEntry.getName() + ":" + generatedOwnEntry.getId() + 
-								  ":LastUpdate:" +
-								  generatedOwnEntry.getLastUpdate() + 
-								  ":VersionNumber:" + generatedOwnEntry.getVersionNumber());
-					/*
-					Enumeration entries =
-						Database.getInstance(InfoServiceDBEntry.class).getEntrySnapshotAsEnumeration();
-					InfoServiceDBEntry entry;
-					while (entries.hasMoreElements())
-					{
-						entry = (InfoServiceDBEntry) entries.nextElement();
-						LogHolder.log(LogLevel.ALERT, LogType.MISC,
-									  entry.getName() + ":" + entry.getId() + ":LastUpdate:" +
-									  entry.getLastUpdate() + ":VersionNumber:" + entry.getVersionNumber());
-					}*/
-					// reset serial number
-					ms_serialNumber = System.currentTimeMillis();
-				}
-
-				/* send it also to all initial neighbour infoservices -> they will always find us, after
-				 * they come up
-				 */
-				InfoServiceDistributor.getInstance().addJobToInititalNeighboursQueue(generatedOwnEntry);
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC,
-							  "Updating and propagating own InfoServerDBEntry.");
+				bInit = false;				
 			}
 			else
 			{

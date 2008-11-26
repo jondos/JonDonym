@@ -819,12 +819,6 @@ final public class Configuration
 					m_aPerfMeterConf[5] = new Integer(Math.max(5*1000, Integer.parseInt(value)));
 				}
 				
-				value = a_properties.getProperty("perf.minPackets", "0");
-				if(value != null)
-				{
-					m_aPerfMeterConf[6] = new Integer(Integer.parseInt(value));
-				}
-				
 				m_strPerfAccountDirectory = 
 					new File(a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_DIRECTORY, 
 							 				 IS_PROP_VALUE_PERFACCOUNT_DIRECTORY));

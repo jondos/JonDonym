@@ -149,12 +149,6 @@ public class PerformanceMeter implements Runnable, Observer
 	private int m_maxWaitForTest;
 	
 	/**
-	 * The number of packets the meter must receive
-	 * from the mix cascade for a speed test. 
-	 */
-	private int m_minPackets;
-	
-	/**
 	 * The local <code>AnonProxy</code>.
 	 */
 	private AnonProxy m_proxy;
@@ -279,7 +273,6 @@ public class PerformanceMeter implements Runnable, Observer
 		m_majorInterval = ((Integer) a_config[3]).intValue();
 		m_requestsPerInterval = ((Integer) a_config[4]).intValue();
 		m_maxWaitForTest = ((Integer) a_config[5]).intValue();
-		m_minPackets = ((Integer) a_config[6]).intValue();
 		
 		// set anon client timeout
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
@@ -290,15 +283,16 @@ public class PerformanceMeter implements Runnable, Observer
 		// set the current week
 		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
 		
-		// import old performance date from this week
-		readOldPerformanceData(m_currentWeek);
-		// if we're on the last day of the week (saturday) we already have enough
-		// performance data for the last 7 days.
 		if(m_cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY)
 		{
 			// if it's not saturday -> import last week, too
 			readOldPerformanceData(m_currentWeek - 1);
 		}
+		
+		// import old performance date from this week
+		readOldPerformanceData(m_currentWeek);
+		// if we're on the last day of the week (saturday) we already have enough
+		// performance data for the last 7 days.
 		
 		try
 		{
@@ -502,6 +496,8 @@ public class PerformanceMeter implements Runnable, Observer
 			
 			m_lastTotalUpdates = 0;
 			
+			//LogHolder.log(LogLevel.WARNING, LogType.THREAD, "Cascades to test: " + knownMixCascades.size());
+			
 			// loop through all mix cascade that need to be tested
 			while(knownMixCascades.size() > 0) 
 			{
@@ -535,7 +531,7 @@ public class PerformanceMeter implements Runnable, Observer
 					long sleepFor = m_nextUpdate - System.currentTimeMillis();    			
 					if (sleepFor > 0)
 					{
-						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Sleeping for " + sleepFor + "ms.");
+						LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance thread sleeping for " + sleepFor + " ms.");
 			    		try 
 			    		{	    			    			
 		    				SYNC_METER.wait(sleepFor);	    				
@@ -675,6 +671,7 @@ public class PerformanceMeter implements Runnable, Observer
 	{
 		synchronized (SYNC_METER)
 		{
+			//LogHolder.log(LogLevel.WARNING, LogType.NET, "Update performance thread!");
 			m_bUpdate = true;
 			m_nextUpdate = System.currentTimeMillis();
 			SYNC_METER.notify();
@@ -782,12 +779,12 @@ public class PerformanceMeter implements Runnable, Observer
 		{
 			String host = (String) cascadeHosts.elementAt(i);
 			
-			if(blackList.contains(host))
+			if (blackList.contains(host))
 			{
 				return false;
 			}
 			
-			if(isHosts.contains(host) && !whiteList.contains(host))
+			if (isHosts.contains(host) && !whiteList.contains(host))
 			{
 				return false;
 			}
@@ -845,13 +842,6 @@ public class PerformanceMeter implements Runnable, Observer
 		
 		// try to fetch the current cascade status
 		a_cascade.fetchCurrentStatus();
-		
-		// check if the cascade has enough packets to be tested
-		if(a_cascade.getCurrentStatus() == null || 
-			a_cascade.getCurrentStatus().getMixedPackets() < m_minPackets)
-		{
-			return iUpdates;
-		}
 		
 		// look for a performance entry for this cascade
 		PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascade.getId());
@@ -917,14 +907,13 @@ public class PerformanceMeter implements Runnable, Observer
 			{
 				try
 				{
-					if (performSingleTest(a_cascade, vDelay, vSpeed, vUsers, vPackets, 
-							hashBadInfoServices, recvBuff))
-					{
+					if (performSingleTest(a_cascade, vDelay, vSpeed, vUsers, vPackets, hashBadInfoServices, recvBuff))
+					{						
 						iUpdates++;
 					}
 				}
 				catch (InterruptedException a_e)
-				{
+				{				
 					break;
 				}
 				catch (InfoServiceException a_e)
@@ -938,38 +927,21 @@ public class PerformanceMeter implements Runnable, Observer
 		// add the data hashtable to the PerformanceEntry 
 		synchronized (SYNC_INTERRUPT)
 		{
-			long timestamp;
 			int lastDelay;
 			int lastSpeed;
 			int lastUsers;
 			int lastPackets;
-			int waitTime;
+			long waitTime;
+			long timestamp = System.currentTimeMillis();
 			
 			if (iUpdates > 0)
 			{
-				m_lastUpdate = System.currentTimeMillis();
+				m_lastUpdate = timestamp;
 				m_lastCascadeUpdated = a_cascade.getMixNames();
 			}
 			
-			timestamp = System.currentTimeMillis();
-			waitTime = a_requestsPerInterval - iUpdates;
-			while (waitTime > 0)
-			{
-				try 
-				{
-					//wait until 
-					Thread.sleep(waitTime);
-					waitTime = 0;
-				} 
-				catch (InterruptedException e) 
-				{
-					// should not be possible
-					LogHolder.log(LogLevel.EMERG, LogType.THREAD, e);
-					waitTime--;
-				}
-			}
 			while (iUpdates < a_requestsPerInterval)
-			{				
+			{
 		    	// timestamp at which the test data was retrieved
 				timestamp += 1;
 				iUpdates++;
@@ -999,6 +971,21 @@ public class PerformanceMeter implements Runnable, Observer
 				
 				logPerftestData(timestamp, a_cascade, Integer.MAX_VALUE, Integer.MAX_VALUE, 
 						info.getNrOfActiveUsers(), packets, null);				
+			}
+			
+			while ((waitTime = timestamp - System.currentTimeMillis()) > 0)
+			{
+				try 
+				{
+					//wait until we have reached the current time
+					Thread.sleep(50);
+					Thread.yield();
+				} 
+				catch (InterruptedException e) 
+				{
+					// should never happen
+					LogHolder.log(LogLevel.EMERG, LogType.THREAD, e);
+				}
 			}
 			
 			lastDelay = entry.addData(PerformanceEntry.DELAY, vDelay);

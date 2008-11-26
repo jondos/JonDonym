@@ -427,7 +427,7 @@ public final class Util
 			if(((Long) a_obj1).intValue() == Long.MAX_VALUE) return -1;
 			if(((Long) a_obj2).intValue() == Long.MAX_VALUE) return 1;			
 			
-			return (int) (((Long) a_obj2).longValue() - ((Integer) a_obj1).longValue());
+			return (int) (((Long) a_obj2).longValue() - ((Long) a_obj1).longValue());
 		}
 	}	
 	
