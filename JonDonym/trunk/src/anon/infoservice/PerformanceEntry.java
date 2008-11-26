@@ -1218,7 +1218,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				return m_lBoundValue;
 			}
 			
-			Integer value;
+			int value;
 			int nextBound;
 			Vector vecTimestamps = new Vector();
 			Hashtable hashValues = (Hashtable)m_Values.clone();

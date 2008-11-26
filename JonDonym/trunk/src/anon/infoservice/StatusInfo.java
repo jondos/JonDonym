@@ -32,10 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.security.SignatureException;
 
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -534,7 +530,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 					System.currentTimeMillis() - perfEntry.getLastTestTime() < PerformanceEntry.LAST_TEST_DATA_TTL &&
 					perfEntry.getLastTestAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getLastTestAverage(PerformanceEntry.DELAY)) : "?") +
 			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.DELAY)) : "?") + ") ") : "") +
-			(!a_bPassiveMode ? "[" : "");  
+			(!a_bPassiveMode ? "[" : "");
 		
 			long delayBound;
 			if (perfEntry == null)

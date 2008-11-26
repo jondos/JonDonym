@@ -496,8 +496,6 @@ public class PerformanceMeter implements Runnable, Observer
 			
 			m_lastTotalUpdates = 0;
 			
-			//LogHolder.log(LogLevel.WARNING, LogType.THREAD, "Cascades to test: " + knownMixCascades.size());
-			
 			// loop through all mix cascade that need to be tested
 			while(knownMixCascades.size() > 0) 
 			{
@@ -671,7 +669,6 @@ public class PerformanceMeter implements Runnable, Observer
 	{
 		synchronized (SYNC_METER)
 		{
-			//LogHolder.log(LogLevel.WARNING, LogType.NET, "Update performance thread!");
 			m_bUpdate = true;
 			m_nextUpdate = System.currentTimeMillis();
 			SYNC_METER.notify();
@@ -908,12 +905,12 @@ public class PerformanceMeter implements Runnable, Observer
 				try
 				{
 					if (performSingleTest(a_cascade, vDelay, vSpeed, vUsers, vPackets, hashBadInfoServices, recvBuff))
-					{						
+					{
 						iUpdates++;
 					}
 				}
 				catch (InterruptedException a_e)
-				{				
+				{
 					break;
 				}
 				catch (InfoServiceException a_e)

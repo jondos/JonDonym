@@ -352,7 +352,7 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		catch(IOException ex)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.NET, 
-					"Could not read "+ PERFORMANCE_LOG_FILE + ". No previous performance data for this week found: " +
+					"No previous performance data for this week found: " +
 					ex.getMessage());
 		}
 		
