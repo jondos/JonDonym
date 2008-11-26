@@ -156,8 +156,8 @@ public class KeyExchangeManager {
 		  }
 		  else
 		  {
-			  Database.getInstance(MixInfo.class).update(
-						   new MixInfo(MixInfo.DEFAULT_NAME, m_cascade.getCertPath()));
+			  //Database.getInstance(MixInfo.class).update(
+					//	   new MixInfo(MixInfo.DEFAULT_NAME, m_cascade.getCertPath()));
 			  MixCascade cascadeInDB =
 				  (MixCascade) Database.getInstance(MixCascade.class).getEntryById(m_cascade.getId());
 			  if (cascadeInDB != null)
@@ -302,7 +302,7 @@ public class KeyExchangeManager {
 
 
 
-
+			  /*
 			  MixInfo oldMixinfo = (MixInfo) Database.getInstance(MixInfo.class).getEntryById(mixinfo.getId());
 			  if (mixinfo.getCertificate() != null &&
 				  (oldMixinfo == null || oldMixinfo.getCertificate() == null ||
@@ -310,7 +310,8 @@ public class KeyExchangeManager {
 			  {
 				  // update the database so the the (new) certificate gets available
 				  Database.getInstance(MixInfo.class).update(mixinfo);
-			  }
+			  }*/
+			  
 			  Element currentMixNode = mixinfo.getXmlStructure();
 			  m_mixParameters[i] = new MixParameters(mixinfo.getId(), new ASymCipher());
 			  if (m_mixParameters[i].getMixCipher().setPublicKey(currentMixNode) != ErrorCodes.E_SUCCESS)

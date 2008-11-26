@@ -180,11 +180,12 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		/* When connecting InfoServices must not be contacted */
 		for (int i = 0; i < cascadeLength; i++) 
 		{
+			/* Do not do this for manually created cascades!!!!!
 			MixInfo info = mixCascade.getMixInfo(i);
 			if(info == null)
 			{
 				return ErrorCodes.E_CONNECT;
-			}
+			}*/
 			
 			/*
 			ServiceOperator op = info.getServiceOperator();

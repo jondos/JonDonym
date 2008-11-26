@@ -531,7 +531,7 @@ public class PerformanceMeter implements Runnable, Observer
 					long sleepFor = m_nextUpdate - System.currentTimeMillis();    			
 					if (sleepFor > 0)
 					{
-						LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance thread sleeping for " + sleepFor + " ms.");
+						LogHolder.log(LogLevel.INFO, LogType.NET, "Performance thread sleeping for " + sleepFor + " ms.");
 			    		try 
 			    		{	    			    			
 		    				SYNC_METER.wait(sleepFor);	    				

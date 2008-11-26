@@ -64,7 +64,8 @@ import java.net.SocketException;
 /**
  * Holds the information for an infoservice.
  */
-public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable
+public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable, 
+	IBoostrapable
 {
 	public static final String XML_ELEMENT_CONTAINER_NAME = "InfoServices";
 	public static final String XML_ELEMENT_NAME = "InfoService";
