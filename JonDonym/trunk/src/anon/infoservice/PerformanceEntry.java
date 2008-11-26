@@ -46,6 +46,8 @@ import org.w3c.dom.Document;
 
 import anon.util.Util.IntegerSortAsc;
 import anon.util.Util.IntegerSortDesc;
+import anon.util.Util.LongSortAsc;
+import anon.util.Util.LongSortDesc;
 import anon.util.Util;
 import anon.util.XMLUtil;
 import anon.util.XMLParseException;
@@ -494,7 +496,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			vecKeys.addElement(enumKeys.nextElement());
 		}
-		Util.sort(vecKeys, new Util.LongSortAsc());
+		Util.sort(vecKeys, new LongSortAsc());
 		enumKeys = vecKeys.elements();
 		
 		int values = 0;
@@ -520,6 +522,10 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			{
 				if (value < Integer.MAX_VALUE)
 				{
+					if (lAverageFromLastTest < 0)
+					{
+						lAverageFromLastTest = 0;
+					}
 					lAverageFromLastTest += value;
 					values++;
 					lastTestTimestamp = timestamp;
@@ -528,7 +534,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			else if (values == 0)
 			{
 				// this was an error
-				lAverageFromLastTest = -1;
+				if (lAverageFromLastTest == 0)
+				{
+					lAverageFromLastTest = -1;
+				}
+				lastTestTimestamp = timestamp;
 			}
 		}
 		
@@ -541,8 +551,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		if (lastTestTimestamp >= 0)
 		{
 			m_lastTestTime = lastTestTimestamp;
+			m_lastTestAverage[a_attribute] = lAverageFromLastTest;
 		}
-		m_lastTestAverage[a_attribute] = lAverageFromLastTest;
+		
 		if (lastUpdateTimestamp >= 0)
 		{
 			m_lastUpdate = lastUpdateTimestamp;
@@ -604,18 +615,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	 */
 	public int getBound(int a_attribute)
 	{
-		if(a_attribute == SPEED)
-		{
-			return m_floatingTimeEntries[a_attribute].getBound(true);
-		}
-		else if(a_attribute == DELAY)
-		{
-			return m_floatingTimeEntries[a_attribute].getBound(false);
-		}
-		else
-		{
-			return 0;
-		}
+		return m_floatingTimeEntries[a_attribute].getBound();
 	}
 	
 	/**
@@ -652,18 +652,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	 */
 	public int getBestBound(int a_attribute)
 	{
-		if(a_attribute == SPEED)
-		{
-			return m_floatingTimeEntries[a_attribute].getBestBound(true);
-		}
-		else if(a_attribute == DELAY)
-		{
-			return m_floatingTimeEntries[a_attribute].getBestBound(false);
-		}
-		else
-		{
-			return 0;
-		}
+		return m_floatingTimeEntries[a_attribute].getBestBound();
 	}
 	
 	/**
@@ -1201,53 +1190,165 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * the stored m_lBoundValue is returned otherwise the bound
 		 * value is calculated from the values in the entry.
 		 * 
-		 * @param a_bLow Low or high bound.
+		 * When invoked by an active InfoService, the bound is calculated
+		 * be removing the BOUND_ROUNDING per cent (%) worst results. The
+		 * remaining worst result is then compared to BOUNDARIES. The
+		 * best value from BOUNDARIES, that is equal to or worse than
+		 * the real worst value after removing the others is the bound.
+		 * 
+		 * In this form, the bound reacts quite fast on bad values, but 
+		 * recovers very slow if the problems are gone and good values
+		 * show up again. It is therefore 'tuned' as follows:
+		 * 
+		 * Look for the time of the last value that was equal to or worse than
+		 * the next best bound compared to the bound calculated as above. 
+		 * If there are at least BOUND_ROUNDING per cent (%) valid values 
+		 * (errors and tries are not counted) left afterwards, calculate the 
+		 * bound again but remove this and all previous values from the 
+		 * calculation. This should honor the fact that some services quickly 
+		 * recover from bad performance.
+		 * 
 		 * @return The bound value.
 		 */
-		public int getBound(boolean a_bLow)
+		public int getBound()
 		{
 			// if it is invoked by the client, just return the stored bound value
-			if(!m_bInfoService)
+			if (!m_bInfoService)
 			{
 				return m_lBoundValue;
 			}
 			
+			Integer value;
+			int nextBound;
+			Vector vecTimestamps = new Vector();
+			Hashtable hashValues = (Hashtable)m_Values.clone();
+			int bound = calculateBound(hashValues, vecTimestamps);
+			int limit = (int) Math.floor((double)vecTimestamps.size() * BOUND_ROUNDING);
+	
+			
+			Util.sort(vecTimestamps, new LongSortDesc()); // start with the latest timestamp
+			for (int i = 0; i < vecTimestamps.size(); i++)
+			{
+				value = ((Integer)hashValues.get(vecTimestamps.elementAt(i))).intValue();
+				if (value < 0 || value == Integer.MAX_VALUE)
+				{
+					// Do not count errors and tries.
+					limit++;
+					continue;
+				}
+				
+				// find the next better bound
+				nextBound = bound;
+				if (m_attribute == DELAY)
+				{
+					for (int j = BOUNDARIES[m_attribute].length - 1; j >= 0; j--)
+					{
+						if (BOUNDARIES[m_attribute][j] == bound)
+						{
+							if (j > 0)
+							{
+								nextBound = BOUNDARIES[m_attribute][j - 1];
+							}
+								
+							break;
+						}
+					}
+				}
+				else
+				{
+					for (int j = 0; j < BOUNDARIES[m_attribute].length; j++)
+					{
+						if (BOUNDARIES[m_attribute][j] == bound)
+						{
+							if (j + 1 < BOUNDARIES[m_attribute].length)
+							{
+								nextBound = BOUNDARIES[m_attribute][j + 1];
+							}
+							break;
+						}
+					}
+				}
+				
+				if (nextBound != bound &&
+					((m_attribute == SPEED && value <= nextBound) || (m_attribute == DELAY && value >= nextBound)))
+				{
+					// We have found the last value that supersedes this bound. Now check the limit!
+					if (i >= limit)
+					{	
+						//LogHolder.log(LogLevel.WARNING, LogType.MISC, "Limit: " + limit +  " Old bound: " +
+							//	bound + " Next bound: " + nextBound);
+						
+						// remove all values worse than or equal to the current bound 
+						for (int j = i; j < vecTimestamps.size(); j++)
+						{
+							hashValues.remove(vecTimestamps.elementAt(j));
+						}
+						
+						// recalculate the bound
+						vecTimestamps.removeAllElements();
+						bound = calculateBound(hashValues, vecTimestamps);
+						
+						//LogHolder.log(LogLevel.WARNING, LogType.MISC, "i: " + i +  " new bound: " + bound);
+					}
+					break;
+				}
+			}
+			
+			return bound;
+		}
+		
+		/**
+		 * Returns the bound value. If it is invoked by the client 
+		 * the stored m_lBoundValue is returned otherwise the bound
+		 * value is calculated from the values in the entry.
+		 * 
+		 * When invoked by an active InfoService, the bound is calculated
+		 * be removing the BOUND_ROUNDING per cent (%) worst results. The
+		 * remaining worst result is then compared to BOUNDARIES. The
+		 * best value from BOUNDARIES, that is equal to or worse than
+		 * the real worst value after removing the others is the bound.
+		 * 
+		 * @param a_bLow Low or high bound.
+		 * @return The bound value.
+		 */
+		private int calculateBound(Hashtable a_hashValues, Vector a_timestamps)
+		{
 			int values = 0;
 			long errors = 0;
 			Long timestamp;
 			
-			Vector vec = new Vector();
-			synchronized (m_Values)
+			Vector vecValues = new Vector();
+			Enumeration e = a_hashValues.keys();
+			
+			while(e.hasMoreElements())
 			{
-				Enumeration e = m_Values.keys();
-				
-				while(e.hasMoreElements())
+				timestamp = (Long) e.nextElement();				
+				// value is too old, remove it
+				if(System.currentTimeMillis() - timestamp.longValue() > DEFAULT_TIMEFRAME)
 				{
-					timestamp = (Long) e.nextElement();
-					// value is too old, remove it
-					if(System.currentTimeMillis() - timestamp.longValue() > DEFAULT_TIMEFRAME)
-					{
-						continue;
-					}
+					continue;
+				}
+				
+				a_timestamps.addElement(timestamp);
 
-					// get the value
-					Integer value = ((Integer) m_Values.get(timestamp));
-					if(value.intValue() < 0)
-					{
-						// value is an error
-						errors++;
-					}
-					else if (value.intValue() == Integer.MAX_VALUE)
-					{
-						// TODO
-					}
-					else
-					{
-						values++;
-						vec.addElement(value);
-					}
+				// get the value
+				Integer value = ((Integer) a_hashValues.get(timestamp));
+				if(value.intValue() < 0)
+				{
+					// value is an error
+					errors++;
+				}
+				else if (value.intValue() == Integer.MAX_VALUE)
+				{
+					// value was not measured (try)
+				}
+				else
+				{
+					values++;
+					vecValues.addElement(value);
 				}
 			}
+			
 			
 			// we don't seem to have any values
 			if (values == 0)
@@ -1257,38 +1358,38 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				{
 					return -1;
 				}
-				else if (a_bLow)
-				{
-					return Integer.MAX_VALUE;
-				}
-				else 
+				else if (m_attribute == DELAY)
 				{
 					return 0;
 				}
+				else 
+				{
+					return Integer.MAX_VALUE;
+				}
 			}
 			
 			
-			if(a_bLow)
+			if (m_attribute == DELAY)
 			{
-				Util.sort(vec, new IntegerSortAsc());
+				Util.sort(vecValues, new IntegerSortDesc());				
 			}
 			else
 			{
-				Util.sort(vec, new IntegerSortDesc());
+				Util.sort(vecValues, new IntegerSortAsc());
 			}
 			
-			int limit = (int) Math.floor((double)vec.size() * BOUND_ROUNDING);
+			int limit = (int) Math.floor((double)vecValues.size() * BOUND_ROUNDING);
 			
 			for (int i = 0; i < limit; i++)
 			{
-				vec.removeElementAt(0);
+				vecValues.removeElementAt(0);
 			}
 			
-			if (vec.size() > 0)
+			if (vecValues.size() > 0)
 			{
-				int value = ((Integer) vec.elementAt(0)).intValue();
+				int value = ((Integer) vecValues.elementAt(0)).intValue();
 			
-				return calculateBoundary(a_bLow, value);
+				return getBoundFromValue(value);
 			}
 			
 			return -1;
@@ -1299,10 +1400,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * the stored m_lBoundValue is returned otherwise the bound
 		 * value is calculated from the values in the entry.
 		 * 
-		 * @param a_bLow Low or high bound.
 		 * @return The best bound value.
 		 */
-		public int getBestBound(boolean a_bLow)
+		public int getBestBound()
 		{
 			// if it is invoked by the client, just return the stored bound value
 			if(!m_bInfoService)
@@ -1316,14 +1416,15 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			int bestValue;
 			
-			if(a_bLow)
-			{
-				bestValue = 0;
-			}
-			else
+			if (m_attribute == SPEED)
 			{
 				bestValue = Integer.MAX_VALUE;
 			}
+			else
+			{
+				bestValue = 0;
+			}
+			
 			
 			synchronized (m_Values)
 			{
@@ -1352,20 +1453,22 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					else
 					{
 						values++;
-						if(a_bLow)
-						{
-							if(value.intValue() > bestValue)
-							{
-								bestValue = value.intValue();
-							}
-						}
-						else
+						
+						if (m_attribute == SPEED)
 						{
 							if(value.intValue() < bestValue)
 							{
 								bestValue = value.intValue();
 							}
 						}
+						else
+						{
+							if(value.intValue() > bestValue)
+							{
+								bestValue = value.intValue();
+							}
+						}
+						
 					}
 				}
 			}
@@ -1378,34 +1481,24 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				{
 					return -1;
 				}
-				else if (a_bLow)
-				{
-					return Integer.MAX_VALUE;
-				}
-				else 
+				else if (m_attribute == SPEED)
 				{
 					return 0;
 				}
+				else 
+				{
+					return Integer.MAX_VALUE;
+				}				
 			}
 			else
 			{
-				return calculateBoundary(a_bLow, bestValue);
+				return getBoundFromValue(bestValue);
 			}
 		}
 		
-		private int calculateBoundary(boolean a_bLow, int value) 
+		private int getBoundFromValue(int value) 
 		{
-			if (a_bLow)
-			{
-				for (int i = BOUNDARIES[m_attribute].length -1 ; i >= 0; i--)
-				{
-					if (value >= BOUNDARIES[m_attribute][i])
-					{
-						return BOUNDARIES[m_attribute][i];
-					}
-				}
-			}
-			else
+			if (m_attribute == DELAY)
 			{
 				for (int i = 0; i < BOUNDARIES[m_attribute].length; i++)
 				{
@@ -1417,6 +1510,17 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				
 				return BOUNDARIES[m_attribute][BOUNDARIES[m_attribute].length - 1];
 			}
+			else
+			{
+				for (int i = BOUNDARIES[m_attribute].length -1 ; i >= 0; i--)
+				{
+					if (value >= BOUNDARIES[m_attribute][i])
+					{
+						return BOUNDARIES[m_attribute][i];
+					}
+				}
+			}
+			
 			
 			return BOUNDARIES[m_attribute][0];
 		}
@@ -1556,16 +1660,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		{
 			Element elem = a_doc.createElement(ATTRIBUTES[m_attribute]);
 			
-			if(this.m_attribute == SPEED)
-			{
-				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getBound(true));
-				XMLUtil.setAttribute(elem, XML_ATTR_BEST, getBestBound(true));
-			}
-			else if(this.m_attribute == DELAY)
-			{
-				XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getBound(false));
-				XMLUtil.setAttribute(elem, XML_ATTR_BEST, getBestBound(false));
-			}
+			XMLUtil.setAttribute(elem, XML_ATTR_BOUND, getBound());
+			XMLUtil.setAttribute(elem, XML_ATTR_BEST, getBestBound());
 			
 			return elem;
 		}
@@ -1642,17 +1738,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 */
 		private boolean m_bPassive; 
 		
-		
-		/**
-		 * Constructs a new <code>PerformanceAttributeEntry</code>.
-		 * 
-		 * @param a_attribute The performance attribute.
-		 */
-		private PerformanceAttributeEntry(int a_attribute)
-		{
-			this(a_attribute, false);
-		}
-		
 		private PerformanceAttributeEntry(int a_attribute, boolean a_bPassive)
 		{
 			m_attribute = a_attribute;
@@ -1667,6 +1752,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 */
 		private void addValue(long a_lTimeStamp, int a_iValue, PerformanceAttributeEntry a_previousEntry)
 		{
+			if (System.currentTimeMillis() - a_lTimeStamp >= WEEK_SEVEN_DAYS_TIMEOUT)
+			{
+				// ignore
+				return;
+			}
+			
 			m_lastUpdate = a_lTimeStamp;						
 			
 			if (a_iValue < 0 || (!m_bPassive && a_iValue == Integer.MAX_VALUE))
@@ -1709,7 +1800,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				
 				if (m_iLastTimestamp < a_lTimeStamp)
 				{
-					if (m_attribute == PACKETS && a_iValue < m_iLastValue)
+					if (a_iValue < m_iLastValue)
 					{
 						// this service has been restarted since the last test
 						m_iResets++;				

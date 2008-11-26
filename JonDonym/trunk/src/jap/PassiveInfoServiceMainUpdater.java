@@ -84,6 +84,15 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
 			throw ex;
 		}
+		
+		/*
+		 * Update current performance entries from performance info cache.
+		 */
+		Enumeration cascades = Database.getInstance(MixCascade.class).getEntrySnapshotAsEnumeration();
+		while(cascades.hasMoreElements())
+		{
+			getUpdatedEntry(((MixCascade) cascades.nextElement()).getId());
+		}
 	}
 	
 	public PassiveInfoServiceMainUpdater() throws IOException
@@ -104,11 +113,11 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		m_performanceInfoUpdater.update();
 		/* 2. MixCascades Database update */
 		m_cascadeUpdater.update();
-		
-		m_mixUpdater.update();
-		
-		/* 4. Exit addresses Database update */
+		/* 3. Exit addresses Database update */
 		InfoServiceHolder.getInstance().getExitAddresses();
+		
+		m_mixUpdater.updateAsync();
+		
 		/* now calculate lowest bounds of the performance entries */
 		Enumeration enumCurrentPerEntries = Database.getInstance(PerformanceEntry.class).getEntrySnapshotAsEnumeration();
 		Enumeration cascades = Database.getInstance(MixCascade.class).getEntrySnapshotAsEnumeration();
