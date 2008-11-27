@@ -323,6 +323,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 
 		/* get the name */
 		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
+		//@todo: rather use this for setting m_strName: generateNameFromMixNames()
+		//(when the mix providers support it)
 		if (m_strName == null && !m_bFromCascade)
 		{
 			throw (new XMLParseException("Name"));
@@ -686,7 +688,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	}
 
 	/**
-	 * Gets the concatenated names of the Mixes in this Cascade.
+	 * Gets (and sets) the concatenated names of the Mixes in this Cascade.
+	 * @todo can't getName() be used instead of that?
 	 * @return
 	 */
 	public String getMixNames()
@@ -706,7 +709,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					{
 						m_strMixNames += "-";
 					}
-					m_strMixNames += m_mixInfos[i].getName();					
+					m_strMixNames += m_mixInfos[i].getNameFragmentForCascade(); //m_mixInfos[i].getName();					
 				}
 				if (m_strMixNames.length() == 0)
 				{
@@ -721,6 +724,39 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return m_strMixNames;
 	}
 	
+	/* this function generates a cascadeName form the namefragments of the corresponding
+	 * mixes. (but only namefragments of mixes with different operators will appear)
+	 * this overwrites the existing cascadename
+	 */
+	private void generateNameFromMixNames()
+	{
+		if(m_decomposedCascadeName == null)
+		{
+			m_decomposedCascadeName = new Vector();
+		}
+		else
+		{
+			m_decomposedCascadeName.removeAllElements();
+		}
+		
+		Vector operators = new Vector();
+		ServiceOperator currentOp = null;
+		String currentNameFragment = null;
+		m_strName = "";
+		
+		for (int i = 0; i < m_mixInfos.length; i++) 
+		{
+			currentOp = m_mixInfos[i].getServiceOperator();
+			if(! operators.contains(m_mixInfos[i].getServiceOperator()))
+			{
+				currentNameFragment = m_mixInfos[i].getNameFragmentForCascade();
+				m_strName += (i == (m_mixInfos.length-1)) ? currentNameFragment : (currentNameFragment+"-");	
+				operators.addElement(currentOp);
+				m_decomposedCascadeName.addElement(currentNameFragment);
+			}
+		}
+	}
+	
 	/**
 	 * Returns the name of the mixcascade.
 	 *
@@ -728,7 +764,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	public String getName()
 	{
-		getDecomposedCascadeName();
+		getDecomposedCascadeName(); /*@todo: remove */
 		return m_strName;
 	}
 
@@ -753,7 +789,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	}
 
 	/**
-	 * @todo remove this when the operator short name is certified
+	 * @todo use generateNameFromMixNames when the operator short name is certified.
+	 * and this method only to return the container containg the name fragments
 	 * @return
 	 */
 	public Vector getDecomposedCascadeName()
@@ -1556,6 +1593,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return rootElement;
 	}
 	
+	/**
+	 * get WebInfos for a cascade with the specified ID
+	 */
 	public static Document getCascadeWebInfo(String cascadeID)
 	{
 		if(cascadeID == null )
@@ -1586,6 +1626,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return webInfoDoc;
 	}
 	
+	/**
+	 * get WebInfos for all cascades
+	 */
 	public static Document getAllCascadeWebInfos()
 	{
 		Document allWebInfosDoc = XMLUtil.createDocument();
