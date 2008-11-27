@@ -54,6 +54,7 @@ import anon.infoservice.InfoServiceIDEntry;
 import anon.infoservice.JAPMinVersion;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.JavaVersionDBEntry;
+import anon.infoservice.ListenerInterface;
 import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixCascadeExitAddresses;
@@ -1241,6 +1242,52 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				(info).getHtmlTableLine(Configuration.getInstance().isPassive()) + "\n";
 			}
 			htmlData = htmlData + "    </TABLE><BR>";
+			
+			if (Configuration.getInstance().isPassive())
+			{
+				htmlData += "<p><b>This Info Service is passive and only collects and combines the more detailed information from other Info Services.</b></p>\n";
+			}
+			
+			Vector infoservices = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
+			Vector interfaces;
+			ListenerInterface listener;
+			InfoServiceDBEntry entry;
+			
+			if (infoservices.size() > 0)
+			{
+				htmlData += "<H2>Available active Info Services:</H2>\n";
+				for (int i = 0; i < infoservices.size(); i++)
+				{
+					entry = (InfoServiceDBEntry)infoservices.elementAt(i);
+					if (entry.isBootstrap())
+					{
+						continue;
+					}
+					interfaces = entry.getListenerInterfaces();
+					if (interfaces.size() == 0)
+					{
+						continue;
+					}					
+					
+					listener = null;
+					for (int j = 0; j < interfaces.size(); j++)
+					{
+						if (((ListenerInterface)interfaces.elementAt(j)).getPort() == 80)
+						{
+							listener = (ListenerInterface)interfaces.elementAt(j);
+						}						
+					}
+					if (listener == null)
+					{
+						listener = (ListenerInterface)interfaces.elementAt(0);
+					}
+					
+					htmlData += "<a href=\"http://" + listener.getHost() + ":" + listener.getPort() +  "/status\">" +
+						entry.getName() + "</a><br>\n";
+				}
+				htmlData += "<br>\n";
+			}
+			
 			
 			if(Configuration.getInstance().isPerfEnabled() && InfoService.getPerfMeter() != null)
 			{
