@@ -187,7 +187,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			Element infoServiceNode = (Element) (XMLUtil.getFirstChildByName(XMLUtil.toXMLDocument(a_postData),
 				InfoServiceDBEntry.XML_ELEMENT_NAME));
 
-			InfoServiceDBEntry newEntry = new InfoServiceDBEntry(infoServiceNode, false);
+			InfoServiceDBEntry newEntry = new InfoServiceDBEntry(infoServiceNode);
 			/* verify the signature --> if requested */
 
 			AbstractDatabaseEntry idEntry = Database.getInstance(InfoServiceIDEntry.class).getEntryById(

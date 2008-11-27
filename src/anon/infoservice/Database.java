@@ -30,6 +30,7 @@
  */
 package anon.infoservice;
 
+import java.lang.reflect.Constructor;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -608,13 +609,38 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 			return updatedEntries;
 		}
 		NodeList dbNodes = a_dbNode.getElementsByTagName(xmlElementName);
+		Constructor constructor = null;
+		AbstractDatabaseEntry instance;
+		
+		try
+		{
+			constructor = m_DatabaseEntryClass.getConstructor(
+					new Class[]{Element.class, long.class});
+			// first try to find constructor with timeout and set timeout unlimited					
+		}
+		catch (Exception a_e)
+		{
+			// no such constructor
+			LogHolder.log(LogLevel.NOTICE, LogType.DB, 
+					"No timeout constructor for " + m_DatabaseEntryClass + " available.");
+		}
+		
 		for (int i = 0; i < dbNodes.getLength(); i++)
 		{
 			/* add all children to the database */			
 			try
 			{
-				AbstractDatabaseEntry instance = (AbstractDatabaseEntry)m_DatabaseEntryClass.getConstructor(
-								new Class[]{Element.class}).newInstance(new Object[]{dbNodes.item(i)});
+				if (constructor == null)
+				{
+					instance = (AbstractDatabaseEntry)m_DatabaseEntryClass.getConstructor(
+							new Class[]{Element.class}).newInstance(new Object[]{dbNodes.item(i)});
+				}
+				else
+				{
+					instance = (AbstractDatabaseEntry)constructor.newInstance(
+							new Object[]{dbNodes.item(i), new Long(Long.MAX_VALUE)});
+				}
+				
 				if (a_bVerify && instance instanceof ICertifiedDatabaseEntry &&
 					!((ICertifiedDatabaseEntry) instance).isVerified())
 				{

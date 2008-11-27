@@ -157,6 +157,9 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 * Creates a new StatusInfo from XML description (MixCascadeStatus node). There is no anonymity
 	 * level calculated for the new status entry -> getAnonLevel() will return -1. This constructor
 	 * should only be called within the context of the infoservice.
+	 * 
+	 * Beware of creating a constructor (Element, long), as Database.loadFromXML will then use an
+	 * unlimited timeout!
 	 *
 	 * @param a_statusNode The MixCascadeStatus node from an XML document.
 	 */

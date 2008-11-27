@@ -1093,7 +1093,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			/* there is a preferred infoservice -> parse it */
 			try
 			{
-				preferredInfoService = new InfoServiceDBEntry(infoServiceNode, true);
+				preferredInfoService = new InfoServiceDBEntry(infoServiceNode, Long.MAX_VALUE);
 			}
 			catch (XMLParseException a_e)
 			{
