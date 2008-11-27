@@ -1416,7 +1416,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			
 			int bestValue;
 			
-			if (m_attribute == SPEED)
+			if (m_attribute == DELAY)
 			{
 				bestValue = Integer.MAX_VALUE;
 			}
@@ -1441,7 +1441,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 
 					// get the value
 					Integer value = ((Integer) m_Values.get(timestamp));
-					if(value.intValue() < 0)
+					if (value.intValue() < 0)
 					{
 						// value is an error
 						errors++;
@@ -1454,7 +1454,7 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 					{
 						values++;
 						
-						if (m_attribute == SPEED)
+						if (m_attribute == DELAY)
 						{
 							if(value.intValue() < bestValue)
 							{
