@@ -746,10 +746,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		m_strName = "";
 		
 		/* special case: If the operator of the first and the last mix are the same
-		 * only this operator is displayed to express the extreme loss of protection. 
+		 * only this operator is displayed. 
 		 */
 		if(m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
 		{
+			//@todo: should we better use only the provider name in this case? 
 			currentNameFragment = m_mixInfos[0].getNameFragmentForCascade();
 			m_decomposedCascadeName.addElement(currentNameFragment);
 			m_strName = currentNameFragment;
@@ -813,6 +814,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		}
 		synchronized (m_strName)
 		{
+			
 			if (m_decomposedCascadeName == null)
 			{			
 				m_decomposedCascadeName = new Vector();
@@ -857,16 +859,31 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				{
 					// cannot decompose this name
 					m_decomposedCascadeName.addElement(m_strName);
-				}	
+				}
+				/* special case: If the operator of the first and the last mix are the same
+				 * only this operator is displayed. 
+				 */
+				else if (m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
+				{
+					m_strName = (String) m_decomposedCascadeName.elementAt(0);
+					m_decomposedCascadeName.addElement(m_strName);
+					return m_decomposedCascadeName;
+				}
 				else
 				{
-					m_strName = "";					
-					for (int i = 0; i < m_decomposedCascadeName.size() && i < getNumberOfOperators(); i++)
+					Vector ops = new Vector();
+					ServiceOperator currentOp = null;
+					m_strName = "";
+					
+					for (int i = 0; (i < m_decomposedCascadeName.size() ) &&
+									(i < m_mixInfos.length); i++)
 					{
-						m_strName += m_decomposedCascadeName.elementAt(i);
-						if (i + 1 < m_decomposedCascadeName.size() && i + 1 < getNumberOfOperators())
+						currentOp = m_mixInfos[i].getServiceOperator();
+						if( !ops.contains(currentOp) )
 						{
-							m_strName += "-";
+							ops.addElement(currentOp);
+							m_strName += m_strName.equals("") ? "" : "-";
+							m_strName += m_decomposedCascadeName.elementAt(i);
 						}
 					}
 				}
