@@ -54,11 +54,17 @@ import anon.pay.AIControlChannel;
  */
 public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable
 {
+	public static final String NAME_TYPE_MIX = "Mix";
+	public static final String NAME_TYPE_OPERATOR = "Operator";
+	public static final String DEFAULT_NAME_TYPE = NAME_TYPE_MIX;
+	
 	public static final String DEFAULT_NAME = "AN.ON Mix";
-
+	
 	public static final String XML_ELEMENT_CONTAINER_NAME = "Mixes";
 	public static final String XML_ELEMENT_NAME = "Mix";
-
+	public static final String XML_ELEMENT_MIX_NAME = "Name";
+	public final static String XML_ATTRIBUTE_NAME_TYPE = "type";
+	
 
     /* LERNGRUPPE: Mix types */
     public static final int FIRST_MIX = 0;
@@ -166,21 +172,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   private boolean m_bFromCascade;
   
   /**
-   * True, if this Mix has a performance server.
-   */
-  private boolean m_bPerformanceServer;
-
-  /**
-	* The host of the performance server.
-	*/
-  private String m_strPerformanceServerHost;
-	
-  /**
-   * The port of the performance server.
-   */
-  private int m_iPerformanceServerPort;
-  
-  /**
    * Creates a new MixInfo from XML description (Mix node). The state of the mix will be set to
    * non-free (only meaningful within the context of the infoservice).
    *
@@ -223,9 +214,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate(), 0);
 	  m_freeMix = false;
 	  m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
-	  m_bPerformanceServer = false;
-	  m_strPerformanceServerHost = "";
-	  m_iPerformanceServerPort = -1;
   }
 
   public MixInfo(String a_mixID, CertPath a_certPath, XMLPriceCertificate a_priceCert, long a_prepaidInterval)
@@ -246,9 +234,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  //
 	  m_priceCert = a_priceCert;
 	  m_prepaidInterval = a_prepaidInterval;
-	  m_bPerformanceServer = false;
-	  m_strPerformanceServerHost = "";
-	  m_iPerformanceServerPort = -1;	  
   }
 
   /**
@@ -313,8 +298,29 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix ID: " + m_mixId);
 	  }
 
-	  m_name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixNode, "Name"), DEFAULT_NAME);
-
+	  /* a name type specifies whether the name should be extracted from the
+	   * operator- or the mix certificate.
+	   */
+	  m_name = null;
+	  Node nameNode = XMLUtil.getFirstChildByName(a_mixNode, XML_ELEMENT_MIX_NAME);
+	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_TYPE, "" );// DEFAULT_NAME_TYPE);
+	  //uncomment the above line to enable a default name type 
+	  
+	  if( nameType.equals(NAME_TYPE_OPERATOR) && (m_operatorCertificate != null) )
+	  {
+		  m_name = (m_operatorCertificate.getSubject() != null) ? 
+				  m_operatorCertificate.getSubject().getCommonName() : null;
+	  }
+	  else if (nameType.equals(NAME_TYPE_MIX) && (m_mixCertificate != null) )
+	  {
+		  m_name = (m_mixCertificate.getSubject() != null) ? 
+				  m_mixCertificate.getSubject().getCommonName() : null;
+	  }
+	  if( m_name == null )
+	  {
+		  m_name = XMLUtil.parseValue(nameNode, DEFAULT_NAME);
+	  }
+	  
 	  m_bSocks = XMLUtil.parseAttribute(
 		   XMLUtil.getFirstChildByName(a_mixNode, "Proxies"), "socks5Support", false);
 
@@ -394,21 +400,12 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 	  
-	  m_strPerformanceServerHost = "";
-	  m_iPerformanceServerPort = -1;
-	  m_bPerformanceServer = false;
+
 	  Node perfNode = XMLUtil.getFirstChildByName(a_mixNode, "PerformanceServer");
 	  if(perfNode != null)
 	  {
 		  Node perfHostNode  = XMLUtil.getFirstChildByName(perfNode, "Host");
-		  Node perfHostPort = XMLUtil.getFirstChildByName(perfNode, "Port");
-		  
-		  if(perfHostNode != null && perfHostPort != null)
-		  {
-			  m_strPerformanceServerHost = XMLUtil.parseValue(perfHostNode, "localhost");
-			  m_iPerformanceServerPort = XMLUtil.parseValue(perfHostPort, 7777);
-			  m_bPerformanceServer = true;
-		  }
+		  Node perfHostPort = XMLUtil.getFirstChildByName(perfNode, "Port");  
 	  }
 
 	  /*
@@ -816,20 +813,4 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
        }
        return result;
    }
-
-	
-	public boolean hasPerformanceServer()
-	{
-		return m_bPerformanceServer;
-	}
-	
-	public String getPerformanceServerHost()
-	{
-		return m_strPerformanceServerHost;
-	}
-	
-	public int getPerformanceServerPort()
-	{
-		return m_iPerformanceServerPort;
-	}   
 }
