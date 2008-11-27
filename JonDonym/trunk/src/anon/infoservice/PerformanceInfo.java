@@ -89,7 +89,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	{
 		super(System.currentTimeMillis() + PERFORMANCE_INFO_TTL);
 		
-		if(a_info == null)
+		if (a_info == null)
 		{
 			throw new XMLParseException("Could not parse PerformanceInfo. Invalid document element.");
 		}

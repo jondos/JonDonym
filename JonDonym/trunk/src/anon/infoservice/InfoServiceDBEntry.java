@@ -178,9 +178,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	}
 
 	/**
-	 * Creates a new InfoService from XML description (InfoService node). The new entry will be
-	 * created within the context of the JAP client (the timeout for infoservice entries within the
-	 * JAP client is used).
+	 * Creates a new InfoService from XML description (InfoService node). The new entry will time out
+	 * if it is not updated. (InfoService context)
 	 *
 	 * @param a_infoServiceNode The InfoService node from an XML document.
 	 *
@@ -188,29 +187,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 */
 	public InfoServiceDBEntry(Element a_infoServiceNode) throws XMLParseException
 	{
-		this(a_infoServiceNode, true);
-	}
-
-	/**
-	 * Creates a new InfoService from XML description (InfoService node). The new entry will be
-	 * created within the specified context. The context influcences the timeout within the database
-	 * of all infoservices.
-	 *
-	 * @param a_infoServiceNode The InfoService node from an XML document.
-	 * @param a_japClientContext Whether the new entry will be created within the context of the
-	 *                           JAP client (true) or the context of the InfoService (false). This
-	 *                           setting influences the timeout of the created entry within the
-	 *                           database of all infoservices.
-	 *
-	 * @exception XMLParseException if an error in the xml structure occurs
-	 */
-	public InfoServiceDBEntry(Element a_infoServiceNode, boolean a_japClientContext) throws XMLParseException
-	{
-		this(a_infoServiceNode,
-			 (a_japClientContext ? (System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE_JAP) :
-			  (System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE)));
-		//XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_infoServiceNode, "LastUpdate"), -1L) +
-		//Constants.TIMEOUT_INFOSERVICE));
+		this(a_infoServiceNode, 0);
 	}
 
 	/**
@@ -222,9 +199,9 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 *
 	 * @exception XMLParseException if an error in the xml structure occurs
 	 */
-	private InfoServiceDBEntry(Element a_infoServiceNode, long a_timeout) throws XMLParseException
+	public InfoServiceDBEntry(Element a_infoServiceNode, long a_timeout) throws XMLParseException
 	{
-		super(a_timeout);
+		super(a_timeout <= 0 ? (System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE) : a_timeout);
 
 		if (a_infoServiceNode == null)
 		{
@@ -1189,7 +1166,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			{
 				if (a_getter.m_dbEntryClass == InfoServiceDBEntry.class)
 				{
-					currentEntry = new InfoServiceDBEntry(entryNode, a_getter.m_bJAPContext);
+					currentEntry = new InfoServiceDBEntry(entryNode, 
+							a_getter.m_bJAPContext ? Long.MAX_VALUE : 0);
 				}
 				else if(a_getter.m_dbEntryClass == TermsAndConditions.class)
 				{
