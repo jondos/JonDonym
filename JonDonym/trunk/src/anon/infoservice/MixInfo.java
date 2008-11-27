@@ -35,6 +35,7 @@ import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import logging.LogHolder;
@@ -63,7 +64,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	public static final String XML_ELEMENT_CONTAINER_NAME = "Mixes";
 	public static final String XML_ELEMENT_NAME = "Mix";
 	public static final String XML_ELEMENT_MIX_NAME = "Name";
-	public final static String XML_ATTRIBUTE_NAME_TYPE = "type";
+	public final static String XML_ATTRIBUTE_NAME_FOR_CASCADE = "forCascade";
 	
 
     /* LERNGRUPPE: Mix types */
@@ -109,6 +110,11 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    */
   private String m_name;
 
+  /**
+   * The name to contribute to the cascade name .
+   */
+  private String m_nameFragmentForCascade;
+  
   /**
    * Some information about the location of the mix.
    */
@@ -297,29 +303,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  {
 		  throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix ID: " + m_mixId);
 	  }
-
-	  /* a name type specifies whether the name should be extracted from the
-	   * operator- or the mix certificate.
-	   */
-	  m_name = null;
-	  Node nameNode = XMLUtil.getFirstChildByName(a_mixNode, XML_ELEMENT_MIX_NAME);
-	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_TYPE, "" );// DEFAULT_NAME_TYPE);
-	  //uncomment the above line to enable a default name type 
-	  
-	  if( nameType.equals(NAME_TYPE_OPERATOR) && (m_operatorCertificate != null) )
-	  {
-		  m_name = (m_operatorCertificate.getSubject() != null) ? 
-				  m_operatorCertificate.getSubject().getCommonName() : null;
-	  }
-	  else if (nameType.equals(NAME_TYPE_MIX) && (m_mixCertificate != null) )
-	  {
-		  m_name = (m_mixCertificate.getSubject() != null) ? 
-				  m_mixCertificate.getSubject().getCommonName() : null;
-	  }
-	  if( m_name == null )
-	  {
-		  m_name = XMLUtil.parseValue(nameNode, DEFAULT_NAME);
-	  }
 	  
 	  m_bSocks = XMLUtil.parseAttribute(
 		   XMLUtil.getFirstChildByName(a_mixNode, "Proxies"), "socks5Support", false);
@@ -433,6 +416,36 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_freeMix = false;
 	  m_xmlStructure = a_mixNode;
 
+	  /* a name type specifies whether the name should be extracted from the
+	   * operator- or the mix certificate.
+	   */
+	  m_name = null;
+	  Node nameNode = XMLUtil.getFirstChildByName(a_mixNode, XML_ELEMENT_MIX_NAME);
+	  
+	  m_name = XMLUtil.parseValue(nameNode, DEFAULT_NAME);
+	  
+	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_FOR_CASCADE, "" );// DEFAULT_NAME_TYPE);
+	  //uncomment the above line to enable a default name type 
+	  
+	  if( nameType.equals(NAME_TYPE_OPERATOR) && (m_operatorCertificate != null) )
+	  {
+		  m_nameFragmentForCascade = (m_mixOperator != null) ? m_mixOperator.getOrganization() : null;
+		  // right now the common name doesn't contain anything useful. Perhaps later it is useful
+		  // to use the common name of the operator cert instead of the organisation name
+		  //(m_operatorCertificate.getSubject() != null) ? 
+		  //	m_operatorCertificate.getSubject().getCommonName() : null; */
+	  }
+	  else if (nameType.equals(NAME_TYPE_MIX) && (m_mixCertificate != null) )
+	  {
+		  m_nameFragmentForCascade = ""+m_name;
+		  //same as above
+			  //(m_mixCertificate.getSubject() != null) ? 
+			  //	  m_mixCertificate.getSubject().getCommonName() : null;
+	  }
+	  if( m_nameFragmentForCascade == null )
+	  {
+		  m_nameFragmentForCascade = ""+m_name;
+	  }
 
   }
   
@@ -573,7 +586,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    *
    * @return The name of this mix.
    */
-  public String getName() {
+  public String getName() 
+  {
     return m_name;
   }
 
@@ -813,4 +827,14 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
        }
        return result;
    }
+
+	public String getNameFragmentForCascade()
+	{
+		return m_nameFragmentForCascade;
+	}
+	
+	public void setNameFragmentForCascade(String fragmentForCascade) 
+	{
+		m_nameFragmentForCascade = fragmentForCascade;
+	}
 }
