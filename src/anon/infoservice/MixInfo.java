@@ -383,14 +383,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 	  
-
-	  Node perfNode = XMLUtil.getFirstChildByName(a_mixNode, "PerformanceServer");
-	  if(perfNode != null)
-	  {
-		  Node perfHostNode  = XMLUtil.getFirstChildByName(perfNode, "Host");
-		  Node perfHostPort = XMLUtil.getFirstChildByName(perfNode, "Port");  
-	  }
-
 	  /*
 	   * Store the Service Operator if
 	   * - it doesn't exist yet or

@@ -320,16 +320,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix-Cascade ID: " + m_mixCascadeId);
 		}
 
-
-		/* get the name */
-		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
-		//@todo: rather use this for setting m_strName: generateNameFromMixNames()
-		//(when the mix providers support it)
-		if (m_strName == null && !m_bFromCascade)
-		{
-			throw (new XMLParseException("Name"));
-		}
-
 		m_mixProtocolVersion =
 			XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "MixProtocolVersion"), null);
 		if (m_mixProtocolVersion != null)
@@ -430,6 +420,16 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			{
 				m_mixInfos[i] = null;
 			}
+		}
+		
+		/* get the name */
+		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
+		//@todo: rather use this for setting m_strName: generateNameFromMixNames()
+		//(when the mix providers support it)
+		if ( m_strName == null && !m_bFromCascade)
+		{
+			generateNameFromMixNames();
+			//throw (new XMLParseException("Name"));	
 		}
 		
 		if (a_expireTime == 0 && m_mixInfos.length > 0)
@@ -795,6 +795,10 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	public Vector getDecomposedCascadeName()
 	{
+		if( m_strName == null )
+		{
+			return null;
+		}
 		synchronized (m_strName)
 		{
 			if (m_decomposedCascadeName == null)
