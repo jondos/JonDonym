@@ -1,44 +1,80 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo Help: Service Mixminion</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>Services: Mixminion</H2>
-<i>This panel is only available in <a href="appearance.html#expertView">Extended View</a>. (Visible in the developer version of JonDo only)</i>
-<P>
-To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>Services</i> from the list to the left, then open the tab <i>Mixminion</i>.
-In this tab, you can find information and settings for the Mixminion anonymization system.
-<BR>If you would like to use JonDo to access the Mixminion system, you will need to enter JonDo as a proxy on port 25 in your email client.
+<p class="navipar"><span class="midlink"><a name="doctop"
+href="index.html#mi_toc">TOC </a><a href="index.html#mi_config"><img
+src="next.gif" alt="-&gt;"> Configuration </a><a href="anon.html"><img
+src="next.gif" alt="-&gt;"> Anonymity </a><a href="services.html"><img
+src="next.gif" alt="-&gt;"> Services</a></span> </p>
+<hr>
 
-<UL>
-    <LI><B>Activate</B><BR>
-    Using Mixminion with JonDo is still experimental. Deactivating this checkbox will result in prevention of accidental usage of Mixminion as well as less memory usage by JonDo.
-    <P>
-    <LI><B>Available Mixminion Nodes:</B><BR>
-    This tab shows other computers that are a part of the Mixminion network and offer a connection to the Mixminion network.
-    <P>
-    <LI><B>Fetch list:</B><BR>
-    This button retrieves an updated list of currently accessible Mixminion nodes.
-    <P>
-    <LI><B>Preferences for anonymous routing:</B><BR>
-    <P>
-    <UL>
-        <LI><B>Nodes per connection:</B><BR>
-        Here you can set the number of Mixminion nodes through which a connection should be routed before being connected to the destination computer.  The more nodes you use, the more effective the anonymization of the connection.
-    </UL>
-    <P>
-    <LI><B>Email settings for answer mails:</B><BR>
-    <P>
-    <UL>
-        <LI><B>My email address:</B><BR>
-        You may enter your email address which will be used for answer mails. If you do not specify an address, JonDo will use the address from your email client.
-    </UL>
-</UL>
+<h2>Services: Mixminion</h2>
 
+<p><em class="jconf">This panel is only available in <a
+href="appearance.html#expertView">Expert View</a> and only in the beta
+version. To get to this settings window press the button <code
+class="jconf">Settings</code> in the main window of JonDo, then choose the
+entry <code class="jconf">Services</code> and open the tab <code
+class="jconf">Mixminion.</code></em> </p>
 
+<p>On this page you can find information and settings for the Mixminion
+anonymization system. Mixminion is a software for anonymously sending and
+receiving emails. Just as with Tor, we can not guarantee for completeness or
+functionality of the option as it is experimental. Further information about
+Mixminion can be found at <a
+href="http://www.mixminion.net">www.mixminion.net.</a></p>
 
+<p>If you would like to use JonDo to access the Mixminion system you need to
+enter it as a proxy on port 25 in your email client.</p>
+<ul>
+  <li><p><b>Activate</b><br>
+    Using Mixminion with JonDo is still experimental. Deactivating this
+    checkbox will lower memory usage by JonDo and prevent accidentally using
+    Mixminion. </p>
+  </li>
+  <li><p><b>Available Mixminion Nodes</b><br>
+    This tab shows systems that offer a connection to the Mixminion network.
+    </p>
+  </li>
+  <li><p><b>Reload</b><br>
+    This button retrieves an updated list of currently accessible Mixminion
+    nodes. </p>
+  </li>
+  <li><p><b>Preferences for anonymous routing</b><br>
+    </p>
+    <ul>
+      <li><p><b>Nodes per connection</b><br>
+        Here you can set the number of Mixminion nodes through which a
+        connection should be routed before being sent to the destination
+        system. The more nodes you use, the more effective the anonymization
+        of the connection will be. </p>
+      </li>
+    </ul>
+  </li>
+  <li><p><b>Email settings for reply mails</b><br>
+    </p>
+    <ul>
+      <li><p><b>My email address</b><br>
+        Enter here your email address used for reply mails. If you do not
+        specify an address JonDo will use the address from your email
+        client.</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+<hr>
+
+<p class="navipar"><span class="midlink"><a name="doctop"
+href="index.html#mi_toc">TOC </a><a href="index.html#mi_config"><img
+src="next.gif" alt="-&gt;"> Configuration </a><a href="anon.html"><img
+src="next.gif" alt="-&gt;"> Anonymity </a><a href="services.html"><img
+src="next.gif" alt="-&gt;"> Services</a></span> </p>
 <!--#include virtual="/footer_en.html"-->
 </body>
 </html>
