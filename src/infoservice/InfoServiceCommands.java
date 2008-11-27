@@ -1971,7 +1971,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			String infoserviceId = command.substring(13);
 			httpResponse = getInfoServiceInfo(infoserviceId);
 		}
-		else if ( (command.equals("/infoservices")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.equals("/infoservices") || command.equals("/infoservices/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /infoservices
 			 * Source: JAP
@@ -2012,7 +2012,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			ISRuntimeStatistics.ms_lNrOfGetCascadeserialsRequests++;
 			httpResponse = m_cascadeResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
-		else if ( (command.equals("/cascades")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ((command.startsWith("/cascades")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /cascades
 			 * Source: JAP
@@ -2042,8 +2042,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			//ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
 			httpResponse = m_exitAddressListResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
-		else if( ( command.equals(MixCascade.INFOSERVICE_COMMAND_WEBINFOS) || 
-				   command.equals(MixCascade.INFOSERVICE_COMMAND_WEBINFOS+"/") ) && 
+		else if( ( command.startsWith(MixCascade.INFOSERVICE_COMMAND_WEBINFOS)) && 
 				 ( method == Constants.REQUEST_METHOD_GET ) )
 		{
 			Document doc = MixCascade.getAllCascadeWebInfos();
@@ -2117,7 +2116,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		{
 			httpResponse = m_tcResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
-		else if ( (command.equals("/status")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ((command.startsWith("/status")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /status
 			 * Source: Browser
@@ -2137,7 +2136,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			ISRuntimeStatistics.ms_lNrOfGetStatus++;
 			httpResponse = infoServiceIndexPage();
 		}
-		else if ( (command.equals("/perfstatus")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.startsWith("/perfstatus")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /perfstatus
 			 * Source: Browser
@@ -2197,7 +2196,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_NOT_FOUND);
 			}
 		}
-		else if ( (command.equals("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.startsWith("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /mixes 
 			 * Source: JAP
@@ -2206,7 +2205,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 *  */
 			httpResponse = fetchAllMixes();
 		}
-		else if ( (command.equals("/availablemixes")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.startsWith("/availablemixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /availablemixes
 			 * Source: JAP
@@ -2379,7 +2378,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 */
 			httpResponse = getJnlpFile(command, method);
 		}
-		else if (command.equals("/echoip") && (method == Constants.REQUEST_METHOD_GET ||
+		else if ((command.startsWith("/echoip")) && (method == Constants.REQUEST_METHOD_GET ||
 											   method == Constants.REQUEST_METHOD_HEAD))
 		{
 			/** Full Command: GET /echoip
@@ -2400,7 +2399,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			ISRuntimeStatistics.ms_lNrOfGetPaymentRequests++;
 			httpResponse = paymentInstancePostHelo(postData);
 		}
-		else if ( (command.equals("/paymentinstances")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ((command.startsWith("/paymentinstances")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /paymentinstances
 			 * Source: JAP
