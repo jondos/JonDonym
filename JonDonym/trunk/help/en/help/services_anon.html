@@ -1,90 +1,247 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo Help: AN.ON/JonDonym</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>Services: JonDonym</H2>
-To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>Services</i> from the list to the left, then open the tab <i>JonDonym</i>.
-Here you can find information about the JonDonym project's anonymization service.
-<UL>
-    <LI><B>Available services</B><BR>
-    This list contains the names of all anonymization services that can currently be accessed.  The service selected in your JonDo client is highlighted in bold font.  You may block single services by unchecking the checkbox to the left of the service. JonDo does not connect to blocked services, and they are not listed in the choice menus. This is useful if you do not trust single services, or their service quality (speed/stability) seems to low. <br>
-    <br>
-    If you click on a service name, you can see further information about that service.
-    <P>
-    <UL>
-        <LI><B>Users</B><BR>
-        This field shows the number of users that are currently connected to the selected service.
-        <P>
-        <LI><B>Reachable by</B><BR>
-        Here you can see the host name or IP address under which the service can be reached.  This address must be open in your firewall for outgoing connections if you want to use that service.
-        <P>
-        <LI><B>Ports</B><BR>
-        The service accepts connections on these port numbers.  at least one of these ports needs to be open on your firewall for the address above.
-		<P>
-		<LI><B>Further information</B><em><B><br>
-        </B>With costs: </em>You have to <a href="payment.html">pay</a> for this service.<br>
-        <em>Excluded by filter :</em>         JonDo prevents the connection to this cascade because of the current <a href="jap.JAPConfTrust.html">service filter settings</a>.<br>
-        <em>Excluded by yourself :</em> As you have manually deselected this service, it is currently in the blacklist. JonDo cannot connect to this service as long as you do not unblock it.<BR>
-    </UL>
-    <P>
-    <LI><B>Reload</B><BR>
-    Clicking this button causes JonDo to request a new list of available services from the InfoService.
-    <P>
-    <LI><B>Select</B><BR>
-    This button sets the currently selected service to the activated service.  JonDo will try to set up a connection to this service when it is turned to "On" in the main window.
-    <P>
-    <LI><B>Manual</B><BR>
-    If a service is not recognized as available by the InfoService, you can manually add the service with this button, if you know the login information for that service.  After clicking on the button, the following fields appear in the bottom half of the window:
-    <P>
-    <UL>
-        <LI><B>Host</B><BR>
-        Enter the host name or IP address of the service here.
-        <P>
-        <LI><B>Port</B><BR>
-        Enter the port number of the service here.
-        <P>
-        <LI><B>Ok</B><BR>
-        Click this button to enter the service into the list of available services.
-        <P>
-        <LI><B>Cancel</B><BR>
-        Click this button to cancel the procedure and discard the information entered.  The new service name is also discarded from the list.
-        <P>
-	</UL>
-  <LI><B>Delete</B><BR>
-        This button is only active if you have selected a manually-entered service from the list of available services.  By clicking on this button, you can remove the service from the list.
-</UL>
+<p class="navipar"><span class="prevlink"><a href="services.html"><img
+src="prev.gif" alt="&lt;-"> Services</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_config"><img src="next.gif" alt="-&gt;"> Configuration
+</a><a href="anon.html"><img src="next.gif" alt="-&gt;"> Anonymity </a><a
+href="services.html"><img src="next.gif" alt="-&gt;"> Services</a></span>
+<span class="nextlink"><a href="services_general.html">Advanced settings <img
+src="next.gif" alt="-&gt;"></a></span> </p>
+<hr>
 
-The bottom part of the window depends on whether a manually-entered service or a registered service from the InfoService is selected.
-<P>
-If a manually-entered service is selected, you can change its configuration data or delete it from the list.
-<P>
-If a service that is registered at the InfoService is selected, you will see the following additional information about that service:
-<UL>
-    <LI><B>Number of servers in the service</B><BR>
-    You see a graphic depiction of the individual servers in the selected service.  The number of server icons represents the number of servers.  By clicking on one of the server icons, you can obtain the following information, which is listed below the server icons:
-    <P>
-    <UL>
-    	<LI><B>Position</B><BR>
-        Here you see the position which the chosen server takes.
-        <P>
-        <LI><B>Operator</B><BR>
-        Here you see the name of the organization that operates that server. Hovering over it with the mouse will show the URL of the operator's homepage, clickin on it will open the page in your browser.
-        <P>
-	<LI><B>Email</B><BR>
-        This email address belongs to the contact person of the selected server. Clicking on it will open you email client.
-        <P>
-      <LI><B>Location</B><BR>
-        The geographic location of the server is displayed here. Clicking on it opens a map.
-	<P>
-	<LI><B>Certificate</B><BR>
-        Here you can see whether the certificate of the server could be verified and whether it is still valid or expired. A click on it will show the certificate.
-(<a href="certificates.html">Further infromation concerning certificates...</a>)    </UL>
-</UL>
+<h2>AN.ON/JonDonym</h2>
 
+<p><em class="jconf">To get to this panel, press the button <code
+class="jconf">Settings</code> in JonDo's main window, then choose the entry
+<code class="jconf">Services</code> from the list to the left and open the
+tab <code class="jconf">AN.ON/JonDonym</code>.</em></p>
 
+<p>This settings panel offers following information or configuration of
+access to the services:</p>
+
+<h3><a name="filter">Filter</a></h3>
+
+<p>Which services your JonDo connects to or displays is determined by a
+service filter that can be adjusted by you. Depending on which filter you
+choose, the list below will display services that match the criteria of the
+filter. The following filters are available to you: </p>
+<ul>
+  <li><b>All services</b><br>
+    Displays all available services that are likely to offer sufficient
+    bandwidth.</li>
+  <li><p><b>Premium services</b><br>
+    Displays only premium services that show good performance data.</p>
+  </li>
+  <li><p><b>Free services</b><br>
+    Hides all services that are not free and unlikely to offer sufficient
+    performance.</p>
+  </li>
+  <li><p><b>Own services </b><br>
+    This filter shows only those services that you have <a
+    href="#manuell">created yourself</a>. </p>
+  </li>
+</ul>
+
+<p>With the help of <i><b>user defined filters</b></i> you can determine the
+selection criteria yourself. This filter, in contrast to the predefined
+filters, also offers the possibility of combining multiple criteria. Click
+the button <b>Edit filter</b> to create your own filter. You can adjust the
+following selection criteria to your needs: </p>
+<ul>
+  <li><p><b>Cascade length</b><br>
+    Determine whether a single mix is acceptable or whether you only want to
+    use mix cascades. </p>
+    <p><b>Notice</b><br>
+    When using a single mix service, your privacy will only be protected if
+    the respective operator is completely trustworthy. </p>
+  </li>
+  <li><p><b>Operator</b><br>
+    Here you may decide if you would like to hide services because of the
+    participation of a certain organization or individual as a mix operator.
+    </p>
+  </li>
+  <li><p><b>Internationality</b><br>
+    Determine how many different nations have to participate in the service.
+    This includes the location of the mix operating organizations and also
+    the geographic location of the servers themselves.<br>
+    </p>
+    <p><b>Notice</b><br>
+    The more internationalization, the more secure the service should be
+    esteemed. </p>
+  </li>
+  <li><p><b>Quality</b><br>
+    Choose whether only <a href="jondonym.html#premium">premium</a>, only
+    free or all services are displayed. </p>
+    <p><b>Notice</b><br>
+    The quality of the premium services is superior to that of the free
+    services in the important aspects security, speed and availability. </p>
+  </li>
+  <li><p><b>Speed and latency</b><br>
+    Here you can set a minimum speed and a maximum latency that the service
+    has to provide in order to meet your selection criteria.</p>
+  </li>
+</ul>
+
+<p>After having adjusted all selection criteria to your likings, click <code
+class="jconf">Accept</code> to activate your user defined filter. With <code
+class="jconf">Abort</code> you can revert your settings. </p>
+
+<p><b>Blocking single services</b></p>
+
+<p>The checkboxes to the left of the service entries are checked at default
+for all available services. Unchecking a box causes JonDo to no longer
+connect to this service. This achieves even more detailed filtering of
+services than is already possible with the user defined service filters.</p>
+
+<h3><a name="serviceinfos">Information about the available services</a></h3>
+
+<p>You can receive very detailed information about the different services.
+When hovering with your mouse over an entry in the selection list below the
+service filter you will be shown the address of the first mix and its access
+ports. To the right of the list you will furthermore be shown the following
+information about the selected service: </p>
+<ul>
+  <li><p><b>Anonymity level</b><br>
+    A value ranging from 0 to 10 measures the level of privacy that can be
+    achieved with the current service. This value depends on the current
+    number of connected users, the length of the cascade and its
+    internationality (<a href="jap.JAPNewView_anonymometer.html">see
+    Anonym-O-Meter</a>).</p>
+  </li>
+  <li><p><b>User count</b><br>
+    The value displays the current number of users connected to the service.
+    The higher the user count, the higher your privacy will be while using
+    the service. </p>
+  </li>
+  <li><p><b>Speed</b><br>
+    Displays the speed with which data is send and received in the cascade.
+    The value is measured by the InfoServices and is calculated across all
+    measurements from within the last hour.</p>
+  </li>
+  <li><p><b>Response time</b><br>
+    Displays the time that passes between sending a data packet and receiving
+    the response data. The value is measured by the InfoServices and is
+    calculated across all measurements from within the last hour.</p>
+  </li>
+  <li><p><b>Availability</b><br>
+    You can recognize from this information how reliable and stable the
+    selected service works. The value is measured by the InfoServices and is
+    calculated across all measurements from within the last hour.</p>
+  </li>
+</ul>
+
+<p>The data is further concretized in the lower part of the window. For every
+mix of the selected service a symbol will be shown. You can tell the number
+of mixes in a cascade from it. The flag symbols to the right of the mix
+symbols indicate the nationality of the mix operator (upper flag) and the
+geographic location of the mix (lower flag). If there is only one flag next
+to the mix symbol it means that the operator and the mix are located in the
+same country. </p>
+
+<p>Click a mix symbol to receive the following information about the
+respective mix: </p>
+<ul>
+  <li><p><b>Position</b><br>
+    The position which the selected mix has in the service. For detailed
+    explanation click the text next to it.</p>
+  </li>
+  <li><p><b>Operator</b><br>
+    The name of the organization that operates the selected mix. If you hover
+    over the operator's name with your mouse you will be displayed the URL of
+    the operator. A click on the text opens the homepage of the operator. The
+    flag symbol to the left depicts the country in which the mix operator is
+    located. </p>
+  </li>
+  <li><p><b>Email</b><br>
+    The email address belongs to the person of contact of the selected
+    server. A click on it opens your email client with the address of the
+    operator. </p>
+  </li>
+  <li><p><b>Location</b><br>
+    The geographic location of the server is shown here. A click on it opens
+    a map. The flag symbol to the left shows at a glance in which country the
+    mix is located. </p>
+  </li>
+  <li><p><b>Certificate</b><br>
+    Here you can see whether the certificate of the server could be verified,
+    whether it is still valid or has already expired. With a click on it you
+    can explore the certificate even further. (<a
+    href="certificates.html">further information about certificates...</a>)
+    </p>
+  </li>
+</ul>
+
+<h3>Actions for the available services</h3>
+
+<p>Below the window with the available JonDonym services you will find a row
+of buttons with which the following actions can be conducted: </p>
+<ul>
+  <li><p><b>Reload</b><br>
+    A click on this button makes JonDo delete all services from the list and
+    ask the InfoService for available services again. </p>
+  </li>
+  <li><p><b>Select</b><br>
+    This button selects the currently marked service as the active service.
+    JonDo will try to connect tot this service if anonymity is set to <code
+    class="jconf">On</code> in the main window. </p>
+    <p><b>Notice</b><br>
+    If you activate a premium service but have no appertaining account a
+    dialog will open for account creation, and no connection will be made to
+    the service.</p>
+  </li>
+  <li><p><b><a name="manuell">Add</a></b><br>
+    Here you can manually add a service which has not been reported available
+    by the InfoService but that you know the access data of.</p>
+    <p><em>This function is rarely needed, e.g. if you can not connect to an
+    InfoService to receive information about services automatically.</em></p>
+    <p>After clicking the button you will be presented the following fields
+    in the lower part of the window: </p>
+    <ul>
+      <li><p><b>Host</b><br>
+        Enter the hostname or IP address of the service. </p>
+      </li>
+      <li><p><b>Port</b><br>
+        Enter the port of the service. </p>
+      </li>
+      <li><p><b>Ok</b><br>
+        After having filled in the above fields, you can insert the service
+        into the list of available services herewith. </p>
+      </li>
+      <li><p><b>Cancel</b><br>
+        Cancels the process and redisplays information about the current
+        service at the bottom section. </p>
+      </li>
+    </ul>
+  </li>
+  <li><p><b>Edit</b><br>
+    This button is only active if a <a href="#manuell">manually entered</a>
+    service exists in the list and is selected. With this action you can edit
+    the settings of a manually entered service again.</p>
+  </li>
+  <li><p><b>Delete</b><br>
+    You can only click this button if you have also selected an already
+    existing manually created service from the list. It will remove the
+    respective service from the list.</p>
+  </li>
+</ul>
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="services.html"><img
+src="prev.gif" alt="&lt;-"> Services</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_config"><img src="next.gif" alt="-&gt;"> Configuration
+</a><a href="anon.html"><img src="next.gif" alt="-&gt;"> Anonymity </a><a
+href="services.html"><img src="next.gif" alt="-&gt;"> Services</a></span>
+<span class="nextlink"><a href="services_general.html">Advanced settings <img
+src="next.gif" alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer_en.html"-->
 </body>
 </html>

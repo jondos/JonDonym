@@ -30,10 +30,11 @@ services and updates. Multiple InfoSerivces of different organizations are
 available in JonDonym. They share and match their data so that they all have
 the same information in the end. This ensures availabilty of the information.
 Most information is requested redundantly so that no single InfoService may
-cheat or conceal information.</p>
+fake or conceal information.</p>
 
 <p><b>Please beware</b><br>
-Changing these settings may make JonDo stop discovering any services.</p>
+Changing these settings may render JonDo incapable of discovering any
+services.</p>
 
 <h3>Configuration</h3>
 On this page, you can see the InfoServices that are known to your JonDo
@@ -44,7 +45,7 @@ following actions:
     Here you can download a new list of InfoServices. </p>
   </li>
   <li><p><b>Set as default</b><br>
-    By clicking this button, the selected InfoService will be chosen as the
+    By clicking this button the selected InfoService will be chosen as the
     default InfoService. This default InfoService will be contacted first for
     <a href="#infoservice_redundat">redundant requests</a> and it will not be
     deleted from the list of available InfoServices, even if it may be
@@ -76,15 +77,15 @@ following actions:
       <li><p><b>InfoService name</b><br>
         If you like, you can enter a name for the InfoService here. The new
         InfoService then appears with this name in the list of known
-        InfoServices. If the field is left empty, the InfoService is listed
-        as a combination of host name and port. </p>
+        InfoServices. If the field is left empty the InfoService is listed as
+        a combination of host name and port. </p>
       </li>
       <li><p><b>Add</b><br>
         Click this button to confirm your entry and insert the new
         InfoService. </p>
       </li>
       <li><p><b>Cancel</b><br>
-        Discards changes and returns to the previous window.</p>
+        Discard changes and return to the previous window.</p>
       </li>
     </ul>
     <p>This part of the window also appears if you select an InfoService
@@ -92,19 +93,19 @@ following actions:
     InfoService's data or delete it. </p>
   </li>
   <li><p><b>Remove</b><br>
-    When you click on this button, the selected InfoService will be removed
+    When you click on this button the selected InfoService will be removed
     from the list of known InfoServices.</p>
-    <p><b>Hinweis</b><br>
+    <p><b>Notice</b><br>
     Deleting the default or preset InfoServices is impossible.</p>
   </li>
 </ul>
 
 <h3>Advanced Settings</h3>
 <ul>
-  <li><p><b>Enable automatic InfoService Requests</b><br>
+  <li><p><a name="infoservice_auto"><b>Enable automatic InfoService requests</b><br>
     JonDo regularly attempts to connect to the InfoService to update the
-    information saved locally. If this checkbox is not set, these automatic
-    connections will cease. <strong>You have to update the InfoService-data
+    information saved locally. If this checkbox is not set these automatic
+    connections will cease. <strong>You have to update the InfoService data
     by clicking the different refresh buttons in the respective windows
     regularly. Otherwise program functionality may not be
     guaranteed.</strong> </p>
@@ -114,27 +115,28 @@ following actions:
     anonymized connection available. This is the recommended setting as there
     is really no need to be anonymous to the InfoServices.<br>
     If this option is deactivated, information from InfoServices may be
-    gathered through anonymized connections only. <strong>This may make it impossible 
-to connect to InfoServices at all.</strong>.<br>
+    gathered through anonymized connections only. <strong>This may make it
+    impossible to connect to InfoServices at all.</strong>.<br>
     </p>
   </li>
-  <li><p><b>Do redundant requests on different InfoServices</b><br>
+  <li><p><a name="infoservice_redundat"><b>Do redundant requests to different InfoServices</b><br>
     Define how many InfoServices will be queried. If you set this value to
-    <code>3</code>, for example, JonDo will always try to reach 3 InfoServices for the
-    requested information. Should one of them be offline, JonDo will try to
-    reach the others. The higher the value, the more resilient against
-    malfunction JonDo will become, but the more time these queries will
-    consume also. The default InfoService will always be contacted first.
-    <em>In the beta version you can completely deactivate this option so that
-    only the default InfoService will be asked, no matter whether it is
-    available or not. This may make it impossible to connect to InfoServices
-    at all.</em> </p>
+    <code>3</code>, for example, JonDo will always try to reach 3
+    InfoServices for the requested information. Should one of them be offline
+    JonDo will try to reach the other two. The higher the value the more
+    resilient against malfunction JonDo will become but the more time these
+    queries will consume also. The default InfoService will always be
+    contacted first. <em>In the beta version you can completely deactivate
+    this option so that only the default InfoService will be asked, no matter
+    whether it is available or not. This may make it impossible to connect to
+    InfoServices at all.</em> </p>
   </li>
   <li><p><b>Connection timeout</b><br>
-    If your internet connection is too slow, a timeout for requests of the
-    information set too short may prevent JonDo from establishing
-    a connection and receiving the information. A timeout set too high may cause long waiting times
-    if one or more InfoServices are slow or unavailable. Therefore, lower or raise the timeout as needed. </p>
+    If your internet connection is too slow a timeout for requests of the
+    information set too short may prevent JonDo from establishing a
+    connection and receiving the information. A timeout set too high may
+    cause long waiting times if one or more InfoServices are slow or
+    unavailable. Therefore, lower or raise the timeout as needed. </p>
   </li>
 </ul>
 <hr>

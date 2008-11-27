@@ -1,46 +1,134 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo Help: Services Tor</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>Services: Tor</H2>
-<i>This panel is only available in <a href="appearance.html#expertView">Extended View</a>. (Visible in the developer version of JonDo only) </i>
-<P>
-To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>Services</i> from the list to the left, then open the tab <i>Tor</i>.
-In this tab, you can find information and settings for the Tor anonymization network.
-<BR>If you would like to use JonDo to access the Tor network, you will need to enter JonDo as a Socks proxy in your browser, rather than as an HTTP/HTTPS proxy.
+<p class="navipar"><span class="midlink"><a name="doctop"
+href="index.html#mi_toc">TOC </a><a href="index.html#mi_config"><img
+src="next.gif" alt="-&gt;"> Configuration </a><a href="anon.html"><img
+src="next.gif" alt="-&gt;"> Anonymity </a><a href="services.html"><img
+src="next.gif" alt="-&gt;"> Services</a></span> </p>
+<hr>
 
-<UL>
-    <LI><B>Activate</B><BR>
-    Using Tor with JonDo is still experimental. Deactivating this checkbox will result in prevention of accidental usage of Tor as well as less memory usage by JonDo.
-    <P>
-    <LI><B>Available Tor Nodes</B><BR>
-    This tab shows other computers that are a part of the Tor network and offer a connection to the Tor network.
-    <P>
-    <LI><B>Fetch list</B><BR>
-    This button retrieves an updated list of currently accesible Tor nodes.
-    <P>
-    <LI><B>Preferences for anonymous routing</B><BR>
-    <P>
-    <UL>
-        <LI><B>Minimal nodes per connection</B><BR>
-        Here you can set the minimum number of Tor nodes through which a connection should be routed before being connected to the destination computer.  The more nodes you use, the more effective the anonymization of the connection.
-        <P>
-        <LI><B>Maximal nodes per connection</B><BR>
-        This slider sets the maximum number of Tor nodes used for a connection.  The larger this number, the slower the connection will be.
-        <P>
-        <LI><B>Change route every x connections</B><BR>
-        Here you can set how often a new route should be established.  Whenever this number of connections has been established, the old route is discarded and a new route through the Tor network is established.
-        <P>
-        <LI><B>pre-create anonymous routes</B><BR>
-        If this box is checked, JonDo automatically establishes a route through the Tor network upon startup.  If it's not checked, a route is not established until a connection is made.
-    </UL>
-</UL>
+<h2>Tor</h2>
 
+<p><em class="jconf">This panel is only available in <a
+href="appearance.html#expertView">Expert View</a> and only in the beta
+version. To get to this settings window press the button <code
+class="jconf">Settings</code> in the main window of JonDo, then choose the
+entry <code class="jconf">Services</code> and open the tab <code
+class="jconf">Tor.</code></em></p>
 
+<h3>Tor versus JonDonym</h3>
 
+<p>On this page you can find information and settings concerning access to
+the <a href="http://tor.eff.org">Tor anonymization network</a>. Since the
+advantages and disadvantages of Tor versus JonDonym are a point of interest
+to many users, we will do a small comparison of both services here.</p>
+
+<p>Tor is an anonymization service that uses a method called <b>Onion
+Routing</b>, whereas JonDonym/AN.ON are based on the <b>Mix Method</b> . Both
+methods are very similar when it comes to the cryptographic processing of the
+data (multiple encapsulated encryption), but they differ in how the data gets
+relayed to the receiver. While in Onion Routing the actual way that the data
+packets take through the anonymization network changes quite often, in a Mix
+Method it is fixed. This is supposed to better spread the traffic load to
+multiple onion routers, while a mix service transfers all the traffic load to
+only a few intermediaries, the so-called mixes. The Tor network consists of a
+multitude of onion routers, the so-called Tor nodes. The individual Tor node
+does not have to fulfill high standards concerning network connection, memory
+and computing capacity since the whole load is spread across the Tor network.
+Compared to that, JonDonym only comprises a few mixes that are connected in
+fixed mix cascades. These few mixes have to carry the whole traffic load. The
+mixes therefore need substantially more resources than Tor nodes, and the
+operation of a mix means significantly more effort and cost. </p>
+
+<p>Because of this difference many users notice the following thing: while in
+Tor the IP address changes with every new route as the last Tor node changes
+too, it remains the same for a long period of time in JonDonym, as one
+usually remains connected to the same cascade for a long period of time. From
+there many users draw an incorrect conclusion: "The more often my IP changes,
+the better my security will be." But in fact, changing an IP does not bring
+about better protection from traffic analysis. What matters is only that the
+visible IP can not be traced back to the original IP. Through multiple
+encryption of data both, JonDonym and Tor, offer strong unlinkability, no
+matter whether the visible IP changes often or not. </p>
+
+<p>The discussion about which of the two methods is "better" is heavy and has
+not brought about any definitive result yet. It is known that mix services
+lead the score when it comes to security with respect to the organization of
+the service. Tor is susceptible to <i>internal attackers</i>, i.e. an
+operator of a Tor node could not be trustworthy and conduct attacks himself.
+Still, both Tor and JonDonym consider this scenario since in both cases a
+single trustworthy mix or tor node will suffice to guarantee the security of
+the users. However, a manageable number of mix operators also makes it easier
+to control them, bind them to contracts and to sanction them if a contractual
+obligation has been failed. In JonDonym it is basically organized this way.
+Tor on the other hand offers the possibility of operating your own Tor node
+and expanding the Tor network to any Internet user without having to fulfill
+such terms or even whole contracts. A Tor user can thus not readily assess
+whether his data is sent through trustworthy intermediaries. Therefore, Tor
+is not suitable for commercial use and can not give as many guarantees as
+JonDonym can with respect to security and speed. </p>
+
+<h3>Access to the Tor network with JonDo</h3>
+JonDo has Tor support, but it is experimental. This is why we do not
+guarantee complete or flawless functionality. If you would like to use JonDo
+to access the Tor network, you will need to enter JonDo as a SOCKS (not as a
+HTTP/HTTPS) proxy in your browser. 
+<ul>
+  <li><p><b>Activate</b><br>
+    Using Tor with JonDo is still experimental. Deactivating this checkbox
+    will result in prevention of accidental usage of Tor as well as less
+    memory usage by JonDo. </p>
+  </li>
+  <li><p><b>Available Tor nodes</b><br>
+    This tab shows systems that are a part of the Tor network and offer a
+    connection to the Tor network. </p>
+  </li>
+  <li><p><b>Reload</b><br>
+    This button reloads an updated list of currently accessible Tor nodes.
+    </p>
+  </li>
+  <li><p><b>Preferences for anonymous routing</b><br>
+    </p>
+    <ul>
+      <li><p><b>Minimum nodes per connection</b><br>
+        Here you can set the minimum number of Tor nodes through which a
+        connection should be routed before being sent to the destination
+        computer. The more nodes you use, the more effective the
+        anonymization of the connection will be. </p>
+      </li>
+      <li><p><b>Maximum nodes per connection</b><br>
+        This slider sets the maximum number of Tor nodes used for a
+        connection. The larger this number, the slower the connection will
+        be. </p>
+      </li>
+      <li><p><b>Change route every x connections</b><br>
+        Here you can set how often a new route should be established.
+        Whenever the threshold of connections has been reached, the old route
+        is discarded and a new route through the Tor network is established.
+        </p>
+      </li>
+      <li><p><b>Create anonymous route at startup</b><br>
+        If this box is checked, JonDo automatically establishes a route
+        through the Tor network at startup. If unchecked, a route is not
+        established until a connection is demanded for the first time.</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+<hr>
+
+<p class="navipar"><span class="midlink"><a name="doctop"
+href="index.html#mi_toc">TOC </a><a href="index.html#mi_config"><img
+src="next.gif" alt="-&gt;"> Configuration </a><a href="anon.html"><img
+src="next.gif" alt="-&gt;"> Anonymity </a><a href="services.html"><img
+src="next.gif" alt="-&gt;"> Services</a></span> </p>
 <!--#include virtual="/footer_en.html"-->
 </body>
 </html>
