@@ -730,6 +730,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	private void generateNameFromMixNames()
 	{
+		//no null checks neccessary because NO NullPointers must occur! 
 		if(m_decomposedCascadeName == null)
 		{
 			m_decomposedCascadeName = new Vector();
@@ -743,6 +744,17 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		ServiceOperator currentOp = null;
 		String currentNameFragment = null;
 		m_strName = "";
+		
+		/* special case: If the operator of the first and the last mix are the same
+		 * only this operator is displayed to express the extreme loss of protection. 
+		 */
+		if(m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
+		{
+			currentNameFragment = m_mixInfos[0].getNameFragmentForCascade();
+			m_decomposedCascadeName.addElement(currentNameFragment);
+			m_strName = currentNameFragment;
+			return;
+		}
 		
 		for (int i = 0; i < m_mixInfos.length; i++) 
 		{
