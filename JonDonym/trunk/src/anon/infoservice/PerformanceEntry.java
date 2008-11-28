@@ -28,8 +28,6 @@
  */
 package anon.infoservice;
 
-import infoservice.Configuration;
-
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

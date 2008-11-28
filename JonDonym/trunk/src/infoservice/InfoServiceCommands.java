@@ -1204,16 +1204,16 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				
 				htmlData +="    <TABLE BORDER=\"0\">\n" +
 				"      <COLGROUP>\n" +
-				"        <COL WIDTH=\"15%\">\n" +
+				"        <COL WIDTH=\"20%\">\n" +
 				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
 				((Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) ?
-				"        <COL WIDTH=\"15%\">\n" +	
-				"        <COL WIDTH=\"15%\">\n" +
+				"        <COL WIDTH=\"10%\">\n" +	
+				"        <COL WIDTH=\"10%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" 	:
 				"        <COL WIDTH=\"15%\">\n" +
-				"        <COL WIDTH=\"20%\">\n" +
+				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"5%\">\n") +				
 				"        <COL WIDTH=\"5%\">\n" +
 				"      </COLGROUP>\n" +
