@@ -258,6 +258,7 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 	 */
 	public void removeStatusMsg(int id)
 	{
+		boolean currentMessageRemoved = false;
 		synchronized (SYNC_MSG)
 		{
 			//messgaes are stored as a linked list, with the last entry pointing to the first, and m_Msgs being one node
@@ -271,10 +272,7 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 			{
 				m_firstMessage = null;
 				m_aktY = ICON_HEIGHT;
-
-				setToolTipText(null);
-				setCursor(Cursor.getDefaultCursor());
-				m_button.setVisible(false);
+				currentMessageRemoved = true;
 			}
 			else
 			{
@@ -304,7 +302,15 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 				prevEntry.m_Next = curEntry.m_Next; //remove entry from list
 			}
 		}
-
+		//HOTFIX: invoking those methods while holding lock for SYNC_MSG
+		//can cause deadlocks. (though this may cause a the button for a newly 
+		//added message to disappear it's better than a deadlock).
+		if(currentMessageRemoved)
+		{
+			setToolTipText(null);
+			setCursor(Cursor.getDefaultCursor());
+			m_button.setVisible(false);
+		}
 
 	}
 
