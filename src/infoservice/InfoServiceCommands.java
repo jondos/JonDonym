@@ -149,7 +149,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 
 	private PerformanceRequestHandler m_perfRequestHandler =  new PerformanceRequestHandler();
 	
-	// Ok the cache the StatusInfo DB here for performance reasonses (the
+	// Ok the cache the StatusInfo DB here for performance reasons (the
 	// database objete itself will always remain the same during the lifetime of
 	// the Is -so
 	//no problem so far
@@ -1208,7 +1208,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				(Configuration.getInstance().isPassive() ?
+				((Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) ?
 				"        <COL WIDTH=\"15%\">\n" +	
 				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" 	:
@@ -1222,10 +1222,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <TH>Cascade ID</TH>\n" +
 				"        <TH>Active Users</TH>\n" +
 				"        <TH>Traffic Situation</TH>\n" +
-				(Configuration.getInstance().isPassive() ? 
+				((Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) ? 
 				"        <TH>Delay Bound</TH>\n" : 
 				"        <TH>Delay (Avg) [Bound]</TH>\n") +
-				(Configuration.getInstance().isPassive() ? 
+				((Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) ? 
 				"        <TH>Speed Bound</TH>\n" :		
 				"        <TH>Speed (Avg) [Bound]</TH>\n") +
 				"        <TH>Mixed Packets</TH>\n" +
@@ -1239,13 +1239,20 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				info = (StatusInfo) (enumer.nextElement());
 				/* get the HTML table line */
 				htmlData = htmlData + "      " + 
-				(info).getHtmlTableLine(Configuration.getInstance().isPassive()) + "\n";
+				(info).getHtmlTableLine(Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) + "\n";
 			}
 			htmlData = htmlData + "    </TABLE><BR>";
 			
 			if (Configuration.getInstance().isPassive())
 			{
-				htmlData += "<p><b>This Info Service is passive and only collects and combines the more detailed information from other Info Services.</b></p>\n";
+				if (!Configuration.getInstance().isPerfEnabled())
+				{
+					htmlData += "<p><b>This Info Service is passive and only collects and combines the more detailed information from other Info Services.</b></p>\n";
+				}
+				else
+				{
+					htmlData += "<p><b>This Info Service is passive: it does performance tests, but does not forward any data to other Info Services.</b></p>\n";
+				}
 			}
 			
 			Vector infoservices = Database.getInstance(InfoServiceDBEntry.class).getEntryList();

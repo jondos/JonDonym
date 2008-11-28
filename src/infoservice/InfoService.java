@@ -116,7 +116,10 @@ public class InfoService implements Observer
 		try
 		{
 			InfoService s1 = new InfoService(fn);
-						
+			
+			// start info service server
+			s1.startServer();
+			
 //			 configure the performance meter
 			if(Configuration.getInstance().isPerfEnabled())
 			{				
@@ -132,9 +135,6 @@ public class InfoService implements Observer
 			{
 				InfoService.ms_perfMeter = null;
 			}
-			
-			// start info service server
-			s1.startServer();
 			
 			SignalHandler handler = new SignalHandler();
 			handler.addObserver(s1);

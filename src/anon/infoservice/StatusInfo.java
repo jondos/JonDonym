@@ -32,6 +32,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.security.SignatureException;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -575,8 +579,9 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 				speedBound = Integer.MAX_VALUE;
 			}
 			else
-			{
+			{				
 				speedBound = perfEntry.getBound(PerformanceEntry.SPEED);
+				//LogHolder.log(LogLevel.WARNING, LogType.MISC, "Getting speed bound for " + getId() + ": " + speedBound);
 			}
 			
 			

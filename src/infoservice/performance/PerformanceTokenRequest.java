@@ -90,12 +90,13 @@ public class PerformanceTokenRequest implements IXMLEncodable
 		m_infoServiceId = XMLUtil.parseValue(isId, "");
 		
 		// check against available infoservices
+		/*
 		InfoServiceDBEntry infoService = (InfoServiceDBEntry) Database.getInstance(InfoServiceDBEntry.class).getEntryById(m_infoServiceId);
 		
 		if(infoService == null)
 		{
 			throw new XMLParseException("Request did not specify a valid infoservice id.");
-		}
+		}*/
 	}
 	
 	/**

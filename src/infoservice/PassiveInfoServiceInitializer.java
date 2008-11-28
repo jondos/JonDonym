@@ -14,6 +14,7 @@ import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.StatusInfo;
+import anon.pay.PaymentInstanceDBEntry;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import jap.InfoServiceUpdater;
@@ -45,7 +46,7 @@ public class PassiveInfoServiceInitializer
 	private final static Class[] CACHE_CLASSES = new Class[]
 	{                    
 		MixCascade.class, MixCascadeExitAddresses.class, PerformanceInfo.class, StatusInfo.class,
-		InfoServiceDBEntry.class, MixInfo.class
+		InfoServiceDBEntry.class, MixInfo.class, PaymentInstanceDBEntry.class
 	};
 	
 	public static String CACHE_FILE_NAME = "cache.xml";

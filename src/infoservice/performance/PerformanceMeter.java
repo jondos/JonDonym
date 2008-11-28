@@ -239,13 +239,15 @@ public class PerformanceMeter implements Runnable, Observer
 	 * A <code>Calendar</code> object for various date calculations.
 	 */
 	private Calendar m_cal = Calendar.getInstance();
+	
+	private InfoServiceDBEntry m_ownInfoService;
 
 	/**
 	 * Constructs a new <code>PerformanceMeter</code> with a given <code>AccountUpdater</code>.
 	 * 
 	 * @param updater An account updater for the pay accounts.
 	 */
-	public PerformanceMeter(AccountUpdater updater)
+	public PerformanceMeter(AccountUpdater updater) throws IOException
 	{
 		init();
 		
@@ -254,9 +256,9 @@ public class PerformanceMeter implements Runnable, Observer
 	}
 	
 	/**
-	 * Initialises the performance meter.
+	 * Initializes the performance meter.
 	 */
-	public void init() 
+	public void init() throws IOException
 	{
 		m_infoServiceConfig = Configuration.getInstance(); 
 		if(m_infoServiceConfig == null)
@@ -307,6 +309,30 @@ public class PerformanceMeter implements Runnable, Observer
 		
 		// add ourself as observer to the MixCascade database so we knew when new MixCascades show up
 		Database.getInstance(MixCascade.class).addObserver(this);
+		
+		
+		// create our local anon proxy
+	
+		try
+		{
+			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
+		}
+		catch (IOException a_e)
+		{
+			LogHolder.log(LogLevel.EMERG, LogType.NET, "Could not start AnonProxy for performance meter on port " + m_proxyPort + "!");
+			throw a_e;
+		}
+		m_proxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
+		
+		// disable header processing and jondofox headers. these used to cause problems with the test.
+		m_proxy.setHTTPHeaderProcessingEnabled(false);
+		m_proxy.setJonDoFoxHeaderEnabled(false);
+		
+		m_ownInfoService =
+			new InfoServiceDBEntry(Configuration.getInstance().getOwnName(),
+								   Configuration.getInstance().getID(),
+								   Configuration.getInstance().getVirtualListeners(), Configuration.getInstance().holdForwarderList(), false,
+								   System.currentTimeMillis(), 0, Configuration.getInstance().isPerfServerEnabled());
 	}
 	
 	/**
@@ -440,8 +466,7 @@ public class PerformanceMeter implements Runnable, Observer
 		}
 		catch(IOException ex)
 		{
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not read "+ PERFORMANCE_LOG_FILE + 
-					". No previous performance data for this week found: " + ex.getMessage());
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "No previous performance data for this week found: " + ex.getMessage());
 		}
 		
 		LogHolder.log(LogLevel.NOTICE, LogType.NET, "Added previous performance data for week" + week);
@@ -452,29 +477,7 @@ public class PerformanceMeter implements Runnable, Observer
 	 */
 	public void run() 
 	{
-		// create our local anon proxy
-		try
-		{
-			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
-			m_proxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
-			
-			// disable header processing and jondofox headers. these used to cause problems with the test.
-			m_proxy.setHTTPHeaderProcessingEnabled(false);
-			m_proxy.setJonDoFoxHeaderEnabled(false);
-		} 
-		catch (UnknownHostException e1)
-		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, 
-					"An error occured while setting up performance monitoring, cause: ", e1);
-			return;
-		} 
-		catch (IOException e1)
-		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.NET, 
-					"An I/O error occured while setting up performance monitoring, cause: ", e1);
-			return;
-		}
-
+		boolean bFirstTestDone = false;
 		// load pay account files and update them to show the correct credit balance.
 		loadAccountFiles();
 		m_accUpdater.update();
@@ -516,6 +519,7 @@ public class PerformanceMeter implements Runnable, Observer
 					// update the last update time
 					if (m_lastTotalUpdates > 0)
 					{
+						bFirstTestDone = true;
 						m_lastUpdateRuntime = System.currentTimeMillis() - updateBegin;
 					}
 				}
@@ -526,7 +530,13 @@ public class PerformanceMeter implements Runnable, Observer
 				// all tests in the current interval are done, wait for the specified time
 				if (!m_bUpdate)
 				{
-					long sleepFor = m_nextUpdate - System.currentTimeMillis();    			
+					if (!bFirstTestDone)
+					{
+						m_nextUpdate = System.currentTimeMillis() + 30000; // wait 30 seconds fo the next try
+					}
+					
+					long sleepFor = m_nextUpdate - System.currentTimeMillis();    	
+					
 					if (sleepFor > 0)
 					{
 						LogHolder.log(LogLevel.INFO, LogType.NET, "Performance thread sleeping for " + sleepFor + " ms.");
@@ -822,7 +832,7 @@ public class PerformanceMeter implements Runnable, Observer
 	{
 		int iUpdates = 0;
 		int dataSize = m_dataSize;
-		int a_requestsPerInterval = m_requestsPerInterval;
+		int requestsPerInterval = m_requestsPerInterval;
 		int errorCode = ErrorCodes.E_UNKNOWN; 		
 		Hashtable hashBadInfoServices = new Hashtable();
 		Hashtable vDelay = new Hashtable();
@@ -894,13 +904,13 @@ public class PerformanceMeter implements Runnable, Observer
 		else
 		{
 				
-			LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting performance test on cascade " + a_cascade.getMixNames() + " with " + a_requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
+			LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting performance test on cascade " + a_cascade.getMixNames() + " with " + requestsPerInterval + " requests and " + m_maxWaitForTest + " ms timeout.");
 			
 			// hashtable that holds the delay, speed and users value from this test			
 			
 	//		 allocate the recv buff
 			char[] recvBuff = new char[dataSize];	
-			for (int i = 0; i < a_requestsPerInterval && !Thread.currentThread().isInterrupted() && m_proxy.isConnected(); i++)
+			for (int i = 0; i < requestsPerInterval && !Thread.currentThread().isInterrupted() && m_proxy.isConnected(); i++)
 			{
 				try
 				{
@@ -916,6 +926,7 @@ public class PerformanceMeter implements Runnable, Observer
 				catch (InfoServiceException a_e)
 				{
 					LogHolder.log(LogLevel.WARNING, LogType.NET, a_e);
+					requestsPerInterval = iUpdates; // do not log this as error; the InfoService failed!
 					break;
 				}
 			}
@@ -928,7 +939,6 @@ public class PerformanceMeter implements Runnable, Observer
 			int lastSpeed;
 			int lastUsers;
 			int lastPackets;
-			long waitTime;
 			long timestamp = System.currentTimeMillis();
 			
 			if (iUpdates > 0)
@@ -937,7 +947,7 @@ public class PerformanceMeter implements Runnable, Observer
 				m_lastCascadeUpdated = a_cascade.getMixNames();
 			}
 			
-			while (iUpdates < a_requestsPerInterval)
+			while (iUpdates < requestsPerInterval)
 			{
 		    	// timestamp at which the test data was retrieved
 				timestamp += 1;
@@ -970,7 +980,7 @@ public class PerformanceMeter implements Runnable, Observer
 						info.getNrOfActiveUsers(), packets, null);				
 			}
 			
-			while ((waitTime = timestamp - System.currentTimeMillis()) > 0)
+			while (timestamp - System.currentTimeMillis() > 0)
 			{
 				try 
 				{
@@ -1058,7 +1068,7 @@ public class PerformanceMeter implements Runnable, Observer
 	       	{
 	       		// choose a random info service for our performance test
 	       		infoservice = chooseRandomInfoService(a_hashBadInfoServices);
-		       	if(infoservice == null)
+		       	if (infoservice == null)
 		       	{		       		
 		       		throw new InfoServiceException("Could not find any info services that are running a performance server.");
 		       	}
@@ -1094,7 +1104,7 @@ public class PerformanceMeter implements Runnable, Observer
 	       	
 	       	if (httpResponse == null)
 	       	{
-	       		throw new Exception("Error while reading from infoservice");
+	       		throw new InfoServiceException("Error while reading from infoservice");
 	       	}
 	       	
 	       	// fetch the token from the response data
@@ -1558,14 +1568,16 @@ public class PerformanceMeter implements Runnable, Observer
 	 * @param a_badInfoServices A hashtable of InfoServices that should not be chosen.
 	 * @return A random InfoService.
 	 */
-	public InfoServiceDBEntry chooseRandomInfoService(Hashtable a_badInfoServices)
+	private InfoServiceDBEntry chooseRandomInfoService(Hashtable a_badInfoServices)
 	{
-		if (!a_badInfoServices.contains(Configuration.getInstance().getID()))
+		if (!a_badInfoServices.containsKey(Configuration.getInstance().getID()))
 		{
 			// always return this InfoService if connection to it is possible
+			return m_ownInfoService;
+			/*
 			return (InfoServiceDBEntry)Database.getInstance(
 					InfoServiceDBEntry.class).getEntryById(
-							Configuration.getInstance().getID());
+							Configuration.getInstance().getID());*/
 		}
 		
 		Vector knownIS = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
@@ -1575,7 +1587,7 @@ public class PerformanceMeter implements Runnable, Observer
 			int i = ms_rnd.nextInt(knownIS.size());
 		
 			InfoServiceDBEntry entry = (InfoServiceDBEntry) knownIS.elementAt(i);
-			if (a_badInfoServices.get(entry.getId()) == null &&
+			if (!a_badInfoServices.containsKey(entry.getId()) &&
 				entry.isPerfServerEnabled() && !entry.getListenerInterfaces().isEmpty())
 			{
 				return entry; 

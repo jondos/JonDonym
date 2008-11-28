@@ -50,6 +50,11 @@ public class PaymentInstanceUpdater extends AbstractDatabaseUpdater
 	{
 		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
 	}
+	
+	public PaymentInstanceUpdater(long a_updateInterval)
+	{
+		super(a_updateInterval);
+	}
 
 	public Class getUpdatedClass()
 	{
@@ -65,14 +70,17 @@ public class PaymentInstanceUpdater extends AbstractDatabaseUpdater
 	{
 		Hashtable pis = InfoServiceHolder.getInstance().getPaymentInstances();
 
-		if (pis == null)
+		if (getUpdateInterval() instanceof DynamicUpdateInterval)
 		{
-			// no entries where found
-			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
-		}
-		else
-		{
-			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+			if (pis == null)
+			{
+				// no entries where found
+				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
+			}
+			else
+			{
+				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+			}
 		}
 
 		if (pis != null && pis.size() == 0)
