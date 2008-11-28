@@ -79,6 +79,11 @@ public class InfoServiceUpdater extends AbstractDatabaseUpdater
 		//return InfoServiceHolder.getInstance().getInfoServiceSerials();
 		return new Hashtable();
 	}
+	
+	protected boolean doCleanup(Hashtable a_newEntries)
+	{
+		return super.doCleanup(a_newEntries);
+	}
 
 
 	protected Hashtable getUpdatedEntries(Hashtable a_entriesToUpdate)

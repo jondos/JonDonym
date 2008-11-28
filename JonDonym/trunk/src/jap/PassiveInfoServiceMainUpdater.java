@@ -1,5 +1,7 @@
 package jap;
 
+import infoservice.Configuration;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,6 +34,7 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 	PerformanceInfoUpdater m_performanceInfoUpdater = null;
 	PassiveInfoServiceCascadeUpdater m_cascadeUpdater = null;
 	MixInfoUpdater m_mixUpdater = null;
+	PaymentInstanceUpdater piUpdater = null;
 	
 	/**
 	 * Stream to the performance log file.
@@ -52,52 +55,68 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 	public PassiveInfoServiceMainUpdater(long interval) throws IOException
 	{
 		super(interval);
-		m_performanceInfoUpdater = new PerformanceInfoUpdater(Long.MAX_VALUE);
+		
 		m_cascadeUpdater = new PassiveInfoServiceCascadeUpdater(Long.MAX_VALUE);
 		m_mixUpdater = new MixInfoUpdater();
+		piUpdater = new PaymentInstanceUpdater(Long.MAX_VALUE);
 		
-		// set calendar to current time
-		m_cal.setTime(new Date(System.currentTimeMillis()));
-
-		
-		// set the current week
-		m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
-		
-		// import old performance date from this week
-		readOldPerformanceData(m_currentWeek);
-		// if we're on the last day of the week (saturday) we already have enough
-		// performance data for the last 7 days.
-		if(m_cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY)
+		if (!Configuration.getInstance().isPerfEnabled())
 		{
-			// if it's not Saturday -> import last week, too
-			readOldPerformanceData(m_currentWeek - 1);
-		}
+			m_performanceInfoUpdater = new PerformanceInfoUpdater(Long.MAX_VALUE);
 		
-		try
-		{
-			// open the stream for the performance log file
-			m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 				
-					m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
-		}
-		catch(IOException ex)
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
-			throw ex;
-		}
-		
-		/*
-		 * Update current performance entries from performance info cache.
-		 */
-		Enumeration cascades = Database.getInstance(MixCascade.class).getEntrySnapshotAsEnumeration();
-		while(cascades.hasMoreElements())
-		{
-			getUpdatedEntry(((MixCascade) cascades.nextElement()).getId());
+			// set calendar to current time
+			m_cal.setTime(new Date(System.currentTimeMillis()));
+	
+			
+			// set the current week
+			m_currentWeek = m_cal.get(Calendar.WEEK_OF_YEAR);
+			
+			// if we're on the last day of the week (saturday) we already have enough
+			// performance data for the last 7 days.
+			if(m_cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY)
+			{
+				// if it's not Saturday -> import last week, too
+				readOldPerformanceData(m_currentWeek - 1);
+			}
+			
+			// import old performance date from this week
+			readOldPerformanceData(m_currentWeek);
+			
+			try
+			{
+				// open the stream for the performance log file
+				m_stream = new FileOutputStream(PERFORMANCE_LOG_FILE + 				
+						m_cal.get(Calendar.YEAR) + "_" + m_currentWeek + ".log", true);
+			}
+			catch(IOException ex)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not open "+ PERFORMANCE_LOG_FILE + ".");
+				throw ex;
+			}
+			
+			/*
+			 * Update current performance entries from performance info cache.
+			 */
+			Enumeration cascades = Database.getInstance(MixCascade.class).getEntrySnapshotAsEnumeration();
+			while(cascades.hasMoreElements())
+			{
+				getUpdatedEntry(((MixCascade) cascades.nextElement()).getId());
+			}
 		}
 	}
 	
 	public PassiveInfoServiceMainUpdater() throws IOException
 	{
 		this(Long.MAX_VALUE);
+	}
+	
+	protected boolean doCleanup(Hashtable a_newEntries)
+	{
+		if (m_performanceInfoUpdater != null)
+		{
+			return super.doCleanup(a_newEntries);
+		}
+		return false;
 	}
 	
 	/**
@@ -108,42 +127,52 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 	 * 4. finally PerformanceEntries are calculated and returned.
 	 */
 	protected Hashtable getUpdatedEntries(Hashtable toUpdate)
-	{	
+	{					
 		/* 1. PerformanceInfos Database update (to calculate the PerformanceEntries) */
-		m_performanceInfoUpdater.update();
+		if (m_performanceInfoUpdater != null)
+		{
+			m_performanceInfoUpdater.update();
+		}
+		
+		piUpdater.update();
+		
 		/* 2. MixCascades Database update */
 		m_cascadeUpdater.update();
 		/* 3. Exit addresses Database update */
 		InfoServiceHolder.getInstance().getExitAddresses();
-		
+				
 		m_mixUpdater.updateAsync();
 		
-		/* now calculate lowest bounds of the performance entries */
-		Enumeration enumCurrentPerEntries = Database.getInstance(PerformanceEntry.class).getEntrySnapshotAsEnumeration();
-		Enumeration cascades = Database.getInstance(MixCascade.class).getEntrySnapshotAsEnumeration();
 		Hashtable performanceEntries = new Hashtable();
-		String currentCascadeId;
-		PerformanceEntry curPerformanceEntry;
-		
-		while(cascades.hasMoreElements())
+		if (m_performanceInfoUpdater != null)
 		{
-			currentCascadeId = ((MixCascade) cascades.nextElement()).getId();
-			performanceEntries.put(currentCascadeId, getUpdatedEntry(currentCascadeId));
-		}
-		
-		while (enumCurrentPerEntries.hasMoreElements())
-		{
-			curPerformanceEntry = (PerformanceEntry)enumCurrentPerEntries.nextElement();
-			if (performanceEntries.containsKey(curPerformanceEntry.getId()))
+			/* now calculate lowest bounds of the performance entries */
+			Enumeration enumCurrentPerEntries = Database.getInstance(PerformanceEntry.class).getEntrySnapshotAsEnumeration();
+			Enumeration cascades = Database.getInstance(MixCascade.class).getEntrySnapshotAsEnumeration();
+			
+			String currentCascadeId;
+			PerformanceEntry curPerformanceEntry;
+			
+			while(cascades.hasMoreElements())
 			{
-				// OK, has been updated
-				continue;
+				currentCascadeId = ((MixCascade) cascades.nextElement()).getId();
+				performanceEntries.put(currentCascadeId, getUpdatedEntry(currentCascadeId));
 			}
 			
-			// this entry needs an update but its cascade is not available; if it is too old, it will be deleted
-			if (System.currentTimeMillis() - curPerformanceEntry.getLastUpdate() < PerformanceEntry.WEEK_SEVEN_DAYS_TIMEOUT)
+			while (enumCurrentPerEntries.hasMoreElements())
 			{
-				performanceEntries.put(curPerformanceEntry.getId(), getUpdatedEntry(curPerformanceEntry.getId()));
+				curPerformanceEntry = (PerformanceEntry)enumCurrentPerEntries.nextElement();
+				if (performanceEntries.containsKey(curPerformanceEntry.getId()))
+				{
+					// OK, has been updated
+					continue;
+				}
+				
+				// this entry needs an update but its cascade is not available; if it is too old, it will be deleted
+				if (System.currentTimeMillis() - curPerformanceEntry.getLastUpdate() < PerformanceEntry.WEEK_SEVEN_DAYS_TIMEOUT)
+				{
+					performanceEntries.put(curPerformanceEntry.getId(), getUpdatedEntry(curPerformanceEntry.getId()));
+				}
 			}
 		}
 		
@@ -298,6 +327,11 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 				if (i < 9)
 				{
 					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC,  "No enough performance log tokens: " + i);
+				}
+				
+				if (System.currentTimeMillis() - timestamp >= PerformanceEntry.WEEK_SEVEN_DAYS_TIMEOUT)
+				{
+					continue;
 				}
 					
 				// look for an existing performance entry

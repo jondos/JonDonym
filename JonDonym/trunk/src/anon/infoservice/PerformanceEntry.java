@@ -28,6 +28,8 @@
  */
 package anon.infoservice;
 
+import infoservice.Configuration;
+
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -1204,9 +1206,9 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 		 * the next best bound compared to the bound calculated as above. 
 		 * If there are at least BOUND_ROUNDING per cent (%) valid values 
 		 * (errors and tries are not counted) left afterwards, calculate the 
-		 * bound again but remove this and all previous values from the 
-		 * calculation. This should honor the fact that some services quickly 
-		 * recover from bad performance.
+		 * bound again but remove all later values from the calculation. This 
+		 * should honor the fact that some services quickly recover from bad 
+		 * performance.
 		 * 
 		 * @return The bound value.
 		 */
@@ -1222,9 +1224,8 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 			int nextBound;
 			Vector vecTimestamps = new Vector();
 			Hashtable hashValues = (Hashtable)m_Values.clone();
-			int bound = calculateBound(hashValues, vecTimestamps);
-			int limit = (int) Math.floor((double)vecTimestamps.size() * BOUND_ROUNDING);
-	
+			int bound = calculateBound(hashValues, vecTimestamps);			
+			int limit = Math.max((int) Math.floor((double)vecTimestamps.size() * BOUND_ROUNDING), 2);
 			
 			Util.sort(vecTimestamps, new LongSortDesc()); // start with the latest timestamp
 			for (int i = 0; i < vecTimestamps.size(); i++)
@@ -1249,7 +1250,6 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 							{
 								nextBound = BOUNDARIES[m_attribute][j - 1];
 							}
-								
 							break;
 						}
 					}
@@ -1270,23 +1270,35 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 				
 				if (nextBound != bound &&
-					((m_attribute == SPEED && value <= nextBound) || (m_attribute == DELAY && value >= nextBound)))
+					((m_attribute == SPEED && value < nextBound) || (m_attribute == DELAY && value > nextBound)))
 				{
-					// We have found the last value that supersedes this bound. Now check the limit!
-					if (i >= limit)
+					//System.out.println("calculating better bound. Limit=" + limit + ", i=" + i );
+					// We have found the last value that supersedes this bound. All newer values are better (at least "limit").
+					if (i > limit)
 					{	
 						//LogHolder.log(LogLevel.WARNING, LogType.MISC, "Limit: " + limit +  " Old bound: " +
 							//	bound + " Next bound: " + nextBound);
-						
+						//System.out.println("Before: " + hashValues.size() + ", bound: " + bound + " , next:" +  nextBound  + " , limit: " + limit);
 						// remove all values worse than or equal to the current bound 
 						for (int j = i; j < vecTimestamps.size(); j++)
 						{
 							hashValues.remove(vecTimestamps.elementAt(j));
 						}
+						//System.out.println("After: " + hashValues.size());
 						
 						// recalculate the bound
 						vecTimestamps.removeAllElements();
 						bound = calculateBound(hashValues, vecTimestamps);
+						
+						/*
+						if (m_attribute == SPEED)
+						{
+							System.out.println("New speed bound: " + bound);
+						}
+						else
+						{
+							System.out.println("New delay bound: " + bound);
+						}*/
 						
 						//LogHolder.log(LogLevel.WARNING, LogType.MISC, "i: " + i +  " new bound: " + bound);
 					}

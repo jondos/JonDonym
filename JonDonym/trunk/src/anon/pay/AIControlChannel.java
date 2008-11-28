@@ -472,7 +472,8 @@ public class AIControlChannel extends XmlControlChannel
 	  if (m_initialCC == null)
 	  {
 		  // this seems to be the first connection to the cascade
-		  LogHolder.log(LogLevel.WARNING, LogType.PAY, "Setting initial CC to current CC...");
+		  LogHolder.log(LogLevel.NOTICE, LogType.PAY, 
+				  "Seems to be the first connection to service. Setting initial CC to current CC...");
 		  m_initialCC = cc;
 	  }
 

@@ -327,10 +327,10 @@ final public class Configuration
 
 			/* load the private key for signing our own infoservice messages */
 			String privatePkcs12KeyFile = a_properties.getProperty("privateKeyFile");
+			PKCS12 infoServiceMessagesPrivateKey = null;
 			if ( (privatePkcs12KeyFile != null) && (!privatePkcs12KeyFile.trim().equals("")))
 			{
-				privatePkcs12KeyFile = privatePkcs12KeyFile.trim();
-				PKCS12 infoServiceMessagesPrivateKey = null;
+				privatePkcs12KeyFile = privatePkcs12KeyFile.trim();				
 				try
 				{
 					do
@@ -403,7 +403,11 @@ final public class Configuration
 						JAPCertificate.CERTIFICATE_TYPE_UPDATE, "update", true);
 				
 				loadTrustedCertificateFiles(a_properties, "trustedPICertificateFiles", 
-						JAPCertificate.CERTIFICATE_TYPE_PAYMENT, "PI", true);						
+						JAPCertificate.CERTIFICATE_TYPE_PAYMENT, "PI", true);			
+				
+				SignatureVerifier.getInstance().getVerificationCertificateStore().
+					addCertificateWithoutVerification(infoServiceMessagesPrivateKey.getX509Certificate(), 
+							JAPCertificate.CERTIFICATE_TYPE_INFOSERVICE, true, true);
 				
 				
 				try
@@ -777,15 +781,8 @@ final public class Configuration
 			
 			m_bPassive = Boolean.valueOf(a_properties.getProperty("modePassive", "false")).booleanValue();
 			
-			if (m_bPassive)
-			{
-				m_bPerfEnabled = false;
-			}
-			else
-			{
-				m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "true")).booleanValue();
-			}
 			
+			m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "true")).booleanValue();						
 			if(m_bPerfEnabled)
 			{
 				String value = a_properties.getProperty("perf.proxyHost", "localhost");
