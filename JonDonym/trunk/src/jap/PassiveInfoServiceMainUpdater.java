@@ -1,7 +1,5 @@
 package jap;
 
-import infoservice.Configuration;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -52,7 +50,8 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 	private final Calendar m_cal = Calendar.getInstance();
 	
 	
-	public PassiveInfoServiceMainUpdater(long interval) throws IOException
+	public PassiveInfoServiceMainUpdater(long interval, boolean a_bFetchPerformanceData) 
+	throws IOException
 	{
 		super(interval);
 		
@@ -60,7 +59,7 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		m_mixUpdater = new MixInfoUpdater();
 		piUpdater = new PaymentInstanceUpdater(Long.MAX_VALUE);
 		
-		if (!Configuration.getInstance().isPerfEnabled())
+		if (a_bFetchPerformanceData)
 		{
 			m_performanceInfoUpdater = new PerformanceInfoUpdater(Long.MAX_VALUE);
 		
@@ -105,9 +104,9 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 		}
 	}
 	
-	public PassiveInfoServiceMainUpdater() throws IOException
+	public PassiveInfoServiceMainUpdater(boolean a_bFetchPerformanceData) throws IOException
 	{
-		this(Long.MAX_VALUE);
+		this(Long.MAX_VALUE, a_bFetchPerformanceData);
 	}
 	
 	protected boolean doCleanup(Hashtable a_newEntries)
