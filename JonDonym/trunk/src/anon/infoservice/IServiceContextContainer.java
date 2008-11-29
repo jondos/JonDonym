@@ -24,7 +24,6 @@ public interface IServiceContextContainer
 	
 	public final String XML_ATTR_CONTEXT = "context";
 	
-	public void setContext(String context);
 	public String getContext();
 	
 }

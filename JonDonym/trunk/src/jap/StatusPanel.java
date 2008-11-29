@@ -293,7 +293,7 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 						return; //not found
 					}
 				}
-				if (curEntry == m_firstMessage) //remove curent entry
+				if (curEntry == m_firstMessage) //remove current entry
 				{
 					m_firstMessage = curEntry.m_Next;
 					m_aktY = ICON_HEIGHT;

@@ -1465,11 +1465,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	{
 		return m_context;
 	}
-
-	public void setContext(String context) 
-	{
-		m_context = context;
-	}
 	
 	public Element getWebInfo(Document webInfoDoc)
 	{
@@ -1494,6 +1489,10 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		Element rootElement = webInfoDoc.createElement(XML_ELEMENT_WEBINFO);
 		XMLUtil.setAttribute(rootElement, XML_ATTR_PAYMENT, isPayment());
 		XMLUtil.setAttribute(rootElement, XML_ATTR_ID, getId());
+		if (getContext() != null)
+		{
+			XMLUtil.setAttribute(rootElement, XML_ATTR_CONTEXT, getContext());
+		}
 		Element cascadeName = XMLUtil.createChildElement(rootElement, XML_ELEMENT_WEBINFO_CASCADE_NAME);
 		Element mixList = webInfoDoc.createElement(MixInfo.XML_ELEMENT_CONTAINER_NAME);
 		
