@@ -135,7 +135,8 @@ public class PassiveInfoServiceInitializer
 		
 		PassiveInfoServiceGlobalUpdater() throws IOException
 		{
-			mainUpdater = new PassiveInfoServiceMainUpdater();
+			mainUpdater = new PassiveInfoServiceMainUpdater(
+					!Configuration.getInstance().isPerfEnabled());
 		}
 		
 		public void run()
