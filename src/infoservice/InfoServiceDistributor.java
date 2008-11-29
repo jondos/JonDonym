@@ -53,7 +53,7 @@ public class InfoServiceDistributor implements IDistributor
 	// look for jobs; for
 	// debugging only
 	private static final int CONNECTION_TIMEOUT = 10000;
-	private static final int BLOCKING_FACTOR = 5;
+	private static final int BLOCKING_FACTOR = 6;
 
 	/**
 	 * Stores the instance of InfoServiceDatabase (Singleton).
@@ -378,12 +378,14 @@ public class InfoServiceDistributor implements IDistributor
 	private boolean sendToInfoService(InfoServiceDBEntry a_infoservice, IDistributable a_information)
 	{
 		boolean connected = false;
+		boolean bAllInvalid = true;
 		Enumeration enumer = a_infoservice.getListenerInterfaces().elements();
 		while ((enumer.hasMoreElements()) && (connected == false))
 		{
 			ListenerInterface currentInterface = (ListenerInterface) (enumer.nextElement());
 			if (currentInterface.isValid())
 			{
+				bAllInvalid = false;
 				/*
 				 * send only to valid interfaces (if we can't reach an
 				 * interface, we set it to invalid)
@@ -412,6 +414,13 @@ public class InfoServiceDistributor implements IDistributor
 				}
 			}
 		}
+		
+		if (bAllInvalid)
+		{
+			// fake connection and wait for error logging until interface is available again
+			return true;
+		}
+		
 		return connected;
 	}
 

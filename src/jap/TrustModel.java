@@ -474,14 +474,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
 			
-			if (entry == null || entry.getBound(PerformanceEntry.SPEED) == Integer.MAX_VALUE || // no performance data
+			if (entry == null || entry.getBound(PerformanceEntry.SPEED).getBound() == Integer.MAX_VALUE || // no performance data
 				minSpeed <= 0) // do not test speed, as all speed values are accepted
 			{
 				return;
 			}
 			
 			if (m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || 
-				entry.getBound(PerformanceEntry.SPEED) < minSpeed))
+				entry.getBound(PerformanceEntry.SPEED).getBound() < minSpeed))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_SPEED)));
 			}
@@ -502,14 +502,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			int maxDelay = ((Integer) m_conditionValue).intValue();
 			
 			// no performance data
-			if (entry == null || entry.getBound(PerformanceEntry.DELAY) == 0)
+			if (entry == null || entry.getBound(PerformanceEntry.DELAY).getBound() == 0)
 			{
 				return;
 			}
 			
 			if (m_trustCondition == TRUST_IF_AT_MOST && (entry == null || 
-					entry.getBound(PerformanceEntry.DELAY) < 0 || 
-					entry.getBound(PerformanceEntry.DELAY) > maxDelay))
+					entry.getBound(PerformanceEntry.DELAY).getBound() < 0 || 
+					entry.getBound(PerformanceEntry.DELAY).getBound() > maxDelay))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH)));
 			}

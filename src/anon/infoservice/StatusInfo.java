@@ -539,14 +539,14 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.DELAY) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.DELAY)) : "?") + ") ") : "") +
 			(!a_bPassiveMode ? "[" : "");
 		
-			long delayBound;
+			int delayBound;
 			if (perfEntry == null)
 			{
 				delayBound = 0;
 			}
 			else
 			{
-				delayBound = perfEntry.getBound(PerformanceEntry.DELAY);
+				delayBound = perfEntry.getBound(PerformanceEntry.DELAY).getBound();
 			}
 		
 			if (delayBound == Integer.MAX_VALUE)
@@ -573,17 +573,15 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 			" (" + ((perfEntry != null && perfEntry.getAverage(PerformanceEntry.SPEED) != 0) ? String.valueOf(perfEntry.getAverage(PerformanceEntry.SPEED)): "?") + ") ") : "") +
 			(!a_bPassiveMode ? "[" : "");
 			
-			long speedBound;
+			int speedBound;
 			if (perfEntry == null)
 			{
 				speedBound = Integer.MAX_VALUE;
 			}
 			else
 			{				
-				speedBound = perfEntry.getBound(PerformanceEntry.SPEED);
-				//LogHolder.log(LogLevel.WARNING, LogType.MISC, "Getting speed bound for " + getId() + ": " + speedBound);
+				speedBound = perfEntry.getBound(PerformanceEntry.SPEED).getBound();				
 			}
-			
 			
 			if(speedBound == 0)
 			{
