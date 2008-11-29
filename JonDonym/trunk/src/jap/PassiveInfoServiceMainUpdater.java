@@ -413,8 +413,10 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 			
 			attributes = a_entry.getStabilityAttributes();
 			
-			m_stream.write((a_timestamp + "\t" + a_entry.getId() + "\t" + a_entry.getBound(PerformanceEntry.DELAY) + "\t" +
-					a_entry.getBestBound(PerformanceEntry.DELAY) + "\t" + a_entry.getBound(PerformanceEntry.SPEED) + "\t" +
+			m_stream.write((a_timestamp + "\t" + a_entry.getId() + "\t" + 
+					a_entry.getBound(PerformanceEntry.DELAY).getNotRecoveredBound() + "\t" +
+					a_entry.getBestBound(PerformanceEntry.DELAY) + "\t" + 
+					a_entry.getBound(PerformanceEntry.SPEED).getNotRecoveredBound() + "\t" +
 					a_entry.getBestBound(PerformanceEntry.SPEED) + "\t" + attributes.getBoundErrors() + "\t" +
 					attributes.getBoundUnknown() + "\t" + attributes.getBoundResets() + "\n").getBytes());
 			m_stream.flush();

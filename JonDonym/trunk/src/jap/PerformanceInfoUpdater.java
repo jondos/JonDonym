@@ -7,7 +7,7 @@ import anon.infoservice.InfoServiceHolder;
 
 public class PerformanceInfoUpdater extends AbstractDatabaseUpdater
 {
-	private static final long UPDATE_INTERVAL = 1000 * 60 * 5; // 5 minutes
+	private static final long UPDATE_INTERVAL = 1000 * 60 * 4; // 4 minutes
 	private static final long MIN_UPDATE_INTERVAL_MS = 20000l;
 	
 	

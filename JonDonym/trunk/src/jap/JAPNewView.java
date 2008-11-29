@@ -2881,7 +2881,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			
 			if(entry != null)
 			{
-				value = entry.getBound(PerformanceEntry.SPEED);
+				value = entry.getBound(PerformanceEntry.SPEED).getBound();
 				best = entry.getBestBound(PerformanceEntry.SPEED);
 				if (value < 0 || value == Integer.MAX_VALUE)
 				{
@@ -2908,7 +2908,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					}
 				}
 				
-				value = entry.getBound(PerformanceEntry.DELAY);
+				value = entry.getBound(PerformanceEntry.DELAY).getBound();
 				best = entry.getBestBound(PerformanceEntry.DELAY);
 				if (value <= 0)
 				{

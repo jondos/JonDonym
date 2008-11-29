@@ -475,21 +475,24 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			{
 				if (m_lastUpdate < (System.currentTimeMillis() - CACHE_MS))
 				{
+					m_lastUpdate = System.currentTimeMillis();
+					
 					doc = XMLUtil.createDocument();
 					containerNode = doc.createElement(XMLUtil.getXmlElementContainerName(getDatabaseClass()));
 					
-					/* @todo cbanse: i'm not really happy with this.... */
 					XMLUtil.setAttribute(containerNode, "id", Configuration.getInstance().getID());
+					XMLUtil.setAttribute(containerNode, AbstractDatabaseEntry.XML_ATTR_LAST_UPDATE, 
+							m_lastUpdate);
 					
-					/* append the nodes of all mixcascades we know */
-					Enumeration knownMixCascades = Database.getInstance(getDatabaseClass()).
+					/* append the nodes of all entries we know */
+					Enumeration knownentries = Database.getInstance(getDatabaseClass()).
 						getEntrySnapshotAsEnumeration();
 					IXMLEncodable currentCascade;
 					Element node;
-					while (knownMixCascades.hasMoreElements())
+					while (knownentries.hasMoreElements())
 					{
-						/* import the MixCascade XML structure in this document */
-						currentCascade = (IXMLEncodable) (knownMixCascades.nextElement());
+						/* import the entry XML structure in this document */
+						currentCascade = (IXMLEncodable) (knownentries.nextElement());
 						if (currentCascade instanceof IBoostrapable && 
 							((IBoostrapable)currentCascade).isBootstrap())
 						{
@@ -522,8 +525,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 					//else
 					{
 						m_cachedResponse = new HttpResponseStructure(doc);
-					}
-					m_lastUpdate = System.currentTimeMillis();
+					}					
 				}
 			}
 

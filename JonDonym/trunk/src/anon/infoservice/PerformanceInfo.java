@@ -94,7 +94,7 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			throw new XMLParseException("Could not parse PerformanceInfo. Invalid document element.");
 		}
 		
-		NodeList list = a_info.getElementsByTagName("PerformanceEntry");
+		NodeList list = a_info.getElementsByTagName(PerformanceEntry.XML_ELEMENT_NAME);
 				
 		/* try to get the certificate from the Signature node */
 		try
@@ -128,8 +128,9 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			m_entries.put(entry.getId(), entry);
 		}
 		
-		m_lastUpdate = System.currentTimeMillis();
-		m_serial = System.currentTimeMillis();
+		// TODO for security reasons, do not interpret structures without last update!
+		m_lastUpdate = XMLUtil.parseAttribute(a_info, XML_ATTR_LAST_UPDATE, System.currentTimeMillis());  
+		m_serial = m_lastUpdate;
 		m_xmlData = a_info;
 	}
 	
@@ -190,12 +191,15 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		
 		Vector vPerfEntries = new Vector();
 		Vector vSpeedBoundaries = new Vector();
+		Vector vSpeedNotRecoveredBoundaries = new Vector();
 		Vector vSpeedBestBoundaries = new Vector();
 		Vector vDelayBoundaries = new Vector();
+		Vector vDelayNotRecoveredBoundaries = new Vector();
 		Vector vDelayBestBoundaries = new Vector();
 		Vector vErrorBoundaries = new Vector();
 		Vector vUnknownBoundaries = new Vector();
 		Vector vResetsBoundaries = new Vector();
+		Integer value;
 		
 		Vector vInfoServices = Database.getInstance(PerformanceInfo.class).getEntryList();
 		for (int i = 0; i < vInfoServices.size(); i++)
@@ -204,17 +208,27 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			if (entry != null)			{
 				vPerfEntries.addElement(entry);
 				// extract the bound value for speed
-				Integer value = new Integer(entry.getBound(PerformanceEntry.SPEED));
+				value = new Integer(entry.getBound(PerformanceEntry.SPEED).getBound());
 				if (value.intValue() != Integer.MAX_VALUE && value.intValue() >= 0)
 				{
 					vSpeedBoundaries.addElement(value);
+				}				
+				value = new Integer(entry.getBound(PerformanceEntry.SPEED).getNotRecoveredBound());
+				if (value.intValue() != Integer.MAX_VALUE && value.intValue() >= 0)
+				{
+					vSpeedNotRecoveredBoundaries.addElement(value);
 				}
 				
 				// extract the bound value for delay
-				value = new Integer(entry.getBound(PerformanceEntry.DELAY));
+				value = new Integer(entry.getBound(PerformanceEntry.DELAY).getBound());
 				if (value.intValue() > 0)
 				{
 					vDelayBoundaries.addElement(value);
+				}
+				value = new Integer(entry.getBound(PerformanceEntry.DELAY).getNotRecoveredBound());
+				if (value.intValue() > 0)
+				{
+					vDelayNotRecoveredBoundaries.addElement(value);
 				}
 				
 				// extract the best bound value for speed
@@ -244,32 +258,38 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		vInfoServices.removeAllElements();
 		vInfoServices = null; // for garbage collection
 		
-		Util.sort(vSpeedBoundaries, new IntegerSortDesc());
-		Util.sort(vSpeedBestBoundaries, new IntegerSortDesc());
-		Util.sort(vDelayBoundaries, new IntegerSortAsc());
-		Util.sort(vDelayBestBoundaries, new IntegerSortAsc());
-		Util.sort(vErrorBoundaries, new IntegerSortAsc());
-		Util.sort(vUnknownBoundaries, new IntegerSortAsc());
-		Util.sort(vResetsBoundaries, new IntegerSortAsc());
-		
 		if (vPerfEntries.size() == 0)
 		{
-			perfEntry.setBound(PerformanceEntry.SPEED, Integer.MAX_VALUE);
+			perfEntry.setBound(PerformanceEntry.SPEED, new PerformanceEntry.Bound(Integer.MAX_VALUE, Integer.MAX_VALUE));
 			perfEntry.setBestBound(PerformanceEntry.SPEED, Integer.MAX_VALUE);
-			perfEntry.setBound(PerformanceEntry.DELAY, 0);
+			perfEntry.setBound(PerformanceEntry.DELAY, new PerformanceEntry.Bound(0,0));
 			perfEntry.setBestBound(PerformanceEntry.DELAY, 0);
 			perfEntry.setStabilityAttributes(new PerformanceEntry.StabilityAttributes(0, 0, 0, 0));
 			return perfEntry;
 		}
+		
+		Util.sort(vSpeedBoundaries, new IntegerSortDesc());
+		Util.sort(vSpeedNotRecoveredBoundaries, new IntegerSortDesc());
+		Util.sort(vSpeedBestBoundaries, new IntegerSortDesc());
+		Util.sort(vDelayBoundaries, new IntegerSortAsc());
+		Util.sort(vDelayNotRecoveredBoundaries, new IntegerSortAsc());
+		Util.sort(vDelayBestBoundaries, new IntegerSortAsc());
+		Util.sort(vErrorBoundaries, new IntegerSortAsc());
+		Util.sort(vUnknownBoundaries, new IntegerSortAsc());
+		Util.sort(vResetsBoundaries, new IntegerSortAsc());
 		
 		attributes = new PerformanceEntry.StabilityAttributes(100, 
 				getMajorityBoundFromSortedBounds(vUnknownBoundaries, 0),
 				getMajorityBoundFromSortedBounds(vErrorBoundaries, 0),
 				getMajorityBoundFromSortedBounds(vResetsBoundaries, 0));
 				
-		perfEntry.setBound(PerformanceEntry.SPEED, getMajorityBoundFromSortedBounds(vSpeedBoundaries, Integer.MAX_VALUE));
+		perfEntry.setBound(PerformanceEntry.SPEED, 
+				new PerformanceEntry.Bound(getMajorityBoundFromSortedBounds(vSpeedBoundaries, Integer.MAX_VALUE),
+						getMajorityBoundFromSortedBounds(vSpeedNotRecoveredBoundaries, Integer.MAX_VALUE)));
 		perfEntry.setBestBound(PerformanceEntry.SPEED, getMajorityBoundFromSortedBounds(vSpeedBestBoundaries, Integer.MAX_VALUE));
-		perfEntry.setBound(PerformanceEntry.DELAY, getMajorityBoundFromSortedBounds(vDelayBoundaries, 0));
+		perfEntry.setBound(PerformanceEntry.DELAY, 
+				new PerformanceEntry.Bound(getMajorityBoundFromSortedBounds(vDelayBoundaries, 0),
+						getMajorityBoundFromSortedBounds(vDelayNotRecoveredBoundaries, 0)));
 		perfEntry.setBestBound(PerformanceEntry.DELAY, getMajorityBoundFromSortedBounds(vDelayBestBoundaries, 0));
 		perfEntry.setStabilityAttributes(attributes);
 		
@@ -311,64 +331,4 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 			return null;
 		}
 	}
-	
-	/**
-	 * Eliminates all stray entries from the vector.
-	 * 
-	 * @param a_vec			The entries to check
-	 * @param r_vecDeleted	A vector that will hold the deleted entries
-	 * @param a_avgSpeed	The average speed of the vector
-	 * @param a_avgDelay	The average delay of the vector
-	 * @param a_maxStray	The maximum stray an entry is allowed to have
-	 * 
-	 * @return The minimum stray of the deleted entries
-	 */
-	/*public static double eliminateStrayEntries(Vector a_vec, Vector r_vecDeleted, long a_avgSpeed, long a_avgDelay, double a_maxStray)
-	{
-		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Looking for entries with stray >" + a_maxStray);
-		double nextStray = Double.MAX_VALUE;
-		
-		for(int k = 0; k < a_vec.size(); k++)
-		{
-			PerformanceEntry entry = ((PerformanceEntry) a_vec.elementAt(k));
-			
-			double straySpeed = (double) Math.abs(a_avgSpeed - entry.getXMLAverage(PerformanceEntry.SPEED)) / (double) a_avgSpeed;
-			double strayDelay = (double) Math.abs(a_avgDelay - entry.getXMLAverage(PerformanceEntry.DELAY)) / (double) a_avgDelay;
-			if(entry.getXMLAverage(PerformanceEntry.SPEED) >= 0 && straySpeed > a_maxStray)
-			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with speed " + entry.getAverage(PerformanceEntry.SPEED));
-				
-				r_vecDeleted.addElement(entry);
-				
-				a_vec.removeElementAt(k);
-				k--;
-				
-				if(straySpeed < nextStray)
-				{
-					nextStray = straySpeed;
-				}
-				
-				continue;
-			}
-			
-			if(entry.getXMLAverage(PerformanceEntry.DELAY) >= 0 && strayDelay > a_maxStray)
-			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Ignoring performance entry with delay " + entry.getAverage(PerformanceEntry.DELAY));
-				
-				r_vecDeleted.addElement(entry);
-				
-				a_vec.removeElementAt(k);
-				k--;
-				
-				if(strayDelay < nextStray)
-				{
-					nextStray = strayDelay;
-				}
-				
-				continue;				
-			}
-		}
-		
-		return nextStray;
-	}*/
 }

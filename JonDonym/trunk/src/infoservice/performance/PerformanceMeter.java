@@ -857,14 +857,6 @@ public class PerformanceMeter implements Runnable, Observer
 		if(entry == null)
 		{
 			entry = new PerformanceEntry(a_cascade.getId());
-		}
-		
-		if (entry.getBound(PerformanceEntry.SPEED) <= PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1] || 
-			entry.getBound(PerformanceEntry.DELAY) >= 
-				PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2])
-		{
-			// this service is very slow; make a shorter test
-			//dataSize /= 4;
 		}		
 		
 		while(!Thread.currentThread().isInterrupted())
