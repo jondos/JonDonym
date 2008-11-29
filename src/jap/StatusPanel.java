@@ -258,10 +258,9 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 	 */
 	public void removeStatusMsg(int id)
 	{
-		boolean currentMessageRemoved = false;
 		synchronized (SYNC_MSG)
 		{
-			//messgaes are stored as a linked list, with the last entry pointing to the first, and m_Msgs being one node
+			//messages are stored as a linked list, with the last entry pointing to the first, and m_Msgs being one node
 			if (m_firstMessage == null) //we don't have any messages
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Could not remove message with id of " + id + " since there are no messages at all");
@@ -270,9 +269,10 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 			}
 			if (m_firstMessage.m_Id == id && m_firstMessage.m_Next == m_firstMessage) //one element
 			{
+				// the currently shown message is being removed
 				m_firstMessage = null;
 				m_aktY = ICON_HEIGHT;
-				currentMessageRemoved = true;
+				m_Thread.interrupt(); //display next message
 			}
 			else
 			{
@@ -302,16 +302,6 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 				prevEntry.m_Next = curEntry.m_Next; //remove entry from list
 			}
 		}
-		//HOTFIX: invoking those methods while holding lock for SYNC_MSG
-		//can cause deadlocks. (though this may cause a the button for a newly 
-		//added message to disappear it's better than a deadlock).
-		if(currentMessageRemoved)
-		{
-			setToolTipText(null);
-			setCursor(Cursor.getDefaultCursor());
-			m_button.setVisible(false);
-		}
-
 	}
 
 	public void paint(Graphics g)
@@ -356,6 +346,12 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 					// top-left drawing
 					g.drawImage(m_firstMessage.m_Icon, 0, ((getSize().height  - m_firstMessage.m_Icon.getHeight(this)) / 2) - m_aktY, this);
 				}
+			}
+			else
+			{
+				setToolTipText(null);
+				setCursor(Cursor.getDefaultCursor());
+				m_button.setVisible(false);
 			}
 		}
 	}
