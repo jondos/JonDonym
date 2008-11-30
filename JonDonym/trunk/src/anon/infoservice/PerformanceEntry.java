@@ -1507,11 +1507,11 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				}
 				else if (m_attribute == SPEED)
 				{
-					return 0;
+					return Integer.MAX_VALUE;
 				}
 				else 
 				{
-					return Integer.MAX_VALUE;
+					return 0;
 				}				
 			}
 			else
