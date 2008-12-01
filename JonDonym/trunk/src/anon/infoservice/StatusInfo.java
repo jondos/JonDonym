@@ -219,7 +219,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 					addCertificateWithoutVerification(a_cascade.getCertPath(),
 					JAPCertificate.CERTIFICATE_TYPE_MIX, false, false);
 			}
-		}		
+		}
 
 		// verify the signature
 		try
@@ -239,23 +239,10 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		{
 		}
 
-		//The following is a workaround because if signature check is disabled, then also
-		//the certificate sent with the POST HELO message are not stored....
-		//we should change this....
-		if(SignatureVerifier.getInstance().isCheckSignatures()&&
-			SignatureVerifier.getInstance().isCheckSignatures(SignatureVerifier.DOCUMENT_CLASS_MIX))
-			{
-				if (m_certificate == null)
-				{
-					throw new SignatureException(
-						 "There is no known certificate to verify the StatusInfo signature of Mix with ID: " +
-						 m_mixCascadeId);
-				}
-				if (!checkId())
-				{
-					throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Status-Entry for Mix ID: " + m_mixCascadeId);
-				}
-			}
+		if (!checkId())
+		{
+			throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Status-Entry for Mix ID: " + m_mixCascadeId);
+		}
 		
 		/* remove the lock on the certificate (if there is any) */
 		if (certificateLock != -1)
