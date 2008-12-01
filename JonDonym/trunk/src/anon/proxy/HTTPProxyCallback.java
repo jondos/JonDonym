@@ -33,6 +33,8 @@ import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import junit.framework.TestCase;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -132,33 +134,38 @@ public class HTTPProxyCallback implements ProxyCallback
 		m_httpConnectionListeners = new Vector();
 	}
 	
-	public byte[] handleUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
+	public byte[] handleUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
 	{
 		return handleStreamChunk(anonRequest, chunk, len, MESSAGE_TYPE_REQUEST, UPSTREAM_HELPER);
 		//return chunk;
 	}
 	
-	public byte[] handleDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
+	public byte[] handleDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
 	{
 		return handleStreamChunk(anonRequest, chunk, len, MESSAGE_TYPE_RESPONSE, DOWNSTREAM_HELPER);
 		//return chunk;
 	}
 
 	private byte[] handleStreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len, 
-			int a_messageType, IHTTPHelper a_helper)
+			int a_messageType, IHTTPHelper a_helper) throws ChunkNotProcessableException
 	{
-		
 		/* Does only work with a valid AnonProxy reference */
 		if(anonRequest == null)
 		{
 			throw new NullPointerException("AnonProxyRequest must not be null!");
 		}
 		/* get the startindex of the CRLFCRLF end delimiter header */		
+		int headerEndLength = HTTP_HEADER_END.length();
 		int headerEndIndex = indexOfHTTPHeaderEnd(chunk);
+		
 		/* this specifies how many bytes of the chunk may contain header data 
 		 * (if the chunk contain header data at all)
 		 */
-		int endLen = (headerEndIndex == -1) ? len : Math.min((headerEndIndex+HTTP_HEADER_END.length()), len);
+		int endLen = (headerEndIndex == -1) ? len : Math.min((headerEndIndex+headerEndLength), len);
+		if(headerEndIndex == -1)
+		{
+			
+		}
 		int contentBytes = len;
 		String chunkData = null;
 		
@@ -183,6 +190,7 @@ public class HTTPProxyCallback implements ProxyCallback
 			chunkData = ( (unfinishedHeaderPart == null) ? "" : unfinishedHeaderPart) + new String(chunk, 0, endLen );
 			
 			boolean finished = extractHeaderParts(anonRequest, chunkData, a_messageType);
+
 			if(!finished)
 			{
 				/* if header parsing hasn't finished yet:
@@ -292,6 +300,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	 * returns false if header could not be extracted
 	 */
 	private synchronized boolean extractHeaderParts(AnonProxyRequest anonRequest, String chunkData, int messageType)
+		throws ChunkNotProcessableException
 	{
 		// assumes, that the chunk is aligned.
 		//Works in almost every case.
@@ -327,9 +336,25 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 		if(hasAlignedHTTPStartLine(chunkData, messageType))
 		{
+			
 			Hashtable unfinishedMessages = 
 				(messageType == MESSAGE_TYPE_REQUEST) ? 
 					m_unfinishedRequests : m_unfinishedResponses;
+			
+			if(!checkValidity(chunkData))
+			{
+				if(messageType == MESSAGE_TYPE_REQUEST)
+				{
+					connHeader.setRequestFinished(true);
+				}
+				else if (messageType == MESSAGE_TYPE_RESPONSE)
+				{
+					connHeader.setResponseFinished(true);
+				}
+				unfinishedMessages.remove(anonRequest);
+				throw new ChunkNotProcessableException("Chunk is invalid: "+chunkData);
+			}
+			
 			int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
 			if((off_headers_end != -1))
 			{
@@ -353,6 +378,52 @@ public class HTTPProxyCallback implements ProxyCallback
 			}
 		}
 		return false;
+	}
+	
+	public static boolean checkValidity(String headerData)
+	{
+		int currentCRIndex = -1;
+		int currentLFIndex = -1;
+		
+		boolean onlyCR = false;
+		//a LF that stands without a leading CR
+		boolean onlyLF = false;
+		boolean endsWithCR = false;
+		boolean noMoreLineTerminations = false;
+		boolean indexExceeds = (Math.max((currentCRIndex+1), (currentLFIndex+1)) >= headerData.length());
+		
+		while(!indexExceeds )
+		{
+			currentCRIndex = headerData.indexOf('\r', (currentCRIndex+1));
+			currentLFIndex = headerData.indexOf('\n', (currentLFIndex+1));
+		
+			noMoreLineTerminations = ( (currentCRIndex == -1) && (currentLFIndex == -1));
+			
+			if(noMoreLineTerminations)
+			{
+				break;
+			}
+			
+			onlyLF = (currentLFIndex != -1) && ( (currentCRIndex == -1) || (currentCRIndex != (currentLFIndex-1)) );
+			if(onlyLF)
+			{
+				break;
+			}
+			
+			onlyCR = (currentCRIndex != -1) && ( (currentLFIndex == -1) || (currentCRIndex != (currentLFIndex-1)) );
+			
+			endsWithCR = (currentCRIndex == (headerData.length() - 1));
+			if(endsWithCR)
+			{
+				break;
+			}
+			indexExceeds = (Math.max((currentCRIndex+1), (currentLFIndex+1)) >= headerData.length());
+		}
+		
+		//System.out.println("String: "+headerData+"onlyCR: "+onlyCR+", onlyLF: "+onlyLF+", endsWithCR: "+endsWithCR);
+		
+		
+		return !onlyLF && ( !onlyCR || endsWithCR );
 	}
 	
 	private boolean hasAlignedHTTPStartLine(String chunkData, int messageType)
@@ -481,6 +552,10 @@ public class HTTPProxyCallback implements ProxyCallback
 		{
 			header = lineTokenizer.nextToken();
 			int delim = header.indexOf(HTTP_HEADER_DELIM);
+			if(delim == -1)
+			{
+				delim = header.indexOf("\n\n");
+			}
 			if(delim != -1)
 			{
 				key = header.substring(0, delim).trim();
