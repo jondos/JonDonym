@@ -484,24 +484,13 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		
 		if(tc != null)
 		{
-		return tc;
-		}
-		
-		// not found, force an update and try again
-		if (JAPController.getInstance().getTermsUpdater() != null)
-		{
-			JAPController.getInstance().getTermsUpdater().update();
+			return tc;
 		}
 		
 		tc = InfoServiceHolder.getInstance().getTCFramework(a_id);
 		
-		if(tc != null)
-		{
-			Database.getInstance(TermsAndConditionsFramework.class).update(tc);
-		}
+		Database.getInstance(TermsAndConditionsFramework.class).update(tc);
 		
-		// return the entry if found, otherwise null
 		return tc;
-		
 	}
 }
