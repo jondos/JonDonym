@@ -1,12 +1,6 @@
 package anon.infoservice;
 
-import jap.TermsAndConditionsUpdater;
-import jap.JAPController;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.Date;
-import java.util.Locale;
 import java.util.StringTokenizer;
 
 import logging.LogHolder;
@@ -18,8 +12,8 @@ import org.w3c.dom.Document;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
-import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
+import anon.crypto.X509SubjectKeyIdentifier;
 import anon.crypto.XMLSignature;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
@@ -60,9 +54,9 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 
 	private CertPath m_certPath = null;
 	
-	public TermsAndConditions(Document a_doc)
+	public TermsAndConditions(Document a_doc, boolean m_bJAPContext) throws XMLParseException
 	{
-		super(System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
+		super(m_bJAPContext ? Long.MAX_VALUE : System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
 		
 		m_doc = a_doc;
 		m_xmlData = a_doc.getDocumentElement();
@@ -71,9 +65,27 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		m_strId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_ID, null);
 		m_referenceId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_REFERENCE_ID, "");
 		
+		StringTokenizer token = new StringTokenizer(m_strId, "_");
+
+		if(token.countTokens() >= 1)
+		{
+			// extract the ski
+			m_ski = token.nextToken();
+		}
+		else
+		{
+			m_ski = null;
+		}
 		
-		m_locale = "en";
-		
+		if(token.countTokens() >= 2)
+		{
+			// extract the locale
+			m_locale = token.nextToken();
+		}
+		else
+		{
+			m_locale = "en";			
+		}
 		
 		m_lastUpdate = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, -1L);
 		
@@ -88,8 +100,26 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 				m_certificate = m_certPath.getSecondCertificate();
 			}
 		}
-		checkId();
+		
+		if (!checkId())
+		{
+			throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed id for TermsAndConditons object: " + m_strId);
+		}
 	}
+	
+	public boolean checkId()
+	{
+		JAPCertificate cert = getCertificate();
+		
+		if(cert == null)
+		{
+			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- cert is NULL!");
+			return false;
+		}
+		return  (m_ski != null) && m_ski.equals(new X509SubjectKeyIdentifier(
+				 getCertificate().getPublicKey()).getValueWithoutColon());
+	}
+
 
 	public String getId() 
 	{
@@ -164,18 +194,15 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		// first look if it's in our database
 		TermsAndConditions tc = (TermsAndConditions) Database.getInstance(TermsAndConditions.class).getEntryById(a_id);
 		
-		if(tc != null)
-		{
-			return tc;
-		}
+		return tc;
 		
 		// not found, force an update and try again
-		if (JAPController.getInstance().getTermsUpdater() != null)
+		/*if (JAPController.getInstance().getTermsUpdater() != null)
 		{
 			JAPController.getInstance().getTermsUpdater().update();
 		}
 		
 		// return the entry if found, otherwise null
-		return (TermsAndConditions) Database.getInstance(TermsAndConditions.class).getEntryById(a_id);
+		return (TermsAndConditions) Database.getInstance(TermsAndConditions.class).getEntryById(a_id);*/
 	}
 }

@@ -70,4 +70,5 @@ public abstract class AbstractMixCascadeContainer extends BasicTrustModel implem
 	public abstract boolean isServiceAutoSwitched();
 
 	public abstract boolean isReconnectedAutomatically();
+		
 }

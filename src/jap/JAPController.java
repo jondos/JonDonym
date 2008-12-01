@@ -69,6 +69,7 @@ import anon.AnonServiceEventAdapter;
 import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.client.AnonClient;
+import anon.client.ITermsAndConditionsContainer;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.AbstractMixCascadeContainer;
@@ -135,7 +136,7 @@ import anon.infoservice.TermsAndConditions;
 
 /* This is the Controller of All. It's a Singleton!*/
 public final class JAPController extends Observable implements IProxyListener, Observer,
-	AnonServiceEventListener, IAIEventListener
+	AnonServiceEventListener, IAIEventListener, ITermsAndConditionsContainer
 {
 	/** Messages */
 	public static final String MSG_ERROR_SAVING_CONFIG = JAPController.class.getName() +
@@ -369,7 +370,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_minVersionUpdater = new MinVersionUpdater();
 		m_javaVersionUpdater = new JavaVersionUpdater();
 		m_messageUpdater = new MessageUpdater();
-		//m_termsUpdater = new TermsAndConditionsUpdater();
+		m_termsUpdater = new TermsAndConditionsUpdater();
 
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
@@ -653,16 +654,20 @@ public final class JAPController extends Observable implements IProxyListener, O
 				if (JAPModel.isInfoServiceDisabled())
 				{
 					m_InfoServiceUpdater.start(false);
+					m_termsUpdater.start(false);
 					m_perfInfoUpdater.start(false);
 					m_paymentInstanceUpdater.start(false);
 					m_MixCascadeUpdater.start(false);
 					m_minVersionUpdater.start(false);
 					m_javaVersionUpdater.start(false);
 					m_messageUpdater.start(false);	
-					//m_termsUpdater.start(false);
 				}
 				else
 				{
+					if (!m_termsUpdater.isFirstUpdateDone())
+					{
+						m_termsUpdater.updateAsync();
+					}
 					if (!m_InfoServiceUpdater.isFirstUpdateDone())
 					{
 						m_InfoServiceUpdater.updateAsync();
@@ -690,10 +695,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (!m_messageUpdater.isFirstUpdateDone())
 					{
 						m_messageUpdater.updateAsync();
-					}
-					//if (!m_termsUpdater.isFirstUpdateDone())
-					{
-						//m_termsUpdater.updateAsync();
 					}
 				}
 
@@ -4041,7 +4042,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							m_Controller.m_javaVersionUpdater.stop();
 							m_Controller.m_messageUpdater.stop();
 							m_Controller.m_perfInfoUpdater.stop();
-							//m_Controller.m_termsUpdater.stop();
+							m_Controller.m_termsUpdater.stop();
 						}
 					}, "Finish IS threads");
 					finishIS.start();
@@ -5202,6 +5203,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 			tcs.remove(a_op.getId());
 		}
 	}
+	
+	public void showTermsAndConditionsDialog(ServiceOperator a_op)
+	{
+		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op); 
+		if(dlg.hasFoundTC())
+		{
+			dlg.setVisible(true);
+		}
+	}
 
 	/**
 	 * This class returns a new random cascade from all currently available cascades every time
@@ -5418,6 +5428,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			TrustModel.getCurrentTrustModel().checkTrust(a_cascade);
+		}
+		
+		public ITermsAndConditionsContainer getTCContainer()
+		{
+			return JAPController.this;
 		}
 	}
 }

@@ -43,7 +43,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 	{
 		return JAPMessages.getString(MSG_TAB_TITLE);
 	}
-
+	
 	public void recreateRootPanel() 
 	{
 		JPanel root = getRootPanel();
@@ -95,7 +95,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 	{
 		((OperatorsTableModel) m_tblOperators.getModel()).update();
 	}
-
+	
 	/**
 	 * Handles the selection of an operator
 	 * @param e ListSelectionEvent

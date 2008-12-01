@@ -328,6 +328,22 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	{
 		return toXMLElement(ownerDocument, SPAM_SAFE);
 	}
+	
+	public boolean hasTermsAndConditions()
+	{
+		return Database.getInstance(TermsAndConditions.class).getEntryById(getSKI()) != null;
+	}
+	
+	public String getSKI()
+	{
+		if(getCertificate() == null || getCertificate().getPublicKey() == null)
+		{
+			return null;
+		}
+		
+		return new X509SubjectKeyIdentifier(
+				 getCertificate().getPublicKey()).getValueWithoutColon();
+	}
 	/* creates a DOM-Tree with the data which will be owned by
 	 * ownerDocument but not appended to it.
 	 * if spamSafe is true than the Email-Tag as well as the content are 

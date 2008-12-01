@@ -415,7 +415,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		try
 		{
 			//LogHolder.log(LogLevel.DEBUG, LogType.NET, "TCOpData recvd XML: " + (new String(a_postData)));
-			TermsAndConditions entry = new TermsAndConditions(XMLUtil.toXMLDocument(a_postData));
+			TermsAndConditions entry = new TermsAndConditions(XMLUtil.toXMLDocument(a_postData), false);
 			/* verify the signature */
 			if (entry.isVerified())
 			{

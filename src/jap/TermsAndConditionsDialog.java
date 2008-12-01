@@ -6,6 +6,7 @@ import javax.swing.JEditorPane;
 import jap.pay.wizardnew.TermsAndConditionsPane;
 import gui.dialog.JAPDialog;
 import anon.infoservice.InfoServiceHolder;
+import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.infoservice.TermsAndConditions;
 
@@ -14,7 +15,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 	TermsAndConditionsPane m_panel;
 	boolean m_foundTC;
 	
-	public TermsAndConditionsDialog(Component a_parent, String a_ski)
+	public TermsAndConditionsDialog(Component a_parent, ServiceOperator a_op)
 	{
 		super(a_parent, "T&C");
 		
@@ -24,7 +25,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 		
 		m_panel = new TermsAndConditionsPane(this, false);
 		
-		TermsAndConditions tc = TermsAndConditions.getById("de_" + a_ski);
+		TermsAndConditions tc = TermsAndConditions.getById(a_op.getSKI() + "_de");
 		
 		if(tc == null)
 		{

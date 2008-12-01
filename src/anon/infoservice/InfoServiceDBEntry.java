@@ -1176,7 +1176,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 					Node node = XMLUtil.importNode(d, entryNode, true);
 					d.appendChild(node);
 					
-					currentEntry = new TermsAndConditions(d);
+					currentEntry = new TermsAndConditions(d, true);
 				}
 				else if (a_getter.m_dbEntryClass == MixCascade.class)
 				{
