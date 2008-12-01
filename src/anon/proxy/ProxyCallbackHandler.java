@@ -47,7 +47,7 @@ public class ProxyCallbackHandler
 		callbacks = new Vector();
 	}
 	
-	public synchronized byte[] deliverUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
+	public synchronized byte[] deliverUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
 	{
 		if(anonRequest == null)
 		{
@@ -61,7 +61,7 @@ public class ProxyCallbackHandler
 		return chunk;
 	}
 	
-	public synchronized byte[] deliverDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
+	public synchronized byte[] deliverDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
 	{
 		if(anonRequest == null)
 		{
