@@ -128,7 +128,7 @@ public class JapCouponField extends JTextField
 
 		public void insertString(int offset, String string, AttributeSet attributeSet) throws BadLocationException
 		{
-			//make everything uppercase
+			//make everything upper case
 			string = string.toUpperCase();
 
 			//remove chars that are not in ACCEPTED_CHARs
@@ -137,12 +137,13 @@ public class JapCouponField extends JTextField
 			int nrOfOkayChars = 0;
 			for (int i = 0; i < originalString.length ; i++)
 			{
-				if ( isCharacterAccepted(originalString[i]) )
+				if (isCharacterAccepted(originalString[i]))
 				{
 					modifiedString[nrOfOkayChars] = originalString[i];
 					nrOfOkayChars++;
 				}
-				else {
+				else 
+				{
 					continue; //exclude the char from modifiedString, do not increase nrOfOkayChars to give its space to next accepted char
 				}
 			}
@@ -156,23 +157,34 @@ public class JapCouponField extends JTextField
 			  string = new String(shortenedString);
 					  }
 			 */
+	
 			if (string.length() + getLength() > NR_OF_CHARACTERS)
 			{
-				// copy and paste error...
-				if (m_nextCouponField != null)
+				if (NR_OF_CHARACTERS <= string.length())
 				{
-					m_nextCouponField.setText(string.substring(NR_OF_CHARACTERS, string.length()));
+					// copy and paste error...
+					if (m_nextCouponField != null && NR_OF_CHARACTERS < string.length())
+					{
+						m_nextCouponField.setText(string.substring(NR_OF_CHARACTERS, string.length()));
+					}
+					string = string.substring(0, NR_OF_CHARACTERS);
+					super.insertString(0, string, attributeSet);
 				}
-				string = string.substring(0, NR_OF_CHARACTERS);
-				super.insertString(0, string, attributeSet);
+				else if (offset + string.length() <= NR_OF_CHARACTERS)
+				{
+					super.replace(offset, string.length(), string, attributeSet);
+				}
+				else if (offset < NR_OF_CHARACTERS)
+				{
+					/* Should not happen, but we handle also this case... Only the first [NR_OF_CHARACTERS - offset] characters are used. */
+					super.replace(offset, NR_OF_CHARACTERS - offset, string.substring(0, NR_OF_CHARACTERS - offset), attributeSet);
+				}
 			}
 			else
 			{
 				//modifications done, set the string
 				super.insertString(offset, string, attributeSet);
 			}
-
-
 
 			//move on after 4 characters have been entered
 			if (getLength() >= NR_OF_CHARACTERS)
@@ -181,7 +193,11 @@ public class JapCouponField extends JTextField
 				{
 					super.remove(NR_OF_CHARACTERS, getLength() - NR_OF_CHARACTERS);
 				}
-				transferFocus();
+				if (JapCouponField.this.getCaretPosition() >= NR_OF_CHARACTERS)
+				{
+					JapCouponField.this.setCaretPosition(0);				
+					transferFocus();
+				}
 			}
 		}
 
