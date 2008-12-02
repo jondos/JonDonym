@@ -37,8 +37,6 @@ import java.util.Vector;
 
 import anon.infoservice.HttpResponseStructure;
 
-import junit.framework.TestCase;
-
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

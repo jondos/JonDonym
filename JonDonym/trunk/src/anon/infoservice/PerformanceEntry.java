@@ -409,7 +409,12 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 				day -= 1;
 				hour = 23;
 			}
+			cal.set(Calendar.HOUR_OF_DAY, hour);
+			cal.set(Calendar.DAY_OF_WEEK, day);
+			a_timestamp = cal.getTime().getTime();
 		}
+		
+		
 
 		// check if entries are obsolete
 		for(int i = hour; i < 24; i++)

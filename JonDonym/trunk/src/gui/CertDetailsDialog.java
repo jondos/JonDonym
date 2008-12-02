@@ -921,7 +921,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 		if (a_certPath != null)
 		{
 			Enumeration certificates = a_certPath.getCertificates();
-			{  //if the certPath is already verified we just ceck the validity
+			{  //if the certPath is already verified we just check the validity
 				while (certificates.hasMoreElements())
 				{
 					CertificateInfoStructure cis = (CertificateInfoStructure)certificates.nextElement();

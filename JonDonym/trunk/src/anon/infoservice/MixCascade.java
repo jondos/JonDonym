@@ -56,7 +56,7 @@ import anon.pay.AIControlChannel;
  * Holds the information for a mixcascade.
  */
 public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
-	implements AnonServerDescription, IVerifyable, IServiceContextContainer
+	implements AnonServerDescription, IVerifyable, IServiceContextContainer, Database.IWebInfo
 {
 	public static final String SUPPORTED_PAYMENT_PROTOCOL_VERSION = "2.0";
 
@@ -69,7 +69,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private static final String XML_ATTR_PAYMENT = "payment";
 	
 	/* Constants for the JonDonym service status */
-	public static final String XML_ELEMENT_WEBINFO_ROOT = "CascadeWebInfos";
+	public static final String XML_ELEMENT_WEBINFO_CONTAINER = "CascadeWebInfos";
 	public static final String XML_ELEMENT_WEBINFO = "CascadeWebInfo";
 	public static final String XML_ELEMENT_WEBINFO_CASCADE_NAME = "CascadeName";
 	public static final String XML_ELEMENT_WEBINFO_NAME = "Name";
@@ -344,13 +344,13 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				throw new XMLParseException("Network");
 			}
 			Element networkNode = (Element) (networkNodes.item(0));
-			NodeList listenerInterfacesNodes = networkNode.getElementsByTagName("ListenerInterfaces");
+			NodeList listenerInterfacesNodes = networkNode.getElementsByTagName(ListenerInterface.XML_ELEMENT_CONTAINER_NAME);
 			if (listenerInterfacesNodes.getLength() == 0)
 			{
 				throw new XMLParseException("ListenerInterfaces");
 			}
 			Element listenerInterfacesNode = (Element) (listenerInterfacesNodes.item(0));
-			NodeList listenerInterfaceNodes = listenerInterfacesNode.getElementsByTagName("ListenerInterface");
+			NodeList listenerInterfaceNodes = listenerInterfacesNode.getElementsByTagName(ListenerInterface.XML_ELEMENT_NAME);
 			if (listenerInterfaceNodes.getLength() == 0)
 			{
 				throw new XMLParseException("ListenerInterface");
@@ -394,7 +394,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			try
 			{
-				m_mixInfos[i] = new MixInfo((Element) mixNodes.item(i), Long.MAX_VALUE, true);
+				m_mixInfos[i] = new MixInfo((Element) mixNodes.item(i), a_expireTime, true);
 				if (i + 1 == mixNodes.getLength())
 				{
 					m_bSock5Support = m_mixInfos[i].isSocks5Supported();
@@ -426,7 +426,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
 		//@todo: rather use this for setting m_strName: generateNameFromMixNames()
 		//(when the mix providers support it)
-		if ( m_strName == null && !m_bFromCascade)
+		if (m_strName == null && !m_bFromCascade)
 		{
 			generateNameFromMixNames();
 			//throw (new XMLParseException("Name"));	
@@ -730,8 +730,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	private void generateNameFromMixNames()
 	{
-		//no null checks neccessary because NO NullPointers must occur! 
-		if(m_decomposedCascadeName == null)
+		//no null checks necessary because NO NullPointers must occur! 
+		if (m_decomposedCascadeName == null)
 		{
 			m_decomposedCascadeName = new Vector();
 		}
@@ -808,18 +808,17 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	public Vector getDecomposedCascadeName()
 	{
-		if( m_strName == null )
+		if (m_strName == null)
 		{
 			return null;
 		}
 		synchronized (m_strName)
-		{
-			
+		{						
 			if (m_decomposedCascadeName == null)
 			{			
 				m_decomposedCascadeName = new Vector();
 				
-				if (isUserDefined())
+				if (isUserDefined() || m_mixInfos.length == 0)
 				{
 					m_decomposedCascadeName.addElement(m_strName);
 					return m_decomposedCascadeName;
@@ -844,7 +843,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 						
 						if (token.length() == 0)
 						{
-//							cannot futher decompose this name
+//							cannot further decompose this name
 							break;
 						}
 						if (token.length() > 15)
@@ -863,11 +862,14 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				/* special case: If the operator of the first and the last mix are the same
 				 * only this operator is displayed. 
 				 */
-				else if (m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
+				else if (m_mixInfos[0] == null || m_mixInfos[0].getServiceOperator() == null ||
+						m_mixInfos[m_mixInfos.length-1] == null ||
+						m_mixInfos[m_mixInfos.length-1].getServiceOperator() == null ||
+						m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
 				{
 					m_strName = (String) m_decomposedCascadeName.elementAt(0);
+					m_decomposedCascadeName.removeAllElements();
 					m_decomposedCascadeName.addElement(m_strName);
-					return m_decomposedCascadeName;
 				}
 				else
 				{
@@ -875,11 +877,15 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					ServiceOperator currentOp = null;
 					m_strName = "";
 					
-					for (int i = 0; (i < m_decomposedCascadeName.size() ) &&
-									(i < m_mixInfos.length); i++)
+					for (int i = 0; (i < m_decomposedCascadeName.size() ) && (i < m_mixInfos.length); i++)
 					{
 						currentOp = m_mixInfos[i].getServiceOperator();
-						if( !ops.contains(currentOp) )
+						if (currentOp == null)
+						{
+							m_strName = (String)m_decomposedCascadeName.elementAt(0);
+							break;
+						}
+						if (!ops.contains(currentOp))
 						{
 							ops.addElement(currentOp);
 							m_strName += m_strName.equals("") ? "" : "-";
@@ -1468,7 +1474,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	
 	public Element getWebInfo(Document webInfoDoc)
 	{
-		if(webInfoDoc == null)
+		if (webInfoDoc == null)
 		{
 			return null;
 		}
@@ -1573,6 +1579,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				
 				/* now set the current Mix Attributes */ 
 				currentMixElement = XMLUtil.createChildElement(mixList, MixInfo.XML_ELEMENT_NAME);
+				XMLUtil.setAttribute(currentMixElement, XML_ATTR_ID, currentMixInfo.getId());
 				
 				if(currentMixName != null)
 				{
@@ -1607,6 +1614,10 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		for (int i = 0; i < getNumberOfListenerInterfaces(); i++)
 		{
 			listenerInterface = getListenerInterface(i);
+			if (listenerInterface.isHidden())
+			{
+				continue;
+			}
 			if (hashInterfaceHosts.containsKey(listenerInterface.getHost()))
 			{
 				elemInterface = (Element)hashInterfaceHosts.get(listenerInterface.getHost());
@@ -1618,78 +1629,12 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				XMLUtil.setAttribute(elemInterface, "Host", listenerInterface.getHost());
 				hashInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
 			}
-			
-			XMLUtil.createChildElementWithValue(elemInterface, "Port", "" + listenerInterface.getPort());
+			if (listenerInterface.getProtocol() != ListenerInterface.PROTOCOL_TYPE_RAW_UNIX)
+			{
+				XMLUtil.createChildElementWithValue(elemInterface, "Port", "" + listenerInterface.getPort());
+			}
 		}
 		
 		return rootElement;
-	}
-	
-	/**
-	 * get WebInfos for a cascade with the specified ID
-	 */
-	public static Document getCascadeWebInfo(String cascadeID)
-	{
-		if(cascadeID == null )
-		{
-			return null;
-		}
-		if(cascadeID.equals(""))
-		{
-			return null;
-		}
-		
-		Document webInfoDoc = XMLUtil.createDocument();
-		Database cascadeDB =Database.getInstance(MixCascade.class);
-		
-		if(cascadeDB == null)
-		{
-			return null;
-		}
-		
-		MixCascade cascade = (MixCascade) cascadeDB.getEntryById(cascadeID);
-		Element webInfoElement =
-			(cascade == null) ? null : cascade.getWebInfo(webInfoDoc);
-		if(webInfoElement == null)
-		{
-			return null;
-		}
-		webInfoDoc.appendChild(webInfoElement);
-		return webInfoDoc;
-	}
-	
-	/**
-	 * get WebInfos for all cascades
-	 */
-	public static Document getAllCascadeWebInfos()
-	{
-		Document allWebInfosDoc = XMLUtil.createDocument();
-		Database cascadeDB =Database.getInstance(MixCascade.class);
-		if(cascadeDB == null)
-		{
-			return null;
-		}
-		Vector cascadeDBEntries = cascadeDB.getEntryList();
-		MixCascade currentCascade = null;
-		
-		if(cascadeDBEntries == null)
-		{
-			return null;
-		}
-		
-		Element rootElement = allWebInfosDoc.createElement(XML_ELEMENT_WEBINFO_ROOT);
-		Element listItem = null;
-		allWebInfosDoc.appendChild(rootElement);
-		
-		for (int i = 0; i < cascadeDBEntries.size(); i++) 
-		{
-			currentCascade = (MixCascade) cascadeDBEntries.elementAt(i);
-			listItem = currentCascade.getWebInfo(allWebInfosDoc);
-			if(listItem != null)
-			{
-				rootElement.appendChild(listItem);
-			}
-		}
-		return allWebInfosDoc;
 	}
 }
