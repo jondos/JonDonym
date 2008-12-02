@@ -29,6 +29,9 @@ package infoservice;
 
 import java.net.InetAddress;
 
+import anon.infoservice.HttpResponseStructure;
+
+
 /**
  * This is the definition for all implementations handling HTTP requests from the
  * InfoServiceConnection.

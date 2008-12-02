@@ -25,14 +25,17 @@
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-package infoservice;
+package anon.infoservice;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.w3c.dom.Document;
 
-import anon.infoservice.HTTPConnectionFactory;
 import anon.util.XMLUtil;
 import anon.util.MyStringBuilder;
 
@@ -94,40 +97,40 @@ public final class HttpResponseStructure
 	 * This constant is used, when no content type shall be specified in the HTTP header.
 	 * This is only for internal use.
 	 */
-	private static final int HTTP_TYPE_NO_TYPE = -1;
+	public static final int HTTP_TYPE_NO_TYPE = -1;
 
-	private static final String HTTP_11_STRING = "HTTP/1.1 ";
-	private static final String HTTP_CRLF_STRING = "\r\n";
+	public static final String HTTP_11_STRING = "HTTP/1.1 ";
+	public static final String HTTP_CRLF_STRING = "\r\n";
 
-	private static final String HTTP_RETURN_OK_STRING = "200 OK";
-	private static final String HTTP_RETURN_ACCEPTED_STRING = "202 Accepted";
-	private static final String HTTP_RETURN_BAD_REQUEST_STRING = "400 Bad Request";
-	private static final String HTTP_RETURN_NOT_FOUND_STRING = "404 Not Found";
-	private static final String HTTP_RETURN_INTERNAL_SERVER_ERROR_STRING = "500 Internal Server Error";
+	public static final String HTTP_RETURN_OK_STRING = "200 OK";
+	public static final String HTTP_RETURN_ACCEPTED_STRING = "202 Accepted";
+	public static final String HTTP_RETURN_BAD_REQUEST_STRING = "400 Bad Request";
+	public static final String HTTP_RETURN_NOT_FOUND_STRING = "404 Not Found";
+	public static final String HTTP_RETURN_INTERNAL_SERVER_ERROR_STRING = "500 Internal Server Error";
 
-	private static final String HTTP_HEADER_TYPE_STRING = "Content-type: ";
-	private static final String HTTP_HEADER_ENCODING_STRING = "Content-Encoding: ";
-	private static final String HTTP_HEADER_LENGTH_STRING = "Content-length: ";
-	private static final String HTTP_HEADER_DATE_STRING = "Date: ";
-	private static final String HTTP_HEADER_EXPIRES_STRING = "Expires: ";
-	private static final String HTTP_HEADER_CACHE_CONTROL_STRING = "Cache-Control: ";
-	private static final String HTTP_HEADER_PRAGMA_STRING = "Pragma: ";
-	private final static String HTTP_HEADER_CACHE_CONTROL_STRINGS=HTTP_HEADER_CACHE_CONTROL_STRING+
+	public static final String HTTP_HEADER_TYPE_STRING = "Content-type: ";
+	public static final String HTTP_HEADER_ENCODING_STRING = "Content-Encoding: ";
+	public static final String HTTP_HEADER_LENGTH_STRING = "Content-length: ";
+	public static final String HTTP_HEADER_DATE_STRING = "Date: ";
+	public static final String HTTP_HEADER_EXPIRES_STRING = "Expires: ";
+	public static final String HTTP_HEADER_CACHE_CONTROL_STRING = "Cache-Control: ";
+	public static final String HTTP_HEADER_PRAGMA_STRING = "Pragma: ";
+	public final static String HTTP_HEADER_CACHE_CONTROL_STRINGS=HTTP_HEADER_CACHE_CONTROL_STRING+
 			"no-cache"+HTTP_CRLF_STRING+HTTP_HEADER_PRAGMA_STRING+"no-cache"+HTTP_CRLF_STRING;
 
 	//private static final String HTTP_ENCODING_PLAIN_STRING = "plain";
-	private static final String HTTP_ENCODING_ZLIB_STRING = HTTPConnectionFactory.HTTP_ENCODING_ZLIB_STRING;
-	private static final String HTTP_ENCODING_GZIP_STRING = HTTPConnectionFactory.HTTP_ENCODING_GZIP_STRING;
+	public static final String HTTP_ENCODING_ZLIB_STRING = HTTPConnectionFactory.HTTP_ENCODING_ZLIB_STRING;
+	public static final String HTTP_ENCODING_GZIP_STRING = HTTPConnectionFactory.HTTP_ENCODING_GZIP_STRING;
 
-	private static final String HTTP_TYPE_APPLICATION_JNLP_STRING = "application/x-java-jnlp-file";
+	public static final String HTTP_TYPE_APPLICATION_JNLP_STRING = "application/x-java-jnlp-file";
 	//private static final String HTTP_TYPE_APPLICATION_ZLIB_STRING = "application/x-compress";
-	private static final String HTTP_TYPE_TEXT_PLAIN_STRING = "text/plain";
-	private static final String HTTP_TYPE_TEXT_HTML_STRING = "text/html";
-	private static final String HTTP_TYPE_TEXT_XML_STRING = "text/xml";
+	public static final String HTTP_TYPE_TEXT_PLAIN_STRING = "text/plain";
+	public static final String HTTP_TYPE_TEXT_HTML_STRING = "text/html";
+	public static final String HTTP_TYPE_TEXT_XML_STRING = "text/xml";
 
-	private static final String HTML_NOT_FOUND = "<HTML><TITLE>404 File Not Found</TITLE><H1>404 File Not Found</H1><P>File not found on this server.</P></HTML>";
-	private static final String HTML_BAD_REQUEST = "<HTML><TITLE>400 Bad Request</TITLE><H1>400 Bad Request</H1><P>Your request has been rejected by the server.</P></HTML>";
-	private static final String HTML_INTERNAL_SERVER_ERROR = "<HTML><TITLE>500 Internal Server Error</TITLE><H1>500 Internal Server Error</H1><P>Error while processing the request on the server.</P></HTML>";
+	public static final String HTML_NOT_FOUND = "<HTML><TITLE>404 File Not Found</TITLE><H1>404 File Not Found</H1><P>File not found on this server.</P></HTML>";
+	public static final String HTML_BAD_REQUEST = "<HTML><TITLE>400 Bad Request</TITLE><H1>400 Bad Request</H1><P>Your request has been rejected by the server.</P></HTML>";
+	public static final String HTML_INTERNAL_SERVER_ERROR = "<HTML><TITLE>500 Internal Server Error</TITLE><H1>500 Internal Server Error</H1><P>Error while processing the request on the server.</P></HTML>";
 
 	/**
 	 * Stores the whole HTTP response, including HTTP code, header and data.
@@ -270,6 +273,13 @@ public final class HttpResponseStructure
 											 a_httpData.getBytes(), a_onlyHeader);
 	}
 
+	public HttpResponseStructure(int httpReturnCode, String httpData)
+	{
+		m_httpReturnData = 
+			createHttpMessage(httpReturnCode, HTTP_TYPE_TEXT_HTML, 
+							HTTP_ENCODING_PLAIN, httpData.getBytes(), false);
+	}
+	
 	/**
 	 * Returns the data of this HTTP response.
 	 *
@@ -305,6 +315,39 @@ public final class HttpResponseStructure
 	 */
 	private byte[] createHttpMessage(int a_httpReturnCode, int a_httpDataType, int a_httpEncoding,
 									 byte[] a_httpData, boolean a_onlyHeader)
+	{
+		return 
+		createHttpMessage
+			(a_httpReturnCode, a_httpDataType, a_httpEncoding, a_httpData, a_onlyHeader, null);
+	}
+	
+	/**
+	 * Creates the whole HTTP response, including HTTP return code, HTTP header and the specified
+	 * content.
+	 *
+	 * @param a_httpReturnCode The HTTP return code for the response, see the HTTP_RETURN constants
+	 *                         in this class.
+	 * @param a_httpDataType The content type, which shall be set in the HTTP header of the
+	 *                       response. See the HTTP_TYPE constants in this class. If
+	 *                       HTTP_TYPE_NO_TYPE is specified here, the content type will not be set
+	 *                       in the HTTP header.
+	 * @param a_httpData The content for the HTTP response. The data should be in the specified
+	 *                   content type. If null is specified here, no content will be in the HTTP
+	 *                   response (response will consist of HTTP return code and header only) and
+	 *                   the content lenght field in the header is not set. In any other case, the
+	 *                   content length will be the length of this data structure.
+	 * @param a_onlyHeader If this is true, only the matching HTTP header (including content type
+	 *                     and content length, if available) is included in the response, but not
+	 *                     the content data itself. It is needed as response for the HTTP HEAD
+	 *                     command. If this parameter is set to false, the full response including
+	 *                     header and data is created.
+	 * @param dateFormat The DatFormatfor headers that contains the actual date. if null is specified 
+	 * 					the default format "EEE, dd MMM yyyy HH:mm:ss zzz" is used.
+	 *
+	 * @return The created HTTP response.
+	 */
+	private byte[] createHttpMessage(int a_httpReturnCode, int a_httpDataType, int a_httpEncoding,
+									 byte[] a_httpData, boolean a_onlyHeader, DateFormat dateFormat)
 	{
 		MyStringBuilder httpHeader = new MyStringBuilder(2048);
 		httpHeader.append(HTTP_11_STRING);
@@ -376,7 +419,14 @@ public final class HttpResponseStructure
 		}
 
 		/* set some more header fields */
-		String currentDate = Configuration.getHttpDateFormat().format(new Date());
+		if(dateFormat == null)
+		{
+			dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+			dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		}
+		String currentDate = dateFormat.format(new Date());
+		//String currentDate = Configuration.getHttpDateFormat().format(new Date());
+		
 		httpHeader.append(HTTP_HEADER_EXPIRES_STRING);
 		httpHeader.append(currentDate);
 		httpHeader.append(HTTP_CRLF_STRING);

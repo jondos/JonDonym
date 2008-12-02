@@ -38,6 +38,7 @@ import java.util.Vector;
 
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
+import anon.infoservice.HttpResponseStructure;
 import anon.util.TimedOutputStream;
 import logging.LogHolder;
 import logging.LogLevel;

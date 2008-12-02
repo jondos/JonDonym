@@ -28,7 +28,6 @@
 package infoservice.agreement.paxos.integration;
 
 import infoservice.Configuration;
-import infoservice.HttpResponseStructure;
 import infoservice.InfoServiceDistributor;
 import infoservice.agreement.IInfoServiceAgreementAdapter;
 import infoservice.agreement.common.AgreementConstants;
@@ -50,6 +49,7 @@ import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
 import anon.infoservice.Database;
 import anon.infoservice.HTTPConnectionFactory;
+import anon.infoservice.HttpResponseStructure;
 import anon.infoservice.IDistributable;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.ListenerInterface;

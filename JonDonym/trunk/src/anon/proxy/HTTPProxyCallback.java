@@ -28,10 +28,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package anon.proxy;
 
+import gui.JAPMessages;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
+import anon.infoservice.HttpResponseStructure;
 
 import junit.framework.TestCase;
 
@@ -65,6 +69,9 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	final static String[] HTTP_REQUEST_METHODS = { "GET", "POST", "CONNECT", "HEAD" , "PUT", "OPTIONS", "DELETE", "TRACE"};
 	final static byte[][] HTTP_REQUEST_METHODS_BYTES;
+	
+	final static String MSG_INVALID_LINETERM_REQUEST ="httpFilter.invalidlineterm.request";
+	final static String MSG_INVALID_LINETERM_RESPONSE ="httpFilter.invalidlineterm.response";
 	
 	static 
 	{
@@ -343,16 +350,24 @@ public class HTTPProxyCallback implements ProxyCallback
 			
 			if(!checkValidity(chunkData))
 			{
+				String errorMsgKey = null;
 				if(messageType == MESSAGE_TYPE_REQUEST)
 				{
 					connHeader.setRequestFinished(true);
+					errorMsgKey = MSG_INVALID_LINETERM_REQUEST;
 				}
 				else if (messageType == MESSAGE_TYPE_RESPONSE)
 				{
 					connHeader.setResponseFinished(true);
+					errorMsgKey = MSG_INVALID_LINETERM_RESPONSE;
 				}
+				
 				unfinishedMessages.remove(anonRequest);
-				throw new ChunkNotProcessableException("Chunk is invalid: "+chunkData);
+				
+				throw new HTTPHeaderParseException(
+						HttpResponseStructure.HTTP_RETURN_BAD_REQUEST,
+						messageType, 
+						JAPMessages.getString(errorMsgKey));
 			}
 			
 			int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);

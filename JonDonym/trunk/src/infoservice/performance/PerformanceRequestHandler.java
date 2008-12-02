@@ -30,16 +30,17 @@ package infoservice.performance;
 
 import org.w3c.dom.Document;
 
-import infoservice.HttpResponseStructure;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import anon.util.XMLUtil;
 import anon.util.XMLParseException;
 import anon.infoservice.Database;
+import anon.infoservice.HttpResponseStructure;
 import anon.crypto.SignatureVerifier;
 
 /**
