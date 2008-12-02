@@ -28,7 +28,6 @@
 package infoservice.dynamic;
 
 import infoservice.Configuration;
-import infoservice.HttpResponseStructure;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -51,6 +50,7 @@ import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.Constants;
 import anon.infoservice.Database;
+import anon.infoservice.HttpResponseStructure;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.util.XMLParseException;

@@ -28,7 +28,6 @@
 package infoservice.agreement.multicast;
 
 import infoservice.Configuration;
-import infoservice.HttpResponseStructure;
 import infoservice.InfoServiceDistributor;
 import infoservice.agreement.IInfoServiceAgreementAdapter;
 import infoservice.agreement.common.FifoQueue;
@@ -49,6 +48,7 @@ import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
 import anon.infoservice.Database;
 import anon.infoservice.HTTPConnectionFactory;
+import anon.infoservice.HttpResponseStructure;
 import anon.infoservice.IDistributable;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.ListenerInterface;

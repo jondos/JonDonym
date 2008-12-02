@@ -48,6 +48,7 @@ import anon.infoservice.AbstractDatabaseEntry;
 import anon.infoservice.AbstractDistributableDatabaseEntry;
 import anon.infoservice.Constants;
 import anon.infoservice.Database;
+import anon.infoservice.HttpResponseStructure;
 import anon.infoservice.IBoostrapable;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceIDEntry;

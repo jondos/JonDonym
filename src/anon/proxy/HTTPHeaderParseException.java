@@ -28,40 +28,68 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package anon.proxy;
 
-/**
- * Exception for the ProxyCallback framework in case a chunk cannot be properly processed
- */
-public class ChunkNotProcessableException extends Exception 
-{
+import anon.infoservice.HttpResponseStructure;
+import HTTPClient.HttpURLConnection;
 
-	public ChunkNotProcessableException()
+public class HTTPHeaderParseException extends ChunkNotProcessableException
+{
+	
+	private int errorCode = 0;
+	private String statusMessage = "";
+	private String errorDescription = "";
+	
+	public HTTPHeaderParseException(int errorCode, int headerType)
 	{
 		super();
-	}
-
-	public ChunkNotProcessableException(String message, Throwable cause) 
-	{
-		super(message, cause);
-	}
-
-	public ChunkNotProcessableException(String message)
-	{
-		super(message);
-	}
-
-	public ChunkNotProcessableException(Throwable cause)
-	{
-		super(cause);
+		this.errorCode = errorCode;
+		if(headerType == HTTPProxyCallback.MESSAGE_TYPE_REQUEST)
+		{
+			switch (errorCode)
+			{
+				/* right now the only one available is 400 Bad Request */
+				case HttpResponseStructure.HTTP_RETURN_BAD_REQUEST:
+				default:
+				{
+					statusMessage = HttpResponseStructure.HTTP_RETURN_BAD_REQUEST_STRING;
+				}
+			}
+		}
+		else
+		{
+			switch (errorCode)
+			{
+				/* right now the only one available for responses is 500 Internal Server Error */
+				case HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR:
+				default:
+				{
+					statusMessage = HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR_STRING;
+				}
+			}
+		}
 	}
 	
-	/**
-	 * A response as byte array to sent to the host
-	 * @return the protocol specific error response
-	 * as byte array
- 	 */
-	public byte[] getErrorResponse()
+	public HTTPHeaderParseException(int errorCode, int headerType, String message)
 	{
-		return getMessage().getBytes();
+		this(errorCode, headerType);
+		errorDescription = message;
 	}
+	
+	public String getMessage()
+	{
+		String errorResponse =
+			"<html><head><title>"+statusMessage+"</title></head>"+
+			"<body><h1>"+statusMessage+"</h1>" +
+					(errorDescription.equals("") ? "" : "<p>"+errorDescription+"</p>")+
+			"</html>";
+		
+		return errorResponse;
+	}
+
+	
+	public byte[] getErrorResponse() 
+	{
+		return new HttpResponseStructure(errorCode, getMessage()).getResponseData();
+	}
+	
 	
 }

@@ -345,7 +345,14 @@ public final class AnonProxyRequest implements Runnable
 		}
 		catch ( ChunkNotProcessableException cnpe)
 		{
-			LogHolder.log(LogLevel.ERR,LogType.NET,"chunk could not be processed. Termibnating",  cnpe );
+			try 
+			{
+				m_OutSocket.write(cnpe.getErrorResponse());
+			} 
+			catch (IOException e) 
+			{
+			}
+			LogHolder.log(LogLevel.ERR,LogType.NET,"chunk could not be processed. Terminating",  cnpe );
 		}
 		closeRequest();
 		m_Proxy.decNumChannels();
@@ -484,6 +491,13 @@ mainLoop:		do
 			catch (ChunkNotProcessableException cnpe)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.NET, cnpe);
+				try 
+				{
+					m_OutSocket.write(cnpe.getErrorResponse());
+				} 
+				catch (IOException e) 
+				{
+				}
 			}
 			try
 			{
