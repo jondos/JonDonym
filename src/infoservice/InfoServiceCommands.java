@@ -94,6 +94,27 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			return InfoServiceDBEntry.class;
 		}
 	};
+	private final HTTPResponseGetter m_cascadeWebInfoResponseGetter = new HTTPResponseGetter(true)
+	{
+		public Class getDatabaseClass()
+		{
+			return MixCascade.class;
+		}
+	};
+	private final HTTPResponseGetter m_mixWebInfoResponseGetter = new HTTPResponseGetter(true)
+	{
+		public Class getDatabaseClass()
+		{
+			return MixInfo.class;
+		}
+	};
+	private final HTTPResponseGetter m_mixesResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return MixInfo.class;
+		}
+	};
 	private final HTTPResponseGetter m_cascadeResponseGetter = new HTTPResponseGetter()
 	{
 		public Class getDatabaseClass()
@@ -459,9 +480,15 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		private HttpResponseStructure m_cachedCompressedResponse;
 		private final Object SYNC_CACHE = new Object();
 		private long m_lastUpdate = 0;
+		private boolean m_bWebInfo;
 
 		public HTTPResponseGetter()
 		{
+		}
+		
+		public HTTPResponseGetter(boolean a_bWebInfo)
+		{
+			m_bWebInfo = a_bWebInfo;
 		}
 
 		public abstract Class getDatabaseClass();
@@ -478,34 +505,41 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				{
 					m_lastUpdate = System.currentTimeMillis();
 					
-					doc = XMLUtil.createDocument();
-					containerNode = doc.createElement(XMLUtil.getXmlElementContainerName(getDatabaseClass()));
-					
-					XMLUtil.setAttribute(containerNode, "id", Configuration.getInstance().getID());
-					XMLUtil.setAttribute(containerNode, AbstractDatabaseEntry.XML_ATTR_LAST_UPDATE, 
-							m_lastUpdate);
-					
-					/* append the nodes of all entries we know */
-					Enumeration knownentries = Database.getInstance(getDatabaseClass()).
-						getEntrySnapshotAsEnumeration();
-					IXMLEncodable currentCascade;
-					Element node;
-					while (knownentries.hasMoreElements())
+					if (m_bWebInfo)
 					{
-						/* import the entry XML structure in this document */
-						currentCascade = (IXMLEncodable) (knownentries.nextElement());
-						if (currentCascade instanceof IBoostrapable && 
-							((IBoostrapable)currentCascade).isBootstrap())
-						{
-							// do not forward this entry, as it is for internal use only
-							continue;
-						}
-						node = currentCascade.toXmlElement(doc);
-						containerNode.appendChild(node);
+						doc = Database.getInstance(getDatabaseClass()).getWebInfos();
 					}
-					SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE,
-						containerNode);
-					doc.appendChild(containerNode);
+					else
+					{
+						doc = XMLUtil.createDocument();
+						containerNode = doc.createElement(XMLUtil.getXmlElementContainerName(getDatabaseClass()));					
+						XMLUtil.setAttribute(containerNode, "id", Configuration.getInstance().getID());
+						XMLUtil.setAttribute(containerNode, AbstractDatabaseEntry.XML_ATTR_LAST_UPDATE, 
+								m_lastUpdate);
+						
+						/* append the nodes of all entries we know */
+						Enumeration knownentries = Database.getInstance(getDatabaseClass()).
+							getEntrySnapshotAsEnumeration();
+						IXMLEncodable currentCascade;
+						Element node;
+						while (knownentries.hasMoreElements())
+						{
+							/* import the entry XML structure in this document */
+							currentCascade = (IXMLEncodable) (knownentries.nextElement());
+							if (currentCascade instanceof IBoostrapable && 
+								((IBoostrapable)currentCascade).isBootstrap())
+							{
+								// do not forward this entry, as it is for internal use only
+								continue;
+							}
+							node = currentCascade.toXmlElement(doc);
+							containerNode.appendChild(node);
+						}
+						SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE,
+							containerNode);
+						doc.appendChild(containerNode);
+					}
+					
 					/* send the XML document to the client */
 					//if ( (a_supportedEncodings & HttpResponseStructure.HTTP_ENCODING_ZLIB) > 0)
 					{
@@ -1245,6 +1279,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				(info).getHtmlTableLine(Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) + "\n";
 			}
 			htmlData = htmlData + "    </TABLE><BR>";
+			
+			htmlData = htmlData + "<a href=\"mixwebinfos\">List available Mixes</a>";
 			
 			if (Configuration.getInstance().isPassive())
 			{
@@ -2055,14 +2091,26 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		else if( ( command.startsWith(MixCascade.INFOSERVICE_COMMAND_WEBINFOS)) && 
 				 ( method == Constants.REQUEST_METHOD_GET ) )
 		{
-			Document doc = MixCascade.getAllCascadeWebInfos();
-			httpResponse = new HttpResponseStructure(doc);
+			httpResponse = m_cascadeWebInfoResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
 		else if( (command.startsWith(MixCascade.INFOSERVICE_COMMAND_WEBINFO) && (method == Constants.REQUEST_METHOD_GET)))
 		{
 			String cascadeID = command.substring(MixCascade.INFOSERVICE_COMMAND_WEBINFO.length());
 			
-			Document doc = MixCascade.getCascadeWebInfo(cascadeID);
+			Document doc = Database.getInstance(MixCascade.class).getWebInfos(cascadeID);
+			httpResponse = (doc == null) ? 
+					new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST) : new HttpResponseStructure(doc);
+		}
+		else if( ( command.startsWith(MixInfo.INFOSERVICE_COMMAND_WEBINFOS)) && 
+				 ( method == Constants.REQUEST_METHOD_GET ) )
+		{
+			httpResponse =  m_mixWebInfoResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if( (command.startsWith(MixInfo.INFOSERVICE_COMMAND_WEBINFO) && (method == Constants.REQUEST_METHOD_GET)))
+		{
+			String cascadeID = command.substring(MixInfo.INFOSERVICE_COMMAND_WEBINFO.length());
+			
+			Document doc = Database.getInstance(MixInfo.class).getWebInfos(cascadeID);
 			httpResponse = (doc == null) ? 
 					new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST) : new HttpResponseStructure(doc);
 		}

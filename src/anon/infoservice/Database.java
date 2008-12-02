@@ -845,4 +845,82 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	{
 		return m_timeoutList.size();
 	}
+	
+	public Document getWebInfos(String a_ID)
+	{
+		return getWebInfos(getEntryClass(), a_ID);
+	}
+	
+	public Document getWebInfos()
+	{
+		return getWebInfos(getEntryClass());
+	}
+	
+	public static interface IWebInfo
+	{
+		public static final String FIELD_XML_ELEMENT_WEBINFO_CONTAINER = "XML_ELEMENT_WEBINFO_CONTAINER";
+//		public static final String XML_ELEMENT_WEBINFO_CONTAINER;  /DO NOT REMOVE! THIS IS PART OF THE SPECIFICATION!
+		Element getWebInfo(Document a_doc);
+	}
+	
+	/**
+	 * get WebInfos for an entry with the specified ID
+	 */
+	private static Document getWebInfos(Class a_webInfoClass, String a_ID)
+	{
+		if (!IWebInfo.class.isAssignableFrom(a_webInfoClass))
+		{
+			LogHolder.log(LogLevel.EMERG, LogType.DB, "Illegal class for web info: " + a_webInfoClass);
+			return null;
+		}
+		
+		Document webInfoDoc = XMLUtil.createDocument();
+		IWebInfo webinfo = (IWebInfo)getInstance(a_webInfoClass).getEntryById(a_ID);
+		Element webInfoElement =
+			(webinfo == null) ? null : webinfo.getWebInfo(webInfoDoc);
+		if(webInfoElement == null)
+		{
+			return null;
+		}
+		webInfoDoc.appendChild(webInfoElement);
+		return webInfoDoc;
+	}
+	
+	/**
+	 * get WebInfos for all entries
+	 */
+	private static Document getWebInfos(Class a_webInfoClass)
+	{
+		if (!IWebInfo.class.isAssignableFrom(a_webInfoClass))
+		{
+			return null;
+		}
+		
+		String nameContainer = 
+			Util.getStaticFieldValue(a_webInfoClass, IWebInfo.FIELD_XML_ELEMENT_WEBINFO_CONTAINER);
+		
+		if (nameContainer == null)
+		{
+			return null;
+		}
+		
+		Document allWebInfosDoc = XMLUtil.createDocument();
+		Vector entries = getInstance(a_webInfoClass).getEntryList();
+		IWebInfo webinfo = null;
+		
+		Element rootElement = allWebInfosDoc.createElement(nameContainer);
+		Element listItem = null;
+		allWebInfosDoc.appendChild(rootElement);
+		
+		for (int i = 0; i < entries.size(); i++) 
+		{
+			webinfo = (IWebInfo) entries.elementAt(i);
+			listItem = webinfo.getWebInfo(allWebInfosDoc);
+			if(listItem != null)
+			{
+				rootElement.appendChild(listItem);
+			}
+		}
+		return allWebInfosDoc;
+	}
 }

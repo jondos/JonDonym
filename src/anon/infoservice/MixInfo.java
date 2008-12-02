@@ -27,11 +27,13 @@
  */
 package anon.infoservice;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import anon.crypto.CertPath;
+import anon.crypto.CertificateInfoStructure;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
@@ -45,6 +47,8 @@ import anon.crypto.IVerifyable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import anon.pay.xml.XMLPriceCertificate;
@@ -53,7 +57,7 @@ import anon.pay.AIControlChannel;
 /**
  * Holds the information of one single mix.
  */
-public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable
+public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable, Database.IWebInfo
 {
 	public static final String NAME_TYPE_MIX = "Mix";
 	public static final String NAME_TYPE_OPERATOR = "Operator";
@@ -66,6 +70,15 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	public static final String XML_ELEMENT_MIX_NAME = "Name";
 	public final static String XML_ATTRIBUTE_NAME_FOR_CASCADE = "forCascade";
 	
+	public static final String XML_ELEMENT_WEBINFO_CONTAINER = "MixWebInfos";
+	public static final String INFOSERVICE_COMMAND_WEBINFOS = "/mixwebinfos";
+	public static final String INFOSERVICE_COMMAND_WEBINFO = "/mixwebinfo/";
+	
+	private static final String XML_ELEMENT_WEBINFO = "MixWebInfo";
+	private static final String XML_ELEM_SERVER_MONITORING = "ServerMonitoring";
+	
+	private static final String XML_ATTR_PAYMENT = "payment";
+	
 
     /* LERNGRUPPE: Mix types */
     public static final int FIRST_MIX = 0;
@@ -77,6 +90,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
      * This is the type of the mix
      */
     private int m_type;
+    
+    private boolean m_bPayment = false;
 
     /**
      * LERNGRUPPE
@@ -92,6 +107,10 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	private final Vector m_vecVisibleAdresses = new Vector();
 
 	private final Vector m_vecListenerAdresses = new Vector();
+	
+	private final Vector m_vecListenerInterfaces = new Vector();
+	
+	private final Vector m_vecListenerMonitoring = new Vector();
 	
   /**
    * This is the ID of the mix.
@@ -199,7 +218,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  this(a_mixNode, a_expireTime, false);
   }
 
-
   public MixInfo(String a_mixID, CertPath a_certPath)
   {
 	  super(Long.MAX_VALUE);
@@ -239,6 +257,10 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_freeMix = false;
 	  //
 	  m_priceCert = a_priceCert;
+	  if (m_priceCert != null)
+	  {
+		  m_bPayment = true;
+	  }
 	  m_prepaidInterval = a_prepaidInterval;
   }
 
@@ -254,9 +276,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   public MixInfo(Element a_mixNode, long a_expireTime, boolean a_bFromCascade)
 	  throws XMLParseException
   {
-	  /* use always the timeout for the infoservice context, because the JAP client currently does
-	   * not have a database of mixcascade entries -> no timeout for the JAP client necessary
-	   */
 	  super(a_expireTime <= 0 ? System.currentTimeMillis() + Constants.TIMEOUT_MIX : a_expireTime);
 	  m_bFromCascade = a_bFromCascade;
 	  /* get the ID */
@@ -325,18 +344,58 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  }
 	  }
 
-	  parseVisibleAdresses(a_mixNode);
-	  parseListenerAdresses(a_mixNode);
+	  if (a_expireTime < Long.MAX_VALUE) // only do this in InfoService context. Otherwise, we might get unwanted DNS requests.
+	  {
+		  parseVisibleAdresses(a_mixNode);
+		  parseListenerAdresses(a_mixNode);
+	  }
+
+	  Element listenerInterfacesNode = 
+		  (Element)XMLUtil.getFirstChildByName(a_mixNode, ListenerInterface.XML_ELEMENT_CONTAINER_NAME);	  
+	  XMLUtil.assertNotNull(listenerInterfacesNode);
+      NodeList listenerInterfaceNodes = listenerInterfacesNode.getElementsByTagName(ListenerInterface.XML_ELEMENT_NAME);
+      if (listenerInterfaceNodes.getLength() == 0)
+      {
+          throw (new XMLParseException("First Mix has no ListenerInterfaces in its XML structure."));
+      }
+      for (int i = 0; i < listenerInterfaceNodes.getLength(); i++)
+      {
+    	  m_vecListenerInterfaces.addElement(new ListenerInterface((Element)listenerInterfaceNodes.item(i)));
+      }
+     
+      Element elemMonitoring = (Element)XMLUtil.getFirstChildByName(a_mixNode, XML_ELEM_SERVER_MONITORING);
+      if (elemMonitoring != null)
+      {
+    	  listenerInterfacesNode = 
+    		  (Element)XMLUtil.getFirstChildByName(elemMonitoring, ListenerInterface.XML_ELEMENT_CONTAINER_NAME);	  
+    	  if (listenerInterfacesNode != null)
+    	  {
+	          listenerInterfaceNodes = listenerInterfacesNode.getElementsByTagName(ListenerInterface.XML_ELEMENT_NAME);
+	          for (int i = 0; i < listenerInterfaceNodes.getLength(); i++)
+	          {
+	        	  m_vecListenerMonitoring.addElement(new ListenerInterface((Element)listenerInterfaceNodes.item(i)));
+	          }
+    	  }
+    	  else
+    	  {
+    		  // alternative listener description
+    		  String host = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemMonitoring, ListenerInterface.XML_ELEM_HOST), null);
+    		  int port = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemMonitoring, ListenerInterface.XML_ELEM_PORT), -1);
+    		  if (host != null && port >= 0)
+    		  {
+    			  m_vecListenerMonitoring.addElement(new ListenerInterface(host, port));
+    		  }
+    	  }
+      }
 	  
 	  if (!a_bFromCascade) //info from cascade does not contain these infos, so no use parsing them
 	  {
 		  /* Parse the MixType */
 		  Node typeNode =  XMLUtil.getFirstChildByName(a_mixNode, "MixType");
-		  if (typeNode == null)
-		  {
-			  throw new XMLParseException("MixType");
-		  }
-		  m_type = parseMixType(typeNode.getFirstChild().getNodeValue());
+		  XMLUtil.assertNotNull(typeNode);
+	
+		  m_type = parseMixType(XMLUtil.parseValue(typeNode, null));
+		  m_bPayment = XMLUtil.parseAttribute(typeNode, XML_ATTR_PAYMENT, false);
 
 		  /* Parse dynamic property */
 		  m_dynamic = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixNode, "Dynamic"), false);
@@ -443,7 +502,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   
   private void parseListenerAdresses(Node nodeMix) 
   {
-	  parseVisibleAdresses(nodeMix, "ListenerInterfaces", "ListenerInterface", m_vecListenerAdresses);
+	  parseVisibleAdresses(nodeMix, ListenerInterface.XML_ELEMENT_CONTAINER_NAME, 
+			  ListenerInterface.XML_ELEMENT_NAME, m_vecListenerAdresses);
   }
   private void parseVisibleAdresses(Node nodeMix)
   {
@@ -528,6 +588,16 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  return (Vector)m_vecListenerAdresses.clone();
   }
   
+  public Vector getListenerInterfaces()
+  {
+	  return (Vector)m_vecListenerInterfaces.clone();
+  }
+  
+  public Vector getMonitoringListenerInterfaces()
+  {
+	  return (Vector)m_vecListenerMonitoring.clone();
+  }
+  
   /**
    * Returns the ID of the mix.
    *
@@ -543,8 +613,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   }
 
   /**
-   * Returns if this MixInfo has been recevied directly from a cascade connection.
-   * @return if this MixInfo has been recevied directly from a cascade connection
+   * Returns if this MixInfo has been received directly from a cascade connection.
+   * @return if this MixInfo has been received directly from a cascade connection
    */
   public boolean isFromCascade()
   {
@@ -728,6 +798,11 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
       return m_type;
   }
 
+  public boolean isPayment()
+  {
+	  return m_bPayment;
+  }
+  
   /**
    * LERNGRUPPE
    * Returns the type of this mix
@@ -762,30 +837,19 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   * @return host
   * @throws Exception
   */
-  public String getFirstHostName() throws Exception {
-
-	  String result = "";
-	  Element mix = this.getXmlStructure();
-      NodeList listenerInterfacesNodes = mix.getElementsByTagName("ListenerInterfaces");
-      if (listenerInterfacesNodes.getLength() == 0)
-      {
-          throw (new Exception("Mix has no ListenerInterfaces in its XML structure."));
-      }
-      Element listenerInterfacesNode = (Element) (listenerInterfacesNodes.item(0));
-      NodeList listenerInterfaceNodes = listenerInterfacesNode
-              .getElementsByTagName("ListenerInterface");
-      if (listenerInterfaceNodes.getLength() == 0)
-      {
-          throw (new Exception("First Mix has no ListenerInterfaces in its XML structure."));
-      }
-
-      for (int i = 0; i < listenerInterfaceNodes.getLength(); i++)
-      {
-          Element listenerInterfaceNode = (Element) (listenerInterfaceNodes.item(i));
-          result =   new ListenerInterface(listenerInterfaceNode).getHost();
-          break;
-      }
-      return result;
+  public String getFirstHostName() throws Exception 
+  {
+	  ListenerInterface listenInterface;
+	  for (int i = 0; i < m_vecListenerInterfaces.size(); i++)
+	  {
+		  listenInterface = (ListenerInterface)m_vecListenerInterfaces.elementAt(i);
+		  if (!listenInterface.isHidden())
+		  {
+			  return listenInterface.getHost();
+		  }
+	  }
+	   
+	  return "";
   }
 
   /**
@@ -794,30 +858,19 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    * @return host
    * @throws Exception
    */
-   public int getFirstPort() throws Exception {
-
- 	  int result = -1;
- 	  Element mix = this.getXmlStructure();
-       NodeList listenerInterfacesNodes = mix.getElementsByTagName("ListenerInterfaces");
-       if (listenerInterfacesNodes.getLength() == 0)
-       {
-           throw (new Exception("Mix has no ListenerInterfaces in its XML structure."));
-       }
-       Element listenerInterfacesNode = (Element) (listenerInterfacesNodes.item(0));
-       NodeList listenerInterfaceNodes = listenerInterfacesNode
-               .getElementsByTagName("ListenerInterface");
-       if (listenerInterfaceNodes.getLength() == 0)
-       {
-           throw (new Exception("First Mix has no ListenerInterfaces in its XML structure."));
-       }
-
-       for (int i = 0; i < listenerInterfaceNodes.getLength(); i++)
-       {
-           Element listenerInterfaceNode = (Element) (listenerInterfaceNodes.item(i));
-           result =   new ListenerInterface(listenerInterfaceNode).getPort();
-           break;
-       }
-       return result;
+   public int getFirstPort() throws Exception 
+   {
+	   ListenerInterface listenInterface;
+	   for (int i = 0; i < m_vecListenerInterfaces.size(); i++)
+	   {
+		   listenInterface = (ListenerInterface)m_vecListenerInterfaces.elementAt(i);
+		   if (!listenInterface.isHidden())
+		   {
+			   return listenInterface.getPort();
+		   }
+	   }
+	   
+	   return -1;
    }
 
 	public String getNameFragmentForCascade()
@@ -828,5 +881,129 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	public void setNameFragmentForCascade(String fragmentForCascade) 
 	{
 		m_nameFragmentForCascade = fragmentForCascade;
+	}
+	
+	
+	public Element getWebInfo(Document webInfoDoc)
+	{
+		if (webInfoDoc == null)
+		{
+			return null;
+		}
+		
+		Element rootElement = webInfoDoc.createElement(XML_ELEMENT_WEBINFO);
+		XMLUtil.setAttribute(rootElement, XML_ATTR_PAYMENT, isPayment());
+		XMLUtil.setAttribute(rootElement, XML_ATTR_ID, getId());
+		/*
+		if (getContext() != null)
+		{
+			XMLUtil.setAttribute(rootElement, XML_ATTR_CONTEXT, getContext());
+		}*/
+		
+		Element currentMixOperatorElement = null;
+		Element currentMixLocationElement = null;
+		
+		if(getOperatorCertificate() == null || getCertificate() == null)
+		{
+			/* no valid document can be returned */
+			return null;
+		}
+
+		
+		XMLUtil.createChildElementWithValue(rootElement, XML_ELEMENT_MIX_NAME, getName());
+		
+		currentMixOperatorElement = new ServiceOperator(null, getOperatorCertificate(), 0l).toXMLElement(webInfoDoc);
+		currentMixLocationElement = new ServiceLocation(null, getCertificate()).toXMLElement(webInfoDoc);
+		
+		if(currentMixOperatorElement != null)
+		{
+			rootElement.appendChild(currentMixOperatorElement);
+		}
+		
+		if(currentMixLocationElement != null)
+		{
+			rootElement.appendChild(currentMixLocationElement);
+		}
+		
+		
+		appendListenerInterfaces(rootElement, m_vecListenerInterfaces);
+		if (m_vecListenerMonitoring.size() > 0)
+		{
+			appendListenerInterfaces(XMLUtil.createChildElement(rootElement, XML_ELEM_SERVER_MONITORING), m_vecListenerMonitoring);
+		}
+		
+		
+		Element elemCertificates = 
+			XMLUtil.createChildElement(rootElement, "Certificates");
+		
+		Enumeration enumCerts = m_mixCertPath.getCertificates();
+		CertificateInfoStructure certStructure;
+		boolean bFirstElementSkipped = false;
+		while (enumCerts.hasMoreElements())
+		{
+			certStructure = (CertificateInfoStructure)enumCerts.nextElement();
+			if (!bFirstElementSkipped)
+			{
+				// skip the verifier
+				bFirstElementSkipped = true;
+				continue;
+			}
+			elemCertificates.appendChild(certStructure.getCertificate().toXmlElement(webInfoDoc));
+		}
+		
+		return rootElement;
+	}
+	
+	private void appendListenerInterfaces(Element a_rootElement, Vector a_listenerInterfaces)
+	{
+		Element listenerInterfaces = 
+			XMLUtil.createChildElement(a_rootElement, ListenerInterface.XML_ELEMENT_CONTAINER_NAME);
+		ListenerInterface listenerInterface;
+		Element elemInterface;
+		Hashtable hashInterfaceHosts = new Hashtable();
+		Hashtable hashHiddenInterfaceHosts = new Hashtable();
+		Hashtable hashVirtualInterfaceHosts = new Hashtable();
+		for (int i = 0; i < a_listenerInterfaces.size(); i++)
+		{
+			listenerInterface = (ListenerInterface)a_listenerInterfaces.elementAt(i);
+			if (listenerInterface.isHidden() && hashHiddenInterfaceHosts.containsKey(listenerInterface.getHost()))
+			{
+				elemInterface = (Element)hashHiddenInterfaceHosts.get(listenerInterface.getHost());
+			}
+			else if (listenerInterface.isVirtual() && hashVirtualInterfaceHosts.containsKey(listenerInterface.getHost()))
+			{
+				elemInterface = (Element)hashVirtualInterfaceHosts.get(listenerInterface.getHost());
+			}
+			else if (hashInterfaceHosts.containsKey(listenerInterface.getHost()))
+			{
+				elemInterface = (Element)hashInterfaceHosts.get(listenerInterface.getHost());
+			}
+			else
+			{
+				elemInterface = XMLUtil.createChildElement(listenerInterfaces, 
+						ListenerInterface.XML_ELEMENT_NAME);
+				if (listenerInterface.isVirtual())
+				{
+					XMLUtil.setAttribute(elemInterface, ListenerInterface.XML_ATTR_VIRTUAL, listenerInterface.isVirtual());
+					hashVirtualInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
+				}
+				else if (listenerInterface.isHidden())
+				{
+					XMLUtil.setAttribute(elemInterface, ListenerInterface.XML_ATTR_HIDDEN, listenerInterface.isHidden());
+					hashHiddenInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
+				}
+				else
+				{
+					hashInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
+				}
+				XMLUtil.setAttribute(elemInterface, ListenerInterface.XML_ELEM_HOST, listenerInterface.getHost());				
+			}
+			
+			if (listenerInterface.getProtocol() != ListenerInterface.PROTOCOL_TYPE_RAW_UNIX)
+			{
+				XMLUtil.createChildElementWithValue(elemInterface, 
+						ListenerInterface.XML_ELEM_PORT, "" + listenerInterface.getPort());
+			}
+		}
 	}
 }

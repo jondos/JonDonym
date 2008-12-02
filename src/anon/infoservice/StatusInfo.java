@@ -491,7 +491,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		int maxUsers = 0;
 		if (ownMixCascade != null)
 		{
-			htmlTableLine = htmlTableLine + ownMixCascade.getName();			
+			htmlTableLine = htmlTableLine + ownMixCascade.getName();
 			maxUsers = ownMixCascade.getMaxUsers();
 		}
 		/* generate a String, which describes the traffic situation */
