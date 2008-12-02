@@ -29,7 +29,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package anon.proxy;
 
 import anon.infoservice.HttpResponseStructure;
-import HTTPClient.HttpURLConnection;
 
 public class HTTPHeaderParseException extends ChunkNotProcessableException
 {
