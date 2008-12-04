@@ -116,7 +116,7 @@ public class HTTPProxyCallback implements ProxyCallback
 		public byte[] dumpHeader(HTTPProxyCallback a_callback, HTTPConnectionHeader a_header, AnonProxyRequest anonRequest)
 		{
 			a_callback.fireRequestHeadersReceived(a_callback.getEvent(anonRequest));
-			return a_header.dumpRequestHeader();
+			return a_header.dumpRequestHeaders();
 		}
 	};
 	private static final IHTTPHelper DOWNSTREAM_HELPER = new IHTTPHelper()
@@ -125,7 +125,7 @@ public class HTTPProxyCallback implements ProxyCallback
 		{
 			//a_callback.handleResponse(a_header);
 			a_callback.fireResponseHeadersReceived(a_callback.getEvent(anonRequest));
-			return a_header.dumpResponseHeader();
+			return a_header.dumpResponseHeaders();
 		}
 	};
 	
@@ -147,7 +147,23 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	public byte[] handleDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
 	{
-		return handleStreamChunk(anonRequest, chunk, len, MESSAGE_TYPE_RESPONSE, DOWNSTREAM_HELPER);
+		/* set noResponseExptected when a response to a request was already 
+		 * parsed and no further requests were sent so we don't expect
+		 * to receive a response either. 
+		 * 
+		 * This flag should avoid confusion when received byte-content contains the
+		 * same aligned byte sequence that would identify it as a response.
+		 */
+		boolean noResponseExpected = false;
+		synchronized(this)
+		{
+			HTTPConnectionHeader connHeader =
+				(HTTPConnectionHeader) m_connectionHTTPHeaders.get(anonRequest);
+			noResponseExpected = (connHeader == null) ? true : !connHeader.isResponseExpected();
+		}
+		
+		return noResponseExpected ? chunk : handleStreamChunk(anonRequest, chunk, len, MESSAGE_TYPE_RESPONSE, DOWNSTREAM_HELPER);
+					
 		//return chunk;
 	}
 
@@ -338,9 +354,9 @@ public class HTTPProxyCallback implements ProxyCallback
 			connHeader = new HTTPConnectionHeader();
 			m_connectionHTTPHeaders.put(anonRequest, connHeader);
 		}
-	
-		if(hasAlignedHTTPStartLine(chunkData, messageType))
-		{
+		
+		//if(hasAlignedHTTPStartLine(chunkData, messageType))
+		//{
 			
 			Hashtable unfinishedMessages = 
 				(messageType == MESSAGE_TYPE_REQUEST) ? 
@@ -376,10 +392,14 @@ public class HTTPProxyCallback implements ProxyCallback
 				if(messageType == MESSAGE_TYPE_REQUEST)
 				{
 					connHeader.setRequestFinished(true);
+					/* response for that request expected. */
+					connHeader.setResponseExpected(true);
 				}
 				else if (messageType == MESSAGE_TYPE_RESPONSE)
 				{
 					connHeader.setResponseFinished(true);
+					/* next response expected when new request is parsed. */
+					connHeader.setResponseExpected(false);
 				}
 				unfinishedMessages.remove(anonRequest);
 				return true;
@@ -389,8 +409,8 @@ public class HTTPProxyCallback implements ProxyCallback
 				unfinishedMessages.put(anonRequest, chunkData);
 				return false;
 			}
-		}
-		return false;
+		//}
+		//return false;
 	}
 	
 	public static boolean checkValidity(String headerData)
@@ -398,6 +418,7 @@ public class HTTPProxyCallback implements ProxyCallback
 		int currentCRIndex = -1;
 		int currentLFIndex = -1;
 		
+		//a CR that stands without a trailing LF
 		boolean onlyCR = false;
 		//a LF that stands without a leading CR
 		boolean onlyLF = false;
@@ -432,10 +453,6 @@ public class HTTPProxyCallback implements ProxyCallback
 			}
 			indexExceeds = (Math.max((currentCRIndex+1), (currentLFIndex+1)) >= headerData.length());
 		}
-		
-		//System.out.println("String: "+headerData+"onlyCR: "+onlyCR+", onlyLF: "+onlyLF+", endsWithCR: "+endsWithCR);
-		
-		
 		return !onlyLF && ( !onlyCR || endsWithCR );
 	}
 	
@@ -682,6 +699,18 @@ public class HTTPProxyCallback implements ProxyCallback
 		private boolean requestFinished = false;
 		private boolean responseFinished = false;
 		
+		private boolean responseExpected = false;
+		
+		public synchronized boolean isResponseExpected() 
+		{
+			return responseExpected;
+		}
+
+		public synchronized void setResponseExpected(boolean responseExpected) 
+		{
+			this.responseExpected = responseExpected;
+		}
+
 		public synchronized boolean isResponseFinished() 
 		{
 			return responseFinished;
@@ -765,7 +794,7 @@ public class HTTPProxyCallback implements ProxyCallback
 			clearHeader(resHeaders, resHeaderOrder);
 		}
 		
-		/* private util-fucntion area. All of these functions are not thread safe and are only to be accessed  
+		/* private util-function area. All of these functions are not thread safe and are only to be accessed  
 		 * synchronized by the actual ConnectionHeader object
 		 */
 		private void setHeader(Hashtable headerMap, Vector headerOrder, String header, String value)
@@ -873,17 +902,17 @@ public class HTTPProxyCallback implements ProxyCallback
 			return values;
 		}
 		
-		private byte[] dumpRequestHeader()
+		private byte[] dumpRequestHeaders()
 		{
-			return dumpHeader(reqHeaders, reqHeaderOrder);
+			return dumpHeaders(reqHeaders, reqHeaderOrder);
 		}
 		
-		private byte[] dumpResponseHeader()
+		private byte[] dumpResponseHeaders()
 		{
-			return dumpHeader(resHeaders, resHeaderOrder);
+			return dumpHeaders(resHeaders, resHeaderOrder);
 		}
 		
-		private byte[] dumpHeader(Hashtable headerMap, Vector headerOrder)
+		private byte[] dumpHeaders(Hashtable headerMap, Vector headerOrder)
 		{
 			String allHeaders = "";
 			String header = null;
