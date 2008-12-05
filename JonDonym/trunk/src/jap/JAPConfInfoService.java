@@ -126,7 +126,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 	private JPanel descriptionPanel;
 	private JButton settingsInfoServiceConfigBasicSettingsRemoveButton;
 	private JCheckBox m_allowAutomaticIS;
-	private JCheckBox m_cbxAllowNonAnonymousConnection;
+	//private JCheckBox m_cbxAllowNonAnonymousConnection;
+	private JComboBox m_comboAnonymousConnection;
 	private JCheckBox m_cbxUseRedundantISRequests;
 	private JComboBox m_cmbAskedInfoServices;
 	private JAPHtmlMultiLineLabel m_lblExplanation;
@@ -199,8 +200,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		{
 			if (a_message.equals(JAPModel.CHANGED_ALLOW_INFOSERVICE_DIRECT_CONNECTION))
 			{
-				m_cbxAllowNonAnonymousConnection.setSelected(
-					JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed());
+				m_comboAnonymousConnection.setSelectedIndex(
+					JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting());
 			}
 			else if (a_message.equals(JAPModel.CHANGED_INFOSERVICE_AUTO_UPDATE))
 			{
@@ -308,7 +309,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 					{
 						while (!JAPController.getInstance().updateInfoServices(false))
 						{
-							if (!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
+							if (JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting()
+								== JAPModel.CONNECTION_FORCE_ANONYMOUS &&
 								!JAPController.getInstance().isAnonConnected())
 							{
 								int returnValue =
@@ -317,11 +319,28 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 									JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
 								if (returnValue == JAPDialog.RETURN_VALUE_YES)
 								{
-									JAPModel.getInstance().allowInfoServiceViaDirectConnection(true);
+									JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+											JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 									JAPController.getInstance().updateInfoServices(false);
 									continue;
 								}
 							}
+							else if (JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting()
+									== JAPModel.CONNECTION_BLOCK_ANONYMOUS &&
+									JAPController.getInstance().isAnonConnected())
+								{
+									int returnValue =
+										JAPDialog.showConfirmDialog(getRootPanel(),
+										JAPMessages.getString(JAPController.MSG_IS_NOT_ALLOWED_FOR_ANONYMOUS),
+										JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
+									if (returnValue == JAPDialog.RETURN_VALUE_YES)
+									{
+										JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+												JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+										JAPController.getInstance().updateInfoServices(false);
+										continue;
+									}
+								}
 							else
 							{
 								JAPDialog.showErrorDialog(getRootPanel(),
@@ -1280,22 +1299,32 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		GridBagConstraints advancedPanelConstraints = new GridBagConstraints();
 		advancedPanelConstraints.anchor = GridBagConstraints.NORTHWEST;
 		advancedPanelConstraints.fill = GridBagConstraints.NONE;
-		advancedPanelConstraints.weightx = 0.0;
-		advancedPanelConstraints.gridwidth = 3;
+		advancedPanelConstraints.weightx = 0.0;		
 
 		advancedPanelConstraints.gridx = 0;
 		advancedPanelConstraints.gridy = 0;
-		advancedPanelConstraints.insets = new Insets(5, 5, 10, 5);
-		advancedPanelLayout.setConstraints(m_allowAutomaticIS, advancedPanelConstraints);
-		advancedPanel.add(m_allowAutomaticIS);
+		advancedPanelConstraints.insets = new Insets(10, 10, 0, 10);		
 
-		advancedPanelConstraints.gridy = 1;
-		m_cbxAllowNonAnonymousConnection = new JCheckBox(JAPMessages.getString(MSG_ALLOW_DIRECT_CONNECTION),
-			JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed());
-		advancedPanel.add(m_cbxAllowNonAnonymousConnection, advancedPanelConstraints);
+		JPanel pnlAnonymous = new JPanel();
+		advancedPanelConstraints.gridwidth = 3;
+		pnlAnonymous.add(new JLabel(JAPMessages.getString(MSG_ALLOW_DIRECT_CONNECTION) + ":"));
+		String[] choiceAnonConnection = JAPModel.getMsgConnectionAnonymous();
+		for (int i = 0; i < choiceAnonConnection.length; i++)
+		{
+			choiceAnonConnection[i] = JAPMessages.getString(choiceAnonConnection[i]);
+		}
+		m_comboAnonymousConnection = new JComboBox(choiceAnonConnection);
+		pnlAnonymous.add(m_comboAnonymousConnection);
+				
+	
+		advancedPanel.add(pnlAnonymous, advancedPanelConstraints);
 
 		advancedPanelConstraints.gridx = 0;
-		advancedPanelConstraints.gridy = 2;
+		advancedPanelConstraints.gridy++;
+		advancedPanelConstraints.gridwidth = 3;
+		advancedPanel.add(m_allowAutomaticIS, advancedPanelConstraints);
+		
+		advancedPanelConstraints.gridy++;
 		advancedPanelConstraints.gridwidth = 2;
 		//advancedPanelConstraints.insets = new Insets(0, 5, 20, 5);
 		if (JAPConstants.m_bReleasedVersion)
@@ -1374,8 +1403,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 	public void onResetToDefaultsPressed()
 	{
-		m_cbxAllowNonAnonymousConnection.setSelected(
-			  JAPConstants.DEFAULT_ALLOW_INFOSERVICE_NON_ANONYMOUS_CONNECTION);
+		m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 		m_cmbAskedInfoServices.setSelectedIndex(InfoServiceHolder.DEFAULT_OF_ASKED_INFO_SERVICES - 1);
 		m_cbxUseRedundantISRequests.setSelected(true);
 		m_allowAutomaticIS.setSelected(true);
@@ -1395,8 +1423,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		}
 		m_cmbAskedInfoServices.setSelectedIndex(index);
 		m_allowAutomaticIS.setSelected(!JAPModel.isInfoServiceDisabled());
-		m_cbxAllowNonAnonymousConnection.setSelected(
-			  JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed());
+		m_comboAnonymousConnection.setSelectedIndex(
+			  JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting());
 		//Select the preferred InfoService
 		m_listKnownInfoServices.setSelectedValue(InfoServiceHolder.getInstance().
 												 getPreferredInfoService(), true);
@@ -1415,7 +1443,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 	protected boolean onOkPressed()
 	{
-		JAPModel.getInstance().allowInfoServiceViaDirectConnection(m_cbxAllowNonAnonymousConnection.isSelected());
+		JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+				m_comboAnonymousConnection.getSelectedIndex());
 		InfoServiceHolder.getInstance().setNumberOfAskedInfoServices(
 			  m_cmbAskedInfoServices.getSelectedIndex() + 1);
 		JAPModel.getInstance().setInfoServiceDisabled(!m_allowAutomaticIS.isSelected());

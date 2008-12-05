@@ -206,6 +206,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		"_createerror";
 	private static final String MSG_DIRECT_CONNECTION_FORBIDDEN = AccountSettingsPanel.class.getName() +
 		"_directConnectionForbidden";
+	private static final String MSG_ANON_CONNECTION_FORBIDDEN = AccountSettingsPanel.class.getName() +
+	"_anonConnectionForbidden";
 	private static final String MSG_NO_ANONYMITY_POSSIBLY_BLOCKED = AccountSettingsPanel.class.getName() +
 		"_noAnonymityPossiblyBlocked";
 	private static final String MSG_ERROR_FORBIDDEN = AccountSettingsPanel.class.getName() +
@@ -366,7 +368,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	private JButton m_btnReload;
 	private JButton m_btnActivate;
 	private JCheckBox m_cbxShowPaymentConfirmation;
-	private JCheckBox m_cbxAllowNonAnonymousConnection;
+	private JComboBox m_comboAnonymousConnection;
 	private JCheckBox m_cbxShowAIErrors;
 	private JCheckBox m_cbxBalanceAutoUpdateEnabled;
 	private JCheckBox m_cbxAskIfNotSaved;
@@ -700,12 +702,22 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		advancedPanelConstraints.gridy = 0;
 		advancedPanelConstraints.insets = new Insets(5, 5, 10, 5);
 
-		panelAdvanced.add(m_cbxShowPaymentConfirmation, advancedPanelConstraints);
-
-		m_cbxAllowNonAnonymousConnection = new JCheckBox(JAPMessages.getString(MSG_ALLOW_DIRECT_CONNECTION));
-
+		JPanel pnlAnonymousConnection = new JPanel();
+		pnlAnonymousConnection.add(new JLabel(JAPMessages.getString(MSG_ALLOW_DIRECT_CONNECTION) + ":"));
+		String[] choiceAnonConnection = JAPModel.getMsgConnectionAnonymous();
+		for (int i = 0; i < choiceAnonConnection.length; i++)
+		{
+			choiceAnonConnection[i] = JAPMessages.getString(choiceAnonConnection[i]);
+		}
+		m_comboAnonymousConnection = new JComboBox(choiceAnonConnection);
+		pnlAnonymousConnection.add(m_comboAnonymousConnection);
+		panelAdvanced.add(pnlAnonymousConnection, advancedPanelConstraints);
+				
 		advancedPanelConstraints.gridy = 1;
-		panelAdvanced.add(m_cbxAllowNonAnonymousConnection, advancedPanelConstraints);
+		
+		panelAdvanced.add(m_cbxShowPaymentConfirmation, advancedPanelConstraints);
+		
+		
 
 		advancedPanelConstraints.gridy = 2;
 		m_cbxShowAIErrors = new JCheckBox(JAPMessages.getString(MSG_SHOW_AI_ERRORS));
@@ -3401,7 +3413,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	protected boolean onOkPressed()
 	{
 		JAPController.getInstance().setDontAskPayment(!m_cbxShowPaymentConfirmation.isSelected());
-		JAPModel.getInstance().allowPaymentViaDirectConnection(m_cbxAllowNonAnonymousConnection.isSelected());
+		JAPModel.getInstance().setPaymentAnonymousConnectionSetting(m_comboAnonymousConnection.getSelectedIndex());
 		PayAccountsFile.getInstance().setIgnoreAIAccountError(!m_cbxShowAIErrors.isSelected());
 		PayAccountsFile.getInstance().setBalanceAutoUpdateEnabled(m_cbxBalanceAutoUpdateEnabled.isSelected());
 		JAPController.getInstance().setAskSavePayment(m_cbxAskIfNotSaved.isSelected());
@@ -3428,7 +3440,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	protected void onResetToDefaultsPressed()
 	{
 		m_cbxShowPaymentConfirmation.setSelected(true);
-		m_cbxAllowNonAnonymousConnection.setSelected(true);
+		m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 		m_cbxShowAIErrors.setSelected(true);
 		m_cbxAskIfNotSaved.setSelected(true);
 		m_cbxBalanceAutoUpdateEnabled.setSelected(true);
@@ -3441,19 +3453,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	protected void onUpdateValues()
 	{
 		m_cbxShowPaymentConfirmation.setSelected(!JAPController.getInstance().getDontAskPayment());
-		m_cbxAllowNonAnonymousConnection.setSelected(
-			JAPModel.getInstance().isPaymentViaDirectConnectionAllowed());
+		m_comboAnonymousConnection.setSelectedIndex(
+			JAPModel.getInstance().getPaymentAnonymousConnectionSetting());
 		m_cbxAskIfNotSaved.setSelected(JAPController.getInstance().isAskSavePayment());
 		m_cbxShowAIErrors.setSelected(!PayAccountsFile.getInstance().isAIAccountErrorIgnored());
 		m_cbxBalanceAutoUpdateEnabled.setSelected(PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled());
 		setConnectionTimeout(BIConnection.getConnectionTimeout());
-		/*
-		   PayAccountsFile accounts = PayAccountsFile.getInstance();
-		   Enumeration enumAccounts = accounts.getAccounts();
-		   while (enumAccounts.hasMoreElements())
-		   {
-		 PayAccount a = (PayAccount) enumAccounts.nextElement();
-		   }*/
 	}
 
 	public void valueChanged(ListSelectionEvent e)
@@ -3478,7 +3483,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 									  PaymentMainPanel.translateBIError( (XMLErrorMessage) a_e), LogType.PAY);
 		}
 		else if (!JAPModel.getInstance().isAnonConnected() &&
-				 !JAPModel.getInstance().isPaymentViaDirectConnectionAllowed())
+				 JAPModel.getInstance().getPaymentAnonymousConnectionSetting() == JAPModel.CONNECTION_FORCE_ANONYMOUS)
 		{
 			int answer =
 				JAPDialog.showConfirmDialog(a_parent,
@@ -3486,8 +3491,21 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 											JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
 			if (answer == JAPDialog.RETURN_VALUE_YES)
 			{
-				m_cbxAllowNonAnonymousConnection.setSelected(true);
-				JAPModel.getInstance().allowPaymentViaDirectConnection(true);
+				m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+				JAPModel.getInstance().setPaymentAnonymousConnectionSetting(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+			}
+		}
+		else if (JAPModel.getInstance().isAnonConnected() &&
+				 JAPModel.getInstance().getPaymentAnonymousConnectionSetting() == JAPModel.CONNECTION_BLOCK_ANONYMOUS)
+		{
+			int answer =
+				JAPDialog.showConfirmDialog(a_parent,
+											JAPMessages.getString(MSG_ANON_CONNECTION_FORBIDDEN),
+											JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
+			if (answer == JAPDialog.RETURN_VALUE_YES)
+			{
+				m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+				JAPModel.getInstance().setPaymentAnonymousConnectionSetting(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 			}
 		}
 		else if (!JAPModel.getInstance().isAnonConnected())

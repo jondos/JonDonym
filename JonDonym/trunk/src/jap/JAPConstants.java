@@ -35,7 +35,7 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.10.044"; //Never change the layout of this line!
+	public static final String aktVersion = "00.10.045"; //Never change the layout of this line!
 	public final static boolean m_bUnstableVersion = false; //Set to true if this is an unstable (development) Version
 
 	
@@ -112,10 +112,6 @@ public final class JAPConstants
 	 * have also this timeout because of the same HTTPConnectionFactory).
 	 */
 	public static final int DEFAULT_INFOSERVICE_TIMEOUT = 30;
-
-	public static final boolean DEFAULT_ALLOW_INFOSERVICE_NON_ANONYMOUS_CONNECTION = true;
-	public static final boolean DEFAULT_ALLOW_PAYMENT_NON_ANONYMOUS_CONNECTION = true;
-	public static final boolean DEFAULT_ALLOW_UPDATE_NON_ANONYMOUS_CONNECTION = true;
 
 	public static final boolean REMIND_OPTIONAL_UPDATE = true;
 	public static final boolean REMIND_JAVA_UPDATE = true;

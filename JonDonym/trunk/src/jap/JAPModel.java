@@ -65,12 +65,16 @@ import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.Util;
 
-/* This is the Model of All. It's a Singelton!*/
+/* This is the Model of All. It's a singleton!*/
 public final class JAPModel extends Observable implements IHelpModel, IServiceContextContainer
 {
 	public static final String MACOSX_LIB_NEEDS_UPDATE = "macOSXLibNeedsUpdate";
 	public static final String DLL_VERSION_UPDATE = "dllVersionUpdate";
 	public static final String DLL_VERSION_WARNING_BELOW = "dllWarningVersion";
+	
+	public static final int CONNECTION_ALLOW_ANONYMOUS = 0;
+	public static final int CONNECTION_FORCE_ANONYMOUS = 1;
+	public static final int CONNECTION_BLOCK_ANONYMOUS = 2;	
 
 	public static final String XML_ANONYMIZED_HTTP_HEADERS = "anonymizedHttpHeaders";
 	public static final String XML_REMIND_OPTIONAL_UPDATE = "remindOptionalUpdate";
@@ -110,6 +114,12 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	public static final Integer CHANGED_DLL_UPDATE = new Integer(10);
 	public static final Integer CHANGED_MACOSX_LIBRARY_UPDATE = new Integer(11);
 	public static final Integer CHANGED_ANONYMIZED_HTTP_HEADERS = new Integer(12);
+	
+	private static final String[] MSG_CONNECTION_ANONYMOUS = new String[] {
+		JAPModel.class.getName() + "_anonymousConnectionAllow", 
+		JAPModel.class.getName() + "_anonymousConnectionForce", 
+		JAPModel.class.getName() + "_anonymousConnectionBlock"
+	};
 
 	private static final int DIRECT_CONNECTION_INFOSERVICE = 0;
 	private static final int DIRECT_CONNECTION_PAYMENT = 1;
@@ -128,8 +138,8 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 
 	private boolean m_bSmallDisplay = false;
 	private boolean m_bInfoServiceDisabled = JAPConstants.DEFAULT_INFOSERVICE_DISABLED;
-	private boolean m_bMinimizeOnStartup = JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP; // true if programm will start minimized
-	private boolean m_bMoveToSystrayOnStartup = JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP; // true if programm will start in the systray
+	private boolean m_bMinimizeOnStartup = JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP; // true if program will start minimized
+	private boolean m_bMoveToSystrayOnStartup = JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP; // true if program will start in the systray
 	private int m_iDefaultView = JAPConstants.DEFAULT_VIEW; //which view we should start?
 
 	private boolean m_bSaveMainWindowPosition;
@@ -143,9 +153,9 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 
 	private boolean m_bGoodByMessageNeverRemind = false; // indicates if Warning message before exit has been deactivated forever
 
-	private boolean m_bAllowPaymentViaDirectConnection;
-	private boolean m_bAllowInfoServiceViaDirectConnection;
-	private boolean m_bAllowUpdateViaDirectConnection;
+	private int m_iPaymentAnonymousConnectionSetting;
+	private int m_iInfoServiceAnonymousConnectionSetting;
+	private int m_iUpdateAnonymousConnectionSetting;
 
 	private boolean m_bAskForAnyNonAnonymousRequest;
 
@@ -311,6 +321,11 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		return ms_TheModel;
 	}
 
+	public static String[] getMsgConnectionAnonymous()
+	{
+		return MSG_CONNECTION_ANONYMOUS;
+	}
+	
 	public ProxyInterface getProxyInterface()
 	{
 		return m_proxyInterface;
@@ -714,23 +729,23 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		}
 	}
 
-	public boolean isPaymentViaDirectConnectionAllowed()
+	public int getPaymentAnonymousConnectionSetting()
 	{
-		return m_bAllowPaymentViaDirectConnection;
+		return m_iPaymentAnonymousConnectionSetting;
 	}
 
-	public boolean isUpdateViaDirectConnectionAllowed()
+	public int getUpdateAnonymousConnectionSetting()
 	{
-		return m_bAllowUpdateViaDirectConnection;
+		return m_iUpdateAnonymousConnectionSetting;
 	}
 
-	public void allowUpdateViaDirectConnection(boolean a_bAllow)
+	public void setUpdateAnonymousConnectionSetting(int a_iUpdateAnonymousConnectionSetting)
 	{
 		synchronized (this)
 		{
-			if (m_bAllowUpdateViaDirectConnection != a_bAllow)
+			if (m_iUpdateAnonymousConnectionSetting != a_iUpdateAnonymousConnectionSetting)
 			{
-				m_bAllowUpdateViaDirectConnection = a_bAllow;
+				m_iUpdateAnonymousConnectionSetting = a_iUpdateAnonymousConnectionSetting;
 				setChanged();
 			}
 			notifyObservers(CHANGED_ALLOW_UPDATE_DIRECT_CONNECTION);
@@ -738,27 +753,27 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	}
 
 
-	public boolean isInfoServiceViaDirectConnectionAllowed()
+	public int getInfoServiceAnonymousConnectionSetting()
 	{
-		return m_bAllowInfoServiceViaDirectConnection;
+		return m_iInfoServiceAnonymousConnectionSetting;
 	}
 
-	public void allowInfoServiceViaDirectConnection(boolean a_bAllowInfoServiceViaDirectConnection)
+	public void setInfoServiceAnonymousConnectionSetting(int a_iInfoServiceAnonymousConnectionSetting)
 	{
 		synchronized (this)
 		{
-			if (m_bAllowInfoServiceViaDirectConnection != a_bAllowInfoServiceViaDirectConnection)
+			if (m_iInfoServiceAnonymousConnectionSetting != a_iInfoServiceAnonymousConnectionSetting)
 			{
-				m_bAllowInfoServiceViaDirectConnection = a_bAllowInfoServiceViaDirectConnection;
+				m_iInfoServiceAnonymousConnectionSetting = a_iInfoServiceAnonymousConnectionSetting;
 				setChanged();
 			}
 			notifyObservers(CHANGED_ALLOW_INFOSERVICE_DIRECT_CONNECTION);
 		}
 	}
 
-	public void allowPaymentViaDirectConnection(boolean a_bAllowPaymentViaDirectConnection)
+	public void setPaymentAnonymousConnectionSetting(int a_iPaymentAnonymousConnectionSetting)
 	{
-		m_bAllowPaymentViaDirectConnection = a_bAllowPaymentViaDirectConnection;
+		m_iPaymentAnonymousConnectionSetting = a_iPaymentAnonymousConnectionSetting;
 	}
 
 	public IMutableProxyInterface getInfoServiceProxyInterface()
@@ -1816,9 +1831,12 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 
 		//interfaces[3] = new ProxyInterface("localhost", getHttpListenerPortNumber(),
 			//							   ProxyInterface.PROTOCOL_TYPE_SOCKS, null); // TOR
-		if ((DIRECT_CONNECTION_PAYMENT == a_component && !isPaymentViaDirectConnectionAllowed()) ||
-			(DIRECT_CONNECTION_INFOSERVICE == a_component && !isInfoServiceViaDirectConnectionAllowed()) ||
-			(DIRECT_CONNECTION_UPDATE == a_component && !isUpdateViaDirectConnectionAllowed()))
+		if ((DIRECT_CONNECTION_PAYMENT == a_component && 
+				m_iPaymentAnonymousConnectionSetting == CONNECTION_FORCE_ANONYMOUS) ||
+			(DIRECT_CONNECTION_INFOSERVICE == a_component && 
+				m_iInfoServiceAnonymousConnectionSetting == CONNECTION_FORCE_ANONYMOUS) ||
+			(DIRECT_CONNECTION_UPDATE == a_component && 
+				m_iUpdateAnonymousConnectionSetting == CONNECTION_FORCE_ANONYMOUS))
 		{
 			// force anonymous connections to BI and InfoService
 			if (!m_connectionChecker.checkAnonConnected())
@@ -1848,7 +1866,20 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		// both proxies are available
 		if (a_bAnonInterface)
 		{
-			return proxyAnon;
+			if ((DIRECT_CONNECTION_PAYMENT == a_component && 
+					CONNECTION_BLOCK_ANONYMOUS == m_iPaymentAnonymousConnectionSetting) ||
+				(DIRECT_CONNECTION_INFOSERVICE == a_component && 
+				 CONNECTION_BLOCK_ANONYMOUS == m_iInfoServiceAnonymousConnectionSetting) ||
+				 (DIRECT_CONNECTION_UPDATE == a_component && 
+					CONNECTION_BLOCK_ANONYMOUS == m_iUpdateAnonymousConnectionSetting))
+			{
+				// Anonymous connection is not allowed!
+				return null;
+			}
+			else
+			{
+				return proxyAnon;
+			}
 		}
 		return proxyDirect;
 	}

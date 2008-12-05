@@ -146,8 +146,9 @@ public class InfoService implements Observer
 			System.out.println("InfoService is running!");
 			
 			JAPModel model = JAPModel.getInstance();
-			model.allowPaymentViaDirectConnection(true);
-			model.allowUpdateViaDirectConnection(true);
+			model.setPaymentAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
+			model.setInfoServiceAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
+			model.setUpdateAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
 			model.setAnonConnectionChecker(JAPController.getInstance().new AnonConnectionChecker());
 			model.setAutoReConnect(true);
 			model.setCascadeAutoSwitch(false);

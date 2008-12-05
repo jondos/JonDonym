@@ -483,7 +483,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					}
 				}
 
-				if (!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
+				if (JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_FORCE_ANONYMOUS &&
 					!JAPController.getInstance().isAnonConnected())
 				{
 					if (JAPDialog.showConfirmDialog(JAPNewView.this, JAPMessages.getString(
@@ -492,7 +493,26 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						JAPDialog.MESSAGE_TYPE_WARNING)
 						== JAPDialog.RETURN_VALUE_YES)
 					{
-						JAPModel.getInstance().allowInfoServiceViaDirectConnection(true);
+						
+						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+								JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+							
+					}
+				}
+				else if (JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_BLOCK_ANONYMOUS &&
+					JAPController.getInstance().isAnonConnected())
+				{
+					if (JAPDialog.showConfirmDialog(JAPNewView.this, JAPMessages.getString(
+						JAPController.MSG_IS_NOT_ALLOWED_FOR_ANONYMOUS),
+						JAPDialog.OPTION_TYPE_YES_NO,
+						JAPDialog.MESSAGE_TYPE_WARNING)
+						== JAPDialog.RETURN_VALUE_YES)
+					{
+						
+						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+								JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+							
 					}
 				}
 			}
@@ -1894,7 +1914,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 					if (!JAPController.getInstance().isShuttingDown()
 						&& (JAPModel.isInfoServiceDisabled() ||
-							(!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
+							(JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+							JAPModel.CONNECTION_FORCE_ANONYMOUS &&
 							 !JAPController.getInstance().isAnonConnected())))
 					{
 						synchronized (SYNC_STATUS_ENABLE_IS)
@@ -2667,7 +2688,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 		if (!JAPController.getInstance().isShuttingDown()
 			&& (JAPModel.isInfoServiceDisabled() ||
-				(!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
+				(JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_FORCE_ANONYMOUS &&
 				 !JAPController.getInstance().isAnonConnected())))
 		{
 			synchronized (SYNC_STATUS_ENABLE_IS)
