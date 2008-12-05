@@ -57,12 +57,23 @@ Version</em> oder zur <em>Entwicklerversion</em> umschalten m&ouml;chten. </p>
 
 <h3>Optionen</h3>
 <ul>
-  <li><p><b>Nicht-anonymisiertes (direktes) Update erlauben</b><br>
-    Es wird empfohlen, diese Option zu aktivieren. Dadurch kann JonDo ein
-    Update vornehmen, auch wenn Sie nicht mit einem JonDonym-Dienst verbunden
-    sind. Wird diese Option nicht aktiviert, k&ouml;nnen Updates nur &uuml;ber
-    eine anonymisierte Verbindung erfolgen. Dadurch kann es sein, dass Sie
-    nicht immer Zugriff auf die aktuelle Version erhalten.</p>
+  <li><p><b>Anonyme Update-Verbindungen</b><br>
+    Wenn <em>erlauben</em> aktiviert ist, kann JonDo Verbindungen zum
+    Update-Server &uuml;ber den gerade aktiven JonDonym-Dienst herstellen, wenn
+    der Server &uuml;ber eine direkte Verbindung nicht erreichbar ist. Dies
+    kann der Fall sein, wenn Ihr Provider den Zugang zum Update-Server
+    blockiert. <em>Erzwingen</em> f&uuml;hrt dazu, dass Updates
+    ausschlie&szlig;lich &uuml;ber JonDonym-Dienste heruntergeladen werden.
+    <strong>Durch diese Einstellung k&ouml;nnen Sie unter Umst&auml;nden keine
+    Updates mehr einspielen. Allerdings sind Sie dadurch vor einer gezielten
+    Manipulation Ihrer Software durch den Hersteller gesch&uuml;tzt, da dieser
+    Ihre Installation nicht identifizieren kann.</strong> M&ouml;chten Sie
+    verhindern, dass die anonyme Verbindung genutzt wird um Updates
+    herunterzuladen so stellen Sie diese Einstellung um auf
+    <em>blockieren</em>. Dies kann sinnvoll sein, um Kosten zu sparen, denn
+    <strong>&uuml;ber kostenpflichtige JonDonym-Dienste &uuml;bertragene
+    Update-Daten werden genauso abgerechnet wie alle sonstigen
+    Nutzdaten</strong>.</p>
   </li>
   <li><p><b>Hinweisfenster anzeigen, wenn neue JAP/JonDo-Version verf&uuml;gbar
     ist</b><br>

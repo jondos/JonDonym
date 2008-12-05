@@ -82,7 +82,7 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 	// private JAPController japController;
 	private JComboBox m_comboType;
 	private JButton m_bttnUpgrade, m_bttnCheckForUpgrade;
-	private JCheckBox m_cbxAllowDirectUpdate;
+	private JComboBox m_comboAnonymousConnection;
 	private JCheckBox m_cbxRemindOptionalUpdate;
 	private JCheckBox m_cbxRemindJavaUpdate;
 
@@ -291,7 +291,7 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 		cFrame.insets = new Insets(10, 10, 10, 10);
 		cFrame.gridx = 0;
 		cFrame.gridy = 0;
-		cFrame.weightx = 1;
+		cFrame.weightx = 0;
 		cFrame.weighty = 0;
 		cFrame.anchor = GridBagConstraints.NORTHWEST;
 		cFrame.fill = GridBagConstraints.BOTH;
@@ -300,14 +300,23 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 
 		cFrame.gridx = 1;
 		cFrame.gridy = 0;
-		cFrame.anchor = GridBagConstraints.NORTHEAST;
 		panelRoot.add(latestPanel, cFrame);
 
 		cFrame.gridx = 0;
 		cFrame.gridy = 2;
 		cFrame.gridwidth = 2;
-		m_cbxAllowDirectUpdate = new JCheckBox(JAPMessages.getString(MSG_ALLOW_DIRECT_CONN));
-		panelRoot.add(m_cbxAllowDirectUpdate, cFrame);
+		JPanel pnlAnonymousConnection = new JPanel();
+		
+		pnlAnonymousConnection.add(new JLabel(JAPMessages.getString(MSG_ALLOW_DIRECT_CONN) + ":"));
+		String[] choiceAnonConnection = JAPModel.getMsgConnectionAnonymous();
+		for (int i = 0; i < choiceAnonConnection.length; i++)
+		{
+			choiceAnonConnection[i] = JAPMessages.getString(choiceAnonConnection[i]);
+		}
+		m_comboAnonymousConnection = new JComboBox(choiceAnonConnection);
+		pnlAnonymousConnection.add(m_comboAnonymousConnection);
+		cFrame.fill = GridBagConstraints.NONE;
+		panelRoot.add(pnlAnonymousConnection, cFrame);
 
 		cFrame.gridy++;
 		m_cbxRemindOptionalUpdate = new JCheckBox(JAPMessages.getString(MSG_REMIND_OPTIONAL_UPDATE));
@@ -347,7 +356,7 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 			if (a_message.equals(JAPModel.CHANGED_ALLOW_UPDATE_DIRECT_CONNECTION))
 			{
 
-				m_cbxAllowDirectUpdate.setSelected(JAPModel.getInstance().isUpdateViaDirectConnectionAllowed());
+				m_comboAnonymousConnection.setSelectedIndex(JAPModel.getInstance().getUpdateAnonymousConnectionSetting());
 			}
 			else if (a_message.equals(JAPModel.CHANGED_NOTIFY_JAP_UPDATES))
 			{
@@ -364,7 +373,7 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 
 	protected boolean onOkPressed()
 	{
-		JAPModel.getInstance().allowUpdateViaDirectConnection(m_cbxAllowDirectUpdate.isSelected());
+		JAPModel.getInstance().setUpdateAnonymousConnectionSetting(m_comboAnonymousConnection.getSelectedIndex());
 		JAPModel.getInstance().setReminderForOptionalUpdate(m_cbxRemindOptionalUpdate.isSelected());
 		JAPModel.getInstance().setReminderForJavaUpdate(m_cbxRemindJavaUpdate.isSelected());
 
@@ -373,14 +382,14 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 
 	public void onResetToDefaultsPressed()
 	{
-		m_cbxAllowDirectUpdate.setSelected(true);
+		m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 		m_cbxRemindOptionalUpdate.setSelected(JAPConstants.REMIND_OPTIONAL_UPDATE);
 		m_cbxRemindJavaUpdate.setSelected(JAPConstants.REMIND_JAVA_UPDATE);
 	}
 
 	protected void onUpdateValues()
 	{
-		m_cbxAllowDirectUpdate.setSelected(JAPModel.getInstance().isUpdateViaDirectConnectionAllowed());
+		m_comboAnonymousConnection.setSelectedIndex(JAPModel.getInstance().getUpdateAnonymousConnectionSetting());
 		m_cbxRemindOptionalUpdate.setSelected(JAPModel.getInstance().isReminderForOptionalUpdateActivated());
 		m_cbxRemindJavaUpdate.setSelected(JAPModel.getInstance().isReminderForJavaUpdateActivated());
 	}
