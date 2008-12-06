@@ -126,7 +126,6 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 	private JPanel descriptionPanel;
 	private JButton settingsInfoServiceConfigBasicSettingsRemoveButton;
 	private JCheckBox m_allowAutomaticIS;
-	//private JCheckBox m_cbxAllowNonAnonymousConnection;
 	private JComboBox m_comboAnonymousConnection;
 	private JCheckBox m_cbxUseRedundantISRequests;
 	private JComboBox m_cmbAskedInfoServices;

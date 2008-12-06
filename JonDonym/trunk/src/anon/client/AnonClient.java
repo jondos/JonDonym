@@ -31,9 +31,6 @@
  */
 package anon.client;
 
-import jap.JAPController;
-import jap.TermsAndConditionsDialog;
-
 import java.io.InterruptedIOException;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -179,14 +176,12 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		
 		if(tcc != null)
 		{
-			/* When connecting InfoServices must not be contacted */
 			for (int i = 0; i < cascadeLength; i++) 
 			{
-				/* Do not do this for manually created cascades!!!!!*/
 				MixInfo info = mixCascade.getMixInfo(i);
 				if(info == null)
 				{
-					return ErrorCodes.E_CONNECT;
+					continue; // ignore
 				}			
 			
 				ServiceOperator op = info.getServiceOperator();

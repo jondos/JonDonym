@@ -172,12 +172,20 @@ public class JapCouponField extends JTextField
 				}
 				else if (offset + string.length() <= NR_OF_CHARACTERS)
 				{
-					super.replace(offset, string.length(), string, attributeSet);
+					super.writeLock();
+					super.remove(offset, string.length());
+					super.insertString(offset, string, attributeSet);
+					//super.replace(offset, string.length(), string, attributeSet); jre 1.4
+					super.writeUnlock();
 				}
 				else if (offset < NR_OF_CHARACTERS)
 				{
 					/* Should not happen, but we handle also this case... Only the first [NR_OF_CHARACTERS - offset] characters are used. */
-					super.replace(offset, NR_OF_CHARACTERS - offset, string.substring(0, NR_OF_CHARACTERS - offset), attributeSet);
+					super.writeLock();
+					super.remove(offset, NR_OF_CHARACTERS - offset);
+					super.insertString(offset, string.substring(0, NR_OF_CHARACTERS - offset), attributeSet);
+					//super.replace(offset, NR_OF_CHARACTERS - offset, string.substring(0, NR_OF_CHARACTERS - offset), attributeSet); jre 1.4
+					super.writeUnlock();
 				}
 			}
 			else

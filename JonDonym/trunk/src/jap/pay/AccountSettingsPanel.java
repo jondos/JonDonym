@@ -232,7 +232,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		"_encryptAccounts";
 	private static final String MSG_NOTEXPORTED = AccountSettingsPanel.class.
 		getName() + "_notexported";
-	private static final String MSG_CONNECTIONACTIVE = AccountSettingsPanel.class.
+	private static final String MSG_CONNECTIONACTIVE_SELECT_QUESTION = AccountSettingsPanel.class.
 		getName() + "_connectionactive";
 	private static final String MSG_CONNECTIONACTIVE_QUESTION = AccountSettingsPanel.class.
 		getName() + "_connectionActiveQuestion";
@@ -2838,12 +2838,15 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	private void doSelectAccount(PayAccount selectedAccount)
 	{
+		boolean bDisconnected = false;
+		
 		if (selectedAccount == null)
 		{
 			return;
 		}
 
-		if (JAPController.getInstance().getAnonMode() && !hasDisconnected())
+		if (JAPController.getInstance().getAnonMode() && 
+			!(bDisconnected = hasDisconnected(true)))
 		{
 			return;
 		}
@@ -2857,6 +2860,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		{
 			JAPDialog.showErrorDialog(GUIUtils.getParentWindow(this.getRootPanel()),
 									  JAPMessages.getString("Could not select account!"), LogType.PAY, ex);
+		}
+		
+		if (bDisconnected)
+		{
+			// re-establish connection
+			reconnect();
 		}
 	}
 
@@ -3274,11 +3283,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		}
 	}
 
-	private boolean hasDisconnected()
+	private boolean hasDisconnected(boolean a_bSelect)
 	{
 		if (JAPDialog.RETURN_VALUE_OK ==
 			JAPDialog.showConfirmDialog(GUIUtils.getParentWindow(getRootPanel()),
-										JAPMessages.getString(MSG_CONNECTIONACTIVE_QUESTION),
+					(a_bSelect?JAPMessages.getString(MSG_CONNECTIONACTIVE_SELECT_QUESTION):
+										JAPMessages.getString(MSG_CONNECTIONACTIVE_QUESTION)),
 										JAPMessages.getString(JAPDialog.MSG_TITLE_WARNING),
 										new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL)
 		{
@@ -3319,6 +3329,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	private void doDeleteAccount(PayAccount selectedAccount)
 	{
+		boolean bDisconnected = false;
+		
 		if (selectedAccount == null)
 		{
 			return;
@@ -3329,9 +3341,9 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		String message;
 
 		if (accounts.getActiveAccount() == selectedAccount && JAPController.getInstance().getAnonMode() &&
-			!hasDisconnected())
+			!(bDisconnected = hasDisconnected(false)))
 		{
-				return;
+			return;
 		}
 		
 		balance = selectedAccount.getBalance();
@@ -3390,7 +3402,32 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 										  JAPMessages.getString(MSG_ERROR_DELETING), LogType.MISC, a_ex);
 			}
 		}
+		
+		if (bDisconnected)
+		{
+			// re-establish connection
+			reconnect();
+		}
 	}
+	
+	private void reconnect()
+	{
+		MixCascade cascade = JAPController.getInstance().getCurrentMixCascade();
+		PayAccount account = PayAccountsFile.getInstance().getActiveAccount();
+		PaymentInstanceDBEntry pi = null;
+		if (account != null)
+		{
+			pi = account.getBI();
+		}
+		
+		if (!cascade.isPayment() || 
+			(cascade.getPIID() != null && pi.getId().equals(cascade.getPIID())) &&
+			account.isCharged(new Timestamp(System.currentTimeMillis())))
+		{
+			JAPController.getInstance().setAnonMode(true);				
+		}
+	}
+	
 
 	public String getHelpContext()
 	{
