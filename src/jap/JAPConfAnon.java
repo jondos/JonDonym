@@ -2041,16 +2041,24 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						if (value < 0 || value == Integer.MAX_VALUE)
 						{
 							m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+							m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
 						}
 						else if(value == 0)
 						{
 							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1],
 									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							m_lblSpeed.setForeground(Color.red);
 						}
 						else
 						{
-							if(best == value || best == Integer.MAX_VALUE)
+							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
+							    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
+							{
+								m_lblSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value,
+										JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							}
+							else if (best == value || best == Integer.MAX_VALUE)
 							{
 								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value,
 										JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
@@ -2062,6 +2070,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 										"-" + JAPUtil.formatKbitPerSecValueWithUnit(best,
 												JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 							}
+							m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
 						}
 						
 						value = entry.getBound(PerformanceEntry.DELAY).getBound();
@@ -2069,16 +2078,22 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						if (value <= 0)
 						{
 							m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+							m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
 						}
-						else if(value == Integer.MAX_VALUE)
+						else if (value == Integer.MAX_VALUE)
 						{
 							m_lblDelay.setText("> " + 
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
+							m_lblDelay.setForeground(Color.red);
 						}
 						else
 						{
-							if(best == value || best == 0)
+							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
+							{
+								m_lblDelay.setText("< " + value + " ms");
+							}
+							else if(best == value || best == 0)
 							{
 								m_lblDelay.setText(value + " ms");
 							}
@@ -2086,12 +2101,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							{
 								m_lblDelay.setText(value + "-" + best + " ms");
 							}
+							m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
 						}
 					}
 					else
 					{
 						m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 						m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+						m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
+						m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
 					}
 					
 					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));

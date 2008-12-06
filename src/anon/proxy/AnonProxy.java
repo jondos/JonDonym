@@ -56,6 +56,7 @@ import logging.LogType;
 import anon.AnonServerDescription;
 import anon.pay.IAIEventListener;
 import anon.infoservice.IMutableProxyInterface;
+import anon.util.IMessages;
 import anon.util.ObjectQueue;
 import java.security.SignatureException;
 
@@ -238,7 +239,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_Anon.addEventListener(this);
 	}
 	
-	public void setHTTPHeaderProcessingEnabled(boolean enable)
+	public void setHTTPHeaderProcessingEnabled(boolean enable, IMessages a_messages)
 	{
 		if(enable)
 		{
@@ -249,7 +250,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			}
 			if(m_httpProxyCallback == null)
 			{
-				m_httpProxyCallback = new HTTPProxyCallback();
+				m_httpProxyCallback = new HTTPProxyCallback(a_messages);
 			}
 			m_callbackHandler.registerProxyCallback(m_httpProxyCallback);
 		}

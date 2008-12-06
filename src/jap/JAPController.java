@@ -3258,7 +3258,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 						}
 					}
 					
-					m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+					m_proxyAnon.setHTTPHeaderProcessingEnabled(
+							JAPModel.getInstance().isAnonymizedHttpHeaders(),
+							JAPMessages.getInstance());
 					m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());	
 					
 					if (!JAPModel.isInfoServiceDisabled())
@@ -3636,7 +3638,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				LogHolder.log(LogLevel.NOTICE, LogType.THREAD, "Waiting for finish of AN.ON connection...");
 				try
 				{
-					m_Controller.m_finishSync.wait(500);
+					m_Controller.m_finishSync.wait(2000);
 				}
 				catch (InterruptedException a_e)
 				{
@@ -4747,7 +4749,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						if(m_proxyAnon != null)
 						{
-							m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+							m_proxyAnon.setHTTPHeaderProcessingEnabled(
+									JAPModel.getInstance().isAnonymizedHttpHeaders(),
+									JAPMessages.getInstance());
 							m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 							
 						}

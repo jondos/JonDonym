@@ -813,7 +813,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			return null;
 		}
 		synchronized (m_strName)
-		{						
+		{
 			if (m_decomposedCascadeName == null)
 			{			
 				m_decomposedCascadeName = new Vector();

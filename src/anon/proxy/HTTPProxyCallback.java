@@ -28,14 +28,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package anon.proxy;
 
-import gui.JAPMessages;
-
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import anon.infoservice.HttpResponseStructure;
+import anon.util.IMessages;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -111,6 +110,8 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	private Vector m_httpConnectionListeners = null;
 	
+	private IMessages m_messages;
+	
 	private static final IHTTPHelper UPSTREAM_HELPER = new IHTTPHelper()
 	{
 		public byte[] dumpHeader(HTTPProxyCallback a_callback, HTTPConnectionHeader a_header, AnonProxyRequest anonRequest)
@@ -129,8 +130,21 @@ public class HTTPProxyCallback implements ProxyCallback
 		}
 	};
 	
-	public HTTPProxyCallback()
+	public HTTPProxyCallback(IMessages a_messages)
 	{
+		m_messages = a_messages;
+		
+		if (m_messages == null)
+		{
+			m_messages = new IMessages()
+			{
+				public String getMessage(String a_key)
+				{
+					return "A proxy message error occured!";
+				}
+			};
+		}
+		
 		m_connectionHTTPHeaders = new Hashtable();
 		m_unfinishedRequests = new Hashtable();
 		m_unfinishedResponses = new Hashtable();
@@ -381,7 +395,7 @@ public class HTTPProxyCallback implements ProxyCallback
 				throw new HTTPHeaderParseException(
 						HttpResponseStructure.HTTP_RETURN_BAD_REQUEST,
 						messageType, 
-						JAPMessages.getString(errorMsgKey));
+						m_messages.getMessage(errorMsgKey));
 			}
 			
 			int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);

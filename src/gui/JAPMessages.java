@@ -36,6 +36,7 @@ import java.util.MissingResourceException;
 import java.text.MessageFormat;
 import java.awt.Frame;
 
+import anon.util.IMessages;
 import anon.util.Util;
 import anon.util.ResourceLoader;
 import logging.LogHolder;
@@ -50,13 +51,15 @@ import logging.LogType;
  * language strings. The other bundles may contain a subset of these strings.
  * @see http://www.w3.org/WAI/ER/IG/ert/iso639.htm
  */
-public final class JAPMessages
+public final class JAPMessages implements IMessages
 {
 	private static ResourceBundle ms_resourceBundle = null;
 	private static ResourceBundle ms_defaultResourceBundle = null;
 	private static Locale ms_locale;
 	private final static Locale SYSTEM_LOCALE;
 	private static Hashtable ms_cachedMessages;
+	private static JAPMessages ms_instance; 
+	private static final Object SYNC = new Object();
 
 	static
 	{
@@ -67,9 +70,26 @@ public final class JAPMessages
 	{
 	}
 
+	public String getMessage(String a_key)
+	{
+		return getString(a_key);
+	}
+	
 	public static Locale getSystemLocale()
 	{
 		return SYSTEM_LOCALE;
+	}
+	
+	public static JAPMessages getInstance()
+	{
+		synchronized (SYNC)
+		{
+			if (ms_instance == null)
+			{
+				ms_instance = new JAPMessages();
+			}
+		}
+		return ms_instance;
 	}
 
 	/**
@@ -204,7 +224,7 @@ public final class JAPMessages
 			ms_locale = a_locale;
 		}
 	}
-
+	
 	/**
 	 * Gets the localised String for a given key.
 	 * @param a_key a key for the localised String

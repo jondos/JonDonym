@@ -39,19 +39,9 @@ public class ChunkNotProcessableException extends Exception
 		super();
 	}
 
-	public ChunkNotProcessableException(String message, Throwable cause) 
-	{
-		super(message, cause);
-	}
-
 	public ChunkNotProcessableException(String message)
 	{
 		super(message);
-	}
-
-	public ChunkNotProcessableException(Throwable cause)
-	{
-		super(cause);
 	}
 	
 	/**
