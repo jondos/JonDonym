@@ -977,6 +977,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_payLabel.setText(JAPMessages.getString(MSG_BAD_AVAILABILITY));
 			m_payLabel.setToolTipText(null);
 		}
+		else if (attributes.getValueSize() == 0)
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
+			m_payLabel.setToolTipText(null);
+			m_payLabel.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+		}
 		else
 		{
 			m_payLabel.setCursor(Cursor.getDefaultCursor());
