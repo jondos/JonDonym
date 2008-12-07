@@ -5251,7 +5251,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	
 	public void showTermsAndConditionsDialog(ServiceOperator a_op)
 	{
-		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op); 
+		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op, false); 
 		if(dlg.hasFoundTC())
 		{
 			dlg.setVisible(true);

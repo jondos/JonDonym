@@ -477,18 +477,17 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}
 	
-	public static TermsAndConditionsFramework getById(String a_id)
+	public static TermsAndConditionsFramework getById(String a_id, boolean a_bUpdateFromInfoService)
 	{
 		// first look if it's in our database
 		TermsAndConditionsFramework tc = (TermsAndConditionsFramework) Database.getInstance(TermsAndConditionsFramework.class).getEntryById(a_id);
 		
-		if(tc != null)
+		if(!a_bUpdateFromInfoService || tc != null)
 		{
 			return tc;
 		}
 		
 		tc = InfoServiceHolder.getInstance().getTCFramework(a_id);
-		
 		Database.getInstance(TermsAndConditionsFramework.class).update(tc);
 		
 		return tc;

@@ -29,6 +29,7 @@ package jap;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.SignatureException;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -82,6 +83,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.JComboBox;
 
+import anon.client.TrustException;
 import anon.crypto.AbstractX509AlternativeName;
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
@@ -1624,6 +1626,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			Database.getInstance(MixCascade.class).update(c);			
 			((MixCascadeTableModel)m_tableMixCascade.getModel()).addElement(c);		
 			TrustModel.setCurrentTrustModel(TrustModel.getTrustModelUserDefined());
+			if (!JAPController.getInstance().isAnonConnected())
+			{
+				JAPController.getInstance().setCurrentMixCascade(c);
+			}
 			setSelectedCascade(c); // update the cascade information
 			new Thread(new Runnable()
 			{
@@ -2036,19 +2042,35 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					
 					if(entry != null)
 					{
+						boolean bTrusted;
+						
+						try
+						{
+							TrustModel.getCurrentTrustModel().getAttribute(
+									TrustModel.SpeedAttribute.class).checkTrust(cascade);
+							bTrusted = true;
+						}
+						catch (TrustException a_e)
+						{
+							bTrusted = false;
+						}
+						catch (SignatureException a_e)
+						{
+							bTrusted = false;
+						}
+						
 						value = entry.getBound(PerformanceEntry.SPEED).getBound();
 						best = entry.getBestBound(PerformanceEntry.SPEED);
 						if (value < 0 || value == Integer.MAX_VALUE)
 						{
 							m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
-							m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
 						}
 						else if(value == 0)
 						{
 							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1],
 									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
-							m_lblSpeed.setForeground(Color.red);
+							bTrusted = false;							;
 						}
 						else
 						{
@@ -2070,7 +2092,29 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 										"-" + JAPUtil.formatKbitPerSecValueWithUnit(best,
 												JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 							}
+						}
+						if (bTrusted)
+						{
 							m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
+						}
+						else
+						{
+							m_lblSpeed.setForeground(Color.red);
+						}
+						
+						try
+						{
+							TrustModel.getCurrentTrustModel().getAttribute(
+									TrustModel.DelayAttribute.class).checkTrust(cascade);
+							bTrusted = true;
+						}
+						catch (TrustException a_e)
+						{
+							bTrusted = false;
+						}
+						catch (SignatureException a_e)
+						{
+							bTrusted = false;
 						}
 						
 						value = entry.getBound(PerformanceEntry.DELAY).getBound();
@@ -2078,14 +2122,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						if (value <= 0)
 						{
 							m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
-							m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
 						}
 						else if (value == Integer.MAX_VALUE)
 						{
 							m_lblDelay.setText("> " + 
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
-							m_lblDelay.setForeground(Color.red);
+							bTrusted = false;
 						}
 						else
 						{
@@ -2101,7 +2144,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							{
 								m_lblDelay.setText(value + "-" + best + " ms");
 							}
+						}
+						if (bTrusted)
+						{
 							m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
+						}
+						else
+						{
+							m_lblDelay.setForeground(Color.red);
 						}
 					}
 					else

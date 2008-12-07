@@ -3424,7 +3424,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			(cascade.getPIID() != null && pi.getId().equals(cascade.getPIID())) &&
 			account.isCharged(new Timestamp(System.currentTimeMillis())))
 		{
-			JAPController.getInstance().setAnonMode(true);				
+			JAPController.getInstance().setAnonMode(true);
 		}
 	}
 	

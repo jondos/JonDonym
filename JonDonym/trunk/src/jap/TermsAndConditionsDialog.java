@@ -15,7 +15,8 @@ public class TermsAndConditionsDialog extends JAPDialog
 	TermsAndConditionsPane m_panel;
 	boolean m_foundTC;
 	
-	public TermsAndConditionsDialog(Component a_parent, ServiceOperator a_op)
+	public TermsAndConditionsDialog(Component a_parent, ServiceOperator a_op, 
+			boolean a_bUpdateFromInfoService)
 	{
 		super(a_parent, "T&C");
 		
@@ -31,7 +32,8 @@ public class TermsAndConditionsDialog extends JAPDialog
 		{
 			return;
 		}
-		TermsAndConditionsFramework fr = TermsAndConditionsFramework.getById(tc.getReferenceId());
+		TermsAndConditionsFramework fr = 
+			TermsAndConditionsFramework.getById(tc.getReferenceId(), a_bUpdateFromInfoService);
 		
 		if(fr == null)
 		{
