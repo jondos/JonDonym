@@ -155,21 +155,25 @@ Verf&uuml;gung.</em> </p>
   <LI><B>Best&auml;tigungsdialog vor der Benutzung eines kostenpflichtigen Dienstes anzeigen</B><BR>
   Wenn Sie diese Option aktivieren, wird ihnen ein Dialog zur Best&auml;tigung angezeigt bevor JonDo eine kostenpflichtige Kaskade benutzt. Das hat auch zur Folge, dass JonDo sich nicht automatisch mit einer Bezahlkaskade verbinden kann.
   <P>-->
-  <li><p><b>Anonyme Verbindungen zu Bezahlinstanzen</b><br>
-    Wenn <em>erlauben</em> aktiviert ist, kann JonDo Informationen &uuml;ber
-    Ihren Kontostand von Bezahlinstanzen &uuml;ber den gerade aktiven
-    JonDonym-Dienst abrufen, wenn die kontaktierte Bezahlinstanz &uuml;ber eine
-    direkte Verbindung nicht erreichbar ist. Dies kann der Fall sein, wenn Ihr
-    Provider den Zugang zur Bezahlisntanz blockiert. <em>Erzwingen</em>
-    f&uuml;hrt dazu, dass Bezahlinstanzen ausschlie&szlig;lich &uuml;ber
-    JonDonym-Dienste kontaktiert werden. <strong>Durch diese Einstellung
-    k&ouml;nnen Sie unter Umst&auml;nden keine Konten mehr anlegen und Ihren
-    aktuellen Kontostand nicht mehr abrufen.</strong> M&ouml;chten Sie
-    verhindern, dass die anonyme Verbindung genutzt wird um Bezahlinstanz-Daten
-    abzufragen so stellen Sie diese Einstellung um auf <em>blockieren</em>.
-    Dies kann sinnvoll sein, um Kosten zu sparen, denn <strong>&uuml;ber
-    kostenpflichtige JonDonym-Dienste &uuml;bertragene Konto-Daten werden
-    genauso abgerechnet wie alle sonstigen Nutzdaten</strong>.</p>
+  <li><b>Anonyme Verbindungen zu Bezahlinstanzen</b><br>
+    <em>Nur wenn direkte Verbindung nicht m&ouml;glich</em> bringt JonDo dazu,
+    Informationen &uuml;ber Ihren Kontostand und Daten zur Kontoerstellung
+    &uuml;ber den gerade aktiven JonDonym-Dienst zu &uuml;bertragen wenn die
+    jeweilige Bezahlinstanz &uuml;ber eine direkte Verbindung nicht erreichbar
+    ist. Dies ist beispielsweise dann der Fall wenn Ihr Provider den Zugang zur
+    Bezahlinstanz blockiert. 
+    <p><em>Immer (nicht-anonyme Verbindung verbieten)</em> f&uuml;hrt dazu,
+    dass Bezahlinstanzen ausschlie&szlig;lich &uuml;ber JonDonym-Dienste
+    kontaktiert werden. <strong>Durch diese Einstellung k&ouml;nnen Sie unter
+    Umst&auml;nden keine Konten mehr anlegen und Ihren aktuellen Kontostand
+    nicht mehr abrufen.</strong></p>
+    <p><em>Niemals (nur direkte Verbindung gestatten)</em> kann sinnvoll sein,
+    um Kosten zu sparen. Denn <strong>&uuml;ber kostenpflichtige
+    JonDonym-Dienste &uuml;bertragene Bezahlinstanz-Daten werden aus zwingenden
+    technischen Gr&uuml;nden genauso abgerechnet wie alle sonstigen
+    Nutzdaten</strong>. Durch diese Einstellung wird verhindert, dass die
+    anonyme Verbindung genutzt wird um Bezahlinstanz-Daten zu
+    &uuml;bertragen.</p>
   </li>
   <li><p><b>Fehlermeldungen der Abrechnungsinstanz melden (nur zum Debugging
     deaktivieren!)</b><br>
