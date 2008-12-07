@@ -40,7 +40,7 @@ public class TermsAndConditionsUpdater extends AbstractDatabaseUpdater
 		while(e.hasMoreElements())
 		{
 			TermsAndConditions tc = (TermsAndConditions) e.nextElement();
-			TermsAndConditionsFramework frm = TermsAndConditionsFramework.getById(tc.getReferenceId());
+			TermsAndConditionsFramework frm = TermsAndConditionsFramework.getById(tc.getReferenceId(), true);
 			if(frm == null)
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.NET, "Droping T&C object " + tc.getId() + " because the t&c framework with the reference id " + tc.getReferenceId() + " could not be retrieved.");

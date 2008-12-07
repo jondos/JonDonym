@@ -117,7 +117,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 				{
 					return;
 				}
-				TermsAndConditionsFramework fr = TermsAndConditionsFramework.getById(tc.getReferenceId());
+				TermsAndConditionsFramework fr = TermsAndConditionsFramework.getById(tc.getReferenceId(), true);
 				
 				if(fr == null)
 				{

@@ -35,6 +35,7 @@ package jap.pay;
  */
 import java.net.URL;
 import java.sql.Timestamp;
+import java.util.Date;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -81,7 +82,7 @@ public class PaymentMainPanel extends FlippingPanel
 {
 	public static final long WARNING_AMOUNT = 25 * 1000; // 25 MB (db stores in Kbyte!)
 	public static final long WARNING_TIME = 1000 * 60 * 60 * 24 * 7; // seven days
-	public static final long FULL_AMOUNT = WARNING_AMOUNT * 4; // 25 MB (db stores in Kbyte!)
+	public static final long FULL_AMOUNT = WARNING_AMOUNT * 4; // 25 MB (db stores in Kbyte!)	
 
 	/** Messages */
 	private static final String MSG_TITLE =
@@ -793,7 +794,6 @@ public class PaymentMainPanel extends FlippingPanel
 						}
 					};
 				}
-
 				else if (!accounts.getActiveAccount().isCharged(new Timestamp(System.currentTimeMillis())))
 				{
 					JAPController.getInstance().setAnonMode(false);
@@ -805,9 +805,9 @@ public class PaymentMainPanel extends FlippingPanel
 						{
 							String message = strMessage +
 								JAPMessages.getString(MSG_PAYMENT_ERRORS[XMLErrorMessage.ERR_ACCOUNT_EMPTY]) +
-								" ";
-
-							if (accounts.getActiveAccount().getBalance().getSpent() <= 0)
+								" ";							
+							if (accounts.getActiveAccount().getBalance().getSpent() <= 0 &&
+								!accounts.getActiveAccount().hasExpired())
 							{
 								message += JAPMessages.getString(MSG_OPEN_TRANSACTION);
 							}
@@ -951,7 +951,6 @@ public class PaymentMainPanel extends FlippingPanel
 							if (JAPModel.getInstance().isCascadeAutoSwitched() &&
 								!TrustModel.getCurrentTrustModel().isPaymentForced())
 							{
-								
 								optionType = JAPDialog.OPTION_TYPE_YES_NO_CANCEL;
 							}
 							else

@@ -514,7 +514,8 @@ public class AIControlChannel extends XmlControlChannel
 				  {
 					  break;
 				  }
-				  else if (openTransactionAccount == null && currentAccount.getSpent() == 0)
+				  else if (openTransactionAccount == null && currentAccount.getSpent() == 0 &&
+						  !currentAccount.hasExpired())
 				  {
 					  openTransactionAccount = currentAccount;
 				  }
