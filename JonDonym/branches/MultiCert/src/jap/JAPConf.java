@@ -64,7 +64,7 @@ import javax.swing.tree.TreePath;
 
 import anon.infoservice.MixCascade;
 import gui.JAPMessages;
-import gui.JAPMultilineLabel;
+import gui.JAPMultiLineLabel;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp;
 
@@ -126,7 +126,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 	private JCheckBox m_cbShowDebugConsole, m_cbDebugToFile;
 	private JTextField m_tfDebugFileName;
 	private JButton m_bttnDebugFileNameSearch;
-	private JAPMultilineLabel m_labelConfDebugLevel, m_labelConfDebugTypes;
+	private JAPMultiLineLabel m_labelConfDebugLevel, m_labelConfDebugTypes;
 
 	private JSlider m_sliderDebugLevel;
 	private JSlider m_sliderDebugDetailLevel;
@@ -474,7 +474,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 			}
 		}
 
-		m_labelConfDebugTypes = new JAPMultilineLabel(JAPMessages.getString("ConfDebugTypes"));
+		m_labelConfDebugTypes = new JAPMultiLineLabel(JAPMessages.getString("ConfDebugTypes"));
 		p.add(m_labelConfDebugTypes, c);
 		c.gridy = 1;
 		p.add(panelLogTypes, c);
@@ -604,7 +604,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		c.gridy = 0;
 		c.fill = GridBagConstraints.NONE;
 		c.insets = new Insets(5, 5, 5, 5);
-		m_labelConfDebugLevel = new JAPMultilineLabel(JAPMessages.getString("ConfDebugLevels"));
+		m_labelConfDebugLevel = new JAPMultiLineLabel(JAPMessages.getString("ConfDebugLevels"));
 		p.add(m_labelConfDebugLevel, c);
 		c.gridy = 1;
 		c.weightx = 1;
@@ -645,7 +645,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		c.gridy = 0;
 		c.fill = GridBagConstraints.NONE;
 		c.insets = new Insets(5, 5, 5, 5);
-		m_labelConfDebugLevel = new JAPMultilineLabel(JAPMessages.getString(MSG_DETAILLEVEL));
+		m_labelConfDebugLevel = new JAPMultiLineLabel(JAPMessages.getString(MSG_DETAILLEVEL));
 		p.add(m_labelConfDebugLevel, c);
 
 		c.gridy = 1;

@@ -1733,7 +1733,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			if (m_serverCertPaths != null && m_serverInfo != null)
 			{
-				MultiCertOverview dialog = new MultiCertOverview(getRootPanel().getParent(), m_serverCertPaths, m_serverInfo.getName());
+				MultiCertOverview dialog = new MultiCertOverview(getRootPanel().getParent(), m_serverCertPaths, m_serverInfo.getName(), false);
 				/*CertDetailsDialog dialog = new CertDetailsDialog(getRootPanel().getParent(),
 					m_serverCert.getFirstCertificate(), isServerCertVerified(),
 					JAPMessages.getLocale(), m_serverInfo.getCertPath().getFirstVerifiedPath());

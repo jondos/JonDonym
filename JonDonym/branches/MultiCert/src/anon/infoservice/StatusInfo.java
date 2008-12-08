@@ -435,7 +435,8 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 
 	public boolean checkId()
 	{
-		return m_signature != null && m_signature.getXORofSKIs().equalsIgnoreCase(getId());
+		//System.out.println(m_signature.getXORofSKIs() + "\n" + getId());
+		return (m_signature != null) && m_signature.getXORofSKIs().equalsIgnoreCase(getId());
 		/*return getCertificate() != null &&
 			 getId().equals(new X509SubjectKeyIdentifier(
 				 getCertificate().getPublicKey()).getValueWithoutColon());

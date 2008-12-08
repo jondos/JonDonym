@@ -51,7 +51,7 @@ import anon.infoservice.JAPVersionInfo;
 import anon.util.ClassUtil;
 import gui.GUIUtils;
 import gui.JAPMessages;
-import gui.JAPMultilineLabel;
+import gui.JAPMultiLineLabel;
 import gui.wizard.BasicWizardPage;
 import jap.JAPConstants;
 import logging.LogHolder;
@@ -99,7 +99,7 @@ public class JAPWelcomeWizardPage extends BasicWizardPage implements ActionListe
 		GridBagConstraints m_panelConstraints = new GridBagConstraints();
 
 		m_panelComponents.setLayout(m_panelComponentsLayout);
-		JAPMultilineLabel label;
+		JAPMultiLineLabel label;
 
 
 		m_panelConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -141,7 +141,7 @@ public class JAPWelcomeWizardPage extends BasicWizardPage implements ActionListe
 		}
 
 		m_panelConstraints.gridy = 1;
-		label = new JAPMultilineLabel(JAPMessages.getString("updateIntroductionMessage"));
+		label = new JAPMultiLineLabel(JAPMessages.getString("updateIntroductionMessage"));
 		m_panelComponents.add(label, m_panelConstraints);
 
 		m_tfJapPath = new JTextField(20);

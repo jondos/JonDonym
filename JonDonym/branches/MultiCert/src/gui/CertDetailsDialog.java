@@ -51,6 +51,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -66,6 +67,8 @@ import anon.crypto.CertPath;
 import anon.crypto.CertificateInfoStructure;
 import anon.crypto.IMyPublicKey;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MyECPublicKey;
+import anon.crypto.MyRSAPublicKey;
 import anon.crypto.Validity;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509Extensions;
@@ -163,6 +166,26 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 	public final static String IMG_CERTENABLEDICON = "cenabled.gif";
 	public final static String IMG_CERTDISABLEDICON = "cdisabled.gif";
 	public final static String IMG_WARNING = "warning.gif";
+	
+	private static final String IMG_PATH = "certs/";
+	private static final String IMG_CERT_ORANGE_OK = IMG_PATH + "cert_orange_ok.png";
+	private static final String IMG_CERT_ORANGE_NOK = IMG_PATH + "cert_orange_nok.png";
+	private static final String IMG_CERT_ORANGE_INVALID = IMG_PATH + "cert_orange_invalid.png";
+	private static final String IMG_CERT_ORANGE_OK_DARK = IMG_PATH + "cert_orange_ok_dark.png";
+	private static final String IMG_CERT_ORANGE_NOK_DARK = IMG_PATH + "cert_orange_nok_dark.png";
+	private static final String IMG_CERT_ORANGE_INVALID_DARK = IMG_PATH + "cert_orange_invalid_dark.png"; 
+	private static final String IMG_CERT_PURPLE_OK = IMG_PATH + "cert_purple_ok.png";
+	private static final String IMG_CERT_PURPLE_NOK = IMG_PATH + "cert_purple_nok.png";
+	private static final String IMG_CERT_PURPLE_INVALID = IMG_PATH + "cert_purple_invalid.png";
+	private static final String IMG_CERT_PURPLE_OK_DARK = IMG_PATH + "cert_purple_ok_dark.png";
+	private static final String IMG_CERT_PURPLE_NOK_DARK = IMG_PATH + "cert_purple_nok_dark.png";
+	private static final String IMG_CERT_PURPLE_INVALID_DARK = IMG_PATH + "cert_purple_invalid_dark.png";
+	private static final String IMG_CERT_BLUE_OK = IMG_PATH + "cert_blue_ok.png";
+	private static final String IMG_CERT_BLUE_NOK = IMG_PATH + "cert_blue_nok.png";
+	private static final String IMG_CERT_BLUE_INVALID = IMG_PATH + "cert_blue_invalid.png";
+	private static final String IMG_CERT_BLUE_OK_DARK = IMG_PATH + "cert_blue_ok_dark.png";
+	private static final String IMG_CERT_BLUE_NOK_DARK = IMG_PATH + "cert_blue_nok_dark.png";
+	private static final String IMG_CERT_BLUE_INVALID_DARK = IMG_PATH + "cert_orange_invalid_dark.png";
 
 	private JLabel lbl_summaryIcon;
 	private Locale m_Locale;
@@ -592,14 +615,71 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 		JLabel lbl_val;
 
 		// Image
-		if (a_bIsVerifyable)
+		lbl_summaryIcon = new JLabel();
+		if(a_cert.getPublicKey() instanceof MyRSAPublicKey)
+		{
+			if(a_bIsVerifyable)
+			{
+				if(a_cert.getValidity().isValid(new Date()))
+				{
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK));
+				}
+				else
+				{
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID));
+				}
+			}
+			else
+			{
+				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK));
+			}
+			
+		}
+		else if(a_cert.getPublicKey() instanceof MyECPublicKey)
+		{
+			
+			if(a_bIsVerifyable)
+			{
+				if(a_cert.getValidity().isValid(new Date()))
+				{
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK));
+				}
+				else
+				{
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID));
+				}
+			}
+			else
+			{
+				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK));
+			}
+		}
+		else //certs with DSA or unknown keys
+		{
+			if(a_bIsVerifyable)
+			{
+				if(a_cert.getValidity().isValid(new Date()))
+				{
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK));
+				}
+				else
+				{
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID));
+				}
+			}
+			else
+			{
+				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK));
+			}
+		}
+		/*if (a_bIsVerifyable)
 		{
 			lbl_summaryIcon = new JLabel(GUIUtils.loadImageIcon(CERT_VALID_INACTIVE, true, false), JLabel.RIGHT);
 		}
 		else
 		{
 			lbl_summaryIcon = new JLabel(GUIUtils.loadImageIcon(CERT_INVALID_INACTIVE, true, false), JLabel.RIGHT);
-		}
+		}*/
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.gridx = 0;
 		constraints.gridy = 0;

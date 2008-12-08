@@ -54,7 +54,7 @@ import javax.swing.JSeparator;
 import gui.CountryMapper;
 import gui.GUIUtils;
 import gui.JAPMessages;
-import gui.JAPMultilineLabel;
+import gui.JAPMultiLineLabel;
 
 import anon.infoservice.ServiceLocation;
 import anon.infoservice.ServiceOperator;
@@ -181,7 +181,7 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		}
 
 		
-		JAPMultilineLabel explain;
+		JAPMultiLineLabel explain;
 		String text;
 		if (a_numberOfMixes > 1)
 		{
@@ -191,7 +191,7 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		{
 			text = "";
 		}
-		explain = new JAPMultilineLabel(text, color);
+		explain = new JAPMultiLineLabel(text, color);
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.anchor = GridBagConstraints.EAST;
 		add(explain, constraints);

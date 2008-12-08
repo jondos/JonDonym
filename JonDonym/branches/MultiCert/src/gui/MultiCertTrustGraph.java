@@ -76,84 +76,6 @@ public class MultiCertTrustGraph
 			}
 		}	
 	}
-
-	/*private Vector createRootLevel(Vector a_infos)
-	{
-		CertPathInfo pathInfo, otherPathInfo;
-		Node rootNode, operatorNode, endNode;
-		Vector sameRoot, sameOp, rootNodes;
-		
-		rootNodes = new Vector();
-		
-		for(int i=0; i<a_infos.size();i++)
-		{
-			pathInfo = (CertPathInfo) a_infos.elementAt(i);
-			if(pathInfo.getRootCertificate() != null)
-			{
-				sameRoot = new Vector();
-				sameRoot.addElement(pathInfo);
-								
-				for(int j=i+1; j<a_infos.size(); j++)
-				{
-					otherPathInfo = (CertPathInfo) a_infos.elementAt(j);
-					if(pathInfo.getRootCertificate().equals(otherPathInfo.getRootCertificate()))
-					{
-						sameRoot.addElement(otherPathInfo);
-					}
-				}
-				
-				rootNode = new Node(pathInfo.getRootCertificate());
-				rootNodes.addElement(rootNode);
-				a_infos.removeElementAt(i);
-				
-				for(int j=0; j<sameRoot.size(); j++)
-				{
-					pathInfo = (CertPathInfo) sameRoot.get(j);
-					if(pathInfo.getSecondCertificate() != null)
-					{
-						sameOp = new Vector();
-						sameOp.addElement(pathInfo);
-						
-						for(int k=j+1; k<sameRoot.size(); k++)
-						{
-							otherPathInfo = (CertPathInfo) sameRoot.elementAt(k);
-							if(pathInfo.getSecondCertificate().equals(otherPathInfo.getSecondCertificate()))
-							{
-								sameOp.addElement(otherPathInfo);
-							}
-						}
-						
-						operatorNode = rootNode.createChildNode(pathInfo.getSecondCertificate());
-						sameRoot.removeElementAt(j);
-						
-						for(int k=0; k<sameOp.size(); k++)
-						{
-							pathInfo = (CertPathInfo) sameOp.get(j);
-							endNode = operatorNode.createChildNode(pathInfo.getFirstCertificate());
-						}
-					}					
- 				}
-				
-				
-				if(pathInfo.getSecondCertificate() != null)
-				{
-					operatorNode = rootNode.createChildNode(pathInfo.getSecondCertificate());
-					endNode = operatorNode.createChildNode(pathInfo.getFirstCertificate());
-					
-				}
-				
-				a_infos.removeElementAt(i);
-			}
-		}
-		
-		//handle paths without root
-		for(int i=0; i<a_infos.size(); i++)
-		{
-			//rootNodes.addElement(new TrustGraphNode(null, Util.toVector(a_infos.elementAt(i)), null));
-		}
-		
-		return rootNodes;
-	}*/
 	
 	public Enumeration getRootNodes()
 	{
@@ -213,20 +135,6 @@ public class MultiCertTrustGraph
 				a_child.m_trusted = this.m_trusted;		
 			}
 		}
-	
-		/*public Node createChildNode(JAPCertificate a_cert)
-		{
-			Node child;
-			
-			if(m_childNodes == null)
-			{
-				m_childNodes = new Vector();
-			}
-			child = new Node(a_cert);
-			m_childNodes.addElement(child);
-		    
-			return child;
-		}*/
 		
 		public JAPCertificate getCertificate()
 		{
