@@ -28,7 +28,7 @@
 
 package update;
 
-import gui.JAPMultilineLabel;
+import gui.JAPMultiLineLabel;
 import gui.wizard.BasicWizardPage;
 import jap.JAPConstants;
 import gui.JAPMessages;
@@ -52,7 +52,7 @@ public class JAPFinishWizardPage extends BasicWizardPage
 		GridBagConstraints constraintsFinish = new GridBagConstraints();
 
 		m_panelComponents.setLayout(gridBagFinish);
-		JAPMultilineLabel labelFinish = new JAPMultilineLabel(JAPMessages.getString("updateFinishMessage"));
+		JAPMultiLineLabel labelFinish = new JAPMultiLineLabel(JAPMessages.getString("updateFinishMessage"));
 		constraintsFinish.gridx = 0;
 		constraintsFinish.gridy = 0;
 		constraintsFinish.weightx = 1;

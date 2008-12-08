@@ -40,7 +40,7 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
 import gui.JAPMessages;
-import gui.JAPMultilineLabel;
+import gui.JAPMultiLineLabel;
 import javax.swing.JLabel;
 import java.util.Dictionary;
 import java.util.Observable;

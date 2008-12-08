@@ -37,7 +37,7 @@ public final class MyECPrivateKey extends AbstractPrivateKey implements IMyPriva
 	}
 	
 	/**
-	 * Use ECPrivateKeyStructure defined in "SEC 1: Elliptic Curve Cryptography" section
+	 * Use ECPrivateKeyStructure defined in "SEC 1: Elliptic Curve Cryptography"
 	 * to be compatible with OpenSSL
 	 * @see http://www.secg.org/
 	 * @param privKeyInfo

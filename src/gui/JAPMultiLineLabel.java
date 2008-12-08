@@ -38,32 +38,32 @@ import javax.swing.JPanel;
 /**
  * This class is needed for JDKs < 1.3 as they cannot recognize new lines "\n" in a JLabel.
  */
-final public class JAPMultilineLabel extends JPanel
+final public class JAPMultiLineLabel extends JPanel
 {
 	private Font m_font;
 
-	public JAPMultilineLabel(String a_strText)
+	public JAPMultiLineLabel(String a_strText)
 	{
 		this(a_strText, new JLabel().getFont());
 	}
 
-	public JAPMultilineLabel(String a_strText, Color a_color)
+	public JAPMultiLineLabel(String a_strText, Color a_color)
 	{
 		this(a_strText, new JLabel().getFont(), a_color);
 	}
 
 
-	public JAPMultilineLabel(Font a_font)
+	public JAPMultiLineLabel(Font a_font)
 	{
 		this("", a_font);
 	}
 
-	public JAPMultilineLabel(String a_strText, Font a_font)
+	public JAPMultiLineLabel(String a_strText, Font a_font)
 	{
 		this(a_strText, a_font, null);
 	}
 
-	public JAPMultilineLabel(String a_strText, Font a_font, Color a_color)
+	public JAPMultiLineLabel(String a_strText, Font a_font, Color a_color)
 	{
 		m_font = a_font;
 		this.setText(a_strText, a_color);

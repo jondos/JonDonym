@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2000 - 2005, The JAP-Team
+ Copyright (c) 2000 - 2008, The JAP-Team
  All rights reserved.
  Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
@@ -637,7 +637,7 @@ public class CertPath implements IXMLEncodable
 		
 		m_valid = buildAndValidate(null);
 		m_verificationTime = System.currentTimeMillis();
-		System.out.println("Doing fresh verification of " + this.getFirstCertificate().getSubject().getCommonName() + "...");
+		//System.out.println("Doing fresh verification of " + this.getFirstCertificate().getSubject().getCommonName() + "...");
 			
 		if(m_rootFound)
 		{

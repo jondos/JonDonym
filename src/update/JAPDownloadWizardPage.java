@@ -28,7 +28,7 @@
 
 package update;
 
-import gui.JAPMultilineLabel;
+import gui.JAPMultiLineLabel;
 import gui.wizard.BasicWizardPage;
 import jap.JAPConstants;
 import gui.JAPMessages;
@@ -87,7 +87,7 @@ public class JAPDownloadWizardPage extends BasicWizardPage
 		constraintsDownload.fill = GridBagConstraints.HORIZONTAL;
 		constraintsDownload.anchor = GridBagConstraints.NORTHWEST;
 		constraintsDownload.insets = new Insets(0, 5, 10, 5);
-		JAPMultilineLabel labelInformation = new JAPMultilineLabel(
+		JAPMultiLineLabel labelInformation = new JAPMultiLineLabel(
 			  JAPMessages.getString("updateDownloadIntroductionMessage"));
 
 		gridBagDownload.setConstraints(labelInformation, constraintsDownload);

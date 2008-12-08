@@ -88,7 +88,7 @@ public final class XMLSignature
 	 * Returns how many signatures the document has.
 	 * @return the number of signatures
 	 */
-	public int getNumberOfSignatures()
+	public int countSignatures()
 	{
 		return m_signatureElements.size();
 	}
@@ -199,16 +199,28 @@ public final class XMLSignature
 	 */
 	public static XMLSignature sign(Node a_node, PKCS12 a_certificate) throws XMLParseException
 	{
-		XMLSignature signature = signInternal(a_node, Util.toVector(a_certificate.getPrivateKey()));
-
-		//TODO implement me
-		/*if (signature != null)
+		return signInternal(a_node, Util.toVector(a_certificate));
+	}
+	
+	
+	public synchronized boolean addCertificate(JAPCertificate a_certificate)
+	{
+		Enumeration signatures;
+		XMLSignatureElement current;
+		
+		if(a_certificate != null)
 		{
-			signature.addCertificate(a_certificate.getX509Certificate());
-			signature.m_certPath = new CertPath(a_certificate.getX509Certificate());
-		}*/
-
-		return signature;
+			signatures = m_signatureElements.elements();
+			while(signatures.hasMoreElements())
+			{
+				current = (XMLSignatureElement) signatures.nextElement();
+				if(current.addCertificate(a_certificate))
+				{
+					return true;
+				}	
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -284,11 +296,10 @@ public final class XMLSignature
 	 * The signatures are added to the node, and any previous signatures are removed. If an error 
 	 * occurs while signing, the old signature (if present) is not removed from the node.
 	 * @param a_node an XML node
-	 * @param a_privateKeys the private keys to sign the signature
+	 * @param a_privateKeys the private keys or private certs to sign the signature
 	 * @return a new XMLSignature or null if no signature could be created
 	 * @exception XMLParseException if the node could not be signed because it could not be
 	 *            properly transformed into bytes
-	 * @todo create method to add certs or add them here!
 	 */
 	private static XMLSignature signInternal(Node a_node, Vector a_privateKeys) throws
 		XMLParseException
@@ -298,6 +309,8 @@ public final class XMLSignature
 		Element elementToSign;
 		XMLSignature xmlSignature;
 		Vector oldSignatureNodes;
+		IMyPrivateKey signKey;
+		PKCS12 signCert = null;
 
 		if (a_node == null || a_privateKeys == null || a_privateKeys.size() == 0)
 		{
@@ -319,8 +332,7 @@ public final class XMLSignature
 		// create an empty XMLSignature; it will be 'filled' while signing the node
 		xmlSignature = new XMLSignature();
 
-		//TODO handle multiple Signatures here
-		/* if there are any Signature nodes, remove them --> we create a new one */
+		/* if there are any Signature nodes, remove them --> we create new ones */
 		oldSignatureNodes = removeSignatureFromInternal(elementToSign);
 
 		/* calculate a message digest for the node; this digest is signed later on */
@@ -331,25 +343,42 @@ public final class XMLSignature
 		digestValue = new byte[digest.getDigestSize()];
 		digest.doFinal(digestValue, 0);
 		
+		// create a signature with each provided private Key
 		Enumeration keys = a_privateKeys.elements();
-		
-		while(keys.hasMoreElements())
+		try
 		{
-			try
+			while(keys.hasMoreElements())
 			{
-				IMyPrivateKey signKey = (IMyPrivateKey) keys.nextElement();
+				Object obj = keys.nextElement();
+				if(obj instanceof IMyPrivateKey)
+				{
+					signCert = null;
+					signKey = (IMyPrivateKey) obj;
+				}
+				else
+				{
+					signCert = (PKCS12) obj;
+					signKey = signCert.getPrivateKey();
+				}
+							 
 				XMLSignatureElement sigElement = new XMLSignatureElement(xmlSignature, elementToSign, signKey, digestValue);
+				if(signCert != null)
+				{
+					sigElement.addCertificate(signCert.getX509Certificate());
+				}
 				xmlSignature.m_signatureElements.addElement(sigElement);
 			}
-			catch (Exception a_e)
-			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.CRYPTO, "Could not sign XML document!", a_e);
-			}
 		}
-		if(xmlSignature.getNumberOfSignatures() == 0)
+		catch (Exception a_e) // if an error occured changes are undone
 		{
-			LogHolder.log(LogLevel.ERR, LogType.CRYPTO, "Could not create a Signature for XML document!");
-			if (oldSignatureNodes != null)
+			LogHolder.log(LogLevel.EXCEPTION, LogType.CRYPTO, "Could not sign XML document!", a_e);
+			
+			if(xmlSignature.countSignatures() != 0)
+			{
+				removeSignatureFromInternal(elementToSign);
+			}
+			
+			if(oldSignatureNodes != null)
 			{
 				Enumeration oldSigs = oldSignatureNodes.elements();
 				while(oldSigs.hasMoreElements())
@@ -359,12 +388,11 @@ public final class XMLSignature
 			}
 			return null;
 		}
-
 		return xmlSignature;
 	}
 
 	/**
-	 * Creates a new XMLSignature from the node and creates a new MultiSignature object.
+	 * Creates a new XMLSignature from the node and creates a new MultiCertPath object.
 	 * To get the verification-result call isVerified() on the retuned XMLSignature.
 	 * @param a_node Node A signed XML node.
 	 * @param a_documentType The document-Type of the node.
