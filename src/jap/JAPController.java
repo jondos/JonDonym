@@ -5275,6 +5275,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 		public AutoSwitchedMixCascadeContainer(boolean a_bSkipInitialCascade)
 		{
+			super(JAPMessages.getInstance());
 			m_bSkipInitialCascade = a_bSkipInitialCascade;
 			m_alreadyTriedCascades = new Hashtable();
 			m_random = new Random(System.currentTimeMillis());

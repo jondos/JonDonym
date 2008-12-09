@@ -578,6 +578,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(String a_strName, long a_id)
 	{
+		super(JAPMessages.getInstance());
 		//m_id = ms_trustModels.size();
 		m_id = a_id;
 		m_strName = a_strName == null ? "Default trust model" : a_strName;
@@ -590,6 +591,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(TrustModel a_trustModel)
 	{
+		super(JAPMessages.getInstance());
 		copyFrom(a_trustModel);
 	}
 
@@ -602,6 +604,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(Element a_trustModelElement) throws XMLParseException
 	{
+		super(JAPMessages.getInstance());
 		XMLUtil.assertNodeName(a_trustModelElement, XML_ELEMENT_NAME);
 
 		XMLUtil.assertNotNull(a_trustModelElement, XML_ATTR_ID);

@@ -1113,6 +1113,11 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 	private class DummyMixCascadeContainer extends AbstractMixCascadeContainer
 	{
+		public DummyMixCascadeContainer()
+		{
+			super(null);
+		}
+		
 		public MixCascade getNextMixCascade()
 		{
 			return null;
@@ -1149,6 +1154,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 		public EncapsulatedMixCascadeContainer(AbstractMixCascadeContainer a_mixCascadeContainer)
 		{
+			super(a_mixCascadeContainer.getMessages());
 			m_mixCascadeContainer = a_mixCascadeContainer;
 		}
 
