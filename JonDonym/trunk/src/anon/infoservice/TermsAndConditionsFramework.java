@@ -5,8 +5,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import jap.JAPController;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
