@@ -1495,6 +1495,10 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		Element rootElement = webInfoDoc.createElement(XML_ELEMENT_WEBINFO);
 		XMLUtil.setAttribute(rootElement, XML_ATTR_PAYMENT, isPayment());
 		XMLUtil.setAttribute(rootElement, XML_ATTR_ID, getId());
+		if (getMaxUsers() > 0)
+		{
+			XMLUtil.setAttribute(rootElement, XML_ATTR_MAX_USERS, getMaxUsers());
+		}
 		if (getContext() != null)
 		{
 			XMLUtil.setAttribute(rootElement, XML_ATTR_CONTEXT, getContext());
