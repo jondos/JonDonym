@@ -1168,7 +1168,7 @@ public class PerformanceMeter implements Runnable, Observer
 	        HTTPResponseHeader resp = null;
 	        
 	        // read HTTP header from PerformanceServer
-	        if(((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
+	        if (((resp = parseHTTPHeader(reader)) == null) || resp.m_statusCode != 200)
 	        {       
 	        	LogHolder.log(LogLevel.WARNING, LogType.NET, "Request to Performance Server failed." + (resp != null ? " Status Code: " + resp.m_statusCode : ""));
 	        	closeMeterSocket();
@@ -1211,6 +1211,9 @@ public class PerformanceMeter implements Runnable, Observer
 	        	bytesRead += recvd;
 	        	toRead -= recvd;
 	        }
+	        
+	        long responseEndTime = System.currentTimeMillis();
+	        
 	        
 	        byte[] ip;
 	        int ipSize = 0;
@@ -1255,14 +1258,13 @@ public class PerformanceMeter implements Runnable, Observer
 	        	}
 	        }
 	        
-	        long responseEndTime = System.currentTimeMillis();
-	        
 	        // could not read all data
     		if(bytesRead != a_recvBuff.length)
     		{
     			LogHolder.log(LogLevel.WARNING, LogType.NET, "Performance Meter could not get all requested bytes. Received " + bytesRead + " of " + a_recvBuff.length + " bytes.");    			
     		}
     		
+    		bytesRead += resp.m_headerBytes;
     		if (bytesRead < (100000))
 			{
 				// less than 100 kb was received; not enough for testing download performance
@@ -1372,16 +1374,16 @@ public class PerformanceMeter implements Runnable, Observer
 		do
 		{
 			line = a_reader.readLine();
-			if(line == null || (i == 0 && !line.startsWith("HTTP"))) return null;
+			r.m_headerBytes += line.length() + 2; // add 2 bytes for \r\n
+			if (line == null || (i == 0 && !line.startsWith("HTTP"))) return null;
 			
-			if(line.startsWith("HTTP"))
+			if (line.startsWith("HTTP"))
 			{
 				int c = line.indexOf(" ");
 				if(c == -1) return null;
 				r.m_statusCode = Integer.parseInt(line.substring(c + 1, c + 4));
 			}
-			
-			if(line.startsWith("Content-Length: "))
+			else if(line.startsWith("Content-Length: "))
 			{
 				r.m_contentLength = Integer.parseInt(line.substring(16));
 			}
@@ -1656,6 +1658,8 @@ public class PerformanceMeter implements Runnable, Observer
 		 * Length of the HTTP content.
 		 */
 		int m_contentLength = 0;
+		
+		int m_headerBytes = 0;
 	}
 	
 	/**
