@@ -828,8 +828,15 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		c.gridx++;
 		m_labelDeposit = new JLabel();
 		p.add(m_labelDeposit, c);
-
+		
+		c.gridx--;
 		c.gridy++;
+		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_STATEMENT_DATE) + ":"), c);		
+		c.gridx++;
+		m_labelStatementDate = new JLabel();
+		p.add(m_labelStatementDate, c);
+
+
 		c.gridy++;
 
 		JPanel buttonsPanel = new JPanel(new GridBagLayout());
@@ -1272,7 +1279,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			{
 				long deposit = balance.getDeposit();
 				boolean bTransaction = true;
-				m_labelStatementDate.setText(JAPUtil.formatTimestamp(balance.getTimestamp(), true,
+				m_labelStatementDate.setText(JAPUtil.formatTimestamp(balance.getTimestamp(), false,
 					JAPMessages.getLocale().getLanguage()));
 				
 				m_labelSpent.setText(JAPUtil.formatBytesValueWithUnit(balance.getSpent()));
