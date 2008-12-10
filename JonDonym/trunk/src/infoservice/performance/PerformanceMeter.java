@@ -1373,9 +1373,10 @@ public class PerformanceMeter implements Runnable, Observer
 		
 		do
 		{
-			line = a_reader.readLine();
-			r.m_headerBytes += line.length() + 2; // add 2 bytes for \r\n
+			line = a_reader.readLine();			
 			if (line == null || (i == 0 && !line.startsWith("HTTP"))) return null;
+			
+			r.m_headerBytes += line.length() + 2; // add 2 bytes for \r\n
 			
 			if (line.startsWith("HTTP"))
 			{
