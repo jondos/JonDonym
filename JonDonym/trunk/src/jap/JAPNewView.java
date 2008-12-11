@@ -783,8 +783,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.gridy = 4;
 		p.add(m_labelOperatorCountries, c1);
 		
-		m_lblUsers = new JLabel("", SwingConstants.LEFT);
-		c1.insets = new Insets(0, 0, 0, 10);
+		m_lblUsers = new JLabel("9999 / 9999", SwingConstants.LEFT);
+		c1.insets = new Insets(5, 0, 0, 10);
 		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
 		c1.fill = GridBagConstraints.HORIZONTAL;
@@ -793,13 +793,12 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.gridwidth = 3;
 		p.add(m_lblUsers, c1);
 		
-		m_labelSpeed = new JLabel("", SwingConstants.LEFT);
-		c1.insets = new Insets(5, 0, 0, 10);
+		m_labelSpeed = new JLabel("1500 - 1500 kbit/s", SwingConstants.LEFT);
 		c1.weightx = 0;
 		c1.gridy = 2;
 		p.add(m_labelSpeed, c1);
 		
-		m_labelDelay = new JLabel("", SwingConstants.LEFT);
+		m_labelDelay = new JLabel("8000 - 8000 ms", SwingConstants.LEFT);
 		c1.weightx = 0;
 		c1.gridy = 3;
 		p.add(m_labelDelay, c1);
@@ -809,7 +808,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		
 		c1.gridwidth = 1;
 		c1.insets = new Insets(5, 2, 0, 5);
-		for(int i = 0; i < m_labelOperatorFlags.length; i++)
+		for (int i = 0; i < m_labelOperatorFlags.length; i++)
 		{
 			c1.gridx = i + 1;
 			c1.gridy = 4;
@@ -1303,9 +1302,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			fetchMixCascadesAsync(false);
 		}
 
-		updateFonts();
-		updateValues(true);
+		updateFonts();		
 		setOptimalSize();
+		updateValues(true);
 		GUIUtils.centerOnScreen(this);
 		GUIUtils.restoreLocation(this, JAPModel.getMainWindowLocation());
 
@@ -1597,7 +1596,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	  }
 	 }*/
 
-	/**Anon Level is >=0 amd <=5. If -1 no measure is available*/
+	/**Anon Level is >=0 and <=5. If -1 no measure is available*/
 	private Icon getMeterImage(int iAnonLevel)
 	{
 		boolean bAnonMode = m_Controller.getAnonMode();
@@ -1874,6 +1873,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 			}
 		}
+		/*
 		else if (a_message instanceof JAPModel.FontResize && a_message != null)
 		{
 			run = new Runnable()
@@ -1900,7 +1900,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					}
 				}
 			};
-		}
+		}*/
 		else if (a_observable instanceof TrustModel.InnerObservable)
 		{
 			m_bTrustChanged = true;
