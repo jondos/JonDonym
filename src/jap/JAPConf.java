@@ -872,9 +872,9 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 								//show transaction for existing account
 								m_accountSettings.showOpenTransaction((PayAccount)a_value);
 							}
-							else if (a_value instanceof Long)
+							else if (a_value instanceof Boolean && !((Boolean)a_value).booleanValue())
 							{
-								// @todo show selected account
+								m_accountSettings.backupAccount();
 							}
 						}
 					}).start();

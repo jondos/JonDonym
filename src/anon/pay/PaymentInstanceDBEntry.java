@@ -263,6 +263,35 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	{
 		return m_strPaymentInstanceId;
 	}
+	
+	public boolean equals(Object a_paymentInstance)
+	{
+		PaymentInstanceDBEntry paymentInstance;
+		
+		if (!(a_paymentInstance instanceof PaymentInstanceDBEntry) || a_paymentInstance == null)
+		{
+			return false;
+		}
+		
+		paymentInstance = (PaymentInstanceDBEntry)a_paymentInstance;
+		
+		if (paymentInstance.getId() == getId() || paymentInstance.getId().equals(getId()))
+		{
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public int hashCode()
+	{
+		if (m_strPaymentInstanceId == null)
+		{
+			return 0;
+		}
+		return m_strPaymentInstanceId.hashCode();
+	}
+	
 
 	public String getName()
 	{

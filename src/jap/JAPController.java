@@ -1717,7 +1717,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 									try
 									{
 										piEntry = new PaymentInstanceDBEntry( (Element) nodePI, Long.MAX_VALUE);
-										if (piEntry.isValid() && piEntry.isVerified())
+										if (piEntry.isVerified())
 										{
 											Database.getInstance(PaymentInstanceDBEntry.class).update(piEntry);
 										}
@@ -3943,7 +3943,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 									public void run()
 									{
 										getInstance().getView().showConfigDialog(
-											JAPConf.PAYMENT_TAB, new Long(tempAcount.getAccountNumber()));
+											JAPConf.PAYMENT_TAB, Boolean.FALSE);
 									}
 								}).start();
 

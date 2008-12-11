@@ -343,13 +343,17 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 		return m_ActiveAccount;
 	}
 
-	public void setActiveAccount(long accountNumber)
-	{
-		setActiveAccount(getAccount(accountNumber));
-	}
 
-	public void setActiveAccount(PayAccount account)
+	public void setActiveAccount(PayAccount a_account)
 	{
+		PayAccount account = null;
+		
+		if (a_account != null)
+		{
+			// look whether this account is in the database
+			account = getAccount(a_account.getAccountNumber(), a_account.getPIID());
+		}
+		
 		if (account != null && account.getPrivateKey() != null)
 		{
 			m_ActiveAccount = account;
@@ -395,14 +399,16 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	 * @return {@link PayAccount} oder null, wenn kein Konto unter der angebenen
 	 * Kontonummer vorhanden ist
 	 */
-	public synchronized PayAccount getAccount(long accountNumber)
+	public synchronized PayAccount getAccount(long accountNumber, String a_piid)
 	{
 		PayAccount tmp = null;
 		Enumeration enumer = m_Accounts.elements();
 		while (enumer.hasMoreElements())
 		{
 			tmp = (PayAccount) enumer.nextElement();
-			if (tmp.getAccountNumber() == accountNumber)
+			if (tmp.getAccountNumber() == accountNumber && 
+					((a_piid == tmp.getPIID() || 
+					(a_piid != null && tmp.getPIID() != null && a_piid.equals(tmp.getPIID())))))
 			{
 				break;
 			}
@@ -423,19 +429,24 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	 * @param accountNumber account number
 	 * @throws Exception Wenn ein Fehler bei Dateizugriff auftrat
 	 */
-	public void deleteAccount(long accountNumber)
+	public void deleteAccount(PayAccount a_account)
 	{
+		if (a_account == null)
+		{
+			return;
+		}
+		
 		PayAccount accountToDelete = null;
 		synchronized (this)
 		{
-			accountToDelete = getAccount(accountNumber);
+			accountToDelete = getAccount(a_account.getAccountNumber(), a_account.getPIID());
 
 			if (accountToDelete != null)
 			{
 				for (int i = 0; i < m_Accounts.size(); i++)
 				{
 					accountToDelete = (PayAccount) m_Accounts.elementAt(i);
-					if (accountToDelete.getAccountNumber() == accountNumber)
+					if (accountToDelete.getAccountNumber() == a_account.getAccountNumber())
 					{
 						m_Accounts.removeElementAt(i);
 						break;

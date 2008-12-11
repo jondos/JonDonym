@@ -196,6 +196,7 @@ public abstract class AbstractDatabaseUpdater extends Updater
 				{
 					updated = true;
 				}
+
 				AbstractDatabaseEntry preferredEntry = getPreferredEntry();
 				if (preferredEntry != null)
 				{

@@ -739,7 +739,7 @@ public class PerformanceMeter implements Runnable, Observer
 						{
 							LogHolder.log(LogLevel.INFO, LogType.PAY, "Added account file " + file.getName() + ".");
 							m_payAccountsFile.addAccount(payAccount);
-							m_payAccountsFile.setActiveAccount(payAccount.getAccountNumber());
+							m_payAccountsFile.setActiveAccount(payAccount);
 							payAccount.setBackupDone(file.lastModified());
 							m_usedAccountFiles.put(file, payAccount);
 						}

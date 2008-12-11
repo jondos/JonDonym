@@ -457,7 +457,7 @@ public class PaymentMainPanel extends FlippingPanel
 	 */
 	private void updateDisplay(final PayAccount activeAccount, final boolean a_bWarnIfNearlyEmpty)
 	{
-		if (activeAccount == null || PayAccountsFile.getInstance().getActiveAccount() != activeAccount)
+		if (PayAccountsFile.getInstance().getActiveAccount() != activeAccount)
 		{
 			return;
 		}
@@ -469,6 +469,7 @@ public class PaymentMainPanel extends FlippingPanel
 				// payment disabled
 				if (activeAccount == null)
 				{
+					m_labelValidUntil.setText("");
 					m_BalanceText.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 					m_BalanceText.setToolTipText(JAPMessages.getString(MSG_TT_CREATE_ACCOUNT));
 					m_BalanceText.setText(JAPMessages.getString(MSG_PAYMENTNOTACTIVE));
@@ -566,17 +567,19 @@ public class PaymentMainPanel extends FlippingPanel
 								m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 							}
 							else if (balance.getCredit() <= 0 && balance.getSpent() == 0 && !expired)
-							{
-								m_BalanceText.setText(JAPMessages.getString(AccountSettingsPanel.
-									MSG_NO_TRANSACTION));
+							{								
 								if (activeAccount.getTransCerts().size() > 0 &&	!activeAccount.isTransactionExpired())
 								{
+									m_BalanceText.setText(JAPMessages.getString(AccountSettingsPanel.
+											MSG_NO_TRANSACTION));
 									m_BalanceText.setToolTipText(JAPMessages.getString(AccountSettingsPanel.
 										MSG_SHOW_TRANSACTION_DETAILS));
 									m_BalanceText.setForeground(Color.blue);
 								}
 								else
 								{
+									m_BalanceText.setText("");
+									m_BalanceText.setToolTipText(null);
 									m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 								}
 							}
@@ -705,7 +708,7 @@ public class PaymentMainPanel extends FlippingPanel
 		 */
 		public boolean accountCertRequested(final MixCascade a_connectedCascade)
 		{
-			final PayAccountsFile accounts = PayAccountsFile.getInstance();
+			final PayAccountsFile payAccounts = PayAccountsFile.getInstance();
 			boolean bSuccess = true;
 			
 			final JAPDialog.LinkedInformationAdapter adapter =			
@@ -738,9 +741,9 @@ public class PaymentMainPanel extends FlippingPanel
 			Runnable run = null;
 			final String strMessage = ""; //JAPMessages.getString(MSG_FREE_OF_CHARGE) + "<br><br>";
 
-			if (accounts.getNumAccounts() == 0  ||
-				(accounts.getActiveAccount() != null &&
-				 !accounts.getActiveAccount().getBI().getId().equals(a_connectedCascade.getPIID())))
+			final PayAccount account = payAccounts.getActiveAccount();
+			if (payAccounts.getNumAccounts() == 0  ||
+				(account != null && !account.getBI().getId().equals(a_connectedCascade.getPIID())))
 			{
 				JAPController.getInstance().setAnonMode(false);
 				bSuccess = false;
@@ -780,7 +783,7 @@ public class PaymentMainPanel extends FlippingPanel
 			}
 			else
 			{
-				if (accounts.getActiveAccount() == null)
+				if (account == null)
 				{
 					JAPController.getInstance().setAnonMode(false);
 					bSuccess = false;
@@ -794,7 +797,7 @@ public class PaymentMainPanel extends FlippingPanel
 						}
 					};
 				}
-				else if (!accounts.getActiveAccount().isCharged(new Timestamp(System.currentTimeMillis())))
+				else if (!account.isCharged(new Timestamp(System.currentTimeMillis())))
 				{
 					JAPController.getInstance().setAnonMode(false);
 					bSuccess = false;
@@ -805,11 +808,12 @@ public class PaymentMainPanel extends FlippingPanel
 						{
 							String message = strMessage +
 								JAPMessages.getString(MSG_PAYMENT_ERRORS[XMLErrorMessage.ERR_ACCOUNT_EMPTY]) +
-								" ";							
-							if (accounts.getActiveAccount().getBalance().getSpent() <= 0 &&
-								!accounts.getActiveAccount().hasExpired())
+								" ";
+							boolean bOpenTransaction = false;
+							if (account.getBalance().getSpent() <= 0 && !account.hasExpired())
 							{
 								message += JAPMessages.getString(MSG_OPEN_TRANSACTION);
+								bOpenTransaction = true;
 							}
 							else
 							{
@@ -833,7 +837,14 @@ public class PaymentMainPanel extends FlippingPanel
 							if (answer == JAPDialog.RETURN_VALUE_YES)
 							{
 								JAPController.getInstance().setAllowPaidServices(true);
-								m_view.showConfigDialog(JAPConf.PAYMENT_TAB, a_connectedCascade.getPIID());
+								if (bOpenTransaction)
+								{
+									m_view.showConfigDialog(JAPConf.PAYMENT_TAB, account);
+								}
+								else
+								{
+									m_view.showConfigDialog(JAPConf.PAYMENT_TAB, a_connectedCascade.getPIID());
+								}
 								//m_view.showConfigDialog(JAPConf.PAYMENT_TAB, new Boolean(true));
 							}
 							else if (answer == JAPDialog.RETURN_VALUE_NO)

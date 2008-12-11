@@ -1319,16 +1319,17 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				}
 				else if (balance.getSpent() == 0 && !expired)
 				{
-					bTransaction = false;
-					m_labelVolume.setText(JAPMessages.getString(MSG_NO_TRANSACTION));
+					bTransaction = false;					
 					if (selectedAccount.getTransCerts().size() > 0 && !selectedAccount.isTransactionExpired() )
 					{
+						m_labelVolume.setText(JAPMessages.getString(MSG_NO_TRANSACTION));
 						m_labelVolume.setToolTipText(JAPMessages.getString(MSG_SHOW_TRANSACTION_DETAILS));
 						m_labelVolume.setForeground(Color.blue);
 						m_labelVolume.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 					}
 					else
 					{
+						m_labelVolume.setText("");
 						m_labelVolume.setToolTipText(null);
 						m_labelVolume.setForeground(m_labelValid.getForeground());
 						m_labelVolume.setCursor(Cursor.getDefaultCursor());
@@ -1430,7 +1431,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	}
 
 	/**
-	 * returns the selected (active) account
+	 * returns the selected account
 	 * @return PayAccount
 	 */
 	private PayAccount getSelectedAccount()
@@ -1442,6 +1443,39 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		catch (Exception a_e)
 		{
 			return null;
+		}
+	}
+	
+	/**
+	 * Backup an account that has not yet been saved. First try the active account,
+	 * otherwise take a random unsaved account.
+	 */
+	public void backupAccount()
+	{
+		PayAccount account = PayAccountsFile.getInstance().getActiveAccount();
+		Enumeration enumAccounts;
+		
+		if (account == null)
+		{
+			return;
+		}
+		
+		if (!account.isBackupDone())
+		{
+			doExportAccount(account);
+		}
+		else
+		{
+			enumAccounts = PayAccountsFile.getInstance().getAccounts();
+			while (enumAccounts.hasMoreElements())
+			{
+				account = (PayAccount)enumAccounts.nextElement();
+				if (!account.isBackupDone())
+				{
+					doExportAccount(account);
+					break;
+				}
+			}
 		}
 	}
 
@@ -2803,8 +2837,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				Object value = doIt.getValue();
 				if (vecTan.size() == 0 && value != null && value instanceof PayAccount)
 				{
-					PayAccountsFile.getInstance().deleteAccount(
-						( (PayAccount) value).getAccountNumber());
+					PayAccountsFile.getInstance().deleteAccount(( (PayAccount) value));
 				}
 
 				updateAccountList();
@@ -2861,7 +2894,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		PayAccountsFile accounts = PayAccountsFile.getInstance();
 		try
 		{
-			accounts.setActiveAccount(selectedAccount.getAccountNumber());
+			accounts.setActiveAccount(selectedAccount);
 		}
 		catch (Exception ex)
 		{
@@ -2978,7 +3011,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			if (JAPController.getInstance().getPaymentPassword() != null)
 			{
 				p = new PasswordContentPane(d, PasswordContentPane.PASSWORD_CHANGE,
-											JAPMessages.getString(MSG_EXPORTENCRYPT))
+											JAPMessages.getString(MSG_EXPORTENCRYPT, "" + 
+													selectedAccount.getAccountNumber()))
 				{
 					public char[] getComparedPassword()
 					{
@@ -2999,7 +3033,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			else
 			{
 				p = new PasswordContentPane(d, PasswordContentPane.PASSWORD_NEW,
-											JAPMessages.getString(MSG_EXPORTENCRYPT))
+											JAPMessages.getString(MSG_EXPORTENCRYPT, "" + 
+													selectedAccount.getAccountNumber()))
 				{
 					public String getNewPasswordLabel()
 					{
@@ -3399,7 +3434,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			try
 			{
 				m_listAccounts.clearSelection();
-				accounts.deleteAccount(selectedAccount.getAccountNumber());
+				accounts.deleteAccount(selectedAccount);
 				updateAccountList();
 				doShowDetails(getSelectedAccount());
 			}
