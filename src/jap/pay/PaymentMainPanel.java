@@ -476,6 +476,9 @@ public class PaymentMainPanel extends FlippingPanel
 					m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 					m_BalanceProgressBar.setValue(0);
 					m_BalanceProgressBar.setEnabled(false);
+					m_spentThisSession = 0;
+					m_labelSessionSpent.setText("");
+					m_labelTotalSpent.setText("");
 				}
 				// we got everything under control, situation normal
 				else
