@@ -130,7 +130,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 			{
 			   m_strEmail = subject.getEmailAddress();
 			}
-
+			
 			// get the URL
 			AbstractX509Extension extension =
 				a_certificate.getExtensions().getExtension(X509SubjectAlternativeName.IDENTIFIER);

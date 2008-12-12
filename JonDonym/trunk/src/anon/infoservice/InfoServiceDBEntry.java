@@ -1171,12 +1171,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				}
 				else if(a_getter.m_dbEntryClass == TermsAndConditions.class)
 				{
-					// the t&c operator data needs his own document to find and transform nodes
-					Document d = XMLUtil.createDocument();
-					Node node = XMLUtil.importNode(d, entryNode, true);
-					d.appendChild(node);
-					
-					currentEntry = new TermsAndConditions(d, true);
+					currentEntry = new TermsAndConditions(entryNode);
 				}
 				else if (a_getter.m_dbEntryClass == MixCascade.class)
 				{
@@ -1271,16 +1266,14 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			throw (new Exception("Error in XML structure for mix with ID " + a_id));
 		}
 		
-		Document d = XMLUtil.createDocument();
-
-		Node node = XMLUtil.importNode(d, nodes.item(0), true);
-		d.appendChild(node);
-		TermsAndConditionsFramework framework = new TermsAndConditionsFramework(d);
+		Element el = (Element) nodes.item(0);
+		
+		TermsAndConditionsFramework framework = new TermsAndConditionsFramework(el, true);
 		/* check the signature */
 		if (!framework.isVerified())
 		{
 			/* signature is invalid -> throw an exception */
-			throw (new Exception("Cannot verify the signature for Mix entry: " + XMLUtil.toString(node)));
+			throw (new Exception("Cannot verify the signature for Mix entry: " + XMLUtil.toString(el)));
 		}
 		/* signature was valid */
 		return framework;

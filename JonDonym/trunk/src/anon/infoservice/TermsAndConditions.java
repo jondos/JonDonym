@@ -1,7 +1,10 @@
 package anon.infoservice;
 
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
+import java.util.Locale;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -9,6 +12,7 @@ import logging.LogType;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
@@ -26,6 +30,7 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	public static int TERMS_AND_CONDITIONS_TTL = 1000*60*60*24;
 	
 	public static final String XML_ATTR_TIME_ACCEPTED = "timeAccepted";
+	public static final String XML_ATTR_DATE = "date";
 	
 	public static String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsList";
 	public static String XML_ELEMENT_NAME = "TermsAndConditions";
@@ -44,6 +49,7 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	public String m_referenceId;
 	
 	public String m_locale;
+	public Date m_date;
 	
 	public long m_lastUpdate;
 	public long m_serial;
@@ -54,9 +60,14 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 
 	private CertPath m_certPath = null;
 	
-	public TermsAndConditions(Document a_doc, boolean m_bJAPContext) throws XMLParseException
+	public TermsAndConditions(Element a_elem) throws XMLParseException
 	{
-		super(m_bJAPContext ? Long.MAX_VALUE : System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
+		this(XMLUtil.createDocumentFromElement(a_elem), true);
+	}
+	
+	public TermsAndConditions(Document a_doc, boolean a_bJAPContext) throws XMLParseException
+	{
+		super(a_bJAPContext ? Long.MAX_VALUE : System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
 		
 		m_doc = a_doc;
 		m_xmlData = a_doc.getDocumentElement();
@@ -65,9 +76,15 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		m_strId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_ID, null);
 		m_referenceId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_REFERENCE_ID, "");
 		
+		ParsePosition p = new ParsePosition(0);
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+		m_date = df.parse(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, null), p);
+		
 		StringTokenizer token = new StringTokenizer(m_strId, "_");
-
-		if(token.countTokens() >= 1)
+		
+		int tokens = token.countTokens();
+		
+		if(tokens >= 1)
 		{
 			// extract the ski
 			m_ski = token.nextToken();
@@ -77,7 +94,7 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 			m_ski = null;
 		}
 		
-		if(token.countTokens() >= 2)
+		if(tokens >= 2)
 		{
 			// extract the locale
 			m_locale = token.nextToken();
@@ -151,6 +168,11 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		return m_serial;
 	}
 	
+	public Date getDate()
+	{
+		return m_date;
+	}
+	
 	public Element getXmlStructure()
 	{
 		return m_xmlData;
@@ -189,20 +211,42 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		return m_certificate;
 	}
 	
-	public static TermsAndConditions getById(String a_id)
+	public static TermsAndConditions getById(String a_id, Locale a_locale)
 	{
-		// first look if it's in our database
-		TermsAndConditions tc = (TermsAndConditions) Database.getInstance(TermsAndConditions.class).getEntryById(a_id);
+		String lang = a_locale.getLanguage();
+		Database db = Database.getInstance(TermsAndConditions.class);
 		
-		return tc;
-		
-		// not found, force an update and try again
-		/*if (JAPController.getInstance().getTermsUpdater() != null)
+		if(lang.equals("en"))
 		{
-			JAPController.getInstance().getTermsUpdater().update();
+			return (TermsAndConditions) db.getEntryById(a_id);
 		}
 		
-		// return the entry if found, otherwise null
-		return (TermsAndConditions) Database.getInstance(TermsAndConditions.class).getEntryById(a_id);*/
+		TermsAndConditions tc = (TermsAndConditions) db.getEntryById(a_id + "_" + lang);
+		
+		// localized version not found, try the English one
+		if(tc == null)
+		{
+			return (TermsAndConditions) db.getEntryById(a_id); 
+		}
+		
+		return tc;
+	}
+	
+	public boolean equals(Object a_object)
+	{
+		boolean objectEquals = false;
+		if (a_object != null)
+		{
+			if (a_object instanceof TermsAndConditions)
+			{
+				objectEquals = this.getId().equals( ( (TermsAndConditions) a_object).getId());
+			}
+		}
+		return objectEquals;
+	}
+	
+	public int hashCode()
+	{
+		return (getId().hashCode());
 	}
 }
