@@ -28,9 +28,9 @@ class="jconf">InfoService</code> from the list on the left side.</em><br>
 <p>The InfoService delivers necessary information to JonDo about available
 services and updates. Multiple InfoSerivces of different organizations are
 available in JonDonym. They share and match their data so that they all have
-the same information in the end. This ensures availabilty of the information.
-Most information is requested redundantly so that no single InfoService may
-fake or conceal information.</p>
+the same information in the end. This ensures availability of the
+information. Most information is requested redundantly so that no single
+InfoService may fake or conceal information.</p>
 
 <p><b>Please beware</b><br>
 Changing these settings may render JonDo incapable of discovering any
@@ -102,24 +102,35 @@ following actions:
 
 <h3>Advanced Settings</h3>
 <ul>
-  <li><p><a name="infoservice_auto"></a><b>Enable automatic InfoService requests</b><br>
-    JonDo regularly attempts to connect to the InfoService to update the
-    information saved locally. If this checkbox is not set these automatic
-    connections will cease. <strong>You have to update the InfoService data
-    by clicking the different refresh buttons in the respective windows
-    regularly. Otherwise program functionality may not be
+  <li><p><b>Anonymous connections to InfoServices</b><br>
+    <em>Only (no direct connection available)</em> makes JonDo connect to
+    InfoServices through the currently active JonDonym service if the
+    respective InfoService is not available through a direct connection. This
+    could for example be the case if your ISP blocks access to the
+    InfoService. </p>
+    <p><em>Always (deny non-anonymous connection)</em> will result in
+    InfoServices being contacted only through JonDonym services. <strong>By
+    setting this, you may under circumstances no longer be able to receive
+    updated information about the JonDonym network, and as a consequence, no
+    longer, or only to some extent, be able to connect to anonymization
+    services.</strong></p>
+    <em>Never (only allow direct connection)</em> can make sense if you want
+    to cut cost. For <strong>InfoService data transmitted through premium
+    JonDonym services will for compelling technical reasons be accounted for
+    just like any other user data</strong>. This setting blocks any requests
+    of InfoService data through the anonymous connection.<br>
+  </li>
+  <li><p><a name="infoservice_auto"></a><b>Enable automatic InfoService
+    requests</b><br>
+    JonDo regularly attempts to connect to the InfoServices to update the
+    information saved locally. If this box is not checked these automatic
+    connections will cease. <strong>You will then have to update the
+    InfoService data by clicking the different refresh buttons in the
+    respective windows regularly. Otherwise program functionality may not be
     guaranteed.</strong> </p>
   </li>
-  <li><p><b>Allow non-anonymous (direct) connections to InfoServices</b><br>
-    If activated, JonDo can connect to InfoServices even if you have no
-    anonymized connection available. This is the recommended setting as there
-    is really no need to be anonymous to the InfoServices.<br>
-    If this option is deactivated, information from InfoServices may be
-    gathered through anonymized connections only. <strong>This may make it
-    impossible to connect to InfoServices at all.</strong>.<br>
-    </p>
-  </li>
-  <li><p><a name="infoservice_redundat"></a><b>Do redundant requests to different InfoServices</b><br>
+  <li><p><a name="infoservice_redundat"></a><b>Do redundant requests to
+    different InfoServices</b><br>
     Define how many InfoServices will be queried. If you set this value to
     <code>3</code>, for example, JonDo will always try to reach 3
     InfoServices for the requested information. Should one of them be offline
