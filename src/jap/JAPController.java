@@ -93,6 +93,7 @@ import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.infoservice.ProxyInterface;
+import anon.infoservice.TermsAndConditionsFramework;
 import anon.mixminion.MixminionServiceDescription;
 import anon.mixminion.mmrdescription.MMRList;
 import anon.pay.BIConnection;
@@ -132,6 +133,7 @@ import jap.pay.AccountUpdater;
 import jap.TermsAndConditionsUpdater;
 import anon.infoservice.ClickedMessageIDDBEntry;
 import anon.client.TrustException;
+import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
 import anon.infoservice.TermsAndConditions;
 
 /* This is the Controller of All. It's a Singleton!*/
@@ -2024,11 +2026,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 				Database.getInstance(CascadeIDEntry.class).update(
 								new CascadeIDEntry(m_currentMixCascade));
 				
-				Element elemTCs = (Element) XMLUtil.getFirstChildByName(root, JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
+				Element elemAcceptedTCs = (Element) XMLUtil.getFirstChildByName(root, JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
 				
-				if(elemTCs != null)
+				if(elemAcceptedTCs != null)
 				{
-					NodeList list = elemTCs.getElementsByTagName(TermsAndConditions.XML_ELEMENT_NAME);
+					NodeList list = elemAcceptedTCs.getElementsByTagName(TermsAndConditions.XML_ELEMENT_NAME);
 					for(i = 0; i < list.getLength(); i++)
 					{
 						Node node = list.item(i);
@@ -2038,6 +2040,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 						acceptTermsAndConditions(ski, timestamp);
 					}
 				}
+				
+				Database.getInstance(TermsAndConditions.class).loadFromXml((Element) XMLUtil.getFirstChildByName(root,TermsAndConditions.XML_ELEMENT_CONTAINER_NAME));
+				Database.getInstance(TermsAndConditionsFramework.class).loadFromXml((Element) XMLUtil.getFirstChildByName(root,TermsAndConditionsFramework.XML_ELEMENT_CONTAINER_NAME));
 			}
 			catch (Exception e)
 			{
@@ -2937,7 +2942,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			
 			e.appendChild(JAPModel.getInstance().getRoutingSettings().toXmlElement(doc));
 			
-			Element elemTCs = doc.createElement(JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
+			Element elemAcceptedTCs = doc.createElement(JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
 			
 			Hashtable acceptedTCs = JAPModel.getInstance().getAcceptedTCs();
 			Enumeration keys = acceptedTCs.keys();
@@ -2950,11 +2955,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 				Element elemTC = doc.createElement(TermsAndConditions.XML_ELEMENT_NAME);
 				XMLUtil.setAttribute(elemTC, TermsAndConditions.XML_ATTR_ID, ski);
 				XMLUtil.setAttribute(elemTC, TermsAndConditions.XML_ATTR_TIME_ACCEPTED, timestamp.longValue());
-				elemTCs.appendChild(elemTC);
+				elemAcceptedTCs.appendChild(elemTC);
 			}
 
-			e.appendChild(elemTCs);
+			e.appendChild(elemAcceptedTCs);
 			
+			e.appendChild(Database.getInstance(TermsAndConditions.class).toXmlElement(doc));
+			e.appendChild(Database.getInstance(TermsAndConditionsFramework.class).toXmlElement(doc));
+
 			return doc;
 		}
 		catch (Throwable ex)
@@ -5236,6 +5244,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	
 	public boolean hasAcceptedTermsAndConditions(ServiceOperator a_op)
 	{
+		// TODO: check for newer TnCs
 		return (a_op == null) ? false : JAPModel.getInstance().getAcceptedTCs().containsKey(a_op.getId());
 	}
 	
@@ -5249,13 +5258,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 	
-	public void showTermsAndConditionsDialog(ServiceOperator a_op)
+	public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(ServiceOperator a_op)
 	{
 		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op, false); 
-		if(dlg.hasFoundTC())
+		
+		if(!dlg.hasError())
 		{
 			dlg.setVisible(true);
 		}
+		
+		return dlg.getReturnValues();
 	}
 
 	/**

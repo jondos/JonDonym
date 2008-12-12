@@ -781,4 +781,21 @@ public final class Util
 
 		return fieldValue;
 	}
+	
+	public static String colonizeSKI(String a_ski)
+	{
+		StringBuffer buff = new StringBuffer();
+		
+		for(int i = 0; i < a_ski.length(); i++)
+		{
+			buff.append(a_ski.charAt(i));
+			
+			if((i + 1) % 2 == 0 && i != a_ski.length() - 1)
+			{
+				buff.append(":");
+			}
+		}
+		
+		return buff.toString();
+	}
 }
