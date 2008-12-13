@@ -78,6 +78,7 @@ final class ISRuntimeStatistics
 		sb.append("</td></tr><tr><td>Total other than GET/POST Requests: </td><td>");
 		sb.append(ms_NumberFormat.format(ms_lNrOfOtherMethod));
 		sb.append("</td></tr><tr><td><br></td><td>");
+		/*
 		sb.append("</td></tr><tr><td>GET Requests for /mixcascadestatus/: </td><td>");
 		sb.append(ms_NumberFormat.format(ms_lNrOfGetMixCascadeStatusRequests));
 		sb.append("</td></tr><tr><td>GET Requests for /cascadeserials: </td><td>");
@@ -97,13 +98,14 @@ final class ISRuntimeStatistics
 		sb.append("</td></tr><tr><td>GET Requests for /tornodes: </td><td>");
 		sb.append(ms_NumberFormat.format(ms_lNrOfGetTorNodesRequests));
 		sb.append("</td></tr><tr><td>GET Requests for /currentjapversion: </td><td>");
-		sb.append(ms_NumberFormat.format(ms_lNrOfGetMinJapVersion));
+		sb.append(ms_NumberFormat.format(ms_lNrOfGetMinJapVersion));*/
 		sb.append("</td></tr><tr><td>GET Requests for /status: </td><td>");
 		sb.append(ms_NumberFormat.format(ms_lNrOfGetStatus));
+		/*
 		sb.append("</td></tr><tr><td>GET Requests for /performanceinfo: </td><td>");		
 		sb.append(ms_NumberFormat.format(ms_lNrOfPerformanceInfoRequests));
 		sb.append("</td></tr><tr><td>GET Requests for Payment: </td><td>");
-		sb.append(ms_NumberFormat.format(ms_lNrOfGetPaymentRequests));
+		sb.append(ms_NumberFormat.format(ms_lNrOfGetPaymentRequests));*/
 		sb.append("</td></tr><tr><td>Unknown Requests: </td><td>");
 		sb.append(ms_NumberFormat.format(ms_lNrOfUnknownRequests));
 		sb.append("</td></tr><tr><td><br></td><td>");

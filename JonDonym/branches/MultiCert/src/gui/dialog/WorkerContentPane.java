@@ -38,6 +38,7 @@ import java.util.Observer;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
+import anon.util.IReturnRunnable;
 import anon.util.ProgressCapsule;
 
 /**

@@ -35,17 +35,17 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.10.030"; //Never change the layout of this line!
-	public final static boolean m_bUnstableVersion = true; //Set to true if this is an unstable (development) Version
+	public static final String aktVersion = "00.10.046"; //Never change the layout of this line!
+	public final static boolean m_bUnstableVersion = false; //Set to true if this is an unstable (development) Version
 
 	
 	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2008-09-15 08:26:14 $";
 
 	//Warning: This is a little bit tricky,
 	//because CVS will expand the $Date: 2008-09-03 12:31:14 $
-	//to the date of the last commmit of this file
+	//to the date of the last commit of this file
 
-	//Never change the layout of the next two lines as serveal automated tools use these lines to do fancy things...
+	//Never change the layout of the next two lines as several automated tools use these lines to do fancy things...
 	public final static boolean m_bReleasedVersion = false; //Set to true if this is a stable (release) Version
 	private static final String RELEASE_DATE = "2008/08/06 12:11:16"; // Set only to a Value, if m_bReleaseVersion=true
 
@@ -57,7 +57,7 @@ public final class JAPConstants
 	//the update dialog
 	static
 	{ //This will set the strRealeaseDate to the correct Value
-		//This is ether the CVS_GENERATED_RELEASE_DATE or the RELEASE_DATE, if m_bReleasedVersion==true;
+		//This is either the CVS_GENERATED_RELEASE_DATE or the RELEASE_DATE, if m_bReleasedVersion==true;
 		if (m_bReleasedVersion)
 		{
 			strReleaseDate = RELEASE_DATE;
@@ -87,19 +87,19 @@ public final class JAPConstants
 	static final int DEFAULT_ANON_PORT_NUMBERS[] = {6544};
 
 	/**
-	 * The name of the default infoservice.
+	 * The names of the default infoservices.
 	 */
 	public static final String DEFAULT_INFOSERVICE_NAMES[] =
 		new String[]{"880D9306B90EC8309178376B43AC26652CE52B74",
 		"8FF9236BD03A12391D939219310597C830F3943A",
-		"6DA81C905C5818E2D95F45B6D6323EFB79F08137"};
+		"1E47E65976C6F7868047B6E9A06654B8AFF36A38"};
 	//new String[]{"1AF4734DD3AA5BD1A8A4A2EDACAD825C711E1770"};
 	public static final String DEFAULT_INFOSERVICE_HOSTNAMES[] =
-		new String[]{"infoservice.inf.tu-dresden.de", "87.230.56.74", "85.31.187.19"};
+		new String[]{"infoservice.inf.tu-dresden.de", "87.230.56.74", "78.129.146.44"};
 	//new String[]{"87.230.20.187"};
 
 	public static final int DEFAULT_INFOSERVICE_PORT_NUMBERS[][] =
-		{{80, 6543}, {80}, {80}};
+		{{80, 6543}, {80, 443}, {80, 443}};
 	//	{{80}};
 
 	/**
@@ -112,10 +112,6 @@ public final class JAPConstants
 	 * have also this timeout because of the same HTTPConnectionFactory).
 	 */
 	public static final int DEFAULT_INFOSERVICE_TIMEOUT = 30;
-
-	public static final boolean DEFAULT_ALLOW_INFOSERVICE_NON_ANONYMOUS_CONNECTION = true;
-	public static final boolean DEFAULT_ALLOW_PAYMENT_NON_ANONYMOUS_CONNECTION = true;
-	public static final boolean DEFAULT_ALLOW_UPDATE_NON_ANONYMOUS_CONNECTION = true;
 
 	public static final boolean REMIND_OPTIONAL_UPDATE = true;
 	public static final boolean REMIND_JAVA_UPDATE = true;
@@ -308,6 +304,7 @@ public final class JAPConstants
 	public final static String CONFIG_PAYMENT = "Payment";
 	public final static String CONFIG_ENCRYPTED_DATA = "EncryptedData";
 	public final static String CONFIG_JAP_FORWARDING_SETTINGS = "JapForwardingSettings";
+	public final static String CONFIG_ACCEPTED_TERMS_AND_CONDITIONS = "AcceptedTermsAndConditions";
 
 	/** Supported non-generic payment names. Comma-separated list. e.g. "CreditCard,DirectDebit"*/
 	public final static String PAYMENT_NONGENERIC="CreditCard";
@@ -318,7 +315,7 @@ public final class JAPConstants
 	 */
 	public static final long TIME_RESTART_AFTER_SOCKET_ERROR = 1000 * 60;
 
-	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr", "ru"}; // "zh", "ca", "es", "ru"}; //pt
+	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr"}; // "zh", "ca", "es", "ru"}; //pt
 
 	public static String[] getSupportedLanguages()
 	{

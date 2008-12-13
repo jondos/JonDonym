@@ -104,6 +104,7 @@ import anon.pay.xml.XMLTransCert;
 import anon.pay.xml.XMLTransactionOverview;
 import anon.pay.xml.XMLVolumePlan;
 import anon.pay.xml.XMLVolumePlans;
+import anon.util.IReturnRunnable;
 import anon.util.SingleStringPasswordReader;
 import anon.util.XMLUtil;
 import anon.util.captcha.ICaptchaSender;
@@ -114,7 +115,6 @@ import gui.dialog.CaptchaContentPane;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.IDialogOptions;
-import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.PasswordContentPane;
 import gui.dialog.SimpleWizardContentPane;
@@ -206,6 +206,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		"_createerror";
 	private static final String MSG_DIRECT_CONNECTION_FORBIDDEN = AccountSettingsPanel.class.getName() +
 		"_directConnectionForbidden";
+	private static final String MSG_ANON_CONNECTION_FORBIDDEN = AccountSettingsPanel.class.getName() +
+	"_anonConnectionForbidden";
 	private static final String MSG_NO_ANONYMITY_POSSIBLY_BLOCKED = AccountSettingsPanel.class.getName() +
 		"_noAnonymityPossiblyBlocked";
 	private static final String MSG_ERROR_FORBIDDEN = AccountSettingsPanel.class.getName() +
@@ -230,7 +232,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		"_encryptAccounts";
 	private static final String MSG_NOTEXPORTED = AccountSettingsPanel.class.
 		getName() + "_notexported";
-	private static final String MSG_CONNECTIONACTIVE = AccountSettingsPanel.class.
+	private static final String MSG_CONNECTIONACTIVE_SELECT_QUESTION = AccountSettingsPanel.class.
 		getName() + "_connectionactive";
 	private static final String MSG_CONNECTIONACTIVE_QUESTION = AccountSettingsPanel.class.
 		getName() + "_connectionActiveQuestion";
@@ -330,6 +332,10 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	private static final String MSG_TERMS_AND_COND_HINT =
 		AccountSettingsPanel.class.getName() + "_termsAndConditionsHint";
 	
+	private static final String MSG_THANK_YOU = AccountSettingsPanel.class.getName() + "_thankYou";
+	
+	
+	
 	private static final String MSG_CHARGING_SUCCESSFUL = AccountSettingsPanel.class.getName() + "_chargingSuccessful";
 
 
@@ -362,7 +368,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	private JButton m_btnReload;
 	private JButton m_btnActivate;
 	private JCheckBox m_cbxShowPaymentConfirmation;
-	private JCheckBox m_cbxAllowNonAnonymousConnection;
+	private JComboBox m_comboAnonymousConnection;
 	private JCheckBox m_cbxShowAIErrors;
 	private JCheckBox m_cbxBalanceAutoUpdateEnabled;
 	private JCheckBox m_cbxAskIfNotSaved;
@@ -696,12 +702,22 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		advancedPanelConstraints.gridy = 0;
 		advancedPanelConstraints.insets = new Insets(5, 5, 10, 5);
 
-		panelAdvanced.add(m_cbxShowPaymentConfirmation, advancedPanelConstraints);
-
-		m_cbxAllowNonAnonymousConnection = new JCheckBox(JAPMessages.getString(MSG_ALLOW_DIRECT_CONNECTION));
-
+		JPanel pnlAnonymousConnection = new JPanel();
+		pnlAnonymousConnection.add(new JLabel(JAPMessages.getString(MSG_ALLOW_DIRECT_CONNECTION) + ":"));
+		String[] choiceAnonConnection = JAPModel.getMsgConnectionAnonymous();
+		for (int i = 0; i < choiceAnonConnection.length; i++)
+		{
+			choiceAnonConnection[i] = JAPMessages.getString(choiceAnonConnection[i]);
+		}
+		m_comboAnonymousConnection = new JComboBox(choiceAnonConnection);
+		pnlAnonymousConnection.add(m_comboAnonymousConnection);
+		panelAdvanced.add(pnlAnonymousConnection, advancedPanelConstraints);
+				
 		advancedPanelConstraints.gridy = 1;
-		panelAdvanced.add(m_cbxAllowNonAnonymousConnection, advancedPanelConstraints);
+		
+		panelAdvanced.add(m_cbxShowPaymentConfirmation, advancedPanelConstraints);
+		
+		
 
 		advancedPanelConstraints.gridy = 2;
 		m_cbxShowAIErrors = new JCheckBox(JAPMessages.getString(MSG_SHOW_AI_ERRORS));
@@ -1254,9 +1270,11 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			}
 			else
 			{
+				long deposit = balance.getDeposit();
+				boolean bTransaction = true;
 				m_labelStatementDate.setText(JAPUtil.formatTimestamp(balance.getTimestamp(), true,
 					JAPMessages.getLocale().getLanguage()));
-				m_labelDeposit.setText(JAPUtil.formatEuroCentValue(balance.getDeposit()));
+				
 				m_labelSpent.setText(JAPUtil.formatBytesValueWithUnit(balance.getSpent()));
 				//m_labelBalance.setText(JAPUtil.formatEuroCentValue(balance.getBalance()));
 
@@ -1290,10 +1308,11 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 										   (expired ? ")" : "")));
 					m_labelVolume.setForeground(m_labelValid.getForeground());
 					m_labelVolume.setToolTipText(null);
-					m_labelVolume.setCursor(Cursor.getDefaultCursor());
+					m_labelVolume.setCursor(Cursor.getDefaultCursor());					
 				}
 				else if (balance.getSpent() == 0 && !expired)
 				{
+					bTransaction = false;
 					m_labelVolume.setText(JAPMessages.getString(MSG_NO_TRANSACTION));
 					if (selectedAccount.getTransCerts().size() > 0 && !selectedAccount.isTransactionExpired() )
 					{
@@ -1315,6 +1334,16 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					m_labelVolume.setForeground(m_labelValid.getForeground());
 					m_labelVolume.setCursor(Cursor.getDefaultCursor());
 				}
+				
+				if (deposit <= 0 && bTransaction)
+				{
+					m_labelDeposit.setText(JAPMessages.getString(MSG_COUPON));
+				}
+				else
+				{
+					m_labelDeposit.setText(JAPUtil.formatEuroCentValue(deposit));
+				}
+				
 				/*
 				   m_labelValid.setText(JAPUtil.formatTimestamp(balance.getValidTime(), true,
 					JAPController.getInstance().getLocale().getLanguage()));
@@ -1336,7 +1365,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				else
 				{
 					//long dep = balance.getVolumeBytesLeft()*1000 + balance.getSpent();
-					long deposit = PaymentMainPanel.FULL_AMOUNT * 1000;
+					deposit = PaymentMainPanel.FULL_AMOUNT * 1000;
 					long credit = balance.getCredit() * 1000;
 					double percent = (double) credit / (double) deposit;
 
@@ -1961,8 +1990,10 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					{
 						messagesToShow.addElement(passiveError);
 					}
-
-				}
+				}				
+				
+				messagesToShow.addElement(JAPMessages.getString(MSG_THANK_YOU));
+				
 				//combine messages and set text
 				String combinedString = "";
 				String stringToAdd;
@@ -2807,12 +2838,15 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	private void doSelectAccount(PayAccount selectedAccount)
 	{
+		boolean bDisconnected = false;
+		
 		if (selectedAccount == null)
 		{
 			return;
 		}
 
-		if (JAPController.getInstance().getAnonMode() && !hasDisconnected())
+		if (JAPController.getInstance().getAnonMode() && 
+			!(bDisconnected = hasDisconnected(true)))
 		{
 			return;
 		}
@@ -2826,6 +2860,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		{
 			JAPDialog.showErrorDialog(GUIUtils.getParentWindow(this.getRootPanel()),
 									  JAPMessages.getString("Could not select account!"), LogType.PAY, ex);
+		}
+		
+		if (bDisconnected)
+		{
+			// re-establish connection
+			reconnect();
 		}
 	}
 
@@ -3243,17 +3283,18 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		}
 	}
 
-	private boolean hasDisconnected()
+	private boolean hasDisconnected(boolean a_bSelect)
 	{
 		if (JAPDialog.RETURN_VALUE_OK ==
 			JAPDialog.showConfirmDialog(GUIUtils.getParentWindow(getRootPanel()),
-										JAPMessages.getString(MSG_CONNECTIONACTIVE_QUESTION),
+					(a_bSelect?JAPMessages.getString(MSG_CONNECTIONACTIVE_SELECT_QUESTION):
+										JAPMessages.getString(MSG_CONNECTIONACTIVE_QUESTION)),
 										JAPMessages.getString(JAPDialog.MSG_TITLE_WARNING),
 										new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL)
 		{
 			public String getYesOKText()
 			{
-				return JAPMessages.getString(JAPDialog.MSG_PROCEED);
+				return JAPMessages.getString(JAPDialog.MSG_BTN_PROCEED);
 			}
 		}, JAPDialog.MESSAGE_TYPE_WARNING, null))
 		{
@@ -3288,6 +3329,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	private void doDeleteAccount(PayAccount selectedAccount)
 	{
+		boolean bDisconnected = false;
+		
 		if (selectedAccount == null)
 		{
 			return;
@@ -3298,9 +3341,9 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		String message;
 
 		if (accounts.getActiveAccount() == selectedAccount && JAPController.getInstance().getAnonMode() &&
-			!hasDisconnected())
+			!(bDisconnected = hasDisconnected(false)))
 		{
-				return;
+			return;
 		}
 		
 		balance = selectedAccount.getBalance();
@@ -3359,19 +3402,36 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 										  JAPMessages.getString(MSG_ERROR_DELETING), LogType.MISC, a_ex);
 			}
 		}
+		
+		if (bDisconnected)
+		{
+			// re-establish connection
+			reconnect();
+		}
 	}
+	
+	private void reconnect()
+	{
+		MixCascade cascade = JAPController.getInstance().getCurrentMixCascade();
+		PayAccount account = PayAccountsFile.getInstance().getActiveAccount();
+		PaymentInstanceDBEntry pi = null;
+		if (account != null)
+		{
+			pi = account.getBI();
+		}
+		
+		if (!cascade.isPayment() || 
+			(cascade.getPIID() != null && pi.getId().equals(cascade.getPIID())) &&
+			account.isCharged(new Timestamp(System.currentTimeMillis())))
+		{
+			JAPController.getInstance().setAnonMode(true);
+		}
+	}
+	
 
 	public String getHelpContext()
 	{
-		int index = 0;
-		index = m_tabPane.getSelectedIndex();
-		switch (index)
-		{
-			case 1:
-				return "payment_extend";
-			default:
-				return "payment_account";
-		}
+		return "payment";
 	}
 
 	/**
@@ -3390,7 +3450,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	protected boolean onOkPressed()
 	{
 		JAPController.getInstance().setDontAskPayment(!m_cbxShowPaymentConfirmation.isSelected());
-		JAPModel.getInstance().allowPaymentViaDirectConnection(m_cbxAllowNonAnonymousConnection.isSelected());
+		JAPModel.getInstance().setPaymentAnonymousConnectionSetting(m_comboAnonymousConnection.getSelectedIndex());
 		PayAccountsFile.getInstance().setIgnoreAIAccountError(!m_cbxShowAIErrors.isSelected());
 		PayAccountsFile.getInstance().setBalanceAutoUpdateEnabled(m_cbxBalanceAutoUpdateEnabled.isSelected());
 		JAPController.getInstance().setAskSavePayment(m_cbxAskIfNotSaved.isSelected());
@@ -3417,7 +3477,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	protected void onResetToDefaultsPressed()
 	{
 		m_cbxShowPaymentConfirmation.setSelected(true);
-		m_cbxAllowNonAnonymousConnection.setSelected(true);
+		m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 		m_cbxShowAIErrors.setSelected(true);
 		m_cbxAskIfNotSaved.setSelected(true);
 		m_cbxBalanceAutoUpdateEnabled.setSelected(true);
@@ -3430,19 +3490,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	protected void onUpdateValues()
 	{
 		m_cbxShowPaymentConfirmation.setSelected(!JAPController.getInstance().getDontAskPayment());
-		m_cbxAllowNonAnonymousConnection.setSelected(
-			JAPModel.getInstance().isPaymentViaDirectConnectionAllowed());
+		m_comboAnonymousConnection.setSelectedIndex(
+			JAPModel.getInstance().getPaymentAnonymousConnectionSetting());
 		m_cbxAskIfNotSaved.setSelected(JAPController.getInstance().isAskSavePayment());
 		m_cbxShowAIErrors.setSelected(!PayAccountsFile.getInstance().isAIAccountErrorIgnored());
 		m_cbxBalanceAutoUpdateEnabled.setSelected(PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled());
 		setConnectionTimeout(BIConnection.getConnectionTimeout());
-		/*
-		   PayAccountsFile accounts = PayAccountsFile.getInstance();
-		   Enumeration enumAccounts = accounts.getAccounts();
-		   while (enumAccounts.hasMoreElements())
-		   {
-		 PayAccount a = (PayAccount) enumAccounts.nextElement();
-		   }*/
 	}
 
 	public void valueChanged(ListSelectionEvent e)
@@ -3467,7 +3520,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 									  PaymentMainPanel.translateBIError( (XMLErrorMessage) a_e), LogType.PAY);
 		}
 		else if (!JAPModel.getInstance().isAnonConnected() &&
-				 !JAPModel.getInstance().isPaymentViaDirectConnectionAllowed())
+				 JAPModel.getInstance().getPaymentAnonymousConnectionSetting() == JAPModel.CONNECTION_FORCE_ANONYMOUS)
 		{
 			int answer =
 				JAPDialog.showConfirmDialog(a_parent,
@@ -3475,8 +3528,21 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 											JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
 			if (answer == JAPDialog.RETURN_VALUE_YES)
 			{
-				m_cbxAllowNonAnonymousConnection.setSelected(true);
-				JAPModel.getInstance().allowPaymentViaDirectConnection(true);
+				m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+				JAPModel.getInstance().setPaymentAnonymousConnectionSetting(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+			}
+		}
+		else if (JAPModel.getInstance().isAnonConnected() &&
+				 JAPModel.getInstance().getPaymentAnonymousConnectionSetting() == JAPModel.CONNECTION_BLOCK_ANONYMOUS)
+		{
+			int answer =
+				JAPDialog.showConfirmDialog(a_parent,
+											JAPMessages.getString(MSG_ANON_CONNECTION_FORBIDDEN),
+											JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
+			if (answer == JAPDialog.RETURN_VALUE_YES)
+			{
+				m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+				JAPModel.getInstance().setPaymentAnonymousConnectionSetting(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 			}
 		}
 		else if (!JAPModel.getInstance().isAnonConnected())

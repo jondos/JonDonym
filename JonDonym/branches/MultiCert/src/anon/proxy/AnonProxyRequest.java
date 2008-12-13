@@ -114,7 +114,7 @@ public final class AnonProxyRequest implements Runnable
 			firstByte = m_InSocket.read();
 		}
 		catch (InterruptedIOException ex)
-		{ // no request received so fare - asume
+		{ // no request received so fare - assume
 			// SMTP, where we have to sent something
 			// first
 			try
@@ -242,6 +242,7 @@ public final class AnonProxyRequest implements Runnable
 			aktPos = 1;
 		}
 		byte[] buff = null;
+		byte[] dsChunk = null;
 		try
 		{
 			m_InChannel = newChannel.getInputStream();
@@ -284,7 +285,12 @@ public final class AnonProxyRequest implements Runnable
 				{
 					if(m_callbackHandler != null)
 					{
-						byte[] dsChunk = m_callbackHandler.deliverUpstreamChunk(this, buff, len);
+						dsChunk = m_callbackHandler.deliverUpstreamChunk(this, buff, len);
+						if(dsChunk == null)
+						{
+							aktPos = 0;
+							continue;
+						}
 						if(dsChunk != buff)
 						{
 							m_OutChannel.write(dsChunk);
@@ -311,10 +317,20 @@ public final class AnonProxyRequest implements Runnable
 					 * it out).
 					 * Solution: Send the remaining bytes again in the next write-call.
 					 */
-					byte[] tempBuff = new byte[buff.length - e.getBytesSent()];
-					System.arraycopy(buff, e.getBytesSent(), tempBuff, 0, tempBuff.length);
-					System.arraycopy(tempBuff, 0, buff, 0, tempBuff.length);
-					aktPos = tempBuff.length;
+					if(m_callbackHandler != null)
+					{
+						/*callback processing has most likely caused this exception
+						 * and needs another handling.
+						 */
+						sendRemainingBytesRecursion(dsChunk, e.getBytesSent(), m_OutChannel);
+					}
+					else
+					{
+						byte[] tempBuff = new byte[buff.length - e.getBytesSent()];
+						System.arraycopy(buff, e.getBytesSent(), tempBuff, 0, tempBuff.length);
+						System.arraycopy(tempBuff, 0, buff, 0, tempBuff.length);
+						aktPos = tempBuff.length;
+					}
 				}
 				// LogHolder.log(LogLevel.DEBUG,LogType.NET,"Channel
 				// "+Integer.toString(m_Channel.hashCode())+" Request Len: "+re+" Read:
@@ -323,14 +339,42 @@ public final class AnonProxyRequest implements Runnable
 				Thread.yield();
 			}
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
 			LogHolder.log(LogLevel.DEBUG,LogType.NET,"Exception in AnonProxyRequest - upstream loop.", e );
+		}
+		catch ( ChunkNotProcessableException cnpe)
+		{
+			try 
+			{
+				m_OutSocket.write(cnpe.getErrorResponse());
+			} 
+			catch (IOException e) 
+			{
+			}
+			LogHolder.log(LogLevel.ERR,LogType.NET,"chunk could not be processed. Terminating",  cnpe );
 		}
 		closeRequest();
 		m_Proxy.decNumChannels();
 	}
 
+	private static void sendRemainingBytesRecursion(byte[] overfullBuffer, 
+													int sentBytes, 
+													OutputStream outputStream) throws IOException
+	{
+		byte[] tempBuff = new byte[overfullBuffer.length - sentBytes];
+		System.arraycopy(overfullBuffer, sentBytes, tempBuff, 0, tempBuff.length);
+		System.arraycopy(tempBuff, 0, overfullBuffer, 0, tempBuff.length);
+		try
+		{
+			outputStream.write(tempBuff);
+		}
+		catch(TooMuchDataForPacketException e)
+		{
+			sendRemainingBytesRecursion(tempBuff, e.getBytesSent(), outputStream);
+		}
+	}
+	
 	private synchronized void closeRequest()
 	{
 		if (m_bRequestIsAlive)
@@ -369,6 +413,10 @@ public final class AnonProxyRequest implements Runnable
 		catch (Throwable t)
 		{
 		}
+		if(m_callbackHandler != null)
+		{
+			m_callbackHandler.closeRequest(this);
+		}
 	}
 
 	final class Response implements Runnable
@@ -384,9 +432,14 @@ public final class AnonProxyRequest implements Runnable
 			
 			try 
 			{	
-				len = m_InChannel.read(buff, 0, CHUNK_SIZE);
-				while ( len > 0)
+				
+mainLoop:		do
 				{
+					len = m_InChannel.read(buff, 0, CHUNK_SIZE);
+					if(len <= 0)
+					{
+						break;
+					}
 					int count = 0;
 					for (; ; )
 					{
@@ -395,6 +448,10 @@ public final class AnonProxyRequest implements Runnable
 							if(m_callbackHandler != null)
 							{
 								byte[] dsChunk = m_callbackHandler.deliverDownstreamChunk(AnonProxyRequest.this, buff, len);
+								if(dsChunk == null)
+								{
+									continue mainLoop;
+								}
 								if(dsChunk != buff)
 								{
 									m_OutSocket.write(dsChunk);
@@ -420,43 +477,47 @@ public final class AnonProxyRequest implements Runnable
 						count++;
 						if (count > 3)
 						{
-							throw new Exception("Could not send to Browser...");
+							throw new IOException("Could not send to Browser...");
 						}
 					}
 					m_Proxy.transferredBytes(len, m_iProtocol);
 					Thread.yield();
-					len = m_InChannel.read(buff, 0, CHUNK_SIZE);
-				}
+				}	while (len > 0 && !m_Channel.isClosed()); 
 			}
-			catch (Exception e)
+			catch (IOException e)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.NET, e);
+			}
+			catch (ChunkNotProcessableException cnpe)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.NET, cnpe);
+				try 
+				{
+					m_OutSocket.write(cnpe.getErrorResponse());
+				} 
+				catch (IOException e) 
+				{
+				}
 			}
 			try
 			{
 				m_clientSocket.close();
 			}
-			catch (Exception e)
+			catch (IOException e)
 			{
 			}
 			try
 			{
 				Thread.sleep(500);
 			}
-			catch (Exception e)
+			catch (InterruptedException e)
 			{
 			}
 			if (m_bRequestIsAlive)
 			{
-				try
-				{
-					m_threadRequest.interrupt();
-				}
-				catch (Exception e)
-				{
-				}
+				m_threadRequest.interrupt();
 			}
+			buff = null;
 		}
-
 	}
 }

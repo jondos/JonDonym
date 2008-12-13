@@ -270,7 +270,7 @@ public abstract class AbstractX509AlternativeName extends AbstractX509Extension
 
 		values = new ASN1EncodableVector();
 
-		if (a_values != null || a_values.size() != 0)
+		if (a_values != null && a_values.size() != 0)
 		{
 			if (a_tags == null || a_values.size() != a_tags.size())
 			{
@@ -315,6 +315,7 @@ public abstract class AbstractX509AlternativeName extends AbstractX509Extension
 					{
 						throw new IllegalArgumentException("Invalid IP address: " + strValue);
 					}
+					/* TODO temporarily disabled, as this may lead to annoying DNS requests
 					try
 					{
 						value = InetAddress.getByName(strValue).getAddress();
@@ -323,7 +324,7 @@ public abstract class AbstractX509AlternativeName extends AbstractX509Extension
 					{
 						// should be impossible
 						throw new RuntimeException("An IP address was not recognized as such!");
-					}
+					}*/
 				}
 				else if (tag.equals(TAG_EMAIL))
 				{

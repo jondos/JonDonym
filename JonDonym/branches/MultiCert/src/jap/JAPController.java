@@ -27,8 +27,10 @@
  */
 package jap;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -67,12 +69,14 @@ import anon.AnonServiceEventAdapter;
 import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.client.AnonClient;
+import anon.client.ITermsAndConditionsContainer;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.AbstractMixCascadeContainer;
 import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.CascadeIDEntry;
 import anon.infoservice.Database;
+import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
@@ -85,6 +89,7 @@ import anon.infoservice.JAPMinVersion;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
+import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.infoservice.ProxyInterface;
@@ -104,6 +109,7 @@ import anon.util.ClassUtil;
 import anon.util.IMiscPasswordReader;
 import anon.util.IPasswordReader;
 import anon.util.JobQueue;
+import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.XMLUtil;
 import forward.server.ForwardServerManager;
@@ -123,12 +129,14 @@ import platform.MacOS;
 import proxy.DirectProxy;
 import update.JAPUpdateWizard;
 import jap.pay.AccountUpdater;
+import jap.TermsAndConditionsUpdater;
 import anon.infoservice.ClickedMessageIDDBEntry;
 import anon.client.TrustException;
+import anon.infoservice.TermsAndConditions;
 
 /* This is the Controller of All. It's a Singleton!*/
 public final class JAPController extends Observable implements IProxyListener, Observer,
-	AnonServiceEventListener, IAIEventListener
+	AnonServiceEventListener, IAIEventListener, ITermsAndConditionsContainer
 {
 	/** Messages */
 	public static final String MSG_ERROR_SAVING_CONFIG = JAPController.class.getName() +
@@ -162,7 +170,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	private static final String MSG_ALLOWUNPROTECTED = JAPController.class.getName() + "_allowunprotected";
 	private static final String MSG_ALLOWUNPROTECTED_ALL = JAPController.class.getName() + "_allowunprotectedAll";
+	private static final String MSG_EXPLAIN_ALLOWUNPROTECTED_ALL = JAPController.class.getName() + "_allowunprotectedAllExplain";
+	
 	public static final String MSG_IS_NOT_ALLOWED = JAPController.class.getName() + "_isNotAllowed";
+	public static final String MSG_IS_NOT_ALLOWED_FOR_ANONYMOUS = JAPController.class.getName() + "_isNotAllowedForAnonymous";
 	public static final String MSG_ASK_SWITCH = JAPController.class.getName() + "_askForSwitchOnError";
 	public static final String MSG_ASK_RECONNECT = JAPController.class.getName() + "_askForReconnectOnError";
 	public static final String MSG_ASK_AUTO_CONNECT = JAPController.class.getName() + "_reallyAutoConnect";
@@ -250,6 +261,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private JavaVersionUpdater m_javaVersionUpdater;
 	private MessageUpdater m_messageUpdater;
 	private PerformanceInfoUpdater m_perfInfoUpdater;
+	private TermsAndConditionsUpdater m_termsUpdater;
 	
 	private Object LOCK_VERSION_UPDATE = new Object();
 	private boolean m_bShowingVersionUpdate = false;
@@ -278,7 +290,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static JAPController m_Controller = null;
 	private static JAPModel m_Model = null;
 	private static JAPFeedback m_feedback = null;
-	private Vector observerVector = null;
+	private Vector observerVector = new Vector();
 	private Vector m_anonServiceListener;
 	private IPasswordReader m_passwordReader;
 	private Object m_finishSync = new Object();
@@ -331,7 +343,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	}
 	
 	public void start() {
-		// simulate database distributor
+		// simulate database distributor and suppress distributor warnings
 		Database.registerDistributor(new IDistributor()
 		{
 			public void addJob(IDistributable a_distributable)
@@ -359,6 +371,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_minVersionUpdater = new MinVersionUpdater();
 		m_javaVersionUpdater = new JavaVersionUpdater();
 		m_messageUpdater = new MessageUpdater();
+		m_termsUpdater = new TermsAndConditionsUpdater();
 
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
@@ -366,8 +379,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 		queueFetchAccountInfo = new JobQueue("FetchAccountInfoJobQueue");
 
-		// Create observer object
-		observerVector = new Vector();
 		// create service listener object
 		m_anonServiceListener = new Vector();
 
@@ -389,15 +400,31 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}		
 					
 					boolean bShowHtmlWarning;
-					JAPDialog.LinkedCheckBox cb = new JAPDialog.LinkedCheckBox(
-									   JAPMessages.getString(JAPDialog.LinkedCheckBox.MSG_REMEMBER_ANSWER), false,
-									   MSG_ALLOWUNPROTECTED)
+					JAPDialog.LinkedInformationAdapter dHelpContext;
+					JAPDialog.LinkedCheckBox cb = null;
+					
+					if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
 					{
-						public boolean isOnTop()
+						cb = new JAPDialog.LinkedCheckBox(
+							   JAPMessages.getString(JAPDialog.LinkedCheckBox.MSG_DO_NOT_SHOW_AGAIN), false)
 						{
-							return true;
-						}
-					};
+							public boolean isOnTop()
+							{
+								return true;
+							}
+						};
+						dHelpContext = cb;
+					}
+					else
+					{
+						dHelpContext = new JAPDialog.LinkedInformationAdapter()
+						{
+							public boolean isOnTop()
+							{
+								return true;
+							}
+						};
+					}
 					
 					uri = a_requestInfo.getURI() + (a_requestInfo.getPort() != 80 ? ":" + a_requestInfo.getPort() : "");
 					if (JAPModel.getInstance().isAskForAnyNonAnonymousRequest())
@@ -412,9 +439,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 					
 					
 					bShowHtmlWarning = !(JAPDialog.showYesNoDialog(
-									   JAPController.getInstance().getViewWindow(), message, headline, cb));
+									   JAPController.getInstance().getViewWindow(), message, headline, dHelpContext));
 					
-					return new Answer(!bShowHtmlWarning, cb.getState());
+					if (cb != null)
+					{
+						return new Answer(!bShowHtmlWarning, cb.getState());
+					}
+					else
+					{
+						return new Answer(!bShowHtmlWarning, true);
+					}
 				}
 			};
 
@@ -485,6 +519,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		JAPModel.getInstance().getRoutingSettings().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().getServerStatisticsListener().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().getRegistrationStatusObserver().addObserver(this);
+		m_Model.addObserver(this);
 		m_iStatusPanelMsgIdForwarderServerStatus = -1;
 	}
 
@@ -620,15 +655,20 @@ public final class JAPController extends Observable implements IProxyListener, O
 				if (JAPModel.isInfoServiceDisabled())
 				{
 					m_InfoServiceUpdater.start(false);
+					m_termsUpdater.start(false);
 					m_perfInfoUpdater.start(false);
 					m_paymentInstanceUpdater.start(false);
 					m_MixCascadeUpdater.start(false);
 					m_minVersionUpdater.start(false);
 					m_javaVersionUpdater.start(false);
-					m_messageUpdater.start(false);					
+					m_messageUpdater.start(false);	
 				}
 				else
 				{
+					if (!m_termsUpdater.isFirstUpdateDone())
+					{
+						m_termsUpdater.updateAsync();
+					}
 					if (!m_InfoServiceUpdater.isFirstUpdateDone())
 					{
 						m_InfoServiceUpdater.updateAsync();
@@ -656,7 +696,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					if (!m_messageUpdater.isFirstUpdateDone())
 					{
 						m_messageUpdater.updateAsync();
-					}					
+					}
 				}
 
 				m_AccountUpdater.start(false);
@@ -717,8 +757,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				public void run()
 				{
 					if (JAPController.getInstance().isConfigAssistantShown() &&
-						!(JAPDialog.isConsoleOnly()||JAPModel.isSmallDisplay()) &&
-						!isPortableMode())
+						!(JAPDialog.isConsoleOnly()||JAPModel.isSmallDisplay()))
 					{
 						showInstallationAssistant();
 					}
@@ -943,10 +982,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 *  @param a_strJapConfFile - file containing the Configuration. If null $(user.home)/jap.conf or ./jap.conf is used.
 	 *  @param loadPay does this JAP support Payment ?
 	 */
-	public synchronized void loadConfigFile(String a_strJapConfFile, boolean loadPay,
-											final ISplashResponse a_splash)
+	public synchronized void loadConfigFile(String a_strJapConfFile, 
+			final ISplashResponse a_splash)
+		throws FileNotFoundException
 	{
-		// @todo: remove since we already looked for the confing file in preLoadConfigFile
+		// @todo: remove since we already looked for the config file in preLoadConfigFile
 		boolean success = lookForConfigFile(a_strJapConfFile);
 		
 		if (a_strJapConfFile != null)
@@ -1059,10 +1099,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 	            m_Model.setDllWarningVersion(XMLUtil.parseAttribute(root, JAPModel.DLL_VERSION_WARNING_BELOW, 0));
 	            m_Model.setMacOSXLibraryUpdateAtStartupNeeded(XMLUtil.parseAttribute(root, JAPModel.MACOSX_LIB_NEEDS_UPDATE, false));
 
-
-				JAPModel.getInstance().allowUpdateViaDirectConnection(
-								XMLUtil.parseAttribute(root, XML_ALLOW_NON_ANONYMOUS_UPDATE,
-					JAPConstants.DEFAULT_ALLOW_UPDATE_NON_ANONYMOUS_CONNECTION));
+	            if (XMLUtil.parseAttribute(root, XML_ALLOW_NON_ANONYMOUS_UPDATE, true))
+	            {
+	            	JAPModel.getInstance().setUpdateAnonymousConnectionSetting(
+	            			XMLUtil.parseAttribute(root, XML_ALLOW_NON_ANONYMOUS_UPDATE, JAPModel.CONNECTION_ALLOW_ANONYMOUS));
+	            }
+	            else
+	            {
+	            	JAPModel.getInstance().setUpdateAnonymousConnectionSetting(JAPModel.CONNECTION_FORCE_ANONYMOUS);
+	            }
 				
 				JAPModel.getInstance().setAnonymizedHttpHeaders(
 						XMLUtil.parseAttribute(root, JAPModel.XML_ANONYMIZED_HTTP_HEADERS, 
@@ -1107,7 +1152,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						JAPModel.getInstance().setHelpPath(new File(
 								AbstractOS.getInstance().getDefaultHelpPath(
-										JAPConstants.APPLICATION_NAME)), false);
+										JAPConstants.APPLICATION_NAME)));
 					}
 					a_splash.setText(messageText);
 				}
@@ -1269,22 +1314,40 @@ public final class JAPController extends Observable implements IProxyListener, O
 				if (nodeCascades != null)
 				{
 					Node nodeCascade = nodeCascades.getFirstChild();
+					String currentCascadeContext = null;
 					while (nodeCascade != null)
 					{
 						if (nodeCascade.getNodeName().equals(MixCascade.XML_ELEMENT_NAME))
 						{
 							try
 							{
-								currentCascade = new MixCascade( (Element) nodeCascade, Long.MAX_VALUE);
-								try
+								currentCascade = new MixCascade( (Element) nodeCascade, Long.MAX_VALUE);								
+								currentCascadeContext = currentCascade.getContext();
+								/* JonDonym is the defult service context */
+								if(currentCascadeContext == null)
 								{
-									Database.getInstance(MixCascade.class).update(currentCascade);
+									currentCascadeContext = IServiceContextContainer.CONTEXT_JONDONYM;
 								}
-								catch (Exception e)
-								{}
-								/* register loaded cascades as known cascades */
-								Database.getInstance(CascadeIDEntry.class).update(
-									new CascadeIDEntry(currentCascade));
+								
+								/* only add to database when the service context matches */
+								if ((currentCascadeContext == null && m_Model.getContext() == null) || 
+									currentCascadeContext.equals(m_Model.getContext()))
+								{
+									try
+									{
+										Database.getInstance(MixCascade.class).update(currentCascade);
+									}
+									catch (Exception e)
+									{}
+									/* register loaded cascades as known cascades */
+									Database.getInstance(CascadeIDEntry.class).update(
+										new CascadeIDEntry(currentCascade));
+								}
+								else
+								{
+									LogHolder.log(LogLevel.NOTICE, LogType.MISC, 
+											"No service context match "+currentCascadeContext+"."+currentCascade.getName());
+								}
 							}
 							catch (Exception a_e)
 							{
@@ -1583,10 +1646,20 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					Element infoserviceManagementNode = (Element) (XMLUtil.getFirstChildByName(root,
 						InfoServiceHolder.getXmlSettingsRootNodeName()));
-					JAPModel.getInstance().allowInfoServiceViaDirectConnection(
-					   XMLUtil.parseAttribute(infoserviceManagementNode,
+					if (XMLUtil.parseAttribute(infoserviceManagementNode,
+						XML_ALLOW_NON_ANONYMOUS_CONNECTION, true))
+					{
+						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+								XMLUtil.parseAttribute(infoserviceManagementNode,
 											  XML_ALLOW_NON_ANONYMOUS_CONNECTION,
-											  JAPConstants.DEFAULT_ALLOW_INFOSERVICE_NON_ANONYMOUS_CONNECTION));
+											  JAPModel.CONNECTION_ALLOW_ANONYMOUS));
+					}
+					else
+					{
+						// backwards compatibility
+						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+								JAPModel.CONNECTION_FORCE_ANONYMOUS);
+					}
 					if (infoserviceManagementNode != null)
 					{
 						InfoServiceHolder.getInstance().loadSettingsFromXml(
@@ -1605,13 +1678,22 @@ public final class JAPController extends Observable implements IProxyListener, O
 				/* load Payment settings */
 				try
 				{
-					if (loadPay)
+					//if (loadPay)
 					{
 						Element elemPay = (Element) XMLUtil.getFirstChildByName(root,
 							JAPConstants.CONFIG_PAYMENT);
-						JAPModel.getInstance().allowPaymentViaDirectConnection(
-											  XMLUtil.parseAttribute(elemPay, XML_ALLOW_NON_ANONYMOUS_CONNECTION,
-							JAPConstants.DEFAULT_ALLOW_PAYMENT_NON_ANONYMOUS_CONNECTION));
+						if (XMLUtil.parseAttribute(elemPay, XML_ALLOW_NON_ANONYMOUS_CONNECTION, true))
+						{
+							JAPModel.getInstance().setPaymentAnonymousConnectionSetting(
+									  XMLUtil.parseAttribute(elemPay, XML_ALLOW_NON_ANONYMOUS_CONNECTION,
+											  JAPModel.CONNECTION_ALLOW_ANONYMOUS));
+						}
+						else
+						{
+							JAPModel.getInstance().setPaymentAnonymousConnectionSetting(
+											  JAPModel.CONNECTION_FORCE_ANONYMOUS);
+						}
+						
 						m_bAskSavePayment = XMLUtil.parseAttribute(elemPay, XML_ATTR_ASK_SAVE_PAYMENT, true);
 						BIConnection.setConnectionTimeout(XMLUtil.parseAttribute(elemPay,
 							BIConnection.XML_ATTR_CONNECTION_TIMEOUT,
@@ -1941,6 +2023,21 @@ public final class JAPController extends Observable implements IProxyListener, O
 				Database.getInstance(MixCascade.class).update(m_currentMixCascade);
 				Database.getInstance(CascadeIDEntry.class).update(
 								new CascadeIDEntry(m_currentMixCascade));
+				
+				Element elemTCs = (Element) XMLUtil.getFirstChildByName(root, JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
+				
+				if(elemTCs != null)
+				{
+					NodeList list = elemTCs.getElementsByTagName(TermsAndConditions.XML_ELEMENT_NAME);
+					for(i = 0; i < list.getLength(); i++)
+					{
+						Node node = list.item(i);
+						String ski = XMLUtil.parseAttribute(node, TermsAndConditions.XML_ATTR_ID, "");
+						long timestamp = XMLUtil.parseAttribute(node, TermsAndConditions.XML_ATTR_TIME_ACCEPTED, -1l);
+						
+						acceptTermsAndConditions(ski, timestamp);
+					}
+				}
 			}
 			catch (Exception e)
 			{
@@ -1951,34 +2048,151 @@ public final class JAPController extends Observable implements IProxyListener, O
 		// fire event
 		notifyJAPObservers();
 	}
-
-	public void preLoadConfigFile(String a_strJapConfFile) 
+	
+	public void uninstall(String a_strConfigFileName) throws IOException
 	{
-		if(lookForConfigFile(a_strJapConfFile))
+		File configFile;
+		File dataDir;
+		File classdir;
+		Document doc;
+		String strDataPath;
+		
+		try
 		{
+			while (lookForConfigFile(a_strConfigFileName))
+			{
+				if (JAPModel.getInstance().getConfigFile() == null)
+				{
+					LogHolder.log(LogLevel.ALERT, LogType.MISC, 
+							"Config file found, but path was not set in model!");
+					break;
+				}
+				configFile = new File(JAPModel.getInstance().getConfigFile());
+				if (configFile.exists())
+				{
+					try
+					{
+						doc = XMLUtil.readXMLDocument(configFile);
+						if (doc == null)
+						{
+							throw new IOException("Error while loading the configuration file!");
+						}
+					}
+					catch (Exception a_e)
+					{
+						throw new IOException(a_e.getMessage());
+					}
+										
+					Element root = doc.getDocumentElement();					
+					JAPModel.getInstance().initHelpPath(
+							XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
+					JAPModel.getInstance().resetHelpPath();					
+					
+					try
+					{
+						configFile.delete();
+					}
+					catch (SecurityException a_e)
+					{
+						throw new IOException(a_e.getMessage());
+					}					
+				}
+				else
+				{
+					LogHolder.log(LogLevel.ALERT, LogType.MISC, "Config file found but does not exist!");
+					break;
+				}
+			}
+		}
+		catch (FileNotFoundException a_e)
+		{
+			// ok, there is no (more) such a config file
+		}
+		/* Now remove the application data directory at its default path if it exists. */
+		strDataPath = AbstractOS.getInstance().getAppdataDefaultDirectory(JAPConstants.APPLICATION_NAME);
+		if (strDataPath != null)
+		{
+			dataDir = new File(strDataPath);
+			classdir = ClassUtil.getClassDirectory(JAPController.class);
+			if (dataDir.exists() && dataDir.isDirectory() &&
+					dataDir.getPath().indexOf(JAPConstants.APPLICATION_NAME) >= 0 &&
+				(classdir == null || !classdir.equals(dataDir)))
+			{
+				/* the above checks should be sufficient to safely delete this directory now */
+				RecursiveFileTool.deleteRecursion(dataDir);
+			}
+			else
+			{
+				LogHolder.log(LogLevel.ALERT, LogType.MISC,
+					"There was a problem while deleting the app data directory: " + dataDir);
+			}
+		}
+	}
+
+	public void preLoadConfigFile(String a_strJapConfFile) throws FileNotFoundException
+	{
+		if (lookForConfigFile(a_strJapConfFile))
+		{
+			String line ="";
 			try
 			{
 				BufferedReader br = new BufferedReader(new FileReader(m_Model.getConfigFile()));
+				int index;
 				
 				// skip the <?xml part
-				br.readLine();
-				Document doc = XMLUtil.toXMLDocument(br.readLine() + "</JAP>");
+				while ((line = br.readLine()) != null && line.indexOf("<JAP") < 0);				
+				
+				if (line == null)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
+							"Unable to pre-load config file " + m_Model.getConfigFile() + ".");
+					return;
+				}
+				
+				index = line.indexOf("?>");
+				if (index >= 0)
+				{
+					line = line.substring(index + 2, line.length());
+				}
+				
+				if (line.indexOf("</JAP>") < 0)
+				{
+					index = line.indexOf(">");
+					if (index <= 0 || line.length() < index + 1)
+					{
+						LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, 
+								"Unable to pre-load config file " + m_Model.getConfigFile() + 
+								". Invalid XML structure.");
+						return;
+					}
+					line = line.substring(0, index + 1);
+					line += "</JAP>";
+				}
+				Document doc = XMLUtil.toXMLDocument(line);
 				
 				m_Model.setShowSplashScreen(XMLUtil.parseAttribute(doc, XML_ATTR_SHOW_SPLASH_SCREEN, true));
 			}
 			catch(Exception ex)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Unable to pre-load config file " + m_Model.getConfigFile() + ".");
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Unable to pre-load config file " + 
+						m_Model.getConfigFile() + ".", ex);
 			}
 		}
 	}
 
-	public boolean lookForConfigFile(String a_strJapConfFile) {
+	private boolean lookForConfigFile(String a_strJapConfFile) throws
+		FileNotFoundException 
+	{
 		boolean success = false;
 		if (a_strJapConfFile != null)
 		{
 			/* try the config file from the command line */
 			success = this.loadConfigFileCommandLine(a_strJapConfFile);
+			if (!success)
+			{
+				throw new FileNotFoundException(
+						"Could not initialise with specified config file: " + a_strJapConfFile);
+			}
 		}
 		if (!success)
 		{
@@ -2303,10 +2517,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 			else
 			{
 				/* JAPModel.getModel().getConfigFile() should always point to a valid configuration file */
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				XMLUtil.write(sb, out);
 				FileOutputStream f = new FileOutputStream(JAPModel.getInstance().getConfigFile());
 				//XMLUtil.formatHumanReadable(doc);
 				//return XMLUtil.toString(doc);
-				XMLUtil.write(sb, f);
+				f.write(out.toByteArray());
 				//((XmlDocument)doc).write(f);
 
 				//f.write(sb.getBytes());
@@ -2382,7 +2598,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 								JAPModel.getInstance().isAnonymizedHttpHeaders());
 			
 			XMLUtil.setAttribute(e, XML_ALLOW_NON_ANONYMOUS_UPDATE,
-								 JAPModel.getInstance().isUpdateViaDirectConnectionAllowed());
+								 JAPModel.getInstance().getUpdateAnonymousConnectionSetting());
 			XMLUtil.setAttribute(e, JAPModel.XML_REMIND_OPTIONAL_UPDATE,
 								 JAPModel.getInstance().isReminderForOptionalUpdateActivated());
 			XMLUtil.setAttribute(e, JAPModel.XML_REMIND_JAVA_UPDATE,
@@ -2414,7 +2630,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					Element elemPayment = doc.createElement(JAPConstants.CONFIG_PAYMENT);
 					XMLUtil.setAttribute(elemPayment, XML_ALLOW_NON_ANONYMOUS_CONNECTION,
-										 JAPModel.getInstance().isPaymentViaDirectConnectionAllowed());
+										 JAPModel.getInstance().getPaymentAnonymousConnectionSetting());
 					XMLUtil.setAttribute(elemPayment, BIConnection.XML_ATTR_CONNECTION_TIMEOUT,
 										 BIConnection.getConnectionTimeout());
 					XMLUtil.setAttribute(elemPayment, XML_ATTR_ASK_SAVE_PAYMENT, m_bAskSavePayment);
@@ -2658,7 +2874,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			/* adding infoservice settings */
 			Element elemIS = InfoServiceHolder.getInstance().toXmlElement(doc);
 			XMLUtil.setAttribute(elemIS, XML_ALLOW_NON_ANONYMOUS_CONNECTION,
-								 JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed());
+								 JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting());
 			e.appendChild(elemIS);
 
 
@@ -2721,8 +2937,24 @@ public final class JAPController extends Observable implements IProxyListener, O
 			
 			e.appendChild(JAPModel.getInstance().getRoutingSettings().toXmlElement(doc));
 			
+			Element elemTCs = doc.createElement(JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
 			
+			Hashtable acceptedTCs = JAPModel.getInstance().getAcceptedTCs();
+			Enumeration keys = acceptedTCs.keys();
+			String ski;
+			
+			while(keys.hasMoreElements())
+			{
+				ski = (String) keys.nextElement();
+				Long timestamp = (Long) acceptedTCs.get(ski);
+				Element elemTC = doc.createElement(TermsAndConditions.XML_ELEMENT_NAME);
+				XMLUtil.setAttribute(elemTC, TermsAndConditions.XML_ATTR_ID, ski);
+				XMLUtil.setAttribute(elemTC, TermsAndConditions.XML_ATTR_TIME_ACCEPTED, timestamp.longValue());
+				elemTCs.appendChild(elemTC);
+			}
 
+			e.appendChild(elemTCs);
+			
 			return doc;
 		}
 		catch (Throwable ex)
@@ -3025,6 +3257,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 								JAPModel.getInstance().getPaymentProxyInterface());
 						}
 					}
+					
+					m_proxyAnon.setHTTPHeaderProcessingEnabled(
+							JAPModel.getInstance().isAnonymizedHttpHeaders(),
+							JAPMessages.getInstance());
+					m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());	
+					
 					if (!JAPModel.isInfoServiceDisabled())
 					{
 						m_feedback.updateAsync();
@@ -3074,6 +3312,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to start AN.ON service...");
 					}
 					//JAPExtension.doIt();
+					//System.out.println("Try to start AN.ON service...");
 					ret = m_proxyAnon.start(cascadeContainer);
 
 
@@ -3192,7 +3431,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 						{
 							LogHolder.log(LogLevel.DEBUG, LogType.NET, "AN.ON service started successfully");
 							adapter.connectionEstablished(proxyAnon.getMixCascade());
-
+							
+							/*
 							if (!mbActCntMessageNotRemind && !JAPModel.isSmallDisplay() &&
 								!m_bShowConfigAssistant && !getInstance().isPortableMode())
 							{
@@ -3216,7 +3456,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 										}
 									}
 								});
-							}
+							}*/
 						}
 						else
 						{
@@ -3254,7 +3494,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							}
 							//else
 							{
-								getView().doClickOnCascadeChooser();
+								//getView().doClickOnCascadeChooser();
 							}
 						}
 					}
@@ -3398,7 +3638,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				LogHolder.log(LogLevel.NOTICE, LogType.THREAD, "Waiting for finish of AN.ON connection...");
 				try
 				{
-					m_Controller.m_finishSync.wait(500);
+					m_Controller.m_finishSync.wait(2000);
 				}
 				catch (InterruptedException a_e)
 				{
@@ -3466,9 +3706,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		m_Model.setDummyTraffic(msIntervall);
 		ForwardServerManager.getInstance().setDummyTrafficInterval(msIntervall);
-		if (m_proxyAnon != null)
+		synchronized (PROXY_SYNC)
 		{
-			m_proxyAnon.setDummyTraffic(msIntervall);
+			if (m_proxyAnon != null)
+			{
+				m_proxyAnon.setDummyTraffic(msIntervall);
+			}
 		}
 	}
 
@@ -3719,8 +3962,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						getInstance().getViewWindow().setEnabled(false);
 						JAPViewIconified viewiconified=getInstance().m_View.getViewIconified();
-						if(viewiconified!=null)
+						if (viewiconified!=null)
+						{
 							viewiconified.setEnabled(false);
+						}
 					}
 
 					getInstance().m_finishSplash.setText(JAPMessages.getString(MSG_SAVING_CONFIG));
@@ -3751,12 +3996,46 @@ public final class JAPController extends Observable implements IProxyListener, O
 						((ProgramExitListener)exitListeners.elementAt(i)).programExiting();
 					}
 
-					boolean error = m_Controller.m_restarter.isConfigFileSaved() ? 
-							m_Controller.saveConfigFile() : false;
-					if (error && bDoNotRestart && !getInstance().m_restarter.hideWarnings())
+					int result = JAPDialog.RETURN_VALUE_NO;
+					while ((m_Controller.m_restarter.isConfigFileSaved() ? 
+							m_Controller.saveConfigFile() : false) && bDoNotRestart && 
+							!getInstance().m_restarter.hideWarnings() &&
+							result == JAPDialog.RETURN_VALUE_NO)
 					{
-						JAPDialog.showErrorDialog(parent, JAPMessages.getString(MSG_ERROR_SAVING_CONFIG,
-							JAPModel.getInstance().getConfigFile() ), LogType.MISC);
+						result = JAPDialog.showConfirmDialog(parent, 
+									JAPMessages.getString(MSG_ERROR_SAVING_CONFIG, JAPModel.getInstance().getConfigFile()), 
+									new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL){
+							public String getYesOKText()
+							{
+								return JAPMessages.getString(DialogContentPane.MSG_OK);
+							}
+							public String getNoText()
+							{
+								return JAPMessages.getString(JAPDialog.MSG_BTN_RETRY);
+							}
+						}, 
+									JAPDialog.MESSAGE_TYPE_ERROR);	
+						if (result == JAPDialog.RETURN_VALUE_OK)
+						{
+							break;
+						}
+						else if (result == JAPDialog.RETURN_VALUE_CANCEL)
+						{
+							if (getInstance().getViewWindow() != null)
+							{
+								getInstance().getViewWindow().setEnabled(true);
+								JAPViewIconified viewiconified=getInstance().m_View.getViewIconified();
+								if (viewiconified!=null)
+								{
+									viewiconified.setEnabled(true);
+								}
+							}
+							if (getInstance().m_finishSplash instanceof JAPSplash)
+							{
+								((JAPSplash)getInstance().m_finishSplash).setVisible(false);
+							}
+							return;
+						}
 					}
 
 					// disallow new connections
@@ -3790,6 +4069,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							m_Controller.m_javaVersionUpdater.stop();
 							m_Controller.m_messageUpdater.stop();
 							m_Controller.m_perfInfoUpdater.stop();
+							m_Controller.m_termsUpdater.stop();
 						}
 					}, "Finish IS threads");
 					finishIS.start();
@@ -3933,6 +4213,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 
+	public boolean updatePaymentInstances(boolean a_bDoOnlyIfNotYetUpdated)
+	{
+		if (a_bDoOnlyIfNotYetUpdated && m_paymentInstanceUpdater.isFirstUpdateDone())
+		{
+			return true;
+		}
+		return m_paymentInstanceUpdater.update();
+	}
+	
 	/**
 	 * Updates the list of known InfoServices.
 	 * @param a_bDoOnlyIfNotYetUpdated only updates the infoservices if not at least one successful
@@ -3968,14 +4257,30 @@ public final class JAPController extends Observable implements IProxyListener, O
 			if (!JAPModel.isSmallDisplay() &&
 				(bShowError || Database.getInstance(MixCascade.class).getNumberOfEntries() == 0))
 			{
-				if (!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() && !isAnonConnected())
+				if (JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_FORCE_ANONYMOUS && !isAnonConnected())
 				{
 					int returnValue =
 						JAPDialog.showConfirmDialog(a_view, JAPMessages.getString(MSG_IS_NOT_ALLOWED),
 						JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
 					if (returnValue == JAPDialog.RETURN_VALUE_YES)
 					{
-						JAPModel.getInstance().allowInfoServiceViaDirectConnection(true);
+						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+								JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+						updateInfoServices(false);
+						continue;
+					}
+				}
+				else if (JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_BLOCK_ANONYMOUS && isAnonConnected())
+				{
+					int returnValue =
+						JAPDialog.showConfirmDialog(a_view, JAPMessages.getString(MSG_IS_NOT_ALLOWED_FOR_ANONYMOUS),
+						JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
+					if (returnValue == JAPDialog.RETURN_VALUE_YES)
+					{
+						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+								JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 						updateInfoServices(false);
 						continue;
 					}
@@ -4247,6 +4552,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 			return null;
 		}
 	}
+	
+	public TermsAndConditionsUpdater getTermsUpdater()
+	{
+		return m_termsUpdater;
+	}
 
 	public IJAPMainView getView()
 	{
@@ -4430,6 +4740,23 @@ public final class JAPController extends Observable implements IProxyListener, O
 						}
 					}
 				}).start();
+			} 
+			else if (a_notifier == m_Model && a_message != null)
+			{
+				if (a_message.equals(JAPModel.CHANGED_ANONYMIZED_HTTP_HEADERS))
+				{
+					synchronized (PROXY_SYNC)
+					{
+						if(m_proxyAnon != null)
+						{
+							m_proxyAnon.setHTTPHeaderProcessingEnabled(
+									JAPModel.getInstance().isAnonymizedHttpHeaders(),
+									JAPMessages.getInstance());
+							m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+							
+						}
+					}
+				}
 			}
 		}
 		catch (Exception e)
@@ -4589,6 +4916,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			entries[i] = new InfoServiceDBEntry(
 						 JAPConstants.DEFAULT_INFOSERVICE_NAMES[i],
 						 JAPConstants.DEFAULT_INFOSERVICE_NAMES[i], listeners, false, true, 0, 0, false);
+			entries[i].markAsBootstrap();
 		}
 
 		return entries;
@@ -4885,10 +5213,50 @@ public final class JAPController extends Observable implements IProxyListener, O
 		return true;
 		//return m_bPayCascadeNoAsk;
 	}
-
+	
 	public void setDontAskPayment(boolean a_payCascadeNoAsk)
 	{
 		m_bPayCascadeNoAsk = a_payCascadeNoAsk;
+	}
+	
+	public void acceptTermsAndConditions(ServiceOperator a_op)
+	{
+		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();
+		
+		if(a_op != null)
+		{
+			tcs.put(a_op.getId(), new Long(System.currentTimeMillis()));
+		}
+	}
+	
+	public void acceptTermsAndConditions(String a_ski, long a_timestamp)
+	{
+		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();
+		tcs.put(a_ski, new Long(a_timestamp));
+	}
+	
+	public boolean hasAcceptedTermsAndConditions(ServiceOperator a_op)
+	{
+		return (a_op == null) ? false : JAPModel.getInstance().getAcceptedTCs().containsKey(a_op.getId());
+	}
+	
+	public void revokeTermsAndConditions(ServiceOperator a_op)
+	{
+		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();
+		
+		if(a_op != null)
+		{
+			tcs.remove(a_op.getId());
+		}
+	}
+	
+	public void showTermsAndConditionsDialog(ServiceOperator a_op)
+	{
+		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op, false); 
+		if(dlg.hasFoundTC())
+		{
+			dlg.setVisible(true);
+		}
 	}
 
 	/**
@@ -4908,6 +5276,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 		public AutoSwitchedMixCascadeContainer(boolean a_bSkipInitialCascade)
 		{
+			super(JAPMessages.getInstance());
 			m_bSkipInitialCascade = a_bSkipInitialCascade;
 			m_alreadyTriedCascades = new Hashtable();
 			m_random = new Random(System.currentTimeMillis());
@@ -5106,6 +5475,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
 			TrustModel.getCurrentTrustModel().checkTrust(a_cascade);
+		}
+		
+		public ITermsAndConditionsContainer getTCContainer()
+		{
+			return JAPController.this;
 		}
 	}
 }

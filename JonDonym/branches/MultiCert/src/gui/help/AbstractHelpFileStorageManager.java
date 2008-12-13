@@ -42,6 +42,7 @@ public abstract class AbstractHelpFileStorageManager
 	public static final String HELP_INVALID_NULL = "invalidHelpPathNull";
 	public static final String HELP_INVALID_PATH_NOT_EXISTS = "invalidHelpPathNotExists";
 	public static final String HELP_INVALID_NOWRITE = "invalidHelpPathNoWrite";
+	public static final String HELP_INVALID_NOREAD = "invalidHelpPathNoRead";
 	public static final String HELP_NO_DIR = "helpNoDir";
 	public static final String HELP_DIR_EXISTS = "helpDirExists";
 	public static final String HELP_JONDO_EXISTS = "helpJonDoExists";
@@ -111,7 +112,7 @@ public abstract class AbstractHelpFileStorageManager
 	 */
 	public abstract Observable getStorageObservable();
 	
-	public abstract void ensureMostRecentVersion(String helpPath);
+	public abstract boolean ensureMostRecentVersion(String helpPath);
 	
 	public abstract boolean helpInstallationExists(String helpPath);
 	

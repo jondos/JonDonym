@@ -1,454 +1,275 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project name="AN.ON" default="dist" basedir=".">
-  <description>Ant Build file for the various compontens of the AN.ON project</description>
-  <!-- set global properties for this build -->
-  <property name="javac1.3.exe" value="/usr/bin/javac" />
-  <property name="src" location="src"/>
-  <property name="certificates" location="certificates"/>
-  
-  <property name="excludesSrcJap" value="jpi/** infoservice/** misc/** anon/crypto/tinytls/test/** platform/signal/**/*"/>
-  <property name="infoservice-excludes" value="jpi/** infoservice/performance/** misc/**"/>
-  <property name="build" location="build"/>
-  <property name="build.libs" location="lib"/>
-  <property name="dist" location="dist"/>
-  <property name="japrelease.jnlp" location="/home/infoservice/japRelease.jnlp"/>
-  <property name="japtomcat" location="/home/tomcat/webapps/jap/"/>
-  <property name="japweb" location="/var/www/JapWeb/"/>
-  <property name="japkeystore" location="/home/compile/.keystore"/>
-  
-  <property name="classpath_httplib_file_name" location="${build.libs}/HTTPClient.jar"/>
-  <property name="classpath_xmllib_file_name" location="${build.libs}/xml.jar"/>
-  <property name="classpath_ftplib_file_name" location="${build.libs}/ApacheFTPClient.jar"/>
-  <property name="classpath_log4j_file_name" location="${build.libs}/log4j.jar"/>
-  <property name="classpath_mail_file_name" location="${build.libs}/mail.jar"/>
-  <property name="classpath_jama_file_name" location="${build.libs}/jama.jar"/>
-  <property name="classpath_bouncy_file_name" location="${build.libs}/BouncyCastleLightForJAP.jar"/>
-  <property name="classpath_xmlrpc_file_name" location="${build.libs}/apache-xml-rpc-1.1.jar"/>
-  <property name="classpath_jaf_file_name" location="${build.libs}/activation.jar"/>
-  <property name="classpath_skype_file_name" location="${build.libs}/skype.jar"/>
-	
-  <path id="classpath_httplib" location="${classpath_httplib_file_name}"/>
-  <path id="classpath_ftplib" location="${classpath_ftplib_file_name}"/>
-  <path id="classpath_xml-rpc" location="${classpath_xmlrpc_file_name}"/>
-  <path id="classpath_java_mail" location="${build.libs}/mail.jar"/>
-  <path id="classpath_mrj" location="${build.libs}/MRJClasses.zip"/>
-  <path id="classpath_aje" location="${build.libs}/AppleJavaExtensions.jar"/>
-  <path id="classpath_jama" location="${build.libs}/jama.jar"/>
-  <path id="classpath_swing" location="${build.libs}/swingall.jar"/>
-  <path id="classpath_log4j" location="${classpath_log4j_file_name}"/>
-  <path id="classpath_bouncycastle_jap" location="${classpath_bouncy_file_name}"/>
-  <path id="classpath_jaf" location="${classpath_jaf_file_name}"/>
-  <path id="classpath_skype" location="${classpath_skype_file_name}"/>
-	
-  <path id="classpath_all">
-    <path refid="classpath_swing"/>
-    <path refid="classpath_httplib"/>
-    <path refid="classpath_ftplib"/>
-    <path refid="classpath_xml-rpc"/>
-    <path refid="classpath_java_mail"/>
-    <path refid="classpath_jama"/>
-    <path refid="classpath_log4j"/>
-    <path refid="classpath_mrj"/>
-    <path refid="classpath_aje"/>
-    <path refid="classpath_bouncycastle_jap"/>
-  	<path refid="classpath_jaf"/>
-  	<path refid="classpath_skype"/>
-  </path>
-  <path id="java_1_1_boot_classes" location="${build.libs}/java_1_1_classes.zip"/>
- 
-  <target name="init-dirs">
-    <!-- Create the time stamp -->
-    <tstamp/>
-    <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${build}"/>
-    <mkdir dir="${build.libs}"/>
-  </target>
- 
-  <target name="init-libs" depends="init-dirs">
-    <get src="http://anon.inf.tu-dresden.de/develop/java_1_1_classes.zip" 
-    	 verbose="true" 
-    	 usetimestamp="true"
-    	 ignoreerrors="true"
-    	 dest="${build.libs}/java_1_1_classes.zip"/>    
-    
-  	<get src="http://anon.inf.tu-dresden.de/develop/swingall.jar" 
-    	 verbose="true" 
-    	 usetimestamp="true"
-    	 ignoreerrors="true"
-    	 dest="${build.libs}/swingall.jar"/>    
-  
-    <get src="http://anon.inf.tu-dresden.de/develop/http.jar" 
-   	  	verbose="true"
-   		usetimestamp="true"
-   	    ignoreerrors="true"
-   		dest="${classpath_httplib_file_name}"/>
-  	
-    <get src="http://anon.inf.tu-dresden.de/develop/xml.jar" 
-    	 verbose="true" 
-    	 usetimestamp="true"
-    	 ignoreerrors="true"
-    	 dest="${classpath_xmllib_file_name}"/>
-  	
-   <get src="http://anon.inf.tu-dresden.de/develop/BouncyCastleLightForJAP.jar" 
-    	 verbose="true" 
-   		 usetimestamp="true"
-    	 ignoreerrors="true"
-    	 dest="${classpath_bouncy_file_name}"/>
-    
-    <get src="http://anon.inf.tu-dresden.de/develop/ApacheFTPClient.jar" 
-    	 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true" 
-    	 dest="${classpath_ftplib_file_name}"/> 
-    
-  	<get src="http://anon.inf.tu-dresden.de/develop/apache-xmlrpc-1.1.jar" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${classpath_xmlrpc_file_name}"/>
-    
-  	<get src="http://anon.inf.tu-dresden.de/develop/mail.jar" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/mail.jar"/>    
-  
-    <get src="http://anon.inf.tu-dresden.de/develop/Jama.jar" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/jama.jar"/>
-  	
-    <get src="http://anon.inf.tu-dresden.de/develop/log4j.jar" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${classpath_log4j_file_name}"/>
-  	
-    <get src="http://anon.inf.tu-dresden.de/develop/MRJClasses.zip" 
-  		 verbose="true"
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/MRJClasses.zip"/>
-  	
-    <get src="http://anon.inf.tu-dresden.de/develop/AppleJavaExtensions.jar" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/AppleJavaExtensions.jar"/>    
-  
-    <get src="http://anon.inf.tu-dresden.de/develop/japdll.dll" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/japdll.dll"/>
-  	
-    <get src="http://anon.inf.tu-dresden.de/develop/libMacOSX.jnilib" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/libMacOSX.jnilib"/>
-  	
-    <get src="http://anon.inf.tu-dresden.de/develop/activation.jar" 
-  		 verbose="true"
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/activation.jar"/>
-  	
-    <get src="http://anon.inf.tu-dresden.de/develop/japdllversion.txt" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/japdllversion.txt"/> 
-  	
-    <get src="http://anon.inf.tu-dresden.de/develop/macosxlibversion.txt" 
-  		 verbose="true" 
-  		 usetimestamp="true"
-  	     ignoreerrors="true"
-  		 dest="${build.libs}/macosxlibversion.txt"/> 
-  	
-  	<get src="http://anon.inf.tu-dresden.de/develop/skype.jar" 
-  	  		 verbose="true" 
-  	  		 usetimestamp="true"
-  	  	     ignoreerrors="true"
-  	  		 dest="${classpath_skype_file_name}"/> 
-  	 
-  	<available file="${classpath_httplib_file_name}" property="httplib.available"/>
-  	<available file="${classpath_xmllib_file_name}" property="xmllib.available"/>
-  	<available file="${classpath_ftplib_file_name}" property="ftplib.available"/>
-  	<available file="${classpath_log4j_file_name}" property="log4j.available"/>
-  	<available file="${classpath_mail_file_name}" property="mail.available"/>
-  	<available file="${classpath_jama_file_name}" property="jama.available"/>
-  	<available file="${classpath_bouncy_file_name}" property="bouncy.available"/>
-  	<available file="${classpath_xmlrpc_file_name}" property="xmlrpc.available"/>
-  	<available file="${classpath_jaf_file_name}" property="jaf.available"/>
-  	<available file="${classpath_skype_file_name}" property="skype.available"/>
-  	
-  	<fail unless="httplib.available" message="HTTP lib not available"/>
-	<fail unless="xmllib.available" message="XML lib not available"/>
-  	<fail unless="ftplib.available" message="FTP lib not available"/>
-  	<fail unless="log4j.available" message="Log4J not available"/>
-  	<fail unless="mail.available" message="Java Mail not available"/>
-  	<fail unless="jama.available" message="Java Matrix not available"/>
-  	<fail unless="bouncy.available" message="Bouncy Castle not available"/>
-  	<fail unless="xmlrpc.available" message="XML RPC not available"/>
-  	<fail unless="jaf.available" message="Java Activation not available"/>
-  	<fail unless="skype.available" message="Skype4Java not available"/>
-  </target>
-  
-  <target name="init" depends="init-libs"/>
+<project name="JonDonym" default="dist" basedir=".">
+	<description>Ant Build file for the various compontens of the JonDonym project</description>
 
-  <target name="dist-pre-compile">
-  <!-- Use javac from Java1.3, because this compiler (at the moment) is the only one know
-      to produce byte codes which could be processed by all java 1.1 compatible implementation
-      Note: Java 1.4 and 1.5 are know to prodcue "bad" bytecode even if target="1.1" is specified!
-      -->
-    <property name="mycompilerversion" value="javac1.3"/>
-    <property name="mycompilerexecutable" value="${javac1.3.exe}"/>
-  </target>
- 
-  <target name="release-pre-compile" depends="init,dist-pre-compile" description="set things so that we can compile a release version of JAP">
-    <!-- Check whether the release flag was set to true ==> if this is not the case set it to relase and
-    increment the version nubmer by one and set the date to the current date
-    -->
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="bIsReleaseVersion">
-      <filterchain>
-        <linecontains>
-          <contains value="m_bReleasedVersion"/>
-        </linecontains>
-        <containsregex pattern="(.*)m_bReleasedVersion( )*=( )*([falsetru]*)(.*)" replace="\4"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <echo message="Is Current Version as Release version: ${bIsReleaseVersion}"/>
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="tmpCurrentVersion_LastValue">
-      <filterchain>
-        <linecontains>
-          <contains value="static final String aktVersion"/>
-        </linecontains>
-        <containsregex pattern="(.*)[0-9][0-9][\.][0-9][0-9][\.]([0-9][0-9][0-9])(.*)" replace="\2"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="tmpCurrentVersion_FirstPart">
-      <filterchain>
-        <linecontains>
-          <contains value="static final String aktVersion"/>
-        </linecontains>
-        <containsregex pattern="(.*)([0-9][0-9][\.][0-9][0-9][\.])[0-9][0-9][0-9](.*)" replace="\2"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <!-- Calculate current Date and new Version number with the help of a property file -->
-    <delete file="${src}/build.number">
-    </delete>
-    <propertyfile file="${src}/build.number">
-    <entry key="currentVersion_LastPart" value="1" operation="+" type="int" pattern="000" default="${tmpCurrentVersion_LastValue}"/>
-    <entry key="releaseDate" default="now" type="date" pattern="yyyy/MM/dd HH:mm:ss">
-    </entry>
-    </propertyfile>
-    <loadproperties srcfile="${src}/build.number">
-    </loadproperties>
-    <property name="currentVersion" value="${tmpCurrentVersion_FirstPart}${currentVersion_LastPart}">
-    </property>
-    <echo message="Current Version is: ${currentVersion}"/>
-    <echo message="Current ReleaseDate is: ${releaseDate}"/>
-    <!-- Replace the values in JAPConstant.java -->
-    <replaceregexp file="${src}/jap/JAPConstants.java" byline="true" match="m_bReleasedVersion( )*=( )*false" replace="m_bReleasedVersion = true"></replaceregexp>
-    <replaceregexp file="${src}/jap/JAPConstants.java" byline="true" match="static final String aktVersion( )*=( )*&quot;[0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9]&quot;" replace="static final String aktVersion = &quot;${currentVersion}&quot;"/>
-    <replaceregexp file="${src}/jap/JAPConstants.java" byline="true" match="private static final String RELEASE_DATE = &quot;.*&quot;" replace="private static final String RELEASE_DATE = &quot;${releaseDate}&quot;"></replaceregexp>
-    <touch file="${src}/jap/JAPConstants.java">    </touch>
-  </target>
+	<!-- set global properties for this build -->
+	<property file="build_properties/global.properties"/>
+	<property file="build_properties/jondo-global.properties"/>	
+	<property file="build_properties/global-libs.properties"/>	
 	
-  <target name="compile" depends="dist-pre-compile, init" description="compile the source">
-    <!-- Compile the java code from ${src} into ${build} -->
-    <javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-    destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2"
-    	fork="yes" compiler="${mycompilerversion}" executable="${mycompilerexecutable}">
-    <include name="**/*.java"/>
-    </javac>
-  </target>
-  
-  <target name="compile-force" depends="init" description="compile the source with whatever compiler">
-    <!-- Compile the java code without checking the version of the compiler -->
-	<javac debug="true" debuglevel="lines,source" sourcepath=""  srcdir="${src}" excludes="${excludesSrcJap}"
-	   destdir="${build}"  classpathref="classpath_all" target="1.1" source="1.2" fork="yes">
-	  <include name="**/*.java"/>
-	</javac>
-  </target>	
+	<property name="mainclass" value="JAP"/>
+	<property name="JAP_args" value=""/>
+	<property name="dist" location="dist"/>
+	<property name="jarfile" location="${dist}/${jarfile.name}.jar"/>
 	
-  <target name="dist" depends="compile, make-only-jap-jar" description="generate the distribution">  </target>
-
-  <target name="make-only-jap-jar" depends="getcurrentjapdllversion,getcurrentmacosxlibversion">
-    <!-- Create the distribution directory -->
-    <mkdir dir="${dist}"/>
-    <jar jarfile="${dist}/JAP.jar" manifest="MANIFEST.MF" index="true" duplicate="preserve">
-      <fileset dir="${build}" includes="**/*.class">
-        <exclude name="jpi/**/*"/>
-        <exclude name="infoservice/**/*"/>
-        <exclude name="misc/**/*"/>
-        <exclude name="captcha/**/*"/>
-		<exclude name="platform/signal/**/*"/>
-      </fileset>
-      <zipfileset dir="src" includes="JAPM*.properties"/>
-      <zipfileset dir="." includes="help/**/*"/>
-      <zipfileset dir="." includes="images/**/*"/>
-      <zipfileset dir="." includes="certificates/**/*"/>
-      <zipfileset src="${classpath_httplib_file_name}"/>
-      <zipfileset src="${classpath_xmllib_file_name}"/>
-      <zipfileset src="${classpath_ftplib_file_name}"/>
-      <zipfileset src="${classpath_log4j_file_name}"/>
-      <zipfileset src="${classpath_bouncy_file_name}"/>
-      <zipfileset src="${classpath_xmlrpc_file_name}"/>
-      <zipfileset src="${classpath_skype_file_name}"/>
-      <zipfileset file="${build.libs}/japdll.dll" fullpath="japdll.dll.${currentJAPDllVersion}"/>
-      <zipfileset file="${build.libs}/libMacOSX.jnilib" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
-    </jar>
-  </target>
+	<property name="dist.linux" location="${dist}/linux"/>
 	
-  <target name="signJAP.jar" description="sings JAP.jar">
-  <input message="Enter passwd for JAP signing key:" addproperty="japkeypass">
-  </input>
-  <signjar jar="${dist}/JAP.jar" verbose="true" alias="jap" storepass="useruser" keypass="useruser"
-     sigfile="JAP-TEAM" keystore="/home/compile/.keystore">
-  </signjar>
-  </target>
 	
-  <target name="dist-release" depends="clean,release-pre-compile,dist,signJAP.jar" description="Generates a release version of JAP.jar(this mainly means that the JAP internal release flag is set to 'release'">  </target>
- 
-  <target name="getcurrentversion" description="Sets the property 'currentVersion', 'releaseDate' to the value provided in JAPConstants.java">
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="currentVersion">
-      <filterchain>
-        <linecontains>
-          <contains value="static final String aktVersion"/>
-        </linecontains>
-        <containsregex pattern="(.*)([0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9])(.*)" replace="\2"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <echo message="Current Version is: ${currentVersion}"/>
-    <loadfile srcfile="${src}/jap/JAPConstants.java" property="releaseDate">
-      <filterchain>
-        <linecontains>
-          <contains value="private static final String RELEASE_DATE"/>
-        </linecontains>
-        <containsregex pattern="(.*&quot;)(.*)(&quot;.*)" replace="\2"/>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <echo message="Release Date is: ${releaseDate}"/>
-  </target>
+	<property name="excludesSrcJap" value="${jondoExcludes} JAPMacintosh.java"/>
 	
-  <target name="getcurrentjapdllversion" description="Sets the property 'currentJAPDllVersion' to the value provided on the Web">
-    <loadfile srcfile="${build.libs}/japdllversion.txt" property="currentJAPDllVersion">
-      <filterchain>
-        <deletecharacters chars="\r\n" />
-      </filterchain>
-    </loadfile>
-    <echo message="Current JAPDLL Version is: ${currentJAPDllVersion}"/>
-  </target>
+	<path id="classpath.httplib" location="${lib.http}"/>
+	<path id="classpath.ftplib" location="${lib.ftp}"/>
+	<path id="classpath.xml-rpc" location="${lib.xmlrpc}"/>
+	<path id="classpath.log4j" location="${lib.log4j}"/>
+	<path id="classpath.bouncycastle_jap" location="${lib.bouncyCastle}"/>
+	<path id="classpath.skype" location="${lib.skype4J}"/>
 	
-  <target name="getcurrentmacosxlibversion" description="Sets the protpery 'currentMacOSXLibVersion' to the value provided on the Web">
-	<loadfile property="currentMacOSXLibVersion" srcfile="${build.libs}/macosxlibversion.txt">
-		<filterchain>
-			<deletecharacters chars="\r\n" />
-		</filterchain>
-	</loadfile>
-	<echo message="Current MacOSXLib Version is: ${currentMacOSXLibVersion}"/>
-  </target>
-
-  <target name="sign-setup-files" description="Signes the setup files on the Web">
-    <input message="Enter passwd for JAP setup files signing key:" addproperty="japsetupfileskeypass"/>
-    <exec executable="/home/www/make_sig.bat">
-      <arg value="${japsetupfileskeypass}"/>
-    </exec>
-  </target>
+	<!--<path id="classpath.java_mail" location="${lib.mail}"/>
+	<path id="classpath.jaf" location="${lib.jaf}"/>
+	<path id="classpath.jama" location="${lib.jama}"/>
+	<path id="classpath.swing" location="${lib.swing}"/> -->
 	
-  <target name="copy-jap-release-files-to-web">
-    <!-- Copies the newly created JAP.jar to the Web-Server -->
-    <copy file="${dist}/JAP.jar" todir="${japweb}/jap/">    </copy>
-    <!-- Sets the new release version number according to JAPConstants.java -->
-    <echo message="${currentVersion}" file="${japweb}/japversionstable.txt"/>
-    <!-- Copy JAP.jar to the Tomcat directory for JAP Update functionality -->
-    <copy file="${dist}/JAP.jar" tofile="${japtomcat}/signedJAP__V${currentVersion}.jar">
-    </copy>
-    <!-- Touch version.xml to make tomcat reread the JAP web-app -->
-    <touch file="${japtomcat}/version.xml">
-    </touch>
-    <!-- Sets the new version number in the JavaWebStart/JAP Update japRelease.jnlp -->
-    <replaceregexp file="${japrelease.jnlp}"
-    match="version=&quot;([0-9][0-9][\.][0-9][0-9][\.][0-9][0-9][0-9])&quot;"
-    replace="version=&quot;${currentVersion}&quot;" byline="true">
-    </replaceregexp>
-    <!-- Sets the new release date in the JavaWebStart/JAP Update japRelease.jnlp -->
-    <replaceregexp file="${japrelease.jnlp}"
-    match="releaseDate=&quot;([^&quot;]*)&quot;"
-    replace="releaseDate=&quot;${releaseDate}&quot;" byline="true">
-    </replaceregexp>
-  </target>
+		
+	<path id="classpath.all">
+		<path refid="classpath.httplib"/>
+		<path refid="classpath.ftplib"/>
+		<path refid="classpath.xml-rpc"/>
+		<path refid="classpath.log4j"/>
+		<path refid="classpath.bouncycastle_jap"/>
+		<path refid="classpath.skype"/>
+		<!--<path refid="classpath.jama"/>-->
+	</path>
 	
-  <target name="make-relase-jap-dmg">
-    <exec executable="/home/compile/generation/test.japmac.dofinal"/>
-  </target>
-	
-  <target name="new-jap-release-anon" depends="clean,dist-release,getcurrentversion,copy-jap-release-files-to-web,make-relase-jap-dmg,sign-setup-files" description="Makes a new release of JAP. Note: This target needs to be started on anon.inf.tu-dresden.de as root...">
-  </target>
-	
-  <target name="clean" description="clean up">
-    <!-- Delete the ${build} and ${dist} directory trees -->
-    <delete dir="${build}"/>
-    <delete dir="${dist}"/>
-    <!-- Delte unwante certifcates from source... -->
-    <delete>
-    <fileset dir="${certificates}" includes="**/*.cer.dev"/>
-    </delete>    
-    <!-- Delete unwanted source files (aka tests etc.) -->
-    <delete dir="${src}/anon/tor/test"/>
-    <delete dir="${src}/anon/crypto/tinytls/test"/>
-    <delete dir="${src}/misc"/>    
-  </target>
-
-	<target name="infoservice-init" depends="infoservice-clean" 
-			description="initializes folder structure for infoservice distribution">
-		<mkdir dir="${build}" />
-		<mkdir dir="${build}/infoservice" />
-		<mkdir dir="${dist}" />
-		<mkdir dir="${dist}/infoservice" />
+	<target name="init-dirs">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}"/>
+		<mkdir dir="${lib}"/>
 	</target>
 	
-	<target name="infoservice-compile" depends="infoservice-init, init-libs"
-			description="compiles infoservices sources">
+	<target name="init-global-libs" depends="init-dirs">
 		
-		<javac debug="true" debuglevel="lines,source"
-				srcdir="${src}" 
-				destdir="${build}" 
-				excludes="${infoservice-excludes}" 
-				classpathref="classpath_all">
-			
+		<!-- 
+		<get src="${lib.java1_1_classes.url}" dest="${lib.java1_1_classes}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>    
+		<get src="${lib.swing.url}" dest="${lib.swing}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/> 
+		<get src="${lib.jama.url}" dest="${lib.jama}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<get src="${lib.japdll.url}" dest="${lib.japdll}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/> -->    
+		
+		<get src="${lib.http.url}" dest="${lib.http}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<get src="${lib.xml.url}" dest="${lib.xml}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<get src="${lib.bouncyCastle.url}" dest="${lib.bouncyCastle}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<get src="${lib.ftp.url}" dest="${lib.ftp}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/> 
+		<get src="${lib.xmlrpc.url}" dest="${lib.xmlrpc}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<get src="${lib.log4j.url}" dest="${lib.log4j}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/>	
+		<get src="${lib.skype4J.url}" dest="${lib.skype4J}"
+  	  		 verbose="true" usetimestamp="true" ignoreerrors="true"/> 
+  	 
+		<!--<available file="${lib.jama}" property="lib.jama.available"/>-->
+		<available file="${lib.http}" property="lib.http.available"/>
+		<available file="${lib.xml}" property="lib.xml.available"/>
+		<available file="${lib.ftp}" property="lib.ftp.available"/>
+		<available file="${lib.log4j}" property="lib.log4j.available"/>
+		<available file="${lib.bouncyCastle}" property="lib.bouncyCastle.available"/>
+		<available file="${lib.xmlrpc}" property="lib.xmlrpc.available"/>
+		<available file="${lib.skype4J}" property="lib.skype4J.available"/>
+  	
+		<!--<fail unless="lib.jama.available" message="Java Matrix not available"/>-->
+		<fail unless="lib.http.available" message="HTTP lib not available"/>
+		<fail unless="lib.xml.available" message="XML lib not available"/>
+		<fail unless="lib.ftp.available" message="FTP lib not available"/>
+		<fail unless="lib.log4j.available" message="Log4J not available"/>
+		<fail unless="lib.bouncyCastle.available" message="Bouncy Castle not available"/>
+		<fail unless="lib.xmlrpc.available" message="XML RPC not available"/>
+		<fail unless="lib.skype4J.available" message="Skype4Java not available"/>
+	</target>
+  
+	<target name="init" depends="init-global-libs"/>
+
+	<target name="compile" depends="init" description="compile the source">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac debug="true" debuglevel="lines,source" sourcepath="" 
+			classpathref="classpath.all" srcdir="${src}" excludes="${excludesSrcJap}" 
+    		destdir="${build}" fork="yes">
 			<include name="**/*.java"/>
 		</javac>
 	</target>
-	
-	<target name="infoservice-dist" depends="infoservice-compile"
-				description="creates infoservice binary distribution">
+  
+	<target name="getcurrentjapdllversion" 
+		description="Sets the property 'currentJAPDllVersion' to the value provided on the Web">
+			  
+		<get src="http://anon.inf.tu-dresden.de/develop/japdllversion.txt" 
+			verbose="true" 
+			usetimestamp="true"
+			ignoreerrors="true"
+			dest="japdllversion.txt"/> 
 			
-			<jar jarfile="${dist}/InfoService.jar" manifest="manifest_info.mf">
-				<fileset dir="${build}" includes="**/*.class">
-				        
-				</fileset>
-				<zipfileset src="${classpath_httplib_file_name}"/>
-				<zipfileset src="${classpath_xmllib_file_name}"/>
-				<zipfileset src="${classpath_ftplib_file_name}"/>
-				<zipfileset src="${classpath_log4j_file_name}"/>
-				<zipfileset src="${classpath_jama_file_name}"/>
-				<zipfileset src="${classpath_bouncy_file_name}"/>
-				<zipfileset src="${classpath_xmlrpc_file_name}"/>
-				<zipfileset src="${classpath_skype_file_name}"/>
-			</jar>
+		<loadfile srcfile="japdllversion.txt" property="currentJAPDllVersion">
+		<filterchain>
+			<deletecharacters chars="\r\n" />
+		</filterchain>
+		</loadfile>
+		<echo message="Current JAPDLL Version is: ${currentJAPDllVersion}"/>
+	</target>
+		
+	<target name="jar-core"
+		depends="compile"	
+		description="generates the core jarfile for without any libraries">
+		
+		<jar jarfile="${jarfile}" manifest="MANIFEST.MF" duplicate="preserve">
+			<fileset dir="${build}" includes="**/*.class">
+				<exclude name="jpi/**/*"/>
+				<exclude name="infoservice/**/*"/>
+				<exclude name="misc/**/*"/>
+				<exclude name="captcha/**/*"/>
+				<exclude name="platform/signal/**/*"/>
+			</fileset>
+			<zipfileset dir="src" includes="JAPM*.properties"/>
+			<zipfileset dir="." includes="help/**/*"/>
+			<zipfileset dir="." includes="images/**/*"/>
+			<zipfileset dir="." includes="certificates/**/*"/>
+		</jar>
 	</target>
 	
-	 <target name="infoservice-clean" description="clean up inforvice compiled units">
-	 	<delete dir="${build}/infoservice" />
-	 	<delete file="${dist}/InfoService.jar"/>
-	 </target>
+	<target name="jar-full"
+		description="creates a jar with all os-independent libraries">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}"/>
+  	
+		<!-- manifest file -->
+		<manifest file="MANIFEST.MF">
+			<attribute name="Main-Class" value="${mainclass}"/>
+		</manifest>
+  	
+		<!-- Create the core jarfile -->
+		<antcall target="jar-core"/>
+  	
+		<!-- append the necessary libraries -->
+		<jar jarfile="${jarfile}" update="true"> 
+			<zipfileset src="${lib.http}"/>
+			<zipfileset src="${lib.xml}"/>
+			<zipfileset src="${lib.ftp}"/>
+			<zipfileset src="${lib.log4j}"/>
+			<zipfileset src="${lib.bouncyCastle}"/>
+			<zipfileset src="${lib.xmlrpc}"/>
+			<zipfileset src="${lib.skype4J}"/>
+		</jar>
+	</target>
+
+	<target name="jar-windows" depends="getcurrentjapdllversion"
+				description="creates a jar for Windows distributions containing the japdll.dll">
+		
+		<antcall target="jar-full"/>
+		<jar jarfile="${jarfile}" update="true"> 
+			<zipfileset file="${lib.japdll}" fullpath="japdll.dll.${currentJAPDllVersion}"/>
+		</jar>
+	</target>
+	
+	<target name="jar-with-external-libs" depends="compile"
+		description="alternative jar target, which does not copy the required libs to the jar-file">
+	    <!-- 
+	    Note: when calling this target: make sure the lib-property is set properly to the 
+	    desired classpath root for all external libs. (The lib property can be redefined by 
+	    using the antcall-task) 
+		-->
+		<mkdir dir="${dist}"/>		
+		<manifest file="MANIFEST.MF">
+			<attribute name="Class-Path" 
+				value="${lib.http} ${lib.xml} ${lib.ftp} ${lib.log4j} ${lib.bouncyCastle} ${lib.xmlrpc} ${lib.skype4J}"/>
+			<attribute name="Main-Class" value="${mainclass}"/>
+		</manifest>
+		
+		<!-- Create the core jarfile -->
+		<antcall target="jar-core"/>
+	</target>
+	
+	<target name="dist" depends="jar-full" description="generate an os-independent distribution"/>
+	
+	<!-- still not usable
+	<target name="debian-dist">
+		<antcall target="jar-with-external-libs" inheritAll="false">
+			<param name="lib" value="${extlibs}"/>
+		</antcall>
+	</target>
+	-->
+	
+	<target name="linux-dist" depends="jar-full">
+		<mkdir dir="${dist.linux}/${appname}"/>
+		<copy file="${jarfile}" todir="${dist.linux}/${appname}"/>
+		
+		<filter token="ARGS" value="${JAP_args}"/>
+		<filter token="APPNAME" value="${appname}"/>
+		<filter token="JARNAME" value="${jarfile.name}"/>
+		<copy file="install_jondo" todir="${dist.linux}/${appname}" filtering="true"/>
+		
+		<!-- Copying with Ant doesn't preserve file permissions !?! -->
+		<exec executable="chmod">
+			<arg value="755"/>
+			<arg value="${dist.linux}/${appname}/install_jondo"/>
+		</exec>
+	</target>
+	
+	<target name="linux-dist-archive" depends="linux-dist">
+		<!--<zip destfile="${dist.linux}/${appname}.zip" basedir="${dist.linux}"/>-->
+		
+		<!-- 
+		better than the corresponding ant target,
+		because it preserves file permissions 
+		-->
+		<exec executable="zip" dir="${dist.linux}">
+			<arg value="-r"/>
+			<arg value="${appname}.zip"/>
+			<arg value="${appname}"/>
+		</exec>
+	</target>
+	
+	
+	
+	<target name="manioq-for-linux-dist-archive">
+		<antcall target="linux-dist-archive">
+			<param name="JAP_args" value="--manioq"/>
+			<param name="dist.linux" value="${dist.linux}/manioq"/>
+		</antcall>
+	</target>
+	
+	<!-- JAP cleanup targets -->
+	<target name="clean" 
+  		depends="cleanup-tests, cleanup-certificates, cleanup-dist, cleanup-libs" 
+  		description="the whole cleanup procedure"/>
+	
+	<target name="cleanup-libs"
+			description="cleans up the downloaded libs">
+		<delete dir="${lib}"/>
+	</target>
+	
+	<target name="cleanup-tests" description="deletes unwanted source files (aka tests etc.)">
+		<delete dir="${src}/anon/tor/test"/>
+		<delete dir="${src}/anon/crypto/tinytls/test"/>
+		<delete dir="${src}/misc"/>    
+	</target>
+	
+	<target name="cleanup-certificates" description="deletes unwanted certifcates from source">
+		<delete>
+			<fileset dir="${certificates}" includes="**/*.cer.dev"/>
+		</delete>   
+	</target>
+	
+	<target name="cleanup-dist" depends="cleanup-build" description="deletes the ${build} and ${dist} directory trees">
+		<delete dir="${dist}"/>
+	</target>
+	
+	<target name="cleanup-build" description="deletes the ${build} directory tree ">
+			<delete dir="${build}"/>
+	</target>
+	
 </project>

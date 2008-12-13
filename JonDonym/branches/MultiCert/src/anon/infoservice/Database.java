@@ -30,6 +30,7 @@
  */
 package anon.infoservice;
 
+import java.lang.reflect.Constructor;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -43,9 +44,10 @@ import anon.crypto.MyRandom;
 import anon.util.Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
-import org.w3c.dom.NodeList;
 
 /**
  * This class is the generic implementation of a database. It is used by the database
@@ -59,6 +61,8 @@ import org.w3c.dom.NodeList;
  */
 public final class Database extends Observable implements Runnable, IXMLEncodable
 {
+	
+	private static String XML_ALL_DB_NAME = "InfoServiceDB";
 	/**
 	 * The registered databases.
 	 */
@@ -167,6 +171,63 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		return database;
 	}
 
+	public static void restoreFromXML(Document xmlAllDBs, Class[] classesToRestore)
+	{
+		
+		if( (xmlAllDBs == null) || (classesToRestore == null) )
+		{
+			return;
+		}
+		
+		Element allDBRoot = xmlAllDBs.getDocumentElement();
+		if(allDBRoot == null)
+		{
+			return;
+		}
+		if(!allDBRoot.getNodeName().equals(XML_ALL_DB_NAME))
+		{
+			return;
+		}
+		
+		Database currentDB = null;
+		for (int i = 0; i < classesToRestore.length; i++) 
+		{
+			currentDB = getInstance(classesToRestore[i]);
+			if(currentDB != null)
+			{
+				currentDB.loadFromXml(allDBRoot);
+			}
+		}
+	}
+	
+	public static Document dumpToXML(Class[] classesToDump)
+	{
+		if(classesToDump == null)
+		{
+			return null;
+		}
+		
+		Document doc = XMLUtil.createDocument();
+		Element root = doc.createElement(XML_ALL_DB_NAME);
+		Database currentDB = null;
+		Element currentDBRoot = null;
+		
+		synchronized (Database.class)
+		{
+			for (int i = 0; i < classesToDump.length; i++) 
+			{		
+				currentDB = getInstance(classesToDump[i]);
+				currentDBRoot = currentDB.toXmlElement(doc);
+				if(currentDBRoot != null)
+				{
+					root.appendChild(currentDBRoot);
+				}
+			}
+		}
+		doc.appendChild(root);
+		return doc;
+	}
+	
 	public static void shutdownDatabases()
 	{
 		synchronized (Database.class)
@@ -246,7 +307,7 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 					else
 					{
 						/* the oldest entry in the database
-						 * has not reached expire time now, so there are not more old entrys
+						 * has not reached expire time now, so there are no more old entries
 						 */
 						moreOldEntrys = false;
 					}
@@ -547,15 +608,39 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		{
 			return updatedEntries;
 		}
-
 		NodeList dbNodes = a_dbNode.getElementsByTagName(xmlElementName);
+		Constructor constructor = null;
+		AbstractDatabaseEntry instance;
+		
+		try
+		{
+			constructor = m_DatabaseEntryClass.getConstructor(
+					new Class[]{Element.class, long.class});
+			// first try to find constructor with timeout and set timeout unlimited					
+		}
+		catch (Exception a_e)
+		{
+			// no such constructor
+			LogHolder.log(LogLevel.NOTICE, LogType.DB, 
+					"No timeout constructor for " + m_DatabaseEntryClass + " available.");
+		}
+		
 		for (int i = 0; i < dbNodes.getLength(); i++)
 		{
 			/* add all children to the database */			
 			try
 			{
-				AbstractDatabaseEntry instance = (AbstractDatabaseEntry)m_DatabaseEntryClass.getConstructor(
-								new Class[]{Element.class}).newInstance(new Object[]{dbNodes.item(i)});
+				if (constructor == null)
+				{
+					instance = (AbstractDatabaseEntry)m_DatabaseEntryClass.getConstructor(
+							new Class[]{Element.class}).newInstance(new Object[]{dbNodes.item(i)});
+				}
+				else
+				{
+					instance = (AbstractDatabaseEntry)constructor.newInstance(
+							new Object[]{dbNodes.item(i), new Long(Long.MAX_VALUE)});
+				}
+				
 				if (a_bVerify && instance instanceof ICertifiedDatabaseEntry &&
 					!((ICertifiedDatabaseEntry) instance).isVerified())
 				{
@@ -759,5 +844,83 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	public int getTimeoutListSize()
 	{
 		return m_timeoutList.size();
+	}
+	
+	public Document getWebInfos(String a_ID)
+	{
+		return getWebInfos(getEntryClass(), a_ID);
+	}
+	
+	public Document getWebInfos()
+	{
+		return getWebInfos(getEntryClass());
+	}
+	
+	public static interface IWebInfo
+	{
+		public static final String FIELD_XML_ELEMENT_WEBINFO_CONTAINER = "XML_ELEMENT_WEBINFO_CONTAINER";
+//		public static final String XML_ELEMENT_WEBINFO_CONTAINER;  /DO NOT REMOVE! THIS IS PART OF THE SPECIFICATION!
+		Element getWebInfo(Document a_doc);
+	}
+	
+	/**
+	 * get WebInfos for an entry with the specified ID
+	 */
+	private static Document getWebInfos(Class a_webInfoClass, String a_ID)
+	{
+		if (!IWebInfo.class.isAssignableFrom(a_webInfoClass))
+		{
+			LogHolder.log(LogLevel.EMERG, LogType.DB, "Illegal class for web info: " + a_webInfoClass);
+			return null;
+		}
+		
+		Document webInfoDoc = XMLUtil.createDocument();
+		IWebInfo webinfo = (IWebInfo)getInstance(a_webInfoClass).getEntryById(a_ID);
+		Element webInfoElement =
+			(webinfo == null) ? null : webinfo.getWebInfo(webInfoDoc);
+		if(webInfoElement == null)
+		{
+			return null;
+		}
+		webInfoDoc.appendChild(webInfoElement);
+		return webInfoDoc;
+	}
+	
+	/**
+	 * get WebInfos for all entries
+	 */
+	private static Document getWebInfos(Class a_webInfoClass)
+	{
+		if (!IWebInfo.class.isAssignableFrom(a_webInfoClass))
+		{
+			return null;
+		}
+		
+		String nameContainer = 
+			Util.getStaticFieldValue(a_webInfoClass, IWebInfo.FIELD_XML_ELEMENT_WEBINFO_CONTAINER);
+		
+		if (nameContainer == null)
+		{
+			return null;
+		}
+		
+		Document allWebInfosDoc = XMLUtil.createDocument();
+		Vector entries = getInstance(a_webInfoClass).getEntryList();
+		IWebInfo webinfo = null;
+		
+		Element rootElement = allWebInfosDoc.createElement(nameContainer);
+		Element listItem = null;
+		allWebInfosDoc.appendChild(rootElement);
+		
+		for (int i = 0; i < entries.size(); i++) 
+		{
+			webinfo = (IWebInfo) entries.elementAt(i);
+			listItem = webinfo.getWebInfo(allWebInfosDoc);
+			if(listItem != null)
+			{
+				rootElement.appendChild(listItem);
+			}
+		}
+		return allWebInfosDoc;
 	}
 }

@@ -30,11 +30,11 @@ package jap;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import anon.infoservice.AbstractDatabaseEntry;
 import anon.infoservice.Database;
 import anon.infoservice.InfoServiceHolder;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.pay.PayAccountsFile;
-import logging.LogHolder;
 import logging.*;
 
 /**
@@ -50,6 +50,11 @@ public class PaymentInstanceUpdater extends AbstractDatabaseUpdater
 	{
 		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
 	}
+	
+	public PaymentInstanceUpdater(long a_updateInterval)
+	{
+		super(a_updateInterval);
+	}
 
 	public Class getUpdatedClass()
 	{
@@ -64,38 +69,17 @@ public class PaymentInstanceUpdater extends AbstractDatabaseUpdater
 	protected Hashtable getUpdatedEntries(Hashtable a_entriesToUpdate)
 	{
 		Hashtable pis = InfoServiceHolder.getInstance().getPaymentInstances();
-		Vector currentPIs = Database.getInstance(PaymentInstanceDBEntry.class).getEntryList();
-		PaymentInstanceDBEntry entry;
 
-		if (pis == null)
+		if (getUpdateInterval() instanceof DynamicUpdateInterval)
 		{
-			// no entries where found
-			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
-			pis = new Hashtable();
-		}
-		else
-		{
-			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
-		}
-
-
-		// do not delete any payment instances for that we still have an account
-		for (int i = 0; i < currentPIs.size(); i++)
-		{
-			entry = (PaymentInstanceDBEntry)currentPIs.elementAt(i);
-			if (!entry.isValid())
+			if (pis == null)
 			{
-				LogHolder.log(LogLevel.ERR, LogType.PAY,
-							  "Certificate of payment instance " +
-							  entry.getId() + " (" +
-							  entry.getName() + ") has expired!");
-				continue;
+				// no entries where found
+				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
 			}
-
-			if (!pis.containsKey(entry.getId()) &&
-				PayAccountsFile.getInstance().getAccounts(entry.getId()).size() > 0)
+			else
 			{
-				pis.put(entry.getId(), entry);
+				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
 			}
 		}
 
@@ -106,5 +90,16 @@ public class PaymentInstanceUpdater extends AbstractDatabaseUpdater
 		}
 
 		return pis;
+	}
+	
+	protected boolean protectFromCleanup(AbstractDatabaseEntry a_currentEntry)
+	{
+		// do not delete any payment instances for that we still have an account
+		if (PayAccountsFile.getInstance().getAccounts(a_currentEntry.getId()).size() > 0)
+		{
+			return true;
+		}
+		
+		return false;
 	}
 }

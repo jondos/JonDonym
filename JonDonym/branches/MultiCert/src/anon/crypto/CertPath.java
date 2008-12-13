@@ -68,7 +68,7 @@ public class CertPath implements IXMLEncodable
 	private Vector m_certificates;
 	/** true if the last cert is a root cert */
 	private boolean m_rootFound;
-	/** true if the CertPath has valid format */
+	/** true if the CertPath has valid format (not timely valid!!) */
 	private boolean m_valid;
 	/** inicates if the CertPath was verified within the last VERIFICATION_INTERVAL */
 	private boolean m_verified;
@@ -141,6 +141,11 @@ public class CertPath implements IXMLEncodable
 	public static CertPath getInstance(JAPCertificate a_firstCert, int a_documentType, Vector a_pathCertificates)
 	{
 		Vector pathCerts;
+		
+		if(a_firstCert == null)
+		{
+			return null;
+		}
 		//check cached CertPaths here!
 		CertificateInfoStructure cachedPath = null;
 		cachedPath = SignatureVerifier.getInstance().getVerificationCertificateStore()
@@ -284,20 +289,23 @@ public class CertPath implements IXMLEncodable
 			}
 			
 			//Name Chaining
-			if(a_cert.getIssuer().equals(issuer.getSubject()) && !a_cert.equals(issuer))
+			if(a_cert.getIssuer() != null && issuer.getSubject() != null)
 			{
-				X509AuthorityKeyIdentifier aki = (X509AuthorityKeyIdentifier) a_cert.getExtensions().
-													getExtension(X509AuthorityKeyIdentifier.IDENTIFIER);
-				
-				//Key Chaining (only if an aki extensions is available)
-				if(aki != null)
+				if(a_cert.getIssuer().equals(issuer.getSubject()) && !a_cert.equals(issuer))
 				{
-					if(!aki.getValue().equals(issuer.getSubjectKeyIdentifier()))
-					{ //key identifiers do not match -> obviously this is the wrong issuer
-						//TODO continue;
+					X509AuthorityKeyIdentifier aki = (X509AuthorityKeyIdentifier) a_cert.getExtensions().
+														getExtension(X509AuthorityKeyIdentifier.IDENTIFIER);
+					
+					//Key Chaining (only if an aki extensions is available)
+					if(aki != null)
+					{
+						if(!aki.getValue().equals(issuer.getSubjectKeyIdentifier()))
+						{ //key identifiers do not match -> obviously this is the wrong issuer
+							//TODO continue;
+						}
 					}
+					return issuer;
 				}
-				return issuer;
 			}
 		}
 		return null;
@@ -788,6 +796,16 @@ public class CertPath implements IXMLEncodable
 	public boolean isValidPath()
 	{
 		return m_valid;
+	}
+	
+	protected Vector getCertificates()
+	{
+		Vector certs = (Vector) m_certificates.clone();
+		if(m_rootFound)
+		{
+			certs.removeElementAt(certs.size()-1);
+		}
+		return certs;
 	}
 	
 	public int getErrorCode()

@@ -35,7 +35,6 @@ import java.io.InterruptedIOException;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.Enumeration;
@@ -61,6 +60,8 @@ import anon.client.replay.TimestampUpdater;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixInfo;
+import anon.infoservice.ServiceOperator;
 import anon.pay.AIControlChannel;
 import anon.pay.Pay;
 import anon.util.XMLParseException;
@@ -170,6 +171,30 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 		m_serviceContainer = a_serviceContainer;
 
+		int cascadeLength = mixCascade.getNumberOfMixes();
+		ITermsAndConditionsContainer tcc = m_serviceContainer.getTCContainer();
+		
+		if(tcc != null)
+		{
+			for (int i = 0; i < cascadeLength; i++) 
+			{
+				MixInfo info = mixCascade.getMixInfo(i);
+				if(info == null)
+				{
+					continue; // ignore
+				}			
+			
+				ServiceOperator op = info.getServiceOperator();
+				if(op != null && !tcc.hasAcceptedTermsAndConditions(op) &&
+				op.hasTermsAndConditions())
+				{
+					tcc.showTermsAndConditionsDialog(op);
+					
+					// TODO: interrupt etc.
+				}
+			}
+		}
+		
 		StatusThread run = new StatusThread()
 		{
 			int status;
@@ -346,7 +371,22 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		{
 			if (m_socketHandler != null)
 			{
-				m_socketHandler.deleteObserver(this);
+				m_socketHandler.deleteObservers();
+			}
+		}
+		
+		synchronized (m_internalSynchronization)
+		{
+			if (m_multiplexer != null)
+			{
+				m_multiplexer.close();
+			}
+		}
+		
+		synchronized (m_internalSynchronizationForSocket)
+		{
+			if (m_socketHandler != null)
+			{
 				m_socketHandler.closeSocket();
 				m_socketHandler = null;
 			}
@@ -360,6 +400,10 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		}
 		synchronized (m_internalSynchronization)
 		{
+			if (m_multiplexer != null)
+			{
+				m_multiplexer.deleteObservers();
+			}
 			m_multiplexer = null;
 			m_connected = false;
 
@@ -592,7 +636,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		notificationThread.start();
 
 		Socket connectedSocket = null;
-		HTTPConnection connction;
+		HTTPConnection connection;
 		int i = 0;
 		while ( (i < a_mixCascade.getNumberOfListenerInterfaces()) && (connectedSocket == null) &&
 			   (!Thread.currentThread().isInterrupted()))
@@ -600,10 +644,13 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			/* try out all interfaces of the mixcascade until we have a connection */
 			try
 			{
-				connction = HTTPConnectionFactory.getInstance().createHTTPConnection(a_mixCascade.
+				connection = HTTPConnectionFactory.getInstance().createHTTPConnection(a_mixCascade.
 					getListenerInterface(i), a_proxyInterface);
-				connction.setTimeout(CONNECT_TIMEOUT);
-				connectedSocket = connction.Connect();
+				connection.setTimeout(CONNECT_TIMEOUT);
+				connectedSocket = connection.Connect();
+				/*connectedSocket = new Socket(a_mixCascade.
+						getListenerInterface(i).getHost(), a_mixCascade.
+						getListenerInterface(i).getPort());*/
 			}
 			catch (InterruptedIOException e)
 			{
@@ -652,10 +699,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		{
 			try
 			{
-				synchronized (m_internalSynchronizationForSocket)
-				{
-					m_socketHandler = new SocketHandler(a_connectionToMixCascade);
-				}
 				try
 				{
 					/* limit timeouts while login procedure */
@@ -666,6 +709,15 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				{
 					/* ignore it */
 				}
+				
+				synchronized (m_internalSynchronizationForSocket)
+				{
+					if (m_socketHandler != null)
+					{
+						m_socketHandler.deleteObservers();
+					}
+					m_socketHandler = new SocketHandler(a_connectionToMixCascade);
+				}				
 
 				final Vector exceptionCache = new Vector();
 				Thread loginThread = new Thread(new Runnable()
@@ -821,7 +873,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		notificationThread.setDaemon(true);
 		notificationThread.start();
 
-		LogHolder.log(LogLevel.ERR, LogType.NET,
+		LogHolder.log(LogLevel.INFO, LogType.NET,
 					  "Connected to MixCascade '" + a_serverDescription.toString() + "'!");
 		/* AnonClient successfully started */
 		m_connected = true;

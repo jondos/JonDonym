@@ -27,7 +27,9 @@
  */
 package anon.infoservice;
 
+import java.net.InetAddress;
 import java.util.Enumeration;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.Date;
 
@@ -57,7 +59,7 @@ import anon.pay.AIControlChannel;
  * Holds the information for a mixcascade.
  */
 public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
-	implements AnonServerDescription, IVerifyable
+	implements AnonServerDescription, IVerifyable, IServiceContextContainer, Database.IWebInfo
 {
 	public static final String SUPPORTED_PAYMENT_PROTOCOL_VERSION = "2.0";
 
@@ -67,7 +69,22 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private static final String XML_ATTR_USER_DEFINED = "userDefined";
 	private static final String XML_ATTR_STUDY = "study";
 	private static final String XML_ATTR_MAX_USERS = "maxUsers";
-
+	private static final String XML_ATTR_PAYMENT = "payment";
+	
+	/* Constants for the JonDonym service status */
+	public static final String XML_ELEMENT_WEBINFO_CONTAINER = "CascadeWebInfos";
+	public static final String XML_ELEMENT_WEBINFO = "CascadeWebInfo";
+	public static final String XML_ELEMENT_WEBINFO_CASCADE_NAME = "CascadeName";
+	public static final String XML_ELEMENT_WEBINFO_NAME = "Name";
+	public static final String XML_ELEMENT_WEBINFO_COMPOSED_NAME = "ComposedName";
+	public static final String XML_ELEMENT_WEBINFO_CURR_USERS = "CurrentUsers";
+	public static final String XML_ATTR_WEBINFO_MIX_COUNTRY = "mixCountry";
+	public static final String XML_ATTR_WEBINFO_MIX_POSITION = "mixPosition";
+	public static final String XML_ATTR_WEBINFO_OP_COUNTRY = "operatorCountry";
+	
+	public static final String INFOSERVICE_COMMAND_WEBINFOS = "/cascadewebinfos";
+	public static final String INFOSERVICE_COMMAND_WEBINFO = "/cascadewebinfo/";
+	
 	//private static final String XML_ELEM_RSA_KEY_VALUE = "RSAKeyValue";
 
 	private boolean m_bDefaultVerified = false;
@@ -91,6 +108,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 * The name of the mixcascade.
 	 */
 	private String m_strName;
+	
+	private Vector m_decomposedCascadeName;
 
 	/**
 	 * Holds the information about the interfaces (IP, Port) the mixcascade (first mix) is listening
@@ -107,6 +126,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private String m_piid = "";
 
 	private MixInfo[] m_mixInfos;
+	private String m_strMixNames;
 	private int m_nrPriceCerts = 0;
 
 	private Vector m_mixNodes;
@@ -165,6 +185,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 * If this MixCascade has been received directly from a cascade connection.
 	 */
 	private boolean m_bFromCascade;
+	private String m_context;
 
 	
 	/**
@@ -280,8 +301,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		
 		m_bStudy = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_STUDY, false);
 		
+		m_context = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_CONTEXT, CONTEXT_JONDONYM);
 		m_maxUsers = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_MAX_USERS, 0);
-		
+		m_maxUsers = Math.min(m_maxUsers, 9999); // 10000 is seen as unlimited
 
 		/* get the ID */
 		if (a_mixCascadeNode == null || !a_mixCascadeNode.getNodeName().equals(XML_ELEMENT_NAME))
@@ -299,14 +321,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		if (!checkId())
 		{
 			throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix-Cascade ID: " + m_mixCascadeId);
-		}
-
-
-		/* get the name */
-		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
-		if (m_strName == null && !m_bFromCascade)
-		{
-			throw (new XMLParseException("Name"));
 		}
 
 		m_mixProtocolVersion =
@@ -333,13 +347,13 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				throw new XMLParseException("Network");
 			}
 			Element networkNode = (Element) (networkNodes.item(0));
-			NodeList listenerInterfacesNodes = networkNode.getElementsByTagName("ListenerInterfaces");
+			NodeList listenerInterfacesNodes = networkNode.getElementsByTagName(ListenerInterface.XML_ELEMENT_CONTAINER_NAME);
 			if (listenerInterfacesNodes.getLength() == 0)
 			{
 				throw new XMLParseException("ListenerInterfaces");
 			}
 			Element listenerInterfacesNode = (Element) (listenerInterfacesNodes.item(0));
-			NodeList listenerInterfaceNodes = listenerInterfacesNode.getElementsByTagName("ListenerInterface");
+			NodeList listenerInterfaceNodes = listenerInterfacesNode.getElementsByTagName(ListenerInterface.XML_ELEMENT_NAME);
 			if (listenerInterfaceNodes.getLength() == 0)
 			{
 				throw new XMLParseException("ListenerInterface");
@@ -383,7 +397,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			try
 			{
-				m_mixInfos[i] = new MixInfo((Element) mixNodes.item(i), Long.MAX_VALUE, true);
+				m_mixInfos[i] = new MixInfo((Element) mixNodes.item(i), a_expireTime, true);
 				if (i + 1 == mixNodes.getLength())
 				{
 					m_bSock5Support = m_mixInfos[i].isSocks5Supported();
@@ -408,6 +422,32 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			catch (XMLParseException a_e)
 			{
 				m_mixInfos[i] = null;
+			}
+		}
+		
+		/* get the name */
+		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
+		//@todo: rather use this for setting m_strName: generateNameFromMixNames()
+		//(when the mix providers support it)
+		if (m_strName == null && !m_bFromCascade)
+		{
+			generateNameFromMixNames();
+			//throw (new XMLParseException("Name"));	
+		}
+		
+		if (a_expireTime == 0 && m_mixInfos.length > 0)
+		{
+			// this seems to be InfoService context
+			Vector visibleAddresses = m_mixInfos[m_mixInfos.length - 1].getVisibleAddresses();
+			if (visibleAddresses.size() == 0)
+			{
+				// take the last mix IP addresses
+				visibleAddresses = m_mixInfos[m_mixInfos.length - 1].getListenerAddresses();
+			}
+			for (int i = 0; i < visibleAddresses.size(); i++)
+			{
+				InetAddress addr = (InetAddress)visibleAddresses.elementAt(i);
+				MixCascadeExitAddresses.addInetAddress(getId(), addr);
 			}
 		}
 		
@@ -651,12 +691,96 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	}
 
 	/**
+	 * Gets (and sets) the concatenated names of the Mixes in this Cascade.
+	 * @todo can't getName() be used instead of that?
+	 * @return
+	 */
+	public String getMixNames()
+	{
+		synchronized (m_mixInfos)
+		{
+			if (m_strMixNames == null)
+			{
+				m_strMixNames = "";
+				for (int i = 0; i < m_mixInfos.length; i++)
+				{
+					if (m_mixInfos[i] == null)
+					{						
+						continue;
+					}
+					if (m_strMixNames.length() > 0)
+					{
+						m_strMixNames += "-";
+					}
+					m_strMixNames += m_mixInfos[i].getNameFragmentForCascade(); //m_mixInfos[i].getName();					
+				}
+				if (m_strMixNames.length() == 0)
+				{
+					m_strMixNames = m_strName;
+				}
+				else if (!m_strName.equals(m_strMixNames))
+				{
+					m_strMixNames = m_strName + "|" + m_strMixNames; 
+				}
+			}			
+		}
+		return m_strMixNames;
+	}
+	
+	/* this function generates a cascadeName form the namefragments of the corresponding
+	 * mixes. (but only namefragments of mixes with different operators will appear)
+	 * this overwrites the existing cascadename
+	 */
+	private void generateNameFromMixNames()
+	{
+		//no null checks necessary because NO NullPointers must occur! 
+		if (m_decomposedCascadeName == null)
+		{
+			m_decomposedCascadeName = new Vector();
+		}
+		else
+		{
+			m_decomposedCascadeName.removeAllElements();
+		}
+		
+		Vector operators = new Vector();
+		ServiceOperator currentOp = null;
+		String currentNameFragment = null;
+		m_strName = "";
+		
+		/* special case: If the operator of the first and the last mix are the same
+		 * only this operator is displayed. 
+		 */
+		if(m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
+		{
+			//@todo: should we better use only the provider name in this case? 
+			currentNameFragment = m_mixInfos[0].getNameFragmentForCascade();
+			m_decomposedCascadeName.addElement(currentNameFragment);
+			m_strName = currentNameFragment;
+			return;
+		}
+		
+		for (int i = 0; i < m_mixInfos.length; i++) 
+		{
+			currentOp = m_mixInfos[i].getServiceOperator();
+			if(! operators.contains(m_mixInfos[i].getServiceOperator()))
+			{
+				currentNameFragment = m_mixInfos[i].getNameFragmentForCascade();
+				m_strName += (i == (m_mixInfos.length-1)) ? currentNameFragment : (currentNameFragment+"-");	
+				operators.addElement(currentOp);
+				m_decomposedCascadeName.addElement(currentNameFragment);
+			}
+		}
+	}
+	
+	/**
 	 * Returns the name of the mixcascade.
 	 *
 	 * @return The name of this mixcascade.
 	 */
 	public String getName()
 	{
+		getDecomposedCascadeName(); /*@todo: remove */
 		return m_strName;
 	}
 
@@ -680,6 +804,103 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return getName();
 	}
 
+	/**
+	 * @todo use generateNameFromMixNames when the operator short name is certified.
+	 * and this method only to return the container containg the name fragments
+	 * @return
+	 */
+	public Vector getDecomposedCascadeName()
+	{
+		if (m_strName == null)
+		{
+			return null;
+		}
+		synchronized (m_strName)
+		{
+			if (m_decomposedCascadeName == null)
+			{			
+				m_decomposedCascadeName = new Vector();
+				
+				if (isUserDefined() || m_mixInfos.length == 0)
+				{
+					m_decomposedCascadeName.addElement(m_strName);
+					return m_decomposedCascadeName;
+				}					
+				
+				StringTokenizer tokenizer = new StringTokenizer(m_strName,"-");
+				StringTokenizer tempTokenizer;
+				String token;								
+				
+				if (tokenizer.countTokens() == getNumberOfMixes())
+				{
+					while (tokenizer.hasMoreTokens())
+					{
+						token = tokenizer.nextToken().trim();
+						tempTokenizer = new StringTokenizer(token);
+						if (!tempTokenizer.hasMoreTokens())
+						{
+//							cannot further decompose this name
+							break;
+						}
+						token = tempTokenizer.nextToken().trim();						
+						
+						if (token.length() == 0)
+						{
+//							cannot further decompose this name
+							break;
+						}
+						if (token.length() > 15)
+						{
+							token = token.substring(0, 15);
+						}
+						m_decomposedCascadeName.addElement(token);
+					}
+				}
+				
+				if (m_decomposedCascadeName.size() == 0)
+				{
+					// cannot decompose this name
+					m_decomposedCascadeName.addElement(m_strName);
+				}
+				/* special case: If the operator of the first and the last mix are the same
+				 * only this operator is displayed. 
+				 */
+				else if (m_mixInfos[0] == null || m_mixInfos[0].getServiceOperator() == null ||
+						m_mixInfos[m_mixInfos.length-1] == null ||
+						m_mixInfos[m_mixInfos.length-1].getServiceOperator() == null ||
+						m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
+				{
+					m_strName = (String) m_decomposedCascadeName.elementAt(0);
+					m_decomposedCascadeName.removeAllElements();
+					m_decomposedCascadeName.addElement(m_strName);
+				}
+				else
+				{
+					Vector ops = new Vector();
+					ServiceOperator currentOp = null;
+					m_strName = "";
+					
+					for (int i = 0; (i < m_decomposedCascadeName.size() ) && (i < m_mixInfos.length); i++)
+					{
+						currentOp = m_mixInfos[i].getServiceOperator();
+						if (currentOp == null)
+						{
+							m_strName = (String)m_decomposedCascadeName.elementAt(0);
+							break;
+						}
+						if (!ops.contains(currentOp))
+						{
+							ops.addElement(currentOp);
+							m_strName += m_strName.equals("") ? "" : "-";
+							m_strName += m_decomposedCascadeName.elementAt(i);
+						}
+					}
+				}
+			}
+		}
+		return m_decomposedCascadeName;
+	}
+	
 	/**
 	 * Compares this object to another one. This method returns only true, if the other object is
 	 * also a MixCascade and has the same ID as this MixCascade.
@@ -889,6 +1110,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		if (m_userDefined && a_oldMixCascade != null && a_oldMixCascade.getId().equals(getId()))
 		{
 			m_strName = a_oldMixCascade.m_strName;
+			m_decomposedCascadeName = new Vector();
+			m_decomposedCascadeName.addElement(m_strName);
+			
 			m_listenerInterfaces = a_oldMixCascade.m_listenerInterfaces;
 			/* set the lastUpdate time */
 			m_lastUpdate = System.currentTimeMillis();
@@ -1258,5 +1482,176 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			m_strMixIds += m_mixIds.elementAt(i);
 		}
+	}
+
+	public String getContext() 
+	{
+		return m_context;
+	}
+	
+	public Element getWebInfo(Document webInfoDoc)
+	{
+		if (webInfoDoc == null)
+		{
+			return null;
+		}
+		
+		Vector decomposedNames = getDecomposedCascadeName();
+		Vector namesToAdd = new Vector(decomposedNames.size());
+		String tempName = null;
+		for (int i = 0; i < decomposedNames.size(); i++) 
+		{
+			tempName = (String) decomposedNames.elementAt(i);
+			if(tempName == null || namesToAdd.contains(tempName))
+			{
+				tempName = "";
+			}
+			namesToAdd.insertElementAt(tempName, i);
+		}
+		
+		Element rootElement = webInfoDoc.createElement(XML_ELEMENT_WEBINFO);
+		XMLUtil.setAttribute(rootElement, XML_ATTR_PAYMENT, isPayment());
+		XMLUtil.setAttribute(rootElement, XML_ATTR_ID, getId());
+		if (getContext() != null)
+		{
+			XMLUtil.setAttribute(rootElement, XML_ATTR_CONTEXT, getContext());
+		}
+		Element cascadeName = XMLUtil.createChildElement(rootElement, XML_ELEMENT_WEBINFO_CASCADE_NAME);
+		Element mixList = webInfoDoc.createElement(MixInfo.XML_ELEMENT_CONTAINER_NAME);
+		
+		XMLUtil.createChildElementWithValue(rootElement, 
+				XML_ELEMENT_WEBINFO_CURR_USERS, 
+				(""+getCurrentStatus().getNrOfActiveUsers()));
+		
+		PerformanceEntry perfEntry = 
+			(PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(getId());
+		
+		if(perfEntry != null)
+		{
+			rootElement.appendChild(perfEntry.toXmlElement(webInfoDoc));
+		}
+		
+		Element currentNameElement = null;
+		String currentDecomposedNameComponent = null;
+		MixInfo currentMixInfo = null;
+		ServiceOperator currentMixOperator = null;
+		ServiceLocation currentMixLocation = null;
+		Element currentMixElement = null;
+		Element currentMixOperatorElement = null;
+		Element currentMixLocationElement = null;
+		String currentMixName = null;
+		rootElement.appendChild(mixList);
+		for (int i = 0; i < getNumberOfMixes(); i++) 
+		{
+			currentMixInfo = getMixInfo(i);
+			if(currentMixInfo != null)
+			{
+				if(currentMixInfo.getCertPath() == null)
+				{
+					/* no valid document can be returned */
+					return null;
+				}
+				CertPath path = currentMixInfo.getCertPath().getPath();
+				currentMixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0l);
+				currentMixLocation = new ServiceLocation(null, path.getFirstCertificate());
+				currentMixName = currentMixInfo.getName();
+				
+				if(currentMixOperator == null || 
+				   currentMixLocation == null)
+				{
+					/* no valid document can be returned */
+					return null;
+				}
+				
+				/* set the cascade name components */
+				currentDecomposedNameComponent = null;
+				if( i < namesToAdd.size() )
+				{
+					currentDecomposedNameComponent = (String) namesToAdd.elementAt(i);
+					if(currentDecomposedNameComponent != null && 
+						currentDecomposedNameComponent.equals(""))
+					{
+						currentDecomposedNameComponent = null;
+					}
+				}
+				
+				if(currentDecomposedNameComponent != null)
+				{
+					currentNameElement = 
+						XMLUtil.createChildElementWithValue(cascadeName, 
+								XML_ELEMENT_WEBINFO_NAME, 
+								currentDecomposedNameComponent);
+				
+					if (currentMixLocation.getCountryCode() != null )
+					{
+						XMLUtil.setAttribute(currentNameElement, XML_ATTR_WEBINFO_MIX_COUNTRY, currentMixLocation.getCountryCode());
+					}
+					
+					if (currentMixOperator.getCountryCode() != null )
+					{
+						XMLUtil.setAttribute(currentNameElement, XML_ATTR_WEBINFO_OP_COUNTRY, currentMixOperator.getCountryCode());
+					}
+					XMLUtil.setAttribute(currentNameElement, XML_ATTR_WEBINFO_MIX_POSITION, i);
+				}
+				
+				/* now set the current Mix Attributes */ 
+				currentMixElement = XMLUtil.createChildElement(mixList, MixInfo.XML_ELEMENT_NAME);
+				XMLUtil.setAttribute(currentMixElement, XML_ATTR_ID, currentMixInfo.getId());
+				
+				if(currentMixName != null)
+				{
+					XMLUtil.createChildElementWithValue(currentMixElement, XML_ELEMENT_WEBINFO_NAME,
+							currentMixName);
+				}
+				
+				currentMixOperatorElement = currentMixOperator.toXMLElement(webInfoDoc);
+				currentMixLocationElement = currentMixLocation.toXMLElement(webInfoDoc);
+				
+				if(currentMixOperatorElement != null)
+				{
+					currentMixElement.appendChild(currentMixOperatorElement);
+				}
+				
+				if(currentMixLocationElement != null)
+				{
+					currentMixElement.appendChild(currentMixLocationElement);
+				}
+			}
+		}	
+		
+		currentNameElement = 
+			XMLUtil.createChildElementWithValue(cascadeName, 
+					XML_ELEMENT_WEBINFO_COMPOSED_NAME, getName());
+		
+		Element listenerInterfaces = 
+			XMLUtil.createChildElement(rootElement, ListenerInterface.XML_ELEMENT_CONTAINER_NAME);
+		ListenerInterface listenerInterface;
+		Element elemInterface;
+		Hashtable hashInterfaceHosts = new Hashtable();
+		for (int i = 0; i < getNumberOfListenerInterfaces(); i++)
+		{
+			listenerInterface = getListenerInterface(i);
+			if (listenerInterface.isHidden())
+			{
+				continue;
+			}
+			if (hashInterfaceHosts.containsKey(listenerInterface.getHost()))
+			{
+				elemInterface = (Element)hashInterfaceHosts.get(listenerInterface.getHost());
+			}
+			else
+			{
+				elemInterface = XMLUtil.createChildElement(listenerInterfaces, 
+						ListenerInterface.XML_ELEMENT_NAME);
+				XMLUtil.setAttribute(elemInterface, "Host", listenerInterface.getHost());
+				hashInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
+			}
+			if (listenerInterface.getProtocol() != ListenerInterface.PROTOCOL_TYPE_RAW_UNIX)
+			{
+				XMLUtil.createChildElementWithValue(elemInterface, "Port", "" + listenerInterface.getPort());
+			}
+		}
+		
+		return rootElement;
 	}
 }

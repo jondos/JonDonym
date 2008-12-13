@@ -28,11 +28,11 @@
 #import "javah_MacOSXLib.h"
 #import <Cocoa/Cocoa.h>
 
-#define LIB_VERSION "00.00.005"
+#define LIB_VERSION "00.00.006"
 
 @interface AppDelegate : NSObject
 - (NSMenu*) applicationDockMenu:(NSApplication*) sender;
-- (void) dockMenuCallback:(id) sender;
+- (void) menuSelector:(id) sender;
 @end
 
 NSMenu* getNSMenuFromJMenu(JNIEnv* env, jobject obj);

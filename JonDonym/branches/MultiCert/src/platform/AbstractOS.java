@@ -381,6 +381,16 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	}
 	
 	/**
+	 * If available, returns the specific directory path where the application data (config files etc.)
+	 * is stored by default.
+	 * @return
+	 */
+	public String getAppdataDefaultDirectory(String a_applicationName)
+	{
+		return null;
+	}
+	
+	/**
 	 * Returns a vector of all running VMs. This only works on the Sun VM
 	 * @return a vector of all running Virtual Machines
 	 */

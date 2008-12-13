@@ -31,39 +31,40 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InterruptedIOException;
 import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.security.SignatureException;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
-import anon.crypto.CertPath;
 import anon.crypto.IVerifyable;
-import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.pay.PaymentInstanceDBEntry;
 import anon.util.ClassUtil;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-import anon.pay.*;
-import java.net.SocketException;
 
 /**
  * Holds the information for an infoservice.
  */
-public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable
+public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable,
+	IBoostrapable
 {
 	public static final String XML_ELEMENT_CONTAINER_NAME = "InfoServices";
 	public static final String XML_ELEMENT_NAME = "InfoService";
@@ -93,6 +94,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 * The name of the infoservice.
 	 */
 	private String m_strName;
+	
+	/**
+	 * Indicates if this is a temporary InfoService entry creates for bootstrapping.
+	 */
+	private boolean m_bTemp = false;
 
 	/**
 	 * Some information about the used infoservice software.
@@ -146,7 +152,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	/**
 	 *
 	 */
-	private JAPCertificate m_certificate;
+	//private JAPCertificate m_certificate;
 
 	private XMLSignature m_signature;
 
@@ -181,29 +187,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 */
 	public InfoServiceDBEntry(Element a_infoServiceNode) throws XMLParseException
 	{
-		this(a_infoServiceNode, true);
-	}
-
-	/**
-	 * Creates a new InfoService from XML description (InfoService node). The new entry will be
-	 * created within the specified context. The context influcences the timeout within the database
-	 * of all infoservices.
-	 *
-	 * @param a_infoServiceNode The InfoService node from an XML document.
-	 * @param a_japClientContext Whether the new entry will be created within the context of the
-	 *                           JAP client (true) or the context of the InfoService (false). This
-	 *                           setting influences the timeout of the created entry within the
-	 *                           database of all infoservices.
-	 *
-	 * @exception XMLParseException if an error in the xml structure occurs
-	 */
-	public InfoServiceDBEntry(Element a_infoServiceNode, boolean a_japClientContext) throws XMLParseException
-	{
-		this(a_infoServiceNode,
-			 (a_japClientContext ? (System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE_JAP) :
-			  (System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE)));
-		//XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_infoServiceNode, "LastUpdate"), -1L) +
-		//Constants.TIMEOUT_INFOSERVICE));
+		this(a_infoServiceNode, 0);
 	}
 
 	/**
@@ -215,9 +199,9 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 *
 	 * @exception XMLParseException if an error in the xml structure occurs
 	 */
-	private InfoServiceDBEntry(Element a_infoServiceNode, long a_timeout) throws XMLParseException
+	public InfoServiceDBEntry(Element a_infoServiceNode, long a_timeout) throws XMLParseException
 	{
-		super(a_timeout);
+		super(a_timeout <= 0 ? (System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE) : a_timeout);
 
 		if (a_infoServiceNode == null)
 		{
@@ -233,10 +217,6 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		if (m_signature != null)
 		{
 			m_certPath = m_signature.getMultiCertPath();
-			/*if (m_certPath != null)
-			{
-				m_certificate = m_certPath.getEndEntity();
-			}*/
 		}
 
 		/* get the information, whether this infoservice was user-defined within the JAP client */
@@ -673,6 +653,16 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			m_infoserviceSoftware = new ServiceSoftware(Constants.INFOSERVICE_VERSION);
 		}
 		m_xmlDescription = generateXmlRepresentation();
+	}
+	
+	public void markAsBootstrap()
+	{
+		m_bTemp = true;
+	}
+	
+	public boolean isBootstrap()
+	{
+		return m_bTemp;
 	}
 
 	/**
@@ -1174,7 +1164,17 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			{
 				if (a_getter.m_dbEntryClass == InfoServiceDBEntry.class)
 				{
-					currentEntry = new InfoServiceDBEntry(entryNode, a_getter.m_bJAPContext);
+					currentEntry = new InfoServiceDBEntry(entryNode, 
+							a_getter.m_bJAPContext ? Long.MAX_VALUE : 0);
+				}
+				else if(a_getter.m_dbEntryClass == TermsAndConditions.class)
+				{
+					// the t&c operator data needs his own document to find and transform nodes
+					Document d = XMLUtil.createDocument();
+					Node node = XMLUtil.importNode(d, entryNode, true);
+					d.appendChild(node);
+					
+					currentEntry = new TermsAndConditions(d, true);
 				}
 				else if (a_getter.m_dbEntryClass == MixCascade.class)
 				{
@@ -1226,8 +1226,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			{
 				/* an error while parsing the node occured -> we don't use this db entry */
 				LogHolder.log(LogLevel.ERR, LogType.MISC, "Error in " +
-							  ClassUtil.getShortClassName(a_getter.m_dbEntryClass) +
-							  " XML node:" + e.toString());
+							  ClassUtil.getShortClassName(a_getter.m_dbEntryClass) + " XML node!", e);
 			}
 		}
 		return entries;
@@ -1251,6 +1250,40 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return getEntries(getter);
 	}
 
+	/**
+	 * Get the MixInfo for the mix with the given ID. If we can't get a connection with the
+	 * infoservice, an Exception is thrown.
+	 *
+	 * @param mixId The ID of the mix to get the MixInfo for.
+	 *
+	 * @return The MixInfo for the mix with the given ID.
+	 */
+	public TermsAndConditionsFramework getTCFramework(String a_id) throws Exception
+	{
+		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest("/tcframework/" + a_id), 
+				HTTPConnectionFactory.HTTP_ENCODING_ZLIB);
+		
+		NodeList nodes = doc.getElementsByTagName("TermsAndConditionsFramework");
+		if (nodes.getLength() == 0)
+		{
+			throw (new Exception("Error in XML structure for mix with ID " + a_id));
+		}
+		
+		Document d = XMLUtil.createDocument();
+
+		Node node = XMLUtil.importNode(d, nodes.item(0), true);
+		d.appendChild(node);
+		TermsAndConditionsFramework framework = new TermsAndConditionsFramework(d);
+		/* check the signature */
+		if (!framework.isVerified())
+		{
+			/* signature is invalid -> throw an exception */
+			throw (new Exception("Cannot verify the signature for Mix entry: " + XMLUtil.toString(node)));
+		}
+		/* signature was valid */
+		return framework;
+	}
+	
 	public Hashtable getPaymentInstances(boolean a_bJAPClientContext) throws Exception
 	{
 		EntryGetter getter = new EntryGetter();
@@ -1352,7 +1385,52 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	{
 		return getStatusInfo(a_cascade, -1);
 	}
-
+	// TODO give proper return values!!
+	public Object getExitAddresses() throws Exception
+	{
+		boolean bUpdated = false;
+		Document doc =
+			getXmlDocument(HttpRequestStructure.createGetRequest("/exitaddresses"));
+		if (doc == null)
+		{
+			return null;
+		}
+		Element parent = doc.getDocumentElement();
+		if (parent == null)
+		{
+			return null;
+		}
+		
+		Node exitAddressesNode = XMLUtil.getFirstChildByName(parent, MixCascadeExitAddresses.XML_ELEMENT_NAME);
+		Node currentAddress = null;
+		String currentID = null;
+		String currentIP = null;
+		while(exitAddressesNode != null)
+		{
+			currentID = XMLUtil.parseAttribute(exitAddressesNode, MixCascadeExitAddresses.XML_ATTR_ID,"");
+			if(!currentID.equals(""))
+			{
+				currentAddress = XMLUtil.getFirstChildByName(exitAddressesNode, MixCascadeExitAddresses.XML_ELEMENT_ADDRESS_NAME);
+				while(currentAddress != null)
+				{
+					currentIP = XMLUtil.parseValue(currentAddress, "");
+					if(!currentIP.equals(""))
+					{						
+						MixCascadeExitAddresses.addInetAddress(currentID, InetAddress.getByName(currentIP));
+						bUpdated = true;
+					}
+					currentAddress = XMLUtil.getNextSiblingByName(currentAddress, MixCascadeExitAddresses.XML_ELEMENT_ADDRESS_NAME);
+				}
+			}
+			exitAddressesNode = XMLUtil.getNextSiblingByName(exitAddressesNode, MixCascadeExitAddresses.XML_ELEMENT_NAME);
+		}
+		if (bUpdated)
+		{
+			return new Object(); // dummy to prevent InfoServiceHolder from throwing error messages
+		}
+		return null;
+	}
+	
 	/**
 	 * Get the StatusInfo for the cascade with the given ID. If we can't get a connection with the
 	 * infoservice, an Exception is thrown.
@@ -1507,12 +1585,36 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return getUpdateEntries(MessageDBEntry.class, true);
 	}
 	
+	public Hashtable getTermsAndConditions() throws Exception
+	{
+		EntryGetter getter = new EntryGetter();
+		getter.m_bJAPContext = true;
+		getter.m_dbEntryClass = TermsAndConditions.class;
+		getter.m_postFile = TermsAndConditions.HTTP_REQUEST_STRING;
+		return getEntries(getter);
+	}
+	
+	public Hashtable getTermsAndConditionSerials() throws Exception
+	{
+		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest(TermsAndConditions.HTTP_SERIALS_REQUEST_STRING),
+				  HTTPConnectionFactory.HTTP_ENCODING_ZLIB);
+
+		if (!SignatureVerifier.getInstance().verifyXml(doc, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+		{
+			/* signature is invalid -> throw an exception */
+			throw (new SignatureException("Cannot verify the signature: " + XMLUtil.toString(doc)));
+		}
+
+		return new AbstractDistributableDatabaseEntry.Serials(TermsAndConditions.class).parse(
+				doc.getDocumentElement());
+	}
+	
 	/**
 	 * Sends a /performanceinfo request to the Info Service, retrieves the data
 	 * and creates a new PerformanceInfo object.
-	 * 
+	 *
 	 * @return a PerformanceInfo object
-	 * 
+	 *
 	 * @throws Exception if the Signature can't be verified, the Info Service doesn't have
 	 * the information available or can't be reached.
 	 */
@@ -1523,15 +1625,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		
 		Element nodePerf = (Element) XMLUtil.getFirstChildByName(doc, PerformanceInfo.XML_ELEMENT_NAME);
 		PerformanceInfo info = new PerformanceInfo(nodePerf);
-		
 		if (!info.isVerified())
 		{
 			// signature could not be verified
 			throw new SignatureException("Document could not be verified!");
 		}
-		
-		
-		
 		return info;
 	}
 

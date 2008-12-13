@@ -36,7 +36,9 @@ import anon.util.ThreadPool;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import anon.pay.PaymentInstanceDBEntry;
+import anon.util.ClassUtil;
 import anon.util.IXMLEncodable;
 import anon.util.Util;
 import anon.util.XMLParseException;
@@ -128,6 +130,18 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 
 	private static final int GET_STATUSINFO_TIMEOUT = 19;
 	private static final int GET_PERFORMANCE_INFO = 20;
+	
+	private static final int GET_TC_FRAMEWORK = 21;
+	
+	private static final int GET_TCS = 22;
+	private static final int GET_TC_SERIALS = 23;
+	
+	private static final int GET_EXIT_ADDRESSES = 24;
+	
+	/**
+	 * Function number for fetchInformation() - getMixInfo().
+	 */
+	private static final int GET_MIXINFOS = 25;
 
 	/**
 	 * This defines, whether there is an automatic change of infoservice after failure as default.
@@ -219,7 +233,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 		{
 			/* also if m_preferredInfoService.equals(a_preferredInfoService), there is the possibility
 			 * that some values of the infoservice, like listener interfaces or the name have been
-			 * changed, so we always update the internal stored pererred infoservice
+			 * changed, so we always update the internal stored preferred infoservice
 			 */
 			m_preferredInfoService = a_preferredInfoService;
 			setChanged();
@@ -378,10 +392,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			 * a lot of IS...
 			 */
 			if (functionNumber == GET_INFOSERVICES || functionNumber == GET_MIXCASCADES
+				|| functionNumber == GET_MIXINFOS 
 				|| functionNumber == GET_INFOSERVICE_SERIALS || functionNumber == GET_MIXCASCADE_SERIALS ||
 				functionNumber == GET_CASCADEINFO || functionNumber == GET_LATEST_JAVA_SERIALS ||
 				functionNumber == GET_LATEST_JAVA || functionNumber == GET_MESSAGES ||
-				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES || functionNumber == GET_PERFORMANCE_INFO)
+				functionNumber == GET_MESSAGE_SERIALS || functionNumber == GET_PAYMENT_INSTANCES ||
+				functionNumber == GET_PERFORMANCE_INFO || 
+				functionNumber == GET_TCS || functionNumber == GET_TC_SERIALS ||
+				functionNumber == GET_EXIT_ADDRESSES)
 			{
 				result = new Hashtable();
 				//if (functionNumber == GET_CASCADEINFO)
@@ -411,7 +429,6 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				 */
 				currentInfoService = null;
 			}
-
 			while ( ( (infoServiceList.size() > 0) || (currentInfoService != null)) &&
 				   !Thread.currentThread().isInterrupted())
 			{
@@ -443,10 +460,22 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					if (functionNumber == GET_MIXCASCADES)
 					{
 						tempHashtable = currentInfoService.getMixCascades();
+						if(arguments != null)
+						{
+							/* a service context (service environment) is specified 
+							 * remove all elements which does not match our context 
+							 */
+							String context = (String) arguments.firstElement();
+							filterServiceContext(tempHashtable, context);
+						}
 					}
 					else if (functionNumber == GET_INFOSERVICES)
 					{
 						tempHashtable = currentInfoService.getInfoServices();
+					}
+					else if (functionNumber == GET_MIXINFOS)
+					{
+						tempHashtable = currentInfoService.getMixes(true);
 					}
 					else if (functionNumber == GET_MIXINFO)
 					{
@@ -459,6 +488,18 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_LATEST_JAVA_SERIALS)
 					{
 						tempHashtable = currentInfoService.getLatestJavaSerials();
+					}
+					else if (functionNumber == GET_TC_FRAMEWORK)
+					{
+						result = currentInfoService.getTCFramework((String) (arguments.elementAt(0)));
+					}
+					else if (functionNumber == GET_TCS)
+					{
+						tempHashtable = currentInfoService.getTermsAndConditions();
+					}
+					else if (functionNumber == GET_TC_SERIALS)
+					{
+						tempHashtable = currentInfoService.getTermsAndConditionSerials();
 					}
 					else if (functionNumber == GET_PERFORMANCE_INFO)
 					{
@@ -489,6 +530,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_MIXCASCADE_SERIALS)
 					{
 						tempHashtable = currentInfoService.getMixCascadeSerials();
+						if(arguments != null)
+						{
+							/* a service context (service environment) is specified 
+							 * remove all elements which does not match our context 
+							 */
+							String context = (String) arguments.firstElement();
+							filterServiceContext(tempHashtable, context);
+						}
 					}
 					else if (functionNumber == GET_INFOSERVICE_SERIALS)
 					{
@@ -522,6 +571,11 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					else if (functionNumber == GET_PAYMENT_INSTANCE)
 					{
 						result = currentInfoService.getPaymentInstance( (String) arguments.firstElement());
+					}
+					else if (functionNumber == GET_EXIT_ADDRESSES)
+					{
+						// TODO ask more than one infoservice
+						result = currentInfoService.getExitAddresses();
 					}
 					else if (functionNumber == GET_CASCADEINFO)
 					{
@@ -578,22 +632,26 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 										 */
 										currentSerialEntry = new AbstractDistributableDatabaseEntry.SerialDBEntry(
 											currentSerialEntry.getId(), 0, Long.MAX_VALUE, // force update of hash
-											currentSerialEntry.isVerified(), currentSerialEntry.isValid());
+											currentSerialEntry.isVerified(), currentSerialEntry.isValid(), 
+											currentSerialEntry.getContext());
 									}
 
 									if (currentSerialEntry.isVerified() != hashedSerialEntry.isVerified())
 									{
 										LogHolder.log(LogLevel.WARNING, LogType.NET,
 													  "InfoServices report different verification status for " +
+													  ClassUtil.getShortClassName(currentEntry.getClass()) + 
+													  " with id " +
 													  currentSerialEntry.getId() + "!");
 										/**
-										 * This may only be used for filtring if allInfoServices think this entry
+										 * This may only be used for filtering if allInfoServices think this entry
 										 * is unverified.
 										 * If at least one IS reports it as verified, it must not be filtered.
 										 */
 										currentSerialEntry = new AbstractDistributableDatabaseEntry.SerialDBEntry(
 											currentSerialEntry.getId(), currentSerialEntry.getVersionNumber(),
-											Long.MAX_VALUE, true, currentSerialEntry.isValid());
+											Long.MAX_VALUE, true, currentSerialEntry.isValid(), 
+											currentSerialEntry.getContext());
 									}
 
 									if (currentSerialEntry.isValid() != hashedSerialEntry.isValid())
@@ -602,13 +660,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 													  "InfoServices report different validity status for " +
 													  currentSerialEntry.getId() + "!");
 										/**
-										 * This may only be used for filtring if allInfoServices think this entry
+										 * This may only be used for filtering if allInfoServices think this entry
 										 * is invalid.
 										 * If at least one IS reports it as valid, it must not be filtered.
 										 */
 										currentSerialEntry = new AbstractDistributableDatabaseEntry.SerialDBEntry(
 											currentSerialEntry.getId(), currentSerialEntry.getVersionNumber(),
-											Long.MAX_VALUE, currentSerialEntry.isVerified(), true);
+											Long.MAX_VALUE, currentSerialEntry.isVerified(), true, 
+											currentSerialEntry.getContext());
 									}
 									currentEntry = currentSerialEntry;
 								}
@@ -702,17 +761,75 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 		return (Hashtable) (fetchInformation(GET_MIXCASCADES, null));
 	}
 	
+	/** 
+	 * same as getMixCascades but a service context that the cascades must match can be specfied.
+	 * If null is specified the method returns all service objects
+	 * @param context service context that the returned cascades must match
+	 * @return all cascades that match the specified service context.
+	 */
+	public Hashtable getMixCascades(String context)
+	{
+		if(context == null)
+		{
+			return getMixCascades();
+		}
+		Vector args = new Vector();
+		args.addElement(context); 
+		return (Hashtable) (fetchInformation(GET_MIXCASCADES, args));
+	}
+	
 	public Hashtable getMixCascadeSerials()
 	{
 		return (Hashtable) (fetchInformation(GET_MIXCASCADE_SERIALS, null));
 	}
-
+	
+	/** 
+	 * same as getMixCascadesSerials but a service context that the serials must match can be specified.
+	 * If null is specified the method returns all service serials
+	 * @param context service context that the returned cascades must match
+	 * @return all cascade serials that match the specified service context.
+	 */
+	public Hashtable getMixCascadeSerials(String context)
+	{
+		if(context == null)
+		{
+			return getMixCascadeSerials();
+		}
+		Vector args = new Vector();
+		args.addElement(context); 
+		return (Hashtable) (fetchInformation(GET_MIXCASCADE_SERIALS, args));
+	}
+	
+	/**
+	 * from preferred info service
+	 * @return
+	 */
+	public TermsAndConditionsFramework getTCFramework(String a_id)
+	{
+		return (TermsAndConditionsFramework) (fetchInformation(GET_TC_FRAMEWORK, Util.toVector(a_id)));
+	}
+	
+	public Hashtable getTermsAndConditions()
+	{
+		return (Hashtable) (fetchInformation(GET_TCS, null));
+	}
+	
+	public Hashtable getTermsAndConditionsSerials()
+	{
+		return (Hashtable) (fetchInformation(GET_TC_SERIALS, null));
+	}
+	
 	/*
 	 * Retrieves the PerformanceInfo object of ALL inforservices!
 	 */
 	public Hashtable getPerformanceInfos()
 	{
 		return (Hashtable) (fetchInformation(GET_PERFORMANCE_INFO, null));
+	}
+	
+	public void getExitAddresses()
+	{
+		fetchInformation(GET_EXIT_ADDRESSES, null);
 	}
 
 	/**
@@ -772,6 +889,11 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	public MixInfo getMixInfo(String mixId)
 	{
 		return (MixInfo) (fetchInformation(GET_MIXINFO, Util.toVector(mixId)));
+	}
+	
+	public Hashtable getMixInfos()
+	{
+		return (Hashtable)(fetchInformation(GET_MIXINFOS, null));
 	}
 
 	/**
@@ -971,19 +1093,50 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			/* there is a preferred infoservice -> parse it */
 			try
 			{
-				preferredInfoService = new InfoServiceDBEntry(infoServiceNode, true);
+				preferredInfoService = new InfoServiceDBEntry(infoServiceNode, Long.MAX_VALUE);
 			}
 			catch (XMLParseException a_e)
 			{
 			}
 		}
 
+		/* remove bootstrap entries is possible; at least three InfoServices have to be loaded, excluding default */
+		Vector currentEntries = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
+		Vector bootstrapIDs = new Vector();
+		int nrLoadedIS = 0;
+		InfoServiceDBEntry entry;
+		for (int i = 0; i < currentEntries.size(); i++)
+		{
+			entry = (InfoServiceDBEntry)currentEntries.elementAt(i);
+			if (entry.isBootstrap())
+			{
+				bootstrapIDs.addElement(entry.getId());
+			}
+			else if (!entry.isUserDefined())
+			{
+				nrLoadedIS++;
+			}
+		}
+		if (nrLoadedIS >= 3) // we need at least 3 InfoServices for some majority calculations
+		{
+			// remove all bootstrap entries
+			for (int i = 0; i < bootstrapIDs.size(); i++)
+			{
+				Database.getInstance(InfoServiceDBEntry.class).remove(bootstrapIDs.elementAt(i).toString());
+			}
+		}
+		
+		
 		synchronized (this)
 		{
 			/* we have collected all values -> set them */
 			if (preferredInfoService != null)
 			{
 				setPreferredInfoService(preferredInfoService);
+			}
+			else if (getPreferredInfoService() == null)
+			{
+				setPreferredInfoService((InfoServiceDBEntry)Database.getInstance(InfoServiceDBEntry.class).getRandomEntry());
 			}
 			if (a_bForceISChange)
 			{
@@ -995,6 +1148,43 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					(Element) (XMLUtil.getFirstChildByName(a_infoServiceManagementNode,
 					XML_ELEM_CHANGE_INFO_SERVICES));
 				setChangeInfoServices(XMLUtil.parseValue(changeInfoServicesNode, isChangeInfoServices()));
+			}
+		}
+	}
+	
+	/**
+	 * helper function that filters service objects matching the specified
+	 * service context. In case of a mismatch the service object will be removed
+	 * from the specified serviceObjects table.
+	 * @param serviceObjects table of service objects to be filtered
+	 * @param context the service context that the service objects must match 
+	 */
+	private static void filterServiceContext(Hashtable serviceObjects, String context)
+	{
+		boolean removeEntry = false;
+		if(context != null && serviceObjects != null)
+		{
+			String currentContext = null;
+			try
+			{
+				for(Enumeration keys = serviceObjects.keys(); keys.hasMoreElements();)
+				{
+					Object currentKey = keys.nextElement();	
+					IServiceContextContainer currentEntry = 
+						(IServiceContextContainer) serviceObjects.get(currentKey);
+					
+					currentContext = currentEntry.getContext();
+					removeEntry = (currentContext == null) ? 
+									true : !currentContext.equals(context);
+					if(removeEntry)
+					{
+						serviceObjects.remove(currentKey);
+					}
+				}
+			}
+			catch(ClassCastException cce)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.MISC, "Wrong type for filter specified", cce);
 			}
 		}
 	}

@@ -48,15 +48,21 @@ import anon.infoservice.AbstractDatabaseEntry;
 import anon.infoservice.AbstractDistributableDatabaseEntry;
 import anon.infoservice.Constants;
 import anon.infoservice.Database;
+import anon.infoservice.HttpResponseStructure;
+import anon.infoservice.IBoostrapable;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceIDEntry;
 import anon.infoservice.JAPMinVersion;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.JavaVersionDBEntry;
+import anon.infoservice.ListenerInterface;
 import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
+import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditions;
 import anon.infoservice.PerformanceEntry;
 import anon.pay.PayAccount;
 import anon.pay.PaymentInstanceDBEntry;
@@ -88,6 +94,27 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			return InfoServiceDBEntry.class;
 		}
 	};
+	private final HTTPResponseGetter m_cascadeWebInfoResponseGetter = new HTTPResponseGetter(true)
+	{
+		public Class getDatabaseClass()
+		{
+			return MixCascade.class;
+		}
+	};
+	private final HTTPResponseGetter m_mixWebInfoResponseGetter = new HTTPResponseGetter(true)
+	{
+		public Class getDatabaseClass()
+		{
+			return MixInfo.class;
+		}
+	};
+	private final HTTPResponseGetter m_mixesResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return MixInfo.class;
+		}
+	};
 	private final HTTPResponseGetter m_cascadeResponseGetter = new HTTPResponseGetter()
 	{
 		public Class getDatabaseClass()
@@ -116,15 +143,35 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			return PerformanceEntry.class;
 		}
 	};
+	private final HTTPResponseGetter m_exitAddressListResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return MixCascadeExitAddresses.class;
+		}
+	};
+	private final HTTPResponseGetter m_tcFrameworksResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return TermsAndConditionsFramework.class;
+		}
+	};
+	private final HTTPResponseGetter m_tcResponseGetter = new HTTPResponseGetter()
+	{
+		public Class getDatabaseClass()
+		{
+			return TermsAndConditions.class;
+		}
+	};
+	
+	private IInfoServiceAgreementAdapter m_agreementAdapter;
 
-	private IInfoServiceAgreementAdapter m_agreementAdapter = DynamicConfiguration.getInstance().
-		getAgreementHandler();
-
-	private DynamicCommandsExtension m_dynamicExtension = new DynamicCommandsExtension();
+	private DynamicCommandsExtension m_dynamicExtension;
 
 	private PerformanceRequestHandler m_perfRequestHandler =  new PerformanceRequestHandler();
 	
-	// Ok the cache the StatusInfo DB here for performance reasonses (the
+	// Ok the cache the StatusInfo DB here for performance reasons (the
 	// database objete itself will always remain the same during the lifetime of
 	// the Is -so
 	//no problem so far
@@ -136,6 +183,12 @@ final public class InfoServiceCommands implements JWSInternalCommands
 	{
 		m_statusinfoDB = Database.getInstance(StatusInfo.class);
 		m_Random = new Random();
+		
+		if (DynamicConfiguration.getInstance().isConfigured())
+		{
+			m_agreementAdapter = DynamicConfiguration.getInstance().getAgreementHandler();
+			m_dynamicExtension = new DynamicCommandsExtension();
+		}
 	}
 
 	/**
@@ -156,7 +209,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			Element infoServiceNode = (Element) (XMLUtil.getFirstChildByName(XMLUtil.toXMLDocument(a_postData),
 				InfoServiceDBEntry.XML_ELEMENT_NAME));
 
-			InfoServiceDBEntry newEntry = new InfoServiceDBEntry(infoServiceNode, false);
+			InfoServiceDBEntry newEntry = new InfoServiceDBEntry(infoServiceNode);
 			/* verify the signature --> if requested */
 
 			AbstractDatabaseEntry idEntry = Database.getInstance(InfoServiceIDEntry.class).getEntryById(
@@ -376,6 +429,42 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		return httpResponse;
 	}
+	
+	private HttpResponseStructure tcopdataPost(byte[] a_postData)
+	{
+		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
+
+		try
+		{
+			//LogHolder.log(LogLevel.DEBUG, LogType.NET, "TCOpData recvd XML: " + (new String(a_postData)));
+			TermsAndConditions entry = new TermsAndConditions(XMLUtil.toXMLDocument(a_postData), false);
+			/* verify the signature */
+			if (entry.isVerified())
+			{
+				Database.getInstance(TermsAndConditions.class).update(entry);
+			}
+			else
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.NET,
+							  "Signature check failed for Mix entry! XML: " + (new String(a_postData)));
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.
+					HTTP_RETURN_INTERNAL_SERVER_ERROR);
+			}
+		}
+		catch (Exception e)
+		{
+			if (a_postData != null && a_postData.length > 0)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.NET, new String(a_postData), e);
+			}
+			else
+			{
+				LogHolder.log(LogLevel.ERR, LogType.NET, e);
+			}
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST);
+		}
+		return httpResponse;
+	}
 
 	private abstract class HTTPResponseGetter
 	{
@@ -391,9 +480,15 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		private HttpResponseStructure m_cachedCompressedResponse;
 		private final Object SYNC_CACHE = new Object();
 		private long m_lastUpdate = 0;
+		private boolean m_bWebInfo;
 
 		public HTTPResponseGetter()
 		{
+		}
+		
+		public HTTPResponseGetter(boolean a_bWebInfo)
+		{
+			m_bWebInfo = a_bWebInfo;
 		}
 
 		public abstract Class getDatabaseClass();
@@ -408,27 +503,43 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			{
 				if (m_lastUpdate < (System.currentTimeMillis() - CACHE_MS))
 				{
-					doc = XMLUtil.createDocument();
-					containerNode = doc.createElement(XMLUtil.getXmlElementContainerName(getDatabaseClass()));
+					m_lastUpdate = System.currentTimeMillis();
 					
-					/* @todo cbanse: i'm not really happy with this.... */
-					XMLUtil.setAttribute(containerNode, "id", Configuration.getInstance().getID());
-					
-					/* append the nodes of all mixcascades we know */
-					Enumeration knownMixCascades = Database.getInstance(getDatabaseClass()).
-						getEntrySnapshotAsEnumeration();
-					IXMLEncodable currentCascade;
-					Element node;
-					while (knownMixCascades.hasMoreElements())
+					if (m_bWebInfo)
 					{
-						/* import the MixCascade XML structure in this document */
-						currentCascade = (IXMLEncodable) (knownMixCascades.nextElement());
-						node = currentCascade.toXmlElement(doc);
-						containerNode.appendChild(node);
+						doc = Database.getInstance(getDatabaseClass()).getWebInfos();
 					}
-					SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE,
-						containerNode);
-					doc.appendChild(containerNode);
+					else
+					{
+						doc = XMLUtil.createDocument();
+						containerNode = doc.createElement(XMLUtil.getXmlElementContainerName(getDatabaseClass()));					
+						XMLUtil.setAttribute(containerNode, "id", Configuration.getInstance().getID());
+						XMLUtil.setAttribute(containerNode, AbstractDatabaseEntry.XML_ATTR_LAST_UPDATE, 
+								m_lastUpdate);
+						
+						/* append the nodes of all entries we know */
+						Enumeration knownentries = Database.getInstance(getDatabaseClass()).
+							getEntrySnapshotAsEnumeration();
+						IXMLEncodable currentCascade;
+						Element node;
+						while (knownentries.hasMoreElements())
+						{
+							/* import the entry XML structure in this document */
+							currentCascade = (IXMLEncodable) (knownentries.nextElement());
+							if (currentCascade instanceof IBoostrapable && 
+								((IBoostrapable)currentCascade).isBootstrap())
+							{
+								// do not forward this entry, as it is for internal use only
+								continue;
+							}
+							node = currentCascade.toXmlElement(doc);
+							containerNode.appendChild(node);
+						}
+						SignatureCreator.getInstance().signXml(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE,
+							containerNode);
+						doc.appendChild(containerNode);
+					}
+					
 					/* send the XML document to the client */
 					//if ( (a_supportedEncodings & HttpResponseStructure.HTTP_ENCODING_ZLIB) > 0)
 					{
@@ -437,10 +548,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 							m_cachedCompressedResponse = new HttpResponseStructure(
 								HttpResponseStructure.HTTP_TYPE_TEXT_XML,
 								HttpResponseStructure.HTTP_ENCODING_ZLIB,
-								//ZLibTools.compress(XMLUtil.toByteArray(doc)));
-								ZLibTools.compress(XMLSignature.toCanonical(doc)));
+								ZLibTools.compress(XMLUtil.toByteArray(doc)));
+								//ZLibTools.compress(XMLSignature.toCanonical(doc)));
 						}
-						catch (XMLParseException ex)
+						catch (/*XMLParse*/Exception ex)
 						{
 							m_cachedCompressedResponse = new HttpResponseStructure(HttpResponseStructure.
 								HTTP_RETURN_INTERNAL_SERVER_ERROR);
@@ -449,8 +560,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 					//else
 					{
 						m_cachedResponse = new HttpResponseStructure(doc);
-					}
-					m_lastUpdate = System.currentTimeMillis();
+					}					
 				}
 			}
 
@@ -572,8 +682,6 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			if (mixEntry.isVerified())
 			{
 				Database.getInstance(MixInfo.class).update(mixEntry);
-				//extract possible last proxy addresses
-				VisibleProxyAddresses.addAddresses(mixNode);
 			}
 			else
 			{
@@ -681,6 +789,34 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_XML,
 					HttpResponseStructure.HTTP_ENCODING_PLAIN,
 					XMLUtil.toString(mixEntry.getXmlStructure()));
+			}
+		}
+		catch (Exception e)
+		{
+			/* should never occur */
+			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR);
+			LogHolder.log(LogLevel.ERR, LogType.NET, e);
+		}
+		return httpResponse;
+	}
+	
+	private HttpResponseStructure japGetTCFramework(String a_id)
+	{
+		HttpResponseStructure httpResponse;
+		try
+		{
+			TermsAndConditionsFramework entry = (TermsAndConditionsFramework) 
+				(Database.getInstance(TermsAndConditionsFramework.class).getEntryById(a_id));
+			if (entry == null)
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_NOT_FOUND);
+			}
+			else
+			{
+				 httpResponse = new HttpResponseStructure(
+							HttpResponseStructure.HTTP_TYPE_TEXT_XML,
+							HttpResponseStructure.HTTP_ENCODING_ZLIB,
+							ZLibTools.compress(XMLUtil.toByteArray(entry.getXmlStructure())));
 			}
 		}
 		catch (Exception e)
@@ -1059,6 +1195,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascadeId);
 			
 			htmlData += "<a href=\"/status\">Back to Server Status</a><br /><br />";
+			htmlData += "<b>User numbers</b><br /><br />";
 			
 			if(entry == null)
 			{
@@ -1107,21 +1244,27 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"        <COL WIDTH=\"20%\">\n" +
 				"        <COL WIDTH=\"15%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				//"        <COL WIDTH=\"2%\">\n" +
 				"        <COL WIDTH=\"10%\">\n" +
-				"        <COL WIDTH=\"15%\">\n" +				
-				"        <COL WIDTH=\"25%\">\n" +
-				"        <COL WIDTH=\"3%\">\n" +				
-				"        <COL WIDTH=\"20%\">\n" +
+				((Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) ?
+				"        <COL WIDTH=\"10%\">\n" +	
+				"        <COL WIDTH=\"10%\">\n" +
+				"        <COL WIDTH=\"10%\">\n" 	:
+				"        <COL WIDTH=\"15%\">\n" +
+				"        <COL WIDTH=\"15%\">\n" +
+				"        <COL WIDTH=\"5%\">\n") +				
+				"        <COL WIDTH=\"5%\">\n" +
 				"      </COLGROUP>\n" +
 				"      <TR>\n" +
 				"        <TH>Cascade Name</TH>\n" +
 				"        <TH>Cascade ID</TH>\n" +
 				"        <TH>Active Users</TH>\n" +
-				//"        <TH>Current Risk</TH>\n" +
 				"        <TH>Traffic Situation</TH>\n" +
-				"        <TH>Delay (Avg) [Bound]</TH>\n" +
-				"        <TH>Speed (Avg) [Bound]</TH>\n" +
+				((Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) ? 
+				"        <TH>Delay Bound</TH>\n" : 
+				"        <TH>Delay (Avg) [Bound]</TH>\n") +
+				((Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) ? 
+				"        <TH>Speed Bound</TH>\n" :		
+				"        <TH>Speed (Avg) [Bound]</TH>\n") +
 				"        <TH>Mixed Packets</TH>\n" +
 				"        <TH>Last Notification</TH>\n" +
 				"      </TR>\n";
@@ -1132,17 +1275,72 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			{
 				info = (StatusInfo) (enumer.nextElement());
 				/* get the HTML table line */
-				htmlData = htmlData + "      " + (info).getHtmlTableLine() +
-					"\n";
+				htmlData = htmlData + "      " + 
+				(info).getHtmlTableLine(Configuration.getInstance().isPassive() && !Configuration.getInstance().isPerfEnabled()) + "\n";
 			}
 			htmlData = htmlData + "    </TABLE><BR>";
+			
+			htmlData = htmlData + "<a href=\"mixwebinfos\">List available Mixes</a>";
+			
+			if (Configuration.getInstance().isPassive())
+			{
+				if (!Configuration.getInstance().isPerfEnabled())
+				{
+					htmlData += "<p><b>This Info Service is passive and only collects and combines the more detailed information from other Info Services.</b></p>\n";
+				}
+				else
+				{
+					htmlData += "<p><b>This Info Service is passive: it does performance tests, but does not forward any data to other Info Services.</b></p>\n";
+				}
+			}
+			
+			Vector infoservices = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
+			Vector interfaces;
+			ListenerInterface listener;
+			InfoServiceDBEntry entry;
+			
+			if (infoservices.size() > 0)
+			{
+				htmlData += "<H2>Available active Info Services:</H2>\n";
+				for (int i = 0; i < infoservices.size(); i++)
+				{
+					entry = (InfoServiceDBEntry)infoservices.elementAt(i);
+					if (entry.isBootstrap())
+					{
+						continue;
+					}
+					interfaces = entry.getListenerInterfaces();
+					if (interfaces.size() == 0)
+					{
+						continue;
+					}					
+					
+					listener = null;
+					for (int j = 0; j < interfaces.size(); j++)
+					{
+						if (((ListenerInterface)interfaces.elementAt(j)).getPort() == 80)
+						{
+							listener = (ListenerInterface)interfaces.elementAt(j);
+						}						
+					}
+					if (listener == null)
+					{
+						listener = (ListenerInterface)interfaces.elementAt(0);
+					}
+					
+					htmlData += "<a href=\"http://" + listener.getHost() + ":" + listener.getPort() +  "/status\">" +
+						entry.getName() + "</a><br>\n";
+				}
+				htmlData += "<br>\n";
+			}
+			
 			
 			if(Configuration.getInstance().isPerfEnabled() && InfoService.getPerfMeter() != null)
 			{
 				htmlData += "<a href=\"/perfstatus\">Performance Monitoring enabled</a>";				
 			}
 			
-			htmlData += "<BR><BR><BR>\n" +
+			htmlData += "<BR>\n" +
 			ISRuntimeStatistics.getAsHTML();
 			
 			htmlData += getHumanStatusFooter();
@@ -1158,7 +1356,71 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		}
 		return httpResponse;
 	}
-
+	
+	/**
+	 * Sends a generated HTML file with all status entrys to the client. This function is not used
+	 * by the JAP client. It's intended to use with a webbrowser to see the status of all cascades.
+	 *
+	 * @return The HTTP response for the client.
+	 */
+	private HttpResponseStructure infoServiceIndexPage()
+	{
+		/* this is only the default, if something is going wrong */
+		HttpResponseStructure httpResponse;
+		
+		String htmlData = "<HTML>\n" +
+		"  <HEAD>\n" +
+		"    <TITLE>InfoService</TITLE>\n" +
+		"    <STYLE TYPE=\"text/css\">\n" +
+		"      <!--\n" +
+		"        h1 {color:blue; text-align:center;}\n" +
+		"        b,h3,h4,h5 {font-weight:bold; color:maroon;}\n" +
+		"        body {margin-top:0px; margin-left:5px; margin-width:0px; margin-height:0px; background-color:white; color:black;}\n" +
+		"        h1,h2,h3,h4,h5,p,address,ol,ul,tr,td,th,blockquote,body,.smalltext,.leftcol {font-family:geneva,arial,helvetica,sans-serif;}\n" +
+		"        p,address,ol,ul,tr,td,th,blockquote {font-size:11pt;}\n" +
+		"        .leftcol,.smalltext {font-size: 10px;}\n" +
+		"        h1 {font-size:17px;}\n" +
+		"        h2 {font-size:16px;}\n" +
+		"        h3 {font-size:15px;}\n" +
+		"        h4 {font-size:14px;}\n" +
+		"        h5 {font-size:13px;}\n" +
+		"        address {font-style:normal;}\n" +
+		"        hr {color:#cccccc;}\n" +
+		"        h2,.leftcol {font-weight:bold; color:#006699;}\n" +
+		"        a:link {color:#006699; font-weight:normal; text-decoration:none;}\n" +
+		"        a:visited {color:#666666; font-weight:normal; text-decoration:none;}\n" +
+		"        a:active {color:#006699; font-weight:normal; text-decoration:none;}\n" +
+		"        a:hover {color:#006699; font-weight:normal; text-decoration:underline;}\n" +
+		"        th {color:white; background:#006699; font-weight:bold; text-align:left;}\n" +
+		"        td.name {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699; background:#eeeeff;}\n" +
+		"        td.status {border-bottom-style:solid; border-bottom-width:1pt; border-color:#006699;}\n" +
+		"      -->\n" +
+		"    </STYLE>\n" +
+		"    <META HTTP-EQUIV=\"refresh\" CONTENT=\"25\">\n" +
+		"  </HEAD>\n" +
+		"  <BODY BGCOLOR=\"#FFFFFF\">\n" +
+		"    <P ALIGN=\"right\">" + (new Date()).toString() + "</P>\n";
+		
+		htmlData += 
+		"    <H2>InfoService Name: " + Configuration.getInstance().getOwnName() + "</H2>\n" +
+		"    <P>Infoservice [" + Constants.INFOSERVICE_VERSION + "] Startup Time: " +
+			Configuration.getInstance().getStartupTime() +
+		"</P>\n" +
+		"   <P>This is an InfoService for AN.ON/JonDonym technology networks.<br>\n" +
+		"   It is a distributed storage for network information and does not harm anyone.<br>\n" + 
+		"   If you do not want your computer contacting it, please stop using AN.ON/JonDonym software and services.\n" +
+		"    <HR noShade SIZE=\"1\">\n" +
+		"    <ADDRESS>&copy; 2000 - 2008 The JAP Team - JonDos GmbH</ADDRESS>\n" +
+		"  </BODY>\n" +
+		"</HTML>\n";
+	
+		/* send content */
+		httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_HTML,
+			HttpResponseStructure.HTTP_ENCODING_PLAIN, htmlData);
+		
+		return httpResponse;
+	}
+	
 	/**
 	 * Sends the complete list of all known mixes to the client. This command is not used by
 	 * the JAP client. It's just a comfort function to see all currently working mixes.
@@ -1186,9 +1448,21 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				mixNode = mixInfo.getXmlStructure();
 				if (mixNode == null)
 				{
+					String hostName = "unknown";
+					try
+					{
+						hostName = mixInfo.getFirstHostName();
+					}
+					catch (Exception a_e)
+					{
+						// ignore:
+					}
+					
 					LogHolder.log(LogLevel.EMERG, LogType.MISC, 
 							"Mix node XML is null for Mix " + mixInfo.getId() + 
-							" (" + mixInfo.getName() + ")!");
+							" (" + mixInfo.getName() + ")! Hostname: " + hostName + 
+							" Operator: " + mixInfo.getServiceOperator().getOrganization() + ", " +
+							mixInfo.getServiceOperator().getEMail());
 					continue;
 				}
 				mixNode = (Element) XMLUtil.importNode(doc, mixNode, true);
@@ -1669,44 +1943,6 @@ final public class InfoServiceCommands implements JWSInternalCommands
 	}
 
 	/**
-	 * This function sends the addresses of
-	 * the proxy servers at the end of the cascades as plain text to the client. The info about
-	 * the proxies comes from the configuration property file and from the information given
-	 * by Last Mixes.
-	 *
-	 * @return The HTTP response for the client.
-	 */
-	private HttpResponseStructure getProxyAddresses()
-	{
-		/* this is only the default, if we don't know the proxy addresses */
-		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.
-			HTTP_RETURN_NOT_FOUND);
-		String strConfiguredProxies = Configuration.getInstance().getProxyAddresses();
-		String strReportedProxies = VisibleProxyAddresses.getVisibleAddresses();
-		if (strConfiguredProxies == null)
-		{
-			if (strReportedProxies != null)
-			{
-				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
-					HttpResponseStructure.HTTP_ENCODING_PLAIN,
-					strReportedProxies);
-			}
-
-		}
-		else
-		{
-			if (strReportedProxies != null)
-			{
-				strConfiguredProxies += " " + strReportedProxies;
-			}
-			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_TYPE_TEXT_PLAIN,
-				HttpResponseStructure.HTTP_ENCODING_PLAIN,
-				strConfiguredProxies);
-		}
-		return httpResponse;
-	}
-
-	/**
 	 * This is the handler for processing the InfoService commands.
 	 *
 	 * @param method The HTTP method used within the request from the client. See the REQUEST_METHOD
@@ -1781,7 +2017,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			String infoserviceId = command.substring(13);
 			httpResponse = getInfoServiceInfo(infoserviceId);
 		}
-		else if ( (command.equals("/infoservices")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.equals("/infoservices") || command.equals("/infoservices/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /infoservices
 			 * Source: JAP
@@ -1810,7 +2046,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: "Ubermittlung einer Beschreibung der Kaskade (Erreichbarkeit, beteiligte Mixe etc.)
 			 */
 //			httpResponse = cascadePostHelo(postData, a_supportedEncodings);
-			httpResponse = m_dynamicExtension.cascadePostHelo(postData, a_supportedEncodings);
+			httpResponse = DynamicCommandsExtension.cascadePostHelo(postData, a_supportedEncodings);
 		}
 		else if ( (command.equals("/cascadeserials")) && (method == Constants.REQUEST_METHOD_GET))
 		{
@@ -1822,7 +2058,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			ISRuntimeStatistics.ms_lNrOfGetCascadeserialsRequests++;
 			httpResponse = m_cascadeResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
-		else if ( (command.equals("/cascades")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ((command.startsWith("/cascades")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /cascades
 			 * Source: JAP
@@ -1836,11 +2072,47 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		{
 			/** Full Command: GET /performanceinfo
 			 * Source: 
-			 * Descriptioin: ?
+			 * Description: ?
 			 * Description_de: 
 			 */
 			ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
 			httpResponse = m_performanceResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if( (command.startsWith("/exitaddresses") && (method == Constants.REQUEST_METHOD_GET)))
+		{
+			/** Full Command: GET /exitaddresses
+			 * Source: 
+			 * Description: ?
+			 * Description_de: 
+			 */
+			//ISRuntimeStatistics.ms_lNrOfPerformanceInfoRequests++;
+			httpResponse = m_exitAddressListResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if( ( command.startsWith(MixCascade.INFOSERVICE_COMMAND_WEBINFOS)) && 
+				 ( method == Constants.REQUEST_METHOD_GET ) )
+		{
+			httpResponse = m_cascadeWebInfoResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if( (command.startsWith(MixCascade.INFOSERVICE_COMMAND_WEBINFO) && (method == Constants.REQUEST_METHOD_GET)))
+		{
+			String cascadeID = command.substring(MixCascade.INFOSERVICE_COMMAND_WEBINFO.length());
+			
+			Document doc = Database.getInstance(MixCascade.class).getWebInfos(cascadeID);
+			httpResponse = (doc == null) ? 
+					new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST) : new HttpResponseStructure(doc);
+		}
+		else if( ( command.startsWith(MixInfo.INFOSERVICE_COMMAND_WEBINFOS)) && 
+				 ( method == Constants.REQUEST_METHOD_GET ) )
+		{
+			httpResponse =  m_mixWebInfoResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if( (command.startsWith(MixInfo.INFOSERVICE_COMMAND_WEBINFO) && (method == Constants.REQUEST_METHOD_GET)))
+		{
+			String cascadeID = command.substring(MixInfo.INFOSERVICE_COMMAND_WEBINFO.length());
+			
+			Document doc = Database.getInstance(MixInfo.class).getWebInfos(cascadeID);
+			httpResponse = (doc == null) ? 
+					new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST) : new HttpResponseStructure(doc);
 		}
 		else if ( (command.equals("/helo")) && (method == Constants.REQUEST_METHOD_POST))
 		{
@@ -1882,7 +2154,27 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 */
 			httpResponse = cascadePostStatus(postData);
 		}
-		else if ( (command.equals("/status")) && (method == Constants.REQUEST_METHOD_GET))
+		else if((command.equals("/tcframeworkserials")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = m_tcFrameworksResponseGetter.fetchResponse(a_supportedEncodings, true);
+		}
+		else if((command.equals("/tcframeworks")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = m_tcFrameworksResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if((command.startsWith("/tcframework/")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = japGetTCFramework(command.substring(13));
+		}
+		else if((command.equals(TermsAndConditions.HTTP_SERIALS_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = m_tcResponseGetter.fetchResponse(a_supportedEncodings, true);
+		}
+		else if((command.equals(TermsAndConditions.HTTP_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			httpResponse = m_tcResponseGetter.fetchResponse(a_supportedEncodings, false);
+		}
+		else if ((command.startsWith("/status")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /status
 			 * Source: Browser
@@ -1892,7 +2184,17 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			ISRuntimeStatistics.ms_lNrOfGetStatus++;
 			httpResponse = humanGetStatus();
 		}
-		else if ( (command.equals("/perfstatus")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.equals("/")) && (method == Constants.REQUEST_METHOD_GET))
+		{
+			/** Full Command: GET /
+			 * Source: Browser
+			 * Description: get an index page
+			 * Description_de: 
+			 */
+			ISRuntimeStatistics.ms_lNrOfGetStatus++;
+			httpResponse = infoServiceIndexPage();
+		}
+		else if ( (command.startsWith("/perfstatus")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /perfstatus
 			 * Source: Browser
@@ -1952,7 +2254,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_NOT_FOUND);
 			}
 		}
-		else if ( (command.equals("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.startsWith("/mixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /mixes 
 			 * Source: JAP
@@ -1961,7 +2263,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 *  */
 			httpResponse = fetchAllMixes();
 		}
-		else if ( (command.equals("/availablemixes")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ( (command.startsWith("/availablemixes")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /availablemixes
 			 * Source: JAP
@@ -1998,6 +2300,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: 
 			 */
 			httpResponse = messagePost(postData, a_supportedEncodings);
+		}
+		else if ( (command.equals(TermsAndConditions.POST_FILE)) && (method == Constants.REQUEST_METHOD_POST))
+		{
+			httpResponse = tcopdataPost(postData);
 		}
 		else if ( (command.startsWith("/cascadeinfo/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
@@ -2130,18 +2436,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 */
 			httpResponse = getJnlpFile(command, method);
 		}
-		else if ( (command.equals("/proxyAddresses")) && (method == Constants.REQUEST_METHOD_GET))
-		{
-			/** Full Command: GET /proxyAddresses
-			 * Source: 
-			 * Description: returns the addresses from the proxies at the end of the cascades, only
-			 * for compatibility with some old scripts (written before world war II)
-			 * Description_de: 
-			 */
-			/** @todo remove it */
-			httpResponse = getProxyAddresses();
-		}
-		else if (command.equals("/echoip") && (method == Constants.REQUEST_METHOD_GET ||
+		else if ((command.startsWith("/echoip")) && (method == Constants.REQUEST_METHOD_GET ||
 											   method == Constants.REQUEST_METHOD_HEAD))
 		{
 			/** Full Command: GET /echoip
@@ -2162,7 +2457,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			ISRuntimeStatistics.ms_lNrOfGetPaymentRequests++;
 			httpResponse = paymentInstancePostHelo(postData);
 		}
-		else if ( (command.equals("/paymentinstances")) && (method == Constants.REQUEST_METHOD_GET))
+		else if ((command.startsWith("/paymentinstances")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /paymentinstances
 			 * Source: JAP
@@ -2193,7 +2488,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			httpResponse = m_dynamicExtension.mixPostConnectivityTest(a_sourceAddress, postData);
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.mixPostConnectivityTest(a_sourceAddress, postData);
+			}
+			else
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_ACCEPTED);
+			}
 		}
 		else if (command.startsWith("/dynacascade") && (method == Constants.REQUEST_METHOD_POST))
 		{
@@ -2202,7 +2504,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			httpResponse = m_dynamicExtension.lastMixPostDynaCascade(postData);
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.lastMixPostDynaCascade(postData);
+			}
+			else
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_ACCEPTED);
+			}
 		}
 		else if ( (command.startsWith("/newcascadeinformationavailable/"))
 				 && (method == Constants.REQUEST_METHOD_GET))
@@ -2213,7 +2522,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: 
 			 */
 			String piID = command.substring(32);
-			httpResponse = m_dynamicExtension.isNewCascadeAvailable(piID);
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.isNewCascadeAvailable(piID);
+			}
+			else
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_ACCEPTED);
+			}
 		}
 		else if ( (command.startsWith("/reconfigure/"))
 				 && (method == Constants.REQUEST_METHOD_GET))
@@ -2224,7 +2540,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description_de: 
 			 */
 			String piID = command.substring(13);
-			httpResponse = m_dynamicExtension.reconfigureMix(piID);
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.reconfigureMix(piID);
+			}
+			else
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_ACCEPTED);
+			}
 		}
 		else if (command.startsWith("/agreement") && (method == Constants.REQUEST_METHOD_POST))
 		{
@@ -2233,8 +2556,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			httpResponse = m_agreementAdapter.handleMessage(postData);
-
+			if (m_agreementAdapter != null)
+			{
+				httpResponse = m_agreementAdapter.handleMessage(postData);
+			}
+			else
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_ACCEPTED);
+			}
 		}
 		else if (command.startsWith("/startagreement")
 				 && (method == Constants.REQUEST_METHOD_GET))
@@ -2244,8 +2573,15 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			m_agreementAdapter.startProtocolByOperator();
-			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
+			if (m_agreementAdapter != null)
+			{
+				m_agreementAdapter.startProtocolByOperator();
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
+			}
+			else
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_ACCEPTED);
+			}			
 		}
 		else if (command.startsWith("/virtualcascades")
 				 && (method == Constants.REQUEST_METHOD_GET))
@@ -2255,7 +2591,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 * Description: ?
 			 * Description_de: 
 			 */
-			httpResponse = m_dynamicExtension.virtualCascadeStatus();
+			if (m_dynamicExtension != null)
+			{
+				httpResponse = m_dynamicExtension.virtualCascadeStatus();
+			}
+			else
+			{
+				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_ACCEPTED);
+			}
 		}
 		else if(command.startsWith("/requestperformancetoken") 
 				&& (method == Constants.REQUEST_METHOD_POST))
@@ -2265,7 +2608,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		else if(command.startsWith("/requestperformance") 
 				&& (method == Constants.REQUEST_METHOD_POST))
 		{
-			httpResponse = m_perfRequestHandler.handlePerformanceRequest(postData);
+			httpResponse = m_perfRequestHandler.handlePerformanceRequest(a_sourceAddress, postData);
 		}
 		else
 		{

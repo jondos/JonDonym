@@ -83,7 +83,8 @@ public class BlacklistedCascadeIDEntry extends AbstractCascadeIDEntry
 							return;
 						}
 						cascade = (MixCascade) message.getMessageData();
-						if (Database.getInstance(PreviouslyKnownCascadeIDEntry.class).getEntryById(
+						if (!cascade.isUserDefined() && 
+								Database.getInstance(PreviouslyKnownCascadeIDEntry.class).getEntryById(
 							cascade.getMixIDsAsString()) == null)
 						{
 							Database.getInstance(PreviouslyKnownCascadeIDEntry.class).update(

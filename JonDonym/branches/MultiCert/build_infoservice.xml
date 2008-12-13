@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="InfoService" default="dist" basedir=".">
+	<description>Ant Build file for InfoService build process</description>
+	
+	<property file="build_properties/global.properties"/>
+	<property file="build_properties/global-libs.properties"/>
+	<property file="build_properties/infoservice-global.properties"/>
+	<property file="build_properties/infoservice-additional-libs.properties"/>	
+	
+	<path id="classpath.httplib" location="${lib.http}"/>
+	<path id="classpath.ftplib" location="${lib.ftp}"/>
+	<path id="classpath.xml-rpc" location="${lib.xmlrpc}"/>
+	<path id="classpath.jama" location="${lib.jama}"/>
+	<path id="classpath.swing" location="${lib.swing}"/>
+	<path id="classpath.log4j" location="${lib.log4j}"/>
+	<path id="classpath.bouncycastle_jap" location="${lib.bouncyCastle}"/>
+	<path id="classpath.skype" location="${lib.skype4J}"/>
+	<path id="classpath.java_mail" location="${lib.mail}"/>
+	
+	<path id="classpath.all">
+		<path refid="classpath.httplib"/>
+		<path refid="classpath.ftplib"/>
+		<path refid="classpath.xml-rpc"/>
+		<path refid="classpath.jama"/>
+		<path refid="classpath.java_mail"/>
+		<path refid="classpath.log4j"/>
+		<path refid="classpath.bouncycastle_jap"/>
+		<path refid="classpath.skype"/>
+	</path>
+	
+	<target name="init-libs">
+		<ant antfile="${buildfile.core}" target="init-global-libs"/>
+		
+		<get src="${lib.jama.url}" dest="${lib.jama}"
+				verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<get src="${lib.mail.url}" dest="${lib.mail}"
+						verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<available file="${lib.jama}" property="lib.jama.available"/>
+		<available file="${lib.mail}" property="lib.mail.available"/>
+		<fail unless="lib.jama.available" message="Java Matrix not available"/>
+		<fail unless="lib.mail.available" message="Java Mail not available"/>
+		
+	</target>
+	
+	<!-- InfoService targets -->
+	<target name="init" depends="init-libs" 
+			description="initializes folder structure for infoservice distribution">
+		<mkdir dir="${build}" />
+		<mkdir dir="${build}/infoservice" />
+		<mkdir dir="${dist}" />
+	</target>
+	
+	<target name="compile" depends="init"
+			description="compiles infoservices sources">
+		
+		<javac debug="true" debuglevel="lines,source"
+				srcdir="${src}" 
+				destdir="${build}" 
+				excludes="${infoservice-excludes}" 
+				classpathref="classpath.all">
+			
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+	
+	<target name="dist" depends="compile"
+			description="creates infoservice binary distribution">
+			
+		<jar jarfile="${jarfile}" manifest="manifest_info.mf">
+			<fileset dir="${build}" includes="**/*.class">
+			        
+			</fileset>
+			<zipfileset dir="." includes="certificates/**/*"/>
+			<zipfileset src="${lib.http}"/>
+			<zipfileset src="${lib.xml}"/>
+			<zipfileset src="${lib.ftp}"/>
+			<zipfileset src="${lib.log4j}"/>
+			<zipfileset src="${lib.jama}"/>
+			<zipfileset src="${lib.bouncyCastle}"/>
+			<zipfileset src="${lib.xmlrpc}"/>
+			<zipfileset src="${lib.skype4J}"/>
+			<!--<zipfileset src="${lib.mail}"/>-->
+		</jar>
+	</target>
+	
+	 <target name="clean" description="clean up inforvice compiled units">
+	 	<delete dir="${build}/infoservice" />
+	 	<delete file="${dist}/InfoService.jar"/>
+	 	<ant antfile="${buildfile.core}" target="clean"/>
+	 </target>
+	
+</project>

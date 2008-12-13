@@ -143,7 +143,7 @@ public class ZipArchiver extends Observable
 				ZipEntry zEntry = (ZipEntry) iterator.nextElement();
 				File destFile = new File(dest+File.separator+zEntry.getName());
 				InputStream zEntryInputStream = m_archive.getInputStream(zEntry);
-				RecursiveCopyTool.copySingleFile(zEntryInputStream, destFile);
+				RecursiveFileTool.copySingleFile(zEntryInputStream, destFile);
 				extractedFiles.addElement(zEntry.getName());
 				sizeOfCopied += zEntry.getSize();
 				notifyAboutChangesInterruptable(sizeOfCopied, totalSize, ProgressCapsule.PROGRESS_ONGOING);

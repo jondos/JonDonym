@@ -49,12 +49,19 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 {
 	private static final long UPDATE_INTERVAL_MS = 4 * 60000l; //every four minutes
 	private static final long MIN_UPDATE_INTERVAL_MS = 30000l;
+	private boolean m_bDoMixInfoCleanup = true;
 
 	public MixCascadeUpdater()
 	{
 		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
 	}
 
+	public MixCascadeUpdater(long interval, boolean a_bDoMixInfoCleanup)
+	{
+		super(interval);
+		m_bDoMixInfoCleanup = a_bDoMixInfoCleanup;
+	}
+	
 	public Class getUpdatedClass()
 	{
 		return MixCascade.class;
@@ -80,38 +87,41 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 	{
 		boolean bUpdated = super.doCleanup(a_newEntries);
 
-		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Do MixInfo database cleanup.");
-
-		Vector mixes = Database.getInstance(MixInfo.class).getEntryList();
-		Vector cascades = Database.getInstance(MixCascade.class).getEntryList();
-		// do not remove mixes of current cascade
-		cascades.addElement(JAPController.getInstance().getCurrentMixCascade());
-		MixInfo currentMix;
-		Vector currentCascadeMixes;
-
-		loop:
-		for (int i = 0; i < mixes.size(); i++)
+		if (m_bDoMixInfoCleanup)
 		{
-			currentMix = (MixInfo)mixes.elementAt(i);
-			if (Database.getInstance(MixCascade.class).getEntryById(currentMix.getId()) != null ||
-				JAPController.getInstance().getCurrentMixCascade().getMixIds().elementAt(0).equals(
-						currentMix.getId()))
+			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Do MixInfo database cleanup.");
+	
+			Vector mixes = Database.getInstance(MixInfo.class).getEntryList();
+			Vector cascades = Database.getInstance(MixCascade.class).getEntryList();
+			// do not remove mixes of current cascade
+			cascades.addElement(JAPController.getInstance().getCurrentMixCascade());
+			MixInfo currentMix;
+			Vector currentCascadeMixes;
+	
+			loop:
+			for (int i = 0; i < mixes.size(); i++)
 			{
-				continue;
-			}
-			for (int j = 0; j < cascades.size(); j++)
-			{
-				currentCascadeMixes = ((MixCascade)cascades.elementAt(j)).getMixIds();
-				for (int k = 1; k < currentCascadeMixes.size(); k++)
+				currentMix = (MixInfo)mixes.elementAt(i);
+				if (Database.getInstance(MixCascade.class).getEntryById(currentMix.getId()) != null ||
+					JAPController.getInstance().getCurrentMixCascade().getMixIds().elementAt(0).equals(
+							currentMix.getId()))
 				{
-					if (currentCascadeMixes.elementAt(k).equals(currentMix.getId()))
+					continue;
+				}
+				for (int j = 0; j < cascades.size(); j++)
+				{
+					currentCascadeMixes = ((MixCascade)cascades.elementAt(j)).getMixIds();
+					for (int k = 1; k < currentCascadeMixes.size(); k++)
 					{
-						continue loop;
+						if (currentCascadeMixes.elementAt(k).equals(currentMix.getId()))
+						{
+							continue loop;
+						}
 					}
 				}
+				Database.getInstance(MixInfo.class).remove(currentMix);
+				LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Cleaned MixInfo DB entry: " + currentMix.getId());
 			}
-			Database.getInstance(MixInfo.class).remove(currentMix);
-			LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Cleaned MixInfo DB entry: " + currentMix.getId());
 		}
 
 		return bUpdated;
@@ -119,14 +129,18 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 
 	protected Hashtable getEntrySerials()
 	{
-		Hashtable result = InfoServiceHolder.getInstance().getMixCascadeSerials();
-		if (result == null)
+		Hashtable result = 
+			InfoServiceHolder.getInstance().getMixCascadeSerials(JAPModel.getInstance().getContext());
+		if (getUpdateInterval() instanceof DynamicUpdateInterval)
 		{
-			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
-		}
-		else
-		{
-			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+			if (result == null)
+			{
+				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(MIN_UPDATE_INTERVAL_MS);
+			}
+			else
+			{
+				((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+			}
 		}
 		
 		return result;
@@ -150,12 +164,12 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 		return getUpdatedEntries_internal(a_entriesToUpdate);
 	}
 
-	private Hashtable getUpdatedEntries_internal(Hashtable a_entriesToUpdate)
+	protected Hashtable getUpdatedEntries_internal(Hashtable a_entriesToUpdate)
 	{
 		Hashtable result;
 		if (a_entriesToUpdate == null)
 		{
-			result = InfoServiceHolder.getInstance().getMixCascades();
+			result = InfoServiceHolder.getInstance().getMixCascades(JAPModel.getInstance().getContext());
 		}
 		else if (a_entriesToUpdate.size() == 0)
 		{

@@ -323,7 +323,11 @@ public abstract class AbstractDataChain implements AnonChannel, Observer, Runnab
     return m_outputStream;
   }
 
-
+  public boolean isClosed()
+  {
+	  return m_chainClosed;
+  }
+  
   public void close() {
     if (!m_chainClosed) {
       /* First: Prevent loops which may occur when closing the output-stream (calls of

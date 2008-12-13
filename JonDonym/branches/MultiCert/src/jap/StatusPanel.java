@@ -260,7 +260,7 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 	{
 		synchronized (SYNC_MSG)
 		{
-			//messgaes are stored as a linked list, with the last entry pointing to the first, and m_Msgs being one node
+			//messages are stored as a linked list, with the last entry pointing to the first, and m_Msgs being one node
 			if (m_firstMessage == null) //we don't have any messages
 			{
 				LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Could not remove message with id of " + id + " since there are no messages at all");
@@ -269,12 +269,10 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 			}
 			if (m_firstMessage.m_Id == id && m_firstMessage.m_Next == m_firstMessage) //one element
 			{
+				// the currently shown message is being removed
 				m_firstMessage = null;
 				m_aktY = ICON_HEIGHT;
-
-				setToolTipText(null);
-				setCursor(Cursor.getDefaultCursor());
-				m_button.setVisible(false);
+				m_Thread.interrupt(); //display next message
 			}
 			else
 			{
@@ -295,7 +293,7 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 						return; //not found
 					}
 				}
-				if (curEntry == m_firstMessage) //remove curent entry
+				if (curEntry == m_firstMessage) //remove current entry
 				{
 					m_firstMessage = curEntry.m_Next;
 					m_aktY = ICON_HEIGHT;
@@ -304,8 +302,6 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 				prevEntry.m_Next = curEntry.m_Next; //remove entry from list
 			}
 		}
-
-
 	}
 
 	public void paint(Graphics g)
@@ -350,6 +346,12 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 					// top-left drawing
 					g.drawImage(m_firstMessage.m_Icon, 0, ((getSize().height  - m_firstMessage.m_Icon.getHeight(this)) / 2) - m_aktY, this);
 				}
+			}
+			else
+			{
+				setToolTipText(null);
+				setCursor(Cursor.getDefaultCursor());
+				m_button.setVisible(false);
 			}
 		}
 	}

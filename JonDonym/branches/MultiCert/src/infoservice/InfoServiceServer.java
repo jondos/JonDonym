@@ -52,7 +52,7 @@ final class InfoServiceServer implements Runnable
 						{
 						}
 					}
-					//Hack!!! [i do not know how to get oterwise notice of "Too many open Files"]
+					//Hack!!! [i do not know how to get otherwise notice of "Too many open Files"]
 					if (ioe.getMessage().equalsIgnoreCase("Too many open files"))
 					{
 						try

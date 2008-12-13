@@ -147,7 +147,7 @@ public class ConsoleJAPMainView implements IJAPMainView
 		{
 			MixCascade cascade = (MixCascade)a_serverDescription;
 			LogHolder.log(LogLevel.ALERT, LogType.NET, "Connecting to " +
-						  cascade.getId() + "(" + cascade.getName() + ")" + "...");
+						  cascade.getId() + "(" + cascade.getMixNames() + ")" + "...");
 		}
 		else
 		{
@@ -162,7 +162,7 @@ public class ConsoleJAPMainView implements IJAPMainView
 		{
 			MixCascade cascade = (MixCascade)a_serverDescription;
 			LogHolder.log(LogLevel.ALERT, LogType.NET, "Connected to " +
-						  cascade.getId() + "(" + cascade.getName() + ")" + "!");
+						  cascade.getId() + "(" + cascade.getMixNames() + ")" + "!");
 		}
 		else
 		{

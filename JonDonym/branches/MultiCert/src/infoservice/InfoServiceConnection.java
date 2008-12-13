@@ -38,6 +38,7 @@ import java.util.Vector;
 
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
+import anon.infoservice.HttpResponseStructure;
 import anon.util.TimedOutputStream;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -162,7 +163,7 @@ final public class InfoServiceConnection implements Runnable
 				}
 				catch (SocketException a_e)
 				{
-					LogHolder.log(LogLevel.WARNING, LogType.NET, "No client request received. " + a_e.getMessage());						
+					LogHolder.log(LogLevel.NOTICE, LogType.NET, "No client request received. " + a_e.getMessage());						
 					requestLine = null;
 				}
 				catch (SocketTimeoutException a_e)
@@ -305,18 +306,28 @@ final public class InfoServiceConnection implements Runnable
 			}
 
 			/* request parsing done -> process the request, if there was no error */
-			HttpResponseStructure response = m_serverImplementation.processCommand(internalRequestMethodCode,
-				supportedEncodings, requestUrl, postData, m_socket.getInetAddress());
-			if (response == null)
+			HttpResponseStructure response;
+			try
 			{
-				LogHolder.log(LogLevel.ERR, LogType.NET,
-							  "InfoServiceConnection (" + Integer.toString(m_connectionId) +
-//							  ", " + m_socket.getInetAddress() +
-							  "): Response could not be generated: Request: " + requestMethod +
-							  " " + requestUrl);
-				response = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_NOT_FOUND);
+				response = m_serverImplementation.processCommand(internalRequestMethodCode,
+					supportedEncodings, requestUrl, postData, m_socket.getInetAddress());
+				
+				if (response == null)
+				{
+					LogHolder.log(LogLevel.WARNING, LogType.NET,
+								  "InfoServiceConnection (" + Integer.toString(m_connectionId) +
+//								  ", " + m_socket.getInetAddress() +
+								  "): Response could not be generated: Request: " + requestMethod +
+								  " " + requestUrl);
+					response = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_NOT_FOUND);
+				}
 			}
-
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.EMERG, LogType.NET, a_e);
+				response = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_INTERNAL_SERVER_ERROR);
+			}
+			
 			/* send our response back to the client */
 			try
 			{

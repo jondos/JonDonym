@@ -51,6 +51,12 @@ public interface ImmutableListenerInterface
 	 */
 	String PROTOCOL_STR_TYPE_HTTPS = "https";
 	int PROTOCOL_TYPE_HTTPS = 4;
+	
+	/**
+	 * The constant for the HTTP protocol.
+	 */
+	String PROTOCOL_STR_TYPE_RAW_UNIX = "RAW/UNIX";
+	int PROTOCOL_TYPE_RAW_UNIX = 5;
 
 	/**
 	 * The constant for the HTTP protocol.

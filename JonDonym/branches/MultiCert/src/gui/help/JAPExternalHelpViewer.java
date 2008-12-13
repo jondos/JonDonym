@@ -51,10 +51,12 @@ public final class JAPExternalHelpViewer extends JAPHelp
 	public static final String MSG_HELP_INSTALL = 
 		JAPExternalHelpViewer.class.getName()+ "_helpInstall";
 	public final static String MSG_HELP_INSTALL_PROGRESS = "helpInstallProgress";
+	public static final String MSG_HELP_INSTALL_FAILED = 
+		JAPExternalHelpViewer.class.getName() + "_helpInstallFailed";
 	private static final String MSG_HELP_PATH_CHOICE = 
-		JAPExternalHelpViewer.class.getName() + "_helpPathChoice";	
-	private static final String MSG_HELP_INSTALL_FAILED = 
-		JAPExternalHelpViewer.class.getName() + "_helpInstallFailed";	
+		JAPExternalHelpViewer.class.getName() + "_helpPathChoice";		
+	private static final String MSG_HELP_INTERNAL = 
+		JAPExternalHelpViewer.class.getName() + "_helpInstallOpenInternal";		
 	private static final String MSG_HELP_INSTALL_SUCCESS = 
 		JAPExternalHelpViewer.class.getName() + "_helpInstallSucceded";	
 
@@ -133,15 +135,36 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			}
 		}		
 		
-		URL helpURL = m_helpModel.getHelpURL(context.getHelpContext()+".html");
-		if(helpURL != null)
+		URL helpURL = m_helpModel.getHelpURL(context.getHelpContext() + ".html");
+		boolean bBrowserAvailable = true;
+		if(helpURL == null || !(bBrowserAvailable = AbstractOS.getInstance().openURL(helpURL)))				
 		{
-			AbstractOS.getInstance().openURL(helpURL);	
+			if (container != null && showInstallDialog(container) &&
+				(helpURL = m_helpModel.getHelpURL(context.getHelpContext() + ".html")) != null)
+			{
+				AbstractOS.getInstance().openURL(helpURL);
+			}
+			else
+			{
+				bBrowserAvailable = false;
+			}
+		}
+		if (!bBrowserAvailable)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.GUI, 
+			"Error while trying to show context in external help!");
+			m_alternativeHelp.setContext(getHelpContext());
+			m_alternativeHelp.setVisible(a_bVisible);
 		}
 	}	
 	
 	private boolean showInstallDialog(Container a_container)
 	{
+		if (m_helpModel.getHelpPath() == null)
+		{
+			return false;
+		}
+		
 		final JAPDialog dialog = 
 			new JAPDialog(a_container, JAPMessages.getString(MSG_HELP_INSTALL));
 		final FileChooserContentPane fileChooser = 
@@ -204,9 +227,10 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			{
 				if (workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
 				{					
-					dialog.setTitle(JAPMessages.getString(JAPDialog.MSG_ERROR_UNKNOWN));
+					dialog.setTitle(JAPMessages.getString(JAPDialog.MSG_TITLE_ERROR));
 					setText("<font color='red'>" + 
-							JAPMessages.getString(MSG_HELP_INSTALL_FAILED) + "</font>");
+							JAPMessages.getString(MSG_HELP_INSTALL_FAILED) +
+							" " + JAPMessages.getString(MSG_HELP_INTERNAL) + "</font>");
 				}
 				return null;
 			}

@@ -50,7 +50,6 @@ import logging.LogType;
  */
 public class Multiplexer extends Observable implements Runnable
 {
-
 	private Vector m_sendJobQueue;
 	private Vector m_controlMessageQueue;
 
@@ -67,6 +66,8 @@ public class Multiplexer extends Observable implements Runnable
 	private SymCipher m_outputStreamCipher;
 
 	private Object m_internalEventSynchronization;
+	
+	private boolean m_bClosed = false;
 
 	public Multiplexer(InputStream a_inputStream, OutputStream a_outputStream,
 					   KeyExchangeManager a_keyExchangeManager, SecureRandom a_channelIdGenerator)
@@ -91,19 +92,17 @@ public class Multiplexer extends Observable implements Runnable
 	{
 		Object ownSynchronizationObject = new Object();
 		boolean coChPacket = m_channelTable.isControlChannelId(a_mixPacket.getChannelId());
-		Vector waitQueue = coChPacket ? m_controlMessageQueue : m_sendJobQueue;;
+		Vector waitQueue = coChPacket ? m_controlMessageQueue : m_sendJobQueue;
 		
 		synchronized (ownSynchronizationObject)
 		{
 			boolean waitForAccess = false;
 						
 			synchronized (m_waitQueueObject)
-			{
-				waitQueue.addElement(ownSynchronizationObject);
-				
+			{								
 				if(!coChPacket)
 				{
-					if((m_controlMessageQueue.size() > 1) || (m_sendJobQueue.size() > 1))
+					if((m_controlMessageQueue.size() > 0) || (m_sendJobQueue.size() > 0))
 					{
 						/* data channel packets have to wait until 
 						 * control channel packets are processed
@@ -113,17 +112,17 @@ public class Multiplexer extends Observable implements Runnable
 				}
 				else
 				{
-					if (m_controlMessageQueue.size() > 1)
+					if (m_controlMessageQueue.size() > 0)
 					{
 						/* control channel packets have higher priority and are processed 
 						 * before any data traffic can be transmitted so cost confirmations 
 						 * can be delivered on time in case of data congestion.
 						 */
 						waitForAccess = true;
-						LogHolder.log(LogLevel.WARNING, LogType.NET,
-								  "Control channel congestion");
+						LogHolder.log(LogLevel.WARNING, LogType.NET, "Control channel congestion");
 					}
 				}
+				waitQueue.addElement(ownSynchronizationObject);
 			}
 			if (waitForAccess)
 			{
@@ -137,30 +136,22 @@ public class Multiplexer extends Observable implements Runnable
 					Object nextLockObject = null;
 					synchronized (m_waitQueueObject)
 					{
-						//if (m_sendJobQueue.indexOf(ownSynchronizationObject) == 0)
-						if (waitQueue.indexOf(ownSynchronizationObject) == 0)
-						{
-							/*control channel messages have higher priority */
-							if ( (coChPacket && (m_controlMessageQueue.size() > 1)) ||		
-								 (!coChPacket && (m_controlMessageQueue.size() > 0)) )
-							{
-								/* first wake up control channel packets */
-								nextLockObject = m_controlMessageQueue.elementAt(1);
-							}
-							else 
-							{
-								/* just in this moment we should get notified -> notify the next waiting
-								 * thread, if there is one
-								 */
-								if ( (!coChPacket && (m_sendJobQueue.size() > 1)) ||		
-									 (coChPacket && (m_sendJobQueue.size() > 0)) )
-								{
-									/* there are more threads waiting to send packets */
-									nextLockObject = m_sendJobQueue.elementAt(1);
-								}
-							}
-						}
 						waitQueue.removeElement(ownSynchronizationObject);
+						
+						/* just in this moment we should get notified -> notify the next waiting
+						 * thread, if there is one
+						 */
+						/*control channel messages have higher priority */
+						if (m_controlMessageQueue.size() > 0)										 
+						{
+							/* first wake up control channel packets */
+							nextLockObject = m_controlMessageQueue.firstElement();
+						}
+						else if (m_sendJobQueue.size() > 0)
+						{									
+							/* there are more threads waiting to send packets */
+							nextLockObject = m_sendJobQueue.firstElement();
+						}				
 					}
 					if (nextLockObject != null)
 					{
@@ -195,6 +186,7 @@ public class Multiplexer extends Observable implements Runnable
 		{
 			m_outputStream.write(packetData);
 			m_outputStream.flush();
+
 			synchronized (m_internalEventSynchronization)
 			{
 				setChanged();
@@ -218,7 +210,7 @@ public class Multiplexer extends Observable implements Runnable
 			synchronized (m_waitQueueObject)
 			{
 				/* remove our lock-object from the job-queue */
-				waitQueue.removeElementAt(0);
+				waitQueue.removeElement(ownSynchronizationObject);
 				
 				/* first handle control channel packets that have higher priority */
 				if (m_controlMessageQueue.size() > 0)
@@ -226,16 +218,16 @@ public class Multiplexer extends Observable implements Runnable
 					/* there are more threads waiting to send packets */
 					nextLockObject = m_controlMessageQueue.firstElement();
 				}
-				else
+				else if (m_sendJobQueue.size() > 0)
 				{
 					/* if there no control channel packets to be processed wake
 					 * up other Threads for data transmission
 					 */
-					if (m_sendJobQueue.size() > 0)
-					{
-						/* there are more threads waiting to send packets */
-						nextLockObject = m_sendJobQueue.firstElement();
-					}
+					nextLockObject = m_sendJobQueue.firstElement();
+				}
+				else
+				{
+					m_waitQueueObject.notify();
 				}
 			}
 			if (nextLockObject != null)
@@ -248,6 +240,11 @@ public class Multiplexer extends Observable implements Runnable
 			}
 		}
 	}
+	
+	protected void close()
+	{
+		m_bClosed = true;
+	}
 
 	public void run()
 	{
@@ -258,6 +255,7 @@ public class Multiplexer extends Observable implements Runnable
 				/* read packet from stream */
 				MixPacket receivedPacket = new MixPacket(m_inputStream, m_inputStreamCipher);
 				AbstractChannel channel = m_channelTable.getChannel(receivedPacket.getChannelId());
+				
 				if (channel != null)
 				{
 					synchronized (m_internalEventSynchronization)
@@ -301,13 +299,40 @@ public class Multiplexer extends Observable implements Runnable
 						}
 					}
 				}
+
+				Thread.yield();
+				/** @todo this should shortly pause downloads when new requests are sent; check if needed or harmful! */
+				/*
+				synchronized (m_waitQueueObject)
+				{
+					if (m_controlMessageQueue.size() > 0 || m_sendJobQueue.size() > 0)
+					{
+						try
+						{
+							// wait until requests are sent
+							m_waitQueueObject.wait(100);
+						}
+						catch (InterruptedException e)
+						{
+							throw new InterruptedIOException(e.getMessage());
+						}
+					}
+				}*/
 			}
 		}
 		catch (IOException e)
 		{
 			/* end of input stream handling */
-			LogHolder.log(LogLevel.WARNING, LogType.NET, Thread.currentThread().getName()+": terminated!");
+			if (m_bClosed)
+			{
+				LogHolder.log(LogLevel.NOTICE, LogType.NET, Thread.currentThread().getName()+": terminated!", e);
+			}
+			else
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.NET, Thread.currentThread().getName()+": terminated!", e);
+			}
 		}
+	
 		/* close the channel-table (notifies also all open channels) */
 		m_channelTable.closeChannelTable();
 	}
