@@ -104,14 +104,14 @@ server thereby "remembers" which virtual shopping cart you had.</p>
 
 <p>But cookies can also be abused to track your steps on the Internet. This
 works exceptionally well with web portals (e.g. Yahoo) and search engines
-(e.g. Google), in particular if you use these a lot in order to reach other
-websites. With cookies, a web host can record large parts of your surfing
-behavior over years and easily relate it to a person. Some internet users
-have collected hundreds of cookies from various websites on their PC. You
-should thus, in any case and at the latest, delete cookies after your browser
-session. Modern browsers usually integrate an optional function for this, but
-it has to be activated by the user first. In <a
-href="jondofox.html">JonDoFox</a> it has been made default.</p>
+(e.g. Google) for you use these a lot in order to reach other websites. With
+cookies, a web host can record large parts of your surfing behavior over
+years and easily relate it to a person. Most internet users have collected
+hundreds of cookies from various websites on their PC. You should thus, in
+any case and at the latest, delete cookies after your browser session. Modern
+browsers usually integrate an optional function for this, but it has to be
+activated by the user first. In <a href="jondofox.html">JonDoFox</a> it has
+been made default.</p>
 <!--<div class="topdown_navi">
 <a href="#doctop"> Beginn &uarr; </a><a href="#docbottom"> &darr; Ende </a>
 </div>-->
@@ -125,7 +125,7 @@ href="http://www.doubleclick.com/">doubleclick.net</a>, <a
 href="http://www.advertisement.com/">advertisement.com</a> or <a
 href="http://www.google.com">Google</a>, although you have never even visited
 their websites. These enterprises use a simple trick to plant cookies on you
-and watch your browsing anyways.</p>
+and watch your browsing anyways: <em>Webbugs</em>.</p>
 
 <p>"Webbugs" are usually pictures of 1x1 pixels and therefore invisible to
 the viewer, but they can also be coded into banner ads embedded in a website.
@@ -139,22 +139,23 @@ assuming the owner of the statistics service collaborates with the owner of
 your preferred search engine, he now has an almost complete picture of your
 internet activity.</p>
 
-<p>In order to prevent session tracking, all cookies should be blocked at
-default and only allowed in for the duration of a session, if needed. The
-privacy functions of some browsers which either flatly deny all cookies or
-only deny those from third parties do unfortunately not achieve optimal
-protection. <a href="jondofox.html">JonDoFox</a> is therefore preconfigured
-to deny all cookies but allow single websites at the expense of two mouse
-clicks. We recommend allowing cookies only on a temporary basis, so that they
-will be automatically blocked again after the session.</p>
+<p>The privacy functions of most current browsers that either flatly deny
+cookies or only deny third party cookies, and alternatively also delete all
+cookie data when closing the browser, do not achieve optimal protection. To
+prevent session tracking, all cookies should be blocked by default if
+possible and only allowed in if needed for the duration of the session. <a
+href="jondofox.html">JonDoFox</a> is therefore preconfigured to deny all
+cookies but allow single websites at the expense of two mouse clicks. We
+recommend allowing cookies only on a temporary basis, so that they will be
+automatically blocked again after the session.</p>
 
 <h3>Browser Header</h3>
 
 <p>With every request for a webpage, browsers send information within the
-framework of the HTTP protocol that can be analyzed by the site: language,
-browser name and version, operating system and version, the last visited
-webpage, supported charsets, files and codecs. Sending these headers is
-usually not necessary for rendering websites, but it can be exploited for
+framework of the HTTP protocol that can be analyzed by the visited site:
+language, browser name and version, operating system and version, the last
+visited webpage, supported charsets, files and codecs. Sending these headers
+is usually not necessary for rendering websites, but it can be exploited for
 reidentifying, profiling and analyzing websurfers.</p>
 
 <p>As of today, different filter applications and services have been
@@ -168,23 +169,23 @@ href="about.html">JonDo</a>, an automatic filtering has been integrated which
 allocates an uniform header profile at least for unencrypted connections
 (HTTP). Those who want to achieve a higher level of security should rely on
 <a href="jondofox.html">JonDoFox</a> though. It sends the same profile for
-encrypted connections too.</p>
+encrypted connections too. This guarantees that websites may at maximum
+realize that it is a JonDo user visiting, but not who.</p>
 
 <h3>Browser History</h3>
 
 <p>By certain trickery, websites can tell which other websites are saved in
-your browser history. For this, the "spying" website sends special formatting
-commands (CSS, Stylesheets) that are executed automatically, e.g. downloading
-an image, if one of the websites mentioned in the formatting commands is
-found in your browser history. The website can then tell that you have
-visited that particular address before. This technique may of course be
-applied to hundreds of addresses simultaneously instead of just one.</p>
+your browser history. For this, the visited "spying" website embeds special
+formatting commands (CSS, Stylesheets) that contain external links "of
+interest" on the pages you visit. If you have visited one of the external
+websites, your browser will react by executing a command defined in the
+format, e.g. download a small picture form the "spying" website. The "spying"
+website can thereby completely or largely guesstimate the contents of your
+browser history.</p>
 
-<p>At the moment, there is no reliable protection against this technique,
-which is why the browser history should be deleted at the end of every
-session, or better yet deactivated. Both has been made default in <a
-href="jondofox.html">JonDoFox</a>. A reliable protection against this is in
-development.</p>
+<p>At the moment, there is no reliable protection against this technique
+apart from deactivating the browser history, which has been made default in
+<a href="jondofox.html">JonDoFox</a>.</p>
 
 <h3>Browser Cache</h3>
 

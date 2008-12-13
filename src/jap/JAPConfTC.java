@@ -111,7 +111,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 			
 			if(op != null)
 			{
-				TermsAndConditions tc = TermsAndConditions.getById("de_" + op.getId());
+				TermsAndConditions tc = TermsAndConditions.getById(op.getId(), JAPMessages.getLocale());
 				
 				if(tc == null)
 				{

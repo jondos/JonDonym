@@ -53,12 +53,27 @@ it applies to the <em>stable version</em> or the <em>beta version</em>.</p>
 
 <h3>Options</h3>
 <ul>
-  <li><p><b>Allow non-anonymous (direct) update</b><br>
-    It is recommended to activate this option. Thereby JonDo can perform
-    updates even if you have no anonymized connection currently
-    established.<br>
-    If this option is deactivated, updates may be done via anonymized
-    connections only. This may keep you from downloading the new version. </p>
+  <li><p><b>Anonymous update connections</b></p>
+    <p>Only (no direct connection available) makes JonDo connect to the
+    update server through the currently active JonDonym service if the
+    respective update server is not available through a direct connection.
+    This could for example be the case if your ISP blocks access to the
+    update server.</p>
+    <p><em></em></p>
+    <p><em>Always (deny non-anonymous connection)</em> will result in update
+    servers being contacted only through JonDonym services. <strong>By
+    setting this, you may under circumstances no longer be able to receive
+    updates. But on the other side you are protected against directed
+    manipulation of the software by the creator for your installation can not
+    be identified.</strong><em></em></p>
+    <p><em></em></p>
+    <p><em>Never (only allow direct connection)</em> can make sense if you
+    want to cut cost. For<strong>update data transmitted through premium
+    JonDonym services will for compelling technical reasons be accounted for
+    just like any other user data</strong>. This setting blocks any updates
+    through the anonymous connection.<br>
+    <br>
+    </p>
   </li>
   <li><p><b>Show information window when a new JAP/JonDo version is
     available</b><br>

@@ -30,7 +30,7 @@ da&szlig; weder der angefragte Server, noch ein Lauscher auf den Verbindungen,
 noch die Betreiber des JonDonym-Dienstes selbst mitbekommen, welche Webseiten
 Sie aufrufen. Die Verbindung zu <a
 href="jondonym.html#premiumservices">Premiumdiensten</a> gestattet es Ihnen
-zus&auml;tzlich, au&szlig;er dem Browser noch folgende weitere Anwendungen zu
+au&szlig;erdem neben dem Browser noch folgende weitere Anwendungen zu
 anonymisieren:</p>
 <ul>
   <li>IRC-Chat-Programme (etwa Chatzilla, ist in <a
@@ -40,7 +40,8 @@ anonymisieren:</p>
     href="http://www.jabber.org/">Jabber</a>-Protokoll und dem <a
     href="http://www.cypherpunks.ca/otr/#downloads">OTR-Plugin</a>) und</li>
   <li>prinzipiell alle Programme, die f&uuml;r einen HTTP-Proxy konfiguriert
-    werden k&ouml;nnen.</li>
+    werden k&ouml;nnen und die &uuml;ber Ihre Netzwerk-Protokolle nichts
+    &uuml;ber Ihre Identit&auml;t verraten.</li>
 </ul>
 
 <p>E-Mail-Programme und VoIP werden derzeit nicht unterst&uuml;tzt. Zum
@@ -61,12 +62,12 @@ Webmail-Zugang.</p>
     href="forwarding_server.html">Weiterleitung (Forwarding-Server)</a>
     konfigurieren, um damit anderen Surfen wiederum den Zugriff auf den
     JonDonym-Dienst zu erm&ouml;glichen.</li>
-  <li>JonDo ist quelloffen und kostenlos.</li>
-  <li>JonDo filtert und anonymisiert HTTP-Header.</li>
-  <li>JonDo ist f&uuml;r alle Betriebssysteme verf&uuml;gbar (Windows, Mac OS
-    X, Linux).</li>
-  <li>JonDo erlaubt den Zugriff auf kostenfreie und kostenpflichtige
-    (Premium-)Dienste.</li>
+  <li>JonDo ist quelloffen und kostenlos, erlaubt aber den Zugriff sowohl auf
+    kostenfreie als auch auf kostenpflichtige (Premium-)Dienste.</li>
+  <li>JonDo filtert und anonymisiert HTTP-Header - allerdings nur auf
+    unverschl&uuml;sselten Verbindungen (nicht HTTPS).</li>
+  <li>JonDo ist f&uuml;r alle g&auml;ngigen Betriebssysteme verf&uuml;gbar
+    (Windows, Mac OS X, Linux).</li>
   <li>JonDo wurde und wird von der <a href="http://www.jondos.de/de">JonDos
     GmbH</a> in Zusammenarbeit mit deutschen Universit&auml;ten (<a
     href="http://dud.inf.tu-dresden.de">TU Dresden</a>, <a
@@ -78,29 +79,49 @@ Webmail-Zugang.</p>
 
 <h3>Was JonDo nicht ist</h3>
 <ul>
-  <li>JonDo macht die IP-Adresse Ihres Rechners NICHT unsichtbar.</li>
-  <li>JonDo ist KEIN Filesharing-Anonymisierungstool.</li>
+  <li>JonDo macht die IP-Adresse Ihres Rechners/Routers NICHT unsichtbar. Ihre
+    IP-Adresse wird Ihnen durch Ihren Provider zugeteilt und ist durch Dritte
+    unver&auml;nderlich. Sie ben&ouml;tigen diese IP-Adresse, damit JonDo sich
+    mit Anonymisierungsdiensten im Internet verbinden kann. Wenn Sie JonDo
+    einsetzen, surfen Sie aber &uuml;ber Rechner (Mixe) im Internet, welche
+    jeweils eine eigene IP-Adresse haben. Die von Ihnen aufgerufenen Webseiten
+    sehen deshalb jeweils diese ausgehende IP-Adresse und nicht Ihre
+  eigene.</li>
+  <li>JonDo wechselt NICHT regelm&auml;&szlig;ig die ausgehende IP-Adresse,
+    sondern beh&auml;lt die gleiche Ausgangs-IP-Adresse, solange er mit
+    derselben Mixkaskade verbunden ist. Dies k&ouml;nnen Minuten, Stunden oder
+    auch Tage sein. Die Adressen von JonDonym-Mixen sind ohnehin
+    &ouml;ffentlich, weshalb ein Wechsel der IP-Adresse keine zus&auml;tzliche
+    Sicherheit bringen w&uuml;rde.</li>
+  <li>JonDo versteckt NICHT die MAC-Adresse Ihres Rechners/Routers. Die
+    MAC-Adresse ist lediglich notwendig, damit Ihr Provider Ihnen eine
+    IP-Adresse zuweisen kann und ist im Internet anonsten nicht sichtbar.</li>
+  <li>JonDo ist KEIN Filesharing-Anonymisierungstool. Sie k&ouml;nnen manche
+    Filesharing-Anwendungen &uuml;ber JonDo laufen lassen, k&ouml;nnen aber
+    selbst keine Dateien anbieten.</li>
   <li>JonDo kann KEINE E-Mail-Programme anonymisieren (au&szlig;er
-    E-Mail-Dienste auf Webseiten).</li>
+    E-Mail-Dienste auf Webseiten). Dazu w&auml;re zus&auml;tzlich eine
+    spezielle Datenfilterung im E-Mail-Programm selbst notwendig.</li>
   <li>JonDo bindet sich NICHT transparent in Ihr Betriebssystem ein, sondern
-    muss f&uuml;r jede anonymisierte Anwendung extra <a
+    muss f&uuml;r jede anonymisierte Anwendung separat <a
     href="browser.html">konfiguriert</a> werden.</li>
-  <li>JonDo beschleunigt NICHT Ihren Internetzugriff.</li>
-  <li>JonDo ist NICHT JonDonym (JonDonym fasst die &uuml;ber JonDo erreichbaren
-    Dienste in einem Begriff zusammen und beschreibt die Technologie).</li>
-  <li>JonDo ist NICHT JonDos (JonDos ist das Unternehmen, das JonDo
-  entwickelt).</li>
+  <li>JonDo beschleunigt NICHT Ihren Internetzugriff. Bei den kostenpflichtigen
+    Diensten werden Sie in der Regel jedoch keinen Geschwindigkeitsverlust beim
+    Websurfen bemerken.</li>
+  <li>JonDo ist NICHT JonDonym. JonDonym fasst die &uuml;ber JonDo erreichbaren
+    Dienste in einem Begriff zusammen und beschreibt die Technologie.</li>
+  <li>JonDo ist NICHT JonDos. JonDos ist das Unternehmen, das JonDo
+    haupts&auml;chlich entwickelt.</li>
   <li>JonDo kann KEINE beliebigen "anonymen" Proxies (z.B. von Listen offener
-    Proxies) nutzen, um eine anonyme Verbindung herzustellen.</li>
-  <li>JonDo wechselt NICHT regelm&auml;&szlig;ig die IP-Adresse, sondern
-    beh&auml;lt die gleiche IP-Adresse, solange er mit derselben Mixkaskade
-    verbunden ist. Dies k&ouml;nnen Minuten, Stunden oder auch Tage sein.</li>
-  <li>JonDo ist KEINE Ein-Klick-Anonymisierungsanwendung - so etwas kann es
-    leider nicht geben. Vorsicht und Verstand bei der Internetsicherheit
-    bleiben wichtig.</li>
+    Proxies) nutzen, um eine anonyme Verbindung herzustellen. Dies w&auml;re
+    eine <a href="otherServices.html#networkproxies">v&ouml;llig unsichere
+    Methode</a> und w&uuml;rde zu keiner echten Anonymisierung f&uuml;hren.</li>
   <li>JonDo filtert KEINE Plugins, Skripte oder HTTPS-Webseiten. Um den Browser
     vollst&auml;ndig abzusichern benutzen Sie am Besten <a
     href="jondofox.html">JonDoFox.</a></li>
+  <li>JonDo ist KEINE Ein-Klick-Anonymisierungsanwendung - so etwas kann es
+    leider nicht geben. Vorsicht und Verstand bleiben f&uuml;r die
+    Internetsicherheit wichtig.</li>
 </ul>
 <ul>
   <!--<li>FTP, Telnet, SSH,... </li>-->

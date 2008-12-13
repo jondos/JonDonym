@@ -134,20 +134,30 @@ particular</p>
 at the JonDo main window, select the entry <code class="jconf">Payment</code>
 from the list to the left and then open the tab <code class="jconf">Advanced
 Settings</code>. This panel is only available in <a
-href="../../de/help/appearance.html#expertView">Extended View</a>.</i></p>
+href="../../de/help/appearance.html#expertView">Expert View</a>.</i></p>
 <ul>
   <!--
   <LI><B>Show confirm dialog before using a service with costs</B><BR>
   Activating this option will cause JonDo to display a confirmation dialog each time a service with costs is about to be used. This also means that JonDo will not be able to connect to a service with costs automatically during startup.
   <P>-->
-  <li><p><b>Allow non-anonymous (direct) connections to payment
-    instances</b><br>
-    If activated, JonDo can get information about your account balance even
-    if you have no anonymized connection at the moment.<br>
-    If this option is deactivated, account information may be retrieved
-    through an anonymized connection only.<br>
-    It is recommended to activate this option so that accounts may be created
-    or information may be retrieved anytime. </p>
+  <li><b>Anonymous connections to payment instances</b>
+    <p>Only (no direct connection available) makes JonDo transfer information
+    about your current account balance and account creation data through the
+    currently active JonDonym service if the respective payment instance is
+    not available through a direct connection. This could for example be the
+    case if your ISP blocks access to the payment instance. <em></em></p>
+    <p><em></em></p>
+    <p><em>Always (deny non-anonymous connection)</em> will result in payment
+    instances being contacted only through JonDonym services. <strong>By
+    setting this, you may under circumstances no longer be able to create new
+    accounts or receive updated information about your account
+    balance.</strong><em></em></p>
+    <p><em></em></p>
+    <p><em>Never (only allow direct connection)</em> can make sense if you
+    want to cut cost. For <strong>payment data transmitted through premium
+    JonDonym services will for compelling technical reasons be accounted for
+    just like any other user data</strong>. This setting blocks any requests
+    of payment data through the anonymous connection. </p>
   </li>
   <li><p><b>Show error messages from payment instance (deactivate for
     debugging only!)</b><br>
@@ -157,10 +167,9 @@ href="../../de/help/appearance.html#expertView">Extended View</a>.</i></p>
   </li>
   <li><p><b>Automatically update account balance</b><br>
     If activated, JonDo will try to update your account balance at fixed
-    intervals.<br>
-    If you do not allow this, JonDo will not automatically show your current
-    account balance. Your account will still be maintained correctly by the
-    payment instance though. </p>
+    intervals. If you do not allow this, JonDo will not automatically show
+    your current account balance. Your account will still be maintained
+    correctly by the payment instance though.</p>
   </li>
   <li><p><b>Warning when closing JonDo while not all accounts have been saved
     </b><br>

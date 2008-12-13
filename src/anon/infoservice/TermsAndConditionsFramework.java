@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
@@ -23,16 +24,20 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
 public class TermsAndConditionsFramework extends AbstractDistributableCertifiedDatabaseEntry
 {
+	private static final String XML_ELEMENT_VENUE = "Venue";
+
+	private static final String XML_ELEMENT_LOCATION = "Location";
+
 	private static final String XML_ELEMENT_OPERATIONAL_AGREEMENT_URL = "OperationalAgreementUrl";
 
 	private static final String XML_ELEMENT_LEGAL_OPINIONS_URL = "LegalOpinionsUrl";
@@ -79,20 +84,29 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	public long m_lastUpdate;
 	public long m_date;
 	
-	public Document m_doc;
+	public Document m_docWorkingCopy;
 	public Element m_xmlData;
 
 	private XMLSignature m_signature = null;
 
 	private MultiCertPath m_certPath = null;
 	
-	// creation from xml structure
-	public TermsAndConditionsFramework(Document a_doc)
+	public TermsAndConditionsFramework(Element a_elem) throws XMLParseException
 	{
-		super(System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
+		this(a_elem, true);
+	}
+	
+	// creation from xml structure
+	public TermsAndConditionsFramework(Element a_elem, boolean a_bJAPContext) throws XMLParseException
+	{
+		super(a_bJAPContext ? Long.MAX_VALUE : System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
 		
-		m_doc = a_doc;
-		m_xmlData = a_doc.getDocumentElement();
+		m_xmlData = a_elem;
+		
+		// create a working copy of this framework
+		m_docWorkingCopy = XMLUtil.createDocument();
+		Node node = XMLUtil.importNode(m_docWorkingCopy, m_xmlData, true);
+		m_docWorkingCopy.appendChild(node);
 		
 		m_date = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
 		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()), "");
@@ -116,9 +130,14 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	{
 		super(System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
 		
-		m_doc = XMLUtil.readXMLDocument(a_file);
+		Document doc = XMLUtil.readXMLDocument(a_file);
 		
-		m_xmlData = m_doc.getDocumentElement();
+		m_xmlData = doc.getDocumentElement();
+		
+		// create a working copy of this framework
+		m_docWorkingCopy = XMLUtil.createDocument();
+		Node node = XMLUtil.importNode(m_docWorkingCopy, m_xmlData, true);
+		m_docWorkingCopy.appendChild(node);
 		
 		m_date = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_DATE, -1);
 		m_locale = new Locale(XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LOCALE, Locale.ENGLISH.toString()), "");
@@ -148,7 +167,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		try
 		{
 			// find the ServiceOperator object to our T&C
-			ServiceOperator op = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(a_data.getId());
+			ServiceOperator op = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(Util.colonizeSKI(a_data.getId()));
 			
 			if(op == null)
 			{
@@ -161,36 +180,45 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			XMLUtil.createChildElementWithValue(operator, XML_ELEMENT_OPERATOR_NAME, op.getOrganization());
 			XMLUtil.createChildElementWithValue(operator, XML_ELEMENT_OPERATOR_EMAIL, op.getEMail());
 			
+			// get country from country code
+			Locale loc = new Locale(op.getCountryCode(), op.getCountryCode());
+			Locale tcLoc = new Locale(a_data.getLocale());
+			
+			Element country = doc.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
+			XMLUtil.setValue(country, loc.getDisplayCountry(tcLoc));
+			operator.appendChild(country);
+			
 			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_STREET);
 			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_POSTAL_CODE);
 			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_CITY);
-			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_COUNTRY);
 			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_VAT);
 			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_FAX);
 			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_EMAIL);
 			
 			replaceNode(operator, XML_ELEMENT_OPERATOR);
-			
-			// replace OperatorCountry
-			replaceNode(importNodeFromTC(a_data, XML_ELEMENT_OPERATOR_COUNTRY), XML_ELEMENT_OPERATOR_COUNTRY);
+			replaceNode(country, XML_ELEMENT_OPERATOR_COUNTRY);
 			
 			// replace PrivacyPolicyUrl
-			replaceNode(doc.getDocumentElement(), XML_ELEMENT_PRIVACY_POLICY_URL);
+			replaceNodeFromTC(a_data, XML_ELEMENT_PRIVACY_POLICY_URL);
 			
 			// replace LegalOpinionsUrl
-			replaceNode(doc.getDocumentElement(), XML_ELEMENT_LEGAL_OPINIONS_URL);
+			replaceNodeFromTC(a_data, XML_ELEMENT_LEGAL_OPINIONS_URL);
 			
 			// replace OperationalAgreementUrl
-			replaceNode(doc.getDocumentElement(), XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
+			replaceNodeFromTC(a_data, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
 			
 			// replace Location
-			replaceNode(importNodeFromTC(a_data, "Location"), "Location");
-
+			replaceNodeFromTC(a_data, XML_ELEMENT_LOCATION);
+			
 			// replace Venue
-			replaceNode(importNodeFromTC(a_data, "Venue"), "Venue");
-
+			replaceNodeFromTC(a_data, XML_ELEMENT_VENUE);
+			
+			// ExtendedOperatorCountry
+			replaceNodeFromTC(a_data, "ExtendedOperatorCountry");
+			
 			Element date = doc.createElement("Date");
-			XMLUtil.setValue(date, a_data.getVersionNumber());
+			DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, tcLoc);
+			XMLUtil.setValue(date, df.format(a_data.getDate()));
 			
 			// replace Date
 			replaceNode(date, "Date");
@@ -199,7 +227,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			NodeList paragraphs = doc.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
 			for(int i = 0; i < paragraphs.getLength(); i++)
 			{
-				Node importParagraph = XMLUtil.importNode(m_doc, paragraphs.item(i), true);
+				Node importParagraph = XMLUtil.importNode(m_docWorkingCopy, paragraphs.item(i), true);
 				String id = XMLUtil.parseAttribute(importParagraph, XML_ATTR_ID, "-1");
 				
 				// try to find it in our original document
@@ -232,8 +260,6 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 					section.replaceChild(importParagraph, para);
 				}
 			}
-			
-			System.out.println(XMLUtil.toString(m_doc));
 		}
 		catch(Exception ex)
 		{
@@ -250,6 +276,15 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}
 	
+	private void replaceNodeFromTC(TermsAndConditions a_tc, String a_nodeName) throws XMLParseException
+	{
+		Node node = importNodeFromTC(a_tc, a_nodeName);
+		if(node != null)
+		{
+			replaceNode(node, a_nodeName);
+		}
+	}
+	
 	private Node importNodeFromTC(TermsAndConditions a_tc, String a_nodeName)
 	{
 		// look for node
@@ -261,7 +296,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		else if(!a_tc.getLocale().equals("en"))
 		{
 			// look in the English version of this T&C
-			TermsAndConditions tcDefault = TermsAndConditions.getById("en_" + a_tc.getId());
+			TermsAndConditions tcDefault = TermsAndConditions.getById(a_tc.getId(), Locale.ENGLISH);
 			
 			if(tcDefault != null)
 			{
@@ -284,9 +319,9 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		return null;
 	}
 	
-	public Node findSectionById(String a_id)
+	private Node findSectionById(String a_id)
 	{
-		NodeList list = m_doc.getElementsByTagName(XML_ELEMENT_SECTION);
+		NodeList list = m_docWorkingCopy.getElementsByTagName(XML_ELEMENT_SECTION);
 		for(int i = 0; i < list.getLength(); i++)
 		{
 			Node node = list.item(i);
@@ -299,9 +334,9 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		return null;
 	}
 	
-	public Node findParagraphById(String a_id)
+	private Node findParagraphById(String a_id)
 	{
-		NodeList list = m_doc.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
+		NodeList list = m_docWorkingCopy.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
 		for(int i = 0; i < list.getLength(); i++)
 		{
 			Node node = list.item(i);
@@ -314,7 +349,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		return null;
 	}
 	
-	public void replaceNode(Node a_src, String a_elementToReplace) throws XMLParseException
+	private void replaceNode(Node a_src, String a_elementToReplace) throws XMLParseException
 	{
 		// find the node in the source document
 		Node node = XMLUtil.getFirstChildByName(a_src, a_elementToReplace);
@@ -337,10 +372,10 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 		
 		// import it in to our document
-		node = XMLUtil.importNode(m_doc, node, true);
+		node = XMLUtil.importNode(m_docWorkingCopy, node, true);
 		
 		// replace all nodes in the original document with it
-		NodeList list = m_doc.getElementsByTagName(a_elementToReplace);
+		NodeList list = m_docWorkingCopy.getElementsByTagName(a_elementToReplace);
 		for(int i = 0; i < list.getLength(); i++)
 		{
 			Node parent = list.item(i).getParentNode();
@@ -356,7 +391,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			File output = new File("output.html");
 			FileOutputStream stream = new FileOutputStream(output);
 			
-			Source xmlSource = new DOMSource(m_doc);
+			Source xmlSource = new DOMSource(m_docWorkingCopy);
 			
 			Source xsltSource = new StreamSource(xsltFile);
 			
@@ -372,8 +407,14 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			
 			String s = writer.toString();
 			
+			// otherwise inserted elements such as Venue or OperatorCountry 
+			// will have additional whitespace after them. 
+			// TODO: find a better way to deal with this
+			s = anon.util.Util.replaceAll(s, "\n", "");
+			s = anon.util.Util.replaceAll(s, "\r", "");
+			
 			// this is needed on some older java versions (mainly 1.5)
-			// otherwise breaks will not be displayed correctly
+			// otherwise br's will not be displayed correctly
 			return anon.util.Util.replaceAll(s, "<br/>", "<br>");
 		}
 		catch(Exception ex)

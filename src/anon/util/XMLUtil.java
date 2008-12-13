@@ -1735,4 +1735,15 @@ public class XMLUtil
 				
 			}
 		}
+	
+		public static Document createDocumentFromElement(Element a_elem) throws XMLParseException
+		{
+			Document d = XMLUtil.createDocument();
+			Node node = XMLUtil.importNode(d, a_elem, true);
+			d.appendChild(node);
+		
+			return d;
+		}
 	}
+
+	

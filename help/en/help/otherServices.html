@@ -25,10 +25,12 @@ Perfect Privacy, Cyber Ghost VPN, XeroBank VPN</h3>
 both share small disadvantages from concept that should be considered when
 using them:</p>
 <ul>
-  <li>Browser plugins (Java/Flash/Silverlight/ActiveX) must be deactivated.
-    Otherwise, your PC's/router's true IP can be revealed by a website.</li>
+  <li>Browser plugins (Java/Flash/Silverlight/ActiveX) must be deactivated at
+    the moment. Otherwise, your PC's/router's true IP can be revealed by a
+    website.</li>
   <li>In principle, transfer speed will be clearly below ADSL capacity
-    (maximum of 1-2 MBit/s possible).</li>
+    (maximum of 1-2 MBit/s possible). This is enough for surfing but maybe
+    not for other scenarios such as huge downloads.</li>
   <li>Applications are not transparently anonymized but each has to be
     configured first (the <a href="jondofox.html">JonDoFox browser</a> is
     preconfigured though).</li>
@@ -42,17 +44,19 @@ less strong anonymization in favor of speed, it can be helpful to use a VPN
 layer of security. A VPN can at least offer limited protection to your IP
 address if you use (unsigned) Java or Flash applets from time to time. But in
 this case, you should take care that your computer is behind a router or
-running in a virtual machine. JonDos is preparing its own supplementary VPN
-offer which will be integrated in JonDo as a combi-package until the end of
-2009.</p>
+running in a virtual machine to protect against automated hacker attacks
+through browser plugins. JonDos is preparing its own supplementary VPN offer
+until the end of 2009, which will be integrated in JonDo as a
+combi-package.</p>
 
 <p>For web surfing, except bigger downloads maybe, VPN services should not be
 used. On one hand, their hosts usually do not ensure that users also have an
 uniform appearance on the Web aside their IP address (<a
-href="wwwprivacy.html">see last chapter</a>). And on the other hand, a local
-observer on your network (ISP, WLAN) could guesstimate websites requested
-over VPN quite well by analyzing size and timing of the encrypted VPN data
-stream. JonDonym and Tor are quite resilient against this attack (a
+href="wwwprivacy.html">see last chapter</a>). The users are thus
+distinguishable and easily identifiable by merging the data. And on the other
+hand, a local observer on your network (ISP, WLAN) could guesstimate websites
+requested over VPN quite well by analyzing size and timing of the encrypted
+VPN data stream. JonDonym and Tor are quite resilient against this attack (a
 scientific article which demonstrates the attack and lists experimental
 results is in preparation; the success rates are over 90% for VPNs). You
 should also keep in mind that VPN hosts can, unlike JonDonym and Tor, track
@@ -60,7 +64,7 @@ and save every step of yours since they control all servers in the VPN.
 Nevertheless, protection by the VPN of a professional and reputable host is
 most of the time better than no protection at all. </p>
 
-<h3>Network proxies and web proxies</h3>
+<h3><a name="networkproxies" id="networkproxies">Network proxies and web proxies</a></h3>
 
 <p>Proxy services are particularly famous for this kind of "anonymization on
 demand", besides the already mentioned services. Proxies are literally proxy
@@ -92,7 +96,7 @@ normal proxies your browser (or other applications on your PC configured for
 JonDo resp.) has to connect to it in order to access the Internet indirectly.
 But since JonDo runs on your own PC, instead of on a third party server, it
 is not affected by the generic proxy security flaws mentioned above. JonDo
-itself relays communication of your Internet applications over a
+itself relays communication of your configured Internet applications over a
 multi-encrypted, direct TCP connection to a <a href="jondonym.html">JonDonym
 mix cascade</a>.</p>
 <hr>
