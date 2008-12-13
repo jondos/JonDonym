@@ -75,7 +75,7 @@ final public class Constants
 
 	/**
 	 * This is the timeout in seconds for verifying a JAP forwarding server (contacting the server
-	 * and getting the acknowledgement, that it is a JAP forwarder). If we can't get the
+	 * and getting the acknowledgment, that it is a JAP forwarder). If we can't get the
 	 * verification within that time, the JAP forwarding server is declared as invalid.
 	 */
 	public static final int FORWARDING_SERVER_VERIFY_TIMEOUT = 20;
@@ -98,6 +98,6 @@ final public class Constants
 	/**
 	 * This is the version number of the infoservice software.
 	 */
-	public static final String INFOSERVICE_VERSION = "IS.08.036"; //never change the layout of this line!
+	public static final String INFOSERVICE_VERSION = "IS.08.038"; //never change the layout of this line!
 
 }

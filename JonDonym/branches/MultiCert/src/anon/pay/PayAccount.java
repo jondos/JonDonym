@@ -1032,6 +1032,11 @@ public class PayAccount implements IXMLEncodable
 		fireChangeEvent();
 	}
 
+	public String getPIID()
+	{
+		return m_strBiID;
+	}
+	
 	public PaymentInstanceDBEntry getBI()
 	{
 		if (m_theBI == null)

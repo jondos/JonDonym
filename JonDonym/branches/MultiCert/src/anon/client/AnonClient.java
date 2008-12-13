@@ -55,6 +55,7 @@ import anon.AnonService;
 import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.NotConnectedToMixException;
+import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
 import anon.client.replay.ReplayControlChannel;
 import anon.client.replay.TimestampUpdater;
 import anon.infoservice.HTTPConnectionFactory;
@@ -188,9 +189,24 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				if(op != null && !tcc.hasAcceptedTermsAndConditions(op) &&
 				op.hasTermsAndConditions())
 				{
-					tcc.showTermsAndConditionsDialog(op);
+					Boolean bError = Boolean.TRUE;
+					Boolean bAcceptedTC = Boolean.FALSE;
 					
-					// TODO: interrupt etc.
+					TermsAndConditonsDialogReturnValues ret = tcc.showTermsAndConditionsDialog(op);
+					
+					// only continue if we successfully displayed the TnC dialog
+					if(ret != null && !ret.hasError())
+					{	
+						if(!ret.hasAccepted())
+						{
+							tcc.revokeTermsAndConditions(op);
+							return ErrorCodes.E_INTERRUPTED;
+						}
+						else
+						{
+							tcc.acceptTermsAndConditions(op);
+						}
+					}
 				}
 			}
 		}
