@@ -29,7 +29,13 @@
 package anon.crypto;
 
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Vector;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import anon.util.IXMLEncodable;
 
 /**
  * This class takes an array of CertPaths that is associated with
@@ -37,8 +43,10 @@ import java.util.Vector;
  * if ONE CertPath in it is both.
  * @author zenoxx
  */
-public class MultiCertPath
+public class MultiCertPath implements IXMLEncodable
 {
+	public static final String XML_ELEMENT_NAME = "MultiCertPath";
+	
 	private CertPath[] m_certPaths;
 	private X509DistinguishedName m_subject;
 	private X509DistinguishedName m_issuer;
@@ -291,5 +299,31 @@ public class MultiCertPath
 			}
 			return infos;
 		}
+	}
+
+	public Element toXmlElement(Document a_doc)
+	{
+		Enumeration certificates;
+		Element elemMultiCertPath;
+		
+		if (a_doc == null)
+		{
+			return null;
+		}
+		
+		elemMultiCertPath = a_doc.createElement(XML_ELEMENT_NAME);
+		
+		synchronized (m_certPaths)
+		{
+			for(int i=0; i<m_certPaths.length; i++)
+			{
+				certificates = m_certPaths[i].getCertificates().elements();
+				while(certificates.hasMoreElements())
+				{
+					elemMultiCertPath.appendChild(((JAPCertificate) certificates.nextElement()).toXmlElement(a_doc));
+				}
+			}
+		}
+		return elemMultiCertPath;
 	}
 }

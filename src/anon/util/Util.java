@@ -35,6 +35,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Vector;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
@@ -397,6 +400,36 @@ public final class Util
 	{
 		public int compare(Object a_obj1, Object a_obj2);
 	}
+
+	public static class LongSortAsc implements Comparable
+	{
+		public int compare(Object a_obj1, Object a_obj2)
+		{
+			if(a_obj1 == null && a_obj2 == null) return 0;
+			else if(a_obj1 == null) return -1;
+			else if(a_obj2 == null) return 1;
+			
+			if(((Long) a_obj1).intValue() == Long.MAX_VALUE) return 1;
+			if(((Long) a_obj2).intValue() == Long.MAX_VALUE) return -1;
+			
+			return (int) (((Long) a_obj1).longValue() - ((Long) a_obj2).longValue());
+		}
+	}
+	
+	public static class LongSortDesc implements Comparable
+	{
+		public int compare(Object a_obj1, Object a_obj2)
+		{
+			if(a_obj1 == null && a_obj2 == null) return 0;
+			else if(a_obj1 == null) return 1;
+			else if(a_obj2 == null) return -1;
+
+			if(((Long) a_obj1).intValue() == Long.MAX_VALUE) return -1;
+			if(((Long) a_obj2).intValue() == Long.MAX_VALUE) return 1;			
+			
+			return (int) (((Long) a_obj2).longValue() - ((Long) a_obj1).longValue());
+		}
+	}	
 	
 	public static class IntegerSortAsc implements Comparable
 	{
@@ -559,7 +592,7 @@ public final class Util
 	 * Since JDK 1.1.8 does not provide String.replaceAll(),
 	 * this is an equivalent method.
 	 */
-	public static String replaceAll(String a_source, String a_toReplace, String a_replaceWith)
+	/*public static String replaceAll(String a_source, String a_toReplace, String a_replaceWith)
 	{
 		int position;
 
@@ -580,6 +613,22 @@ public final class Util
 		}
 
 		return a_source;
+	}*/
+	
+	public static String replaceAll(String a_source, String a_toReplace, String a_replaceWith)
+	{
+		StringBuffer buf = new StringBuffer("");
+		int index = a_source.indexOf(a_toReplace, 0);
+		int lastIndex = 0;
+		while(index != -1)
+		{
+			buf.append(a_source.substring(lastIndex, index));				
+			buf.append(a_replaceWith);
+			lastIndex = index+a_toReplace.length();
+			index = a_source.indexOf(a_toReplace, lastIndex);
+		}
+		buf.append(a_source.substring(lastIndex));
+		return buf.toString();
 	}
 	
 	public static String encodeWhiteSpaces(String stringWithWhitespaces)
@@ -620,6 +669,95 @@ public final class Util
 		a_input.close();
 		a_output.flush();
 		a_output.close();
+	}
+	
+	/**
+	 * filters out the chars &, <, >and "
+	 * with the unicode entities.
+	 * WARNING: this destroys valid Entities
+	 * so only use this this for dirty, not XML compliant Strings 
+	 * @param a_source
+	 * @return
+	 */
+	public static String filterXMLChars(String a_source)
+	{
+		String returnString = replaceAll(a_source, "&", "&#38;");
+		returnString = replaceAll(returnString, "<", "&#60;");
+		returnString = replaceAll(returnString, ">", "&#62;");
+		returnString = replaceAll(returnString, "\"", "&#34;");
+		return returnString;
+	}
+	
+	public static void filterXMLCharsForAnObject(Object anObject)
+	{
+		if(anObject == null)
+		{
+			return;
+		}
+		Class objectClass = anObject.getClass();
+		Method[] allMethods = objectClass.getMethods();
+		
+		Class[] currentMethodParameterTypes = null;
+		
+		Method currentStringSetter = null;
+		Method currentStringGetter = null;
+		
+		int currentModifiers = 0;
+		String temp = null;
+		String toFilter = null;
+		
+		for (int i = 0; i < allMethods.length; i++) 
+		{
+			if( allMethods[i].getParameterTypes().length == 1 )
+			{
+				currentModifiers = allMethods[i].getModifiers();
+				if(allMethods[i].getParameterTypes()[0].equals(String.class) &&
+						allMethods[i].getName().startsWith("set")	&&
+						Modifier.isPublic(currentModifiers) &&
+						!Modifier.isStatic(currentModifiers) )
+				{
+					currentStringGetter = null;
+					toFilter = null;
+					
+					currentStringSetter = allMethods[i];
+					temp = currentStringSetter.getName().substring(3);
+					
+					if( temp != null && !temp.equals("") )
+					{
+						try {
+							currentStringGetter = objectClass.getMethod("get"+temp, null);
+							if(currentStringGetter != null)
+							{
+								if(currentStringGetter.getReturnType().equals(String.class))
+								{
+									toFilter = (String) currentStringGetter.invoke(anObject, null);
+									if( toFilter != null )
+									{
+										toFilter = filterXMLChars(toFilter);
+										currentStringSetter.invoke(anObject, new Object[]{toFilter});
+									}
+								}
+							}
+						} 
+						catch (SecurityException e) 
+						{
+						} 
+						catch (NoSuchMethodException e) 
+						{
+						}
+						catch (IllegalArgumentException e)
+						{
+						} 
+						catch (IllegalAccessException e) 
+						{
+						} 
+						catch (InvocationTargetException e) 
+						{
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	/**

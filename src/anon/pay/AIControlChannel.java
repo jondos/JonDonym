@@ -167,7 +167,7 @@ public class AIControlChannel extends XmlControlChannel
 
 
 				  updateBalance(PayAccountsFile.getInstance().getActiveAccount(), false); // show that account is empty
-				  PayAccount currentAccount = PayAccountsFile.getInstance().getAlternativeNonEmptyAccount(
+				  PayAccount currentAccount = PayAccountsFile.getInstance().getAlternativeChargedAccount(
 								  m_connectedCascade.getPIID());
 
 				  if (currentAccount != null)
@@ -286,7 +286,7 @@ public class AIControlChannel extends XmlControlChannel
     }
   }
 
-  private void updateBalance(final PayAccount currentAccount, boolean a_bSynchronous)
+  private void updateBalance(final PayAccount currentAccount, final boolean a_bSynchronous)
   {
 	  Runnable runUpdate;
 	  if (currentAccount == null)
@@ -300,7 +300,15 @@ public class AIControlChannel extends XmlControlChannel
 		  {
 			  try
 			  {
-				  currentAccount.fetchAccountInfo(m_proxys, false);
+				  if (a_bSynchronous)
+				  {
+					  /* set a short connection timeout as this update blocks connection to a Cascade */
+					  currentAccount.fetchAccountInfo(m_proxys, false, 2000); 
+				  }
+				  else
+				  {
+					  currentAccount.fetchAccountInfo(m_proxys, false);
+				  }
 			  }
 			  catch (Exception ex)
 			  {
@@ -464,7 +472,8 @@ public class AIControlChannel extends XmlControlChannel
 	  if (m_initialCC == null)
 	  {
 		  // this seems to be the first connection to the cascade
-		  LogHolder.log(LogLevel.WARNING, LogType.PAY, "Setting initial CC to current CC...");
+		  LogHolder.log(LogLevel.NOTICE, LogType.PAY, 
+				  "Seems to be the first connection to service. Setting initial CC to current CC...");
 		  m_initialCC = cc;
 	  }
 
@@ -505,7 +514,8 @@ public class AIControlChannel extends XmlControlChannel
 				  {
 					  break;
 				  }
-				  else if (openTransactionAccount == null && currentAccount.getSpent() == 0)
+				  else if (openTransactionAccount == null && currentAccount.getSpent() == 0 &&
+						  !currentAccount.hasExpired())
 				  {
 					  openTransactionAccount = currentAccount;
 				  }
@@ -736,6 +746,7 @@ public class AIControlChannel extends XmlControlChannel
 
 				if (currentAccount.addCostConfirmation(a_cc) < 0)
 				{
+					confirmedbytes = 0;
 					/*
 					a_cc.setTransferredBytes(currentAccount.getAccountInfo().getCC(
 									   a_cc.getConcatenatedPriceCertHashes()).getTransferredBytes());*/

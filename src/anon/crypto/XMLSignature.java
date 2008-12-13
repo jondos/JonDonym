@@ -741,7 +741,7 @@ public final class XMLSignature
 	public static byte[] toCanonical(Node a_inputNode, Vector a_excludedNodes) throws XMLParseException
 	{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		if (makeCanonical(a_inputNode, out, false, a_excludedNodes, false) == -1)
+		if (makeCanonical(a_inputNode, out, false, a_excludedNodes, false, "UTF-8") == -1)
 		{
 			throw new XMLParseException(a_inputNode.getNodeName(),
 										"Could not make the node canonical!");
@@ -850,9 +850,8 @@ public final class XMLSignature
 
 	private static int makeCanonical(Node node, OutputStream o, boolean bSiblings, Node excludeNode)
 	{
-		return makeCanonical(node, o, bSiblings, Util.toVector(excludeNode), false);
+		return makeCanonical(node, o, bSiblings, excludeNode, false);
 	}
-
 
 	/**
 	 * @todo find a better way to get the data of the node as a bytestream, for
@@ -866,7 +865,26 @@ public final class XMLSignature
 	 * @see http://www.w3.org/TR/xmldsig-core/#sec-CanonicalizationMethod
 	 * @see http://www.w3.org/TR/xml-c14n
 	 */
-	private static int makeCanonical(Node node, OutputStream o, boolean bSiblings, Vector excludedNodes, boolean a_bKeepSpaces)
+	private static int makeCanonical
+		(Node node, OutputStream o, boolean bSiblings, Node excludeNode, boolean a_bKeepSpaces)
+	{
+		return makeCanonical(node, o, bSiblings, Util.toVector(excludeNode), a_bKeepSpaces, "UTF-8");
+	}
+
+	/**
+	 * @todo find a better way to get the data of the node as a bytestream, for
+	 *       compatibility reasons we use this now; it cannot be verifed that this canonicalization
+	 *       method is compatible to one of the methods defined by w3c
+	 * @param node Node
+	 * @param o OutputStream
+	 * @param bSiblings boolean
+	 * @param excludeNode Node
+	 * @return int
+	 * @see http://www.w3.org/TR/xmldsig-core/#sec-CanonicalizationMethod
+	 * @see http://www.w3.org/TR/xml-c14n
+	 */
+	private static int makeCanonical
+		(Node node, OutputStream o, boolean bSiblings, Vector excludedNodes, boolean a_bKeepSpaces, String charsetName)
 	{
 		try
 		{
@@ -892,7 +910,14 @@ public final class XMLSignature
 			{
 				Element elem = (Element) node;
 				o.write('<');
-				o.write(elem.getNodeName().getBytes());
+				if(charsetName != null)
+				{
+					o.write(elem.getNodeName().getBytes(charsetName));
+				}
+				else
+				{
+					o.write(elem.getNodeName().getBytes());
+				}
 				NamedNodeMap attr = elem.getAttributes();
 				if (attr.getLength() > 0)
 				{
@@ -909,41 +934,68 @@ public final class XMLSignature
 					for (int i = 0; i < attr.getLength(); i++)
 					{
 						o.write(' ');
-						o.write(nodeNames[i].getBytes());
+						if(charsetName != null)
+						{
+							o.write(nodeNames[i].getBytes(charsetName));
+						}
+						else
+						{
+							o.write(nodeNames[i].getBytes());
+						}
 						o.write('=');
 						o.write('\"');
-						o.write(nodeValues[i].getBytes());
+						if(charsetName != null)
+						{
+							o.write(nodeValues[i].getBytes(charsetName));
+						}
+						else
+						{
+							o.write(nodeValues[i].getBytes());
+						}
 						o.write('\"');
 					}
 				}
 				o.write('>');
 				if (elem.hasChildNodes())
 				{
-					if (makeCanonical(elem.getFirstChild(), o, true, excludedNodes, a_bKeepSpaces) == -1)
+					if (makeCanonical(elem.getFirstChild(), o, true, excludedNodes, a_bKeepSpaces, charsetName) == -1)
 					{
 						return -1;
 					}
 				}
 				o.write('<');
 				o.write('/');
-				o.write(elem.getNodeName().getBytes());
+				if(charsetName != null)
+				{
+					o.write(elem.getNodeName().getBytes(charsetName));
+				}
+				else
+				{
+					o.write(elem.getNodeName().getBytes());
+				}
 				o.write('>');
-				if (bSiblings && makeCanonical(elem.getNextSibling(), o, true, excludedNodes, a_bKeepSpaces) == -1)
+				if (bSiblings && 
+					makeCanonical(elem.getNextSibling(), o, true, excludedNodes, a_bKeepSpaces, charsetName) == -1)
 				{
 					return -1;
 				}
 			}
 			else if (node.getNodeType() == Node.TEXT_NODE)
 			{
-				if (a_bKeepSpaces)
+				String textNode = node.getNodeValue();
+				if (!a_bKeepSpaces)
 				{
-					o.write(node.getNodeValue().getBytes());
+					textNode = textNode.trim();
+				}
+				if(charsetName != null)
+				{
+					o.write(textNode.getBytes(charsetName));
 				}
 				else
 				{
-					o.write(node.getNodeValue().trim().getBytes());
+					o.write(textNode.getBytes());
 				}
-				if (makeCanonical(node.getNextSibling(), o, true, excludedNodes, a_bKeepSpaces) == -1)
+				if (makeCanonical(node.getNextSibling(), o, true, excludedNodes, a_bKeepSpaces, charsetName) == -1)
 				{
 					return -1;
 				}
@@ -953,11 +1005,20 @@ public final class XMLSignature
 			{
 				if (a_bKeepSpaces)
 				{
-					o.write("<!--".getBytes());
-					o.write(node.getNodeValue().getBytes());
-					o.write("-->\n".getBytes());
+					if(charsetName != null)
+					{
+						o.write("<!--".getBytes(charsetName));
+						o.write(node.getNodeValue().getBytes(charsetName));
+						o.write("-->\n".getBytes(charsetName));
+					}
+					else
+					{
+						o.write("<!--".getBytes());
+						o.write(node.getNodeValue().getBytes());
+						o.write("-->\n".getBytes());
+					}
 				}
-				if (makeCanonical(node.getNextSibling(), o, true, excludedNodes, a_bKeepSpaces) == -1)
+				if (makeCanonical(node.getNextSibling(), o, true, excludedNodes, a_bKeepSpaces, charsetName) == -1)
 				{
 					return -1;
 				}

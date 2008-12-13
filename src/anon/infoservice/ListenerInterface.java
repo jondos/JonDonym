@@ -57,6 +57,14 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 
 	public static final String XML_ELEMENT_NAME = "ListenerInterface";
 	public static final String XML_ELEMENT_CONTAINER_NAME = "ListenerInterfaces";
+	
+	public static final String XML_ATTR_HIDDEN = "hidden";
+	public static final String XML_ATTR_VIRTUAL = "virtual";
+	
+	public static final String XML_ELEM_HOST = "Host";
+	public static final String XML_ELEM_PORT = "Port";
+	public static final String XML_ELEM_FILE = "File";
+	
 
 	private long m_endOfBlocking = 0;
 
@@ -86,6 +94,9 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 	 * non-local (remote) interfaces.
 	 */
 	private boolean m_bUseInterface = false;
+	
+	private boolean m_bVirtual = false;	
+	private boolean m_bHidden = false;
 
 	/**
 	 * Creates a new ListenerInterface from XML description (ListenerInterface node).
@@ -96,26 +107,16 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 	public ListenerInterface(Element listenerInterfaceNode) throws XMLParseException
 	{
 		String strHostname;
-
-		Node hostNode = XMLUtil.getFirstChildByName(listenerInterfaceNode, "Host");
-		Node ipNode = XMLUtil.getFirstChildByName(listenerInterfaceNode, "IP");
-		if (hostNode == null && ipNode == null)
+		
+		m_bHidden = XMLUtil.parseAttribute(listenerInterfaceNode, XML_ATTR_HIDDEN, false);
+		m_bVirtual = XMLUtil.parseAttribute(listenerInterfaceNode, XML_ATTR_VIRTUAL, false);
+		if (m_bVirtual && m_bHidden)
 		{
-			throw new XMLParseException("Host,IP", "Neither Host nor IP are given.");
+			m_bHidden = false;
+			m_bVirtual = false;
 		}
-		//The value give in Host supersedes the one given by IP
-		strHostname = XMLUtil.parseValue(hostNode, null);
-		if (!isValidHostname(strHostname))
-		{
-			strHostname = XMLUtil.parseValue(ipNode, null);
-			if (!isValidIP(strHostname))
-			{
-				throw new XMLParseException("Host, IP", "Invalid Host and IP.");
-			}
-		}
-
-		setHostname(strHostname);
-		//TRy Type and NetworkRptocol for backward compatibility...
+		
+		//Try Type and NetworkProtocol for backwards compatibility...
 		String strProtocol = XMLUtil.parseValue(XMLUtil.getFirstChildByName(listenerInterfaceNode, "Type"), null);
 		if (strProtocol == null)
 		{
@@ -124,7 +125,32 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 		}
 		setProtocol(strProtocol);
 
-		setPort(XMLUtil.parseValue(XMLUtil.getFirstChildByName(listenerInterfaceNode, "Port"), -1));
+		if (getProtocol() == PROTOCOL_TYPE_RAW_UNIX)
+		{
+			strHostname = XMLUtil.parseValue(XMLUtil.getFirstChildByName(listenerInterfaceNode, XML_ELEM_FILE), null);
+		}
+		else
+		{
+			Node hostNode = XMLUtil.getFirstChildByName(listenerInterfaceNode, XML_ELEM_HOST);
+			Node ipNode = XMLUtil.getFirstChildByName(listenerInterfaceNode, "IP");
+			if (hostNode == null && ipNode == null)
+			{
+				throw new XMLParseException("Host,IP", "Neither Host nor IP are given.");
+			}
+			//The value give in Host supersedes the one given by IP
+			strHostname = XMLUtil.parseValue(hostNode, null);
+			if (!isValidHostname(strHostname))
+			{
+				strHostname = XMLUtil.parseValue(ipNode, null);
+				if (!isValidIP(strHostname))
+				{
+					throw new XMLParseException("Host, IP", "Invalid Host and IP.");
+				}
+			}
+		}
+
+		setHostname(strHostname);		
+		setPort(XMLUtil.parseValue(XMLUtil.getFirstChildByName(listenerInterfaceNode, XML_ELEM_PORT), -1));
 
 		setUseInterface(true);
 	}
@@ -310,6 +336,8 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 				return PROTOCOL_STR_TYPE_HTTPS;
 			case PROTOCOL_TYPE_HTTP:
 				return PROTOCOL_STR_TYPE_HTTP;
+			case PROTOCOL_TYPE_RAW_UNIX:
+				return PROTOCOL_STR_TYPE_RAW_UNIX;
 			default:
 				return PROTOCOL_STR_TYPE_UNKNOWN;
 		}
@@ -409,6 +437,16 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 		return isValidPort(getPort()) && isValidHostname(getHost()) && m_bUseInterface &&
 			(m_endOfBlocking < System.currentTimeMillis());
 	}
+	
+	public boolean isVirtual()
+	{
+		return m_bVirtual;
+	}
+	
+	public boolean isHidden()
+	{
+		return m_bHidden;
+	}
 
 	/**
 	 * Returns a String equal to getHost(). If getHost() is an IP, we try to find the hostname
@@ -475,6 +513,10 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 			else if (a_protocol.equalsIgnoreCase(PROTOCOL_STR_TYPE_RAW_TCP))
 			{
 				iProtocol = PROTOCOL_TYPE_RAW_TCP;
+			}
+			else if (a_protocol.equalsIgnoreCase(PROTOCOL_STR_TYPE_RAW_UNIX))
+			{
+				iProtocol = PROTOCOL_TYPE_RAW_UNIX;
 			}
 		}
 
@@ -604,11 +646,21 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 		Element listenerInterfaceNode = doc.createElement(a_strXmlElementName);
 		/* Create the child nodes of ListenerInterface (Type, Port, Host) */
 		Element typeNode = doc.createElement("Type");
+		Element hostNode;
+		Element portNode = null;
 		XMLUtil.setValue(typeNode, getProtocolAsString());
-		Element portNode = doc.createElement("Port");
-		XMLUtil.setValue(portNode, m_iInetPort);
-		Element hostNode = doc.createElement("Host");
-		XMLUtil.setValue(hostNode, m_strHostname);
+		if (getProtocol() == PROTOCOL_TYPE_RAW_UNIX)
+		{
+			hostNode = doc.createElement(XML_ELEM_FILE);
+			XMLUtil.setValue(hostNode, m_strHostname);
+		}
+		else
+		{
+			portNode = doc.createElement(XML_ELEM_PORT);
+			XMLUtil.setValue(portNode, m_iInetPort);
+			hostNode = doc.createElement(XML_ELEM_HOST);
+			XMLUtil.setValue(hostNode, m_strHostname);
+		}
 		/*String ipString = null;
 		   try
 		   {
@@ -623,8 +675,20 @@ public class ListenerInterface implements ImmutableListenerInterface, IXMLEncoda
 		   Element ipNode = doc.createElement("IP");
 		   ipNode.appendChild(doc.createTextNode(ipString));
 		 */
+		if (m_bHidden)
+		{
+			XMLUtil.setAttribute(listenerInterfaceNode, XML_ATTR_HIDDEN, m_bHidden);
+		}
+		else if (m_bVirtual)
+		{
+			XMLUtil.setAttribute(listenerInterfaceNode, XML_ATTR_VIRTUAL, m_bVirtual);
+		}
+
 		listenerInterfaceNode.appendChild(typeNode);
-		listenerInterfaceNode.appendChild(portNode);
+		if (portNode != null)
+		{
+			listenerInterfaceNode.appendChild(portNode);
+		}
 		listenerInterfaceNode.appendChild(hostNode);
 		//listenerInterfaceNode.appendChild(ipNode);
 		return listenerInterfaceNode;

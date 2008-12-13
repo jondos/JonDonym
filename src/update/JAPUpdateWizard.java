@@ -183,7 +183,8 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		{
 			if (!updateAborted)
 			{
-				if (!JAPModel.getInstance().isUpdateViaDirectConnectionAllowed() &&
+				if (JAPModel.getInstance().getUpdateAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_FORCE_ANONYMOUS &&
 					!JAPController.getInstance().isAnonConnected())
 				{
 					int answer =
@@ -193,7 +194,21 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 						JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
 					if (answer == JAPDialog.RETURN_VALUE_YES)
 					{
-						JAPModel.getInstance().allowUpdateViaDirectConnection(true);
+						JAPModel.getInstance().setUpdateAnonymousConnectionSetting(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+					}
+				}
+				else if (JAPModel.getInstance().getUpdateAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_BLOCK_ANONYMOUS &&
+					JAPController.getInstance().isAnonConnected())
+				{
+					int answer =
+						JAPDialog.showConfirmDialog(downloadPage,
+						JAPMessages.getString("updateInformationMsgStep2")
+						+ JAPMessages.getString("updateInformationMsgStep2_noAnonConn"),
+						JAPDialog.OPTION_TYPE_YES_NO, JAPDialog.MESSAGE_TYPE_ERROR);
+					if (answer == JAPDialog.RETURN_VALUE_YES)
+					{
+						JAPModel.getInstance().setUpdateAnonymousConnectionSetting(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 					}
 				}
 				else

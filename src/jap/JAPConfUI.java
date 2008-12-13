@@ -58,6 +58,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 import anon.util.ClassUtil;
+import anon.util.IReturnRunnable;
+import anon.util.ProgressCapsule;
 import gui.GUIUtils;
 import gui.JAPDll;
 import gui.JAPMessages;
@@ -65,7 +67,6 @@ import gui.LanguageMapper;
 import gui.TitledGridBagPanel;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
-import gui.dialog.IReturnRunnable;
 import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
@@ -897,7 +898,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 			{
 				public void run()
 				{
-	//				When we set the path: the file storage manager does the rest (if the path is valid) */
+	//				When we set the path, the file storage manager does the rest (if the path is valid) */
 					model.setHelpPath(new File(m_helpPathField.getText()));
 				}
 			};
@@ -909,6 +910,12 @@ final class JAPConfUI extends AbstractJAPConfModule
 			workerPane.updateDialog();
 			dialog.setResizable(false);
 			dialog.setVisible(true);
+			if(workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
+			{			
+				resetHelpPath();
+				JAPDialog.showErrorDialog(JAPConf.getInstance(), 
+						JAPMessages.getString(JAPExternalHelpViewer.MSG_HELP_INSTALL_FAILED), LogType.MISC);
+			}
 		}
 	}
 
@@ -919,8 +926,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 	
 	private void updateHelpPath()
 	{
-		if(JAPModel.getInstance().isHelpPathDefined() && 
-			JAPModel.getInstance().isHelpPathChangeable())
+		if(JAPModel.getInstance().isHelpPathDefined() && JAPModel.getInstance().isHelpPathChangeable())
 		{
 			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
 		}

@@ -27,35 +27,59 @@
  */
 package anon.infoservice;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import anon.crypto.CertPath;
+import anon.crypto.CertificateInfoStructure;
 import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.crypto.IVerifyable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import anon.pay.xml.XMLPriceCertificate;
 import anon.pay.AIControlChannel;
 
 /**
  * Holds the information of one single mix.
  */
-public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable
+public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable, Database.IWebInfo
 {
+	public static final String NAME_TYPE_MIX = "Mix";
+	public static final String NAME_TYPE_OPERATOR = "Operator";
+	public static final String DEFAULT_NAME_TYPE = NAME_TYPE_MIX;
+	
 	public static final String DEFAULT_NAME = "AN.ON Mix";
-
+	
 	public static final String XML_ELEMENT_CONTAINER_NAME = "Mixes";
 	public static final String XML_ELEMENT_NAME = "Mix";
-
+	public static final String XML_ELEMENT_MIX_NAME = "Name";
+	public final static String XML_ATTRIBUTE_NAME_FOR_CASCADE = "forCascade";
+	
+	public static final String XML_ELEMENT_WEBINFO_CONTAINER = "MixWebInfos";
+	public static final String INFOSERVICE_COMMAND_WEBINFOS = "/mixwebinfos";
+	public static final String INFOSERVICE_COMMAND_WEBINFO = "/mixwebinfo/";
+	
+	private static final String XML_ELEMENT_WEBINFO = "MixWebInfo";
+	private static final String XML_ELEM_SERVER_MONITORING = "ServerMonitoring";
+	
+	private static final String XML_ATTR_PAYMENT = "payment";
+	
 
     /* LERNGRUPPE: Mix types */
     public static final int FIRST_MIX = 0;
@@ -67,6 +91,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
      * This is the type of the mix
      */
     private int m_type;
+    
+    private boolean m_bPayment = false;
 
     /**
      * LERNGRUPPE
@@ -75,7 +101,18 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
     private boolean m_dynamic = false;
 
 	private boolean m_bSocks = false;
+	
+	/**
+	 * Stores all exit IP addresses of this mix.
+	 */
+	private final Vector m_vecVisibleAdresses = new Vector();
 
+	private final Vector m_vecListenerAdresses = new Vector();
+	
+	private final Vector m_vecListenerInterfaces = new Vector();
+	
+	private final Vector m_vecListenerMonitoring = new Vector();
+	
   /**
    * This is the ID of the mix.
    */
@@ -93,6 +130,11 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    */
   private String m_name;
 
+  /**
+   * The name to contribute to the cascade name .
+   */
+  private String m_nameFragmentForCascade;
+  
   /**
    * Some information about the location of the mix.
    */
@@ -156,21 +198,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   private boolean m_bFromCascade;
   
   /**
-   * True, if this Mix has a performance server.
-   */
-  private boolean m_bPerformanceServer;
-
-  /**
-	* The host of the performance server.
-	*/
-  private String m_strPerformanceServerHost;
-	
-  /**
-   * The port of the performance server.
-   */
-  private int m_iPerformanceServerPort;
-  
-  /**
    * Creates a new MixInfo from XML description (Mix node). The state of the mix will be set to
    * non-free (only meaningful within the context of the infoservice).
    *
@@ -191,7 +218,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   {
 	  this(a_mixNode, a_expireTime, false);
   }
-
 
   public MixInfo(String a_mixID, MultiCertPath a_certPath)
   {
@@ -214,9 +240,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
 	  m_freeMix = false;
 	  m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
-	  m_bPerformanceServer = false;
-	  m_strPerformanceServerHost = "";
-	  m_iPerformanceServerPort = -1;
   }
 
   public MixInfo(String a_mixID, MultiCertPath a_certPath, XMLPriceCertificate a_priceCert, long a_prepaidInterval)
@@ -237,10 +260,11 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_freeMix = false;
 	  //
 	  m_priceCert = a_priceCert;
+	  if (m_priceCert != null)
+	  {
+		  m_bPayment = true;
+	  }
 	  m_prepaidInterval = a_prepaidInterval;
-	  m_bPerformanceServer = false;
-	  m_strPerformanceServerHost = "";
-	  m_iPerformanceServerPort = -1;	  
   }
 
   /**
@@ -255,9 +279,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   public MixInfo(Element a_mixNode, long a_expireTime, boolean a_bFromCascade)
 	  throws XMLParseException
   {
-	  /* use always the timeout for the infoservice context, because the JAP client currently does
-	   * not have a database of mixcascade entries -> no timeout for the JAP client necessary
-	   */
 	  super(a_expireTime <= 0 ? System.currentTimeMillis() + Constants.TIMEOUT_MIX : a_expireTime);
 	  m_bFromCascade = a_bFromCascade;
 	  /* get the ID */
@@ -304,9 +325,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  {
 		  throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix ID: " + m_mixId);
 	  }
-
-	  m_name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixNode, "Name"), DEFAULT_NAME);
-
+	  
 	  m_bSocks = XMLUtil.parseAttribute(
 		   XMLUtil.getFirstChildByName(a_mixNode, "Proxies"), "socks5Support", false);
 
@@ -328,15 +347,58 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  }
 	  }
 
+	  if (a_expireTime < Long.MAX_VALUE) // only do this in InfoService context. Otherwise, we might get unwanted DNS requests.
+	  {
+		  parseVisibleAdresses(a_mixNode);
+		  parseListenerAdresses(a_mixNode);
+	  }
+
+	  Element listenerInterfacesNode = 
+		  (Element)XMLUtil.getFirstChildByName(a_mixNode, ListenerInterface.XML_ELEMENT_CONTAINER_NAME);	  
+	  XMLUtil.assertNotNull(listenerInterfacesNode);
+      NodeList listenerInterfaceNodes = listenerInterfacesNode.getElementsByTagName(ListenerInterface.XML_ELEMENT_NAME);
+      if (listenerInterfaceNodes.getLength() == 0)
+      {
+          throw (new XMLParseException("First Mix has no ListenerInterfaces in its XML structure."));
+      }
+      for (int i = 0; i < listenerInterfaceNodes.getLength(); i++)
+      {
+    	  m_vecListenerInterfaces.addElement(new ListenerInterface((Element)listenerInterfaceNodes.item(i)));
+      }
+     
+      Element elemMonitoring = (Element)XMLUtil.getFirstChildByName(a_mixNode, XML_ELEM_SERVER_MONITORING);
+      if (elemMonitoring != null)
+      {
+    	  listenerInterfacesNode = 
+    		  (Element)XMLUtil.getFirstChildByName(elemMonitoring, ListenerInterface.XML_ELEMENT_CONTAINER_NAME);	  
+    	  if (listenerInterfacesNode != null)
+    	  {
+	          listenerInterfaceNodes = listenerInterfacesNode.getElementsByTagName(ListenerInterface.XML_ELEMENT_NAME);
+	          for (int i = 0; i < listenerInterfaceNodes.getLength(); i++)
+	          {
+	        	  m_vecListenerMonitoring.addElement(new ListenerInterface((Element)listenerInterfaceNodes.item(i)));
+	          }
+    	  }
+    	  else
+    	  {
+    		  // alternative listener description
+    		  String host = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemMonitoring, ListenerInterface.XML_ELEM_HOST), null);
+    		  int port = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemMonitoring, ListenerInterface.XML_ELEM_PORT), -1);
+    		  if (host != null && port >= 0)
+    		  {
+    			  m_vecListenerMonitoring.addElement(new ListenerInterface(host, port));
+    		  }
+    	  }
+      }
+	  
 	  if (!a_bFromCascade) //info from cascade does not contain these infos, so no use parsing them
 	  {
 		  /* Parse the MixType */
 		  Node typeNode =  XMLUtil.getFirstChildByName(a_mixNode, "MixType");
-		  if (typeNode == null)
-		  {
-			  throw new XMLParseException("MixType");
-		  }
-		  m_type = parseMixType(typeNode.getFirstChild().getNodeValue());
+		  XMLUtil.assertNotNull(typeNode);
+	
+		  m_type = parseMixType(XMLUtil.parseValue(typeNode, null));
+		  m_bPayment = XMLUtil.parseAttribute(typeNode, XML_ATTR_PAYMENT, false);
 
 		  /* Parse dynamic property */
 		  m_dynamic = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixNode, "Dynamic"), false);
@@ -385,23 +447,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 	  
-	  m_strPerformanceServerHost = "";
-	  m_iPerformanceServerPort = -1;
-	  m_bPerformanceServer = false;
-	  Node perfNode = XMLUtil.getFirstChildByName(a_mixNode, "PerformanceServer");
-	  if(perfNode != null)
-	  {
-		  Node perfHostNode  = XMLUtil.getFirstChildByName(perfNode, "Host");
-		  Node perfHostPort = XMLUtil.getFirstChildByName(perfNode, "Port");
-		  
-		  if(perfHostNode != null && perfHostPort != null)
-		  {
-			  m_strPerformanceServerHost = XMLUtil.parseValue(perfHostNode, "localhost");
-			  m_iPerformanceServerPort = XMLUtil.parseValue(perfHostPort, 7777);
-			  m_bPerformanceServer = true;
-		  }
-	  }
-
 	  /*
 	   * Store the Service Operator if
 	   * - it doesn't exist yet or
@@ -427,7 +472,95 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_freeMix = false;
 	  m_xmlStructure = a_mixNode;
 
+	  /* a name type specifies whether the name should be extracted from the
+	   * operator- or the mix certificate.
+	   */
+	  m_name = null;
+	  Node nameNode = XMLUtil.getFirstChildByName(a_mixNode, XML_ELEMENT_MIX_NAME);
+	  
+	  m_name = XMLUtil.parseValue(nameNode, DEFAULT_NAME);
+	  
+	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_FOR_CASCADE, "" );// DEFAULT_NAME_TYPE);
+	  //uncomment the above line to enable a default name type 
+	  
+	  if( nameType.equals(NAME_TYPE_OPERATOR) && (m_mixCertPath != null))
+	  {
+		  m_nameFragmentForCascade = (m_mixOperator != null) ? m_mixOperator.getOrganization() : null;
+		  // right now the common name doesn't contain anything useful. Perhaps later it is useful
+		  // to use the common name of the operator cert instead of the organisation name
+		  //(m_operatorCertificate.getSubject() != null) ? 
+		  //	m_operatorCertificate.getSubject().getCommonName() : null; */
+	  }
+	  else if (nameType.equals(NAME_TYPE_MIX) && (m_mixCertPath != null) )
+	  {
+		  m_nameFragmentForCascade = ""+m_name;
+		  //same as above
+			  //(m_mixCertificate.getSubject() != null) ? 
+			  //	  m_mixCertificate.getSubject().getCommonName() : null;
+	  }
+	  if( m_nameFragmentForCascade == null )
+	  {
+		  m_nameFragmentForCascade = ""+m_name;
+	  }
 
+  }
+  
+  private void parseListenerAdresses(Node nodeMix) 
+  {
+	  parseVisibleAdresses(nodeMix, ListenerInterface.XML_ELEMENT_CONTAINER_NAME, 
+			  ListenerInterface.XML_ELEMENT_NAME, m_vecListenerAdresses);
+  }
+  private void parseVisibleAdresses(Node nodeMix)
+  {
+		Node nodeTmp = XMLUtil.getFirstChildByName(nodeMix, "Proxies");
+		if (nodeTmp == null)
+		{
+			return;
+		}
+		nodeTmp = XMLUtil.getFirstChildByName(nodeTmp, "Proxy");
+		while (nodeTmp != null)
+		{
+			if (nodeTmp.getNodeName().equals("Proxy"))
+			{
+				parseVisibleAdresses(nodeTmp, "VisibleAddresses", "VisibleAddress", m_vecVisibleAdresses);
+			}
+			nodeTmp=nodeTmp.getNextSibling();
+		}
+  }
+  
+  private void parseVisibleAdresses(Node nodeMix, String a_containerName, String a_nodeName, Vector a_storage)
+  {
+		Node nodeVisibleAddresses = XMLUtil.getFirstChildByName(nodeMix, a_containerName);
+		Node nodeVisibleAddress = XMLUtil.getFirstChildByName(nodeVisibleAddresses, a_nodeName);
+		while (nodeVisibleAddress != null)
+		{
+			if (nodeVisibleAddress.getNodeName().equals(a_nodeName))
+			{
+				Node nodeHost = XMLUtil.getFirstChildByName(nodeVisibleAddress, "Host");
+				String strHost = XMLUtil.parseValue(nodeHost, null);
+				if (strHost != null)
+				{
+					try
+					{							
+						InetAddress address = InetAddress.getByName(strHost);
+						if (MixCascadeExitAddresses.isValidAddress(address) && 
+							!a_storage.contains(address))
+						{
+							a_storage.addElement(address);
+						}												
+					}
+					catch (UnknownHostException a_e)
+					{
+						LogHolder.log(LogLevel.INFO, LogType.NET, a_e);
+					}
+					catch (Exception e)
+					{
+						LogHolder.log(LogLevel.EXCEPTION, LogType.NET, e);
+					}
+				}
+			}
+			nodeVisibleAddress = nodeVisibleAddress.getNextSibling();
+		}
   }
 
   /**
@@ -450,6 +583,26 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
       throw new XMLParseException("MixType", "Unkonwn type: " + nodeValue);
   }
 
+  public Vector getVisibleAddresses()
+  {
+	  return (Vector)m_vecVisibleAdresses.clone();
+  }
+  
+  public Vector getListenerAddresses()
+  {
+	  return (Vector)m_vecListenerAdresses.clone();
+  }
+  
+  public Vector getListenerInterfaces()
+  {
+	  return (Vector)m_vecListenerInterfaces.clone();
+  }
+  
+  public Vector getMonitoringListenerInterfaces()
+  {
+	  return (Vector)m_vecListenerMonitoring.clone();
+  }
+  
   /**
    * Returns the ID of the mix.
    *
@@ -465,8 +618,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   }
 
   /**
-   * Returns if this MixInfo has been recevied directly from a cascade connection.
-   * @return if this MixInfo has been recevied directly from a cascade connection
+   * Returns if this MixInfo has been received directly from a cascade connection.
+   * @return if this MixInfo has been received directly from a cascade connection
    */
   public boolean isFromCascade()
   {
@@ -500,7 +653,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    *
    * @return The name of this mix.
    */
-  public String getName() {
+  public String getName() 
+  {
     return m_name;
   }
 
@@ -655,6 +809,11 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
       return m_type;
   }
 
+  public boolean isPayment()
+  {
+	  return m_bPayment;
+  }
+  
   /**
    * LERNGRUPPE
    * Returns the type of this mix
@@ -689,30 +848,19 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   * @return host
   * @throws Exception
   */
-  public String getFirstHostName() throws Exception {
-
-	  String result = "";
-	  Element mix = this.getXmlStructure();
-      NodeList listenerInterfacesNodes = mix.getElementsByTagName("ListenerInterfaces");
-      if (listenerInterfacesNodes.getLength() == 0)
-      {
-          throw (new Exception("Mix has no ListenerInterfaces in its XML structure."));
-      }
-      Element listenerInterfacesNode = (Element) (listenerInterfacesNodes.item(0));
-      NodeList listenerInterfaceNodes = listenerInterfacesNode
-              .getElementsByTagName("ListenerInterface");
-      if (listenerInterfaceNodes.getLength() == 0)
-      {
-          throw (new Exception("First Mix has no ListenerInterfaces in its XML structure."));
-      }
-
-      for (int i = 0; i < listenerInterfaceNodes.getLength(); i++)
-      {
-          Element listenerInterfaceNode = (Element) (listenerInterfaceNodes.item(i));
-          result =   new ListenerInterface(listenerInterfaceNode).getHost();
-          break;
-      }
-      return result;
+  public String getFirstHostName() throws Exception 
+  {
+	  ListenerInterface listenInterface;
+	  for (int i = 0; i < m_vecListenerInterfaces.size(); i++)
+	  {
+		  listenInterface = (ListenerInterface)m_vecListenerInterfaces.elementAt(i);
+		  if (!listenInterface.isHidden())
+		  {
+			  return listenInterface.getHost();
+		  }
+	  }
+	   
+	  return "";
   }
 
   /**
@@ -721,45 +869,137 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    * @return host
    * @throws Exception
    */
-   public int getFirstPort() throws Exception {
-
- 	  int result = -1;
- 	  Element mix = this.getXmlStructure();
-       NodeList listenerInterfacesNodes = mix.getElementsByTagName("ListenerInterfaces");
-       if (listenerInterfacesNodes.getLength() == 0)
-       {
-           throw (new Exception("Mix has no ListenerInterfaces in its XML structure."));
-       }
-       Element listenerInterfacesNode = (Element) (listenerInterfacesNodes.item(0));
-       NodeList listenerInterfaceNodes = listenerInterfacesNode
-               .getElementsByTagName("ListenerInterface");
-       if (listenerInterfaceNodes.getLength() == 0)
-       {
-           throw (new Exception("First Mix has no ListenerInterfaces in its XML structure."));
-       }
-
-       for (int i = 0; i < listenerInterfaceNodes.getLength(); i++)
-       {
-           Element listenerInterfaceNode = (Element) (listenerInterfaceNodes.item(i));
-           result =   new ListenerInterface(listenerInterfaceNode).getPort();
-           break;
-       }
-       return result;
+   public int getFirstPort() throws Exception 
+   {
+	   ListenerInterface listenInterface;
+	   for (int i = 0; i < m_vecListenerInterfaces.size(); i++)
+	   {
+		   listenInterface = (ListenerInterface)m_vecListenerInterfaces.elementAt(i);
+		   if (!listenInterface.isHidden())
+		   {
+			   return listenInterface.getPort();
+		   }
+	   }
+	   
+	   return -1;
    }
 
-	
-	public boolean hasPerformanceServer()
+	public String getNameFragmentForCascade()
 	{
-		return m_bPerformanceServer;
+		return m_nameFragmentForCascade;
 	}
 	
-	public String getPerformanceServerHost()
+	public void setNameFragmentForCascade(String fragmentForCascade) 
 	{
-		return m_strPerformanceServerHost;
+		m_nameFragmentForCascade = fragmentForCascade;
 	}
 	
-	public int getPerformanceServerPort()
+	
+	public Element getWebInfo(Document webInfoDoc)
 	{
-		return m_iPerformanceServerPort;
-	}   
+		if (webInfoDoc == null)
+		{
+			return null;
+		}
+		
+		Element rootElement = webInfoDoc.createElement(XML_ELEMENT_WEBINFO);
+		XMLUtil.setAttribute(rootElement, XML_ATTR_PAYMENT, isPayment());
+		XMLUtil.setAttribute(rootElement, XML_ATTR_ID, getId());
+		/*
+		if (getContext() != null)
+		{
+			XMLUtil.setAttribute(rootElement, XML_ATTR_CONTEXT, getContext());
+		}*/
+		
+		Element currentMixOperatorElement = null;
+		Element currentMixLocationElement = null;
+		
+		if(getCertPath() == null)
+		{
+			/* no valid document can be returned */
+			return null;
+		}
+
+		
+		XMLUtil.createChildElementWithValue(rootElement, XML_ELEMENT_MIX_NAME, getName());
+		
+		CertPath path = getCertPath().getPath();
+		currentMixOperatorElement = new ServiceOperator(null, path.getSecondCertificate(), 0l).toXMLElement(webInfoDoc);
+		currentMixLocationElement = new ServiceLocation(null, path.getFirstCertificate()).toXMLElement(webInfoDoc);
+		
+		if(currentMixOperatorElement != null)
+		{
+			rootElement.appendChild(currentMixOperatorElement);
+		}
+		
+		if(currentMixLocationElement != null)
+		{
+			rootElement.appendChild(currentMixLocationElement);
+		}
+		
+		
+		appendListenerInterfaces(rootElement, m_vecListenerInterfaces);
+		if (m_vecListenerMonitoring.size() > 0)
+		{
+			appendListenerInterfaces(XMLUtil.createChildElement(rootElement, XML_ELEM_SERVER_MONITORING), m_vecListenerMonitoring);
+		}
+		
+		
+		rootElement.appendChild(m_mixCertPath.toXmlElement(webInfoDoc));
+		
+		return rootElement;
+	}
+	
+	private void appendListenerInterfaces(Element a_rootElement, Vector a_listenerInterfaces)
+	{
+		Element listenerInterfaces = 
+			XMLUtil.createChildElement(a_rootElement, ListenerInterface.XML_ELEMENT_CONTAINER_NAME);
+		ListenerInterface listenerInterface;
+		Element elemInterface;
+		Hashtable hashInterfaceHosts = new Hashtable();
+		Hashtable hashHiddenInterfaceHosts = new Hashtable();
+		Hashtable hashVirtualInterfaceHosts = new Hashtable();
+		for (int i = 0; i < a_listenerInterfaces.size(); i++)
+		{
+			listenerInterface = (ListenerInterface)a_listenerInterfaces.elementAt(i);
+			if (listenerInterface.isHidden() && hashHiddenInterfaceHosts.containsKey(listenerInterface.getHost()))
+			{
+				elemInterface = (Element)hashHiddenInterfaceHosts.get(listenerInterface.getHost());
+			}
+			else if (listenerInterface.isVirtual() && hashVirtualInterfaceHosts.containsKey(listenerInterface.getHost()))
+			{
+				elemInterface = (Element)hashVirtualInterfaceHosts.get(listenerInterface.getHost());
+			}
+			else if (hashInterfaceHosts.containsKey(listenerInterface.getHost()))
+			{
+				elemInterface = (Element)hashInterfaceHosts.get(listenerInterface.getHost());
+			}
+			else
+			{
+				elemInterface = XMLUtil.createChildElement(listenerInterfaces, 
+						ListenerInterface.XML_ELEMENT_NAME);
+				if (listenerInterface.isVirtual())
+				{
+					XMLUtil.setAttribute(elemInterface, ListenerInterface.XML_ATTR_VIRTUAL, listenerInterface.isVirtual());
+					hashVirtualInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
+				}
+				else if (listenerInterface.isHidden())
+				{
+					XMLUtil.setAttribute(elemInterface, ListenerInterface.XML_ATTR_HIDDEN, listenerInterface.isHidden());
+					hashHiddenInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
+				}
+				else
+				{
+					hashInterfaceHosts.put(listenerInterface.getHost(), elemInterface);
+				}
+				XMLUtil.setAttribute(elemInterface, ListenerInterface.XML_ELEM_HOST, listenerInterface.getHost());				
+			}
+			
+			if (listenerInterface.getProtocol() != ListenerInterface.PROTOCOL_TYPE_RAW_UNIX)
+			{
+				XMLUtil.createChildElementWithValue(elemInterface, 
+						ListenerInterface.XML_ELEM_PORT, "" + listenerInterface.getPort());
+			}
+		}
+	}
 }

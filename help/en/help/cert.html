@@ -1,35 +1,104 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo Help: Certification Authorities</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>Certificate Authorities</H2>
-<i>This panel is only available in <a href="appearance.html#expertView">Extended View</a>.</i><P>
-To get to this panel, press button <i>Settings</i> in JonDo's main window, then choose the entry <i>Certificate Authorities</i> from the list to the left.
-<P> A certificate is a (digital) container for a public encryption key, digitally signed by a certification authority (e.g. the JonDo team), that approves for third parties by the signature that this key belongs to a given person or organisation. If this approval for certificates didn't exist, anyone could pretend to be the JonDo team or a trusted Mix operator, and may operate honypot Mixes, for example, or may engage in the communication between users and really trusted Mixes/operators and read all data.  Moreover, the insertion of faked update messages would be easy.
- (<a href="certificates.html">Further infromation concerning certificates...</a>)
-<UL>
-    <LI><B>I only want to use servers certified by the following authorities:</B><BR>
-    This list contains all certification authorities that you trust.
-    <P>
-    <LI><B>Import...</B><BR>
-    With this button, you can add certification authorities to the list of trusted authorities.  The appropriate certificate should be chosen in the dialog field that appears.
-    <P>
-    <LI><B>Remove</B><BR>
-    This button removes an entry from the list.
-    <P>
-    <LI><B>Disable</B><BR>
-    By clicking this button, you can deactivate an entry without removing it from the list.
-    <P>
-    <LI><B>Details...</B><BR>
-    Click on this button to the the certificate of the selected entry.
-    <P>
-</UL>
-<H3>Certificate Authority Information</H3>
-Here you see detailed information about the currently selected certification authority.
+<p class="navipar"><span class="prevlink"><a
+href="forwarding_server.html"><img src="prev.gif" alt="&lt;-"> Forwarding
+server</a></span> <span class="midlink"><a name="doctop"
+href="index.html#mi_toc">TOC </a><a href="index.html#mi_config"><img
+src="next.gif" alt="-&gt;"> Configuration </a><a href="anon.html"><img
+src="next.gif" alt="-&gt;"> Anonymity </a></span> <span class="nextlink"><a
+href="japconf.html">Configuration file <img src="next.gif"
+alt="-&gt;"></a></span> </p>
+<hr>
 
+<h2>Certification Authorities</h2>
+
+<p><em class="jconf">Only available in <a
+href="appearance.html#expertView">Expert View</a>. To get to this panel,
+press <code class="jconf">Settings</code> in JonDo's main window, then choose
+the entry <code class="jconf">Certification Authorities</code> from the list
+to the left.</em></p>
+
+<p>To ensure authenticity and integrity of digital data, secure digital
+signatures are created from secret keys. The validity of such a signature can
+be tested with the public key that corresponds to the secret key; just like a
+key fits the proper lock. But capable proof is still needed that the key in
+question belongs to a certain person or organization. </p>
+
+<p>This is where <b>certificates</b> come in. A certificate is a (digital)
+container of the identity of a person or organization and their the public
+encryption keys. To obtain a capable proof of authenticity, the certificate
+has then to be digitally signed by an authorized certification authority
+whose keys are openly available.<br>
+<img src="next.gif" alt="-&gt;"> <a href="certificates.html">further
+information about certificates...</a></p>
+
+<p>Certificates play a key role in JonDonym: mixes prove their authenticity
+to JonDo with them. Your JonDo already has all the needed certificates
+included to ensure that it only connects to services of certified operators.
+But with this settings panel you are also given the opportunity of adding
+your own certificates and administering them in case you want to connect to
+cascades that Jondo has no certificates of yet. </p>
+
+<p><b>BEWARE</b><br>
+Adding certificates is a very sensitive and security critical area. If you
+accept certificates from untrustworthy certification authorities you run the
+risk of damage by connecting to dubious services. So you should only add new
+certificates if you really know what you are doing. It is not necessary
+usually.</p>
+
+<h3>Certification authorities</h3>
+<ul>
+  <li><p><b>I only want to use servers certified by the following
+    authorities</b><br>
+    This list contains all certification authorities that you trust. If a
+    server is not certified by a certifying body listed here JonDo will not
+    connect to it. <strong>If you deactivate this option no verification of
+    certificates will be conducted. Third parties may then make JonDo believe
+    that they are secure services, or they may falsify identities of the
+    operators.</strong></p>
+  </li>
+  <li><b>Import</b><br>
+    With this button, you can add certification authorities to the list. The
+    appropriate certificate has to be chosen in the dialog that appears. 
+    <p></p>
+  </li>
+  <li><b>Remove</b><br>
+    This button removes the selected entry from the list. 
+    <p></p>
+  </li>
+  <li><b>Disable</b><br>
+    By clicking this button, you can temporarily deactivate an entry without
+    removing it from the list. The entry is flagged <code
+    class="jconf">untrustworthy</code> and JonDo will no longer accept
+    certificates issued by this certifying body. <strong>Under certain
+    circumstances you can no longer connect to a service after having
+    deactivated certificates from certifying bodies.</strong> 
+    <p></p>
+  </li>
+  <li><b>Details...</b><br>
+    Click this button to see the details of the selected certificate. </li>
+</ul>
+
+<h3>Certification Authority Information</h3>
+Here you can see detailed information about the currently selected
+certification authority. 
+<hr>
+
+<p class="navipar"><span class="prevlink"><a
+href="forwarding_server.html"><img src="prev.gif" alt="&lt;-"> Forwarding
+server</a></span> <span class="midlink"><a name="doctop"
+href="index.html#mi_toc">TOC </a><a href="index.html#mi_config"><img
+src="next.gif" alt="-&gt;"> Configuration </a><a href="anon.html"><img
+src="next.gif" alt="-&gt;"> Anonymity </a></span> <span class="nextlink"><a
+href="japconf.html">Configuration file <img src="next.gif"
+alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer_en.html"-->
 </body>
 </html>

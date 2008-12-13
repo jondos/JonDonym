@@ -469,19 +469,19 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			super(TRUST_IF_AT_LEAST, a_conditionValue);
 		}
 
-		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
+		public void checkTrust(MixCascade a_cascade) throws TrustException
 		{
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int minSpeed = ((Integer) m_conditionValue).intValue();
 			
-			if (entry == null || entry.getBound(PerformanceEntry.SPEED) == Integer.MAX_VALUE || // no performance data
+			if (entry == null || entry.getBound(PerformanceEntry.SPEED).getBound() == Integer.MAX_VALUE || // no performance data
 				minSpeed <= 0) // do not test speed, as all speed values are accepted
 			{
 				return;
 			}
 			
 			if (m_trustCondition == TRUST_IF_AT_LEAST && (entry == null || 
-				entry.getBound(PerformanceEntry.SPEED) < minSpeed))
+				entry.getBound(PerformanceEntry.SPEED).getBound() < minSpeed))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_SPEED)));
 			}
@@ -496,20 +496,20 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			super(TRUST_IF_AT_MOST, a_conditionValue);
 		}
 		
-		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
+		public void checkTrust(MixCascade a_cascade) throws TrustException
 		{
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int maxDelay = ((Integer) m_conditionValue).intValue();
 			
 			// no performance data
-			if (entry == null || entry.getBound(PerformanceEntry.DELAY) == 0)
+			if (entry == null || entry.getBound(PerformanceEntry.DELAY).getBound() == 0)
 			{
 				return;
 			}
 			
 			if (m_trustCondition == TRUST_IF_AT_MOST && (entry == null || 
-					entry.getBound(PerformanceEntry.DELAY) < 0 || 
-					entry.getBound(PerformanceEntry.DELAY) > maxDelay))
+					entry.getBound(PerformanceEntry.DELAY).getBound() < 0 || 
+					entry.getBound(PerformanceEntry.DELAY).getBound() > maxDelay))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH)));
 			}
@@ -538,13 +538,15 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000));
 		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100));
+		model.setAttribute(NumberOfMixesAttribute.class, TRUST_IF_AT_LEAST, new Integer(3));
+		
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE);
 		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
-		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
-		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
+		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
+		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_USER_DEFINED, 4)
@@ -576,6 +578,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(String a_strName, long a_id)
 	{
+		super(JAPMessages.getInstance());
 		//m_id = ms_trustModels.size();
 		m_id = a_id;
 		m_strName = a_strName == null ? "Default trust model" : a_strName;
@@ -588,6 +591,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(TrustModel a_trustModel)
 	{
+		super(JAPMessages.getInstance());
 		copyFrom(a_trustModel);
 	}
 
@@ -600,6 +604,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(Element a_trustModelElement) throws XMLParseException
 	{
+		super(JAPMessages.getInstance());
 		XMLUtil.assertNodeName(a_trustModelElement, XML_ELEMENT_NAME);
 
 		XMLUtil.assertNotNull(a_trustModelElement, XML_ATTR_ID);

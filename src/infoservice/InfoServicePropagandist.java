@@ -100,16 +100,8 @@ public class InfoServicePropagandist implements Runnable
 				{
 					if (i == 1 && !bInit)
 					{
-						// update MixCascades and Mixes at startup only
+						// update MixCascades and Mixes at startup only; update InfoServices as often as possible
 						break;
-					}
-					if (i == 3)
-					{
-						// all cascades are fetched, start meter thread
-						if (m_meter != null)
-						{
-							m_meter.update();
-						}
 					}
 
 					hashEntries = new Hashtable();
@@ -189,7 +181,6 @@ public class InfoServicePropagandist implements Runnable
 						}
 					}
 				}
-				bInit = false;
 
 				InfoServiceDBEntry generatedOwnEntry =
 					new InfoServiceDBEntry(Configuration.getInstance().getOwnName(),
@@ -227,6 +218,16 @@ public class InfoServicePropagandist implements Runnable
 				InfoServiceDistributor.getInstance().addJobToInititalNeighboursQueue(generatedOwnEntry);
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 							  "Updating and propagating own InfoServerDBEntry.");
+				
+				if (bInit)
+				{
+					bInit = false;
+					// all cascades are fetched, start meter thread
+					if (m_meter != null)
+					{
+						m_meter.update();
+					}
+				}				
 			}
 			else
 			{

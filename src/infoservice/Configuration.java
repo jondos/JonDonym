@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -41,6 +42,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import anon.util.XMLParseException;
+
 import anon.crypto.JAPCertificate;
 import anon.crypto.PKCS12;
 import anon.crypto.X509SubjectKeyIdentifier;
@@ -49,6 +52,7 @@ import anon.crypto.SignatureVerifier;
 import anon.infoservice.Constants;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.Database;
+import anon.infoservice.TermsAndConditionsFramework;
 import infoservice.tor.TorDirectoryAgent;
 import infoservice.tor.TorDirectoryServer;
 import infoservice.tor.TorDirectoryServerUrl;
@@ -202,6 +206,13 @@ final public class Configuration
 	 * Stores if the performance monitoring is enabled
 	 */
 	private boolean m_bPerfEnabled;
+	
+	/**
+	 * If InfoService is in passive (listen/poll) mode.
+	 */
+	private boolean m_bPassive;
+	
+	private String m_lastPassword = "";
 
 	/** Stores 7 configuration values for cascade performance monitoring.
 	 * <ul>
@@ -249,6 +260,7 @@ final public class Configuration
 		IS_PROP_NAME_PERFORMANCE_MONITORING + ".server";
 	public final static String IS_PROP_VALUE_PERF_SERVER = "true";
 	
+	public final static String IS_PROP_VALUE_TERMS_AND_CONDITIONS_DIR = "terms";
 	
 	public Configuration(Properties a_properties) throws Exception
 	{
@@ -271,9 +283,10 @@ final public class Configuration
 			m_strOwnName = a_properties.getProperty("ownname").trim();
 			m_iMaxPostContentLength = Integer.parseInt(a_properties.getProperty("maxPOSTContentLength").trim());
 			String strHardwareListeners = a_properties.getProperty("HardwareListeners").trim();
-			String strVirtualListeners = a_properties.getProperty("VirtualListeners").trim();
+			String strVirtualListeners = a_properties.getProperty("VirtualListeners");
+			
 			StringTokenizer stHardware = new StringTokenizer(strHardwareListeners, ",");
-			StringTokenizer stVirtual = new StringTokenizer(strVirtualListeners, ",");
+			
 
 			/* create a list of all interfaces we are listening on */
 			m_hostList = new Vector();
@@ -289,16 +302,24 @@ final public class Configuration
 				}
 			}
 			
-			m_virtualListenerList = new Vector();
-			while (stVirtual.hasMoreTokens())
+			if (strVirtualListeners != null)
 			{
-				ListenerInterface iface = new ListenerInterface(stVirtual.nextToken());
-				m_virtualListenerList.addElement(iface);
-				
-				if(iface != null && !m_hostList.contains(iface.getHost()))
+				m_virtualListenerList = new Vector();
+				StringTokenizer stVirtual = new StringTokenizer(strVirtualListeners.trim(), ",");
+				while (stVirtual.hasMoreTokens())
 				{
-					m_hostList.addElement(iface.getHost());
+					ListenerInterface iface = new ListenerInterface(stVirtual.nextToken());
+					m_virtualListenerList.addElement(iface);
+					
+					if(iface != null && !m_hostList.contains(iface.getHost()))
+					{
+						m_hostList.addElement(iface.getHost());
+					}
 				}
+			}
+			else
+			{
+				m_virtualListenerList = (Vector)m_hardwareListenerList.clone();
 			}
 
 			/* only for compatibility */
@@ -306,17 +327,16 @@ final public class Configuration
 
 			/* load the private key for signing our own infoservice messages */
 			String privatePkcs12KeyFile = a_properties.getProperty("privateKeyFile");
+			PKCS12 infoServiceMessagesPrivateKey = null;
 			if ( (privatePkcs12KeyFile != null) && (!privatePkcs12KeyFile.trim().equals("")))
 			{
-				privatePkcs12KeyFile = privatePkcs12KeyFile.trim();
-				PKCS12 infoServiceMessagesPrivateKey = null;
+				privatePkcs12KeyFile = privatePkcs12KeyFile.trim();				
 				try
 				{
-					String lastPassword = "";
 					do
 					{
 						infoServiceMessagesPrivateKey = loadPkcs12PrivateKey(privatePkcs12KeyFile,
-							lastPassword);
+							m_lastPassword);
 						if (infoServiceMessagesPrivateKey == null)
 						{
 							/* file was found, but the private key could not be loaded -> maybe wrong password */
@@ -326,7 +346,7 @@ final public class Configuration
 							System.out.print("Password: ");
 							BufferedReader passwordReader = new BufferedReader(new InputStreamReader(System.
 								in));
-							lastPassword = passwordReader.readLine();
+							m_lastPassword = passwordReader.readLine();
 						}
 					}
 					while (infoServiceMessagesPrivateKey == null);
@@ -383,7 +403,11 @@ final public class Configuration
 						JAPCertificate.CERTIFICATE_TYPE_UPDATE, "update", true);
 				
 				loadTrustedCertificateFiles(a_properties, "trustedPICertificateFiles", 
-						JAPCertificate.CERTIFICATE_TYPE_PAYMENT, "PI", true);						
+						JAPCertificate.CERTIFICATE_TYPE_PAYMENT, "PI", true);			
+				
+				SignatureVerifier.getInstance().getVerificationCertificateStore().
+					addCertificateWithoutVerification(infoServiceMessagesPrivateKey.getX509Certificate(), 
+							JAPCertificate.CERTIFICATE_TYPE_INFOSERVICE, true, true);
 				
 				
 				try
@@ -585,6 +609,7 @@ final public class Configuration
 					new InfoServiceDBEntry(null, null,
 										   ( (ListenerInterface) m_initialNeighbourInfoServices.elementAt(i)).
 										   toVector(), false, false, System.currentTimeMillis(), 0, false);
+				entry.markAsBootstrap();
 
 				//entry.setNeighbour(true);
 				try
@@ -740,18 +765,24 @@ final public class Configuration
 							  "Could not read 'maxNrOfConcurrentConnections' setting - default to: " +
 							  m_NrOfThreads);
 			}
-			try
+			
+			if (Boolean.valueOf(a_properties.getProperty("enableDynamicConfiguration", "false")).booleanValue())
 			{
-				DynamicConfiguration.getInstance().readConfiguration(a_properties);
-			}
-			catch (Exception e2)
-			{
-				System.err.println("Error reading the configurastion information related to Dynamic Cascades");
-				System.err.println("Exception: " + e2.toString());
+				try
+				{
+					DynamicConfiguration.getInstance().readConfiguration(a_properties);
+				}
+				catch (Exception e2)
+				{
+					System.err.println("Error reading the configuration information related to Dynamic Cascades");
+					System.err.println("Exception: " + e2.toString());
+				}
 			}
 			
-			m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "true")).booleanValue();
+			m_bPassive = Boolean.valueOf(a_properties.getProperty("modePassive", "false")).booleanValue();
 			
+			
+			m_bPerfEnabled = Boolean.valueOf(a_properties.getProperty("perf", "true")).booleanValue();						
 			if(m_bPerfEnabled)
 			{
 				String value = a_properties.getProperty("perf.proxyHost", "localhost");
@@ -762,7 +793,7 @@ final public class Configuration
 				if(value != null)
 					m_aPerfMeterConf[1] = Integer.valueOf(value);
 
-				value = a_properties.getProperty("perf.dataSize", "200000");
+				value = a_properties.getProperty("perf.dataSize", "250000");
 				if(value != null)
 				{
 					m_aPerfMeterConf[2] = new Integer(Math.min(512*1024*2, Integer.parseInt(value)));
@@ -784,12 +815,6 @@ final public class Configuration
 				if(value != null)
 				{
 					m_aPerfMeterConf[5] = new Integer(Math.max(5*1000, Integer.parseInt(value)));
-				}
-				
-				value = a_properties.getProperty("perf.minPackets", "0");
-				if(value != null)
-				{
-					m_aPerfMeterConf[6] = new Integer(Integer.parseInt(value));
 				}
 				
 				m_strPerfAccountDirectory = 
@@ -1136,7 +1161,19 @@ final public class Configuration
 	{
 		return JAPCertificate.getInstance(new File(a_x509FileName));
 	}
-
+	
+	/**
+	 * Returns if this InfoService does not propagate any information to
+	 * other InfoServices, but only passively stores some data (e.g. Mixes, Cascades, Status, Performance)
+	 * collected from other InfoServices. This passively stored information is kept as long as a JonDo 
+	 * client would do.
+	 * @return
+	 */
+	public boolean isPassive()
+	{
+		return m_bPassive;
+	}
+	
 	public Object[] getPerformanceMeterConfig() 
 	{
 		return m_aPerfMeterConf;
@@ -1175,6 +1212,11 @@ final public class Configuration
 	public Vector getHostList()
 	{
 		return m_hostList;
+	}
+	
+	public File getTermsAndConditionsDir()
+	{
+		return new File(IS_PROP_VALUE_TERMS_AND_CONDITIONS_DIR);
 	}
 
 }

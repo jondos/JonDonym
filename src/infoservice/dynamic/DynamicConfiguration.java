@@ -63,6 +63,8 @@ public class DynamicConfiguration
     private int m_agreementLogLevel = LogLevel.DEBUG;
 
     private static final DynamicConfiguration m_instance = new DynamicConfiguration();
+    
+    private boolean m_bConfigured = false;
 
     /**
      * Returns the singleton instance of this class
@@ -152,7 +154,13 @@ public class DynamicConfiguration
         {
             m_cascadeBuildingStrategy = new ComleteRandomStrategy();
         }
-
+        
+        m_bConfigured = true;
+    }
+    
+    public boolean isConfigured()
+    {
+    	return m_bConfigured;
     }
 
     /**

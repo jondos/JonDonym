@@ -1,40 +1,76 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
-<style type="text/css">
+  <title>Jondo Help: Security test</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <style type="text/css">
 <!--
 .Stil2 {color: #FF0000}
 .Stil3 {color: #FF6600}
 -->
-</style>
+
+  </style>
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
-<H2>Checking settings of browser / filter</H2>
-<p>We will use a test site which lets us know whether your browser (and filter proxy, if any) is correctly configured.
-JonDos suggests the preconfigured, portable <a href="http://www.jondos.de/en/jondofox">JonDoFox</a> for secure anonymous web browsing. It is availabe as complete browser (Windows) or as Firefox profile for all operating systems and passes all  tests. </p>
-<p align="center"><a href="http://www.jondos.de/en/anontest">JonDos anonymity test</a> <br>
-  </p>
-<p align="left">The site gives a quick overview of all IP, header and other information that your browser sends to websites. All fields should be colored green or be without color, <span class="Stil3">orange</span> would be tolerable, <span class="Stil2">red</span> may be a killer for your anonymity. If you see <span class="Stil3">orange</span> or <span class="Stil2">red</span> colors, <strong>move your mouse pointer </strong> above the respective fields, and you will see hints and an explanation as popups. </p>
-<p align="left">In case the results of the test do not meet requirements this might be due to the following reasons:</p>
-<UL><LI>JonDo has not <a href="browser.html">been installed</a> correctly 
-    <LI>Neither <a href="http://www.jondos.de/en/jondofox">JonDoFox</a> nor <A href="noactive_general.html">filter proxy</A> has been used, or you did not set the <a href="noactive.html">data protection configuration for your browser</a> correctly .    
-    <LI>Filter proxy is not using correct filter settings.
-  <LI>Filter proxy is not using JonDo as external proxy.
-  <LI>Your browser is not using the filter proxy as proxy.
-</UL>
 
-Further test sites:
-<UL>
-<LI><a href="http://www.leader.ru/secure/who.html">Leader.ru</a> Quick overview on headers 
-<LI><B><A href="http://www.whatismyip.com/">WhatIsMyIP</A></B> Displays external IP address.
-<LI><B><A href="https://www.astalavista.net/?cmd=net">Astalavista</A></B> Displays connection information (HTTPS)
-<LI><B><A href="http://proxyjudge.org/">Proxyjudge</A></B> Attempts to make a statement about anonymity level (improper rating scheme)
-<LI><B><A href="http://www.rrdb.org/check_yourself.php?l=en">RRDB</A></B> Displays connection information
-<LI><B><a href="http://www.netreal.de/test/ip/">NetReal</a></B> German site with good explanations
-<LI><B><a href="http://gemal.dk/browserspy/">Browserspy</a></B> Holds a big list with identifying attributes 
-</UL>
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative browser</a></span> <span
+class="midlink"><a name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser setup
+</a></span> <span class="nextlink"><a href="interface.html">JonDo User
+Interface <img src="next.gif" alt="-&gt;"></a></span> </p>
+<hr>
+
+<h2>Testing the browser setup</h2>
+
+<p>With the help of different testsites you can tell whether your browser has
+been configured right. We recommend specifically the</p>
+
+<p align="center"><a href="http://www.jondos.de/en/anontest">JonDos Anonymity
+Test</a><br>
+</p>
+
+<p align="left">The website will give you a quick overview of all your IP,
+header or other information that your browser sends to websites. <span
+class="style1">All fields should be colored green or colorless.</span> <span
+class="Stil3">Orange</span> is usually tolerable, <span
+class="Stil2">red</span> can be devastating to your anonymity. </p>
+
+<p>If you see any <span class="Stil2">red</span>, please work through the
+browser setup pages again. Check especially the displayed IP address. If it
+is <span class="Stil2">red</span> you are surfing on the Net without any
+protection by JonDo or Tor. Also, make sure that your browser can not run
+ActiveX, Java and Flash without your prior confirmation. An automatic
+execution of these plugins will usually give away your IP address and
+important system settings, and can thus revoke anonymity completely or at
+least partially with respect to that website.</p>
+
+<p><strong>Please remember that at the moment only <a name="JonDoFox"
+id="JonDoFox" href="jondofox.html">JonDoFox</a> passes all criteria applied
+in the test for secure and anonymous surfing. With other browsers such a
+configuration is only possible to experts, if at all. </strong></p>
+
+<p>More testsites: </p>
+<ul>
+  <li><b><a href="http://gemal.dk/browserspy/">Browserspy</a></b> contains a
+    huge list with identification criteria and elaborate tests.</li>
+  <li><a href="http://www.leader.ru/secure/who.html">Leader.ru</a> gives an
+    overview to different identification criteria.</li>
+  <li><b><a href="https://www.astalavista.net/?cmd=net">Astalavista</a></b>
+    displays general connection information (HTTPS).</li>
+  <li><a
+    href="http://www.gurusheaven.de/index_sicherheit.html">Gurushaven.de</a>
+    gives a very detailed German description of different tests.</li>
+</ul>
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative browser</a></span> <span
+class="midlink"><a name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser setup
+</a></span> <span class="nextlink"><a href="interface.html">JonDo User
+Interface <img src="next.gif" alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer_en.html"-->
-
 </body>
 </html>

@@ -35,6 +35,7 @@ import java.util.Observer;
 import java.util.Observable;
 import platform.signal.SignalHandler;
 
+import infoservice.PassiveInfoServiceInitializer;
 import infoservice.performance.PerformanceMeter;
 import gui.JAPMessages;
 import jap.pay.AccountUpdater;
@@ -43,7 +44,10 @@ import jap.JAPController;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
+import anon.infoservice.IDistributable;
+import anon.infoservice.IDistributor;
 import anon.infoservice.ListenerInterface;
+import anon.infoservice.TermsAndConditionsFramework;
 import anon.util.ThreadPool;
 import anon.util.TimedOutputStream;
 import logging.LogHolder;
@@ -57,7 +61,7 @@ public class InfoService implements Observer
 
 	private static int m_connectionCounter;
 	private static PerformanceMeter ms_perfMeter;
-	private static AccountUpdater ms_accountUpdater; 
+	private static AccountUpdater ms_accountUpdater;
 	
 	private String m_configFileName;
 	
@@ -112,7 +116,10 @@ public class InfoService implements Observer
 		try
 		{
 			InfoService s1 = new InfoService(fn);
-						
+			
+			// start info service server
+			s1.startServer();
+			
 //			 configure the performance meter
 			if(Configuration.getInstance().isPerfEnabled())
 			{				
@@ -129,9 +136,6 @@ public class InfoService implements Observer
 				InfoService.ms_perfMeter = null;
 			}
 			
-			// start info service server
-			s1.startServer();
-			
 			SignalHandler handler = new SignalHandler();
 			handler.addObserver(s1);
 			handler.addSignal("HUP");
@@ -142,11 +146,35 @@ public class InfoService implements Observer
 			System.out.println("InfoService is running!");
 			
 			JAPModel model = JAPModel.getInstance();
-			model.allowPaymentViaDirectConnection(true);
-			model.allowUpdateViaDirectConnection(true);
+			model.setPaymentAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
+			model.setInfoServiceAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
+			model.setUpdateAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
 			model.setAnonConnectionChecker(JAPController.getInstance().new AnonConnectionChecker());
 			model.setAutoReConnect(true);
-			model.setCascadeAutoSwitch(false);										
+			model.setCascadeAutoSwitch(false);
+			
+			Thread tacLoader = new Thread()
+			{
+				public void run()
+				{
+					while(true)
+					{
+						TermsAndConditionsFramework.loadFromDirectory(
+							Configuration.getInstance().getTermsAndConditionsDir());
+						
+						try
+						{
+							Thread.sleep(TermsAndConditionsFramework.TERMS_AND_CONDITIONS_UPDATE_INTERVAL);	
+						}
+						catch(InterruptedException ex)
+						{
+							break;
+						}
+					}
+				}
+			};
+			
+			tacLoader.start();
 		}
 		catch (Exception e)
 		{
@@ -244,12 +272,28 @@ public class InfoService implements Observer
 	{
 		HTTPConnectionFactory.getInstance().setTimeout(Constants.COMMUNICATION_TIMEOUT);
 		/* initialize Distributor */
-		InfoServiceDistributor.getInstance();
-		Database.registerDistributor(InfoServiceDistributor.getInstance());
+		
+		
 		/* initialize internal commands of InfoService */
 		oicHandler = new InfoServiceCommands();
 		/* initialize propagandist for our infoservice */
-		InfoServicePropagandist.generateInfoServicePropagandist(ms_perfMeter);
+		if(!Configuration.getInstance().isPassive())
+		{
+			InfoServicePropagandist.generateInfoServicePropagandist(ms_perfMeter);
+			Database.registerDistributor(InfoServiceDistributor.getInstance());
+		}
+		else
+		{
+			// suppress distributor warnings
+			Database.registerDistributor(new IDistributor()
+			{
+				public void addJob(IDistributable a_distributable)
+				{
+				}
+			});
+			//in passive mode we obtain our information by requesting it from other services
+			PassiveInfoServiceInitializer.init();
+		}
 		// start server
 		LogHolder.log(LogLevel.EMERG, LogType.MISC, "InfoService -- Version " + Constants.INFOSERVICE_VERSION);
 		LogHolder.log(LogLevel.EMERG, LogType.MISC, System.getProperty("java.version"));

@@ -1,61 +1,66 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo Help: Firefox proxy settings</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>Proxy settings for browsers: Mozilla Firefox 2.x </H2>
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative browser configuration</a></span>
+<span class="midlink"><a name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser setup
+</a><a href="browser.html"><img src="next.gif" alt="-&gt;"> Alternative
+browser configuration</a> </span> <span class="nextlink"><a
+href="browser.html">Alternative browser configuration <img src="next.gif"
+alt="-&gt;"></a></span> </p>
+<hr>
 
-To set up JonDo for Mozilla-Firefox, do the following steps:
-<BR><BR>
-1.) From the menu "Tools", choose the submenu "Options".  The settings window will open. Choose the "Advanced" category and then the tab "Network".
-<BR><BR>
-<CENTER><IMG SRC="firefox3.gif"></CENTER>
-<BR><BR>
-2.) To change the proxy server, click on the "Settings..." button. In the new window that opens, choose "Manual proxy configuration". Activate "Use this proxy server for all protocols" and enter "127.0.0.1" as the server and "4001" as the port (without the quotation marks).
-<BR><BR>
-<CENTER><IMG SRC="firefox2.gif"></CENTER>
-<BR><BR>
-<BR>
-If you want specify addresses where JonDo shall not be used, you can enter those exceptions into the field <i>No Proxy for:</i>, separated by commas.
-<br>Please note that exceptions can be managed in a more flexible way using <a href="noactive_proxomitron.html">Proxomitron</a>.
+<h2>Proxy settings: Mozilla Firefox 2.x and 3.x</h2>
+JonDos recommends the already preconfigured <a
+href="http://www.jondos.de/en/jondofox">JonDoFox</a> for secure, anonymous
+surfing. It is available as a complete browser or a portable Firefox profile
+for all operating systems.<br>
+To set up JonDo for Mozilla-Firefox without JonDoFox, do the following: <br>
 <br>
-<B>Note:</B> If you set a different <A HREF="portlistener.html">listener port</A> in JonDo, you'll have to enter this port here too, rather than 4001.
-<BR><BR>
-<B>Recommended plugins for Mozilla firefox</B>
+1.) From the menu "Tools" (Windows) or "Firefox" (Mac OS X) choose the
+submenu "Options". The settings window will open. Choose the category
+"Advanced" and then the tab "Network". <br>
+<br>
 
-<P>
-<i>SwitchProxy</i> is a recommended plugin for firefox.
-This extension adds a toolbar to firefox allowing fast switching between proxy settings. This is useful for switching between surfing with JonDo and non-anonymous surfing without JonDo.
-<UL>
-<LI><B>Installation</B><P>
-<UL>These are two ways to go to the plugin's installation website:<P>
-<LI>Open <A href="https://addons.mozilla.org/firefox/125/">this link</A> to go to the installation website directly.
-<P><B>OR</B><P>
-<LI>Choose <i>Tools</i> from the menu, then <i>Extensions</i>. A window showing all installed extensions will appear. Click <i>Get more extensions</i> to reach the plugin site for firefox. Perform a search for "SwitchProxy Tool".<P>
-</UL>
-Click on "Install Now". Approve the installation and restart your browser.
-<P>
-<LI><B>Settings</B><P>
-Now you should see a new toolbar:
-<BR>
-<CENTER><IMG SRC="switchproxy.gif"></CENTER>
-<BR>
-Choose <i>Add</i> from the toolbar to add a new proxy. Choose proxy configuration type <i>Standard</i> and click <i>Next</i>.
-<br>Next to <i>Proxy Label</i>, enter for example "JonDo" ein, but the labelling is not important. Enter address "127.0.0.1" and port 4001 for each type of proxy except for SOCKS (HTTP, SSL, FTP, Gopher):
-<BR>
-<CENTER><IMG SRC="switchproxy2.gif"></CENTER>
-<BR>
-Confirm by pressing <i>OK</i>.
-<P>
-<LI><B>Optional settings</B><P>
-You may hide SwitchProxy's toolbar so that it will consume no space. It may still be used by context menu (right click) and menu <i>Tools</i> -> <i>SwitchProxy</i>.
-<br>To hide the toolbar, click <i>Preferences</i> in it <b>or</b> go to <i>Tools</i> -> <i>Extensions</i> to open a window with all extensions listed, choose plugin <i>SwitchProxy</i> and click <i>Options</i>.
-<br>Uncheck <i>Show toolbar</i> but leave <i>Show Context Menu</i> and <i>Show in Status Bar</i> checked.
 
-</UL>
+<center>
+<img src="firefox3.gif"></center>
+<br>
+<br>
+2.) To change the proxy server, click on the "Settings..." button. In the new
+window that opens, choose "Manual proxy configuration". Activate "Use this
+proxy server for all protocols" and enter "127.0.0.1" as server and "4001" as
+port (without the quotation marks, of course). <br>
+<br>
+
+
+<center>
+<img src="firefox2.gif"></center>
+<br>
+<p>If you want specify addresses where JonDo shall not be used, you can enter
+those exceptions into the field <i>No Proxy for:</i>, separated by commas.
+<br>
+<b>Note:</b> If you set a different <a href="net.html">listen
+port</a> in JonDo, you'll have to enter this port here too, rather than
+"4001".</p>
+
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative browser configuration</a></span>
+<span class="midlink"><a name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser setup
+</a><a href="browser.html"><img src="next.gif" alt="-&gt;"> Alternative
+browser configuration</a> </span> <span class="nextlink"><a
+href="browser.html">Alternative browser configuration <img src="next.gif"
+alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer_en.html"-->
-
 </body>
 </html>

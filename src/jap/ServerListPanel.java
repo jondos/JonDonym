@@ -290,7 +290,7 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		if(a_location != null)
 		{
 			CountryMapper county = 
-				new CountryMapper(a_location.getCountry(), JAPMessages.getLocale());
+				new CountryMapper(a_location.getCountryCode(), JAPMessages.getLocale());
 			
 			m_mixFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + county.getISOCode() + ".png"));
 			

@@ -1,0 +1,146 @@
+#!/bin/bash
+
+## Copyright (c) The JAP-Team, JonDos GmbH
+##
+## All rights reserved.
+##
+## Redistribution and use in source and binary forms, with or without modification,
+## are permitted provided that the following conditions are met:
+##
+##     * Redistributions of source code must retain the above copyright notice, this list
+##   of conditions and the following disclaimer.
+##     * Redistributions in binary form must reproduce the above copyright notice,
+##       this list of conditions and the following disclaimer in the documentation and/or
+##       other materials provided with the distribution.
+##     * Neither the name of the University of Technology Dresden, Germany, nor the name of
+##       the JonDos GmbH, nor the names of their contributors may be used to endorse or
+##       promote products derived from this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+## LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+## A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+## PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+## LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+## NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+## SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##
+##   JonDo client installation script for bash
+##   2008 by Simon Pecher, JonDos GmbH (simon.pecher@jondos.de)
+##
+
+#default INSTALL_PATH is the users home directory
+INSTALL_PATH=${HOME}
+
+#set placeholders for ant token filtering
+#these values should be set by ant
+ARGS="@ARGS@" 
+APPNAME="@APPNAME@"
+JARNAME="@JARNAME@"
+
+#don't leave the installpath dir in a mess when errors occur.
+onErrorCleanupAndExit()
+{
+	rm -Rf "${INSTALL_PATH}/${APPNAME}"
+	echo "${APPNAME} installation failed."
+	echo ""
+	exit 1
+}
+
+errorStarter()
+{
+	echo "Error creating ${APPNAME} Starter."
+	rm -f "${STARTER}" 
+	onErrorCleanupAndExit	
+}
+
+#if no filtering was done, replace the token placeholders with default values
+args_token=$(expr "${ARGS}" : "@\(.*\)@")
+if  [ "${args_token}" = "ARGS" ]; then
+	ARGS=""
+fi
+
+appname_token=$(expr "${APPNAME}" : "@\(.*\)@")
+if  [ "${appname_token}" = "APPNAME" ]; then
+	APPNAME="JonDo"
+fi
+
+jarname_token=$(expr "${JARNAME}" : "@\(.*\)@")
+if  [ "${jarname_token}" = "JARNAME" ]; then
+	JARNAME="JAP"
+fi
+
+#the name of the Jondo Starter should be in lowercase
+APPNAME_LOWERCASE=$(echo "$APPNAME" | tr "[:upper:]" "[:lower:]" || echo "$APPNAME")
+
+#print help text
+if [ "$1" == "--help" ]; then
+	echo ""
+	echo "${APPNAME} installation for Linux, (2008 Copyright (c) JonDos GmbH)"
+	echo "usage: $0 [ <installpath> | --help ]"
+	echo ""
+	echo "The following files will be installed by this:"
+	echo ""
+	echo " <installpath>/${APPNAME}/${JARNAME}.jar"
+	echo " <installpath>/bin/${APPNAME_LOWERCASE}"
+	echo ""
+	echo "When not specified installpath defaults to \$HOME or \"/usr/local\", if HOME is not set." 
+	echo "NOTE: if you install to a directory where certain permissions are required, the" \
+		"automatic updating of ${APPNAME} will fail unless you start it as a privileged user."
+	echo ""
+	echo "The option --help will show this info."	
+	echo ""
+	exit 0
+fi
+
+if [ "$1" != "" ]; then
+	INSTALL_PATH=$1
+elif [ "${INSTALL_PATH}" = "" ]; then
+	INSTALL_PATH="/usr/local" #if nothing is set: default install path is /usr/local
+fi
+
+echo ""
+echo "Installing ${APPNAME} to ${INSTALL_PATH}"
+
+#complete path of the starter
+STARTER_ROOT="${INSTALL_PATH}/bin"
+STARTER="${STARTER_ROOT}/${APPNAME_LOWERCASE}"
+
+#install JAP.jar
+install -Dvm 755 "${JARNAME}.jar" "${INSTALL_PATH}/${APPNAME}/${JARNAME}.jar"
+
+if [ $? -ne 0 ]; then
+	onErrorCleanupAndExit
+fi
+
+#make sure the bin dir for the JonDo starter exists
+if [ -d "${STARTER_ROOT}" ]; then
+	echo "Directory ${STARTER_ROOT} exists."
+else
+	echo "creating directory ${STARTER_ROOT}"
+	mkdir "${STARTER_ROOT}" || onErrorCleanupAndExit
+fi
+
+java -version >& /dev/null || \
+echo "WARNING: No Java VM installation found. ${APPNAME} will not be able to run without Java."
+
+#create the JonDo starter (the appname in lower case by convention)
+echo '#!/bin/sh' > ${STARTER} 	|| errorStarter
+echo '' >> ${STARTER} 		|| errorStarter
+echo "java -jar ${INSTALL_PATH}/${APPNAME}/${JARNAME}.jar ${ARGS} \$@" \
+	>> ${STARTER}	 	|| errorStarter
+echo '' >> ${STARTER} 		|| errorStarter
+
+chmod 755 ${STARTER} 		|| errorStarter
+
+#everything worked fine
+echo ""
+echo "${APPNAME} was successfully installed to ${INSTALL_PATH}."
+echo "Now type '${APPNAME_LOWERCASE}' to start the ${APPNAME} client." 
+echo "(If that won't do try '${STARTER}' or add '${STARTER_ROOT}' to your PATH variable)"
+echo ""
+
+exit 0

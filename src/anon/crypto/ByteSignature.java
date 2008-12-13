@@ -152,7 +152,7 @@ public final class ByteSignature
 				value += ":";
 			}
 		}
-
+		currentValue = null; // for the garbage collector
 		return value;
 	}
 }

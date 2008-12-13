@@ -32,6 +32,7 @@
 package anon;
 
 import anon.client.ITrustModel;
+import anon.client.ITermsAndConditionsContainer;
 
 /**
  * This interface is needed to pass through the keepCurrentService method in order to
@@ -43,12 +44,13 @@ public interface IServiceContainer extends ITrustModel
 {
 	/**
 	 * Allows to return the current Service that was returned also the next time this method is called.
-	 * @param a_bKeepCurrentService allows or dissallows to keep the current service for the next call
+	 * @param a_bKeepCurrentService allows or disallows to keep the current service for the next call
 	 */
 	public void keepCurrentService(boolean a_bKeepCurrentService);
-
+	
 	public boolean isServiceAutoSwitched();
-
+	
 	public boolean isReconnectedAutomatically();
-
+	
+	public ITermsAndConditionsContainer getTCContainer();
 }

@@ -299,17 +299,6 @@ public class KeyExchangeManager {
 					  Integer.toString(i+1) + "."));
 			  }
 
-
-
-
-			  /*MixInfo oldMixinfo = (MixInfo) Database.getInstance(MixInfo.class).getEntryById(mixinfo.getId());
-			  if (mixinfo.getCertificate() != null &&
-				  (oldMixinfo == null || oldMixinfo.getCertificate() == null ||
-				   !oldMixinfo.getCertificate().equals(mixinfo.getCertificate())))
-			  {
-				  // update the database so the the (new) certificate gets available
-				  Database.getInstance(MixInfo.class).update(mixinfo);
-			  }*/
 			  Element currentMixNode = mixinfo.getXmlStructure();
 			  m_mixParameters[i] = new MixParameters(mixinfo.getId(), new ASymCipher());
 			  if (m_mixParameters[i].getMixCipher().setPublicKey(currentMixNode) != ErrorCodes.E_SUCCESS)

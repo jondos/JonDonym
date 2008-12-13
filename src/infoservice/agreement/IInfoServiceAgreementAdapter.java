@@ -27,7 +27,7 @@
  */
 package infoservice.agreement;
 
-import infoservice.HttpResponseStructure;
+import anon.infoservice.HttpResponseStructure;
 
 public interface IInfoServiceAgreementAdapter
 {

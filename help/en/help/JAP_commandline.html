@@ -1,71 +1,114 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo Help: Commandline Arguments</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>Command line arguments for JonDo</H2>
+<p class="navipar"><span class="prevlink"><a href="miniwindow.html"><img
+src="prev.gif" alt="&lt;-"> Mini View</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_bedienung"><img src="next.gif" alt="-&gt;"> Usage
+</a></span> <span class="nextlink"><a href="appearance.html">Changing
+appearance <img src="next.gif" alt="-&gt;"></a></span> </p>
+<hr>
 
-JonDo can be launched from the command line. Several commands can be specified on startup.
-<UL>
-  <B>Commands (<em>long version, short version</em> respective):</B>
-  <P>
-<LI><B> --help, -h</B>
-  <P>
-Shows a help message.
-<LI><B>--console</B>
-  <P>
-JonDo will only be running on console. This means that no graphical user interface will be shown.<br>
-In order to quit JonDo, type "exit" and press <i>Enter</i>.<br>
-In order to save configuration, type "save" and press <i>Enter</i>.
+<h2>Commandline arguments for JonDo</h2>
 
+<p>JonDo can also be launched from the commandline. Run <code>JAP.jar</code>
+with: </p>
 
-<LI><B>--cascade {[host][:port]}</B>
-	<p>
-		Connects to the specified Mix-Cascade.
-</p>  	
-</li>
+<p><code>java -jar JAP.jar &lt;switches&gt;</code>. </p>
+Several switches can be specified on startup. 
+<ul>
+  <li><p><b>--help, -h</b> </p>
+    <p>Shows a help message. </p>
+  </li>
+  <li><b>--console</b> 
+    <p>JonDo will only be running in a console. This means that no graphical
+    user interface will be shown.<br>
+    In order to quit JonDo, type "exit" and press <i>Enter</i>.<br>
+    In order to save the configuration, type "save" and press <i>Enter</i>.
+    </p>
+    <p>The console version offers only limited functionality and allows for
+    no configuration at the moment. It is thus recommended to configure the
+    <a href="japconf.html">jap.conf</a> in a GUI and to copy it to the
+    environment in which the console version of JonDo will be run.</p>
+  </li>
+  <li><b>--cascade {[host][:port][:id]}</b> 
+    <p>Connects to the specified mix cascade. </p>
+  </li>
+  <li><b>--minimized, -m </b> 
+    <p>JonDo will start in <a href="miniwindow.html">Mini View</a>. </p>
+  </li>
+  <li><b>--noSplash, -s</b> 
+    <p>Suppresses the splash screen at JonDo startup. Starting JonDo will
+    then seem to take a little bit longer, as it takes some time until the
+    JonDo main window is initialized. The splash screen's function is to
+    bridge this time gap. </p>
+  </li>
+  <li><p><b>--allow-multiple, -a</b></p>
+    <p>Allows for multiple instances of JonDo running at the same time. </p>
+  </li>
+  <li><p><b>--listen, -l {[host][:port]}</b></p>
+    <p>Specifies the interface JonDo will listen to. The relative setting in
+    the configuration of JonDo will be overwritten. </p>
+  </li>
+  <li><b>--portable [path_to_browser]</b> 
+    <p>Tells JonDo that it runs in a portable environment. If a path to a
+    portable browser is given, it may also be launched directly from JonDo.
+    JonDo will use this browser for internal connections to websites also.
+    </p>
+  </li>
+  <li><b>--portable-help-path [html]</b> 
+    <p>Path to external HTML help for usage in portable mode.</p>
+  </li>
+  <li><b>--portable-jre</b> 
+    <p>Should be set if JonDo runs with a portable JRE. Suppresses update
+    messages for Java. </p>
+  </li>
+  <li><b>--uninstall, -u</b>
+    <p>Deletes all files created by the application. <strong>Attention:
+    Volume accounts not saved to a separate file will be lost!</strong></p>
+  </li>
+  <li><b>--version, -v</b> 
+    <p>JonDo will print version information for JonDo and Java to the console
+    window. </p>
+  </li>
+  <li><b>--config {Filename}, -c {Filename} </b> 
+    <p>JonDo will use the specified configuration file instead of the <a
+    href="japconf.html">standard configuration file</a>.</p>
+  </li>
+</ul>
+<b>Example</b> 
 
-<LI><B>--minimized, -m </B>
-  <P>
-JonDo minimizes it's window during startup.
-<LI><B>--noSplash, -s</B>
-  <P> Suppresses the splash screen at JonDo startup. Starting JonDo will then seem to take a little bit longer, as it takes some time until the JonDo main window is initialised. The spash screen's function is to bridge this time gap.
-<LI><B>--portable [path_to_browser]</B>
-	<p>
- Tells JonDo that it runs in a portable environment. If a path to a portable browser is given, 
- it may be launched directly from JonDo. URLs in JonDo are opened with this browser,
- instead of with the system default browser.
-</p>
+<p>In order to start JonDo minimized open a console window, switch to the
+directory where <code>JAP.jar</code> is located and enter the following
+command: </p>
 
-<LI><B>--portable-browserprofile [profile]</B>
-	<p>
- Path to the portable browser profile if not detected automatically.
-</p>
+<p><code>java -jar JAP.jar --minimized</code> </p>
 
-  	
- <LI><B>--portable-help-path [html]</B>
-     <p> Path to external HTML help for useage in portable mode.</p>
- </li>
- <LI> <B>--portable-jre</B>
- <p> Should be set if JonDo runs with a portable JRE. Suppresses update messages for Java. </p>  
- 
-<LI><B>--version, -v</B>
-  <P>
-JonDo will print version information for JonDo und Java onto the console window.
-<LI><B>--config {Filename}, -c {Filename} </B>
-  <P>
-JonDo will use this configuration file.
-</UL>
-<b>Example</b><P>
-In order to start JonDo minimized, open a console window, switch to JonDo's directory and enter the following command:
-<P><code>java -jar JAP.jar -minimized</code>
-<P>You may also use these arguments in Windows shortcuts. Just click on the JonDo shortcut with the right mouse button, choose <em>Settings</em> and edit the shortcut as follows:
-<P>Target: &lt;Path to JAP.jar&gt;\jap.exe -minimized <br>
-Execute in: &lt;Path to JAP.jar&gt; 
-<P>Replace hereby &lt;Path to JonDo.jar&gt; with the path where the JAP.jar and the japdll.dll are located (typically <code>C:\Programme\Jap</code>). 
-  <!--#include virtual="/footer_en.html"-->
-          
+<p>You may also use these arguments in Windows shortcuts. Just click on the
+JonDo shortcut with the right mouse button, choose <em>Settings</em> and edit
+the shortcut as follows: </p>
+
+<p>Target: <code>&lt;Path to JonDo&gt;\jap.exe &lt;switches&gt;</code><br>
+Run in: <code>&lt;Path to JAP.jar&gt;</code> </p>
+
+<p>Substitute <code>&lt;Path to JonDo&gt;</code> with the actual path to the
+files <i>JAP.jar</i> and <i>japdll.dll</i> (typically
+<code>C:\Program&#xa0;Files\Jap</code>) and choose the arguments you wish as
+<code>&lt;switches&gt;</code>. </p>
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="miniwindow.html"><img
+src="prev.gif" alt="&lt;-"> Mini View</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_bedienung"><img src="next.gif" alt="-&gt;"> Usage
+</a></span> <span class="nextlink"><a href="appearance.html">Changing
+appearance <img src="next.gif" alt="-&gt;"></a></span> </p>
+<!--#include virtual="/footer_en.html"-->
 </body>
 </html>

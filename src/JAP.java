@@ -34,17 +34,21 @@
  *
  */
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.zip.ZipFile;
 
 import java.awt.Frame;
 import java.awt.Window;
 
 import anon.client.crypto.KeyPool;
+import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;
@@ -53,6 +57,7 @@ import gui.JAPAWTMsgBox;
 import gui.JAPDll;
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
+import gui.help.AbstractHelpFileStorageManager;
 import jap.AbstractJAPMainView;
 import jap.ConsoleJAPMainView;
 import jap.ConsoleSplash;
@@ -66,10 +71,11 @@ import jap.JAPNewView;
 import jap.JAPSplash;
 import jap.JAPViewIconified;
 import jap.MacOSXLib;
-import jap.SystrayPopupMenu;
+import logging.FileLog;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+import logging.SystemErrLog;
 import platform.AbstractOS;
 import platform.WindowsOS;
 import platform.MacOS;
@@ -101,8 +107,11 @@ public class JAP
 		JAP.class.getName() + "_explainNoFirefoxFound";
 	private static final String MSG_USE_DEFAULT_BROWSER = 
 		JAP.class.getName() + "_useDefaultBrowser";
+	private static final String MSG_UNINSTALLING = JAP.class.getName() + "_uninstalling";
+	
 	
 	private final static String WHITESPACE_ENCODED = "%20";
+	private static final String OPTION_MANIOQ = "--manioq";
 	
 	private JAPController m_controller;
 	
@@ -160,11 +169,15 @@ public class JAP
 		String os = System.getProperty("os.name");
 		String mrjVersion = System.getProperty("mrj.version");
 		boolean bConsoleOnly = false;
-		boolean loadPay = true;
+		boolean bUninstall = false;		
 		String listenHost = null;
 		int listenPort = 0;
 		MixCascade commandlineCascade = null;
-
+		
+		/* system wide socks settings should not not apply to JAP */
+		System.getProperties().remove("socksProxyHost");
+		System.getProperties().remove("socksProxyPort");
+		
 		if (isArgumentSet("--version") || isArgumentSet("-v"))
 		{
 			System.out.println("JAP/JonDo version: " + JAPConstants.aktVersion + "\n" +
@@ -179,6 +192,13 @@ public class JAP
 							   "/" + vendor + "/" + os +
 							   (mrjVersion != null ? "/" + mrjVersion : "") + ")");
 		}
+		
+		SystemErrLog templog = new SystemErrLog();
+		LogHolder.setLogInstance(templog);
+		templog.setLogType(LogType.ALL);
+		templog.setLogLevel(LogLevel.WARNING);		
+		
+		
 		//Macintosh Runtime for Java (MRJ) on Mac OS
 		// Test (part 1) for right JVM
 		if (javaVersion.compareTo("1.0.2") <= 0)
@@ -200,6 +220,7 @@ public class JAP
 			System.out.println("--presenation, -p            Presentation mode (slight GUI changes).");
 			System.out.println("--forwarder, -f {port}       Act as a forwarder on a specified port.");
 			System.out.println("--listen, -l {[host][:port]} Listen on the specified interface.");
+			System.out.println("--uninstall, -u              Delete all configuration and help files.");
 			System.out.println("--cascade {[host][:port][:id]}    Connects to the specified Mix-Cascade.");
 			System.out.println("--portable [path_to_browser] Tell JonDo that it runs in a portable environment.");
 			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
@@ -213,7 +234,10 @@ public class JAP
 			bConsoleOnly = true;
 		}
 	
-
+		if (isArgumentSet("--uninstall") || isArgumentSet("-u"))
+		{
+			bUninstall = true;
+		}
 		
 		// Test (part 2) for right JVM....
 		if (vendor.startsWith("Transvirtual"))
@@ -319,12 +343,16 @@ public class JAP
 		// Set path to Firefox for portable JAP
 		boolean bPortable = isArgumentSet("--portable");
 		m_controller.setPortableMode(bPortable);
+		if (isArgumentSet(OPTION_MANIOQ))
+		{
+			JAPModel.getInstance().setContext(IServiceContextContainer.CONTEXT_MANIOQ);
+		}
 		
 		String configFileName = null;
 		/* check, whether there is the -config parameter, which means the we use userdefined config
 		 * file
 		 */
-		if ( (configFileName = getArgumentValue("--config")) == null)
+		if ((configFileName = getArgumentValue("--config")) == null)
 		{
 			configFileName = getArgumentValue("-c");
 		}
@@ -345,7 +373,15 @@ public class JAP
 			LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Loading config file '" + configFileName + "'.");
 		}
 		
-		m_controller.preLoadConfigFile(configFileName);
+		try 
+		{
+			m_controller.preLoadConfigFile(configFileName);
+		} 
+		catch (FileNotFoundException a_e) {
+			
+			LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e);
+			System.exit(-1);
+		}
 		// Show splash screen
 		ISplashResponse splash;
 		String splashText;
@@ -395,7 +431,7 @@ public class JAP
 			JAPMessages.init(JAPConstants.MESSAGESFN);
 		}
 
-		if (!bConsoleOnly)
+		if (!bConsoleOnly && !bUninstall)
 		{
 			JAPModel.getInstance().setDialogFormatShown(isArgumentSet("--showDialogFormat"));
 
@@ -420,8 +456,31 @@ public class JAP
 		JAPDebug.getInstance().setLogType(LogType.ALL);
 		JAPDebug.getInstance().setLogLevel(LogLevel.WARNING);
 
+		
+		if (bUninstall)
+		{
+			int exitCode = 0;
+			splash.setText(JAPMessages.getString(MSG_UNINSTALLING));
+			try 
+			{
+				m_controller.uninstall(configFileName);
+			} 
+			catch (IOException a_e) 
+			{
+				LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e);
+				exitCode = -1;
+			}
+			
+			if (splash instanceof JAPSplash)
+			{
+				((JAPSplash)splash).setVisible(false);
+			}
+			System.exit(exitCode);
+		}
+		
+		
 		splash.setText(JAPMessages.getString(MSG_INIT_RANDOM));
-		// initialise secure random generators
+		// initialize secure random generators
 		Thread secureRandomThread = new Thread(new Runnable()
 		{
 			public void run()
@@ -545,8 +604,6 @@ public class JAP
 			}
 		}
 
-
-
 		// Create the controller object
 		splash.setText(JAPMessages.getString(MSG_STARTING_CONTROLLER));
 		m_controller.start();
@@ -567,8 +624,6 @@ public class JAP
 			}
 			m_controller.setCommandLineArgs(cmdArgs);
 		}
-
-		
 
 		if (isArgumentSet("--portable-jre"))
 		{
@@ -659,7 +714,25 @@ public class JAP
 		JAPModel.getInstance().setForwardingStateModuleVisible(forwardingStateVisible);
 		// load settings from config file
 		splash.setText(JAPMessages.getString(MSG_LOADING_SETTINGS));
-		m_controller.loadConfigFile(configFileName, loadPay, splash);
+		try
+		{
+			m_controller.loadConfigFile(configFileName, splash);
+		} 
+		catch (FileNotFoundException a_e) 
+		{			
+			splash.setText(a_e.getMessage());
+			LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e);
+			try 
+			{
+				Thread.sleep(5000);
+			} 
+			catch (InterruptedException e) 
+			{
+				// ignore
+			}
+			System.exit(-1);
+		}
+		
 		// configure forwarding server
 		String forwardingServerPort;
 		if ( (forwardingServerPort = getArgumentValue("--forwarder")) == null)
@@ -717,7 +790,7 @@ public class JAP
 			view = new JAPNewView(JAPConstants.TITLE, m_controller);
 
 			// Create the main frame
-			view.create(loadPay);
+			view.create(true);
 			//view.setWindowIcon();
 			// Switch Debug Console Parent to MainView
 			JAPDebug.setConsoleParent( (JAPNewView) view);
@@ -897,7 +970,7 @@ public class JAP
 		}
 	}
 
-	public String getArgumentValue(String a_argument)
+	private String getArgumentValue(String a_argument)
 	{
 		String value = (String) m_arstrCmdnLnArgs.get(a_argument);
 		if (value != null && value.trim().length() == 0)
@@ -908,17 +981,16 @@ public class JAP
 		return value;
 	}
 
-	public boolean isArgumentSet(String a_argument)
+	private boolean isArgumentSet(String a_argument)
 	{
 		return m_arstrCmdnLnArgs.containsKey(a_argument);
 	}
 	
-	public String buildPortableFFCommand(ISplashResponse a_splash)
+	private String buildPortableFFCommand(ISplashResponse a_splash)
 	{
 		String pFFExecutable = null;
 		String pFFHelpPath = null;
 
-		
 		if (!isArgumentSet("--portable") )
 		{
 			return null;
@@ -945,8 +1017,53 @@ public class JAP
 			if (isArgumentSet("--portable-help-path"))
 			{
 				pFFHelpPath = getArgumentValue("--portable-help-path");
-			}	
+			}
 			
+			if (pFFHelpPath == null && isArgumentSet("--jar-path"))
+			{				
+				int index;
+				String jarpath = getArgumentValue("--jar-path");
+				String pFFHelpPathTmp;
+				
+				try
+				{
+					if (m_temp != null && m_temp.length > 0 && jarpath != null)
+					{					
+						pFFHelpPathTmp = m_temp[0];					
+						index = pFFHelpPathTmp.indexOf(jarpath);
+						if (index > 0)
+						{	
+							pFFHelpPathTmp = pFFHelpPathTmp.substring(0, index);
+							String[] dirs = new File(pFFHelpPathTmp).list();						
+							for (int i = 0; i < dirs.length; i++)
+							{
+								if (dirs[i].toUpperCase().equals(AbstractHelpFileStorageManager.HELP_FOLDER.toUpperCase()))
+								{
+									// found a help folder in the jarpath; assume that it is the right one...
+									pFFHelpPath = pFFHelpPathTmp;
+									break;
+								}
+							}
+						}									
+					}
+				}
+				catch (Exception a_e)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+				}
+			}
+			
+//			if no path was found, set the help directory to the path where the JAP.jar is located
+			if (pFFHelpPath == null)
+			{
+				ZipFile jar = ClassUtil.getJarFile();
+				if (jar != null)
+				{
+					pFFHelpPath = new File(jar.getName()).getParent();
+				}
+			}
+			
+	
 			if(pFFHelpPath != null)
 			{
 				String messageText = a_splash.getText();
@@ -954,7 +1071,7 @@ public class JAP
 				JAPModel.getInstance().setHelpPath(new File(pFFHelpPath), true);
 				a_splash.setText(messageText);				
 			}
-		}			
+		}
 		
 		return pFFExecutable;
 	}

@@ -44,6 +44,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Vector;
+import java.util.Hashtable;
 
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -55,20 +56,25 @@ import platform.AbstractOS;
 import anon.crypto.JAPCertificate;
 import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.IProxyInterfaceGetter;
+import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.ProxyInterface;
 import anon.mixminion.mmrdescription.MMRList;
 import anon.util.ClassUtil;
-import anon.util.RecursiveCopyTool;
+import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.Util;
 
-/* This is the Model of All. It's a Singelton!*/
-public final class JAPModel extends Observable implements IHelpModel
+/* This is the Model of All. It's a singleton!*/
+public final class JAPModel extends Observable implements IHelpModel, IServiceContextContainer
 {
 	public static final String MACOSX_LIB_NEEDS_UPDATE = "macOSXLibNeedsUpdate";
 	public static final String DLL_VERSION_UPDATE = "dllVersionUpdate";
 	public static final String DLL_VERSION_WARNING_BELOW = "dllWarningVersion";
+	
+	public static final int CONNECTION_ALLOW_ANONYMOUS = 0;
+	public static final int CONNECTION_FORCE_ANONYMOUS = 1;
+	public static final int CONNECTION_BLOCK_ANONYMOUS = 2;	
 
 	public static final String XML_ANONYMIZED_HTTP_HEADERS = "anonymizedHttpHeaders";
 	public static final String XML_REMIND_OPTIONAL_UPDATE = "remindOptionalUpdate";
@@ -108,6 +114,12 @@ public final class JAPModel extends Observable implements IHelpModel
 	public static final Integer CHANGED_DLL_UPDATE = new Integer(10);
 	public static final Integer CHANGED_MACOSX_LIBRARY_UPDATE = new Integer(11);
 	public static final Integer CHANGED_ANONYMIZED_HTTP_HEADERS = new Integer(12);
+	
+	private static final String[] MSG_CONNECTION_ANONYMOUS = new String[] {
+		JAPModel.class.getName() + "_anonymousConnectionAllow", 
+		JAPModel.class.getName() + "_anonymousConnectionForce", 
+		JAPModel.class.getName() + "_anonymousConnectionBlock"
+	};
 
 	private static final int DIRECT_CONNECTION_INFOSERVICE = 0;
 	private static final int DIRECT_CONNECTION_PAYMENT = 1;
@@ -126,8 +138,8 @@ public final class JAPModel extends Observable implements IHelpModel
 
 	private boolean m_bSmallDisplay = false;
 	private boolean m_bInfoServiceDisabled = JAPConstants.DEFAULT_INFOSERVICE_DISABLED;
-	private boolean m_bMinimizeOnStartup = JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP; // true if programm will start minimized
-	private boolean m_bMoveToSystrayOnStartup = JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP; // true if programm will start in the systray
+	private boolean m_bMinimizeOnStartup = JAPConstants.DEFAULT_MINIMIZE_ON_STARTUP; // true if program will start minimized
+	private boolean m_bMoveToSystrayOnStartup = JAPConstants.DEFAULT_MOVE_TO_SYSTRAY_ON_STARTUP; // true if program will start in the systray
 	private int m_iDefaultView = JAPConstants.DEFAULT_VIEW; //which view we should start?
 
 	private boolean m_bSaveMainWindowPosition;
@@ -141,9 +153,9 @@ public final class JAPModel extends Observable implements IHelpModel
 
 	private boolean m_bGoodByMessageNeverRemind = false; // indicates if Warning message before exit has been deactivated forever
 
-	private boolean m_bAllowPaymentViaDirectConnection;
-	private boolean m_bAllowInfoServiceViaDirectConnection;
-	private boolean m_bAllowUpdateViaDirectConnection;
+	private int m_iPaymentAnonymousConnectionSetting;
+	private int m_iInfoServiceAnonymousConnectionSetting;
+	private int m_iUpdateAnonymousConnectionSetting;
 
 	private boolean m_bAskForAnyNonAnonymousRequest;
 
@@ -166,6 +178,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	
 	private boolean m_bAnonymizedHttpHeaders = JAPConstants.ANONYMIZED_HTTP_HEADERS;
 
+	private String m_context = CONTEXT_JONDONYM;
+	
 	private int m_fontSize = 0;
 
 	private GUIUtils.IIconResizer m_resizer = new GUIUtils.IIconResizer()
@@ -245,6 +259,8 @@ public final class JAPModel extends Observable implements IHelpModel
 
 	private AbstractHelpFileStorageManager m_helpFileStorageManager;
 	
+	private Hashtable m_acceptedTCs = new Hashtable();
+	
 	private JAPModel()
 	{
 		try
@@ -305,6 +321,11 @@ public final class JAPModel extends Observable implements IHelpModel
 		return ms_TheModel;
 	}
 
+	public static String[] getMsgConnectionAnonymous()
+	{
+		return MSG_CONNECTION_ANONYMOUS;
+	}
+	
 	public ProxyInterface getProxyInterface()
 	{
 		return m_proxyInterface;
@@ -708,23 +729,23 @@ public final class JAPModel extends Observable implements IHelpModel
 		}
 	}
 
-	public boolean isPaymentViaDirectConnectionAllowed()
+	public int getPaymentAnonymousConnectionSetting()
 	{
-		return m_bAllowPaymentViaDirectConnection;
+		return m_iPaymentAnonymousConnectionSetting;
 	}
 
-	public boolean isUpdateViaDirectConnectionAllowed()
+	public int getUpdateAnonymousConnectionSetting()
 	{
-		return m_bAllowUpdateViaDirectConnection;
+		return m_iUpdateAnonymousConnectionSetting;
 	}
 
-	public void allowUpdateViaDirectConnection(boolean a_bAllow)
+	public void setUpdateAnonymousConnectionSetting(int a_iUpdateAnonymousConnectionSetting)
 	{
 		synchronized (this)
 		{
-			if (m_bAllowUpdateViaDirectConnection != a_bAllow)
+			if (m_iUpdateAnonymousConnectionSetting != a_iUpdateAnonymousConnectionSetting)
 			{
-				m_bAllowUpdateViaDirectConnection = a_bAllow;
+				m_iUpdateAnonymousConnectionSetting = a_iUpdateAnonymousConnectionSetting;
 				setChanged();
 			}
 			notifyObservers(CHANGED_ALLOW_UPDATE_DIRECT_CONNECTION);
@@ -732,27 +753,27 @@ public final class JAPModel extends Observable implements IHelpModel
 	}
 
 
-	public boolean isInfoServiceViaDirectConnectionAllowed()
+	public int getInfoServiceAnonymousConnectionSetting()
 	{
-		return m_bAllowInfoServiceViaDirectConnection;
+		return m_iInfoServiceAnonymousConnectionSetting;
 	}
 
-	public void allowInfoServiceViaDirectConnection(boolean a_bAllowInfoServiceViaDirectConnection)
+	public void setInfoServiceAnonymousConnectionSetting(int a_iInfoServiceAnonymousConnectionSetting)
 	{
 		synchronized (this)
 		{
-			if (m_bAllowInfoServiceViaDirectConnection != a_bAllowInfoServiceViaDirectConnection)
+			if (m_iInfoServiceAnonymousConnectionSetting != a_iInfoServiceAnonymousConnectionSetting)
 			{
-				m_bAllowInfoServiceViaDirectConnection = a_bAllowInfoServiceViaDirectConnection;
+				m_iInfoServiceAnonymousConnectionSetting = a_iInfoServiceAnonymousConnectionSetting;
 				setChanged();
 			}
 			notifyObservers(CHANGED_ALLOW_INFOSERVICE_DIRECT_CONNECTION);
 		}
 	}
 
-	public void allowPaymentViaDirectConnection(boolean a_bAllowPaymentViaDirectConnection)
+	public void setPaymentAnonymousConnectionSetting(int a_iPaymentAnonymousConnectionSetting)
 	{
-		m_bAllowPaymentViaDirectConnection = a_bAllowPaymentViaDirectConnection;
+		m_iPaymentAnonymousConnectionSetting = a_iPaymentAnonymousConnectionSetting;
 	}
 
 	public IMutableProxyInterface getInfoServiceProxyInterface()
@@ -1307,7 +1328,7 @@ public final class JAPModel extends Observable implements IHelpModel
 
 	public synchronized String getHelpPath()
 	{
-		return m_helpPath != null ?
+		return (m_helpPath != null || m_bPortableHelp) ?
 				m_helpPath : AbstractOS.getInstance().getDefaultHelpPath(
 						JAPConstants.APPLICATION_NAME);
 		
@@ -1316,10 +1337,8 @@ public final class JAPModel extends Observable implements IHelpModel
 	public synchronized URL getHelpURL(String a_startDoc)
 	{
 		URL helpURL = null;
-		if(isHelpPathDefined())
+		if(isHelpPathDefined() && m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath))
 		{
-			m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath);
-			
 			try 
 			{
 				helpURL = new URL("file://" + m_helpPath + "/" +
@@ -1348,13 +1367,13 @@ public final class JAPModel extends Observable implements IHelpModel
 			return;
 		}
 		
-		/** @todo remove after some months; created on 2008-08-17 */
+		/** TODO remove after some months; created on 2008-08-17 */
 		blockedPath = AbstractOS.getInstance().getenv("ALLUSERSPROFILE");
 		if (blockedPath != null && helpPath != null && helpPath.startsWith(blockedPath))
 		{
 			if (helpPath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
 			{
-				RecursiveCopyTool.deleteRecursion(new File(helpPath));
+				RecursiveFileTool.deleteRecursion(new File(helpPath));
 			}
 			
 			helpPath = null;
@@ -1383,6 +1402,11 @@ public final class JAPModel extends Observable implements IHelpModel
 	{	
 		String strCheck;
 		
+		if (m_bPortableHelp && !a_bPortable)
+		{
+			return;
+		}
+		
 		if(hpFile == null)
 		{
 			resetHelpPath();
@@ -1390,50 +1414,54 @@ public final class JAPModel extends Observable implements IHelpModel
 		else
 		{
 			hpFile = new File(hpFile.getAbsolutePath());
-			if (hpFile.isFile())
+			if (a_bPortable)
 			{
-				/* This is for backwards compatibility with old portable
-				 * launchers for Windows. The xml file check is disabled for this
-				 * kind of installation. 
-				 */				
-				int index;
-				if ((index = hpFile.getPath().toUpperCase().indexOf((
-						AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "de" + 
-						File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0 ||
-						(index = hpFile.getPath().toUpperCase().indexOf((
-								AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "en" +
-								File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0)
+				m_bPortableHelp = true;
+				if (hpFile.isFile())
 				{
-					if (index > 0)
+					/* This is for backwards compatibility with old portable
+					 * launchers for Windows. The xml file check is disabled for this
+					 * kind of installation. 
+					 */				
+					int index;
+					if ((index = hpFile.getPath().toUpperCase().indexOf((
+							AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "de" + 
+							File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0 ||
+							(index = hpFile.getPath().toUpperCase().indexOf((
+									AbstractHelpFileStorageManager.HELP_FOLDER + File.pathSeparator + "en" +
+									File.pathSeparator + AbstractHelpFileStorageManager.HELP_FOLDER).toUpperCase())) >= 0)
 					{
-						hpFile = new File(hpFile.getPath().substring(0, index));
+						if (index > 0)
+						{
+							hpFile = new File(hpFile.getPath().substring(0, index));
+						}
+						else
+						{
+							hpFile = null;
+						}
 					}
 					else
 					{
-						hpFile = null;
-					}
+	//					get the parent directory as help path
+						String tmp = hpFile.getParent();
+						if (tmp != null)
+						{
+							hpFile = new File(tmp);
+						}
+						else
+						{
+							hpFile = null;
+						}
+					}	
 				}
-				else
-				{
-//					get the parent directory as help path
-					String tmp = hpFile.getParent();
-					if (tmp != null)
-					{
-						hpFile = new File(tmp);
-					}
-					else
-					{
-						hpFile = null;
-					}
-				}			
 				
 				if (hpFile != null && hpFile.isDirectory())										
-				{			LogHolder.log(LogLevel.EMERG, LogType.MISC, hpFile.getPath());					
+				{				
 					strCheck = m_helpFileStorageManager.helpPathValidityCheck(hpFile.getPath(), true);
 					if (strCheck.equals(AbstractHelpFileStorageManager.HELP_VALID) ||
 						strCheck.equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 					{						
-						//deletes old help directory if it exists and create a new one
+						//delete old help directory if it exists and create a new one
 						if (m_helpFileStorageManager.handleHelpPathChanged(
 								m_helpPath, hpFile.getPath(), true))
 						{
@@ -1445,13 +1473,11 @@ public final class JAPModel extends Observable implements IHelpModel
 						}
 						else
 						{
-							LogHolder.log(LogLevel.EMERG, LogType.MISC, "reset1");
 							resetHelpPath();
 						}
 					}
 					else
-					{
-						LogHolder.log(LogLevel.EMERG, LogType.MISC, "reset2");		
+					{	
 						resetHelpPath();
 					}
 				}
@@ -1475,10 +1501,6 @@ public final class JAPModel extends Observable implements IHelpModel
 			}
 		}
 		
-		if (a_bPortable && m_helpPath != null)
-		{
-			m_bPortableHelp = true;
-		}
 		notifyObservers(CHANGED_HELP_PATH);		
 	}
 	
@@ -1520,7 +1542,7 @@ public final class JAPModel extends Observable implements IHelpModel
 		}
 	}
 	
-	private synchronized void resetHelpPath()
+	protected synchronized void resetHelpPath()
 	{
 		String oldHelpPath = m_helpPath;
 		
@@ -1588,22 +1610,14 @@ public final class JAPModel extends Observable implements IHelpModel
 		
 		if(helpPathExists && !helpInstallationExists)
 		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path "+m_helpPath+" configured but no valid help could be found!");
-			if (m_bPortableHelp)
-			{
-				m_bPortableHelp = false;
-				JAPModel.getInstance().setHelpPath(new File(m_helpPath), true);
-				helpInstallationExists = m_helpPath != null;
-			}
-			else
-			{
-				m_helpPath = null;
-				m_bPortableHelp = false;
-				setChanged();
-			}
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path " + m_helpPath + 
+					" configured but no valid help could be found!");
+			m_helpPath = null;
+			setChanged();
 		}
 		
-		if (m_helpPath == null && m_helpFileStorageManager.helpInstallationExists(
+		if (!m_bPortableHelp && m_helpPath == null 
+				&& m_helpFileStorageManager.helpInstallationExists(
 				AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME)) &&
 				helpPathValidityCheck(AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME)).equals(
 						AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
@@ -1817,9 +1831,12 @@ public final class JAPModel extends Observable implements IHelpModel
 
 		//interfaces[3] = new ProxyInterface("localhost", getHttpListenerPortNumber(),
 			//							   ProxyInterface.PROTOCOL_TYPE_SOCKS, null); // TOR
-		if ((DIRECT_CONNECTION_PAYMENT == a_component && !isPaymentViaDirectConnectionAllowed()) ||
-			(DIRECT_CONNECTION_INFOSERVICE == a_component && !isInfoServiceViaDirectConnectionAllowed()) ||
-			(DIRECT_CONNECTION_UPDATE == a_component && !isUpdateViaDirectConnectionAllowed()))
+		if ((DIRECT_CONNECTION_PAYMENT == a_component && 
+				m_iPaymentAnonymousConnectionSetting == CONNECTION_FORCE_ANONYMOUS) ||
+			(DIRECT_CONNECTION_INFOSERVICE == a_component && 
+				m_iInfoServiceAnonymousConnectionSetting == CONNECTION_FORCE_ANONYMOUS) ||
+			(DIRECT_CONNECTION_UPDATE == a_component && 
+				m_iUpdateAnonymousConnectionSetting == CONNECTION_FORCE_ANONYMOUS))
 		{
 			// force anonymous connections to BI and InfoService
 			if (!m_connectionChecker.checkAnonConnected())
@@ -1849,7 +1866,20 @@ public final class JAPModel extends Observable implements IHelpModel
 		// both proxies are available
 		if (a_bAnonInterface)
 		{
-			return proxyAnon;
+			if ((DIRECT_CONNECTION_PAYMENT == a_component && 
+					CONNECTION_BLOCK_ANONYMOUS == m_iPaymentAnonymousConnectionSetting) ||
+				(DIRECT_CONNECTION_INFOSERVICE == a_component && 
+				 CONNECTION_BLOCK_ANONYMOUS == m_iInfoServiceAnonymousConnectionSetting) ||
+				 (DIRECT_CONNECTION_UPDATE == a_component && 
+					CONNECTION_BLOCK_ANONYMOUS == m_iUpdateAnonymousConnectionSetting))
+			{
+				// Anonymous connection is not allowed!
+				return null;
+			}
+			else
+			{
+				return proxyAnon;
+			}
 		}
 		return proxyDirect;
 	}
@@ -1863,4 +1893,19 @@ public final class JAPModel extends Observable implements IHelpModel
 		{
 			m_iDialogVersion = dialogVersion;
 		}
+		
+	public Hashtable getAcceptedTCs()
+	{
+		return m_acceptedTCs;
+	}
+
+	public String getContext() 
+	{
+		return m_context;
+	}
+
+	public void setContext(String context) 
+	{
+		this.m_context = context;
+	}
 }

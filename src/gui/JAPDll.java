@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.SwingUtilities;
 
 import anon.util.ClassUtil;
-import anon.util.RecursiveCopyTool;
+import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.Util;
 import gui.dialog.JAPDialog;
@@ -64,8 +64,7 @@ final public class JAPDll {
 	public static final String MSG_IGNORE_UPDATE = JAPDll.class.getName() + "_ignoreUpdate";
 	
 	//required japdll.dll version for this JAP-version
-	public static final String JAP_DLL_REQUIRED_VERSION = "00.04.008";
-	//public static final String JAP_DLL_REQUIRED_VERSION = "00.04.009";
+	public static final String JAP_DLL_REQUIRED_VERSION = "00.04.009";
 	public static final String START_PARAMETER_ADMIN = "--dllAdminUpdate";
 	
 	private static final String UPDATE_PATH;
@@ -175,7 +174,7 @@ final public class JAPDll {
 						tempFile = new File(tempDir + DLL_LIBRARY_NAME);
 						if (tempFile.exists())
 						{
-							if (!RecursiveCopyTool.deleteRecursion(tempFile))
+							if (!RecursiveFileTool.deleteRecursion(tempFile))
 							{
 								throw new Exception("Delete recursive");
 							}
@@ -223,7 +222,10 @@ final public class JAPDll {
 					{
 						try
 						{
-							hideSystray_dll();
+							if (getDllVersion() != null)
+							{
+								hideSystray_dll();
+							}
 						}
 						catch (Throwable a_e)
 						{

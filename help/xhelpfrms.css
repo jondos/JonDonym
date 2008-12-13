@@ -41,3 +41,12 @@ span.nowrap { white-space:nowrap;}
 .contentsbox {font-size:14pt;padding-top:7px;padding-bottom:7px;}
 
 .navipar {text-align:center;}
+
+code.jconf {
+	font-size:12pt;
+	font-style:normal;
+}
+
+em.jconf {
+
+}

@@ -37,6 +37,7 @@ package anon.infoservice;
 public abstract class AbstractDatabaseEntry
 {
 	public static final String XML_LAST_UPDATE = "LastUpdate";
+	public static final String XML_ATTR_LAST_UPDATE = "lastUpdate";
 
 	/**
 	 * Stores the time when this entry will be deleted from the database.

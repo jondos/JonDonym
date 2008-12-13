@@ -2,7 +2,9 @@ package anon.proxy;
 
 public interface ProxyCallback 
 {
-	byte[] handleUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len);
+	public byte[] handleUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException;
 	
-	byte[] handleDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len);
+	public byte[] handleDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException;
+	
+	public void closeRequest(AnonProxyRequest anonRequest);
 }

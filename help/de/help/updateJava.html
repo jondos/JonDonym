@@ -1,25 +1,92 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>Java-Software (JRE) aktualisieren</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
+
 <body>
 <!--#include virtual="/header.html"-->
 
-<H2>Java-Software (JRE) aktualisieren</H2>
+<p class="navipar"><span class="prevlink"><a href="trouble.html"><img
+src="prev.gif" alt="&lt;-"> Fehlerbehebung</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_problem"><img src="next.gif" alt="-&gt;"> Problembehandlung
+</a></span> <span class="nextlink"><a href="credits.html">Danksagung und Lizenz
+<img src="next.gif" alt="-&gt;"></a></span> </p>
+<hr>
 
-JonDo ist in der Programmiersprache Java geschrieben und ben&ouml;tigt deshalb ein installiertes <a href="http://java.sun.com">Java</a> zur Ausf&uuml;hrung. Die Installation von Java f&uuml;hrt allerdings auch dazu, dass ein sogenanntes Plugin in den Browser integriert wird, mit dem dieser nun Java-Webanwendungen (Applets) ausf&uuml;hren kann. Leider werden auch in diesem Plugin, wie in jeder Software, immer wieder Fehler gefunden, von denen einige auch die Sicherheit des Computers, auf dem diese installiert ist, gef&auml;hrden k&ouml;nnen. JonDo weist Sie deshalb darauf hin wenn Updates f&uuml;r Ihr installiertes Java vorliegen, und wir empfehlen dringend die Aktualisierung jeweils sofort durchzuf&uuml;hren. Au&szlig;erdem sollten Sie das <a href="noactive.html">Plugin in Ihrem Browser immer deaktivieren</a>, da dessen Ausf&uuml;hrung  trotz aktivem JonDo zur Deanonymisierung Ihrer Internetverbindung f&uuml;hren kann.
-<P>Obwohl Java mehrere gleichzeitige Installationen verschiedenen Versionen unterst&uuml;tzt, sollten Sie au&szlig;erdem immer nur <a href="http://sunsolve.sun.com/search/document.do?assetkey=1-26-102557-1">EINE Java-Version auf dem Rechner installiert haben.</a> Deinstallieren Sie deshalb vor einer neuen Java-Installation alle alten Versionen dieser Software.
-<P>Das Aktualisieren ihrer Java Version unter Windows  erfolgt in drei Schritten:
-<OL>
-	<LI><b>Herunterladen der neuen Version</b><br>
-	Laden Sie sich die aktuelle Version von <a href="http://java.sun.com/javase/downloads/index.jsp">dieser Seite</a> herunter (bitte beachten Sie, dass Sun-Java-Version ab 1.4 nicht auf Windows 95 laufen). Sie ben&ouml;tigen die aktuelle Version des "Java Runtime Environment (JRE) &lt;Versionsnummer&gt;". Klicken Sie auf "Download". Klicken Sie in der folgenden Seite auf "Accept License Agreement". Klicken Sie anschlie&szlig;end auf den Link "Windows Offline Installation, Multi-language". (Auch die "Online Installation" ist m&ouml;glich, dann m&uuml;ssen Sie zum Zeitpunkt der Installation allerdings online sein, da der Installer Daten aus dem Internet nachladen muss).
-	<P>
-	<LI><b>Deinstallieren der alten Version</b><br>
-	&Ouml;ffnen Sie im Startmen&uuml; die "Systemsteuerung", dort w&auml;hlen Sie "Software". Es kann eine Weile dauern, bis die Liste aufgebaut wurde. W&auml;hlen Sie in der Liste den Eintrag "J2SE Runtime Environment &lt;Versionsnummer&gt;" und w&auml;hlen Sie "Entfernen". Warten Sie, bis die Deinstallation abgeschlossen ist. Eventuell m&uuml;ssen Sie den Rechner neu starten.
-	<P>
-	<LI><b>Installieren der neuen Version</b><br>
-	Doppelklicken Sie auf das Installationsprogramm, das Sie im Schritt 1) heruntergeladen hatten. Folgen Sie den Installationsanweisungen. Die Installation kann einige Zeit in Anspruch nehmen. Eventuell m&uuml;ssen Sie den Rechner neu starten.
-</OL>
+<h2>Java-Software (JRE) aktualisieren</h2>
+
+<p><em>Hinweis: Nutzer von MacOS X beziehen Updates von Java automatisch
+&#xfc;ber das Betriebssystem und m&#xfc;ssen keine manuelle Aktualisierung
+vornehmen. Die folgenden Ausf&#xfc;hrung sind f&#xfc;r sie nicht
+relevant.</em></p>
+
+<p>JonDo ist in der Programmiersprache Java geschrieben und ben&#xf6;tigt
+deshalb ein installiertes <a href="http://java.sun.com"
+target="_blank">Java</a> zur Ausf&#xfc;hrung. Bitte beachten Sie , dass
+JAP/JonDo momentan nur mit den Java-Distributionen <a
+href="http://java.sun.com">Sun-Java</a> und <a href="http://openjdk.java.net/"
+target="_blank">OpenJDK</a> kompatibel ist. </p>
+
+<p>Sofern Sie einen anderen Browser als <a href="jondofox.html">JonDoFox</a>
+verwenden, wird Java bei der Installation in Ihrem Browser meist als Plugin
+eingerichtet. Dieses ist f&#xfc;r JonDo nicht notwendig, f&#xfc;hrt allerdings
+auch dazu, dass Ihr Browser nun Java-Webanwendungen (Applets) ausf&#xfc;hren
+kann, <a href="wwwprivacy.html#active">die auch Ihre Anonymit&#xe4;t aufheben
+k&#xf6;nnen</a>. Es wird deshalb sehr empfohlen, dieses Plugin in Ihrem Browser zu
+deaktivieren oder zu filtern. Ferner werden auch in diesem Plugin, wie in
+jeder Software, immer wieder Fehler gefunden von denen einige auch die
+Sicherheit des Computers, auf dem diese installiert ist, gef&#xe4;hrden
+k&#xf6;nnen. JonDo weist Sie deshalb darauf hin wenn Updates f&#xfc;r Ihr
+installiertes Java vorliegen, und wir empfehlen dringend die Aktualisierung
+jeweils sofort durchzuf&#xfc;hren. </p>
+
+<p>Obwohl Java mehrere gleichzeitige Installationen verschiedenen Versionen
+unterst&#xfc;tzt, sollten Sie m&#xf6;glichst immer nur <a
+href="http://sunsolve.sun.com/search/document.do?assetkey=1-26-102557-1"
+target="_blank">EINE EINZIGE Java-Version auf Ihrem Rechner installiert
+haben.</a> Deinstallieren Sie deshalb vor einer neuen Java-Installation alle
+alten Versionen dieser Software. </p>
+
+<p><em>Hinweis: Die folgende Anleitung bezieht sich auf die Installation unter
+Windows. Bei Linux ist die Installation distributionsspezifisch. Eventuell
+steht nicht f&#xfc;r jede Linux-Distribution die neueste Java-Version zur
+Verf&#xfc;gung.</em></p>
+
+<p>Die Aktualisierung ihrer Java-Version in drei Schritten:</p>
+<ol>
+  <li><b>Herunterladen der neuen Version</b><br>
+    Laden Sie sich die aktuelle Version von <a
+    href="http://www.java.com/de/">dieser Seite</a> herunter (<a
+    href="http://java.sun.com/javase/downloads/previous.jsp"
+    target="_blank">alternativ von dieser Seite f&#xfc;r &#xe4;ltere
+    Windows-Versionen;</a> bitte beachten Sie, dass Sun-Java-Version ab 1.4
+    nicht auf Windows 95 laufen). 
+    <p></p>
+  </li>
+  <li><b>Deinstallieren der alten Version</b><br>
+    &#xd6;ffnen Sie im Startmen&#xfc; die "Systemsteuerung", dort w&#xe4;hlen
+    Sie "Software". Es kann eine Weile dauern, bis die Liste aufgebaut wurde.
+    W&#xe4;hlen Sie in der Liste den Eintrag "J2SE Runtime Environment" und
+    w&#xe4;hlen Sie "Entfernen". Warten Sie, bis die Deinstallation
+    abgeschlossen ist. Eventuell m&#xfc;ssen Sie den Rechner neu starten. 
+    <p></p>
+  </li>
+  <li><b>Installieren der neuen Version</b><br>
+    Doppelklicken Sie auf das Installationsprogramm, das Sie im Schritt 1)
+    heruntergeladen hatten. Folgen Sie den Installationsanweisungen. Die
+    Installation kann einige Zeit in Anspruch nehmen. Eventuell m&#xfc;ssen Sie
+    den Rechner danach neu starten. </li>
+</ol>
+
+<hr>
+<p class="navipar"><span class="prevlink"><a href="trouble.html"><img
+src="prev.gif" alt="&lt;-"> Fehlerbehebung</a></span> <span class="midlink"><a
+name="docbottom" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_problem"><img src="next.gif" alt="-&gt;"> Problembehandlung
+</a></span> <span class="nextlink"><a href="credits.html">Danksagung und Lizenz
+<img src="next.gif" alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer.html"-->
 </body>
 </html>

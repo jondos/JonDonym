@@ -1,27 +1,115 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>Jondo Help: JonDonym certificates</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>JonDonym certificates and their meaning</H2>
-<p>Certificates are used to identify operators of JonDonym services. Typically, a mix cascade consists of two or more consecutive mix servers, operated by different organisations. Only if all of these operators cooperate, the anonymity of users my be revoked. Users of JonDo should consider  themself if they trust the operators of a cascade, and if they connect to this service according to this decision. It is therefore crucial that</p>
+<p class="navipar"><span class="prevlink"><a href="about.html"><img
+src="prev.gif" alt="&lt;-"> JonDo </a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_intro"><img src="next.gif" alt="-&gt;"> Introduction
+</a><a href="about.html"><img src="next.gif" alt="-&gt;"> JonDo</a></span>
+<span class="nextlink"><a href="about.html">JonDo <img src="next.gif"
+alt="-&gt;"></a></span> </p>
+<hr>
+
+<h2>JonDonym certificates and their meaning</h2>
+
+<p>Certificates are used to identify operators of JonDonym services.
+Typically, a mix cascade consists of two or more consecutive mix servers
+operated by different organizations. Only if all of these operators cooperate
+could the anonymity of users be revoked. Users of JonDo should consider for
+themselves whether they trust the operators of a cascade and whether they
+connect to the service. It is therefore crucial that</p>
 <ul>
-  <li>the individual mixes are run by independent organisations and that </li>
-  <li>the information about these organisations is reliable. </li>
+  <li>the individual mixes are run by independent organizations and that </li>
+  <li>the information about these organizations is reliable. </li>
 </ul>
-<p>Certificates are part of so-called cryptographic public key procedures: the organisation identified by a certificate own a private key, and uses it to forge digital signatures. This key must always be kept secret, as everyone could forge such signatures with it. By using the publicly available public key others can check these signatures and can decide, whether they really communicate with the requested organisation. The correlation of identity and public key is proven by a <em>digital certificate</em>. This is an electronic document digitally signed by a so-called certification authority. It is highly recommended to inspect the certificates of each individual server of a mix cascade (click on the individual Mix icons and there on the certificate, respectively). </p>
+
+<p>Certificates are part of the so-called cryptographic public key method:
+the organization identified by a certificate owns a private key that it uses
+to create digital signatures. This key must always be kept secret since
+everyone could otherwise use it to create signatures. By comparision to the
+openly available public key others can check these signatures and verify that
+they really communicate with the requested organization. The correlation of
+identity and public key is proven by a <em>digital certificate</em>. This is
+an electronic document digitally signed by a certification authority. It is
+highly recommended to inspect the certificates of each individual server of a
+mix cascade (click on the different mix icons and then on the respective
+certificate). </p>
+
 <h3>Certification authorities </h3>
-<p>The JonDonym service gets insecure against the operator, if the used mix cascade is nominally run by different operators, but in fact all Mixes are under control of a single organisation. Trustwothy certification authorities (CAs) should ensure that operators with different names do really exist as independent entities. Without identity check by one of these authorities Mixes are not usable for JonDo. In the end, you will have to trust in the certification authorities themselves, as they would be able &quot;generate&quot; non-existing operators and thereby run Mixes in the name of others. </p>
-<p>In JonDonym, there currently are only two root certification authorities (<a href="http://www.jondos.de/en">JonDos GmbH</a> and <a href="http://anon.inf.tu-dresden.de/index_en.html">TU Dresden JAP Team</a>) that have committet themselves to be very careful when certifying operators. Moreover, the certification of Mix operators may also be done by so-called Sub-CAs, whose identity has been confirmed by the root CAs, and who may perform their own certification processes.  Sub-CAs are needed if the identity of operators known to the Sub-CA cannot be confirmed by the root CA without doubt, but these operators should nevertheless not be excluded from the JonDonym system. In the end, the users themselves will have to decide whether they want to trust the Sub-CAs or not.</p>
-<p> For the future it is <a href="http://www.jondos.de/en/development">planned</a> to perform a multi-party-certification. Then, at least two certification authorities are needed in order to issue a trustworthy certificate. Thereby there is no more need to trust any single certification authority. For three or more certification authorities, even if the secret certificate of a certification authority gets lost or gets invalid in any other way, all other certificates may remain valid.</p>
+
+<p>The JonDonym service may be compromised by the operator if a mix cascade
+is only nominally run by different operators, while in fact all mixes are
+under the control of a single organization. Trustworthy certification
+authorities (CAs) should ensure that operators with different names really
+are independent entities. Without an identity check by one of these
+authorities mixes are useless for JonDo. But in the end, you will also have
+to trust the certification authorities themselves, as they could in theory
+invent non-existent operators and thereby run mixes under false flag. </p>
+
+<p>In JonDonym, there currently are only two root certification authorities
+(<a href="http://www.jondos.de/en">JonDos GmbH</a> and <a
+href="http://anon.inf.tu-dresden.de/index_en.html">TU Dresden JAP Team</a>),
+and they have committed themselves to be very careful when certifying
+operators. Moreover, the certification of mix operators may also be done by
+so-called Sub-CAs, whose identity has been confirmed by the root CAs and who
+may perform their own certification processes. Sub-CAs are needed if the
+identity of operators known to the Sub-CA can not be confirmed by the root CA
+beyond doubt while such operators shall nevertheless not be excluded from the
+JonDonym system. In the end, the user himself will have to decide whether he
+wants to trust the Sub-CAs or not.</p>
+
+<p>In the future, it is <a
+href="http://www.jondos.de/en/development">planned</a> to perform
+multi-party-certification. By then at least two certification authorities
+will be needed in order to issue a trustworthy certificate. Thus, there will
+no longer be the need to trust any single certification authority. With three
+or more certification authorities, even if the secret certificate of a
+certification authority gets lost or is invalid in any way, all other
+certificates may remain valid.</p>
+
 <h3>Mix certificates and operator certificates</h3>
-<p>Both Mixes and operators of Mixes receive certificates. A CA issues   operator certificates for the identity of the operator, who may then generate as many Mix certificates as they like with their certificate. These Mixes or Mix certificates, respective, then correlate with the generating operators without doubt. This means, on the other hand, that information about the location of Mixes is certified by the operator himself, and is therefore not that relyable as the information about the operator.</p>
-<h3>States of certificates </h3>
-<p>A certificate is considered as <strong>verified</strong> only if you trust the certification authority who has issued this certificate. Non-verifyable certificates are generally <strong>not trusted</strong> as everyone, who knows a little about computer technology, can generate such certificates by himself. The <strong>validity</strong> of a certificate depends on the time period for which the certificate has been issued. Typically, you should not trust an <strong>expired</strong> certificate any longer, as it is not clear whether the owner still has the right to offer the service. Certificates may also be <strong>revoked</strong>, for example if their encryption was broken, the operator turned out to be dubious, or if the private certificate got into the hands of unauthorized persons.</p>
-<p>JonDo disallows connections to Mix cascades with at least one <em>untrusted</em> Mix at the moment. Expired or revoked certificates are currently ignored, but are displayed as such. We are currently implementing a cascade filter with a finer granularity.
-  <!--#include virtual="/footer_en.html"-->
-</p>
+
+<p>Both mixes and operators of mixes receive certificates. A CA issues an
+operator certificates that are attached to its identity. An operator may then
+generate as many mix certificates as he likes with his certificate. These
+mixes, or mix certificates respectively, can then be associated with their
+operators beyond a doubt. But it also means that information about the
+location of mixes is in the end certified by an operator himself and is
+therefore not as reliable as the information about the operator himself.</p>
+
+<h3>Statuses of certificates </h3>
+
+<p>A certificate is considered as <strong>verified</strong> only if you trust
+the certification authority who has issued this certificate. Non-verifiable
+certificates are generally <strong>not trusted</strong> as anyone who knows a
+little about computer technology can generate such certificates by himself.
+The <strong>validity</strong> of a certificate depends on the time period for
+which the certificate has been issued. Typically, you should not trust an
+<strong>expired</strong> certificate any longer, as it is not clear whether
+the owner still has the right to offer the service. Certificates may also be
+<strong>revoked</strong>, for example if their encryption was broken, the
+operator turned out to be dubious or if the private certificate got into the
+hands of unauthorized persons.</p>
+
+<p>JonDo does not permit connections to mix cascades with at least one
+<em>untrusted</em> mix at the moment. Expired or revoked certificates are
+currently ignored, but are displayed as such. We are currently also
+implementing a cascade filter with a better scalability.</p>
+<!--#include virtual="/footer_en.html"-->
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="about.html"><img
+src="prev.gif" alt="&lt;-"> JonDo </a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_intro"><img src="next.gif" alt="-&gt;"> Introduction
+</a><a href="about.html"><img src="next.gif" alt="-&gt;"> JonDo</a></span>
+<span class="nextlink"><a href="about.html">JonDo <img src="next.gif"
+alt="-&gt;"></a></span> </p>
 </body>
 </html>

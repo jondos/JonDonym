@@ -1,41 +1,88 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <title>JonDo Help: IE proxy settings</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
 </head>
-<body>
+
+<body lang="en">
 <!--#include virtual="/header_en.html"-->
 
-<H2>Proxy settings for browsers: Internet Explorer</H2>
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative browser configuration</a></span>
+<span class="midlink"><a name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser setup
+</a><a href="browser.html"><img src="next.gif" alt="-&gt;"> Alternative
+browser configuration</a> </span> <span class="nextlink"><a
+href="browser.html">Alternative browser configuration <img src="next.gif"
+alt="-&gt;"></a></span> </p>
+<hr>
 
-<p>JonDos suggests the preconfigured, portable <a href="http://www.jondos.de/en/jondofox">JonDoFox</a> for secure anonymous web browsing. The Internet Explorer, however, is regarding anonymity,  badly configurable and rates less secure than most of the other browsers.</p>
-<p>To set up JonDo for Internet Explorer nevertheless, do the following steps:
-  <BR>
-  <BR>
-  1.) From the menu "Tools", choose the submenu "Internet Options...".  The settings window opens. <BR>
-  <BR>
-</p>
-<CENTER><IMG SRC="ie1.gif"></CENTER>
-<BR><BR>
-2.) Choose the "Connections" tab.
-<BR><BR>
-<CENTER><IMG SRC="ie2.gif"></CENTER>
-<BR><BR>
-3.1) <B>Modem or ISDN:</B> If you use a modem to connect to the internet, first choose your internet connection under the Dial-up and Virtual Private Network settings section.  Then, click on the "Settings..." button.
-<BR>
-3.2) <B>DSL, cable, or some other form of direct internet connection:</B> Click the "LAN Settings..." button under the Local Area Network (LAN) settings section.
-<BR><BR>
-4.) In the window that is now opened, select the checkbox "Use a proxy server for this connection" (or "Use a proxy server for your LAN") and enter "127.0.0.1" as the proxy server and "4001" as the port.
-<BR><BR>
-<CENTER><IMG SRC="ie3.gif"></CENTER>
-<BR><BR>
-<BR>
-If you want specify addresses where JonDo shall not be used, klick <i>Advanced</i> and enter those exceptions into the field <i>Exceptions</i>, separated by semicolons.
-<br>Please note that such exceptions can be managed in a more flexible way using <a href="noactive_proxomitron.html">Proxomitron</a>.
+<h2>Proxy settings: Internet Explorer</h2>
+
+<p>JonDos suggests the preconfigured, portable <a
+href="http://www.jondos.de/en/jondofox">JonDoFox</a> for secure anonymous web
+browsing. The Internet Explorer, however, is hardly configurable regarding
+anonymity, allows for basically no HTTP header adjustments and comes with a
+crippled, inflexible and user-unfriendly active content control. If you care
+about privacy we strongly discourage you from using IE.</p>
+
+<p>To set up JonDo for Internet Explorer nevertheless, do the following: <br>
 <br>
-<B>Note:</B> If you set a different <A HREF="portlistener.html">listener port</A> in JonDo, you'll have to enter this port here too, rather than 4001.
-<BR><BR><BR>
+1.) From the menu "Tools", choose the submenu "Internet Options...". The
+settings window opens. <br>
+<br>
+</p>
+
+<center>
+<img src="ie1.gif"></center>
+<br>
+<br>
+2.) Choose the "Connections" tab. <br>
+<br>
 
 
+<center>
+<img src="ie2.gif"></center>
+<br>
+<br>
+3.1) <b>Modem or ISDN:</b> If you use a modem to connect to the Internet,
+first choose your Internet connection under the "Dial-up and Virtual Private
+Network settings" section. Then click on the "Settings..." button.<br>
+3.2) <b>DSL, cable, or some other type of direct Internet connection:</b>
+Click the "LAN Settings..." button under the Local Area Network (LAN)
+settings section. <br>
+<br>
+4.) In the window opened, select the checkbox "Use a proxy server for this
+connection" (or "Use a proxy server for your LAN") and enter "127.0.0.1" as
+the proxy server and "4001" as the port. <br>
+<br>
+
+
+<center>
+<img src="ie3.gif"></center>
+<br>
+<br>
+<br>
+If you want specify addresses where JonDo shall not be used, click
+<i>Advanced</i> and enter those exceptions into the field <i>Exceptions</i>,
+separated by semicolons. <br>
+<!--Please note that such exceptions can be managed in a more flexible way using
+<a href="noactive_proxomitron.html">Proxomitron</a>. <br>-->
+ <b>Note:</b> If you set a different <a href="net.html">listen port</a> in
+JonDo, you'll have to enter this port here too, instead of "4001". <br>
+<br>
+<br>
+
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative browser configuration</a></span>
+<span class="midlink"><a name="doctop" href="index.html#mi_toc">Table of
+contents </a><a href="index.html#mi_browser"><img src="next.gif" alt="-&gt;">
+Browser setup </a><a href="browser.html"><img src="next.gif" alt="-&gt;">
+Alternative browser configuration</a> </span> <span class="nextlink"><a
+href="browser.html">Alternative browser configuration <img src="next.gif"
+alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer_en.html"-->
 </body>
 </html>

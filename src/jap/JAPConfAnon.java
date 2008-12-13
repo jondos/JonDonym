@@ -34,6 +34,7 @@ import gui.JAPJIntField;
 import gui.JAPMessages;
 import gui.MapBox;
 import gui.MultiCertOverview;
+import gui.OperatorsCellRenderer;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp;
 import jap.forward.JAPRoutingMessage;
@@ -56,11 +57,10 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.SignatureException;
 import java.text.DecimalFormat;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -100,6 +100,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
+import anon.client.TrustException;
 import anon.crypto.AbstractX509AlternativeName;
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
@@ -180,6 +181,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_AT_LEAST = JAPConfAnon.class.getName() + "_atLeast";
 	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
+	
+	private static final String MSG_LBL_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityLbl";
+	private static final String MSG_USER_LIMIT = JAPConfAnon.class.getName() + "_availabilityUserLimit";
+	private static final String MSG_UNSTABLE = JAPConfAnon.class.getName() + "_availabilityUnstable";
+	private static final String MSG_HARDLY_REACHABLE = JAPConfAnon.class.getName() + "_availabilityHardlyReachable";
+	private static final String MSG_UNREACHABLE = JAPConfAnon.class.getName() + "_availabilityUnreachable";
+	private static final String MSG_BAD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityBad";
+	private static final String MSG_GOOD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityGood";
 
 	private static final int FILTER_SPEED_MAJOR_TICK = 100;
 	private static final int FILTER_SPEED_MAX = 400;
@@ -308,6 +317,17 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		if (m_infoService == null)
 		{
 			m_infoService = new InfoServiceTempLayer(false);
+		}
+		else if (!m_infoService.isFilled())
+		{
+			new Thread(new Runnable()
+			{
+				public void run()
+				{
+					m_infoService.fill(true);
+					updateValues(false);
+				}
+			}).start();
 		}
 	}
 
@@ -537,19 +557,20 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 
 		JLabel l;
-		
+		/*
 		l = new JLabel(JAPMessages.getString(MSG_FILTER) + ":");
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(-5, 0, 0, 5);
-		m_cascadesPanel.add(l, c);
+		m_cascadesPanel.add(l, c);*/
 
-		c.gridx = 1;
+		c.gridx = 0;
 		c.gridy = 0;
-		c.gridwidth = 1;
-		c.insets = new Insets(0, 0, 0, 0);
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 5, 0, 0);
 		c.anchor = GridBagConstraints.NORTHEAST;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weighty = 0.2;
@@ -781,9 +802,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		m_cascadesPanel.add(m_lblDelay, c);
 		
 		c.insets = new Insets(5, 20, 0, 5);
+		l = new JLabel(JAPMessages.getString(MSG_LBL_AVAILABILITY) + ":");
 		c.gridx = 2;
+		c.gridy = 5;
+		c.weightx = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		m_cascadesPanel.add(l, c);
+		
+		c.insets = new Insets(5, 5, 0, 0);
+		c.gridx = 3;
 		c.gridy = 5;		
-		c.gridwidth = 2;
 		m_payLabel = new JLabel("");
 		m_payLabel.addMouseListener(new MouseAdapter()
 		{
@@ -879,9 +907,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		drawServerInfoPanel();
 	}
 
-	private void setPayLabel(MixCascade cascade)
+	private void setPayLabel(MixCascade cascade, PerformanceEntry a_entry)
 	{
 		StringBuffer buff = new StringBuffer();
+		PerformanceEntry.StabilityAttributes attributes = a_entry.getStabilityAttributes();		
 		
 		if (!TrustModel.getCurrentTrustModel().isTrusted(cascade, buff))
 		{
@@ -906,7 +935,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 			else
 			{
-				m_payLabel.setText(JAPMessages.getString(MSG_NOT_TRUSTWORTHY) + " (" + buff.toString() + ")");
+				//m_payLabel.setText(JAPMessages.getString(MSG_NOT_TRUSTWORTHY) + " (" + buff.toString() + ")");
+				m_payLabel.setText(buff.toString());
 				m_payLabel.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 					TrustModel.getCurrentTrustModel().getName()));
 				m_blacklist = false;
@@ -914,25 +944,61 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 
 		}
-		else if (m_infoService.isPay(cascade.getId()))
+		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 75)
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			//m_payLabel.setForeground(m_anonLevelLabel.getForeground());
+			m_payLabel.setForeground(Color.red);
+			m_payLabel.setText(JAPMessages.getString(MSG_UNREACHABLE));
+			m_payLabel.setToolTipText(null);
+		}
+		else if (m_infoService.isUserLimitReached(cascade.getId()))
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			m_payLabel.setForeground(Color.red);
+			m_payLabel.setText(JAPMessages.getString(MSG_USER_LIMIT));
+			m_payLabel.setToolTipText(null);
+		}
+		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 25)
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			//m_payLabel.setForeground(m_anonLevelLabel.getForeground());
+			m_payLabel.setForeground(Color.red);
+			m_payLabel.setText(JAPMessages.getString(MSG_HARDLY_REACHABLE));
+			m_payLabel.setToolTipText(null);
+		}
+		else if (attributes.getBoundResets() > 5 || attributes.getBoundErrors() > 10)
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			m_payLabel.setForeground(Color.red);
+			m_payLabel.setText(JAPMessages.getString(MSG_UNSTABLE));
+			m_payLabel.setToolTipText(null);
+		}
+		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 5)
 		{
 			m_payLabel.setCursor(Cursor.getDefaultCursor());
 			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
-			m_payLabel.setText(JAPMessages.getString(MSG_PAYCASCADE));
-			//m_payLabel.setToolTipText(JAPMessages.getString(JAPNewView.MSG_NO_REAL_PAYMENT));
+			m_payLabel.setText(JAPMessages.getString(MSG_BAD_AVAILABILITY));
 			m_payLabel.setToolTipText(null);
+		}
+		else if (attributes.getValueSize() == 0)
+		{
+			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
+			m_payLabel.setToolTipText(null);
+			m_payLabel.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 		}
 		else
 		{
 			m_payLabel.setCursor(Cursor.getDefaultCursor());
-			m_payLabel.setToolTipText("");
-			m_payLabel.setText("");
+			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
+			m_payLabel.setToolTipText(null);
+			m_payLabel.setText(JAPMessages.getString(MSG_GOOD_AVAILABILITY));
 		}
 	}
 
 	public synchronized void itemStateChanged(ItemEvent e)
 	{
-		//System.out.println("\nbegin item state");
 		int server = m_serverList.getSelectedIndex();
 		MixCascade cascade = (MixCascade)m_tableMixCascade.getValueAt(m_tableMixCascade.getSelectedRow(), 1);
 		String selectedMixId = null;
@@ -1025,7 +1091,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				continue;
 			}
 			
-			if(!location.getCountry().equals(operator.getCertificate().getSubject().getCountryCode()))
+			if(!location.getCountryCode().equals(operator.getCertificate().getSubject().getCountryCode()))
 			{
 				m_serverList.updateFlag(i, location, false);
 				m_serverList.updateOperatorFlag(i, operator);
@@ -1087,7 +1153,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		ServiceLocation location = m_infoService.getServiceLocation(cascade, selectedMixId);
 		if (location != null)
 		{
-			m_locationLabel.setIcon(GUIUtils.loadImageIcon("flags/" + location.getCountry() + ".png"));
+			m_locationLabel.setIcon(GUIUtils.loadImageIcon("flags/" + location.getCountryCode() + ".png"));
 		}
 		else
 		{
@@ -1136,7 +1202,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 
 		pRoot.validate();
-		//System.out.println("final item state");
 	}
 
 	/**
@@ -1577,6 +1642,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			Database.getInstance(MixCascade.class).update(c);			
 			((MixCascadeTableModel)m_tableMixCascade.getModel()).addElement(c);		
 			TrustModel.setCurrentTrustModel(TrustModel.getTrustModelUserDefined());
+			if (!JAPController.getInstance().isAnonConnected())
+			{
+				JAPController.getInstance().setCurrentMixCascade(c);
+			}
 			setSelectedCascade(c); // update the cascade information
 			new Thread(new Runnable()
 			{
@@ -1751,17 +1820,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					{
 						m_mapShown = true;
 						getRootPanel().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						try
-						{
-							new MapBox(getRootPanel(), (String) m_locationCoordinates.elementAt(0),
+						// Create a MapBox
+						new MapBox(getRootPanel(), (String) m_locationCoordinates.elementAt(0),
 									   (String) m_locationCoordinates.elementAt(1), 8).setVisible(true);
-						}
-						catch (IOException a_e)
-						{
-							JAPDialog.showErrorDialog(GUIUtils.getParentWindow(getRootPanel()),
-													  JAPMessages.getString(MapBox.MSG_ERROR_WHILE_LOADING),
-													  LogType.NET, a_e);
-						}
 						getRootPanel().setCursor(Cursor.getDefaultCursor());
 						m_mapShown = false;
 					}
@@ -1850,6 +1911,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	protected void onRootPanelShown()
 	{
+		boolean bUpdateValues = false;
 		synchronized (LOCK_OBSERVABLE)
 		{
 			if (!m_observablesRegistered)
@@ -1862,13 +1924,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				Database.getInstance(MixCascade.class).addObserver(this);
 				Database.getInstance(StatusInfo.class).addObserver(this);
 				Database.getInstance(MixInfo.class).addObserver(this);
+				Database.getInstance(PerformanceInfo.class).addObserver(this);
+				m_cmbCascadeFilter.setSelectedItem(TrustModel.getCurrentTrustModel());
 				TrustModel.addModelObserver(this);
 				m_observablesRegistered = true;
+				bUpdateValues = true;
 			}
 		}
 
 		if (!m_infoService.isFilled())
 		{
+			bUpdateValues = true;			
+		}
+		if (bUpdateValues)
+		{
+			//updateValues(false); // deadlock in MacOS
 			new Thread(new Runnable()
 			{
 				public void run()
@@ -1879,7 +1949,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}).start();
 			//fetchCascades(false, false, true);
 		}
-
 
 		if (m_tableMixCascade.getRowCount() > 0 && m_tableMixCascade.getSelectedRow() < 0)
 		{
@@ -1987,64 +2056,137 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
 					int value;
+					int best;
 					
 					DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
 					df.applyPattern("#,####0.00");
 					
 					if(entry != null)
 					{
-						value = entry.getBound(PerformanceEntry.SPEED);						
+						boolean bTrusted;
+						
+						try
+						{
+							TrustModel.getCurrentTrustModel().getAttribute(
+									TrustModel.SpeedAttribute.class).checkTrust(cascade);
+							bTrusted = true;
+						}
+						catch (TrustException a_e)
+						{
+							bTrusted = false;
+						}
+						catch (SignatureException a_e)
+						{
+							bTrusted = false;
+						}
+						
+						value = entry.getBound(PerformanceEntry.SPEED).getBound();
+						best = entry.getBestBound(PerformanceEntry.SPEED);
 						if (value < 0 || value == Integer.MAX_VALUE)
 						{
 							m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 						}
 						else if(value == 0)
 						{
-							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1]));
+							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
+									PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1],
+									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							bTrusted = false;							;
 						}
 						else
 						{
-							m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
+							    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
+							{
+								m_lblSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value,
+										JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							}
+							else if (best == value || best == Integer.MAX_VALUE)
+							{
+								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value,
+										JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							}
+							else
+							{
+								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithoutUnit(value,
+										JAPUtil.MAX_FORMAT_KBIT_PER_SEC) + 
+										"-" + JAPUtil.formatKbitPerSecValueWithUnit(best,
+												JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							}
+						}
+						if (bTrusted)
+						{
+							m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
+						}
+						else
+						{
+							m_lblSpeed.setForeground(Color.red);
 						}
 						
-													
-						value = entry.getBound(PerformanceEntry.DELAY);
+						try
+						{
+							TrustModel.getCurrentTrustModel().getAttribute(
+									TrustModel.DelayAttribute.class).checkTrust(cascade);
+							bTrusted = true;
+						}
+						catch (TrustException a_e)
+						{
+							bTrusted = false;
+						}
+						catch (SignatureException a_e)
+						{
+							bTrusted = false;
+						}
+						
+						value = entry.getBound(PerformanceEntry.DELAY).getBound();
+						best = entry.getBestBound(PerformanceEntry.DELAY);
 						if (value <= 0)
 						{
 							m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 						}
-						else if(value == Integer.MAX_VALUE)
+						else if (value == Integer.MAX_VALUE)
 						{
 							m_lblDelay.setText("> " + 
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
+							bTrusted = false;
 						}
 						else
 						{
-							m_lblDelay.setText(value + " ms");
+							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
+							{
+								m_lblDelay.setText("< " + value + " ms");
+							}
+							else if(best == value || best == 0)
+							{
+								m_lblDelay.setText(value + " ms");
+							}
+							else
+							{
+								m_lblDelay.setText(value + "-" + best + " ms");
+							}
+						}
+						if (bTrusted)
+						{
+							m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
+						}
+						else
+						{
+							m_lblDelay.setForeground(Color.red);
 						}
 					}
 					else
 					{
 						m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 						m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+						m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
+						m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
 					}
 					
 					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));
 					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
 					
-					//System.out.println(m_numOfUsersLabel.getText());
-					//m_reachableLabel.setFont(m_numOfUsersLabel.getFont());
-					//m_lblHosts.setFont(m_numOfUsersLabel.getFont());
-					//m_reachableLabel.setText(m_infoService.getHosts(cascadeId));
-					/*m_cascadesPanel.remove(m_lblHosts);
-					m_cascadesPanel.add(m_lblHosts, m_constrHosts);*/
-					//m_portsLabel.setFont(m_numOfUsersLabel.getFont());
-					//m_lblPorts.setFont(m_numOfUsersLabel.getFont());
-					//m_portsLabel.setText(m_infoService.getPorts(cascadeId));
-					/*m_cascadesPanel.remove(m_lblPorts);
-					m_cascadesPanel.add(m_lblPorts, m_constrPorts);*/
-					setPayLabel(cascade);
+					setPayLabel(cascade, entry);
 					m_lblSocks.setVisible(cascade.isSocks5Supported());
 				}
 				if(m_filterPanel == null || !m_filterPanel.isVisible())
@@ -2283,6 +2425,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 					}
 				}
+				else if (message.getMessageData() instanceof PerformanceInfo)
+				{
+					bDatabaseChanged = true;
+				}
 			}
 			else if (a_notifier == JAPController.getInstance() && a_message != null)
 			{
@@ -2355,7 +2501,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	 * Temporary image of relevant infoservice entries. For better response time
 	 * of the GUI.
 	 */
-	final class InfoServiceTempLayer
+	private final class InfoServiceTempLayer
 	{
 		private Hashtable m_Cascades;
 		private boolean m_isFilled = false;
@@ -2372,25 +2518,36 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 		public boolean isFilled()
 		{
-			return m_isFilled;
+			synchronized (LOCK_FILL)
+			{
+				return m_isFilled;
+			}
 		}
 
-		public synchronized void removeCascade(MixCascade a_cascade)
+		public void removeCascade(MixCascade a_cascade)
 		{
 			if (a_cascade == null)
 			{
 				return;
 			}
-			m_Cascades.remove(a_cascade.getId());
+			synchronized (LOCK_FILL)
+			{
+				m_Cascades.remove(a_cascade.getId());
+			}
 		}
 
 		/**
 		 * Adds or updates cached cascade information concerning ports and hosts.
 		 * @param a_cascade the cascade that should be updated
 		 */
-		public synchronized void updateCascade(MixCascade a_cascade)
+		public void updateCascade(MixCascade a_cascade)
 		{
-			if (a_cascade == null)
+			updateCascade(a_cascade, m_Cascades);
+		}
+		
+		private void updateCascade(MixCascade a_cascade, Hashtable a_hashtable)
+		{
+			if (a_cascade == null || a_hashtable == null)
 			{
 				return;
 			}
@@ -2451,13 +2608,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					ports += ", ";
 				}
 			}
-
-			m_Cascades.put(id, new TempCascade(id, interfaces, ports, a_cascade.getMaxUsers()));
+			
+			synchronized (LOCK_FILL)
+			{
+				a_hashtable.put(id, new TempCascade(id, interfaces, ports, a_cascade.getMaxUsers()));
+			}
 		}
 
 		private void fill(boolean a_bCheckInfoServiceUpdateStatus)
 		{
-			synchronized (LOCK_FILL)
+			//synchronized (LOCK_FILL)
 			{
 				if (!fill(Database.getInstance(MixCascade.class).getEntryList(),
 						  a_bCheckInfoServiceUpdateStatus))
@@ -2480,7 +2640,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 			synchronized (LOCK_FILL)
 			{
-				m_Cascades = new Hashtable();
+				Hashtable cascades = new Hashtable();
 
 				for (int j = 0; j < c.size(); j++)
 				{
@@ -2492,28 +2652,25 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				for (int j = 0; j < c.size(); j++)
 				{
 					MixCascade cascade = (MixCascade) c.elementAt(j);
-					/* fetch the current cascade state */
-					if (!cascade.isUserDefined() &&
-						(!a_bCheckInfoServiceUpdateStatus || !JAPModel.isInfoServiceDisabled()))
-					{
-						Database.getInstance(StatusInfo.class).update(cascade.fetchCurrentStatus());
-					}
-					// update hosts and ports
-					updateCascade(cascade);
-				}
-				for (int j = 0; j < c.size(); j++)
-				{
-					
-					// update MixInfo for each mix in cascade
-					/** @todo really needed?
-					MixCascade cascade = (MixCascade) c.elementAt(j);
-					update(Database.getInstance(MixCascade.class),
-						   new DatabaseMessage(DatabaseMessage.ENTRY_ADDED, cascade));
-					*/
-				}
 
-				m_isFilled = true;
+					// update hosts and ports
+					updateCascade(cascade, cascades);
+				}
+				m_Cascades = cascades;
+				m_isFilled = true;								
 			}
+			
+			for (int j = 0; j < c.size(); j++)
+			{
+				MixCascade cascade = (MixCascade) c.elementAt(j);
+				/* fetch the current cascade state */
+				if (!cascade.isUserDefined() &&
+					(!a_bCheckInfoServiceUpdateStatus || !JAPModel.isInfoServiceDisabled()))
+				{
+					Database.getInstance(StatusInfo.class).update(cascade.fetchCurrentStatus());
+				}
+			}
+			
 			return true;
 		}
 
@@ -2521,11 +2678,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public String getAnonLevel(String a_cascadeId)
 		{
 			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
-			if (statusInfo != null)
+			if (statusInfo != null && statusInfo.getAnonLevel() >= 0)
 			{
 				return "" + statusInfo.getAnonLevel() + " / " + StatusInfo.ANON_LEVEL_MAX;
 			}
-			return "N/A";
+					
+			//return "N/A";
+			return "? / " + StatusInfo.ANON_LEVEL_MAX;
 		}
 
 
@@ -2550,6 +2709,28 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				return "" + statusInfo.getNrOfActiveUsers() + (maxUsers != 0 ? " / " + maxUsers : "");
 			}
 			return "N/A";
+		}
+		
+		public boolean isUserLimitReached(String a_cascadeId)
+		{
+			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
+			TempCascade cascade = (TempCascade) m_Cascades.get(a_cascadeId);
+			if (statusInfo != null)
+			{
+				int maxUsers = 0;
+				if (cascade != null)
+				{
+					maxUsers = cascade.getMaxUsers();
+				}
+				if (maxUsers > 0)
+				{
+					if (maxUsers - statusInfo.getNrOfActiveUsers() <= 3)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		/**
@@ -3891,8 +4072,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				Database.getInstance(BlacklistedCascadeIDEntry.class).remove(
 								cascade.getMixIDsAsString());
 			}
-			setPayLabel(cascade);
-			m_lblSocks.setVisible(cascade.isSocks5Supported());
+			//setPayLabel(cascade);
+			//m_lblSocks.setVisible(cascade.isSocks5Supported());
 			fireTableCellUpdated(rowIndex, 1);
 		}
 	}
@@ -4024,34 +4205,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public Vector getBlacklist()
 		{
 			return m_vecBlacklist;
-		}
-	}
-	
-	class OperatorsCellRenderer extends DefaultTableCellRenderer
-	{
-		/**
-		 * serial version UID
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public void setValue(Object value)
-		{
-			if(value == null)
-			{
-				setText("");
-				return;
-			}
-			else if(value instanceof ServiceOperator)
-			{
-				ServiceOperator op = (ServiceOperator) value;
-				setForeground(Color.black);
-				
-				if(op.getCertificate() == null)
-				{
-					setForeground(Color.gray);
-				}
-				setText(op.getOrganization());
-			}
 		}
 	}
 }

@@ -74,6 +74,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import anon.AnonServerDescription;
+import anon.client.TrustException;
 import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.CascadeIDEntry;
 import anon.infoservice.ClickedMessageIDDBEntry;
@@ -88,7 +89,6 @@ import anon.infoservice.MessageDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.NewCascadeIDEntry;
-import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
 import anon.pay.IMessageListener;
 import anon.pay.PayAccountsFile;
@@ -104,13 +104,13 @@ import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPProgressBar;
 import gui.MixDetailsDialog;
-import gui.OperatorDetailsDialog;
 import gui.PopupMenu;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.JAPDialog.LinkedInformationAdapter;
 import gui.dialog.JAPDialog.Options;
 import gui.help.JAPHelp;
+import jap.TrustModel.DelayAttribute;
 import jap.forward.JAPRoutingMessage;
 import jap.forward.JAPRoutingRegistrationStatusObserver;
 import jap.forward.JAPRoutingServerStatisticsListener;
@@ -134,8 +134,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	public static final String MSG_NO_REAL_PAYMENT = JAPNewView.class.getName() + "_noRealPayment";
 	public static final String MSG_UNKNOWN_PERFORMANCE = JAPNewView.class.getName() + "_unknownPerformance";
 
-	private static final String MSG_ANONYMETER_TOOL_TIP = JAPNewView.class.getName() + "_anonymeterToolTip";
-	private static final String MSG_SERVICE_NAME = JAPNewView.class.getName() + "_ngAnonymisierungsdienst";
+	public static final String MSG_USERS = JAPNewView.class.getName() + "_users";
+	protected static final String MSG_SERVICE_NAME = JAPNewView.class.getName() + "_ngAnonymisierungsdienst";
+	private static final String MSG_ANONYMETER_TOOL_TIP = JAPNewView.class.getName() + "_anonymeterToolTip";	
 	private static final String MSG_ERROR_DISCONNECTED = JAPNewView.class.getName() + "_errorDisconnected";
 	private static final String MSG_ERROR_PROXY = JAPNewView.class.getName() + "_errorProxy";
 	private static final String MSG_TITLE_OLD_JAVA = JAPNewView.class.getName() + "_titleOldJava";
@@ -216,7 +217,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private final JLabel DEFAULT_LABEL = new JLabel();
 
 	//private JLabel meterLabel;
-	private JLabel m_lblPrice;
 	private JLabel m_labelVersion;
 	private JPanel m_pnlVersion;
 	private JButton m_bttnHelp, m_bttnQuit, m_bttnIconify, m_bttnConf, m_btnAssistant, m_btnAbout;
@@ -238,11 +238,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JLabel m_labelAnonService, m_labelAnonymity, m_labelAnonymitySmall, m_labelAnonymityOnOff;
 	private JLabel m_labelAnonMeter, m_labelAnonymityLow, m_labelAnonymityHigh;
 
-	private JLabel m_labelSpeed, m_labelDelay, m_labelSpeedLabel, m_labelDelayLabel, m_labelMixCountries, m_labelOperatorCountries;
+	private JLabel m_labelSpeed, m_labelDelay, m_labelSpeedLabel, m_labelDelayLabel, m_labelOperatorCountries;
+	private JLabel m_lblUsers, m_lblUsersLabel;
 	
-	private JLabel m_labelMixFlags[], m_labelOperatorFlags[];
-	private MixMouseAdapter m_adapterMix[];
-	private OperatorMouseAdapter m_adapterOperator[];
+	private JLabel m_labelOperatorFlags[];
+	private MixMouseAdapter m_adapterOperator[];
 	
 	private JLabel m_labelOwnTraffic, m_labelOwnTrafficSmall;
 	private JLabel m_labelOwnActivity, m_labelForwarderActivity;
@@ -402,6 +402,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
+				
 				boolean bUpdated = false;
 				Vector vecVersions = new Vector();
 				JAPVersionInfo viTemp;
@@ -468,6 +470,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
+				
 				if (JAPModel.isInfoServiceDisabled())
 				{
 					if (JAPDialog.showConfirmDialog(JAPNewView.this,
@@ -481,7 +485,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					}
 				}
 
-				if (!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
+				if (JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_FORCE_ANONYMOUS &&
 					!JAPController.getInstance().isAnonConnected())
 				{
 					if (JAPDialog.showConfirmDialog(JAPNewView.this, JAPMessages.getString(
@@ -490,7 +495,26 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						JAPDialog.MESSAGE_TYPE_WARNING)
 						== JAPDialog.RETURN_VALUE_YES)
 					{
-						JAPModel.getInstance().allowInfoServiceViaDirectConnection(true);
+						
+						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+								JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+							
+					}
+				}
+				else if (JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_BLOCK_ANONYMOUS &&
+					JAPController.getInstance().isAnonConnected())
+				{
+					if (JAPDialog.showConfirmDialog(JAPNewView.this, JAPMessages.getString(
+						JAPController.MSG_IS_NOT_ALLOWED_FOR_ANONYMOUS),
+						JAPDialog.OPTION_TYPE_YES_NO,
+						JAPDialog.MESSAGE_TYPE_WARNING)
+						== JAPDialog.RETURN_VALUE_YES)
+					{
+						
+						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
+								JAPModel.CONNECTION_ALLOW_ANONYMOUS);
+							
 					}
 				}
 			}
@@ -500,6 +524,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
+				
 				JAPDialog.showMessageDialog(JAPNewView.this,
 											JAPMessages.getString(MSG_NEW_SERVICES_FOUND_EXPLAIN,
 					JAPMessages.getString(MSG_SERVICE_NAME)));
@@ -578,6 +604,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				public void actionPerformed(ActionEvent e)
 				{
+					m_comboAnonServices.closeCascadePopupMenu();
 					AbstractOS.getInstance().openBrowser();	
 				}
 			});
@@ -607,32 +634,20 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.fill = GridBagConstraints.NONE;
 		m_panelAnonService.add(m_labelAnonService, c1);
 		m_comboAnonServices = new JAPMixCascadeComboBox();
+		addComponentListener(new ComponentAdapter()
+		{
+			public void componentMoved(ComponentEvent a_event)
+			{
+				/* TODO temporarily disable as this, in Linux, the move event is thrown when clicking on the combo box 
+				m_comboAnonServices.closeCascadePopupMenu();
+				*/
+			}
+		});
 		m_comboAnonServices.addItemListener(new ItemListener()
 		{
 			public void itemStateChanged(ItemEvent e)
 			{
 				final MixCascade cascade = (MixCascade) m_comboAnonServices.getSelectedItem();
-				if (cascade != null)
-				{
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							if (cascade.isPayment())
-							{
-								m_lblPrice.setText(JAPMessages.getString(MSG_WITH_COSTS));
-								m_lblPrice.setForeground(Color.blue);
-								m_lblPrice.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-							}
-							else
-							{
-								m_lblPrice.setText(JAPMessages.getString(MSG_NO_COSTS));
-								m_lblPrice.setForeground(new JLabel().getForeground());
-								m_lblPrice.setCursor(Cursor.getDefaultCursor());
-							}
-						}
-					});
-				}
 
 				if (m_bIgnoreAnonComboEvents)
 				{
@@ -673,6 +688,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
 				fetchMixCascadesAsync(true);
 			}
 		});
@@ -719,22 +735,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(5, 5, 0, 0);
-		//c1.fill = GridBagConstraints.HORIZONTAL;
-		m_lblPrice = new JLabel(JAPMessages.getString(MSG_NO_COSTS));
-		m_lblPrice.addMouseListener(new MouseAdapter()
-		{
-			public void mouseClicked(MouseEvent a_event)
-			{
-				if (m_lblPrice.getCursor() == Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
-				{
-					JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
-												JAPMessages.getString(MSG_NO_REAL_PAYMENT));
-				}
-			}
-		});
-		//m_panelAnonService.add(m_lblPrice, c1);
-
-
 
 
 		c1.insets = new Insets(5, 20, 0, 0);
@@ -763,71 +763,61 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		p.setLayout(gbl1);
 		m_labelAnonymity = new JLabel(JAPMessages.getString("ngCascadeInfo"));
 		c1.insets = new Insets(0, 5, 0, 0);
-		p.add(m_labelAnonymity, c1);
+		p.add(m_labelAnonymity, c1);		
 		
-		m_labelSpeedLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_speed") + ":");
+		m_lblUsersLabel = new JLabel(JAPMessages.getString(MSG_USERS) + ":");
 		c1.gridy = 1;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(5, 15, 0, 10);
+		p.add(m_lblUsersLabel, c1);
+		
+		m_labelSpeedLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_speed") + ":");
+		c1.gridy = 2;
 		p.add(m_labelSpeedLabel, c1);
 		
 		m_labelDelayLabel = new JLabel(JAPMessages.getString(JAPConfAnon.class.getName() + "_latency") + ":");
-		c1.gridy = 2;
-		p.add(m_labelDelayLabel, c1);
-		
-		m_labelMixCountries = new JLabel(JAPMessages.getString("ngMixCountries"));
 		c1.gridy = 3;
-		p.add(m_labelMixCountries, c1);
+		p.add(m_labelDelayLabel, c1);
 		
 		m_labelOperatorCountries = new JLabel(JAPMessages.getString("ngOperatorCountries"));
 		c1.gridy = 4;
 		p.add(m_labelOperatorCountries, c1);
 		
-		m_labelSpeed = new JLabel("", SwingConstants.LEFT);
-		c1.insets = new Insets(5, 0, 0, 10);
+		m_lblUsers = new JLabel("", SwingConstants.LEFT);
+		c1.insets = new Insets(0, 0, 0, 10);
 		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
 		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.gridy = 1;
 		c1.gridx = 1;
 		c1.gridwidth = 3;
+		p.add(m_lblUsers, c1);
+		
+		m_labelSpeed = new JLabel("", SwingConstants.LEFT);
+		c1.insets = new Insets(5, 0, 0, 10);
+		c1.weightx = 0;
+		c1.gridy = 2;
 		p.add(m_labelSpeed, c1);
 		
 		m_labelDelay = new JLabel("", SwingConstants.LEFT);
-		c1.insets = new Insets(5, 0, 0, 10);
-		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0;
-		c1.fill = GridBagConstraints.HORIZONTAL;
-		c1.gridy = 2;
-		c1.gridx = 1;
-		c1.gridwidth = 3;
+		c1.gridy = 3;
 		p.add(m_labelDelay, c1);
 
-		m_labelMixFlags = new JLabel[3];
 		m_labelOperatorFlags = new JLabel[3];
-		m_adapterMix = new MixMouseAdapter[3];
-		m_adapterOperator = new OperatorMouseAdapter[3];
+		m_adapterOperator = new MixMouseAdapter[3];
 		
 		c1.gridwidth = 1;
 		c1.insets = new Insets(5, 2, 0, 5);
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < m_labelOperatorFlags.length; i++)
 		{
 			c1.gridx = i + 1;
-			
-			m_labelMixFlags[i] = new JLabel("");
-			c1.gridy = 3;
-			p.add(m_labelMixFlags[i], c1);
-			
-			m_labelMixFlags[i].addMouseListener(m_adapterMix[i] = 
-				new MixMouseAdapter(null, i));
-			m_labelMixFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			
 			c1.gridy = 4;
 			m_labelOperatorFlags[i] = new JLabel("");
 			p.add(m_labelOperatorFlags[i], c1);
 			
 			m_labelOperatorFlags[i].addMouseListener(m_adapterOperator[i] =
-				new OperatorMouseAdapter(null));
+				new MixMouseAdapter(null, i));
 			m_labelOperatorFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		}
 		
@@ -1277,6 +1267,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			public void windowClosing(WindowEvent e)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
 				if (isEnabled())
 				{
 					JAPController.goodBye(true);
@@ -1285,12 +1276,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 			public void windowDeiconified(WindowEvent e)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
 				m_bIsIconified = false;
 				updateValues(false);
 			}
 
 			public void windowIconified(WindowEvent e)
 			{
+				m_comboAnonServices.closeCascadePopupMenu();
 				hideWindowInTaskbar();
 				m_bIsIconified = true;
 				updateValues(false);
@@ -1340,10 +1333,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_mainMovedAdapter = new ComponentMovedAdapter();
 		m_helpMovedAdapter = new ComponentMovedAdapter();
 		m_configMovedAdapter = new ComponentMovedAdapter();
-		addComponentListener(m_mainMovedAdapter);
+		addComponentListener(m_mainMovedAdapter);		
+		
 		if(JAPHelp.getHelpDialog() != null)
 		{
-			JAPHelp.getHelpDialog().addComponentListener(m_helpMovedAdapter);
+			JAPHelp.getHelpDialog().addComponentListener(m_helpMovedAdapter);			
 		}
 		//new GUIUtils.WindowDocker(this);
 
@@ -1757,13 +1751,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					cascade.getMixIDsAsString()) != null)
 				{
 					m_bTrustChanged = true;
-					synchronized (SYNC_NEW_SERVICES)
+					if (!JAPController.getInstance().getCurrentMixCascade().isPayment())
 					{
-						if (m_newServicesID < 0)
+						synchronized (SYNC_NEW_SERVICES)
 						{
-							m_newServicesID = m_StatusPanel.addStatusMsg(
-								JAPMessages.getString(MSG_LBL_NEW_SERVICES_FOUND),
-								JOptionPane.INFORMATION_MESSAGE, false, m_listenerNewServices);
+							if (m_newServicesID < 0)
+							{
+								m_newServicesID = m_StatusPanel.addStatusMsg(
+									JAPMessages.getString(MSG_LBL_NEW_SERVICES_FOUND),
+									JOptionPane.INFORMATION_MESSAGE, false, m_listenerNewServices);
+							}
 						}
 					}
 				}
@@ -1919,7 +1916,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 					if (!JAPController.getInstance().isShuttingDown()
 						&& (JAPModel.isInfoServiceDisabled() ||
-							(!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
+							(JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+							JAPModel.CONNECTION_FORCE_ANONYMOUS &&
 							 !JAPController.getInstance().isAnonConnected())))
 					{
 						synchronized (SYNC_STATUS_ENABLE_IS)
@@ -2226,6 +2224,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	public void showIconifiedView()
 	{
+		m_comboAnonServices.closeCascadePopupMenu();
 		synchronized (SYNC_ICONIFIED_VIEW)
 		{
 			if (m_ViewIconified != null)
@@ -2318,6 +2317,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	{
 		//		LogHolder.log(LogLevel.DEBUG,LogType.MISC,"GetEvent: "+event.getSource());
 		final JAPNewView view = this;
+		m_comboAnonServices.closeCascadePopupMenu();
 		synchronized (SYNC_ACTION)
 		{
 			if (m_bActionPerformed)
@@ -2357,6 +2357,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				else if (source == m_btnAbout)
 				{
 					//JAPController.getInstance().simuateProxyError();
+					m_comboAnonServices.closeCascadePopupMenu();
 					JAPController.aboutJAP();
 				}
 				else if (source == m_btnAssistant)
@@ -2513,6 +2514,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showHelpWindow()
 	{
+		m_comboAnonServices.closeCascadePopupMenu();
 		JAPHelp help = JAPHelp.getInstance();
 		help.setContext(
 				JAPHelpContext.createHelpContext("index", this));
@@ -2565,6 +2567,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	public void showConfigDialog(final String card, final Object a_value)
 	{
+		m_comboAnonServices.closeCascadePopupMenu();
 		if (m_bConfigActive)
 		{
 			return;
@@ -2644,6 +2647,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		 */
 		Enumeration entries =
 			Database.getInstance(JAPVersionInfo.class).getEntrySnapshotAsEnumeration();
+		String strTemp;
 		JAPVersionInfo vi = null;
 		while (entries.hasMoreElements())
 		{
@@ -2686,7 +2690,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 		if (!JAPController.getInstance().isShuttingDown()
 			&& (JAPModel.isInfoServiceDisabled() ||
-				(!JAPModel.getInstance().isInfoServiceViaDirectConnectionAllowed() &&
+				(JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting() ==
+					JAPModel.CONNECTION_FORCE_ANONYMOUS &&
 				 !JAPController.getInstance().isAnonConnected())))
 		{
 			synchronized (SYNC_STATUS_ENABLE_IS)
@@ -2778,18 +2783,30 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			strSystrayTooltip += "\n" + GUIUtils.trim(currentMixCascade.getName(), 25);
 
+			if (currentStatus.getNrOfActiveUsers() > -1)
+			{
+				m_lblUsers.setText(Integer.toString(currentStatus.getNrOfActiveUsers()) + 
+						(currentMixCascade.getMaxUsers() > 0 ? " / " + currentMixCascade.getMaxUsers() : ""));
+			}
+			else
+			{
+				m_lblUsers.setText("");
+				/*
+				strTemp = JAPMessages.getString("meterNA");
+				if (m_lblUsers.getText() == null ||
+					!m_lblUsers.getText().equals(strTemp))
+				{
+					// optimized change...
+					m_lblUsers.setText(strTemp);
+				}*/
+			}
+			
+			
 			if (m_Controller.isAnonConnected())
 			{
 				//m_bShowConnecting = false;
 				if (currentStatus.getNrOfActiveUsers() > -1)
 				{
-					// Nr of active users
-					//if (currentStatus.getNrOfActiveUsers() > userProgressBar.getMaximum())
-					//{
-					//	userProgressBar.setMaximum(currentStatus.getNrOfActiveUsers());
-					//}
-					//strSystrayTooltip += "\n" + JAPMessages.getString("ngNrOfUsers") + ": " +
-					//currentStatus.getNrOfActiveUsers();
 					if (anonLevel >= StatusInfo.ANON_LEVEL_MIN)
 					{
 						strSystrayTooltip += "\n" + JAPMessages.getString(JAPViewIconified.MSG_ANON) + ": ";
@@ -2822,6 +2839,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						}
 					}
 				}
+				
 				/*int t = currentStatus.getTrafficSituation();
 				if (t > -1)
 				{
@@ -2844,7 +2862,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			else
 			{
-				/* we are not in anonymity mode */
+				/* we are not in anonymity mode */				
 				//m_progressAnonTraffic.setValue(0);
 				m_progressAnonLevel.setValue(0);
 			}
@@ -2855,23 +2873,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				numMixes = 1;
 			}
 			
-			for(int i = 0; i < numMixes; i++)
+			for(int i = 0; i < numMixes && i < m_labelOperatorFlags.length; i++)
 			{
 				MixInfo mixInfo = currentMixCascade.getMixInfo(i);
-				
-				if(mixInfo != null && mixInfo.getCertPath() != null && 
-						mixInfo.getCertPath().getSubject() != null) 
-				{
-					String mixCountry = mixInfo.getCertPath().getSubject().getCountryCode();
-					CountryMapper country = new CountryMapper(mixCountry, JAPMessages.getLocale());
-					m_labelMixFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + mixCountry + ".png"));
-					m_labelMixFlags[i].setToolTipText(country.toString());
-					m_adapterMix[i].setMixInfo(mixInfo);
-				}
-				else
-				{
-					m_labelMixFlags[i].setIcon(null);
-				}
 				
 				if(mixInfo != null && mixInfo.getCertPath() != null && 
 						mixInfo.getCertPath().getIssuer() != null) 
@@ -2880,7 +2884,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					CountryMapper country = new CountryMapper(operatorCountry, JAPMessages.getLocale());
 					m_labelOperatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + operatorCountry + ".png"));
 					m_labelOperatorFlags[i].setToolTipText(country.toString());
-					m_adapterOperator[i].setOperator(mixInfo.getServiceOperator());
+					m_adapterOperator[i].setMixInfo(mixInfo);
 				}
 				else
 				{
@@ -2889,52 +2893,131 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			
 			// clear the unused labels
-			for(int i = numMixes; i < 3; i++)
+			for(int i = numMixes; i < m_labelOperatorFlags.length; i++)
 			{
-				m_labelMixFlags[i].setIcon(null);
 				m_labelOperatorFlags[i].setIcon(null);
 			}
 			
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(currentMixCascade.getId());
 			
 			int value = 0;
+			int best = 0;
 			
 			if(entry != null)
 			{
-				value = entry.getBound(PerformanceEntry.SPEED);						
+				boolean bTrusted;
+				
+				try
+				{
+					TrustModel.getCurrentTrustModel().getAttribute(
+							TrustModel.SpeedAttribute.class).checkTrust(currentMixCascade);
+					bTrusted = true;
+				}
+				catch (TrustException a_e)
+				{
+					bTrusted = false;
+				}
+				
+				value = entry.getBound(PerformanceEntry.SPEED).getBound();
+				best = entry.getBestBound(PerformanceEntry.SPEED);
 				if (value < 0 || value == Integer.MAX_VALUE)
 				{
 					m_labelSpeed.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
 				}
-				else if(value == 0)
+				else if (value == 0)
 				{
-					m_labelSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1]));
+					m_labelSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
+							PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1], 
+							JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+					bTrusted = false;
+				}
+				else
+				{										
+					if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
+					    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
+					{
+						m_labelSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value, 
+								JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+					}
+					else if (best == value || best == Integer.MAX_VALUE)
+					{
+						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value, 
+								JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+					}
+					else
+					{
+						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithoutUnit(
+								value, JAPUtil.MAX_FORMAT_KBIT_PER_SEC) + "-" + 
+								JAPUtil.formatKbitPerSecValueWithUnit(best, JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+					}
+				}
+				
+				if (bTrusted)
+				{
+					m_labelSpeed.setForeground(m_lblUsers.getForeground());
 				}
 				else
 				{
-					m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value));
+					m_labelSpeed.setForeground(Color.red);
 				}
 				
-				value = entry.getBound(PerformanceEntry.DELAY);
+				
+				try
+				{
+					TrustModel.getCurrentTrustModel().getAttribute(
+							TrustModel.DelayAttribute.class).checkTrust(currentMixCascade);
+					bTrusted = true;
+				}
+				catch (TrustException a_e)
+				{
+					bTrusted = false;
+				}
+				
+				value = entry.getBound(PerformanceEntry.DELAY).getBound();
+				best = entry.getBestBound(PerformanceEntry.DELAY);
 				if (value <= 0)
 				{
 					m_labelDelay.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
 				}
-				else if(value == Integer.MAX_VALUE)
+				else if (value == Integer.MAX_VALUE)
 				{
 					m_labelDelay.setText("> " + 
 							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
 							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
+					bTrusted = false;
 				}
 				else
 				{
-					m_labelDelay.setText(value + " ms");
+					if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
+					{
+						m_labelDelay.setText("< " + value + " ms");
+					}
+					else if(best == value || best == 0)
+					{
+						m_labelDelay.setText(value + " ms");
+					}
+					else
+					{
+						m_labelDelay.setText(value + "-" + best + " ms");
+					}
+					
+				}
+				
+				if (bTrusted)
+				{
+					m_labelDelay.setForeground(m_lblUsers.getForeground());
+				}
+				else
+				{
+					m_labelDelay.setForeground(Color.red);
 				}
 			}
 			else
 			{
 				m_labelSpeed.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
 				m_labelDelay.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
+				m_labelSpeed.setForeground(m_lblUsers.getForeground());
+				m_labelDelay.setForeground(m_lblUsers.getForeground());
 			}
 			
 			JAPDll.setSystrayTooltip(strSystrayTooltip);
@@ -3175,6 +3258,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private void showJavaUpdateDialog(JavaVersionDBEntry a_entry)
 	{
+		m_comboAnonServices.closeCascadePopupMenu();
 		Object[] args = new Object[5];
 		args[0] = JavaVersionDBEntry.CURRENT_JAVA_VERSION;
 		args[1] = JavaVersionDBEntry.CURRENT_JAVA_VENDOR;
@@ -3199,6 +3283,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			{
 				//setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				m_Controller.updateInfoServices(!bShowError);
+				m_Controller.updatePaymentInstances(!bShowError);
 				m_Controller.fetchMixCascades(bShowError, JAPController.getInstance().getViewWindow(),
 											  !bShowError);
 				//setCursor(Cursor.getDefaultCursor());
@@ -3402,28 +3487,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		public void setMixInfo(MixInfo a_mixInfo)
 		{
 			m_mixInfo = a_mixInfo;
-		}
-	}
-	
-	private final class OperatorMouseAdapter extends MouseAdapter
-	{
-		private ServiceOperator m_operator;
-		
-		public OperatorMouseAdapter(ServiceOperator a_operator)
-		{
-			m_operator = a_operator;
-		}
-		
-		public void mouseClicked(MouseEvent a_event)
-		{
-			OperatorDetailsDialog dialog = new OperatorDetailsDialog(JAPNewView.this, m_operator);
-			dialog.pack();
-			dialog.setVisible(true);
-		}
-		
-		public void setOperator(ServiceOperator a_operator)
-		{
-			m_operator = a_operator;
 		}
 	}
 }

@@ -150,4 +150,8 @@ public class TypeFilterDataChain implements AnonChannel {
     m_originChannel.close();
   }
 
+  public boolean isClosed()
+  {
+	  return m_originChannel.isClosed();
+  }
 }

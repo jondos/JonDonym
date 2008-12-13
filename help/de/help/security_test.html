@@ -1,44 +1,85 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
-<style type="text/css">
+  <title>Test der Browsereinstellungen</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+  <style type="text/css">
 <!--
+.style1 {color:#008000}
 .Stil2 {color: #FF0000}
 .Stil3 {color: #FF6600}
 -->
-</style>
+
+  </style>
 </head>
+
 <body>
 <!--#include virtual="/header.html"-->
-<H2>Einstellungen des Browsers / Filters testen</H2>
-<p>Im folgenden verwenden wir Testseiten, die uns erkennen lassen, ob der Browser (und, soweit vorhanden, der Filterproxy) richtig konfiguriert wurde.
-  JonDos empfiehlt den bereits fertig konfigurierten, portablen <a href="http://www.jondos.de/de/jondofox">JonDoFox</a> zum sicheren, anonymen Websurfen. Er ist als vollst&auml;ndiger Browser (Windows) oder als Firefox-Profil f&uuml;r alle Betriebssysteme verf&uuml;gbar und besteht alle Tests.</p>
-<p align="center"><a href="http://www.jondos.de/de/anontest">JonDos-Anonymit&auml;tstest</a><br>
+
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative browser configuration</a></span>
+<span class="midlink"><a name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;">
+Browservorbereitung </a></span> <span class="nextlink"><a
+href="interface.html">JonDo-Oberfl&#xe4;che <img src="next.gif"
+alt="-&gt;"></a></span> </p>
+<hr>
+
+<h2>Test der Browsereinstellungen</h2>
+
+<p>Mithilfe verschiedener Testseiten k&#xf6;nnen Sie erkennen, ob Ihr Browser
+richtig konfiguriert wurde. Empfehlenswert ist besonders der</p>
+
+<p align="center"><a
+href="http://www.jondos.de/de/anontest">JonDos-Anonymit&#xe4;tstest</a><br>
 </p>
-<p align="left">Die Seite gibt einen schnellen &Uuml;berblick &uuml;ber alle IP-, Header- und sonstigen Informationen, die Ihr Browser an Webseiten sendet. Alle Felder sollten gr&uuml;n gef&auml;rbt oder farblos sein, <span class="Stil3">Orange</span> w&auml;re tolerierbar, <span class="Stil2">Rot</span> k&ouml;nnte verheerend f&uuml;r Ihre Anonymit&auml;t sein. Wenn Sie <span class="Stil3">Orange</span> oder<span class="Stil2"> Rote</span> Farben sehen, <strong>bewegen Sie den Mauszeiger</strong> &uuml;ber die jeweiligen Felder. Sie werden dann Hinweise und Erkl&auml;rungen als Popups erhalten.</p>
-<P>
-Sollten die Testergebnisse nicht den beschriebenen Anforderungen entsprechen, so kann das u.a. folgende Ursachen haben:
-<UL>
-	<LI>  JonDo ist nicht <a href="browser.html">korrekt eingerichtet </a>
-	<LI>Sie habe die <a href="noactive.html">Datenschutzeinstellungen im Browser</a> nicht korrekt eingestellt 
-	<LI>Es wird kein <A href="noactive_general.html">Filterproxy</A> verwendet.
-	<LI>Der Filterproxy verwendet nicht die richtigen Filter.
-	<LI>Der Filterproxy benutzt nicht JonDo als externen Proxy.
-	<LI>Der Browser benutzt nicht den Filterproxy als Proxy.
-</UL>
 
-Weitere Testseiten:
-<UL>
-<LI> <A href="http://www.leader.ru/secure/who.html">Leader.ru</A> &Uuml;berblick &uuml;ber verschiedene Header 
-<LI><A href="http://www.gurusheaven.de/index_sicherheit.html">Gurushaven.de</A> Sehr ausf&uuml;hrliche Beschreibungen von verschiedenen Tests 
-<LI><B><A href="http://www.whatismyip.com/">WhatIsMyIP</A></B> Zeigt die externe IP Adresse an.
-<LI><B><A href="https://www.astalavista.net/?cmd=net">Astalavista</A></B> Zeigt Verbindungsinformationen an (HTTPS)
-<LI><B><A href="http://proxyjudge.org/">Proxyjudge</A></B> Versucht, eine Aussage &uuml;ber das Anonymit&auml;tslevel zu machen (irrelevantes Bewertungsschema)
-<LI><B><A href="http://www.rrdb.org/check_yourself.php?l=en">RRDB</A></B> Zeigt Verbindungsinformationen an
-<LI><B><a href="http://www.netreal.de/test/ip/">NetReal</a></B> Deutsche Seite mit guten Erkl&auml;rungen 
-<LI><B><a href="http://gemal.dk/browserspy/">Browserspy</a></B> Enth&auml;lt eine gro&szlig;e Liste mit  Identifizierungsmerkmalen
-</UL>
+<p align="left">Diese Seite gibt Ihnen einen schnellen &#xdc;berblick
+&#xfc;ber alle IP-, Header- und sonstigen Informationen, die Ihr Browser an
+Webseiten sendet. <span class="style1">Alle Felder sollten gr&#xfc;n
+gef&#xe4;rbt oder farblos sein</span>. <span class="Stil3">Orange</span> ist
+normalerweise tolerierbar, <span class="Stil2">Rot</span> k&#xf6;nnte
+verheerend f&#xfc;r Ihre Anonymit&#xe4;t sein. </p>
 
+<p>Wenn Sie <span class="Stil2">Rote</span> Farben sehen, gehen Sie bitte die
+Anleitung zur Browservorbereitung nochmals gr&#xfc;ndlich durch.
+&#xdc;berpr&#xfc;fen Sie vor allem die angezeigte IP-Adresse. Sofern diese
+<span class="Stil2">Rot</span> erscheint, bewegen Sie sich komplett ohne den
+Schutz durch JonDo oder Tor im Netz. Sorgen Sie au&#xdf;erdem daf&#xfc;r,
+dass Ihr Browser ActiveX, Java und Flash nur nach Ihrer jeweils einzelnen
+Best&#xe4;tigung ausf&#xfc;hren kann. Eine automatische Ausf&#xfc;hrung
+dieser Plugins w&#xfc;rde der Webseite in den meisten F&#xe4;llen Ihre
+IP-Adresse und wichtige Systemeinstellungen verraten und damit Ihre
+Anonymit&#xe4;t gegen&#xfc;ber dieser Seite komplett oder zumindest
+weitestgehend aufheben.</p>
+
+<p><strong>Bitte beachten Sie, dass derzeit nur der <a name="JonDoFox"
+id="JonDoFox" href="jondofox.html">JonDoFox</a>-Browser alle im Test
+angegebenen Kriterien f&#xfc;r sicheres und anonymes Surfen erf&#xfc;llt. Bei
+anderen Browsern ist eine entsprechende Konfiguration, wenn &#xfc;berhaupt,
+nur f&#xfc;r Experten m&#xf6;glich. </strong></p>
+
+<p>Weitere Testseiten: </p>
+<ul>
+  <li><b><a href="http://gemal.dk/browserspy/">Browserspy</a></b>
+    enth&#xe4;lt eine gro&#xdf;e Liste mit Identifizierungsmerkmalen und
+    ausgezeichneten Tests</li>
+  <li><a href="http://www.leader.ru/secure/who.html">Leader.ru</a> gibt einen
+    &#xdc;berblick &#xfc;ber verschiedene Identifizierungsmerkmale </li>
+  <li><b><a href="https://www.astalavista.net/?cmd=net">Astalavista</a></b>
+    zeigt allgemeine Verbindungsinformationen an (HTTPS) </li>
+  <li><a
+    href="http://www.gurusheaven.de/index_sicherheit.html">Gurushaven.de</a>
+    sehr ausf&#xfc;hrliche deutsche Beschreibung von verschiedenen Tests </li>
+</ul>
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="browser.html"><img
+src="prev.gif" alt="&lt;-"> Alternative Browser</a></span> <span
+class="midlink"><a name="docbottom" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;">
+Browservorbereitung </a></span> <span class="nextlink"><a
+href="interface.html">JonDo-Oberfl&#xe4;che <img src="next.gif"
+alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer.html"-->
 </body>
 </html>

@@ -29,6 +29,7 @@ package anon.pay;
 
 import java.io.File;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Calendar;
@@ -101,6 +102,8 @@ public class PayAccount implements IXMLEncodable
 
 	private final Object SYNC_BYTES = new Object();
 
+	private static final long NEW_ACCOUNT_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7; // seven days
+	
 	private static final String VERSION = "1.1";
 
 	/** contains zero or more xml transfer certificates as XMLTransCert */
@@ -453,6 +456,25 @@ public class PayAccount implements IXMLEncodable
 		}
 	}
 
+	public boolean equals(Object a_account)
+	{
+		PayAccount account;
+		if (a_account == null || !(a_account instanceof PayAccount))
+		{
+			return false;
+		}
+		account = (PayAccount)a_account;
+		
+		return account.getAccountNumber() == this.getAccountNumber() &&
+			(account.m_strBiID == this.m_strBiID || (account.m_strBiID != null && 
+			this.m_strBiID != null && account.m_strBiID.equals(this.m_strBiID)));
+	}
+	
+	public int hashCode()
+	{
+		return (this.getAccountNumber() + this.m_strBiID).hashCode();
+	}
+	
 	/**
 	 * Returns the account's accountnumber
 	 *
@@ -463,19 +485,29 @@ public class PayAccount implements IXMLEncodable
 		return m_accountCertificate.getAccountNumber();
 	}
 
+	public boolean hasExpired()
+	{
+		return hasExpired(new Timestamp(System.currentTimeMillis()));
+	}
+	
 	public boolean hasExpired(Timestamp a_time)
 	{
 		XMLBalance balance = getBalance();
-		if (balance == null)
+		if (balance != null)
 		{
-			return false;
+			if ((balance.getCredit() > 0 || balance.getSpent() > 0) && 
+				balance.getFlatEnddate() != null && balance.getFlatEnddate().before(a_time))
+			{
+				return true;
+			}
 		}
 		
-		if ((balance.getCredit() > 0 || balance.getSpent() > 0) && 
-			balance.getFlatEnddate() != null && balance.getFlatEnddate().before(a_time))
+		if (getCreationTime().before(
+				new Date(System.currentTimeMillis() - NEW_ACCOUNT_EXPIRATION_TIME)))
 		{
 			return true;
 		}
+		
 		return false;
 	}
 	
@@ -891,6 +923,13 @@ public class PayAccount implements IXMLEncodable
 	public XMLAccountInfo fetchAccountInfo(IMutableProxyInterface a_proxys, boolean a_bForce)
 		throws SecurityException, Exception
 	{
+		return fetchAccountInfo(a_proxys, a_bForce, 0);
+	}
+	
+	public XMLAccountInfo fetchAccountInfo(IMutableProxyInterface a_proxys, boolean a_bForce,
+			int a_connectionTimeout)
+		throws SecurityException, Exception
+	{
 		if (!a_bForce && !PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled())
 		{
 			return null;
@@ -912,7 +951,14 @@ public class PayAccount implements IXMLEncodable
 		try
 		{
 			biConn = new BIConnection(m_theBI);
-			biConn.connect(a_proxys);
+			if (a_connectionTimeout > 0)
+			{
+				biConn.connect(a_proxys, a_connectionTimeout);
+			}
+			else
+			{
+				biConn.connect(a_proxys);
+			}
 			biConn.authenticate(m_accountCertificate, m_privateKey);
 			info = biConn.getAccountInfo();
 			biConn.disconnect();

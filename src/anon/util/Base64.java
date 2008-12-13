@@ -1,5 +1,9 @@
 package anon.util;
 
+import logging.LogHolder;
+import logging.LogType;
+import logging.LogLevel;
+
 
 /**
  * Encodes and decodes to and from Base64 notation.
@@ -1415,7 +1419,7 @@ public class Base64
 
 			{
 
-				System.err.println("Bad Base64 input character at " + i + ": " + source[i] + "(decimal)");
+				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Bad Base64 input character at " + i + ": " + source[i] + "(decimal)");
 
 				return null;
 

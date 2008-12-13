@@ -47,7 +47,7 @@ public class ProxyCallbackHandler
 		callbacks = new Vector();
 	}
 	
-	public synchronized byte[] deliverUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
+	public synchronized byte[] deliverUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
 	{
 		for (Enumeration enumeration = callbacks.elements(); enumeration.hasMoreElements();) 
 		{
@@ -57,7 +57,7 @@ public class ProxyCallbackHandler
 		return chunk;
 	}
 	
-	public synchronized byte[] deliverDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len)
+	public synchronized byte[] deliverDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
 	{
 		for (Enumeration enumeration = callbacks.elements(); enumeration.hasMoreElements();) 
 		{
@@ -67,9 +67,26 @@ public class ProxyCallbackHandler
 		return chunk;
 	}
 	
+	public synchronized void closeRequest(AnonProxyRequest anonRequest)
+	{
+		if(anonRequest == null)
+		{
+			throw new NullPointerException("AnonProxyRequest must not be null!");
+		}
+		for (Enumeration enumeration = callbacks.elements(); enumeration.hasMoreElements();) 
+		{
+			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();
+			callback.closeRequest(anonRequest);
+		}
+		
+	}
+	
 	public synchronized void registerProxyCallback(ProxyCallback callback)
 	{
-		callbacks.addElement(callback);
+		if(! callbacks.contains(callback))
+		{
+			callbacks.addElement(callback);
+		}
 	}
 	
 	public synchronized void removeCallback(ProxyCallback callback)
