@@ -1,5 +1,10 @@
 package anon.infoservice;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,30 +12,25 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
-
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.Transformer;
 
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import anon.crypto.CertPath;
+import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
-import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
+import anon.util.Util;
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 public class TermsAndConditionsFramework extends AbstractDistributableCertifiedDatabaseEntry
 {
@@ -167,7 +167,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		try
 		{
 			// find the ServiceOperator object to our T&C
-			ServiceOperator op = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(Util.colonizeSKI(a_data.getId()));
+			ServiceOperator op = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(Util.colonizeSKI(a_data.getSKI()));
 			
 			if(op == null)
 			{
@@ -182,7 +182,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			
 			// get country from country code
 			Locale loc = new Locale(op.getCountryCode(), op.getCountryCode());
-			Locale tcLoc = new Locale(a_data.getLocale());
+			Locale tcLoc = new Locale(a_data.getLocale(), "", "");
 			
 			Element country = doc.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
 			XMLUtil.setValue(country, loc.getDisplayCountry(tcLoc));
@@ -296,7 +296,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		else if(!a_tc.getLocale().equals("en"))
 		{
 			// look in the English version of this T&C
-			TermsAndConditions tcDefault = TermsAndConditions.getById(a_tc.getId(), Locale.ENGLISH);
+			TermsAndConditions tcDefault = TermsAndConditions.getById(a_tc.getSKI(), Locale.ENGLISH);
 			
 			if(tcDefault != null)
 			{
@@ -465,7 +465,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 		return false;
 	}
-
+	
 	public static void loadFromDirectory(File a_dir)
 	{
 		File file = null;
@@ -518,17 +518,33 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		
 		return tc;
 	}
+	
+	public boolean equals(Object a_object)
+	{
+		boolean objectEquals = false;
+		if (a_object != null)
+		{
+			if (a_object instanceof TermsAndConditionsFramework)
+			{
+				objectEquals = this.getId().equals( ( (TermsAndConditionsFramework) a_object).getId());
+			}
+		}
+		return objectEquals;
+	}
+	
+	public int hashCode()
+	{
+		return (getId().hashCode());
+	}
 
-	@Override
 	public XMLSignature getSignature()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return m_signature;
 	}
 
 	public MultiCertPath getCertPath()
 	{
 		// TODO Auto-generated method stub
-		return null;
+		return m_certPath;
 	}
 }

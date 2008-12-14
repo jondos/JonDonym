@@ -45,6 +45,7 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	public static String POST_FILE = "/tc";
 	
 	public String m_strId;
+	public String m_ski;
 	
 	public String m_referenceId;
 	
@@ -55,7 +56,7 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	public long m_serial;
 
 	private XMLSignature m_signature = null;
-	
+
 	private MultiCertPath m_certPath = null;
 	
 	public TermsAndConditions(Element a_elem) throws XMLParseException
@@ -85,11 +86,11 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		if(tokens >= 1)
 		{
 			// extract the ski
-			m_strId = token.nextToken();
+			m_ski = token.nextToken();
 		}
 		else
 		{
-			m_strId = null;
+			m_ski = null;
 		}
 		
 		if(tokens >= 2)
@@ -117,6 +118,17 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 			throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed id for TermsAndConditons object: " + m_strId);
 		}
 	}
+	
+	public boolean checkId()
+	{
+		if(m_signature == null)
+		{
+			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- signature is NULL!");
+			return false;
+		}
+		return  (m_ski != null) && m_ski.equals(m_signature.getXORofSKIs());
+	}
+
 
 	public String getId() 
 	{
@@ -126,6 +138,11 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	public String getReferenceId()
 	{
 		return m_referenceId;
+	}
+	
+	public String getSKI()
+	{
+		return m_ski;
 	}
 	
 	public String getLocale()
