@@ -44,6 +44,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.util.ClassUtil;
+import anon.util.IMiscPasswordReader;
 
 /**
  * This abstract class provides access to OS-specific implementations of certain
@@ -440,6 +441,20 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		}
 
 		return r_vms;
+	}
+	
+	/**
+	 * Copies a file with root/administrator rights to the specified directory.
+	 * @param a_sourceFile
+	 * @param a_targetDirectory
+	 * @param a_passwordReader a password reader for getting the root/user password if needed
+	 * @return true if copying the file was successful; false is an error occurred or if this
+	 * operation is not supported on this platform
+	 */
+	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, 
+			IMiscPasswordReader a_passwordReader)
+	{
+		return false;
 	}
 	
 	public String getTempPath()

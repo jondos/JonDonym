@@ -34,6 +34,8 @@ import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import anon.ErrorCodes;
 import anon.crypto.AsymmetricCryptoKeyPair;
 import anon.infoservice.Database;
 import anon.infoservice.IMutableProxyInterface;
@@ -382,9 +384,10 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 
 	public long getActiveAccountNumber()
 	{
-		if (m_ActiveAccount != null)
+		PayAccount activeAccount = m_ActiveAccount;
+		if (activeAccount != null)
 		{
-			return m_ActiveAccount.getAccountNumber();
+			return activeAccount.getAccountNumber();
 		}
 		else
 		{
@@ -822,17 +825,19 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	/**
 	 * signalAccountRequest
 	 */
-	public boolean signalAccountRequest(MixCascade a_connectedCascade)
+	public int signalAccountRequest(MixCascade a_connectedCascade)
 	{
-		boolean m_bSuccess = true;
+		int m_bSuccess = ErrorCodes.E_SUCCESS;
 		synchronized (m_paymentListeners)
 		{
 			Enumeration enumListeners = m_paymentListeners.elements();
 			while (enumListeners.hasMoreElements())
 			{
-				if (!( (IPaymentListener) enumListeners.nextElement()).accountCertRequested(a_connectedCascade))
+				if ((m_bSuccess = 
+					( (IPaymentListener) enumListeners.nextElement()).accountCertRequested(a_connectedCascade)) !=
+						ErrorCodes.E_SUCCESS)
 				{
-					m_bSuccess = false;
+					break;
 				}
 			}
 		}

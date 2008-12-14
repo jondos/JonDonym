@@ -157,7 +157,7 @@ public class AIControlChannel extends XmlControlChannel
 
 			  XMLErrorMessage error = new XMLErrorMessage(elemRoot);
 			  LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
-						"processing AI ErrorMessage "+error.getErrorCode()+": "+error.getMessage());
+						"For account " + PayAccountsFile.getInstance().getActiveAccountNumber() + ", processing AI ErrorMessage "+error.getErrorCode()+": "+error.getMessage());
 			  if (error.getErrorCode() ==  XMLErrorMessage.ERR_ACCOUNT_EMPTY)
 			  {
 				  // find an account that is not empty - if possible...
@@ -179,7 +179,6 @@ public class AIControlChannel extends XmlControlChannel
 					  getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
 					  processErrorMessage(new XMLErrorMessage(elemRoot));
 				  }
-
 			  }
 			  else
 			  {
@@ -556,12 +555,11 @@ public class AIControlChannel extends XmlControlChannel
 		  }
 	  }
 
-	  if (!PayAccountsFile.getInstance().signalAccountRequest(m_connectedCascade) ||
-		  PayAccountsFile.getInstance().getActiveAccount() == null)
+	  int errorAccount = PayAccountsFile.getInstance().signalAccountRequest(m_connectedCascade);
+	  if (errorAccount != ErrorCodes.E_SUCCESS)
 	  {
-		  return ErrorCodes.E_UNKNOWN;
+		  return errorAccount;
 	  }
-
 
 	  if (priceCerts.size() != mixIDs.size())
 	  {

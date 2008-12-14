@@ -27,7 +27,6 @@
  */
 package anon.pay;
 
-import anon.infoservice.ImmutableProxyInterface;
 
 /**
  * This class is the high-level part of the communication with the AI. It

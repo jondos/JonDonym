@@ -112,10 +112,12 @@ public class XMLGenericText implements IXMLEncodable
 			throw new Exception("XMLGenericText: cannot parse, wrong xml format!");
 		}
 
-		Element elem;
-
 		// parse text
 		m_text = XMLUtil.parseValue(xml, "");
+		if (m_text == null)
+		{
+			m_text = XMLUtil.toString(xml.getFirstChild());
+		}
 		//might very well be empty
 	}
 

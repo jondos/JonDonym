@@ -386,14 +386,14 @@ public class BIConnection implements ICaptchaSender
 
 	public XMLGenericText getTerms(String lang) throws Exception
 	{
-
 		m_httpClient.writeRequest("POST","terms",lang);
 		Document doc = m_httpClient.readAnswer();
 		XMLGenericText terms;
 		try
 		{
 			terms = new XMLGenericText(doc);
-		} catch (Exception e) // e.g. JPI returned an ErrorMessage instead of GenericText
+		} 
+		catch (Exception e) // e.g. JPI returned an ErrorMessage instead of GenericText
 		{
 			return null;
 		}
@@ -605,7 +605,7 @@ public class BIConnection implements ICaptchaSender
 		else
 		{
 			XMLTransactionOverview overview = new XMLTransactionOverview(doc.getDocumentElement());
-			String theReturnedOverview = XMLUtil.toString(overview.toXmlElement(XMLUtil.createDocument()));
+			//String theReturnedOverview = XMLUtil.toString(overview.toXmlElement(XMLUtil.createDocument()));
 			return overview;
 		}
 	}

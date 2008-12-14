@@ -1,14 +1,15 @@
 package anon.pay.xml;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
-import java.util.Vector;
-import org.w3c.dom.NodeList;
-import java.util.Hashtable;
-import org.w3c.dom.Node;
-import java.util.Enumeration;
 
 /**
  * Wraps a Hashtable of Strings in xml

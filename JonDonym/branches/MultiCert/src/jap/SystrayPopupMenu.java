@@ -37,6 +37,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -249,7 +254,6 @@ public class SystrayPopupMenu extends PopupMenu
 		add(panel);
 
 
-
 		JMenu filterMenu;
 		Vector models = TrustModel.getTrustModels();
 
@@ -271,6 +275,26 @@ public class SystrayPopupMenu extends PopupMenu
 				final CascadePopupMenu tmpPopupCascade = new CascadePopupMenu(filterMenu.getPopupMenu());
 				add(filterMenu);
 
+				filterMenu.addMouseListener(new MouseAdapter()
+				{					
+					public void mouseClicked(MouseEvent a_event)
+					{
+						if (TrustModel.getCurrentTrustModel() == null || 
+							!TrustModel.getCurrentTrustModel().equals(tmpModel))
+						{
+							JAPController.getInstance().switchTrustFilter(tmpModel);
+							setVisible(false);
+						}
+						else if (!JAPController.getInstance().getAnonMode() ||
+								!TrustModel.getCurrentTrustModel().isTrusted(
+										JAPController.getInstance().getCurrentMixCascade()))
+						{
+							JAPController.getInstance().switchToNextMixCascade();
+							setVisible(false);
+						}
+					}
+				});
+				
 				filterMenu.addMenuListener(new MenuListener()
 				{
 					public void menuSelected(MenuEvent e)

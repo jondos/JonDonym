@@ -762,9 +762,14 @@ final public class JAPDll {
 		{
 			return false;
 		}
-		//return shellExecute("xcopy", "/Y /R /q /i /s C:\\Users\\jondos\\Coding\\JonDo\\JAPDll\\Release\\japdll.dll \"C:\\Program Files\\JAP\\\"", a_asAdmin);
-		return shellExecute("xcopy", "/Y /R /q /i /s \"" + a_file + 
-				"\" \"" + a_directory + "\"", a_asAdmin);
+		
+		String dirSwitch = "";
+		if (a_file.isDirectory())
+		{
+			dirSwitch = "/E ";
+		}
+		
+		return shellExecute("xcopy", "/Y /R /Q /I " + dirSwitch + "\"" + a_file + "\" \"" + a_directory + "\"", a_asAdmin);
 	}
 	
 	public static String getDllVersion()

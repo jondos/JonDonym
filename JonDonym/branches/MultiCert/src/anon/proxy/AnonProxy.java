@@ -862,7 +862,8 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 			if (ret != ErrorCodes.E_SUCCESS)
 			{
-				if (ret == ErrorCodes.E_INTERRUPTED || !m_currentMixCascade.isReconnectedAutomatically() ||
+				if (ret == ErrorCodes.E_INTERRUPTED || ret == ErrorCodes.E_ACCOUNT_EMPTY ||
+					!m_currentMixCascade.isReconnectedAutomatically() ||
 					(!m_currentMixCascade.isServiceAutoSwitched() &&
 					 // these errors cannot be 'healed'
 					 (ret == E_SIGNATURE_CHECK_FIRSTMIX_FAILED ||

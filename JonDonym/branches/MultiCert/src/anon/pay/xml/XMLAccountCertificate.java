@@ -30,11 +30,11 @@ package anon.pay.xml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import anon.crypto.IMyPublicKey;
-import anon.util.XMLUtil;
-import anon.util.IXMLEncodable;
 import anon.crypto.IMyPrivateKey;
+import anon.crypto.IMyPublicKey;
 import anon.crypto.XMLSignature;
+import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  * This class contains the functionality for creating and parsing XML account

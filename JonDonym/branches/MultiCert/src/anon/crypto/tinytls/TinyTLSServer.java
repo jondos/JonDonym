@@ -1,6 +1,7 @@
 package anon.crypto.tinytls;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -8,7 +9,6 @@ import anon.crypto.IMyPrivateKey;
 import anon.crypto.JAPCertificate;
 import anon.crypto.MyDSAPrivateKey;
 import anon.crypto.MyRSAPrivateKey;
-import java.net.InetAddress;
 
 /**
  * @author stefan

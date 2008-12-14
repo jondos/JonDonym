@@ -73,7 +73,7 @@ public class PasswordContentPane extends DialogContentPane implements IMiscPassw
 		PasswordContentPane.class.getName() + "_pressedCapsLock";
 
 	private static final String MSG_WRONG_PASSWORD = PasswordContentPane.class.getName() + "_wrongPassword";
-	private static final String MSG_ENTER_PASSWORD_TITLE = PasswordContentPane.class.getName() + "_title";
+	public static final String MSG_ENTER_PASSWORD_TITLE = PasswordContentPane.class.getName() + "_title";
 	private static final String MSG_CONFIRM_LBL = PasswordContentPane.class.getName() + "_confirmPasswordLabel";
 	private static final String MSG_ENTER_OLD_LBL = PasswordContentPane.class.getName() + "_enterOldPasswordLabel";
 

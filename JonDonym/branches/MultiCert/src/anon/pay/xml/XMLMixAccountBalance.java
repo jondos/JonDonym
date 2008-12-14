@@ -27,12 +27,18 @@
  */
 package anon.pay.xml;
 
-import java.io.*;
-import javax.xml.parsers.*;
+import java.io.ByteArrayInputStream;
 
-import org.w3c.dom.*;
-import anon.crypto.*;
-import anon.util.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import anon.crypto.IMyPrivateKey;
+import anon.crypto.XMLSignature;
+import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  * A simple XML structure storing the current balance of a MixOperator
