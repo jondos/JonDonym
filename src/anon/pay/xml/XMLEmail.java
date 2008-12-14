@@ -28,10 +28,15 @@
 
 package anon.pay.xml;
 
-import org.w3c.dom.*;
-import anon.util.*;
 import java.io.ByteArrayInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  * simple XML representation of the subject, return Address, sender name (not an email field,
@@ -75,6 +80,8 @@ public class XMLEmail implements IXMLEncodable
 		m_bodyText = bodyText;
 		m_senderIdentification = senderIdentification;
 		setDefaultValues();
+		m_docTheEmail = XMLUtil.createDocument();
+		m_docTheEmail.appendChild(internal_toXmlElement(m_docTheEmail));
 	}
 
 	/**
@@ -96,6 +103,9 @@ public class XMLEmail implements IXMLEncodable
 		m_subject = subject;
 		m_senderIdentification = senderIdentification;
 		setDefaultValues();
+		m_docTheEmail = XMLUtil.createDocument();
+		m_docTheEmail.appendChild(internal_toXmlElement(m_docTheEmail));
+
 	}
 	/**
 	 * ensure that no empty xml elements are encoded

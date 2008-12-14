@@ -28,11 +28,12 @@
 
 package anon.crypto;
 
-import org.w3c.dom.*;
-
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.Date;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;

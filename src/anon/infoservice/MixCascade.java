@@ -492,6 +492,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		// JAP will not pay more than the predefined maximum!
 		if (isPayment())
 		{
+			if (m_piid == null)
+			{
+				throw new XMLParseException("Payment instance id is null on paid cascade!");
+			}
+			
 			if (m_prepaidInterval > AIControlChannel.MAX_PREPAID_INTERVAL)
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.PAY, "Prepaid interval of cascade " + getId() +

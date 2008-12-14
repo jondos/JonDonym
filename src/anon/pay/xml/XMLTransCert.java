@@ -36,7 +36,6 @@ import anon.crypto.IMyPrivateKey;
 import anon.crypto.XMLSignature;
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
-import logging.*;
 
 /** @todo add spent, BiID */
 public class XMLTransCert implements IXMLEncodable
@@ -48,7 +47,7 @@ public class XMLTransCert implements IXMLEncodable
 	private Date m_usedDate;
 	private long m_accountNumber;
 	private long m_transferNumber;
-	private long m_deposit;	
+	private long m_deposit;
 	private Document m_docTheTransCert;
 
 	public final static String XML_ELEMENT_NAME_TRANSFER_CERTIFICATES = "TransferCertificates";

@@ -72,7 +72,7 @@ public class XMLTransactionOverview implements IXMLEncodable
 	public static final String KEY_AMOUNT = "amount";
 	public static final String KEY_VOLUMEPLAN = "volumeplan";
 	public static final String KEY_PAYMENTMETHOD = "paymentmethod";
-	public static final String KEY_USED = "used";	
+	public static final String KEY_USED = "used";
 
 	public XMLTransactionOverview(String a_language)
 	{

@@ -35,6 +35,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.awt.Container;
 
+import platform.AbstractOS;
+
 import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
 import anon.infoservice.HTTPConnectionFactory;
@@ -46,6 +48,7 @@ import gui.wizard.BasicWizard;
 import gui.wizard.BasicWizardHost;
 import gui.wizard.WizardPage;
 import gui.dialog.JAPDialog;
+import gui.dialog.PasswordContentPane;
 import jap.JAPConstants;
 import jap.JAPController;
 import jap.JAPModel;
@@ -65,9 +68,14 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 	public JAPDownloadWizardPage downloadPage;
 	public JAPFinishWizardPage finishPage;
 	private BasicWizardHost host;
+	private String m_strTempDirectory;
 
 	//private Vector m_Pages;
 
+	private static final String MSG_ADMIN_RIGHTS_NEEDED = 
+		JAPUpdateWizard.class.getName() + "_adminRightsNeeded";
+	private static final String MSG_ENTER_ADMIN_PASSWORD = 
+		JAPUpdateWizard.class.getName() + "_enterAdminPassword";
 
 	//private JAPUpdateWizard updateWizard;
 
@@ -174,7 +182,8 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		// Start with Step 1 copy
 		if (renameJapJar() != 0)
 		{
-			downloadPage.showInformationDialog(JAPMessages.getString("updateInformationMsgStep1"));
+			downloadPage.showInformationDialog(JAPMessages.getString("updateInformationMsgStep1") + " " +
+					JAPMessages.getString(MSG_ADMIN_RIGHTS_NEEDED));
 			resetChanges();
 			return;
 		}
@@ -224,7 +233,8 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		{
 			if (applyJARDiffJAPJar() != 0)
 			{
-				downloadPage.showInformationDialog(JAPMessages.getString("updateInformationMsgStep3"));
+				downloadPage.showInformationDialog(JAPMessages.getString("updateInformationMsgStep3") + " " +
+						JAPMessages.getString(MSG_ADMIN_RIGHTS_NEEDED));
 				resetChanges();
 				return;
 			}
@@ -248,7 +258,8 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		// Step 5
 		if (overwriteJapJar() != 0)
 		{
-			downloadPage.showInformationDialog(JAPMessages.getString("updateInformationMsgStep5"));
+			downloadPage.showInformationDialog(JAPMessages.getString("updateInformationMsgStep5") + " " +
+					JAPMessages.getString(MSG_ADMIN_RIGHTS_NEEDED));
 			return;
 		}
 		try
@@ -396,18 +407,38 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 	//Step 1
 	private int renameJapJar()
 	{
-		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Start to make a copy of old JAP.jar!");
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Start to make a copy of old jar-File!");
 		
 		//just copy the File and then rename the copy
 		downloadPage.m_labelIconStep1.setIcon(downloadPage.arrow);
 		try
 		{
-			//newFile = new File(prefix+JAPConstants.aktVersion2+suffix);
-			m_fileJapJarCopy = new File(m_strAktJapJarPath + m_strAktJapJarFileName +
-										JAPConstants.aktVersion + EXTENSION_BACKUP +
-										m_strAktJapJarExtension);
-			Util.copyStream(new FileInputStream(m_fileAktJapJar), 
-					new FileOutputStream(m_fileJapJarCopy));
+			try
+			{
+				//newFile = new File(prefix+JAPConstants.aktVersion2+suffix);
+				m_fileJapJarCopy = new File(m_strAktJapJarPath + m_strAktJapJarFileName +
+											JAPConstants.aktVersion + EXTENSION_BACKUP +
+										m_strAktJapJarExtension);			
+				Util.copyStream(new FileInputStream(m_fileAktJapJar), 
+						new FileOutputStream(m_fileJapJarCopy));
+			}
+			catch (Throwable a_e)
+			{
+				m_strTempDirectory = AbstractOS.getInstance().getTempPath();
+				if (m_strTempDirectory == null)
+				{
+					throw a_e;
+				}
+				
+				// we will use a temp directory and administrator rights				
+				m_fileJapJarCopy = new File(m_strTempDirectory + m_strAktJapJarFileName +
+						JAPConstants.aktVersion + EXTENSION_BACKUP +
+					m_strAktJapJarExtension);
+				Util.copyStream(new FileInputStream(m_fileAktJapJar), 
+						new FileOutputStream(m_fileJapJarCopy));
+				finishPage.m_labelBackupOfJapJar.setText(m_fileJapJarCopy.getAbsolutePath());				
+				downloadPage.m_labelSaveTo.setText(m_fileJapJarCopy.getAbsolutePath());
+			}
 			//TODO
 			//if totalLength!=0 ...
 			// the first step has the Zone from 0 to 5 in the ProgressBar
@@ -634,6 +665,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		}
 		catch (Exception e)
 		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 			return -1;
 		}
 		downloadPage.m_labelIconStep2.setIcon(downloadPage.arrow);
@@ -656,6 +688,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		}
 		catch (Exception e)
 		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 			return -1;
 		}
 	}
@@ -665,8 +698,16 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 	{
 		try
 		{
-			m_fileNewJapJar = new File(m_strAktJapJarPath + m_strAktJapJarFileName + m_strNewJapVersion +
-									   EXTENSION_NEW + m_strAktJapJarExtension);
+			if (m_strTempDirectory == null)
+			{
+				m_fileNewJapJar = new File(m_strAktJapJarPath + m_strAktJapJarFileName + m_strNewJapVersion +
+						   EXTENSION_NEW + m_strAktJapJarExtension);
+			}
+			else
+			{
+				m_fileNewJapJar = new File(m_strTempDirectory + m_fileAktJapJar.getName());
+			}
+			
 			FileOutputStream fos = new FileOutputStream(m_fileNewJapJar);
 			if (m_arBufferNewJapJar == null)
 			{
@@ -685,6 +726,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		}
 		catch (Exception e)
 		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 			return -1;
 		}
 	}
@@ -715,7 +757,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 			return -1; //listener.progress(0,0,UpdateListener.STATE_ABORTED_STEP3);
 		}
 
@@ -744,10 +786,46 @@ private boolean checkSignature()
 			}
 			downloadPage.m_labelIconStep5.setIcon(downloadPage.arrow);
 	
-			Util.copyStream(new FileInputStream(m_fileNewJapJar),
-					new FileOutputStream(m_fileAktJapJar));
+			if (m_strTempDirectory == null)
+			{
+				Util.copyStream(new FileInputStream(m_fileNewJapJar),
+					new FileOutputStream(m_fileAktJapJar));				
+			}
+			else
+			{
+				JAPDialog dialog = new JAPDialog(downloadPage, 
+						JAPMessages.getString(PasswordContentPane.MSG_ENTER_PASSWORD_TITLE));
+				PasswordContentPane pane = 
+					new PasswordContentPane(dialog, PasswordContentPane.PASSWORD_ENTER,
+							JAPMessages.getString(MSG_ENTER_ADMIN_PASSWORD));
+				pane.updateDialog();
+				dialog.pack();
+				dialog.setResizable(false);
+				if (!AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, m_fileAktJapJar.getParentFile(), pane))
+				{
+					dialog.dispose();
+					throw new Exception ("Administrator copy failed!");
+				}
+				dialog.dispose();
+				int i = 0;
+				for (; i < 9; i++)
+				{					
+					downloadPage.progressBar.setValue(491 + i);
+					downloadPage.progressBar.repaint();
+					if (m_fileNewJapJar.length() == m_fileAktJapJar.length() &&
+						m_fileNewJapJar.lastModified() == m_fileAktJapJar.lastModified())
+						/* TODO get version number of the JAP.jar file by a java shell call */
+					{
+						break;
+					}
+					Thread.sleep(500);
+				}
+				if (i == 9)
+				{
+					throw new Exception ("Administrator copy failed!");
+				}
+			}
 			
-			// the 5th step has the Zone from 490 to 500 in the ProgressBar
 			downloadPage.progressBar.setValue(500);
 			downloadPage.progressBar.repaint();
 			downloadPage.m_labelIconStep5.setIcon(downloadPage.stepfinished);
@@ -755,6 +833,7 @@ private boolean checkSignature()
 		}
 		catch (Exception e)
 		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 			GUIUtils.setLoadImages(true);
 			return -1;
 		}

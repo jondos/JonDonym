@@ -27,8 +27,8 @@
  */
 package anon.pay;
 
-import anon.util.captcha.IImageEncodedCaptcha;
 import anon.util.captcha.ICaptchaSender;
+import anon.util.captcha.IImageEncodedCaptcha;
 
 
 /**

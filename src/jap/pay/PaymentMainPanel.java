@@ -53,10 +53,13 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import anon.ErrorCodes;
+import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.pay.AIControlChannel;
 import anon.pay.PayAccount;
 import anon.pay.PayAccountsFile;
+import anon.pay.PaymentInstanceDBEntry;
 import anon.pay.xml.XMLBalance;
 import anon.pay.xml.XMLErrorMessage;
 import anon.util.JobQueue;
@@ -104,6 +107,8 @@ public class PaymentMainPanel extends FlippingPanel
 		"_noActiveAccount";
 	private static final String MSG_ENABLE_AUTO_SWITCH = PaymentMainPanel.class.getName() +
 		"_enableAutoSwitch";
+	private static final String MSG_WITH_COSTS = PaymentMainPanel.class.getName() +
+	"_withCosts";
 	private static final String MSG_EXPERIMENTAL = PaymentMainPanel.class.getName() +
 		"_experimental";
 	private static final String MSG_TITLE_FLAT = PaymentMainPanel.class.getName() + "_title_flat";
@@ -704,16 +709,51 @@ public class PaymentMainPanel extends FlippingPanel
 			updateDisplay(acc, true);
 		}
 
+		private String formatCascadeName(MixCascade a_cascade)
+		{
+			String strCascadeName;
+			
+			if (a_cascade == null || a_cascade.getName() == null)
+			{
+				strCascadeName = "";
+			}
+			else
+			{
+				strCascadeName = ", <b>" + a_cascade.getName() + "</b>,";
+			}
+			return strCascadeName;
+		}
+		
+		private String formatOrganisation(String a_strOrganisation)
+		{
+			String strOrganisation;
+			
+			/** Fix this, when test BI has a new organisation... */
+			a_strOrganisation = "JonDos GmbH";
+			
+			if (a_strOrganisation == null)
+			{
+				strOrganisation = "";
+			}
+			else
+			{
+				strOrganisation = "<b>" + a_strOrganisation + "</b>";
+			}
+			return strOrganisation;			
+		}
+		
 		/**
 		 * accountCertRequested
 		 *
 		 * @param usingCurrentAccount boolean
 		 */
-		public boolean accountCertRequested(final MixCascade a_connectedCascade)
+		public int accountCertRequested(final MixCascade a_connectedCascade)
 		{
 			final PayAccountsFile payAccounts = PayAccountsFile.getInstance();
-			boolean bSuccess = true;
-			
+			int bSuccess = ErrorCodes.E_SUCCESS;
+			PaymentInstanceDBEntry piEntry;
+			String strOrganisation = null;
+
 			final JAPDialog.LinkedInformationAdapter adapter =			
 				new JAPDialog.AbstractLinkedURLAdapter()
 			{
@@ -743,13 +783,22 @@ public class PaymentMainPanel extends FlippingPanel
 			};
 			Runnable run = null;
 			final String strMessage = ""; //JAPMessages.getString(MSG_FREE_OF_CHARGE) + "<br><br>";
+						
+			piEntry = (PaymentInstanceDBEntry)Database.getInstance(PaymentInstanceDBEntry.class).getEntryById(
+					a_connectedCascade.getPIID());
+			if (piEntry != null)
+			{
+				strOrganisation = piEntry.getOrganisation();
+			}
+			final String fstrOrganisation = strOrganisation;
+			final MixCascade cascade = (MixCascade)Database.getInstance(MixCascade.class).getEntryById(a_connectedCascade.getId());
 
 			final PayAccount account = payAccounts.getActiveAccount();
 			if (payAccounts.getNumAccounts() == 0  ||
-				(account != null && !account.getBI().getId().equals(a_connectedCascade.getPIID())))
+				(account != null && !account.getPIID().equals(a_connectedCascade.getPIID())))
 			{
 				JAPController.getInstance().setAnonMode(false);
-				bSuccess = false;
+				bSuccess = ErrorCodes.E_ACCOUNT_EMPTY;
 
 				run = new Runnable()
 				{
@@ -765,9 +814,12 @@ public class PaymentMainPanel extends FlippingPanel
 						{
 							optionType = JAPDialog.OPTION_TYPE_OK_CANCEL;
 						}
+						
 						int answer = JAPDialog.showConfirmDialog(
 							JAPController.getInstance().getViewWindow(),
-							strMessage + JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION),
+							strMessage + JAPMessages.getString(MSG_WITH_COSTS, formatCascadeName(cascade)) + " " + 
+							JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION, 
+									formatOrganisation(fstrOrganisation)),
 							optionType, JAPDialog.MESSAGE_TYPE_QUESTION, adapter);
 						
 						if (answer == JAPDialog.RETURN_VALUE_YES)
@@ -789,7 +841,7 @@ public class PaymentMainPanel extends FlippingPanel
 				if (account == null)
 				{
 					JAPController.getInstance().setAnonMode(false);
-					bSuccess = false;
+					bSuccess = ErrorCodes.E_ACCOUNT_EMPTY;
 					run = new Runnable()
 					{
 						public void run()
@@ -803,15 +855,14 @@ public class PaymentMainPanel extends FlippingPanel
 				else if (!account.isCharged(new Timestamp(System.currentTimeMillis())))
 				{
 					JAPController.getInstance().setAnonMode(false);
-					bSuccess = false;
+					bSuccess = ErrorCodes.E_ACCOUNT_EMPTY;
 
 					run = new Runnable()
 					{
 						public void run()
 						{
-							String message = strMessage +
-								JAPMessages.getString(MSG_PAYMENT_ERRORS[XMLErrorMessage.ERR_ACCOUNT_EMPTY]) +
-								" ";
+							String message = strMessage + JAPMessages.getString(MSG_WITH_COSTS, 
+									formatCascadeName(cascade)) + " ";
 							boolean bOpenTransaction = false;
 							if (account.getBalance().getSpent() <= 0 && !account.hasExpired())
 							{
@@ -820,8 +871,8 @@ public class PaymentMainPanel extends FlippingPanel
 							}
 							else
 							{
-								message += //JAPMessages.getString(MSG_WANNA_CHARGE);
-									JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION);
+								message += JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION, 
+											formatOrganisation(fstrOrganisation));
 							}
 							JAPController.getInstance().setAnonMode(false);
 							int optionType;
@@ -859,23 +910,6 @@ public class PaymentMainPanel extends FlippingPanel
 						}
 					};
 				}
-				else if (!JAPController.getInstance().getDontAskPayment())
-				{
-					JAPDialog.LinkedCheckBox checkBox = new JAPDialog.LinkedCheckBox(false);
-
-					int ret = JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(),
-						strMessage + JAPMessages.getString("payUseAccountQuestion"), // + "<br><br>" +
-						//"<Font color=\"red\">" + JAPMessages.getString(MSG_EXPERIMENTAL) + "</Font>",
-						JAPDialog.OPTION_TYPE_OK_CANCEL, JAPDialog.MESSAGE_TYPE_INFORMATION,
-						checkBox);
-					JAPController.getInstance().setDontAskPayment(checkBox.getState());
-
-					if (ret != JAPDialog.RETURN_VALUE_OK)
-					{
-						JAPController.getInstance().setAnonMode(false);
-						bSuccess = false;
-					}
-				}
 			}
 			if (run != null)
 			{
@@ -904,6 +938,9 @@ public class PaymentMainPanel extends FlippingPanel
 		 */
 		public void accountError(XMLErrorMessage a_msg, boolean a_bIgnore)
 		{
+			PaymentInstanceDBEntry piEntry;
+			String strOrganisation = null;
+			
 			if (a_msg.getErrorCode() <= XMLErrorMessage.ERR_OK || a_msg.getErrorCode() < 0)
 			{
 				// no error
@@ -911,7 +948,8 @@ public class PaymentMainPanel extends FlippingPanel
 			}
 
 			final MixCascade cascade = JAPController.getInstance().getCurrentMixCascade();
-			if (cascade.equals(JAPController.getInstance().switchToNextMixCascade()))
+			if (a_msg.getErrorCode() != XMLErrorMessage.ERR_ACCOUNT_EMPTY &&
+				cascade.equals(JAPController.getInstance().switchToNextMixCascade()))
 			{
 				// there are no other cascades to switch to
 				LogHolder.log(LogLevel.WARNING, LogType.NET, "There are no other cascades to choose!");
@@ -931,6 +969,14 @@ public class PaymentMainPanel extends FlippingPanel
 					}
 				}
 			}
+			
+			piEntry = (PaymentInstanceDBEntry)Database.getInstance(PaymentInstanceDBEntry.class).getEntryById(
+					cascade.getPIID());
+			if (piEntry != null)
+			{
+				strOrganisation = piEntry.getOrganisation();
+			}
+			final String fstrOrganisation = strOrganisation;
 
 			if (!m_bShowingError && !a_bIgnore)
 			{
@@ -959,8 +1005,9 @@ public class PaymentMainPanel extends FlippingPanel
 						if (msg.getErrorCode() == XMLErrorMessage.ERR_ACCOUNT_EMPTY)
 						{
 							message += "<br><br>" +
-								//JAPMessages.getString(MSG_WANNA_CHARGE);
-								JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION);
+								JAPMessages.getString(MSG_WITH_COSTS, formatCascadeName(cascade)) + " " +
+								JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION, 
+										formatOrganisation(fstrOrganisation));
 							int optionType;
 							if (JAPModel.getInstance().isCascadeAutoSwitched() &&
 								!TrustModel.getCurrentTrustModel().isPaymentForced())

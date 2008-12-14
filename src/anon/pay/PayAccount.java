@@ -27,7 +27,6 @@
  */
 package anon.pay;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Enumeration;
@@ -190,6 +189,7 @@ public class PayAccount implements IXMLEncodable
 		m_privateKey = privateKey;
 		m_transCerts = new Vector();
 		m_theBI = theBI;
+		m_strBiID = theBI.getId();
 		setTerms(terms);
 	}
 

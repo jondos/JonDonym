@@ -32,27 +32,27 @@
 
 package anon.crypto;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.Signature;
 
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-import org.bouncycastle.crypto.signers.DSASigner;
-import org.bouncycastle.asn1.DEROutputStream;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERInteger;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import java.math.BigInteger;
-import java.io.IOException;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.signers.DSASigner;
 
 /**
  * Implements the DSA algorithm for signatures.
