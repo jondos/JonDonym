@@ -801,7 +801,8 @@ private boolean checkSignature()
 				pane.updateDialog();
 				dialog.pack();
 				dialog.setResizable(false);
-				if (!AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, m_fileAktJapJar.getParentFile(), pane))
+				if (!AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, 
+						new File(m_fileAktJapJar.getParent()), pane))
 				{
 					dialog.dispose();
 					throw new Exception ("Administrator copy failed!");

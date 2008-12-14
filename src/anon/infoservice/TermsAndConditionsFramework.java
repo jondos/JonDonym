@@ -191,7 +191,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			
 			// get country from country code
 			Locale loc = new Locale(op.getCountryCode(), op.getCountryCode());
-			Locale tcLoc = new Locale(a_data.getLocale());
+			Locale tcLoc = new Locale(a_data.getLocale(), "", "");
 			
 			Element country = doc.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
 			XMLUtil.setValue(country, loc.getDisplayCountry(tcLoc));
