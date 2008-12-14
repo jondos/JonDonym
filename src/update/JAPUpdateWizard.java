@@ -706,6 +706,8 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 			else
 			{
 				m_fileNewJapJar = new File(m_strTempDirectory + m_fileAktJapJar.getName());
+				downloadPage.m_labelStep3.setText(JAPMessages.getString("updateM_labelStep3Part1") + " " + 
+						m_fileAktJapJar.getName());
 			}
 			
 			FileOutputStream fos = new FileOutputStream(m_fileNewJapJar);
