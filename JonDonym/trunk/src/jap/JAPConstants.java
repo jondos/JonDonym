@@ -35,7 +35,7 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.10.047"; //Never change the layout of this line!
+	public static final String aktVersion = "00.10.048"; //Never change the layout of this line!
 	public final static boolean m_bUnstableVersion = false; //Set to true if this is an unstable (development) Version
 
 	
@@ -250,7 +250,6 @@ public final class JAPConstants
 	public final static String CONFIG_LISTENER_IS_LOCAL = "listenerIsLocal";
 	public final static String CONFIG_NEVER_REMIND_ACTIVE_CONTENT = "neverRemindActiveContent";
 	public final static String CONFIG_NEVER_EXPLAIN_FORWARD = "neverExplainForward";
-	public final static String CONFIG_NEVER_ASK_PAYMENT = "neverAskPayment";
 	public final static String CONFIG_DO_NOT_ABUSE_REMINDER = "doNotAbuseReminder";
 	public final static String CONFIG_NEVER_REMIND_GOODBYE = "neverRemindGoodBye";
 	public final static String CONFIG_INFOSERVICE_DISABLED = "infoServiceDisabled";

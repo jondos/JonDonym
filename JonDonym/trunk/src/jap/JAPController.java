@@ -77,6 +77,7 @@ import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.CascadeIDEntry;
 import anon.infoservice.Database;
 import anon.infoservice.IServiceContextContainer;
+import anon.infoservice.PerformanceEntry;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
@@ -244,6 +245,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static final long ACCOUNT_UPDATE_INTERVAL_MS = 60000;
 
 
+	/**
+	 * Tells if the user has already transferred some bytes on the anonymous connection.
+	 * If not, we may switch to another connection if the current connection is bad.
+	 */
+	private boolean m_bConnectionUnused = true;
 
 	/**
 	 * Stores the active MixCascade.
@@ -276,7 +282,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private boolean mbActCntMessageNeverRemind = false; // indicates if Warning message in setAnonMode has been deactivated forever
 	private boolean mbDoNotAbuseReminder = false; // indicates if new warning message in setAnonMode (containing Do no abuse) has been shown
 	private boolean m_bForwarderNotExplain = false; //indicates if the warning message about forwarding should be shown
-	private boolean m_bPayCascadeNoAsk = false;
 
 	private boolean m_bAskSavePayment;
 	private boolean m_bPresentationMode = false;
@@ -522,6 +527,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		JAPModel.getInstance().getRoutingSettings().getServerStatisticsListener().addObserver(this);
 		JAPModel.getInstance().getRoutingSettings().getRegistrationStatusObserver().addObserver(this);
 		m_Model.addObserver(this);
+		Database.getInstance(PerformanceInfo.class).addObserver(this);
 		m_iStatusPanelMsgIdForwarderServerStatus = -1;
 	}
 
@@ -1190,9 +1196,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 											   !JAPConstants.DEFAULT_WARN_ON_CLOSE));
 					m_bForwarderNotExplain =
 						XMLUtil.parseAttribute(root, JAPConstants.CONFIG_NEVER_EXPLAIN_FORWARD, false);
-					m_bPayCascadeNoAsk =
-						XMLUtil.parseAttribute(root, JAPConstants.CONFIG_NEVER_ASK_PAYMENT, false);
-
 				}
 				catch (Exception ex)
 				{
@@ -2687,7 +2690,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_NEVER_REMIND_ACTIVE_CONTENT,
 								 mbActCntMessageNeverRemind);
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_NEVER_EXPLAIN_FORWARD, m_bForwarderNotExplain);
-			XMLUtil.setAttribute(e, JAPConstants.CONFIG_NEVER_ASK_PAYMENT, m_bPayCascadeNoAsk);
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_DO_NOT_ABUSE_REMINDER, mbDoNotAbuseReminder);
 			XMLUtil.setAttribute(e, JAPConstants.CONFIG_NEVER_REMIND_GOODBYE,
 								 JAPModel.getInstance().isNeverRemindGoodbye());
@@ -2998,6 +3000,17 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 
+	public MixCascade switchTrustFilter(TrustModel a_trustModel)
+	{
+		TrustModel.setCurrentTrustModel(a_trustModel);
+		if (!a_trustModel.isTrusted(getCurrentMixCascade()))
+		{
+			return switchToNextMixCascade();
+		}
+		
+		return getCurrentMixCascade();
+	}
+	
 	public MixCascade switchToNextMixCascade()
 	{
 		MixCascade cascade = new AutoSwitchedMixCascadeContainer(true).getNextMixCascade();
@@ -4766,6 +4779,19 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 				}
 			}
+			else if (a_notifier == Database.getInstance(PerformanceInfo.class) && 
+					a_message != null && 
+					!a_message.equals(DatabaseMessage.INITIAL_OBSERVER_MESSAGE))
+			{
+				// react on bad performance data if this connection has not been used yet
+				if (m_bConnectionUnused && JAPModel.getInstance().isCascadeAutoSwitched() &&
+					!TrustModel.getCurrentTrustModel().isTrusted(getCurrentMixCascade()))
+				{					
+					switchToNextMixCascade();
+					LogHolder.log(LogLevel.WARNING, LogType.NET, 
+						"Automatically switched service due to bad performance/bad trust!");
+				}
+			}
 		}
 		catch (Exception e)
 		{
@@ -5168,6 +5194,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	public void packetMixed(final long a_totalBytes)
 	{
+		if (a_totalBytes == 0)
+		{
+			m_bConnectionUnused = true;
+		}
+		else
+		{
+			m_bConnectionUnused = false;
+		}
 		JobQueue.Job job = new JobQueue.Job(true)
 		{
 			public void runJob()
@@ -5213,17 +5247,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 				( (AnonServiceEventListener) e.nextElement()).packetMixed(a_totalBytes);
 			}
 		}
-	}
-
-	public boolean getDontAskPayment()
-	{
-		return true;
-		//return m_bPayCascadeNoAsk;
-	}
-	
-	public void setDontAskPayment(boolean a_payCascadeNoAsk)
-	{
-		m_bPayCascadeNoAsk = a_payCascadeNoAsk;
 	}
 	
 	public void acceptTermsAndConditions(ServiceOperator a_op)

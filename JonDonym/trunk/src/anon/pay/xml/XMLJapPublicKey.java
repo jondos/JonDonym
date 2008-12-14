@@ -27,7 +27,6 @@
  */
 package anon.pay.xml;
 
-import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.crypto.params.DSAParameters;
@@ -40,6 +39,7 @@ import anon.crypto.MyDSAPublicKey;
 import anon.crypto.MyRSAPublicKey;
 import anon.util.Base64;
 import anon.util.IXMLEncodable;
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
 /** This class handles RSA and DSA Public Keys represented in XML.
@@ -85,13 +85,13 @@ public class XMLJapPublicKey implements IXMLEncodable //extends XMLDocument
 		this(new String(data));
 	}
 	
-	public XMLJapPublicKey(String data) throws Exception
+	public XMLJapPublicKey(String data) throws XMLParseException
 	{
         Document doc = XMLUtil.toXMLDocument(data);
 		setPubKey(doc.getDocumentElement());
 	}
 	
-	public XMLJapPublicKey(Element elemKey) throws Exception
+	public XMLJapPublicKey(Element elemKey) throws XMLParseException
 	{
 		setPubKey(elemKey);
 	}
@@ -108,11 +108,11 @@ public class XMLJapPublicKey implements IXMLEncodable //extends XMLDocument
 	 * @param elemKey Element the "JapPublicKey" tag
 	 * @throws Exception
 	 */
-	private void setPubKey(Element elemKey) throws Exception
+	private void setPubKey(Element elemKey) throws XMLParseException
 	{
 		if (!elemKey.getTagName().equals(ms_elemName))
 		{
-			throw new Exception("XMLJapPublicKey wrong xml structure. Tagname is" + elemKey.getTagName());
+			throw new XMLParseException("XMLJapPublicKey wrong xml structure. Tagname is" + elemKey.getTagName());
 		}
 		Element elemRsa = (Element) XMLUtil.getFirstChildByName(elemKey, "RSAKeyValue");
 		if (elemRsa != null)
@@ -144,7 +144,7 @@ public class XMLJapPublicKey implements IXMLEncodable //extends XMLDocument
 			m_publicKey = new MyDSAPublicKey(param);
 			return;
 		}
-		throw new Exception("Wrong key format: Neither RSAKeyValue nor DSAKeyValue found!");
+		throw new XMLParseException("Wrong key format: Neither RSAKeyValue nor DSAKeyValue found!");
 	}
 
 	public Element toXmlElement(Document a_doc) //throws Exception

@@ -27,9 +27,10 @@
  */
 package anon.util;
 
+import java.util.Vector;
+
 import logging.LogHolder;
 import logging.LogLevel;
-import java.util.Vector;
 import logging.LogType;
 
 /**

@@ -31,20 +31,21 @@ package anon.pay.xml;
 import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 import java.util.Vector;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import anon.crypto.XMLSignature;
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
-import org.w3c.dom.DOMException;
-import logging.LogType;
-import logging.LogLevel;
-import logging.LogHolder;
-import anon.util.XMLParseException;
 
 /**
  *  XML representation of a Vector of XMLPriceCertificates

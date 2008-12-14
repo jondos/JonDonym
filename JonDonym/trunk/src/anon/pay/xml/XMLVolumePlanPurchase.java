@@ -28,10 +28,14 @@
 
 package anon.pay.xml;
 
-import org.w3c.dom.*;
-import anon.util.*;
 import java.io.ByteArrayInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  *

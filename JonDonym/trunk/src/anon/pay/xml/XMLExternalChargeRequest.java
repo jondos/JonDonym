@@ -27,15 +27,16 @@
  */
 package anon.pay.xml;
 
+import java.util.Enumeration;
 import java.util.Vector;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import java.util.Enumeration;
-import java.io.ByteArrayInputStream;
 
 /**
  * This class represents an external charge request. It can be used for charging

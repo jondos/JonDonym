@@ -50,14 +50,14 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
-import anon.infoservice.NewCascadeIDEntry;
-import gui.CountryMapper;
 import gui.GUIUtils;
 import gui.JAPMessages;
 import javax.swing.ImageIcon;
+
+import platform.AbstractOS;
+import platform.LinuxOS;
 
 public class JAPMixCascadeComboBox extends JComboBox
 {
@@ -181,10 +181,52 @@ public class JAPMixCascadeComboBox extends JComboBox
 	{
 		public void setSelectedItem(Object anObject)
 		{
-
-			if (anObject instanceof TrustModel ||
-				anObject.equals(JAPMixCascadeComboBox.ITEM_NO_SERVERS_AVAILABLE)||
-				anObject.equals(ITEM_AVAILABLE_SERVERS))
+			if (anObject instanceof TrustModel)
+			{
+				boolean bSwitchTrust = false;
+				boolean bSwitch = false;
+				if (TrustModel.getCurrentTrustModel() == null || 
+					!TrustModel.getCurrentTrustModel().equals(anObject))
+				{
+					bSwitch = true;
+					bSwitchTrust = true;
+				}
+				else if (!JAPController.getInstance().getAnonMode() || 
+						!TrustModel.getCurrentTrustModel().isTrusted(
+								JAPController.getInstance().getCurrentMixCascade()))
+				{
+					bSwitch = true;
+					bSwitchTrust = false;
+				}
+				if (bSwitch)
+				{
+					MixCascade selectedCascade = null;
+					for (int i = 0; i < getSize(); i++)
+					{
+						if (getElementAt(i) instanceof MixCascade)
+						{
+							selectedCascade = (MixCascade)getElementAt(i);							
+						}
+					}
+					if (selectedCascade != null)
+					{					
+						closeCascadePopupMenu();
+						super.setSelectedItem(selectedCascade);
+						if (bSwitchTrust)
+						{
+							JAPController.getInstance().switchTrustFilter((TrustModel)anObject);
+						}
+						else
+						{
+							JAPController.getInstance().switchToNextMixCascade();
+						}
+					}
+				}
+				
+				return;
+			}
+			else if (anObject.equals(JAPMixCascadeComboBox.ITEM_NO_SERVERS_AVAILABLE) ||
+					anObject.equals(ITEM_AVAILABLE_SERVERS))
 			{
 				return;
 			}
@@ -270,7 +312,15 @@ public class JAPMixCascadeComboBox extends JComboBox
 			contraints.gridx++;
 			contraints.anchor = GridBagConstraints.EAST;
 			contraints.weightx = 1.0;
-			m_lblMenuArrow = new JLabel(GUIUtils.loadImageIcon("arrow46.gif", true));
+			if ((AbstractOS.getInstance() instanceof LinuxOS))
+			{
+				m_lblMenuArrow = new JLabel(GUIUtils.loadImageIcon("", true));				
+			}
+			else
+			{
+				m_lblMenuArrow = new JLabel(GUIUtils.loadImageIcon("arrow46.gif", true));
+			}
+			
 			m_lblMenuArrow.setOpaque(true);
 			m_cascadePopupMenu.add(m_lblMenuArrow, contraints);
 			m_cascadePopupMenu.setOpaque(true);
@@ -386,31 +436,34 @@ public class JAPMixCascadeComboBox extends JComboBox
 			{
 				if (isSelected)
 				{
-					synchronized (SYNC_POPUP)
-					{										
-						if (!m_currentCascadePopup.isVisible())
+					if (!(AbstractOS.getInstance() instanceof LinuxOS))
+					{
+						synchronized (SYNC_POPUP)
 						{
-							int x, y;
-							Point location = list.getLocationOnScreen();
-							Point popupLocation;
-	
-							x = location.x + list.getWidth();
-							y = location.y + (int)list.indexToLocation(index).y; // - list.getHeight();
-	
-							if (m_currentCascadePopup.update((TrustModel)value))
+							if (!m_currentCascadePopup.isVisible())
 							{
-								y -= m_currentCascadePopup.getHeaderHeight();
-								popupLocation =
-									m_currentCascadePopup.calculateLocationOnScreen(list, new Point(x, y));
-	
-								if (popupLocation.x < x)
+								int x, y;
+								Point location = list.getLocationOnScreen();
+								Point popupLocation;
+		
+								x = location.x + list.getWidth();
+								y = location.y + (int)list.indexToLocation(index).y; // - list.getHeight();
+		
+								if (m_currentCascadePopup.update((TrustModel)value))
 								{
-									x = location.x - m_currentCascadePopup.getWidth();
+									y -= m_currentCascadePopup.getHeaderHeight();
 									popupLocation =
 										m_currentCascadePopup.calculateLocationOnScreen(list, new Point(x, y));
+		
+									if (popupLocation.x < x)
+									{
+										x = location.x - m_currentCascadePopup.getWidth();
+										popupLocation =
+											m_currentCascadePopup.calculateLocationOnScreen(list, new Point(x, y));
+									}
+									m_currentCascadePopup.setLocation(popupLocation);
+									m_currentCascadePopup.setVisible(true);
 								}
-								m_currentCascadePopup.setLocation(popupLocation);
-								m_currentCascadePopup.setVisible(true);
 							}
 						}
 					}

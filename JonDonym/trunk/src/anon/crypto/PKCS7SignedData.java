@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERObject;
@@ -22,10 +23,6 @@ import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.asn1.pkcs.SignerInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.jce.X509Principal;
-
-
-
-import org.bouncycastle.asn1.ASN1InputStream;
 
 /**
  * This was stolen from BouncyCastle and changed a little bit to get it work without BC provider...

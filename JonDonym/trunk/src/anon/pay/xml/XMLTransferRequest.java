@@ -29,10 +29,15 @@
 
 package anon.pay.xml;
 
-import org.w3c.dom.*;
-import anon.util.*;
 import java.io.ByteArrayInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  * XML representation of a transfer request, i.e.

@@ -27,6 +27,8 @@
  */
 package platform;
 
+import gui.JAPDll;
+
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -36,6 +38,8 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import java.net.URL;
+
+import anon.util.IMiscPasswordReader;
 
 /**
  * This class is instantiated by AbstractOS if the current OS is Windows
@@ -178,6 +182,12 @@ public class WindowsOS extends AbstractOS
 	public String getAppdataDefaultDirectory(String a_applicationName)
 	{
 		return getEnvPath(a_applicationName, "APPDATA");
+	}
+	
+	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, 
+			IMiscPasswordReader a_passwordReader)
+	{
+		return JAPDll.xcopy(a_sourceFile, a_targetDirectory, true);
 	}
 	
 	public String getTempPath()

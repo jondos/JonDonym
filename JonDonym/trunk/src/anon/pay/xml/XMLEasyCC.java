@@ -109,14 +109,14 @@ public class XMLEasyCC implements IXMLEncodable
 		m_docTheEasyCC = doc;
 	}
 
-	public XMLEasyCC(String xml) throws Exception
+	public XMLEasyCC(String xml) throws XMLParseException
 	{
 		Document doc = XMLUtil.toXMLDocument(xml);
 		setValues(doc.getDocumentElement());
 		m_docTheEasyCC = doc;
 	}
 	
-	public XMLEasyCC(char[] data) throws Exception
+	public XMLEasyCC(char[] data) throws XMLParseException
 	{
 		this(new String(data));
 	}
@@ -143,22 +143,27 @@ public class XMLEasyCC implements IXMLEncodable
 		 m_strPIID = a_copiedCc.m_strPIID;
 	 }
 
+	 /**
+	  *
+	  * @return boolean: true if old hash format, i.e. no position given, or all positions given as -1 (meaning not present in xml)
+	  * Note that even if hasOldHashFormat is true, the keys of the hashtable will still be MixCascade.MixPosition objects, not Strings as in previous versions of this class
+	  */
 	 public boolean hasOldHashFormat()
 	 {
 		 return m_bOldHashFormat;
 	 }
 
-	private void setValues(Element element) throws Exception
+	private void setValues(Element element) throws XMLParseException
 	{
 		if(!element.getTagName().equals(ms_strElemName))
 		{
-			throw new Exception("XMLEasyCC wrong xml root element name");
+			throw new XMLParseException("XMLEasyCC wrong xml root element name");
 		}
 		String strVersion=XMLUtil.parseAttribute(element,"version",null);
 		if (strVersion==null ||
 			!(strVersion.equals("1.2")||strVersion.equals("1.1")))
 		{
-			throw new Exception("XMLEasyCC wrong version");
+			throw new XMLParseException("XMLEasyCC wrong version");
 		}
 		Element elem;
 		elem = (Element) XMLUtil.getFirstChildByName(element, "AccountNumber");
@@ -185,7 +190,7 @@ public class XMLEasyCC implements IXMLEncodable
 				curId = XMLUtil.parseAttribute(elemHash, "id", "abc");
 				if (curId.equals("abc"))
 				{
-					throw new Exception("wrong or missing id of price certificate");
+					throw new XMLParseException("wrong or missing id of price certificate");
 				}
 				else
 				{

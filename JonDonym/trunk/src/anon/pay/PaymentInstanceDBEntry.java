@@ -91,6 +91,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 
 	private Vector m_listenerInterfaces;
 	private String m_name;
+	private String m_strOrganisation;
 
 	private JAPCertificate m_cert; //= JAPCertificate.getInstance("certificates/bi.cer");
 
@@ -125,6 +126,10 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 			{
 				m_cert = m_certPath.getFirstCertificate();
 			}
+			if (m_cert != null)
+			{
+				m_strOrganisation = m_cert.getSubject().getOrganisation();
+			}
 		}
 
 		/* get the ID */
@@ -132,7 +137,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		if(!checkId() ) {
 			throw new XMLParseException(elemRoot.getNodeName(),"Invalid Payment-Instance ID: " + m_strPaymentInstanceId );
 		}
-			
+		
 		m_name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, XML_ELEM_NAME), "");
 
 		/* get the creation timestamp */
@@ -222,6 +227,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 			{
 				m_cert = m_certPath.getFirstCertificate();
 			}
+			m_strOrganisation = m_cert.getSubject().getOrganisation();
 		}
 		else if (m_certPath != null)
 		{
@@ -259,6 +265,11 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		return getName();
 	}
 
+	public String getOrganisation()
+	{
+		return m_strOrganisation;
+	}
+	
 	public String getId()
 	{
 		return m_strPaymentInstanceId;

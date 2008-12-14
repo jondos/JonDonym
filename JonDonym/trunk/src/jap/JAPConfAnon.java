@@ -616,8 +616,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
-				if(TrustModel.getCurrentTrustModel() != null || 
-						!TrustModel.getCurrentTrustModel().equals(m_cmbCascadeFilter.getSelectedItem()))
+				if (TrustModel.getCurrentTrustModel() == null || 
+					!TrustModel.getCurrentTrustModel().equals(m_cmbCascadeFilter.getSelectedItem()))
 				{
 					TrustModel.setCurrentTrustModel((TrustModel)m_cmbCascadeFilter.getSelectedItem());
 					//m_showEditFilterButton.setEnabled(((TrustModel)m_cmbCascadeFilter.getSelectedItem()).isEditable());
@@ -2084,7 +2084,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
 							    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
 							{
-								m_lblSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value,
+								m_lblSpeed.setText("\u2265 " + JAPUtil.formatKbitPerSecValueWithUnit(value,
 										JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 							}
 							else if (best == value || best == Integer.MAX_VALUE)
@@ -2141,7 +2141,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						{
 							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
 							{
-								m_lblDelay.setText("< " + value + " ms");
+								m_lblDelay.setText("\u2264 " + value + " ms");
 							}
 							else if(best == value || best == 0)
 							{

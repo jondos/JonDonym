@@ -28,10 +28,10 @@
 package anon.util;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InterruptedIOException;
-import java.util.Hashtable;
+import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 /** This class implements an OutputStream, where a timeout for the write() and flush () operations can be set.
  *
@@ -90,6 +90,10 @@ final public class TimedOutputStream extends OutputStream
 			}
 		}
 
+	}
+
+	private TimedOutputStream()
+	{
 	}
 
 	public static void init()

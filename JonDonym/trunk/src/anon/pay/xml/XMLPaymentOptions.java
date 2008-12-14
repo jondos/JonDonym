@@ -27,17 +27,20 @@
  */
 package anon.pay.xml;
 
-import java.util.Vector;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import anon.util.IXMLEncodable;
-import anon.util.XMLUtil;
 import java.util.Enumeration;
+import java.util.Vector;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  * This class represents a XMLPaymentOptions structure.

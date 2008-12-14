@@ -31,8 +31,6 @@ import java.util.Hashtable;
 
 import org.w3c.dom.Node;
 
-import anon.crypto.XMLSignature;
-
 public class SignatureCreator
 {
 

@@ -27,25 +27,25 @@
  */
 package anon.crypto;
 
-import java.util.Vector;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.lang.Integer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.net.InetAddress;
-import org.bouncycastle.asn1.DEROctetString;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREncodableVector;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DEREncodableVector;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.ASN1Sequence;
 
-import anon.util.Util;
 import anon.infoservice.ListenerInterface;
+import anon.util.Util;
 
 /**
  * The SubjectAlternativeName extension represents an alias to distinguished name (DN).

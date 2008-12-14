@@ -27,14 +27,20 @@
  */
 package anon.pay.xml;
 
-import java.io.*;
-import javax.xml.parsers.*;
+import java.io.ByteArrayInputStream;
 
-import org.w3c.dom.*;
-import anon.util.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  * XML Structure for the bank account information for a Mix Operator

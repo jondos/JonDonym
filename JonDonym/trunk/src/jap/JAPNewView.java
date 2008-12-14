@@ -120,6 +120,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
+import platform.WindowsOS;
 import update.JAPUpdateWizard;
 
 final public class JAPNewView extends AbstractJAPMainView implements IJAPMainView, ActionListener,
@@ -634,15 +635,19 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.fill = GridBagConstraints.NONE;
 		m_panelAnonService.add(m_labelAnonService, c1);
 		m_comboAnonServices = new JAPMixCascadeComboBox();
-		addComponentListener(new ComponentAdapter()
+		if (AbstractOS.getInstance() instanceof WindowsOS)
 		{
-			public void componentMoved(ComponentEvent a_event)
+			/* TODO temporarily enable this only for windows as in Linux, 
+			 * the move event is thrown when clicking on the combo box
+			 **/
+			addComponentListener(new ComponentAdapter()
 			{
-				/* TODO temporarily disable as this, in Linux, the move event is thrown when clicking on the combo box 
-				m_comboAnonServices.closeCascadePopupMenu();
-				*/
-			}
-		});
+				public void componentMoved(ComponentEvent a_event)
+				{
+					m_comboAnonServices.closeCascadePopupMenu();		
+				}
+			});
+		}	
 		m_comboAnonServices.addItemListener(new ItemListener()
 		{
 			public void itemStateChanged(ItemEvent e)
@@ -2936,7 +2941,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
 					    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
 					{
-						m_labelSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value, 
+						m_labelSpeed.setText("\u2265 " + JAPUtil.formatKbitPerSecValueWithUnit(value, 
 								JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
 					}
 					else if (best == value || best == Integer.MAX_VALUE)
@@ -2990,7 +2995,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 					if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
 					{
-						m_labelDelay.setText("< " + value + " ms");
+						m_labelDelay.setText("\u2264 " + value + " ms");
 					}
 					else if(best == value || best == 0)
 					{

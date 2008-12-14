@@ -40,7 +40,6 @@ import anon.util.XMLUtil;
 
 final public class HttpClient
 {
-	//private final static int MAX_LINE_LENGTH = 100;
 	private BufferedReader m_reader;
 	private BufferedOutputStream m_OS;
 	private Socket m_socket;
@@ -54,8 +53,6 @@ final public class HttpClient
 	public HttpClient(Socket socket) throws IOException
 	{
 		m_socket = socket;
-		
-		//m_dataIS = new DataInputStream(m_socket.getInputStream());
 		m_reader = new BufferedReader(new InputStreamReader(m_socket.getInputStream()));
 		m_OS = new BufferedOutputStream(m_socket.getOutputStream(),4096);
 	}
@@ -114,10 +111,6 @@ final public class HttpClient
 		int contentLength = -1;
 		char[] data = null;
 		int index;
-		//BufferedReader reader = new BufferedReader(new InputStreamReader(m_dataIS));
-		
-		/* better use BufferedReader */
-		//String line = readLine(m_dataIS);
 		String line = m_reader.readLine(); 
 				
 		if(line == null) {
@@ -135,8 +128,6 @@ final public class HttpClient
 		String Status = line.substring(0, index);
 		String statusString = line.substring(index + 1);
 		
-		/* better use BufferedReader */
-		//while ( (line = readLine(m_dataIS)).length() != 0)
 		line = m_reader.readLine();
 		while (line != null)
 		{
@@ -180,8 +171,6 @@ final public class HttpClient
 			int ret = 0;
 			do
 			{
-				/* better use BufferedReader */
-				//ret = m_dataIS.read(data, pos, contentLength - pos);
 				ret = m_reader.read(data, pos, contentLength - pos);
 				if (ret == -1)
 				{
