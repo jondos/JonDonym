@@ -4781,7 +4781,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			}
 			else if (a_notifier == Database.getInstance(PerformanceInfo.class) && 
 					a_message != null && 
-					!a_message.equals(DatabaseMessage.INITIAL_OBSERVER_MESSAGE))
+					!a_message.equals(new Integer(DatabaseMessage.INITIAL_OBSERVER_MESSAGE)))
 			{
 				// react on bad performance data if this connection has not been used yet
 				if (m_bConnectionUnused && JAPModel.getInstance().isCascadeAutoSwitched() &&
