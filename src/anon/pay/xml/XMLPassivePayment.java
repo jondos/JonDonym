@@ -33,6 +33,7 @@ import java.util.Hashtable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
@@ -68,6 +69,9 @@ public class XMLPassivePayment implements IXMLEncodable
 	private static final String PAYMENT_DATA = "PaymentData";
 	private static final String REF = "ref";
 	private static final String PAYMENT_NAME = "PaymentName";
+	private static final String ERRORCODE = "ErrorCode";
+	private static final String ERRORMSG = "ErrorMessage";
+	private static final String IP = "IPAdress";
 
 	private Hashtable m_paymentData = new Hashtable();
 	private long m_transferNumber;
@@ -75,6 +79,9 @@ public class XMLPassivePayment implements IXMLEncodable
 	private long m_centAmount;
 	private String m_paymentName;
 	private boolean m_charged;
+	private String m_sErrorCode="";
+	private String m_sErrorMessage="";
+	private String m_sIP="";
 
 	//keys for payment data - use these for addData() / getPaymentData()
 	public static final String KEY_COUPONCODE = "code";
@@ -83,7 +90,10 @@ public class XMLPassivePayment implements IXMLEncodable
 	public static final String KEY_VOLUMEPLAN = "volumeplan";
 	public static final String KEY_MERCHANT_ID = "merchant_id"; //Paysafecard-specific merchant id
 	public static final String KEY_TRANSACTION_ID = "transaction_id"; //Paysafecard-specific, NOT equal to the AN.ON- transfer number
-
+	public static final String KEY_ERRORCODE = "errorcode"; //Paysafecard-specific Error Code
+	public static final String KEY_ERRORMESSAGE = "errormessage"; //Paysafecard-specific Error Message
+	public static final String KEY_IPADRESS = "IPAdress"; //Paysafecard-specific Error Message
+	
 	/**
 	 * Constructor
 	 */
@@ -166,9 +176,64 @@ public class XMLPassivePayment implements IXMLEncodable
 		m_currency = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, CURRENCY), null);
 		m_paymentName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, PAYMENT_NAME), null);
 		m_charged = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, CHARGED), false);
-
+		m_sErrorCode = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, ERRORCODE), "0");
+		m_sErrorMessage = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, ERRORMSG), "");
 	}
 
+	/**
+	 * Sets the payment method IP Adress
+	 * @param a_sErrorCode String
+	 */
+	public void setIP(String a_sIP)
+	{
+		m_sIP = a_sIP;
+	}
+
+	/**
+	 * Gets the payment method IP Adress
+	 * @return String
+	 */
+	public String getIP()
+	{
+		return m_sIP;
+	}
+	
+	/**
+	 * Sets the payment method error message
+	 * @param a_sErrorCode String
+	 */
+	public void setErrorMessage(String a_sErrorMessage)
+	{
+		m_sErrorMessage = a_sErrorMessage;
+	}
+
+	/**
+	 * Gets the payment method error message
+	 * @return String
+	 */
+	public String getErrorMessage()
+	{
+		return m_sErrorMessage;
+	}
+	
+	/**
+	 * Sets the payment method error code
+	 * @param a_sErrorCode String
+	 */
+	public void setErrorCode(String a_sErrorCode)
+	{
+		m_sErrorCode = a_sErrorCode;
+	}
+
+	/**
+	 * Gets the payment method error code
+	 * @return String
+	 */
+	public String getErrorCode()
+	{
+		return m_sErrorCode;
+	}
+	
 	/**
 	 * Sets the payment method name
 	 * @param a_paymentName String
@@ -338,6 +403,18 @@ public class XMLPassivePayment implements IXMLEncodable
 		XMLUtil.setValue(elem, m_charged);
 		elemRoot.appendChild(elem);
 
+		elem = a_doc.createElement(ERRORCODE);
+		XMLUtil.setValue(elem, m_sErrorCode);
+		elemRoot.appendChild(elem);
+
+		elem = a_doc.createElement(ERRORMSG);
+		XMLUtil.setValue(elem, m_sErrorMessage);
+		elemRoot.appendChild(elem);
+		
+		elem = a_doc.createElement(IP);
+		XMLUtil.setValue(elem, m_sIP);
+		elemRoot.appendChild(elem);
+		
 		Enumeration refs = m_paymentData.keys();
 		while (refs.hasMoreElements())
 		{

@@ -20,7 +20,7 @@ public interface IPaymentListener extends EventListener
 	 * The AI has signaled that the current cascade has to be payed for.
 	 * @param acc PayAccount
 	 */
-	boolean accountCertRequested(MixCascade a_connectedCascade);
+	int accountCertRequested(MixCascade a_connectedCascade);
 
 	/**
 	 * The AI has signaled an error.

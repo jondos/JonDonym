@@ -40,6 +40,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
+import anon.ErrorCodes;
 import anon.pay.IPaymentListener;
 import anon.pay.PayAccount;
 import anon.pay.xml.XMLErrorMessage;
@@ -222,9 +223,9 @@ public class CaptchaContentPane extends DialogContentPane implements
 		return true;
 	}
 
-	public boolean accountCertRequested(MixCascade a_connectedCascade)
+	public int accountCertRequested(MixCascade a_connectedCascade)
 	{
-		return true;
+		return ErrorCodes.E_SUCCESS;
 	}
 
 	public void accountError(XMLErrorMessage msg, boolean a_bIgnore)

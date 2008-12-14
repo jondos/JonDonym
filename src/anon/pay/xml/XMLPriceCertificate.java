@@ -245,7 +245,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 
 	public boolean verify(PaymentInstanceDBEntry a_bi)
 	{
-		if(a_bi==null)
+		if (a_bi == null)
 		{
 			return false;
 		}

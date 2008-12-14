@@ -44,4 +44,5 @@ public final class ErrorCodes
 	public final static int E_NOT_TRUSTED = -26;
 	public final static int E_NOT_PARSABLE = -27;
 	public final static int E_SPACE=-31;
+	public final static int E_ACCOUNT_EMPTY = -32;
 }

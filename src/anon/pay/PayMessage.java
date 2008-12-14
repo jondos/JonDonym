@@ -1,7 +1,8 @@
 package anon.pay;
 
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.*;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

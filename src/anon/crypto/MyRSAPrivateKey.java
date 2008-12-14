@@ -46,8 +46,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import anon.util.Base64;
-import anon.util.XMLUtil;
 import anon.util.XMLParseException;
+import anon.util.XMLUtil;
 
 final public class MyRSAPrivateKey extends AbstractPrivateKey implements IMyPrivateKey
 {

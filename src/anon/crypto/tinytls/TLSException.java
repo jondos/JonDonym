@@ -41,7 +41,13 @@ import java.io.IOException;
  */
 public class TLSException extends IOException
 {
-
+	public static final int LEVEL_WARNING = 1;
+	public static final int LEVEL_FATAL = 2;
+	
+	public static final String MSG_EOF = "EOF";
+	
+	public static final int DESC_CLOSE_NOTIFY = 0;
+	
 	private byte m_AlertLevel;
 	private byte m_AlertDescription;
 	private boolean m_Alert;

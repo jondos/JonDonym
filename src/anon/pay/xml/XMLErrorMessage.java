@@ -5,12 +5,6 @@ import org.w3c.dom.Element;
 
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
-import java.lang.reflect.Constructor;
-import org.w3c.dom.Node;
-
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
 /**
  * This class encapsulates an error or success message.
@@ -195,7 +189,7 @@ public class XMLErrorMessage extends Exception implements IXMLEncodable
 	}
 
 	/**
-	 * getMessageObject: object corresponding to the message, might be null
+	 * getMessageObject: object corresponding to the message, may be null
 	 *
 	 * @return IXMLEncodable: exact type will depend on the message code, to be looked up via getMessageObjectType
 	 */

@@ -170,10 +170,21 @@ public class TinyTLSServerSocket extends Socket
 					ioe.bytesTransferred = 0;
 					throw ioe;
 				}
+				catch (SocketException a_e)
+				{
+					throw new TLSException(a_e.getMessage(), 
+							TLSException.LEVEL_FATAL, TLSException.DESC_CLOSE_NOTIFY);	
+				}
+				catch (EOFException a_e)
+				{
+					// the peer unexpectedly closed the connection
+					throw new TLSException(TLSException.MSG_EOF, 
+							TLSException.LEVEL_FATAL, TLSException.DESC_CLOSE_NOTIFY);
+				}
 
 				if (contenttype < 20 || contenttype > 23)
 				{
-					throw new TLSException("SSL Content typeProtocoll not supportet" + contenttype, 2, 10);
+					throw new TLSException("SSL content type protocol not supported: " + contenttype, 2, 10);
 				}
 				m_aktTLSRecord.setType(contenttype);
 				m_ReadRecordState = STATE_VERSION;
@@ -192,7 +203,7 @@ public class TinyTLSServerSocket extends Socket
 				}
 				if (version != PROTOCOLVERSION_SHORT)
 				{
-					throw new TLSException("Protocollversion not supportet" + version, 2, 70);
+					throw new TLSException("Protocol version not supported" + version, 2, 70);
 				}
 				m_ReadRecordState = STATE_LENGTH;
 			}
@@ -227,7 +238,9 @@ public class TinyTLSServerSocket extends Socket
 						int ret = m_stream.read(dataBuff, m_aktPendOffset, len);
 						if (ret < 0)
 						{
-							throw new EOFException();
+							// the peer unexpectedly closed the connection
+							throw new TLSException("EOF", 
+									TLSException.LEVEL_FATAL, TLSException.DESC_CLOSE_NOTIFY);							
 						}
 						len -= ret;
 						m_aktPendOffset += ret;
@@ -595,7 +608,15 @@ public class TinyTLSServerSocket extends Socket
 			{
 				m_selectedciphersuite.encode(m_aktTLSRecord);
 			}
-			m_stream.write(m_aktTLSRecord.getHeader());
+			try
+			{
+				m_stream.write(m_aktTLSRecord.getHeader());
+			}
+			catch (SocketException a_e)
+			{
+				throw new TLSException(a_e.getMessage(), 
+						TLSException.LEVEL_FATAL, TLSException.DESC_CLOSE_NOTIFY);				
+			}
 			m_stream.write(dataBuff, 0, m_aktTLSRecord.getLength());
 			m_stream.flush();
 		}

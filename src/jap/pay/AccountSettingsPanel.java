@@ -83,6 +83,7 @@ import javax.swing.filechooser.FileFilter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import HTTPClient.ForbiddenIOException;
+import anon.ErrorCodes;
 import anon.crypto.DSAKeyPair;
 import anon.crypto.XMLEncryption;
 import anon.infoservice.IMutableProxyInterface;
@@ -367,7 +368,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	private JButton m_btnPassword;
 	private JButton m_btnReload;
 	private JButton m_btnActivate;
-	private JCheckBox m_cbxShowPaymentConfirmation;
 	private JComboBox m_comboAnonymousConnection;
 	private JCheckBox m_cbxShowAIErrors;
 	private JCheckBox m_cbxBalanceAutoUpdateEnabled;
@@ -402,9 +402,9 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	}
 
 
-	public boolean accountCertRequested(MixCascade a_connectedCascade)
+	public int accountCertRequested(MixCascade a_connectedCascade)
 	{
-		return true;
+		return ErrorCodes.E_SUCCESS;
 	}
 
 
@@ -687,8 +687,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	{
 		JPanel panelAdvanced = new JPanel();
 
-		m_cbxShowPaymentConfirmation = new JCheckBox(JAPMessages.getString(MSG_SHOW_PAYMENT_CONFIRM_DIALOG));
-		m_cbxShowPaymentConfirmation.setVisible(false); // not needed any more
 		GridBagLayout advancedPanelLayout = new GridBagLayout();
 		panelAdvanced.setLayout(advancedPanelLayout);
 
@@ -715,7 +713,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				
 		advancedPanelConstraints.gridy = 1;
 		
-		panelAdvanced.add(m_cbxShowPaymentConfirmation, advancedPanelConstraints);
 		
 		
 
@@ -3491,7 +3488,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	protected boolean onOkPressed()
 	{
-		JAPController.getInstance().setDontAskPayment(!m_cbxShowPaymentConfirmation.isSelected());
 		JAPModel.getInstance().setPaymentAnonymousConnectionSetting(m_comboAnonymousConnection.getSelectedIndex());
 		PayAccountsFile.getInstance().setIgnoreAIAccountError(!m_cbxShowAIErrors.isSelected());
 		PayAccountsFile.getInstance().setBalanceAutoUpdateEnabled(m_cbxBalanceAutoUpdateEnabled.isSelected());
@@ -3518,7 +3514,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	protected void onResetToDefaultsPressed()
 	{
-		m_cbxShowPaymentConfirmation.setSelected(true);
 		m_comboAnonymousConnection.setSelectedIndex(JAPModel.CONNECTION_ALLOW_ANONYMOUS);
 		m_cbxShowAIErrors.setSelected(true);
 		m_cbxAskIfNotSaved.setSelected(true);
@@ -3531,7 +3526,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	protected void onUpdateValues()
 	{
-		m_cbxShowPaymentConfirmation.setSelected(!JAPController.getInstance().getDontAskPayment());
 		m_comboAnonymousConnection.setSelectedIndex(
 			JAPModel.getInstance().getPaymentAnonymousConnectionSetting());
 		m_cbxAskIfNotSaved.setSelected(JAPController.getInstance().isAskSavePayment());

@@ -27,8 +27,6 @@
  */
 package anon.pay.xml;
 
-import java.io.ByteArrayInputStream;
-
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
