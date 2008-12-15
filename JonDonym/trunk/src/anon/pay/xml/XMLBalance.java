@@ -28,22 +28,31 @@ import anon.util.XMLUtil;
 public class XMLBalance implements IXMLEncodable
 {
 	private static final String DEFAULT_RATE_ENDDATE = "3000-01-01 00:00:00.00000000";
-
+	
+	/** the number of the account that this balance object belongs to*/ 
 	private long m_lAccountNumber;
 	
 	private java.sql.Timestamp m_Timestamp;
 	
+	/** bytes that are not consumed if there are any will expire after that date */
 	private java.sql.Timestamp m_ValidTime;
 	
+	/** the amount of money which the user has paid for the corresponding volume plan */
 	private long m_lDeposit;
 	
+	/** 
+	 * the amount of byte which are already consumed for the 
+	 * corresponding account 
+	 */
 	private long m_lSpent;
 	
 	private java.sql.Timestamp m_flatEnddate;
 	
+	/**  the bytes that are still left to spend for the corresponding account */
 	private long m_volumeBytesleft;
 	
-	private int m_balance;
+	/** */
+	//private int m_balance;
 	
 	private String m_message;
 	
@@ -57,7 +66,7 @@ public class XMLBalance implements IXMLEncodable
 					  long deposit, long spent,
 					  Timestamp timestamp,
 					  Timestamp validTime,
-					  int balance,
+					  //int balance,
 					  long volumeBytesleft,
 					  Timestamp flatEnddate,
 					  IMyPrivateKey signKey)
@@ -75,7 +84,7 @@ public class XMLBalance implements IXMLEncodable
 			m_ValidTime = Timestamp.valueOf(DEFAULT_RATE_ENDDATE);
 		}
 		m_lAccountNumber = accountNumber;
-		m_balance = balance;
+		//m_balance = balance;
 		m_volumeBytesleft = volumeBytesleft;
 		m_flatEnddate = flatEnddate;
 		if (m_flatEnddate == null)
@@ -164,7 +173,7 @@ public class XMLBalance implements IXMLEncodable
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "BalanceInCent");
 		str = XMLUtil.parseValue(elem, "0");
-		m_balance = Math.max(0, Integer.parseInt(str));
+		//m_balance = Math.max(0, Integer.parseInt(str));
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "FlatrateEnddate");
 		str = XMLUtil.parseValue(elem, DEFAULT_RATE_ENDDATE);
@@ -290,9 +299,9 @@ public class XMLBalance implements IXMLEncodable
 		elem = a_doc.createElement("Spent");
 		XMLUtil.setValue(elem, m_lSpent);
 		elemRoot.appendChild(elem);
-		elem = a_doc.createElement("BalanceInCent");
-		XMLUtil.setValue(elem,m_balance);
-		elemRoot.appendChild(elem);
+		//elem = a_doc.createElement("BalanceInCent");
+		//XMLUtil.setValue(elem,m_balance);
+		//elemRoot.appendChild(elem);
 		elem = a_doc.createElement("FlatrateEnddate");
 		XMLUtil.setValue(elem, m_flatEnddate.toString() );
 		elemRoot.appendChild(elem);
@@ -335,26 +344,39 @@ public class XMLBalance implements IXMLEncodable
 
 		return elemRoot;
 	}
-
+	
+	/**
+	 * Returns the number the number of the account to which this balance belongs to
+	 * @return number of the account that this balance belongs to
+	 */
 	public long getAccountNumber()
 	{
 		return m_lAccountNumber;
 	}
-
+	
+	/**
+	 * Returns the total amount of money spent by the user to buy the 
+	 * corresponding volume plan.
+	 * @return costs for the volume plan of the corresponding account
+	 */
 	public long getDeposit()
 	{
 		return m_lDeposit;
 	}
-
+	
+	/**
+	 * Returns the overall spent bytes for the corresponding account
+	 * @return bytes spent overall
+	 */
 	public long getSpent()
 	{
 		return m_lSpent;
 	}
 
-	public int getBalance()
+	/*public int getBalance()
 	{
 		return m_balance;
-	}
+	}*/
 
 	/**
 	 * getVolumeBytesLeft: returns the current credit of the user
@@ -379,7 +401,12 @@ public class XMLBalance implements IXMLEncodable
 	{
 		return m_Timestamp;
 	}
-
+	
+	/**
+	 * Returns the Date after that unspent byte volume
+	 * will expire 
+	 * @return the expire date
+	 */
 	public java.sql.Timestamp getValidTime()
 	{
 		return m_ValidTime;
