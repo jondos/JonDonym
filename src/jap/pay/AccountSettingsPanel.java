@@ -1288,7 +1288,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				Timestamp now = new Timestamp(System.currentTimeMillis());
 
 				boolean expired = false;
-				if (balance.getCredit() == 0)
+				if (balance.getVolumeBytesLeft() == 0)
 				{
 					m_labelValid.setText("");
 				}
@@ -1305,7 +1305,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 
 				//m_labelEnddate.setText(JAPUtil.formatTimestamp(flatEnddate, false, curLang));
-				if (balance.getCredit() > 0)
+				if (balance.getVolumeBytesLeft() > 0)
 				{
 					m_labelVolume.setText(((expired ? "(" : "") +
 										   JAPUtil.formatBytesValueWithUnit(balance.getVolumeBytesLeft() * 1000) +
@@ -1371,7 +1371,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				{
 					//long dep = balance.getVolumeBytesLeft()*1000 + balance.getSpent();
 					deposit = PaymentMainPanel.FULL_AMOUNT * 1000;
-					long credit = balance.getCredit() * 1000;
+					long credit = balance.getVolumeBytesLeft() * 1000;
 					double percent = (double) credit / (double) deposit;
 
 					if (percent > 0.87)

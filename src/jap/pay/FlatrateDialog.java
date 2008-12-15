@@ -138,7 +138,7 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 		//check if account balance is sufficient to buy flat
 		String flatPriceString = paymentSettings.getSettingValue("FlatratePrice");
 		long flatPrice = Long.parseLong(flatPriceString);
-		long balance = m_account.getBalance().getCredit();
+		long balance = m_account.getBalance().getVolumeBytesLeft();
 		isFlatAffordable = balance >= flatPrice;
 
 		//build dialog elements
@@ -210,7 +210,7 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 		gbl.setConstraints(m_lBalanceLabel,gbc);
 		flatPanel.add(m_lBalanceLabel);
 
-		String balance = JAPUtil.formatEuroCentValue(account.getBalance().getCredit());
+		String balance = JAPUtil.formatEuroCentValue(account.getBalance().getVolumeBytesLeft());
 		m_lBalance = new JLabel(balance);
 		gbc.gridx = 1;
 		gbc.gridy = 0;

@@ -497,7 +497,7 @@ public class PaymentMainPanel extends FlippingPanel
 					if (balance != null && activeAccount.isCharged(now))
 					{
 						m_BalanceProgressBar.setEnabled(false);
-						m_BalanceText.setText(JAPUtil.formatBytesValueWithUnit(balance.getCredit() * 1000));
+						m_BalanceText.setText(JAPUtil.formatBytesValueWithUnit(balance.getVolumeBytesLeft() * 1000));
 //							JAPUtil.MAX_FORMAT_KBYTES));
 						m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 						m_labelValidUntil.setText(JAPUtil.formatTimestamp(balance.getFlatEnddate(), false,
@@ -555,7 +555,7 @@ public class PaymentMainPanel extends FlippingPanel
 							m_BalanceText.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 							m_BalanceText.setToolTipText(JAPMessages.getString(MSG_TT_CREATE_ACCOUNT));
 
-							if (balance.getCredit() == 0)
+							if (balance.getVolumeBytesLeft() == 0)
 							{
 								m_labelValidUntil.setText("");
 							}
@@ -569,12 +569,12 @@ public class PaymentMainPanel extends FlippingPanel
 								m_labelValidUntil.setText(JAPMessages.getString(AccountSettingsPanel.MSG_EXPIRED));
 							}
 
-							if (balance.getCredit() > 0 && expired)
+							if (balance.getVolumeBytesLeft() > 0 && expired)
 							{
 								m_BalanceText.setText(JAPMessages.getString(AccountSettingsPanel.MSG_EXPIRED));
 								m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 							}
-							else if (balance.getCredit() <= 0 && balance.getSpent() == 0 && !expired)
+							else if (balance.getVolumeBytesLeft() <= 0 && balance.getSpent() == 0 && !expired)
 							{								
 								if (activeAccount.getTransCerts().size() > 0 &&	!activeAccount.isTransactionExpired())
 								{
