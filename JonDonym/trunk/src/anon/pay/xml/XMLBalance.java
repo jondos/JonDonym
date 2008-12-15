@@ -30,15 +30,25 @@ public class XMLBalance implements IXMLEncodable
 	private static final String DEFAULT_RATE_ENDDATE = "3000-01-01 00:00:00.00000000";
 
 	private long m_lAccountNumber;
+	
 	private java.sql.Timestamp m_Timestamp;
+	
 	private java.sql.Timestamp m_ValidTime;
+	
 	private long m_lDeposit;
+	
 	private long m_lSpent;
+	
 	private java.sql.Timestamp m_flatEnddate;
+	
 	private long m_volumeBytesleft;
+	
 	private int m_balance;
+	
 	private String m_message;
+	
 	private String m_messageText;
+	
 	private URL m_messageLink;
 
 	private Document m_docTheBalance = null;
@@ -341,8 +351,13 @@ public class XMLBalance implements IXMLEncodable
 		return m_lSpent;
 	}
 
+	public int getBalance()
+	{
+		return m_balance;
+	}
+
 	/**
-	 * getCredit: returns the current credit of the user
+	 * getVolumeBytesLeft: returns the current credit of the user
 	 * Implementation depends on the payment system used
 	 * formerly returned the difference between cumulative spent and deposit bytes
 	 * now returns volume_bytesleft
@@ -350,16 +365,6 @@ public class XMLBalance implements IXMLEncodable
 	 *
 	 * @return long: currently volume_bytesleft
 	 */
-	public long getCredit()
-	{
-		return m_volumeBytesleft;
-	}
-
-	public int getBalance()
-	{
-		return m_balance;
-	}
-
 	public long getVolumeBytesLeft()
 	{
 		return m_volumeBytesleft;

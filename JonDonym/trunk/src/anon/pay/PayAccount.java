@@ -495,7 +495,7 @@ public class PayAccount implements IXMLEncodable
 		XMLBalance balance = getBalance();
 		if (balance != null)
 		{
-			if ((balance.getCredit() > 0 || balance.getSpent() > 0) && 
+			if ((balance.getVolumeBytesLeft() > 0 || balance.getSpent() > 0) && 
 				balance.getFlatEnddate() != null && balance.getFlatEnddate().before(a_time))
 			{
 				return true;
@@ -523,7 +523,7 @@ public class PayAccount implements IXMLEncodable
 			return false;
 		}
 
-		return balance.getCredit() > 0 && balance.getFlatEnddate() != null &&
+		return balance.getVolumeBytesLeft() > 0 && balance.getFlatEnddate() != null &&
 			balance.getFlatEnddate().after(a_time);
 	}
 
@@ -639,7 +639,7 @@ public class PayAccount implements IXMLEncodable
 	{
 		if (m_accountInfo != null)
 		{
-			return m_accountInfo.getBalance().getCredit();
+			return m_accountInfo.getBalance().getVolumeBytesLeft();
 		}
 		return 0L;
 	}
