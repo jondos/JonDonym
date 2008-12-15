@@ -40,8 +40,10 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Vector;
 import java.util.Hashtable;
@@ -1822,7 +1824,24 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 				{
 					if (m_proxyAnon == null || m_proxyAnon.getPort() != getHttpListenerPortNumber())
 					{
-						m_proxyAnon = new ProxyInterface("localhost", getHttpListenerPortNumber(), null);
+						InetAddress proxyListenerAddress = JAPController.getInstance().getListenerInetAddress();
+						if(proxyListenerAddress != null)
+						{
+							String hostAddress = proxyListenerAddress.getHostAddress();
+							if(proxyListenerAddress.getHostAddress().equals(JAPConstants.IN_ADDR_ANY_IPV4))
+							{
+								try 
+								{
+									hostAddress = InetAddress.getLocalHost().getHostAddress();
+								} 
+								catch (UnknownHostException e)
+								{
+									hostAddress = JAPConstants.IN_ADDR_LOOPBACK_IPV4;
+								}
+								
+							}
+							m_proxyAnon = new ProxyInterface(hostAddress , getHttpListenerPortNumber(), null);
+						}
 					}
 				}
 				return m_proxyAnon; // AN.ON
