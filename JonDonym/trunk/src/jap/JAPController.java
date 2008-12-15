@@ -3058,7 +3058,17 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 
 	}
-
+	
+	public InetAddress getListenerInetAddress()
+	{
+		return (m_socketHTTPListener == null) ? null : m_socketHTTPListener.getInetAddress();
+	}
+	
+	public int getListenerPort()
+	{
+		return (m_socketHTTPListener == null) ? -1 : m_socketHTTPListener.getLocalPort();
+	}
+	
 	/**
 	 * Returns the active MixCascade.
 	 *
@@ -3787,7 +3797,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			{
 				if (host == null && JAPModel.isHttpListenerLocal())
 				{
-					host = "127.0.0.1";
+					host = JAPConstants.IN_ADDR_LOOPBACK_IPV4;
 				}
 				if (host != null)
 				{
