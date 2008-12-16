@@ -1551,7 +1551,8 @@ public class PerformanceMeter implements Runnable, Observer
 			
 			if(account.getBI() != null && account.getBI().getId().equals(a_piid))
 			{
-				credit += account.getBalance().getVolumeBytesLeft() * 1000;
+				//credit += account.getBalance().getVolumeKBytesLeft() * 1000;
+				credit += account.getCurrentCredit() * 1000;
 			}
 		}
 		

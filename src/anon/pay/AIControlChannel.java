@@ -274,7 +274,20 @@ public class AIControlChannel extends XmlControlChannel
     XMLEasyCC cc = request.getCC();
     if (cc != null) {
       try {
-		  processCcToSign(cc);
+    	  System.out.println("Account: "+PayAccountsFile.getInstance().getActiveAccount().getAccountNumber()+" is "+
+    	  (PayAccountsFile.getInstance().getActiveAccount().isCharged(new Timestamp(System.currentTimeMillis())) ?
+    	  "valid." : "not valid."));
+		 if(PayAccountsFile.getInstance().getActiveAccount().isCharged(new Timestamp(System.currentTimeMillis())))
+		 {
+			 processCcToSign(cc);
+		 }
+		 else
+		 {
+			 System.out.println("sending error message");
+			 PayAccountsFile.getInstance().signalAccountError(
+					 new XMLErrorMessage(XMLErrorMessage.ERR_ACCOUNT_EMPTY));
+			 
+		 }
       }
       catch (Exception ex1) {
         // the account stated by the AI does not exist or is not currently
@@ -498,7 +511,9 @@ public class AIControlChannel extends XmlControlChannel
 	  {
 		  PayAccount currentAccount = null;
 		  PayAccount openTransactionAccount = null;
-		  if (activeAccount != null && activeAccount.getSpent() == 0) // spent means account has been used
+		  if (activeAccount != null && 
+				  //activeAccount.getSpent() == 0)
+				  activeAccount.getCurrentSpent() == 0)// spent means account has been used
 		  {
 			  openTransactionAccount = PayAccountsFile.getInstance().getActiveAccount();
 		  }
@@ -513,7 +528,9 @@ public class AIControlChannel extends XmlControlChannel
 				  {
 					  break;
 				  }
-				  else if (openTransactionAccount == null && currentAccount.getSpent() == 0 &&
+				  else if (openTransactionAccount == null && 
+						  //currentAccount.getSpent() == 0 &&
+						  activeAccount.getCurrentSpent() == 0 &&
 						  !currentAccount.hasExpired())
 				  {
 					  openTransactionAccount = currentAccount;

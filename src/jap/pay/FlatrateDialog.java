@@ -117,7 +117,8 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 		//refuse to buy new flatrate if one is already active
 		if (m_account.isFlatrateActive()  )
 		{
-			long remainingBytes = m_account.getBalance().getVolumeBytesLeft();
+			//long remainingBytes = m_account.getBalance().getVolumeKBytesLeft();
+			long remainingBytes = m_account.getCurrentCredit();
 			if (remainingBytes > PayAccount.MAX_KBYTES_COUNTING_AS_EMPTY )
 			{
 				JAPDialog.showMessageDialog(this, getString(MSG_ERROR_ALREADY_ACTIVE));
@@ -138,7 +139,8 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 		//check if account balance is sufficient to buy flat
 		String flatPriceString = paymentSettings.getSettingValue("FlatratePrice");
 		long flatPrice = Long.parseLong(flatPriceString);
-		long balance = m_account.getBalance().getVolumeBytesLeft();
+		//long balance = m_account.getBalance().getVolumeKBytesLeft();
+		long balance = m_account.getCurrentCredit();
 		isFlatAffordable = balance >= flatPrice;
 
 		//build dialog elements
@@ -210,7 +212,8 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 		gbl.setConstraints(m_lBalanceLabel,gbc);
 		flatPanel.add(m_lBalanceLabel);
 
-		String balance = JAPUtil.formatEuroCentValue(account.getBalance().getVolumeBytesLeft());
+		//String balance = JAPUtil.formatEuroCentValue(account.getBalance().getVolumeKBytesLeft());
+		String balance = JAPUtil.formatEuroCentValue(account.getCurrentCredit());
 		m_lBalance = new JLabel(balance);
 		gbc.gridx = 1;
 		gbc.gridy = 0;
