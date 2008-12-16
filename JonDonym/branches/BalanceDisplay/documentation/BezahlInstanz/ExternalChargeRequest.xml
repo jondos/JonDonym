@@ -1,0 +1,8 @@
+<ExternalChargeRequest>
+    <Password>PASSWORD</Password>
+    <Charge>
+        <TransferNumber>838362061451</TransferNumber>
+        <Currency>EUR</Currency>
+        <Amount>1</Amount>
+    </Charge>
+</ExternalChargeRequest>

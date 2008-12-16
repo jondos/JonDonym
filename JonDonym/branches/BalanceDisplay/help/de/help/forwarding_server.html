@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <title>JonDo-Hilfe: Forwarding-Server</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+
+<body>
+<!--#include virtual="/header.html"-->
+
+<p class="navipar"><span class="prevlink"><a href="infoservice.html"><img
+src="prev.gif" alt="&lt;-"> InfoService</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_config"><img src="next.gif" alt="-&gt;"> Konfiguration
+</a><a href="anon.html"><img src="next.gif" alt="-&gt;"> Anonymit&auml;t
+</a></span> <span class="nextlink"><a href="cert.html">Zertifikatsstellen <img
+src="next.gif" alt="-&gt;"></a></span> </p>
+<hr>
+
+<h2>Forwarding-Server</h2>
+
+<p><em class="jconf">Dieses Einstellungsfenster steht Ihnen nur in der <a
+href="appearance.html#expertView">erweiterten Ansicht</a> zur Verf&uuml;gung.
+Um zu diesem Einstellungsfenster zu gelangen, klicken Sie im Hauptfenster von
+JonDo auf <code class="jconf">Einstellungen</code> und w&auml;hlen
+anschlie&szlig;end aus der linken Liste den Eintrag <code
+class="jconf">Forwarding-Server</code>. </em> </p>
+
+<p>Ein Forwarding-Server dient zur Umgehung von Zugangssperren zu
+JonDonym-Diensten. Durch Zensur oder andere restriktive Ma&szlig;nahmen ist es
+manchen JonDo-Nutzern nicht m&ouml;glich, eine direkte Verbindung zu den
+Diensten herzustellen. Aus diesem Grund kann ein JonDo, dem dies m&ouml;glich
+ist, als Forwarding-Server f&uuml;r andere JonDo-Nutzer agieren und diese an
+die Dienste weiterleiten. Wenn Sie Ihren JonDo als Forwarding-Server
+freischalten m&ouml;chten, k&ouml;nnen Sie in diesem Fenster die Einstellungen
+dazu vornehmen. </p>
+
+<p>Mit der Option <code class="jconf">Forwarding Server EIN</code> k&ouml;nnen
+Sie den Forwarding-Server aktivieren. </p>
+
+<p><b>Bitte beachten Sie</b><br>
+Wenn Sie den Forwarding-Server aktivieren, kann jeder JonDonym-Nutzer Ihren
+JonDo als Zugangspunkt zu den Diensten verwenden. Sie gehen dabei das Risiko
+ein, dass Nutzer Ihren JonDo verwenden k&ouml;nnen, um strafbare Handlungen im
+Internet durchzuf&uuml;hren, sind aber durch die Anonymit&auml;t der Dienste
+gut vor einer Aufdeckung Ihrer eigenen Adresse gesch&uuml;tzt.</p>
+
+<h3>Forwarding-Server Einstellungen</h3>
+<ul>
+  <li><p><b>Portnummer</b><br>
+    Tragen Sie hier den Port ein, auf dem Ihr JonDo Forwarding-Verbindungen
+    annimmt. Dazu ist es erforderlich, dass Sie diesen Port in Ihrer Firewall
+    f&uuml;r eingehende Verbindungen freischalten. </p>
+  </li>
+  <li><p><b>Meine Internetverbindung</b><br>
+    W&auml;hlen Sie hier die Art und Geschwindigkeit Ihrer Internetverbindung
+    aus. Dadurch wird der Wert im Feld <code class="jconf">Max.
+    Bandbreite</code> automatisch gesetzt. </p>
+  </li>
+  <li><p><b>Anteil f&uuml;r Forwarding</b><br>
+    W&auml;hlen Sie in diesem Feld den Prozentsatz aus, der von Ihrer gesamten
+    Upload-Bandbreite f&uuml;r das Forwarding zur Verf&uuml;gung stehen soll.
+    </p>
+  </li>
+  <li><p><b>Max. benutzte Bandbreite</b><br>
+    Hier wird Ihnen angezeigt, wie viel Bandbreite tats&auml;chlich
+    gem&auml;&szlig; den obigen Einstellungen f&uuml;r das Forwarding genutzt
+    wird. </p>
+  </li>
+</ul>
+
+<h3>Erlaubte Dienste</h3>
+
+<p>In diesem Abschnitt haben Sie grunds&auml;tzlich zwei
+Einstellungsm&ouml;glichkeiten. Entweder, Sie erlauben den Clients, die Ihren
+JonDo als Forwarder benutzen, den Zugriff auf alle Ihrem JonDo bekannten
+Dienste (<code class="jconf">Erlaube Client-Zugriff auf alle verf&uuml;gbaren
+Dienste</code> ist markiert) oder Sie erlauben den Zugriff nur auf bestimmte
+Dienste. Auf welche Dienste zugegriffen werden darf, legen Sie mit den
+Schaltfl&auml;chen <code class="jconf">Zu erlaubten Dienste
+hinzuf&uuml;gen</code> und <code class="jconf">Von erlaubten Diensten
+entfernen</code> fest. Der Zugriff ist dann nur auf Dienste m&ouml;glich, die
+sich im Feld <code class="jconf">Erlaubte Dienste</code> befinden. </p>
+
+<h3>InfoService-Anmeldung</h3>
+
+<p>Damit JonDo-Benutzer, die einen Forwarding-Server ben&ouml;tigen, Ihren
+JonDo finden k&ouml;nnen, muss Ihr JonDo bei mindestens einem InfoService als
+Forwarder registriert sein. Sie k&ouml;nnen sich bei allen InfoServices oder
+nur bei bestimmten anmelden. Die Verfahrensweise ist analog zum Vorgehen bei
+den erlaubten Diensten. </p>
+<!--#include virtual="/footer.html"-->
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="infoservice.html"><img
+src="prev.gif" alt="&lt;-"> InfoService</a></span> <span class="midlink"><a
+name="docbottom" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_config"><img src="next.gif" alt="-&gt;"> Konfiguration
+</a><a href="anon.html"><img src="next.gif" alt="-&gt;"> Anonymit&auml;t
+</a></span> <span class="nextlink"><a href="cert.html">Zertifikatsstellen <img
+src="next.gif" alt="-&gt;"></a></span> </p>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<JAPRouting>
+  <Request subject="cascade" msg="select" >
+    <MixCascade id="cNewYorkBerlinDresden" />
+  </Request>
+</JAPRouting>
+  

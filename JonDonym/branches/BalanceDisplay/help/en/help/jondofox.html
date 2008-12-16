@@ -1,0 +1,322 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <title>JonDo Help: JonDoFox</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+
+<body lang="en">
+<!--#include virtual="/header_en.html"-->
+
+<p class="navipar"><span class="prevlink"><a href="firststeps.html"><img
+src="prev.gif" alt="&lt;-"> First steps</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser
+setup</a></span> <span class="nextlink"><a href="browser.html">Alternative
+browser configuration <img src="next.gif" alt="-&gt;"></a></span> </p>
+<hr>
+
+<h2>JonDoFox - Security and Privacy for Firefox </h2>
+
+<p>JonDoFox is a <a
+href="http://www.mozilla-europe.org/en/firefox/">Firefox</a> browser profile
+particularly optimized for anonymous and secure web surfing<a
+href="jondonym.html"></a>.</p>
+
+<h3><a name="ffprofile" id="ffprofile">Profile installation</a></h3>
+
+<p>This installation option integrates the JonDoFox profile and a locally
+installed Firefox, so that JonDoFox operates seamlessly with your system. Any
+previous Firefox configuration you may have created remains untouched by the
+installation. After installing, you may choose between both your profile and
+the JonDoFox configuration at each start of Firefox.</p>
+
+<p>First, install <a
+href="http://www.mozilla-europe.org/en/firefox/">Firefox</a> on your system if
+you haven't done so yet. After that, you may install JonDoFox as follows:</p>
+<ul>
+  <li><a name="ffpwindows"><b>Windows</b></a> 
+    <p>Launch the <a
+    href="https://www.jondos.de/downloads/JonDoFox.paf.exe">JonDoFox
+    installation program</a>, choose "lite" or "complete" and then follow the
+    instructions. The installer is also suitable for a portable installation
+    (see below).</p>
+  </li>
+  <li><a name="ffpmacosx"><b>Mac OS X</b></a> 
+    <ol>
+      <li>Download the file <a
+        href="https://www.jondos.de/en/downloads/JonDoFox_OS_X.dmg">JonDoFox_OS_X.dmg</a>
+        (also available as <a
+        href="https://www.jondos.de/en/downloads/JonDoFox_OS_X_lite.dmg">Lite
+        version</a> with only the security relevant extensions).</li>
+      <li>Open the file by double clicking. Then launch
+        <em>JonDoFox_Install</em> with another double click.</li>
+    </ol>
+    <p><b>Notice</b><br>
+    The installer may also be used for deinstalling the previously installed
+    profile, but <b>beware:</b><br>
+    Please do not change the entries that the installer creates. Otherwise, a
+    clean installation can not be guaranteed! Also, <b>only</b> use the
+    installer for deinstallation if you have also used it for installing
+    JonDoFox.</p>
+  </li>
+  <li><a name="ffplinux"><b>Linux</b></a> 
+    <ol>
+      <li>Download the file <a
+        href="https://www.jondos.de/en/downloads/profile.zip">profile.zip</a>
+        (also available as <a
+        href="https://www.jondos.de/en/downloads/profile_lite.zip">Lite
+        version</a> with only the security relevant extensions).</li>
+      <li>Unpack the file, e.g. from the command line, using the command:
+        <code>user@computer#:/&gt; unzip profile.zip -d target</code>.</li>
+      <li>Go to the directory where you placed the files:
+        <code>user@computer#:/&gt; cd target</code>.</li>
+      <li>To install JonDoFox, run the script <code>install_linux.sh</code>
+        from there: <code>user@computer#:/<i>target</i>&gt;
+        ./install_linux.sh</code></li>
+    </ol>
+  </li>
+</ul>
+
+<p><b>Notice</b><br>
+When a new version of JonDoFox is released, you may always install the new
+version "on top of" the old one, i.e. into the same directory. Your bookmarks
+will be kept. </p>
+
+<h3>Portable installation</h3>
+
+<p>The portable installation is recommended for removable drives. It will not
+integrate with your system. If needed, you have to create any links to the
+JonDoFox program files yourself.</p>
+
+<h4>Windows (2000, XP, Vista)</h4>
+
+<p>The <a href="https://www.jondos.de/downloads/JonDoFox.paf.exe">JonDoFox
+installation program</a> is also prepared for a portable installation. If you
+choose the portable installation, you may install JonDoFox on both a removable
+drive and your hard drive. Any existing Firefox or JonDoFox installation
+remains untouched as long as you do not install JonDoFox to the same directory
+and thus update an existing installation. While updating from earlier JonDoFox
+versions your bookmarks are kept. JonDoFox Portable automatically integrates
+with the <a href="http://portableapps.com/">PortableApps</a> menu for which a
+lot of <a href="http://portableapps.com/apps">other applications are
+available</a> as well.</p>
+
+<h4>for Mac OS X (10.4 or higher)</h4>
+
+<p>(in preparation)</p>
+<!--<p>You get a "portable" version of JonDoFox for Mac OS X 
+<a
+href="https://www.jondos.de/en/downloads/JonDoFox_OS_X_portable.dmg">here</a>
+(or, as an alternative, the <a
+href="https://www.jondos.de/en/downloads/JonDoFox_OS_X_lite_portable.dmg">lite
+version</a>). You may start this version from both a removable drive and from
+your hard drive. For installation, please open the downloaded file with a
+double click. Then copy the included file on a data medium of your choice. You
+may start it from there with a simple double click. </p> -->
+
+<h3><a name="critical_addons">Security relevant Firefox extensions</a></h3>
+
+<p>The JonDoFox lite package contains all extensions which are relevant for
+your security, already with settings optimized. You will find some other useful
+extensions in the complete package which we have individually tested concerning
+their security and compatibility with JonDoFox. The Firefox status bar always
+gives you control of the most important functions integrated in JonDoFox: </p>
+
+<div style="text-align:left">
+<img alt="Statuszeile JonDoFox (CSLite, NoScript, AdblockPlus, JonDoFox)"
+src="img_jondofox/jondofox_statusbar.png"></div>
+
+<h3>Control Cookies with CS-Lite </h3>
+
+<p>Using CS-Lite, you may very conveniently determine for which websites to
+accept cookies and for which to block them. If you click on the CS-Lite icon
+<span class="nowrap"><img src="img_jondofox/cslite.gif"
+alt="CS-Lite Icon"></span> with your left mouse button, you are given the
+following options for the currently visited web site: </p>
+
+<div style="text-align:left">
+<img src="img_jondofox/cslite_menu.gif" alt="CS-Lite Men&uuml;"> </div>
+<ul>
+  <li style="list-style-image:url(img_jondofox/cslite_temp.gif)"><b>Allow
+    temporarily</b><br>
+    The Cookie is only accepted for the current browser session and will be
+    removed afterwards. After browser restart, the website is no longer allowed
+    to read or set a Cookie. <strong>This is the recommended
+  setting.</strong></li>
+  <li style="list-style-image:url(img_jondofox/cslite_session.gif)"><b>Allow
+    for session</b><br>
+    The Cookie is only accepted for the current browser session and will be
+    removed afterwards. After browser restart, the website may set a new
+  cookie.</li>
+  <li
+    style="list-style-image:url(img_jondofox/cslite_allow.gif)"><b>Allow</b><br>
+    The cookie is stored in the browser as long as the website defined. It may
+    be kept and accessed by the web site even after browser restart. </li>
+  <li
+    style="list-style-image:url(img_jondofox/cslite_remove.gif)"><b>Remove</b><br>
+    Any rule you set for the website before is removed. The website is no
+    longer allowed to read or set a cookie.</li>
+</ul>
+
+<p><strong>Warning:</strong> You should never use the option <span
+class="nowrap"><img src="img_jondofox/cslite_global.gif"
+alt="CS-Lite: Cookies global akzeptieren"> <b>Allow Cookies Globally</b></span>
+if possible. This allows cookies from all websites that have not been
+explicitly <span class="nowrap"><img src="img_jondofox/cslite.gif"
+alt="CS-Lite: Cookies global akzeptieren"> <b>blocked</b></span>, and others
+may track your steps on the Web.</p>
+
+<h3>Filter advertizements with AdblockPlus</h3>
+
+<p>AdblockPlus <img alt="AdblockPlus" src="img_jondofox/abp-enabled-16.png"> is
+an advertizement filter that runs in the background. Usually, you do not have
+to alter its settings. However, you may add your own filter lists any time.</p>
+
+<h3>Control active contents with NoScript</h3>
+
+<p>NoScript <img src="img_jondofox/noscript.gif" alt="NoScript-Icon"> lets you
+conveniently control which potential dangerous scripts and plugins from a
+website your browser may execute or not.</p>
+
+<h4>Controlling installed plugins</h4>
+
+<p>When you visit a website containing plugin content like Flash movies or Java
+applets, this content will be automatically blocked by NoScript. A placeholder
+(left image) is shown instead of the active content: </p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><span style="text-align:left;margin-right:50px;"><img
+        src="img_jondofox/noscript_placeholder.gif" alt="NoScript-Platzhalter">
+        </span> </td>
+      <td><span style="text-align:left;margin-left:50px;"><img
+        src="img_jondofox/noscript_blocked.gif"
+        alt="NoScript: Geblockte Objekte Men&uuml;"> </span> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>You may allow the content by clicking on the placeholder or by choosing the
+respective option in <span><img src="img_jondofox/noscript_blockedcontent.gif"
+alt="NoScript: Geblockte Objekte"> <b>Blocked Objects</b></span> after clicking
+on the NoScript menu icon <img src="img_jondofox/noscript.gif"
+alt="NoScript-Icon">. </p>
+
+<p><strong>Warning:</strong> Without <a
+href="https://www.jondos.de/en/jondofox/faq#12n1327">special protective
+measures</a>, allowed plugin content may completely or partially revoke your
+anonymity and might even damage your system.</p>
+
+<h4>Controlling JavaScript</h4>
+
+<p>If you click on the NoScript icon<span class="nowrap"><img
+src="img_jondofox/noscript.gif" alt="NoScript-Icon"></span> you get a list of
+all addresses/service providers with JavaScript code on the currently visited
+web site. The respective entries are marked with the<span class="nowrap"><img
+src="img_jondofox/noscript_temp.gif"
+alt="NoScript tempor&auml;r erlauben"></span> icon: </p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><span style="text-align:left;margin-right:50px;"><img
+        src="img_jondofox/noscript_allow.gif"
+        alt="NoScript: Erlaubnis erteilen"> </span> </td>
+      <td><span style="text-align:left;margin-left:50px;"><img
+        src="img_jondofox/noscript_disallow.gif"
+        alt="NoScript: Erlaubnis entziehen"> </span> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>By clicking on <span><img src="img_jondofox/noscript_temp.gif"
+alt="NoScript tempor&auml;r erlauben"> <b>Temporarily allow</b></span> you
+activate scripts for this entry. By another click, as shown in the right image,
+you may easily remove this permission again. If you would like to remove the
+permissions for all addresses, you just have to click on <span><img
+src="img_jondofox/noscript_disallowall.gif"
+alt="NoScript: Tempor&auml;re Berechtigungen aufheben"> <b>Revoke temporary
+permissions</b></span>.</p>
+
+<p><strong>Warning:</strong> You should give as few permissions as possible,
+and if possible only for the currently visited website. Third party scripts are
+often only used to spy on you and are rarely needed for proper functionality of
+the website.</p>
+
+<p>If you generally distrust any address you may classify it
+<em>untrusted</em>, and it will no more show up within the addresses you might
+allow. In order to make this classification, move your mouse over the option
+<span class="nowrap"><img src="img_jondofox/noscript_untrwicon.gif"
+alt="NoScript: nicht vertrauensw&uuml;rdig"> <b>Untrusted</b>.</span> Then, you
+get an overview of all the addresses on the current website which you may mark
+untrusted: </p>
+
+<div style="text-align:left">
+<img src="img_jondofox/noscript_untrustw.gif"
+alt="NoScript: nicht vertrauensw&uuml;rdig Men&uuml;"> </div>
+
+<p>You may undo this action just the same way. </p>
+
+<h3>Switching proxies</h3>
+
+<p>If you would like to surf the Web with a different (local) proxy than JonDo
+or without any proxy, just use the button <img alt="JonDo-Proxy"
+src="img_jondofox/jondofox_jondo.png"> integrated in JonDoFox (down right) in
+order to switch between different proxy configurations: </p>
+
+<p><img alt="JonDoFox-Popup" src="img_jondofox/jondofox_popup.png"></p>
+<ul>
+  <li><b>No Proxy</b>: If no proxy is set, JonDoFox directly connects to the
+    Internet. <strong>Attention: Your IP address will be sent in plain and is
+    not hidden!</strong></li>
+  <li><b>Custom</b>: Using this setting, you may use your own proxy
+    configuration. Choose <span class="nowrap"><img
+    src="img_jondofox/servermanuell.gif"
+    alt="NoScript: nicht vertrauensw&uuml;rdig"> <b>Edit Custom
+    Proxy</b></span> in order to create an individual proxy configuration.
+    However, this is only recommended for experts.</li>
+  <li><b>Tor</b>: If you have installed and started the program <a
+    href="http://www.torproject.org">Tor</a> you may use it as an alternative
+    to JonDo with this setting.</li>
+  <li><b>JonDo</b>: When this setting is active, JonDoFox sends the browser's
+    communication data to JonDo. JonDo needs to be separately <a
+    href="https://www.jondos.de/en/download">installed and started</a>.</li>
+</ul>
+
+<p>Whenever you like to bypass the proxy without completely deactivating it
+(e.g. when downloading large files to save time and money), just open the
+context menu with a right mouse click on the file and choose <em>Bypass
+JonDo/Tor/Proxy and Save Link As...</em></p>
+
+<h3>Downloading videos</h3>
+
+<p>To prevent having to activate dangerous Flash in your browser, you should
+always download web videos to your hard drive and play them from there. This
+also saves you the additional traffic which would be needed to view a streaming
+video again. JonDoFox contains some download tools for doing this. For Windows
+and Linux (under WINE), there also exists an excellent freeware program called
+<a href="http://atube-catcher.dsnetwb.com">aTube Catcher</a>. You may configure
+this program for JonDo by activating the HTTP proxy in aTube Catcher in
+<strong><em>Tools-&gt;Connection settings</em></strong> and setting it to
+<strong><em>Host:127.0.0.1</em></strong> and <strong><em>Port:
+4001</em></strong></p>
+
+<p><img alt="aTube Catcher Connection settings: HTTP proxy 127.0.0.1:4001"
+src="img_jondofox/aTubeCatcherConnection.png"></p>
+
+<p>For playing movies of all video formats on all operating systems, the free
+<a href="http://www.videolan.org/">VideoLAN Media Player</a> is a very good
+choice.</p>
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="firststeps.html"><img
+src="prev.gif" alt="&lt;-"> First steps</a></span> <span class="midlink"><a
+name="docbottom" href="index.html#mi_toc">TOC </a><a
+href="index.html#mi_browser"><img src="next.gif" alt="-&gt;"> Browser
+setup</a></span> <span class="nextlink"><a href="browser.html">Alternative
+browser configuration<img src="next.gif" alt="-&gt;"></a></span> </p>
+<!--#include virtual="/footer_en.html"-->
+</body>
+</html>
