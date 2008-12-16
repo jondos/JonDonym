@@ -49,12 +49,15 @@ import anon.infoservice.MixPosition;
  */
 public class XMLEasyCC implements IXMLEncodable
 {
+	
+	public static final String XML_ELEMENT_NAME = "CC";
+	
 	//~ Instance fields ********************************************************
 
 	private long m_lTransferredBytes;
 	private long m_lAccountNumber;
 	private int m_id = 0; //to be used as primary key in the BI database, 0 if not yet stored in db
-	private static final String ms_strElemName = "CC";
+	//private static final String ms_strElemName = "CC";
 	private Hashtable m_priceCerts = new Hashtable(); //key: Subjectkeyidentifier of Mix (String, id attribute of pricecerthash element)
 									//value: value of PriceCerthash element (String)
 	private String m_cascadeID; //stored as its own variable, since Hashtable doesnt guarantee order (so we don't know which mix is the first one)
@@ -69,7 +72,7 @@ public class XMLEasyCC implements IXMLEncodable
 
 	public static String getXMLElementName()
 	{
-		return ms_strElemName;
+		return XML_ELEMENT_NAME;
 	}
 
 	/**
@@ -155,7 +158,7 @@ public class XMLEasyCC implements IXMLEncodable
 
 	private void setValues(Element element) throws XMLParseException
 	{
-		if(!element.getTagName().equals(ms_strElemName))
+		if(!element.getTagName().equals(XML_ELEMENT_NAME))
 		{
 			throw new XMLParseException("XMLEasyCC wrong xml root element name");
 		}
@@ -209,7 +212,7 @@ public class XMLEasyCC implements IXMLEncodable
 
 	private Element internal_toXmlElement(Document a_doc)
 	{
-		Element elemRoot = a_doc.createElement(ms_strElemName);
+		Element elemRoot = a_doc.createElement(XML_ELEMENT_NAME);
 		elemRoot.setAttribute("version", "1.2");
 		Element elem;
 
