@@ -75,7 +75,6 @@ public class XMLAccountInfo implements IXMLEncodable //extends XMLDocument
 	//~ Instance fields ********************************************************
 
 	public static final String XML_ELEMENT_NAME_COST_CONFIRMATIONS = "CostConfirmations";
-	public static final String XML_ELEMENT_NAME_COST_CONFIRMATION = "CostConfirmation";
 	
 	/** the balance certificate */
 	private XMLBalance m_balance = null;
@@ -186,13 +185,13 @@ public class XMLAccountInfo implements IXMLEncodable //extends XMLDocument
 		m_balance = new XMLBalance(elemBalance);
 
 		Element elemCCs = (Element) XMLUtil.getFirstChildByName(elemRoot, XML_ELEMENT_NAME_COST_CONFIRMATIONS);
-		Element elemCC = (Element) XMLUtil.getFirstChildByName(elemCCs, XML_ELEMENT_NAME_COST_CONFIRMATION);
+		Element elemCC = (Element) XMLUtil.getFirstChildByName(elemCCs, XMLEasyCC.XML_ELEMENT_NAME);
 		XMLEasyCC cc = null;
 		while (elemCC != null)
 		{
 			cc = new XMLEasyCC(elemCC);
 			m_costConfirmations.put(cc.getConcatenatedPriceCertHashes(), cc);
-			elemCC = (Element) XMLUtil.getNextSiblingByName(elemCC, XML_ELEMENT_NAME_COST_CONFIRMATION);
+			elemCC = (Element) XMLUtil.getNextSiblingByName(elemCC, XMLEasyCC.XML_ELEMENT_NAME);
 		}
 	}
 
