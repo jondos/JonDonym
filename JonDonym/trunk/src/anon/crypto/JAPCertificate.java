@@ -50,6 +50,7 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -65,14 +66,17 @@ import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.digests.GeneralDigest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.util.encoders.Hex;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -130,6 +134,23 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 
 	private static final String BASE64_TAG = "CERTIFICATE";
 	private static final String BASE64_ALTERNATIVE_TAG = "X509 " + BASE64_TAG;
+	
+	/** SignatureAlgorithmIdentifiers and their names as specified by RFC 3279 */
+	private static final String IDENTIFIER_DSA_WITH_SHA1 = 				"1.2.840.10040.4.3";
+	private static final String DSA_WITH_SHA1 = 						"dsaWithSHA1";
+	
+	private static final String IDENTIFIER_MD2_WITH_RSA_ENCRYPTION = 	"1.2.840.113549.1.1.2";
+	private static final String MD2_WITH_RSA_ENCRYPTION = 				"md2WithRSAEncryption";
+	
+	private static final String IDENTIFIER_MD5_WITH_RSA_ENCRYPTION = 	"1.2.840.113549.1.1.4";
+	private static final String MD5_WITH_RSA_ENCRYPTION = 				"md5WithRSAEncryption";
+	
+	private static final String IDENTIFIER_SHA1_WITH_RSA_ENCRYPTION =   "1.2.840.113549.1.1.5";
+	private static final String SHA1_WITH_RSA_ENCRYPTION = 				"sha-1WithRSAEncryption";
+	
+	private static final String IDENTIFIER_ECDSA_WITH_SHA1 = 			"1.2.840.10045.4.1";
+	private static final String ECDSA_WITH_SHA1 = 						"ecdsa-with-SHA1";
+	
 
 	/**
 	 * The dummy private key is used to create temporary certificates.
@@ -140,6 +161,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	private X509DistinguishedName m_subject;
 	private X509DistinguishedName m_issuer;
 	private X509Extensions m_extensions;
+	private X509SubjectKeyIdentifier m_subjectKeyIdentifier;
 
 	private IMyPublicKey m_PubKey;
 	private String m_id;
@@ -187,6 +209,12 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		m_issuer = new X509DistinguishedName(m_bcCertificate.getIssuer());
 		m_extensions = new X509Extensions(m_bcCertificate.getTBSCertificate().getExtensions());
 		m_id = m_sha1Fingerprint + m_validity.getValidFrom() + m_validity.getValidTo();
+		m_subjectKeyIdentifier = (X509SubjectKeyIdentifier)m_extensions.getExtension(X509SubjectKeyIdentifier.IDENTIFIER);
+		if(m_subjectKeyIdentifier == null)
+		{
+			m_subjectKeyIdentifier = new X509SubjectKeyIdentifier(this.getPublicKey());
+		}
+		
 	}
 
 	/**
@@ -485,26 +513,55 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	}
 
 	/**
-	 * Determine this certificates SubjectKeyIdentifier from
-	 * the X509Extensions and return its string representation.
+	 * Returns the String representation of the X509SubjectKeyIdentifier
 	 * @return this certificate's SubjectKeyIdentifier as a string
 	 */
 	public String getSubjectKeyIdentifier()
 	{
-		// FIXME: Do this only once and store the SKI as a member of this class?
-		// Get the extensions and determine the identifier
-		X509Extensions extensions = this.getExtensions();
-		AbstractX509Extension ski = extensions.getExtension(X509SubjectKeyIdentifier.IDENTIFIER);
-		// Return it as a string
-		if (ski != null && ski instanceof X509SubjectKeyIdentifier)
+		return m_subjectKeyIdentifier.getValue();
+	}
+	
+	/**
+	 * Returns the byte representation of the X509SubjectKeyIdentifier
+	 * @return this certificate's SubjectKeyIdentifier as a raw byte-array
+	 */
+	public byte[] getRawSubjectKeyIdentifier()
+	{
+		return Hex.decode(m_subjectKeyIdentifier.getValueWithoutColon());
+	}
+	
+	/**
+	 * Converts the ObjectIdentifier from the certificate's signature algorithm
+	 * into its human-readable Name as specified by RFC 3279.
+	 * @return the human-readable Name of the algorithm the certificate was signed
+	 * 		   with or the ObjectIdentifier as String, if the algorithm is unknown.
+	 */
+	public String getSignatureAlgorithmName()
+	{
+		String id = m_bcCertificate.getSignatureAlgorithm().getObjectId().getId();
+		
+		if(id.equals(IDENTIFIER_DSA_WITH_SHA1))
 		{
-			return ((X509SubjectKeyIdentifier)ski).getValueWithoutColon();
-		} 
-		else
-		{
-			// TODO: Rather throw an exception
-			return null;	
+			return DSA_WITH_SHA1;
 		}
+		if(id.equals(IDENTIFIER_SHA1_WITH_RSA_ENCRYPTION))
+		{
+			return SHA1_WITH_RSA_ENCRYPTION;
+		}
+		if(id.equals(IDENTIFIER_MD5_WITH_RSA_ENCRYPTION))
+		{
+			return MD5_WITH_RSA_ENCRYPTION;
+		}
+		if(id.equals(IDENTIFIER_MD2_WITH_RSA_ENCRYPTION))
+		{
+			return MD2_WITH_RSA_ENCRYPTION;
+		}
+		if(id.equals(IDENTIFIER_ECDSA_WITH_SHA1))
+		{
+			return ECDSA_WITH_SHA1;
+		}
+		
+		return id;		
 	}
 	
 	public BigInteger getSerialNumber()
@@ -699,52 +756,6 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	}
 
 	/**
-	 * Returns the first JAPCertificate or CertificateInfostructure from the
-	 * Enumeration that could verify this JAPCertificate.  If you call this
-	 * Method with an Enumeration of JAPCertificates you will get a JAPCertificate
-	 * as return value, but you have to cast this. If you just check on != null you
-	 * do not have to make a ClassCast.
-	 * With CertificateInfoStructures it runs the same way.
-	 * Null is returned if there was no Verifier.
-	 * @param a_verifyingCertificates An Enumeration of JAPCertificates or
-	 *                                CertificateInfoStructures to verify
-	 *                                this JAPCertificate
-	 * @param checkValidity shall the Validity of the Certs be checked or not?
-	 * @return the first JAPCertificate or CertificateInfoStructure that verified
-	 *         this JAPCertificate or null if there was no Verifier
-	 */
-	public synchronized Object getVerifier(Enumeration a_verifyingCertificates, boolean checkValidity)
-	{
-		if(a_verifyingCertificates != null)
-		{
-			Date today = new Date();
-			while (a_verifyingCertificates.hasMoreElements())
-			{
-				Object object = a_verifyingCertificates.nextElement();
-				JAPCertificate certificate = null;
-				if(object instanceof JAPCertificate)
-				{
-					certificate = (JAPCertificate)object;
-				}
-				else if(object instanceof CertificateInfoStructure)
-				{
-					certificate = ((CertificateInfoStructure)object).getCertificate();
-				}
-				else
-				{ //the nextElement is neither a JAPCertificate nor a CertificateInfoStructure
-					continue;
-				}
-				if (this.verify(certificate) &&
-					! (checkValidity && ! (certificate.getValidity().isValid(today))))
-				{
-					return object;
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Checks if a given Certificate could be directly verified against a set of other certificates.
 	 * @param a_verifyingCertificates A Vector of JAPCertificates to verify this JAPCertificate.
 	 * @return True, if this certificate could be verified.
@@ -821,24 +832,23 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		{
 			return false;
 		}
-
-		// the cert is verified, too, if the public key is the same as the test key
-		if (getPublicKey().equals(a_publicKey))
+		
+		AlgorithmIdentifier aid1 = a_publicKey.getSignatureAlgorithm().getIdentifier();
+		AlgorithmIdentifier aid2 = this.m_bcCertificate.getSignatureAlgorithm();
+		if(aid1.equals(aid2))
 		{
-			return true;
-		}
-
-		try
-		{
-			ByteArrayOutputStream bArrOStream = new ByteArrayOutputStream();
-			(new DEROutputStream(bArrOStream)).writeObject(m_bcCertificate.getTBSCertificate());
-
-			return ByteSignature.verify(bArrOStream.toByteArray(),
-										m_bcCertificate.getSignature().getBytes(), a_publicKey);
-		}
-		catch (IOException a_e)
-		{
-			// should not happen
+			try
+			{
+				ByteArrayOutputStream bArrOStream = new ByteArrayOutputStream();
+				(new DEROutputStream(bArrOStream)).writeObject(m_bcCertificate.getTBSCertificate());
+	
+				return ByteSignature.verify(bArrOStream.toByteArray(),
+											m_bcCertificate.getSignature().getBytes(), a_publicKey);
+			}
+			catch (IOException a_e)
+			{
+				// should not happen
+			}
 		}
 
 		return false;
@@ -1079,7 +1089,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		digestData = new byte[a_digestGenerator.getDigestSize()];
 		a_digestGenerator.update(a_data, 0, a_data.length);
 		a_digestGenerator.doFinal(digestData, 0);
-
+		
 		return ByteSignature.toHexString(digestData);
 	}
 
@@ -1188,7 +1198,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 				signature = ByteSignature.sign(bOut.toByteArray(), a_privateKey);
 
 				/* construct certificate */
-				seqv = new DEREncodableVector();
+				seqv = new ASN1EncodableVector();
 				seqv.add(tbsCert);
 				seqv.add(a_privateKey.getSignatureAlgorithm().getIdentifier());
 				seqv.add(new DERBitString(signature));
@@ -1231,5 +1241,19 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 
 			return JAPCertificate.getInstance(a_file.getInputStream(a_entry));
 		}
+	}
+	
+	/**
+	 * Returns <code>true</code> if this cert is self-signed.
+	 * @return if this cert is self-signed.
+	 */
+	public boolean isSelfSigned()
+	{
+		return this.verify(this.getPublicKey());
+	}
+	
+	public boolean isRevoked()
+	{
+		return RevokedCertifcateStore.getInstance().isCertificateRevoked(this);
 	}
 }

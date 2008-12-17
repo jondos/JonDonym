@@ -27,6 +27,8 @@
  */
 package anon.crypto;
 
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+
 /**
  * This interface represents an algorithm that verifies cryptographic signatures.
  */
@@ -72,5 +74,6 @@ public interface ISignatureVerificationAlgorithm
 	 * @see http://www.w3.org/TR/xmldsig-core/#sec-AlgID
 	 */
 	public String getXMLSignatureAlgorithmReference();
-
+	
+	public AlgorithmIdentifier getIdentifier();
 }

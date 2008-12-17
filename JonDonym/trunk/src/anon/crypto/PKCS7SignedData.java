@@ -22,7 +22,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.asn1.pkcs.SignerInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.asn1.x509.X509Name;
 
 /**
  * This was stolen from BouncyCastle and changed a little bit to get it work without BC provider...
@@ -173,13 +173,13 @@ public class PKCS7SignedData implements PKCSObjectIdentifiers
 		// Get the signing certificate
 		//
 		BigInteger serialNumber = isAnds.getCertificateSerialNumber().getValue();
-		X509Principal issuer = new X509Principal(isAnds.getName());
+		X509Name a_issuer = isAnds.getName();
 
 		for (Enumeration enumer = certs.elements(); enumer.hasMoreElements(); )
 		{
 			JAPCertificate cert = (JAPCertificate) enumer.nextElement();
 			boolean bS = serialNumber.equals(cert.getSerialNumber());
-			if (bS && issuer.equals(new X509Principal(cert.getIssuer().getX509Name())))
+			if (bS && a_issuer.equals(cert.getIssuer().getX509Name()))
 			{
 				signCert = cert;
 				break;

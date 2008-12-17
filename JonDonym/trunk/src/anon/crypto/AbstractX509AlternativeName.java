@@ -36,6 +36,7 @@ import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodableVector;
@@ -43,6 +44,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x509.GeneralName;
 
 import anon.infoservice.ListenerInterface;
 import anon.util.Util;
@@ -64,6 +66,16 @@ public abstract class AbstractX509AlternativeName extends AbstractX509Extension
 	public static final Integer TAG_URL = new Integer(6);
 	public static final Integer TAG_IP = new Integer(7);
 	//public static final Integer TAG_REGISTERED_ID = new Integer(8);
+	
+	public static final String OTHER_NAME                  = "otherName";
+	public static final String RFC_822_NAME                = "rfc822Name";
+	public static final String DNS_NAME                    = "dNSName";
+	public static final String X400_ADDRESS                = "x400Address";
+	public static final String DIRECTORY_NAME              = "directoryName";
+	public static final String EDI_PARTY_NAME              = "ediPartyName";
+	public static final String UNIFORM_RESOURCE_IDENTIFIER = "uniformResourceIdentifier";
+	public static final String IP_ADDRESS                  = "iPAddress";
+	public static final String REGISTERED_ID               = "registeredID";
 
 	private Vector m_values;
 	private Vector m_tags;
@@ -256,7 +268,7 @@ public abstract class AbstractX509AlternativeName extends AbstractX509Extension
 		Vector tempTags, tempValues;
 		StringTokenizer tokenizer;
 
-		values = new DEREncodableVector();
+		values = new ASN1EncodableVector();
 
 		if (a_values != null && a_values.size() != 0)
 		{
@@ -366,5 +378,32 @@ public abstract class AbstractX509AlternativeName extends AbstractX509Extension
 		}
 
 		return out.toByteArray();
+	}
+	
+	public static String getTagAsString(int tagNo)
+	{
+		switch(tagNo)
+		{
+			case GeneralName.otherName:
+				return OTHER_NAME;
+			case GeneralName.rfc822Name:
+				return RFC_822_NAME;
+			case GeneralName.dNSName:
+				return DNS_NAME;
+			case GeneralName.x400Address:
+				return X400_ADDRESS;
+			case GeneralName.directoryName:
+				return DIRECTORY_NAME;
+			case GeneralName.ediPartyName:
+				return EDI_PARTY_NAME;
+			case GeneralName.uniformResourceIdentifier:
+				return UNIFORM_RESOURCE_IDENTIFIER;
+			case GeneralName.iPAddress:
+				return IP_ADDRESS;
+			case GeneralName.registeredID:
+				return REGISTERED_ID;
+			default:
+				return null;
+		}
 	}
 }

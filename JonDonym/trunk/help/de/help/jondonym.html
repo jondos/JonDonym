@@ -21,21 +21,21 @@ alt="-&gt;"></a></span> </p>
 
 <p>Der Anonymisierungsdienst JonDonym, dessen Technik aus dem <a
 href="http://anon.inf.tu-dresden.de">AN.ON-Projekt</a> hervorgegangen ist,
-besteht aus mehreren einzeln w&auml;hlbaren Mixkaskaden. Diese wiederum
-setzen sich aus bis zu drei Mix-Servern zusammen, die von jeweils voneinander
+besteht aus mehreren einzeln w&auml;hlbaren Mixkaskaden. Diese wiederum setzen
+sich aus bis zu drei Mix-Servern zusammen, die von jeweils voneinander
 unabh&auml;ngigen Organisationen oder Privatpersonen betrieben werden, <a
-href="certificates.html">deren Identit&auml;t ver&ouml;ffentlicht wird</a>.
-Die Betreiber m&uuml;ssen sich an strikte Betriebsrichtlinien halten, die
-ihnen verbieten, Verbindungsdaten zu speichern oder mit den anderen
-Mix-Betreibern in der Kaskade oder mit einer dritten Organisation Surfdaten
-von Nutzern auszutauschen. Jede Internetverbindung eines Nutzers wird
-f&uuml;r jeden Mix einer Kaskade einzeln verschl&uuml;sselt und &uuml;ber die
-Mixkaskade bis zum Ziel, z.B. zu einer Webseite, gesendet. Ziel dieser
-mehrfachen Verschl&uuml;sselung und Weiterleitung ist, dass kein Mixbetreiber
-alleine den Nutzer enttarnen kann, und dass Lauscher auf den Verbindungen
-(Provider, W-LAN) keine Inhaltsdaten abgreifen k&ouml;nnen. Da au&szlig;erdem
-viele Benutzer gleichzeitig den Anonymisierungsdienst nutzen und sich dabei
-alle dieselbe <a href="wwwprivacy.html#ip">IP-Adresse</a> teilen, werden die
+href="certificates.html">deren Identit&auml;t ver&ouml;ffentlicht wird</a>. Die
+Betreiber m&uuml;ssen sich an strikte Betriebsrichtlinien halten, die ihnen
+verbieten, Verbindungsdaten zu speichern oder mit den anderen Mix-Betreibern in
+der Kaskade oder mit einer dritten Organisation Surfdaten von Nutzern
+auszutauschen. Jede Internetverbindung eines Nutzers wird f&uuml;r jeden Mix
+einer Kaskade einzeln verschl&uuml;sselt und &uuml;ber die Mixkaskade bis zum
+Ziel, z.B. zu einer Webseite, gesendet. Ziel dieser mehrfachen
+Verschl&uuml;sselung und Weiterleitung ist, dass kein Mixbetreiber alleine den
+Nutzer enttarnen kann, und dass Lauscher auf den Verbindungen (Provider, W-LAN)
+keine Inhaltsdaten abgreifen k&ouml;nnen. Da au&szlig;erdem viele Benutzer
+gleichzeitig den Anonymisierungsdienst nutzen und sich dabei alle dieselbe <a
+href="wwwprivacy.html#ip">IP-Adresse</a> teilen, werden die
 Internetverbindungen jedes Benutzers unter denen aller anderen Benutzer auf
 derselben Kaskade versteckt: jeder Benutzer k&ouml;nnte der Urheber einer
 bestimmten Verbindung gewesen sein. Dieses Verfahren verhindert, dass
@@ -46,18 +46,20 @@ welchem Benutzer eine bestimmte Verbindung stammt.</p>
 <p>JonDonym bietet im Vergleich zu anderen Anonymisierungsdiensten einige
 konkrete Vorteile:</p>
 <ul>
-  <li><b>Starke Verschl&uuml;sselung und Authentisierung:</b> Niemand kann
-    den Datenverkehr zwischen Ihrem Rechner und dem JonDonym-Dienst
-  mitlesen.</li>
-  <li><b>Schutz vor dem Dienstbetreiber:</b> Solange nicht alle
-    Dienstbetreiber von JonDonym unabh&auml;ngig voneinander gezwungen
-    werden, Sie zu &uuml;berwachen, sind JonDonym-Verbindungen sicher. Die
-    Mixbetreiber werden regelm&auml;&szlig;ig auf ihre Seriosit&auml;t und
-    Professionalit&auml;t gepr&uuml;ft. Au&szlig;erdem wird ihre
-    Identit&auml;t ver&ouml;ffentlicht.</li>
+  <li><b>Starke Verschl&uuml;sselung und Authentisierung:</b> Niemand kann den
+    Datenverkehr zwischen Ihrem Rechner und dem JonDonym-Dienst mitlesen.
+    (Verschl&uuml;sselt mit RSA 2048 und AES 128; signiert mit DSA, RSA oder
+    ECDSA; realisiert mit den Bibliotheken BouncyCastle und OpenSSL)</li>
+  <li><b>Schutz vor dem Dienstbetreiber:</b> Solange nicht alle Dienstbetreiber
+    von JonDonym unabh&auml;ngig voneinander gezwungen werden, Sie zu
+    &uuml;berwachen, sind JonDonym-Verbindungen sicher. Die Mixbetreiber werden
+    regelm&auml;&szlig;ig auf ihre Seriosit&auml;t und Professionalit&auml;t
+    gepr&uuml;ft. Au&szlig;erdem wird ihre Identit&auml;t
+  ver&ouml;ffentlicht.</li>
   <li><b>Keine Logdaten:</b> Den Mixbetreibern ist es vertraglich untersagt,
     Logdaten &uuml;ber die IP-Adressen der Nutzer zu speichern, auch nicht
-    f&uuml;r wenige Sekunden. Dasselbe gilt f&uuml;r Inhaltsdaten.</li>
+    f&uuml;r wenige Sekunden. Dasselbe gilt f&uuml;r Inhaltsdaten. Durch
+    nationales Recht bedingte Ausnahmen werden deutlich markiert.</li>
   <li><b>Transparente Funktionalit&auml;t:</b> Informative
     Programmoberfl&auml;che, publizierte Verfahren, offene/OSI-konforme
     Quelltexte aller Programmkomponenten.</li>
@@ -70,8 +72,8 @@ konkrete Vorteile:</p>
     Softwareentwickler zu verhindern. Updates k&ouml;nnen vollst&auml;ndig
     &uuml;ber eine anonyme Verbindung durchgef&uuml;hrt werden.</li>
   <li><b>Sicheres Browserprofil:</b> Mit <a href="jondofox.html">JonDoFox</a>
-    steht Ihnen ein speziell f&uuml;r anonymes und sicheres Surfen mit
-    JonDonym entwickeltes Firefox-Profil kostenlos zur Verf&uuml;gung.</li>
+    steht Ihnen ein speziell f&uuml;r anonymes und sicheres Surfen mit JonDonym
+    entwickeltes Firefox-Profil kostenlos zur Verf&uuml;gung.</li>
   <li><b>Anonymit&auml;t zum Mitnehmen:</b> <a href="about.html">JonDo</a>
     l&auml;uft auch ohne Installation auf dem Rechner direkt von einem
     tragbaren USB-Stick (Windows / Mac OS X).</li>
@@ -79,37 +81,35 @@ konkrete Vorteile:</p>
     der Technischen Universit&auml;t Dresden (AN.ON), der Universit&auml;t
     Regensburg (AN.ON) und bei der JonDos GmbH (JonDonym) erweitern und
     verbessern das System.</li>
-  <li><b>Kompetenter, schneller und kostenloser Support:</b>
-    Ausf&uuml;hrliche Hilfefunktion, betreute Nutzerforen,
-  E-Mail-Support.</li>
+  <li><b>Kompetenter, schneller und kostenloser Support:</b> Ausf&uuml;hrliche
+    Hilfefunktion, betreute Nutzerforen, E-Mail-Support.</li>
 </ul>
 
 <p>Eine &auml;hnlich starke Anonymisierung kann nur das nicht-kommerzielle
 System <a href="http://tor.eff.org/">Tor</a> bieten, welches f&uuml;r
 Internet-Profis als Erg&auml;nzung zu JonDonym sehr empfehlenswert ist.
 Internet-Anf&auml;nger und Computer-Unerfahrene sollten mit Tor jedoch
-vorsichtig sein: bei diesem Dienst wird nicht kontrolliert, welche Menschen
-die Server betreiben, &uuml;ber die ihre Daten laufen. In der Vergangenheit
-gab es immer wieder den Verdacht, dass Kriminelle und Geheimdienste das
-Tor-Netzwerk missbrauchen, um unbemerkt unverschl&uuml;sselt &uuml;bertragene
-Informationen wie Passw&ouml;rter, Kontoverbindungen und Kreditkartendaten
-abzufangen und zu missbrauchen. Mit bestimmten Tricks k&ouml;nnen einzelne
-Tor-Server besonders viel Datenverkehr auf sich leiten um diese Angriffe
-effektiver zu machen. Tor kann aber gefahrlos als <a href="net.html">Proxy in
-JonDo eingetragen</a> werden, wodurch das Surfen zwar langsamer, aber noch
-sicherer wird als mit JonDo allein. Denn die letzten Server in der Kette sind
-dann Teil des verifizierten JonDonym-Netzwerkes.</p>
+vorsichtig sein: bei diesem Dienst wird nicht kontrolliert, welche Menschen die
+Server betreiben, &uuml;ber die ihre Daten laufen. In der Vergangenheit gab es
+immer wieder den Verdacht, dass Kriminelle und Geheimdienste das Tor-Netzwerk
+missbrauchen, um unbemerkt unverschl&uuml;sselt &uuml;bertragene Informationen
+wie Passw&ouml;rter, Kontoverbindungen und Kreditkartendaten abzufangen und zu
+missbrauchen. Mit bestimmten Tricks k&ouml;nnen einzelne Tor-Server besonders
+viel Datenverkehr auf sich leiten um diese Angriffe effektiver zu machen. Tor
+kann aber gefahrlos als <a href="net.html">Proxy in JonDo eingetragen</a>
+werden, wodurch das Surfen zwar langsamer, aber noch sicherer wird als mit
+JonDo allein. Denn die letzten Server in der Kette sind dann Teil des
+verifizierten JonDonym-Netzwerkes.</p>
 
 <p>Auch die jeweils letzten Mix-Server einer JonDonym-Kaskade k&ouml;nnten
 Datenverkehr, der nicht zus&auml;tzlich &uuml;ber HTTPS/SSL gesichert ist,
 mitschneiden. Im Gegensatz zu Tor und anderen Diensten k&ouml;nnen allerdings
 nur von JonDos und eventuell weiteren Zertifizierungsstellen auf Ihre
-Seriosit&auml;t gepr&uuml;fte und namentlich ver&ouml;ffentlichte Personen
-und Organisationen einen Mix-Server betreiben. Die Nutzer k&ouml;nnen dann
-selbst entscheiden, ob sie den jeweiligen Betreibern vertrauen m&ouml;chten
-oder nicht. Dadurch wird es sehr unwahrscheinlich, dass sich kriminelle
-Betreiber in JonDonym einschleichen und ungestraft ihr Unwesen treiben
-k&ouml;nnen.</p>
+Seriosit&auml;t gepr&uuml;fte und namentlich ver&ouml;ffentlichte Personen und
+Organisationen einen Mix-Server betreiben. Die Nutzer k&ouml;nnen dann selbst
+entscheiden, ob sie den jeweiligen Betreibern vertrauen m&ouml;chten oder
+nicht. Dadurch wird es sehr unwahrscheinlich, dass sich kriminelle Betreiber in
+JonDonym einschleichen und ungestraft ihr Unwesen treiben k&ouml;nnen.</p>
 
 <h3><a name="premium" id="premium">Premiumdienste</a></h3>
 
@@ -117,41 +117,40 @@ k&ouml;nnen.</p>
 und den kostenpflichtigen Premiumdiensten. Um f&uuml;r Premiumdienste zu
 bezahlen wird ein Abrechnungskonto ben&ouml;tigt. <b>Durch die Bezahlung der
 Premiumdienste unterst&uuml;tzen Sie den Erhalt des JonDonym-Systems und die
-Weiterentwicklung der JonDo-Software</b>. Bei Nutzung der Premiumdienste
-bietet Ihnen die Software JonDo zus&auml;tzlich zu den sonstigen
-Eigenschaften folgende Vorteile:</p>
+Weiterentwicklung der JonDo-Software</b>. Bei Nutzung der Premiumdienste bietet
+Ihnen die Software JonDo zus&auml;tzlich zu den sonstigen Eigenschaften
+folgende Vorteile:</p>
 <ul>
   <li><b>Verf&uuml;gbarkeitsgarantie</b>: Eine Verbindung zu mindestens einem
     Premium-Dienst ist zu mindestens 90% im Jahresmittel m&ouml;glich.</li>
-  <li><b>Leistungsgarantie:</b> Im Rahmen der genannten Verf&uuml;gbarkeit
-    ist mindestens ein Dienst mit einer Geschwindigkeit von mindestens 100
-    kbit/s und Verz&ouml;gerungen von maximal 4 Sekunden zu 90% im
-    Tagesmittel nutzbar. Kostenlose Dienste, auch Tor, sind in der Regel
-    deutlich langsamer.</li>
-  <li><b>Rechtssicherheit:</b> Die Adresse der Softwarehersteller befindet
-    sich in Deutschland, und nicht bei einer anonymen Offshore-Firma ohne
+  <li><b>Leistungsgarantie:</b> Im Rahmen der genannten Verf&uuml;gbarkeit ist
+    mindestens ein Dienst mit einer Geschwindigkeit von mindestens 100 kbit/s
+    und Verz&ouml;gerungen von maximal 4 Sekunden zu 90% im Tagesmittel
+    nutzbar. Kostenlose Dienste, auch Tor, sind in der Regel deutlich
+  langsamer.</li>
+  <li><b>Rechtssicherheit:</b> Die Adresse der Softwarehersteller befindet sich
+    in Deutschland, und nicht bei einer anonymen Offshore-Firma ohne
     ladungsf&auml;hige Anschrift. Deutschland setzt weltweit hohe Standards
     beim Verbraucherschutz.</li>
-  <li><b>Drei-Betreiber-Garantie:</b> Jede Premium-Mixkaskade wird von
-    jeweils drei voneinander unabh&auml;ngigen Organisationen oder Personen
-    betrieben.</li>
+  <li><b>Drei-Betreiber-Garantie:</b> Jede Premium-Mixkaskade wird von jeweils
+    drei voneinander unabh&auml;ngigen Organisationen oder Personen
+  betrieben.</li>
   <li><b>Internationalit&auml;tsgarantie:</b> Mixe und Betreiber jeder
     Premium-Mixkaskade stehen verteilt in jeweils mindestens zwei
     unterschiedlichen L&auml;ndern. Dies verhindert, dass gro&szlig;e
-    Netzknoten (CIX) den gesamten Datenverkehr beobachten k&ouml;nnen.
-    Nebenbei wird dadurch zuverl&auml;ssig jede nationale
-    Vorratsdatenspeicherung ausgehebelt, da niemals alle Mixe einer Kaskade
-    mitloggen.</li>
+    Netzknoten (CIX) den gesamten Datenverkehr beobachten k&ouml;nnen. Nebenbei
+    wird dadurch zuverl&auml;ssig jede nationale Vorratsdatenspeicherung
+    ausgehebelt, da niemals alle Mixe einer Kaskade mitloggen.</li>
   <li><b>Verbindungsgarantie:</b> Die Mixbetreiber blockieren in der Regel
     keine Internetports (ausgenommen E-Mail-Ports, falls dies zur Abwehr von
     SPAM notwendig sein sollte).</li>
 </ul>
 
 <p>Von diesen Garantien ausgenommen sind Softwarefehler, f&uuml;r die
-gem&auml;&szlig; <a
-href="https://www.jondos.de/de/termsAndConditions">AGB</a> nicht gehaftet
-wird. Weitere m&ouml;gliche Einschr&auml;nkungen bei den Leistungen einzelner
-Dienste entnehmen Sie bitte den AGB der jeweiligen Mixbetreiber.</p>
+gem&auml;&szlig; <a href="https://www.jondos.de/de/termsAndConditions">AGB</a>
+nicht gehaftet wird. Weitere m&ouml;gliche Einschr&auml;nkungen bei den
+Leistungen einzelner Dienste entnehmen Sie bitte den AGB der jeweiligen
+Mixbetreiber.</p>
 
 <p>Wenn Sie die Premiumdienste nutzen m&ouml;chten, erstellen Sie in Ihrem
 JonDo-Programm ein <a href="payment.html">Einmalkonto</a> und aktivieren es
@@ -159,16 +158,16 @@ mittels Bezahlung &uuml;ber eine anonyme oder nicht-anonyme <a
 href="https://www.jondos.de/de/payment">Bezahlmethode Ihrer Wahl</a>. Danach
 steht ihnen <a href="https://www.jondos.de/de/payment">je nach gew&auml;hltem
 Tarif</a> ein bestimmtes Datenvolumen f&uuml;r die Bezahlung von
-Premiumdiensten zur Verf&uuml;gung. Wenn dieses Datenvolumen verbraucht ist
-und Sie mit den JonDonym-Diensten zufrieden sind, k&ouml;nnen Sie jederzeit
-ein neues Einmalkonto erzeugen und aktivieren.</p>
+Premiumdiensten zur Verf&uuml;gung. Wenn dieses Datenvolumen verbraucht ist und
+Sie mit den JonDonym-Diensten zufrieden sind, k&ouml;nnen Sie jederzeit ein
+neues Einmalkonto erzeugen und aktivieren.</p>
 
 <p>Hinweise zum Datenschutz: Zur Abrechnung des Datenvolumens mit den
 Mixbetreibern wird jeweils kumulativ gespeichert, wie viel Volumen ein Konto
-auf welcher Mixkaskade verbraucht. Eine mehr als tagesgenaue Abrechnung
-erfolgt dabei nicht. Eine Zuordnung von Konten zu Nutzeridentit&auml;ten wird
-nicht gespeichert. &Uuml;ber das abgerechnete Datenvolumen ist es technisch
-nicht m&ouml;glich, aufgerufene Internetseiten zu erkennen, selbst bei
+auf welcher Mixkaskade verbraucht. Eine mehr als tagesgenaue Abrechnung erfolgt
+dabei nicht. Eine Zuordnung von Konten zu Nutzeridentit&auml;ten wird nicht
+gespeichert. &Uuml;ber das abgerechnete Datenvolumen ist es technisch nicht
+m&ouml;glich, aufgerufene Internetseiten zu erkennen, selbst bei
 sekundengenauer bzw. maximal genauer Speicherung. </p>
 
 <p><strong>Hinweis: Die Premiumdienste sind nicht mit allen Versionen des

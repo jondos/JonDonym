@@ -439,7 +439,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 						Math.abs(random.nextInt()) % infoServiceList.size()));
 				}
 
-				if (currentInfoService.getCertPath() != null && !currentInfoService.getCertPath().verify())
+				if (currentInfoService.getCertPath() != null && !currentInfoService.getCertPath().isVerified())
 				{
 					LogHolder.log(LogLevel.NOTICE, LogType.NET,
 								  "Skipped non-verifyable InfoService: " + currentInfoService.getName(), true);

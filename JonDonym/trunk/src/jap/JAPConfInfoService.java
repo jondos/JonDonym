@@ -27,10 +27,14 @@
  */
 package jap;
 
-import java.util.Enumeration;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Vector;
+import gui.CertDetailsDialog;
+import gui.GUIUtils;
+import gui.JAPHtmlMultiLineLabel;
+import gui.JAPJIntField;
+import gui.JAPMessages;
+import gui.JAPMultilineLabel;
+import gui.MultiCertOverview;
+import gui.dialog.JAPDialog;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -46,6 +50,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Enumeration;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Vector;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -64,24 +73,16 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import anon.crypto.CertPath;
-import anon.crypto.JAPCertificate;
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+import anon.crypto.MultiCertPath;
 import anon.infoservice.Database;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.InfoServiceHolderMessage;
 import anon.infoservice.ListenerInterface;
-import gui.CertDetailsDialog;
-import gui.GUIUtils;
-import gui.JAPHtmlMultiLineLabel;
-import gui.JAPJIntField;
-import gui.JAPMessages;
-import gui.JAPMultilineLabel;
-import gui.dialog.JAPDialog;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
 /**
  * This is the configuration GUI for the infoservice.
@@ -134,8 +135,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 	private boolean mb_newInfoService = true;
 
-	private JAPCertificate m_selectedISCert;
-	private CertPath m_selectedISCertPath;
+	private MultiCertPath m_selectedISCertPaths;
+	private String m_selectedISName;
 
 	private JTabbedPane m_infoServiceTabPane;
 
@@ -434,14 +435,9 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
-				if(m_selectedISCert != null)
+				if(m_selectedISCertPaths != null)
 				{
-					CertDetailsDialog dialog = new CertDetailsDialog(getRootPanel().getParent(),
-					m_selectedISCert.getX509Certificate(), true, //isServerCertVerified(),
-					JAPMessages.getLocale(), m_selectedISCertPath);
-					dialog.pack();
-					dialog.setVisible(true);
-
+					MultiCertOverview dialog = new MultiCertOverview(getRootPanel().getParent(), m_selectedISCertPaths, m_selectedISName, true);
 				}
 			}
 		});
@@ -799,7 +795,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 						{
 							addInfoServicePanel.setVisible(false);
 							descriptionPanel.setVisible(true);
-							viewCertButton.setEnabled(selectedInfoService.getCertificate() != null);
+							viewCertButton.setEnabled(selectedInfoService.getCertPath() != null);
 						}
 					}
 
@@ -816,8 +812,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 								getPreferredInfoService();
 							settingsInfoServiceConfigBasicSettingsRemoveButton.setEnabled(selectedInfoService.
 								isUserDefined() && (!selectedInfoService.equals(preferredInfoService)));
-							m_selectedISCert = selectedInfoService.getCertificate();
-							m_selectedISCertPath = selectedInfoService.getCertPath();
+							m_selectedISCertPaths = selectedInfoService.getCertPath();
+							m_selectedISName = selectedInfoService.getName();
 						}
 						else
 						{

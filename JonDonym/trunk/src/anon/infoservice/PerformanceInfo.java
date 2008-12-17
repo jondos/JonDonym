@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.Util;
@@ -59,7 +60,9 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	 */
 	private Element m_xmlData;
 	
-	private JAPCertificate m_isCertificate;
+	private XMLSignature m_signature;
+	
+	private MultiCertPath m_certPath;	
 	
 	/**
 	 * All PerformanceEntry objects measured by the info service
@@ -99,15 +102,11 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		/* try to get the certificate from the Signature node */
 		try
 		{
-			XMLSignature signature = SignatureVerifier.getInstance().getVerifiedXml(a_info,
+			m_signature = SignatureVerifier.getInstance().getVerifiedXml(a_info,
 				SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
-			if (signature != null && signature.isVerified())
+			if (m_signature != null)
 			{
-				CertPath certPath = signature.getCertPath();
-				if (certPath != null && certPath.getFirstCertificate() != null)
-				{
-					m_isCertificate = certPath.getFirstCertificate();
-				}
+				m_certPath = m_signature.getMultiCertPath();
 			}
 		}
 		catch (Exception e)
@@ -134,14 +133,23 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 		m_xmlData = a_info;
 	}
 	
-	public JAPCertificate getCertificate()
+	public XMLSignature getSignature()
 	{
-		return m_isCertificate;
+		return m_signature;
+	}
+	
+	public MultiCertPath getCertPath()
+	{
+		return m_certPath;
 	}
 	
 	public boolean isVerified()
 	{
-		return m_isCertificate != null;
+		if (m_signature != null)
+		{
+			return m_signature.isVerified();
+		}
+		return false;
 	}
 	
 	public String getId()

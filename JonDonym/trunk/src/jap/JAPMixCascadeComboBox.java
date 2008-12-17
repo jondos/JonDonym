@@ -611,10 +611,10 @@ public class JAPMixCascadeComboBox extends JComboBox
 				m_componentConstraints.gridx++;
 				
 				mixInfo = cascade.getMixInfo(i);				
-				if (mixInfo != null && mixInfo.getCertificate() != null && 
-					mixInfo.getCertificate().getSubject() != null) 
+				if (mixInfo != null && mixInfo.getCertPath() != null && 
+					mixInfo.getCertPath().getSubject() != null) 
 				{
-					String mixCountry = mixInfo.getCertificate().getSubject().getCountryCode();
+					String mixCountry = mixInfo.getCertPath().getSubject().getCountryCode();
 					m_flags[i].setIcon(GUIUtils.loadImageIcon("flags/" + mixCountry + ".png"));
 				}
 				else

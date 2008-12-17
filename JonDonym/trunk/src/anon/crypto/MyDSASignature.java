@@ -311,8 +311,8 @@ public final class MyDSASignature implements IMySignature
 		return "http://www.w3.org/2000/09/xmldsig#dsa-sha1";
 	}
 
-	/// From BouncyCasatle....
-	private byte[] derEncode(BigInteger r, BigInteger s) throws IOException
+	/// From BouncyCastle....
+	static byte[] derEncode(BigInteger r, BigInteger s) throws IOException
 	{
 		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 		DEROutputStream dOut = new DEROutputStream(bOut);
@@ -326,7 +326,7 @@ public final class MyDSASignature implements IMySignature
 		return bOut.toByteArray();
 	}
 
-	private BigInteger[] derDecode(byte[] encoding,int off,int len) throws IOException
+	static BigInteger[] derDecode(byte[] encoding,int off,int len) throws IOException
 	{
 		ByteArrayInputStream bIn = new ByteArrayInputStream(encoding,off,len);
 		ASN1InputStream aIn = new ASN1InputStream(bIn);

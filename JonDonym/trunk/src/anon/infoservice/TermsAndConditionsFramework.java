@@ -21,6 +21,7 @@ import javax.xml.transform.Transformer;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
@@ -85,12 +86,10 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	
 	public Document m_docWorkingCopy;
 	public Element m_xmlData;
-	
-	private JAPCertificate m_certificate = null;
 
 	private XMLSignature m_signature = null;
 
-	private CertPath m_certPath = null;
+	private MultiCertPath m_certPath = null;
 	
 	public TermsAndConditionsFramework(Element a_elem) throws XMLParseException
 	{
@@ -122,11 +121,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		if (m_signature != null)
 		{
-			m_certPath = m_signature.getCertPath();
-			if (m_certPath != null)
-			{
-				m_certificate = m_certPath.getFirstCertificate();
-			}
+			m_certPath = m_signature.getMultiCertPath();
 		}
 	}
 	
@@ -161,11 +156,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		if (m_signature != null)
 		{
-			m_certPath = m_signature.getCertPath();
-			if (m_certPath != null)
-			{
-				m_certificate = m_certPath.getFirstCertificate();
-			}
+			m_certPath = m_signature.getMultiCertPath();
 		}
 	}
 	
@@ -470,14 +461,9 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	{
 		if (m_certPath != null)
 		{
-			return m_certPath.checkValidity(new Date());
+			return m_certPath.isValid(new Date());
 		}
 		return false;
-	}
-	
-	public JAPCertificate getCertificate()
-	{
-		return m_certificate;
 	}
 	
 	public static void loadFromDirectory(File a_dir)
@@ -549,5 +535,16 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	public int hashCode()
 	{
 		return (getId().hashCode());
+	}
+
+	public XMLSignature getSignature()
+	{
+		return m_signature;
+	}
+
+	public MultiCertPath getCertPath()
+	{
+		// TODO Auto-generated method stub
+		return m_certPath;
 	}
 }

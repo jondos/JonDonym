@@ -2881,11 +2881,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			for(int i = 0; i < numMixes && i < m_labelOperatorFlags.length; i++)
 			{
 				MixInfo mixInfo = currentMixCascade.getMixInfo(i);
-
-				if(mixInfo != null && mixInfo.getOperatorCertificate() != null && 
-						mixInfo.getOperatorCertificate().getSubject() != null) 
+				
+				if(mixInfo != null && mixInfo.getCertPath() != null && 
+						mixInfo.getCertPath().getIssuer() != null) 
 				{
-					String operatorCountry = mixInfo.getOperatorCertificate().getSubject().getCountryCode();
+					String operatorCountry = mixInfo.getCertPath().getIssuer().getCountryCode();
 					CountryMapper country = new CountryMapper(operatorCountry, JAPMessages.getLocale());
 					m_labelOperatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + operatorCountry + ".png"));
 					m_labelOperatorFlags[i].setToolTipText(country.toString());

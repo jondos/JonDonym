@@ -43,6 +43,7 @@ import anon.infoservice.ListenerInterface;
 import anon.infoservice.ServiceSoftware;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
+import anon.crypto.MultiCertPath;
 import anon.crypto.X509SubjectKeyIdentifier;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
@@ -78,7 +79,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	private Element m_xmlDescription;
 
 	private XMLSignature m_signature;
-	private CertPath m_certPath;
+	private MultiCertPath m_certPath;
 
 	/**
 	 * Stores the time when this payment instance entry was created by the origin payment instance.
@@ -92,8 +93,6 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	private Vector m_listenerInterfaces;
 	private String m_name;
 	private String m_strOrganisation;
-
-	private JAPCertificate m_cert; //= JAPCertificate.getInstance("certificates/bi.cer");
 
 	public PaymentInstanceDBEntry(Element elemRoot) throws XMLParseException
 	{
@@ -121,14 +120,10 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 			SignatureVerifier.DOCUMENT_CLASS_PAYMENT);
 		if (m_signature != null)
 		{
-			m_certPath = m_signature.getCertPath();
+			m_certPath = m_signature.getMultiCertPath();
 			if (m_certPath != null)
 			{
-				m_cert = m_certPath.getFirstCertificate();
-			}
-			if (m_cert != null)
-			{
-				m_strOrganisation = m_cert.getSubject().getOrganisation();
+				m_strOrganisation = m_certPath.getSubject().getOrganisation();
 			}
 		}
 
@@ -171,7 +166,7 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 
 
 	public PaymentInstanceDBEntry(String a_id, String a_name,
-								  JAPCertificate a_cert, /** @todo remove this when new JAP available */
+								  JAPCertificate a_cert,
 								  Enumeration a_listeners,
 								  String software_version, long creationTime, long a_serialNumber)
 	{
@@ -179,7 +174,6 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		m_strPaymentInstanceId = a_id;
 		m_creationTimeStamp = creationTime;
 		m_serialNumber = a_serialNumber;
-		m_cert = a_cert;
 		m_name = a_name;
 
 		Document doc = XMLUtil.createDocument();
@@ -206,32 +200,24 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		Element elemLastUpdate = doc.createElement(XML_LAST_UPDATE);
 		XMLUtil.setValue(elemLastUpdate, m_creationTimeStamp);
 		elemRoot.appendChild(elemLastUpdate);
-	    if (m_cert != null)
+	    if (a_cert != null)
 		{
 			Element elemCert = doc.createElement(XML_ELEM_CERT);
 			elemRoot.appendChild(elemCert);
-			elemCert.appendChild(m_cert.toXmlElement(doc));
+			elemCert.appendChild(a_cert.toXmlElement(doc));
 
 			m_signature = SignatureCreator.getInstance().getSignedXml(
 				SignatureVerifier.DOCUMENT_CLASS_PAYMENT, elemRoot);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertPath();
+				m_certPath = m_signature.getMultiCertPath();
 			}
 
-			if (m_certPath == null || m_certPath.getFirstCertificate() == null)
+			if (m_certPath == null)
 			{
 				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Document could not be signed!");
 			}
-			else
-			{
-				m_cert = m_certPath.getFirstCertificate();
-			}
-			m_strOrganisation = m_cert.getSubject().getOrganisation();
-		}
-		else if (m_certPath != null)
-		{
-			m_cert = m_certPath.getFirstCertificate();
+			m_strOrganisation = a_cert.getSubject().getOrganisation();
 		}
 
 		m_xmlDescription = elemRoot;
@@ -250,12 +236,17 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 	{
 		if (m_certPath != null)
 		{
-			return m_certPath.checkValidity(new Date());
+			return m_certPath.isValid(new Date());
 		}
 		return false;
 	}
-
-	public CertPath getCertPath()
+	
+	public XMLSignature getSignature()
+	{
+		return m_signature;
+	}
+	
+	public MultiCertPath getCertPath()
 	{
 		return m_certPath;
 	}
@@ -327,11 +318,6 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		}
 
 		return interfacesReturned.elements();
-	}
-
-	public JAPCertificate getCertificate()
-	{
-		return m_cert;
 	}
 
 	/**

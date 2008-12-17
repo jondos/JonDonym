@@ -28,15 +28,15 @@
 package anon.crypto;
 
 import java.util.Enumeration;
-import java.util.Vector;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
+import anon.util.XMLUtil;
 
 /**
  * Manages the verification of all signatures.
@@ -350,56 +350,18 @@ public class SignatureVerifier implements IXMLEncodable
 						additionalCertPaths.addElement(certStructure.getCertPath());
 					}
 				}
-				/* get the root certificates for verifying appended certificates */
-				Vector rootCertificates = new Vector();
-				if ( (a_documentClass == DOCUMENT_CLASS_MIX) ||
-					(a_documentClass == DOCUMENT_CLASS_INFOSERVICE) ||
-				   (a_documentClass == DOCUMENT_CLASS_UPDATE) ||
-				   (a_documentClass == DOCUMENT_CLASS_PAYMENT))
-				{
-					int rootType = JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX;
-					if (a_documentClass == DOCUMENT_CLASS_INFOSERVICE)
-					{
-						rootType = JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE;
-					}
-					else if (a_documentClass == DOCUMENT_CLASS_UPDATE)
-					{
-						rootType = JAPCertificate.CERTIFICATE_TYPE_ROOT_UPDATE;
-					}
-					else if (a_documentClass == DOCUMENT_CLASS_PAYMENT)
-					{
-						rootType = JAPCertificate.CERTIFICATE_TYPE_ROOT_PAYMENT;
-					}
-
-					Vector rootCertificateInfoStructures = m_trustedCertificates.
-						getAvailableCertificatesByType(rootType);
-					Enumeration rootCertificatesEnumerator = rootCertificateInfoStructures.elements();
-					while (rootCertificatesEnumerator.hasMoreElements())
-					{
-						certStructure = (CertificateInfoStructure) rootCertificatesEnumerator.nextElement();
-						if (certStructure.isAvailable())
-						{
-							rootCertificates.addElement(certStructure.getCertificate());
-						}
-					}
-				}
 
 				/* now we have everything -> verify the signature */
 				try
 				{
-					signature = XMLSignature.getVerified(a_rootNode, rootCertificates, additionalCertPaths, false);
-					if (!isCheckSignatures() || !isCheckSignatures(a_documentClass))
-					{
-						signature.setVerified(true);
-					}
-					signature.getCertPath().setDocType(a_documentClass);
+					signature = XMLSignature.getVerified(a_rootNode, a_documentClass, additionalCertPaths);
 				}
 				catch (Exception e)
 				{
 					/* this should only happen, if there is no signature child node */
 				}
 			}
-		return signature;
+			return signature;
 		}
 
 

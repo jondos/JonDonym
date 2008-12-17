@@ -226,7 +226,7 @@ public class BIConnection implements ICaptchaSender
 				{
 					tls.setSoTimeout(a_connectionTimeout);
 				}
-				tls.setRootKey(m_theBI.getCertificate().getPublicKey());
+				tls.setRootKey(m_theBI.getCertPath().getFirstVerifiedPath().getFirstCertificate().getPublicKey());
 				tls.startHandshake();
 
 				m_httpClient = new HttpClient(m_socket);
@@ -323,7 +323,7 @@ public class BIConnection implements ICaptchaSender
 		//System.out.println(XMLUtil.toString(XMLUtil.toXMLDocument(cert)));
 
 
-		if (!XMLSignature.verifyFast(doc, m_theBI.getCertificate().getPublicKey()))
+		if (!XMLSignature.verifyFast(doc, m_theBI.getCertPath().getEndEntityKeys()))
 		{
 			throw new Exception("The BI's signature under the transfer certificate is invalid");
 		}
@@ -354,7 +354,7 @@ public class BIConnection implements ICaptchaSender
 		Document doc = m_httpClient.readAnswer();
 		info = new XMLAccountInfo(doc);
 		XMLBalance bal = info.getBalance();
-		if (XMLSignature.verify(XMLUtil.toXMLDocument(bal), m_theBI.getCertificate()) == null)
+		if (!XMLSignature.verifyFast(XMLUtil.toXMLDocument(bal), m_theBI.getCertPath().getEndEntityKeys()))
 		{
 			throw new Exception("The BI's signature under the balance certificate is Invalid!");
 		}
@@ -537,7 +537,7 @@ public class BIConnection implements ICaptchaSender
 		m_httpClient.writeRequest("POST", "response", strResponse);
 		doc = m_httpClient.readAnswer();
 		// check signature
-		if (!XMLSignature.verifyFast(doc, m_theBI.getCertificate().getPublicKey()))
+		if (!XMLSignature.verifyFast(doc, m_theBI.getCertPath().getEndEntityKeys()))
 		{
 			throw new Exception("AccountCertificate: Wrong signature!");
 		}

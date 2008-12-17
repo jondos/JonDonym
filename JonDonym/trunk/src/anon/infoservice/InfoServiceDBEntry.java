@@ -32,6 +32,7 @@ import java.io.DataInputStream;
 import java.io.InterruptedIOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -39,32 +40,31 @@ import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
-import anon.crypto.CertPath;
 import anon.crypto.IVerifyable;
-import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.pay.PaymentInstanceDBEntry;
 import anon.util.ClassUtil;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import anon.util.ZLibTools;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-import anon.pay.*;
-import java.net.SocketException;
 
 /**
  * Holds the information for an infoservice.
  */
-public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable, 
+public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEntry implements IVerifyable,
 	IBoostrapable
 {
 	public static final String XML_ELEMENT_CONTAINER_NAME = "InfoServices";
@@ -153,14 +153,14 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	/**
 	 *
 	 */
-	private JAPCertificate m_certificate;
+	//private JAPCertificate m_certificate;
 
 	private XMLSignature m_signature;
 
 	/**
 	 *
 	 */
-	private CertPath m_certPath;
+	private MultiCertPath m_certPath;
 
 	private long m_serial;
 	
@@ -178,8 +178,9 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	}
 
 	/**
-	 * Creates a new InfoService from XML description (InfoService node). The new entry will time out
-	 * if it is not updated. (InfoService context)
+	 * Creates a new InfoService from XML description (InfoService node). The new entry will be
+	 * created within the context of the JAP client (the timeout for infoservice entries within the
+	 * JAP client is used).
 	 *
 	 * @param a_infoServiceNode The InfoService node from an XML document.
 	 *
@@ -216,11 +217,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
 		if (m_signature != null)
 		{
-			m_certPath = m_signature.getCertPath();
-			if (m_certPath != null)
-			{
-				m_certificate = m_certPath.getFirstCertificate();
-			}
+			m_certPath = m_signature.getMultiCertPath();
 		}
 
 		/* get the information, whether this infoservice was user-defined within the JAP client */
@@ -516,7 +513,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE, infoServiceNode);
 			if (m_signature != null)
 			{
-				m_certPath = m_signature.getCertPath();
+				m_certPath = m_signature.getMultiCertPath();
 			}
 		}
 		catch (Exception a_e)
@@ -563,8 +560,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	public boolean isValid()
 	{
 		if (m_certPath != null)
-		{
-			return m_certPath.checkValidity(new Date());
+		{	
+			return m_certPath.isValid(new Date());
 		}
 		return false;
 	}
@@ -579,12 +576,12 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return m_userDefined || super.checkId();
 	}
 
-	public JAPCertificate getCertificate()
+	public XMLSignature getSignature()
 	{
-		return m_certificate;
+		return m_signature;
 	}
-
-	public CertPath getCertPath()
+	
+	public MultiCertPath getCertPath()
 	{
 		return m_certPath;
 	}

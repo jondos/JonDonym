@@ -197,10 +197,26 @@ final public class MyDSAPublicKey extends AbstractPublicKey implements DSAPublic
 
 		return (int) m_hashValue;
 	}
-
+	
+	/**
+	 * Tested this implementation with Key-lengths from 256 to 1024 Bit in 64 Bit steps.
+	 * Always calculated the right size that was handed over to the KeyPairGenerator.
+	 * The actual size of the PublicKey is some bytes larger and the Parameters are 
+	 * about twice as long as Y. But getKeyLength() is intended to give a hint about the
+	 * encryption strength, so this should be the best implementation.
+	 * @author Robert Hirschberger
+	 */
 	public int getKeyLength()
 	{
-		return m_params.getP().bitCount();
+		int len = m_Y.toByteArray().length * 8;
+		return len-(len % 64);
+	}
+	
+	public int getParameterLength()
+	{
+		return (m_params.getG().toByteArray().length + 
+		m_params.getP().toByteArray().length + 
+		m_params.getQ().toByteArray().length)*8;
 	}
 
 }

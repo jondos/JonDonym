@@ -120,8 +120,13 @@ public class CertificateStore extends Observable implements IXMLEncodable
 	public CertificateInfoStructure getCertificateInfoStructure(JAPCertificate a_certificate,
 		int a_certificateType)
 	{
-		return (CertificateInfoStructure)m_trustedCertificates.get(
-			  getCertificateId(a_certificate, a_certificateType));
+		CertificateContainer container = (CertificateContainer) m_trustedCertificates.get(
+				  getCertificateId(a_certificate, a_certificateType));
+		if(container != null)
+		{
+			return container.getInfoStructure();
+		}
+		return null;
 	}
 
 
@@ -196,7 +201,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 						/* try to verify the certificate against the next root certificate */
 						JAPCertificate currentRootCertificate = ( (CertificateInfoStructure) (
 							rootCertificates.nextElement())).getCertificate();
-						verificationSuccessful = a_certificate.verify(currentRootCertificate);
+						verificationSuccessful = a_certificate.isVerifier(currentRootCertificate);
 						if (verificationSuccessful)
 						{
 							/* we have found the parent certificate */
@@ -239,7 +244,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 	public int addCertificateWithoutVerification(JAPCertificate a_certificate, int a_certificateType,
 												 boolean a_onlyHardRemovable, boolean a_bNotRemovable)
 	{
-		return addCertificateWithoutVerification(new CertPath(a_certificate), a_certificateType,
+		return addCertificateWithoutVerification(CertPath.getRootInstance(a_certificate), a_certificateType,
 												 a_onlyHardRemovable, a_bNotRemovable);
 	}
 
@@ -532,10 +537,11 @@ public class CertificateStore extends Observable implements IXMLEncodable
 						/* the current certificate needs verification but is not verified -> try to do it
 						 * with the specified certificate
 						 */
-						if (currentCertificateContainer.getCertPath().verify(a_certificate))
+						if (currentCertificateContainer.getCertPath().isVerifier(a_certificate))
 						{
 							/* verification of the current certificate was successful */
 							currentCertificateContainer.setParentCertificate(a_certificate);
+							currentCertificateContainer.setEnabled(true);
 						}
 					}
 				}
@@ -562,6 +568,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 						{
 							/* the current certificate depends on the specified certificate -> deactivate it */
 							currentCertificateContainer.setParentCertificate(null);
+							currentCertificateContainer.setEnabled(false);
 						}
 					}
 				}
