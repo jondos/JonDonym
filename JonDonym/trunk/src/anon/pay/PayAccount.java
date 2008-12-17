@@ -237,6 +237,12 @@ public class PayAccount implements IXMLEncodable
 		if (elemAccInfo != null)
 		{
 			m_accountInfo = new XMLAccountInfo(elemAccInfo);
+			Enumeration ccS = m_accountInfo.getCCs();
+			while(ccS.hasMoreElements())
+			{
+				XMLEasyCC cc = (XMLEasyCC) ccS.nextElement();
+				m_mySpent += cc.getTransferredBytes();
+			}
 		}
 
 	    //set terms
@@ -495,7 +501,7 @@ public class PayAccount implements IXMLEncodable
 		XMLBalance balance = getBalance();
 		if (balance != null)
 		{
-			if ((balance.getVolumeBytesLeft() > 0 || balance.getSpent() > 0) && 
+			if (( /*balance.getVolumeKBytesLeft() > 0*/ getCurrentCredit() > 0 || getCurrentSpent() > 0 /* balance.getSpent() > 0 */) && 
 				balance.getFlatEnddate() != null && balance.getFlatEnddate().before(a_time))
 			{
 				return true;
@@ -523,8 +529,10 @@ public class PayAccount implements IXMLEncodable
 			return false;
 		}
 
-		return balance.getVolumeBytesLeft() > 0 && balance.getFlatEnddate() != null &&
-			balance.getFlatEnddate().after(a_time);
+		return 	//balance.getVolumeKBytesLeft() > 0 
+				getCurrentCredit() > 0
+				&& balance.getFlatEnddate() != null 
+				&& balance.getFlatEnddate().after(a_time);
 	}
 
 	public boolean isBackupDone()
@@ -635,27 +643,57 @@ public class PayAccount implements IXMLEncodable
 	 *
 	 * @return Guthaben
 	 */
-	public long getCertifiedCredit()
+	/*public long getCertifiedCredit()
 	{
 		if (m_accountInfo != null)
 		{
-			return m_accountInfo.getBalance().getVolumeBytesLeft();
+			return m_accountInfo.getBalance().getVolumeKBytesLeft();
 		}
 		return 0L;
-	}
+	}*/
 
 	/**
 	 * Returns the current credit (i. e. deposit - spent) as counted by the Jap
 	 * itself. It is possible that this value is outdated, so it may be a good
 	 * idea to call {@link updateCurrentBytes()} first.
 	 *
-	 * @return long
+	 * @return current credit in KBYTES (for some weird compatibility reasons)
 	 */
 	public long getCurrentCredit()
 	{
 		if (m_accountInfo != null)
 		{
-			return m_accountInfo.getBalance().getDeposit() - m_mySpent;
+			long jonDoCountedCredit = 
+				(m_accountInfo.getBalance().getSpent() + 
+				 m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
+				m_accountInfo.getAllCCsTransferredBytes();
+			jonDoCountedCredit /= 1000;
+			if((jonDoCountedCredit) > getBalance().getVolumeKBytesLeft())
+			{
+				return getBalance().getVolumeKBytesLeft();
+			}
+			else
+			{
+				return (jonDoCountedCredit < 0) ? 0l : jonDoCountedCredit;
+			}
+		}
+		return 0L;
+	}
+	/**
+	 * returns totalBytes - getCurrentCredit() in BYTES or 0 if no accountInfo is given.
+	 * (the methods getCurentSpent and getCurrentCredit are 
+	 * self calculated counterparts of the PI-determined getBalance().getSpent()
+	 * and getBalance.getVolumeKBytesLeft(). Because one of them returns kbxtes and the other bytes
+	 * getCurentSpent and getCurrentCredit have to behave the same way)
+	 * @return
+	 */
+	public long getCurrentSpent()
+	{
+		if (m_accountInfo != null)
+		{
+			return (m_accountInfo.getBalance().getSpent() + 
+					m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
+					(getCurrentCredit()*1000l);
 		}
 		return 0L;
 	}
@@ -903,7 +941,8 @@ public class PayAccount implements IXMLEncodable
 		XMLBalance curBalance = m_accountInfo.getBalance();
 		Timestamp endDate =curBalance.getFlatEnddate();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
-		long flatBytes = curBalance.getVolumeBytesLeft();
+		//long flatBytes = curBalance.getVolumeKBytesLeft();
+		long flatBytes = getCurrentCredit();
 		if (endDate != null && endDate.after(now) && flatBytes > 0)
 		{
 			hasFlat = true;

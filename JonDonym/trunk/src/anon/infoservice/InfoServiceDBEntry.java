@@ -330,6 +330,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	public InfoServiceDBEntry(String a_host, int a_port) throws IllegalArgumentException
 	{
 		this(null, null, new ListenerInterface(a_host, a_port).toVector(), false, true, 0, 0, false);
+		setUserDefined(true);
 	}
 
 	/**

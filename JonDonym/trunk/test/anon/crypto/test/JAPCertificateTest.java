@@ -64,6 +64,7 @@ public class JAPCertificateTest extends XtendedPrivateTestCase
 	 */
 	public void testExtensionsDSA() throws Exception
 	{
+		//TODO: test does not validate: either fix test or fix the function
 		m_random.setSeed(158943225);
 		testExtensions(new DSATestKeyPairGenerator(m_random));
 	}
@@ -74,6 +75,7 @@ public class JAPCertificateTest extends XtendedPrivateTestCase
 	 */
 	public void testExtensionsRSA() throws Exception
 	{
+		//TODO: test does not validate: either fix test or fix the function
 		m_random.setSeed(355582912);
 		testExtensions(new RSATestKeyPairGenerator(m_random));
 	}
@@ -84,6 +86,7 @@ public class JAPCertificateTest extends XtendedPrivateTestCase
 	 */
 	public void testExtensionsDummy() throws Exception
 	{
+		//TODO: test does not validate: either fix test or fix the function
 		m_random.setSeed(692981264);
 		testExtensions(new DummyTestKeyPairGenerator(m_random));
 	}

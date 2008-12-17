@@ -121,7 +121,7 @@ public class HTTPValidityCheckerTest extends TestCase
 	public static Test suite()
 	{
 		Test[] allTests = createAllValidityTests();
-		TestSuite suite = new TestSuite();
+		TestSuite suite = new TestSuite(HTTPValidityCheckerTest.class.getName());
 		for (int i = 0; i < allTests.length; i++) 
 		{
 			suite.addTest(allTests[i]);

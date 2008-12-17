@@ -853,11 +853,12 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	{
 		synchronized (m_paymentListeners)
 		{
+			IPaymentListener currentListener = null;
 			Enumeration enumListeners = m_paymentListeners.elements();
 			while (enumListeners.hasMoreElements())
 			{
-				( (IPaymentListener) enumListeners.nextElement()).accountError(msg,
-					m_bIgnoreAIAccountErrorMessages);
+				currentListener = (IPaymentListener) enumListeners.nextElement();
+				currentListener.accountError(msg, m_bIgnoreAIAccountErrorMessages);
 			}
 		}
 	}

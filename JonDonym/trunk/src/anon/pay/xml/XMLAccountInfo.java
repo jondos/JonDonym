@@ -220,7 +220,23 @@ public class XMLAccountInfo implements IXMLEncodable //extends XMLDocument
 	{
 		return ((Hashtable)m_costConfirmations.clone()).elements();
 	}
-
+	
+	/**
+	 * returns the overall sum of all the transfered bytes of all 
+	 * CCs belonging to this account.
+	 * @return
+	 */
+	public long getAllCCsTransferredBytes()
+	{
+		long sum = 0l;
+		Enumeration e = m_costConfirmations.elements();
+		while(e.hasMoreElements())
+		{
+			sum += ((XMLEasyCC) e.nextElement()).getTransferredBytes();
+		}
+		return sum;
+	}
+	
 	/**
 	 * setBalance
 	 *
