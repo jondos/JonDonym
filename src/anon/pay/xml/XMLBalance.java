@@ -48,8 +48,8 @@ public class XMLBalance implements IXMLEncodable
 	
 	private java.sql.Timestamp m_flatEnddate;
 	
-	/**  the bytes that are still left to spend for the corresponding account */
-	private long m_volumeBytesleft;
+	/**  the kbytes that are still left to spend for the corresponding account */
+	private long m_volumeKBytesleft;
 	
 	/** */
 	//private int m_balance;
@@ -85,7 +85,7 @@ public class XMLBalance implements IXMLEncodable
 		}
 		m_lAccountNumber = accountNumber;
 		//m_balance = balance;
-		m_volumeBytesleft = volumeBytesleft;
+		m_volumeKBytesleft = volumeBytesleft;
 		m_flatEnddate = flatEnddate;
 		if (m_flatEnddate == null)
 		{
@@ -180,7 +180,7 @@ public class XMLBalance implements IXMLEncodable
 		m_flatEnddate = java.sql.Timestamp.valueOf(str);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "VolumeBytesLeft");
-		m_volumeBytesleft = XMLUtil.parseValue(elem, 0);
+		m_volumeKBytesleft = XMLUtil.parseValue(elem, 0);
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Timestamp");
 		str = XMLUtil.parseValue(elem, (String)null);
@@ -306,7 +306,7 @@ public class XMLBalance implements IXMLEncodable
 		XMLUtil.setValue(elem, m_flatEnddate.toString() );
 		elemRoot.appendChild(elem);
 		elem = a_doc.createElement("VolumeBytesLeft");
-		XMLUtil.setValue(elem, m_volumeBytesleft);
+		XMLUtil.setValue(elem, m_volumeKBytesleft);
 		elemRoot.appendChild(elem);
 		elem = a_doc.createElement("Timestamp");
 		XMLUtil.setValue(elem, m_Timestamp.toString());
@@ -379,17 +379,17 @@ public class XMLBalance implements IXMLEncodable
 	}*/
 
 	/**
-	 * getVolumeBytesLeft: returns the current credit of the user
+	 * getVolumeKBytesLeft: returns the current credit of the user
 	 * Implementation depends on the payment system used
 	 * formerly returned the difference between cumulative spent and deposit bytes
 	 * now returns volume_bytesleft
 	 * return value will be compared to jap.pay.PaymentMainPanel WARNING_AMOUNT
 	 *
-	 * @return long: currently volume_bytesleft
+	 * @return long: currently volume_kbytesleft
 	 */
-	public long getVolumeBytesLeft()
+	public long getVolumeKBytesLeft()
 	{
-		return m_volumeBytesleft;
+		return m_volumeKBytesleft;
 	}
 
 	public java.sql.Timestamp getFlatEnddate()

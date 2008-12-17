@@ -497,16 +497,18 @@ public class PaymentMainPanel extends FlippingPanel
 					if (balance != null && activeAccount.isCharged(now))
 					{
 						m_BalanceProgressBar.setEnabled(false);
-						m_BalanceText.setText(JAPUtil.formatBytesValueWithUnit(balance.getVolumeBytesLeft() * 1000));
+						//m_BalanceText.setText(JAPUtil.formatBytesValueWithUnit(balance.getVolumeKBytesLeft() * 1000));
+						m_BalanceText.setText(JAPUtil.formatBytesValueWithUnit(activeAccount.getCurrentCredit() * 1000));
 //							JAPUtil.MAX_FORMAT_KBYTES));
 						m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 						m_labelValidUntil.setText(JAPUtil.formatTimestamp(balance.getFlatEnddate(), false,
 							JAPMessages.getLocale().getLanguage()));
 						//m_labelBalanceInEuros.setText(JAPUtil.formatEuroCentValue(balance.getBalance()));
 
-						//long deposit = balance.getVolumeBytesLeft() * 1000 + balance.getSpent();
+						//long deposit = balance.getVolumeKBytesLeft() * 1000 + balance.getSpent();
 						long deposit = FULL_AMOUNT * 1000;
-						long credit = activeAccount.getCertifiedCredit() * 1000;
+						//long credit = balance.getVolumeKBytesLeft() * 1000;
+						long credit = activeAccount.getCurrentCredit() * 1000;
 						double percent = (double) credit / (double) deposit;
 						if (percent > 0.83)
 						{
@@ -555,7 +557,8 @@ public class PaymentMainPanel extends FlippingPanel
 							m_BalanceText.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 							m_BalanceText.setToolTipText(JAPMessages.getString(MSG_TT_CREATE_ACCOUNT));
 
-							if (balance.getVolumeBytesLeft() == 0)
+							//if (balance.getVolumeKBytesLeft() == 0)
+							if (activeAccount.getCurrentCredit() == 0)
 							{
 								m_labelValidUntil.setText("");
 							}
@@ -569,12 +572,17 @@ public class PaymentMainPanel extends FlippingPanel
 								m_labelValidUntil.setText(JAPMessages.getString(AccountSettingsPanel.MSG_EXPIRED));
 							}
 
-							if (balance.getVolumeBytesLeft() > 0 && expired)
+							//if (balance.getVolumeKBytesLeft() > 0 && expired)
+							if (activeAccount.getCurrentBytes() > 0 && expired)
 							{
 								m_BalanceText.setText(JAPMessages.getString(AccountSettingsPanel.MSG_EXPIRED));
 								m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 							}
-							else if (balance.getVolumeBytesLeft() <= 0 && balance.getSpent() == 0 && !expired)
+							//else if (balance.getVolumeKBytesLeft() <= 0 && balance.getSpent() == 0 && !expired)
+							else if (activeAccount.getCurrentBytes() <= 0 && 
+									//activeAccount.getSpent() == 0 && 
+									activeAccount.getCurrentSpent() == 0 && 
+									!expired)
 							{								
 								if (activeAccount.getTransCerts().size() > 0 &&	!activeAccount.isTransactionExpired())
 								{
@@ -603,11 +611,12 @@ public class PaymentMainPanel extends FlippingPanel
 
 					m_labelSessionSpent.setText(JAPUtil.formatBytesValueWithUnit(m_spentThisSession));
 
-					m_labelTotalSpent.setText(JAPUtil.formatBytesValueWithUnit(activeAccount.getSpent()));
+					//m_labelTotalSpent.setText(JAPUtil.formatBytesValueWithUnit(activeAccount.getSpent()));
+					m_labelTotalSpent.setText(JAPUtil.formatBytesValueWithUnit(activeAccount.getCurrentSpent()));
 					// account is nearly empty
 
 					if (a_bWarnIfNearlyEmpty && //a_bWarnIfNearlyEmpty means warnings are not to be suppressed
-						activeAccount.getCertifiedCredit() <= WARNING_AMOUNT && !m_notifiedEmpty &&
+						activeAccount.getCurrentCredit() <= WARNING_AMOUNT && !m_notifiedEmpty &&
 						activeAccount.isCharged(now) &&
 						PayAccountsFile.getInstance().getAlternativeChargedAccount(
 							JAPController.getInstance().getCurrentMixCascade().getPIID()) == null)
@@ -864,7 +873,8 @@ public class PaymentMainPanel extends FlippingPanel
 							String message = strMessage + JAPMessages.getString(MSG_WITH_COSTS, 
 									formatCascadeName(cascade)) + " ";
 							boolean bOpenTransaction = false;
-							if (account.getBalance().getSpent() <= 0 && !account.hasExpired())
+							//if (account.getBalance().getSpent() <= 0 && !account.hasExpired())
+							if (account.getCurrentSpent() <= 0 && !account.hasExpired())
 							{
 								message += JAPMessages.getString(MSG_OPEN_TRANSACTION);
 								bOpenTransaction = true;
@@ -948,9 +958,12 @@ public class PaymentMainPanel extends FlippingPanel
 			}
 
 			final MixCascade cascade = JAPController.getInstance().getCurrentMixCascade();
-			if (a_msg.getErrorCode() != XMLErrorMessage.ERR_ACCOUNT_EMPTY &&
+			/* When "account empty" is signaled the connection should always be closed.
+			 * But this should not be controlled by a GUI component.
+			 */
+			/*if (a_msg.getErrorCode() != XMLErrorMessage.ERR_ACCOUNT_EMPTY &&
 				cascade.equals(JAPController.getInstance().switchToNextMixCascade()))
-			{
+			{*/
 				// there are no other cascades to switch to
 				LogHolder.log(LogLevel.WARNING, LogType.NET, "There are no other cascades to choose!");
 				for (int i = 0; i < 5 &&
@@ -968,7 +981,7 @@ public class PaymentMainPanel extends FlippingPanel
 						break;
 					}
 				}
-			}
+			//}
 			
 			piEntry = (PaymentInstanceDBEntry)Database.getInstance(PaymentInstanceDBEntry.class).getEntryById(
 					cascade.getPIID());
