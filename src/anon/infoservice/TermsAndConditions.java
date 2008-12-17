@@ -16,6 +16,7 @@ import org.w3c.dom.Node;
 
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.X509SubjectKeyIdentifier;
 import anon.crypto.XMLSignature;
@@ -53,12 +54,10 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	
 	public long m_lastUpdate;
 	public long m_serial;
-	
-	private JAPCertificate m_certificate = null;
 
 	private XMLSignature m_signature = null;
 
-	private CertPath m_certPath = null;
+	private MultiCertPath m_certPath = null;
 	
 	public TermsAndConditions(Element a_elem) throws XMLParseException
 	{
@@ -84,7 +83,7 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 		
 		int tokens = token.countTokens();
 		
-		if(tokens >= 1)
+		if (tokens >= 1)
 		{
 			// extract the ski
 			m_ski = token.nextToken();
@@ -111,11 +110,7 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 			SignatureVerifier.DOCUMENT_CLASS_MIX);
 		if (m_signature != null)
 		{
-			m_certPath = m_signature.getCertPath();
-			if (m_certPath != null)
-			{
-				m_certificate = m_certPath.getSecondCertificate();
-			}
+			m_certPath = m_signature.getMultiCertPath();
 		}
 		
 		if (!checkId())
@@ -126,15 +121,12 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	
 	public boolean checkId()
 	{
-		JAPCertificate cert = getCertificate();
-		
-		if(cert == null)
+		if(m_signature == null)
 		{
-			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- cert is NULL!");
+			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- signature is NULL!");
 			return false;
 		}
-		return  (m_ski != null) && m_ski.equals(new X509SubjectKeyIdentifier(
-				 getCertificate().getPublicKey()).getValueWithoutColon());
+		return  (m_ski != null) && m_ski.equals(m_signature.getXORofSKIs());
 	}
 
 
@@ -201,14 +193,9 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	{
 		if (m_certPath != null)
 		{
-			return m_certPath.checkValidity(new Date());
+			return m_certPath.isValid(new Date());
 		}
 		return false;
-	}
-	
-	public JAPCertificate getCertificate()
-	{
-		return m_certificate;
 	}
 	
 	public static TermsAndConditions getById(String a_id, Locale a_locale)
@@ -248,5 +235,15 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 	public int hashCode()
 	{
 		return (getId().hashCode());
+	}
+
+	public XMLSignature getSignature()
+	{
+		return m_signature;
+	}
+
+	public MultiCertPath getCertPath()
+	{
+		return m_certPath;
 	}
 }

@@ -128,6 +128,7 @@ import jap.JAPController;
 import jap.JAPControllerMessage;
 import jap.JAPModel;
 import jap.JAPUtil;
+import jap.TrustModel;
 import jap.pay.wizardnew.CancellationPolicyPane;
 import jap.pay.wizardnew.JpiSelectionPane;
 import jap.pay.wizardnew.MethodSelectionPane;
@@ -2051,6 +2052,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					currentCascade.getPIID().equals(a_accountCreationThread.getAccount().getBI().getId()) &&
 					JAPModel.isAutomaticallyReconnected())
 				{
+					// switch the trust model to premium so that this user from now on connects to premium services only
+					if (TrustModel.getCurrentTrustModel() == TrustModel.TRUST_MODEL_DEFAULT &&
+						TrustModel.TRUST_MODEL_PREMIUM.isTrusted(currentCascade))
+					{
+						TrustModel.setCurrentTrustModel(TrustModel.TRUST_MODEL_PREMIUM);
+					}
 					// try to connect to the current Cascade if not yet connected
 					JAPController.getInstance().setAnonMode(true);
 				}
@@ -3459,9 +3466,9 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			pi = account.getBI();
 		}
 		
-		if (!cascade.isPayment() || 
+		if (JAPModel.isAutomaticallyReconnected() && (!cascade.isPayment() || 
 			(cascade.getPIID() != null && pi.getId().equals(cascade.getPIID())) &&
-			account.isCharged(new Timestamp(System.currentTimeMillis())))
+			account.isCharged(new Timestamp(System.currentTimeMillis()))))
 		{
 			JAPController.getInstance().setAnonMode(true);
 		}

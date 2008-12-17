@@ -249,14 +249,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 		{
 			return false;
 		}
-		try
-		{
-			return XMLSignature.verify(m_docThePriceCert, a_bi.getCertificate()) != null;
-		}
-		catch (XMLParseException ex)
-		{
-			return false;
-		}
+		return XMLSignature.verifyFast(m_docThePriceCert, a_bi.getCertPath().getEndEntityKeys());
 	}
 
 

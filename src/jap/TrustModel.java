@@ -78,6 +78,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	public static final TrustModel TRUST_MODEL_USER_DEFINED;
 	public static final TrustModel TRUST_MODEL_DEFAULT;
+	public static final TrustModel TRUST_MODEL_PREMIUM;
 
 	public static TrustModel TRUST_MODEL_CUSTOM_FILTER;
 	
@@ -199,6 +200,24 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			return m_conditionValue;
 		}
 
+		public boolean isTrusted(MixCascade a_cascade)
+		{
+			try
+			{
+				checkTrust(a_cascade);
+				return true;
+			}
+			catch(TrustException a_e)
+			{
+				// ignore
+			}
+			catch (SignatureException a_e)
+			{
+				// ignore
+			}
+			return false;						
+		}
+		
 		public abstract void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException;
 		
 		public Element toXmlElement(Document a_doc)
@@ -328,7 +347,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			if (a_cascade.getCertPath() != null && !a_cascade.getCertPath().checkValidity(new Date()))
+			if (a_cascade.getCertPath() != null && !a_cascade.getCertPath().isValid(new Date()))
 			{
 				if (m_trustCondition == TRUST_IF_NOT_TRUE)
 				{
@@ -539,7 +558,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000));
 		model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100));
 		model.setAttribute(NumberOfMixesAttribute.class, TRUST_IF_AT_LEAST, new Integer(3));
-		
+		TRUST_MODEL_PREMIUM = model;
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);

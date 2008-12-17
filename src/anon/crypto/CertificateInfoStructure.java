@@ -41,16 +41,7 @@ public class CertificateInfoStructure
 
   private boolean m_onlyHardRemovable;
 
-	private boolean m_bNotRemovable;
-
-	public CertificateInfoStructure(JAPCertificate a_certificate, JAPCertificate a_parentCertificate,
-										int a_certificateType, boolean a_enabled,
-										boolean a_certificateNeedsVerification, boolean a_onlyHardRemovable,
-									boolean a_notRemovable)
-	{
-		this (new CertPath(a_certificate), a_parentCertificate, a_certificateType, a_enabled,
-			  a_certificateNeedsVerification, a_onlyHardRemovable, a_notRemovable);
-	}
+  private boolean m_bNotRemovable;
 
 
 	public CertificateInfoStructure(CertPath a_certPath, JAPCertificate a_parentCertificate,
@@ -58,9 +49,9 @@ public class CertificateInfoStructure
 									boolean a_certificateNeedsVerification, boolean a_onlyHardRemovable,
 									boolean a_notRemovable)
 	{
-		if (a_certPath == null || a_certPath.getFirstCertificate() == null)
+		if (a_certPath == null)
 		{
-			throw new IllegalArgumentException("Invalid cert path!");
+			throw new IllegalArgumentException("CertPath may not be null");
 		}
 		m_certPath = a_certPath;
 		m_parentCertificate = a_parentCertificate;

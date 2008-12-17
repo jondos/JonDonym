@@ -27,19 +27,20 @@
  */
 package anon.crypto;
 
-import java.util.Vector;
 import java.util.Enumeration;
+import java.util.Vector;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DEREncodableVector;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 
 import anon.util.ClassUtil;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
 /**
  * Represents and creates an X509 V3 extensions. The concrete extensions are subclasses of this
@@ -54,8 +55,10 @@ public abstract class AbstractX509Extension
 	public static final String IDENTIFIER = null;
 
 	private static Class[] AVAILABLE_EXTENSIONS = new Class[]
-		{X509UnknownExtension.class, X509SubjectKeyIdentifier.class,
-		X509SubjectAlternativeName.class, X509IssuerAlternativeName.class};
+		{X509UnknownExtension.class, 
+		X509SubjectKeyIdentifier.class, X509AuthorityKeyIdentifier.class,
+		X509SubjectAlternativeName.class, X509IssuerAlternativeName.class,
+		X509BasicConstraints.class, X509KeyUsage.class};
 
 	private static Vector ms_classExtensions;
 
@@ -72,7 +75,7 @@ public abstract class AbstractX509Extension
 	 */
 	public AbstractX509Extension(String a_identifier, boolean a_critical, byte[] a_value)
 	{
-		DEREncodableVector extension = new DEREncodableVector();
+		ASN1EncodableVector extension = new ASN1EncodableVector();
 
 		m_identifier = new DERObjectIdentifier(a_identifier);
 		m_critical = a_critical;

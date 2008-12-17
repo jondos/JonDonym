@@ -27,11 +27,13 @@
  */
 package anon.infoservice;
 
-import anon.crypto.JAPCertificate;
-import anon.crypto.X509SubjectKeyIdentifier;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
+import anon.crypto.X509SubjectKeyIdentifier;
+import anon.crypto.XMLSignature;
 
 /**
  *
@@ -45,8 +47,8 @@ public abstract class AbstractDistributableCertifiedDatabaseEntry extends Abstra
 	{
 		super(a_expireTime);
 	}
-
-	public abstract JAPCertificate getCertificate();
+	
+	public abstract XMLSignature getSignature();
 
 	/**
 	 * Returns if this entry has been verified with a certificate chain.
@@ -60,14 +62,14 @@ public abstract class AbstractDistributableCertifiedDatabaseEntry extends Abstra
 	 */
 	public boolean checkId()
 	{
-		JAPCertificate cert=getCertificate();
-		if(cert==null)
+		XMLSignature signature = getSignature();
+		if(signature == null)
 		{
-			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- cert is NULL!");
+			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry.checkId() -- Signature is NULL!");
 			return false;
 		}
-		return  (getId() != null) && getId().equals(new X509SubjectKeyIdentifier(
-				 getCertificate().getPublicKey()).getValueWithoutColon());
+		return (getId() != null) && 
+				getId().equalsIgnoreCase(signature.getXORofSKIs());
 	}
 
 }

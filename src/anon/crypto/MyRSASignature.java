@@ -37,6 +37,10 @@ import java.io.ByteArrayOutputStream;
 import java.security.InvalidKeyException;
 import java.security.Key;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -48,11 +52,8 @@ import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSAEngine;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
-/*** SHA1withRSA Signature as described in RFC 2313 */
+/*** SHA1withRSA Signature as described in RFC 2437*/
 public final class MyRSASignature implements IMySignature
 {
 	private static final AlgorithmIdentifier ms_identifier =
@@ -225,27 +226,29 @@ public final class MyRSASignature implements IMySignature
 
 	/**
 	 * Encodes a signature in a way it meets the W3C standard for RSA XML signature values.
+	 * Note: No further encoding has to be done!
+	 * @see http://tools.ietf.org/html/rfc2437#section-8.1
 	 * @param a_signature an non-encoded signature
 	 * @return the encoded signature in PKCS1 format or null if an error occured
 	 * @see http://www.w3.org/TR/xmldsig-core/#sec-PKCS1
-	 * @todo not implemented yet
 	 */
 	public byte[] encodeForXMLSignature(byte[] a_signature)
 	{
-		return null;
+		return a_signature;
 	}
 
 	/**
 	 * Tries to decode a signature in a way as it would meet the W3C standard for RSA XML
 	 * signature values.
+	 * Note: No further decoding has to be done!
+	 * @see http://tools.ietf.org/html/rfc2437#section-8.1
 	 * @param a_encodedSignature an encoded signature in PKCS1 format
 	 * @return the decoded signature or null if an error occured
 	 * @see http://www.w3.org/TR/xmldsig-core/#sec-PKCS1
-	 * @todo not implemented yet
 	 */
 	public byte[] decodeForXMLSignature(byte[] a_encodedSignature)
 	{
-		return null;
+		return a_encodedSignature;
 	}
 
 	/**

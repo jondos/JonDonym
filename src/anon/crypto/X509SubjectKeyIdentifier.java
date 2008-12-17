@@ -27,19 +27,15 @@
  */
 package anon.crypto;
 
-import java.util.Vector;
-import java.util.StringTokenizer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
-
-import anon.util.Util;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.X509Extensions;
 
 /**
  * The subject public key identifier is calculated using a SHA1 hash over the BIT STRING from
@@ -47,11 +43,9 @@ import anon.util.Util;
  * For DSA-PublicKeys the AlgorithmIdentifier of the SubjectPublicKeyInfo MUST contain the DSA-Parameters as specified in RFC 3279
  * @author Rolf Wendolsky
  */
-public final class X509SubjectKeyIdentifier extends AbstractX509Extension
+public final class X509SubjectKeyIdentifier extends AbstractX509KeyIdentifier
 {
 	public static final String IDENTIFIER = X509Extensions.SubjectKeyIdentifier.getId();
-
-	private String m_value;
 
 	/**
 	 * Creates a new X509SubjectKeyIdentifier from a public key.
@@ -59,7 +53,7 @@ public final class X509SubjectKeyIdentifier extends AbstractX509Extension
 	 */
 	public X509SubjectKeyIdentifier(IMyPublicKey a_publicKey)
 	{
-		super(IDENTIFIER, false, createDEROctets(a_publicKey));
+		super(IDENTIFIER, createDEROctets(a_publicKey));
 		createValue();
 	}
 
@@ -81,45 +75,7 @@ public final class X509SubjectKeyIdentifier extends AbstractX509Extension
 	{
 		return "SubjectKeyIdentifier";
 	}
-
-	/**
-	 * Returns the subject public key identifier as human-readable hex string of the form
-	 * A4:54:21:52:F1:...
-	 * @return the subject public key identifier as human-readable hex string of the form
-	 * A4:54:21:52:F1:...
-	 */
-	public String getValue()
-	{
-		return m_value;
-	}
-
-	/**
-	 * Returns the subject public key identifier as human-readable hex string without ":"
-	 * separators.
-	 * @return the subject public key identifier as human-readable hex string without ":"
-	 * separators
-	 */
-	public String getValueWithoutColon()
-	{
-		StringTokenizer tokenizer = new StringTokenizer(m_value, ":");
-		String value = "";
-
-		while (tokenizer.hasMoreTokens())
-		{
-			value += tokenizer.nextToken();
-		}
-		return value;
-	}
-
-	/**
-	 * Returns the subject public key identifier as human-readable hex string.
-	 * @return a Vector containing the subject public key identifier as human-readable hex string
-	 */
-	public Vector getValues()
-	{
-		return Util.toVector(m_value);
-	}
-
+	
 	private static byte[] createDEROctets(IMyPublicKey a_publicKey)
 	{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -140,7 +96,7 @@ public final class X509SubjectKeyIdentifier extends AbstractX509Extension
 
 	   return out.toByteArray();
 	}
-
+	
 	private void createValue()
 	{
 		byte[] identifier;
@@ -148,7 +104,7 @@ public final class X509SubjectKeyIdentifier extends AbstractX509Extension
 		try
 		{
 			 identifier = ((DEROctetString)new ASN1InputStream(
-						 new ByteArrayInputStream(getDEROctets())).readObject()).getOctets();
+					 new ByteArrayInputStream(getDEROctets())).readObject()).getOctets();
 		}
 		catch (Exception a_e)
 		{
@@ -158,5 +114,4 @@ public final class X509SubjectKeyIdentifier extends AbstractX509Extension
 
 		m_value = ByteSignature.toHexString(identifier);
 	}
-
 }

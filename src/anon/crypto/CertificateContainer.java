@@ -108,23 +108,6 @@ public class CertificateContainer implements IXMLEncodable
 	 *                                       certificate store, if it can be verified against an
 	 *                                       active root certificate from the store.
 	 */
-	public CertificateContainer(JAPCertificate a_certificate, int a_certificateType,
-								boolean a_certificateNeedsVerification)
-	{
-		this(new CertPath(a_certificate), a_certificateType, a_certificateNeedsVerification);
-	}
-
-
-	/**
-	 * Creates a new instance of CertificateContainer. Only instances of CertificateStore should
-	 * call this constructor.
-	 *
-	 * @param a_certificate The certificate for which the container is built.
-	 * @param a_certificateType The type of the certificate.
-	 * @param a_certificateNeedsVerification Whether this certificate is only valid within the
-	 *                                       certificate store, if it can be verified against an
-	 *                                       active root certificate from the store.
-	 */
 	public CertificateContainer(CertPath a_certPath, int a_certificateType,
 								boolean a_certificateNeedsVerification)
 	{
@@ -198,11 +181,6 @@ public class CertificateContainer implements IXMLEncodable
 			m_certPath = new CertPath((Element)XMLUtil.getFirstChildByName(
 						 certificateDataNode, CertPath.XML_ELEMENT_NAME));
 			//throw (new Exception("Invalid CertificateData value. Cannot get the certificate."));
-		}
-		else
-		{
-			// for compatibility with older versions of this class
-			m_certPath = new CertPath(certificate);
 		}
 
 		m_parentCertificate = null;
@@ -318,6 +296,7 @@ public class CertificateContainer implements IXMLEncodable
 	public void setEnabled(boolean a_enabled)
 	{
 		m_enabled = a_enabled;
+		m_certPath.resetVerification();
 	}
 
 	/**

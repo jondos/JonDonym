@@ -23,7 +23,8 @@
 */
 package anon.infoservice;
 
-import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
+import anon.crypto.XMLSignature;
 
 /**
  *
@@ -31,7 +32,9 @@ import anon.crypto.JAPCertificate;
  */
 public interface ICertifiedDatabaseEntry 
 {
-	public JAPCertificate getCertificate();
+	public MultiCertPath getCertPath();
+	
+	public XMLSignature getSignature();
 
 	public boolean isVerified();
 

@@ -190,9 +190,9 @@ final public class MyDSAPrivateKey extends AbstractPrivateKey implements DSAPriv
 	}
 
 	public 	DSAPrivateKeyParameters getPrivateParams()
-		{
-			return new DSAPrivateKeyParameters(m_X,m_params);
-		}
+	{
+		return new DSAPrivateKeyParameters(m_X,m_params);
+	}
 
 
 	/**

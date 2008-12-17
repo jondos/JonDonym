@@ -52,6 +52,7 @@ public class AsymmetricCryptoKeyPair
 	// register the mandatory key classes so that they are compiled; do not remove!
 	private static final MyDSAPrivateKey dsaKey = null;
 	private static final MyRSAPrivateKey rsaKey = null;
+	private static final MyECPrivateKey ecKey = null;
 
 	/**
 	 * Stores all registered private key classes.

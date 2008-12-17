@@ -4794,12 +4794,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 					!a_message.equals(new Integer(DatabaseMessage.INITIAL_OBSERVER_MESSAGE)))
 			{
 				// react on bad performance data if this connection has not been used yet
-				if (m_bConnectionUnused && JAPModel.getInstance().isCascadeAutoSwitched() &&
-					!TrustModel.getCurrentTrustModel().isTrusted(getCurrentMixCascade()))
+				if (m_bConnectionUnused && JAPModel.getInstance().isCascadeAutoSwitched() && 
+					(!TrustModel.getCurrentTrustModel().getAttribute(
+					 TrustModel.SpeedAttribute.class).isTrusted(getCurrentMixCascade()) ||
+					 !TrustModel.getCurrentTrustModel().getAttribute(
+						TrustModel.DelayAttribute.class).isTrusted(getCurrentMixCascade())))
 				{					
 					switchToNextMixCascade();
 					LogHolder.log(LogLevel.WARNING, LogType.NET, 
-						"Automatically switched service due to bad performance/bad trust!");
+						"Automatically switched service due to bad performance!");
 				}
 			}
 		}
@@ -5027,10 +5030,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 			  JAPConstants.CERTSPATH + JAPConstants.CERT_JAPINFOSERVICEMESSAGES));
 		if (updateMessagesCert != null)
 		{
-			SignatureVerifier.getInstance().getVerificationCertificateStore().
-				addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_UPDATE, true, true);
+			//changed this back to add updateCert as CERTIFICATE_TYPE_ROOT_UPDATE for new CertPath implementation. rh
 			//SignatureVerifier.getInstance().getVerificationCertificateStore().
-				//addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_ROOT_UPDATE, true, true);
+				//addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_UPDATE, true, true);
+			SignatureVerifier.getInstance().getVerificationCertificateStore().
+				addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_ROOT_UPDATE, true, true);
 		}
 		else
 		{

@@ -35,6 +35,7 @@ import org.w3c.dom.NodeList;
 import anon.crypto.CertPath;
 import anon.crypto.CertificateInfoStructure;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.Util;
@@ -162,18 +163,10 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   private Element m_xmlStructure;
 
   /**
-   * Stores the certificate for this mix.
-   * The certificate is not set (null) if the MixInfo-Object is in the InfoService
-   */
-  private JAPCertificate m_mixCertificate;
-
-  private JAPCertificate m_operatorCertificate;
-
-  /**
    * Stores the certPath for this mix.
    * The CertPath is not set (null) if the MixInfo-Object is in the InfoService
    */
-  private CertPath m_mixCertPath;
+  private MultiCertPath m_mixCertPath;
 
   /**
    *  The price certificate for the Mix
@@ -218,7 +211,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  this(a_mixNode, a_expireTime, false);
   }
 
-  public MixInfo(String a_mixID, CertPath a_certPath)
+  public MixInfo(String a_mixID, MultiCertPath a_certPath)
   {
 	  super(Long.MAX_VALUE);
 	  if (a_mixID == null)
@@ -230,17 +223,18 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_type = -1;
 	  m_bFromCascade = true;
 	  m_mixCertPath = a_certPath;
-	  m_mixCertificate = a_certPath.getFirstCertificate();
-	  m_operatorCertificate = a_certPath.getSecondCertificate();
+	  //m_mixCertificate = a_certPath.getEndEntity();
+	  //m_operatorCertificate = a_certPath.getSecondCertificate();
 	  m_lastUpdate = 0;
 	  m_serial = 0;
-	  m_mixLocation = new ServiceLocation(null, m_mixCertificate);
-	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate(), 0);
+	  CertPath path = a_certPath.getPath();
+	  m_mixLocation = new ServiceLocation(null, path.getFirstCertificate());
+	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
 	  m_freeMix = false;
 	  m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
   }
 
-  public MixInfo(String a_mixID, CertPath a_certPath, XMLPriceCertificate a_priceCert, long a_prepaidInterval)
+  public MixInfo(String a_mixID, MultiCertPath a_certPath, XMLPriceCertificate a_priceCert, long a_prepaidInterval)
   {
 	  super(Long.MAX_VALUE);
 	  m_mixId = a_mixID;
@@ -248,12 +242,13 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_type = -1;
 	  m_bFromCascade = true;
 	  m_mixCertPath = a_certPath;
-	  m_mixCertificate = a_certPath.getFirstCertificate();
-	  m_operatorCertificate = a_certPath.getSecondCertificate();
+	  //m_mixCertificate = a_certPath.getFirstCertificate();
+	  //m_operatorCertificate = a_certPath.getSecondCertificate();
 	  m_lastUpdate = 0;
 	  m_serial = 0;
-	  m_mixLocation = new ServiceLocation(null, m_mixCertificate);
-	  m_mixOperator = new ServiceOperator(null, m_mixCertPath.getSecondCertificate(), 0);
+	  CertPath path = a_certPath.getPath();
+	  m_mixLocation = new ServiceLocation(null, path.getFirstCertificate());
+	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
 	  m_freeMix = false;
 	  //
 	  m_priceCert = a_priceCert;
@@ -293,17 +288,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 
 		  if (m_mixSignature != null)
 		  {
-			  m_mixCertPath = m_mixSignature.getCertPath();
-			  if (m_mixCertPath != null && m_mixCertPath.getFirstCertificate() != null)
-			  {
-				  m_mixCertificate = m_mixCertPath.getFirstCertificate();
-				  m_operatorCertificate = m_mixCertPath.getSecondCertificate();
-			  }
-			  else
-			  {
-				  LogHolder.log(LogLevel.DEBUG, LogType.MISC,
-								"No appended certificates in the MixCascade structure.");
-			  }
+			  m_mixCertPath = m_mixSignature.getMultiCertPath();
 		  }
 		  else
 		  {
@@ -430,15 +415,17 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  {
 		  m_mixSoftware = new ServiceSoftware(softwareNode);
 	  }
-
-	  m_mixLocation = new ServiceLocation(locationNode, m_mixCertificate);
-	  //get the Operator Certificate from the CertPath
-	  if (m_mixCertPath != null)
+	  CertPath path = m_mixCertPath.getPath();
+	  
+	  //get the Mix and Operator Certificate from the CertPath
+	  if (path != null)
 	  {
-		  m_mixOperator = new ServiceOperator(operatorNode, m_mixCertPath.getSecondCertificate(), m_lastUpdate);
+		  m_mixLocation = new ServiceLocation(locationNode, path.getFirstCertificate());
+		  m_mixOperator = new ServiceOperator(operatorNode, path.getSecondCertificate(), m_lastUpdate);	
 	  }
 	  else
 	  {
+		  m_mixLocation = new ServiceLocation(locationNode, null);
 		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 	  
@@ -478,7 +465,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_FOR_CASCADE, "" );// DEFAULT_NAME_TYPE);
 	  //uncomment the above line to enable a default name type 
 	  
-	  if( nameType.equals(NAME_TYPE_OPERATOR) && (m_operatorCertificate != null) )
+	  if( nameType.equals(NAME_TYPE_OPERATOR) && (m_mixCertPath != null))
 	  {
 		  m_nameFragmentForCascade = (m_mixOperator != null) ? m_mixOperator.getOrganization() : null;
 		  // right now the common name doesn't contain anything useful. Perhaps later it is useful
@@ -486,7 +473,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  //(m_operatorCertificate.getSubject() != null) ? 
 		  //	m_operatorCertificate.getSubject().getCommonName() : null; */
 	  }
-	  else if (nameType.equals(NAME_TYPE_MIX) && (m_mixCertificate != null) )
+	  else if (nameType.equals(NAME_TYPE_MIX) && (m_mixCertPath != null) )
 	  {
 		  m_nameFragmentForCascade = ""+m_name;
 		  //same as above
@@ -655,9 +642,9 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 
   public boolean isVerified()
   {
-	  if (m_mixSignature != null)
+	  if (m_mixCertPath != null)
 	  {
-		  return m_mixSignature.isVerified();
+		  return m_mixCertPath.isVerified();
 	  }
 	  return false;
   }
@@ -666,26 +653,11 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   {
 	  if (m_mixCertPath != null)
 	  {
-		  return m_mixCertPath.checkValidity(new Date());
+		  return m_mixCertPath.isValid(new Date());
 	  }
 	  return false;
   }
-
-  /**
-   * Returns the certificate of the mix
-   * For MixInfo-Objects in the InfoService the certificate is null
-   * @return the certificate of the mix
-   */
-  public JAPCertificate getCertificate()
-  {
-	  return m_mixCertificate;
-  }
-
-  public JAPCertificate getOperatorCertificate()
-  {
-	  return m_operatorCertificate;
-  }
-
+  
   public XMLPriceCertificate getPriceCertificate()
   {
       return m_priceCert;
@@ -706,10 +678,16 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    * For MixInfo-Objects in the InfoService the CertPath is null
    * @return the CertPath of the mix
    */
-  public CertPath getCertPath()
+  public MultiCertPath getCertPath()
   {
 	  return m_mixCertPath;
   }
+  
+  public XMLSignature getSignature()
+  {
+	  return m_mixSignature;
+  } 
+  
   /**
    * Returns the location of the mix.
    *
@@ -903,7 +881,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		Element currentMixOperatorElement = null;
 		Element currentMixLocationElement = null;
 		
-		if(getOperatorCertificate() == null || getCertificate() == null)
+		if(getCertPath() == null)
 		{
 			/* no valid document can be returned */
 			return null;
@@ -912,8 +890,9 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		
 		XMLUtil.createChildElementWithValue(rootElement, XML_ELEMENT_MIX_NAME, getName());
 		
-		currentMixOperatorElement = new ServiceOperator(null, getOperatorCertificate(), 0l).toXMLElement(webInfoDoc);
-		currentMixLocationElement = new ServiceLocation(null, getCertificate()).toXMLElement(webInfoDoc);
+		CertPath path = getCertPath().getPath();
+		currentMixOperatorElement = new ServiceOperator(null, path.getSecondCertificate(), 0l).toXMLElement(webInfoDoc);
+		currentMixLocationElement = new ServiceLocation(null, path.getFirstCertificate()).toXMLElement(webInfoDoc);
 		
 		if(currentMixOperatorElement != null)
 		{
@@ -933,23 +912,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		}
 		
 		
-		Element elemCertificates = 
-			XMLUtil.createChildElement(rootElement, "Certificates");
-		
-		Enumeration enumCerts = m_mixCertPath.getCertificates();
-		CertificateInfoStructure certStructure;
-		boolean bFirstElementSkipped = false;
-		while (enumCerts.hasMoreElements())
-		{
-			certStructure = (CertificateInfoStructure)enumCerts.nextElement();
-			if (!bFirstElementSkipped)
-			{
-				// skip the verifier
-				bFirstElementSkipped = true;
-				continue;
-			}
-			elemCertificates.appendChild(certStructure.getCertificate().toXmlElement(webInfoDoc));
-		}
+		rootElement.appendChild(m_mixCertPath.toXmlElement(webInfoDoc));
 		
 		return rootElement;
 	}

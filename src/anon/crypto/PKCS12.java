@@ -41,7 +41,7 @@ import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.Vector;
 
-
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -50,7 +50,6 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.BEROutputStream;
 import org.bouncycastle.asn1.DERBMPString;
-import org.bouncycastle.asn1.DEREncodableVector;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -574,12 +573,12 @@ public final class PKCS12 implements PKCSObjectIdentifiers, X509ObjectIdentifier
 			// set a default friendly name (from the key id) and local id
 			//
 			DERSequence[] seqs = new DERSequence[2];
-			DEREncodableVector kSeq = new DEREncodableVector();
+			ASN1EncodableVector kSeq = new ASN1EncodableVector();
 			kSeq.add(pkcs_9_at_localKeyId);
 			kSeq.add(new DERSet(createSubjectKeyId()));
 			seqs[0] = new DERSequence(kSeq);
 			//kName.addObject(new DERSequence(kSeq));
-			kSeq = new DEREncodableVector();
+			kSeq = new ASN1EncodableVector();
 			kSeq.add(pkcs_9_at_friendlyName);
 			kSeq.add(new DERSet(new DERBMPString(getAlias())));
 			seqs[1] = new DERSequence(kSeq);
@@ -600,16 +599,16 @@ public final class PKCS12 implements PKCSObjectIdentifiers, X509ObjectIdentifier
 			PKCS12PBEParams cParams = new PKCS12PBEParams(cSalt, MIN_ITERATIONS);
 			AlgorithmIdentifier cAlgId = new AlgorithmIdentifier(new DERObjectIdentifier(CERT_ALGORITHM),
 				cParams);
-			CertBag cBag = new CertBag(x509certType, new DEROctetString(
+			CertBag cBag = new CertBag(x509Certificate, new DEROctetString(
 						 m_x509certificate.getBouncyCastleCertificate()));
-			DEREncodableVector fSeq = new DEREncodableVector();
+			ASN1EncodableVector fSeq = new ASN1EncodableVector();
 			fSeq.add(pkcs_9_at_localKeyId);
 			fSeq.add(new DERSet(createSubjectKeyId()));
 			DERSequence[] seqs = new DERSequence[2];
 			seqs[0] = new DERSequence(fSeq);
 
 
-			fSeq = new DEREncodableVector();
+			fSeq = new ASN1EncodableVector();
 			fSeq.add(pkcs_9_at_friendlyName);
 			fSeq.add(new DERSet(new DERBMPString(getAlias())));
 			seqs[1] = new DERSequence(fSeq);
