@@ -77,18 +77,29 @@ public class MultiCertPath implements IXMLEncodable
 	}
 	
 	/**
-	 * Returns <code>true</code> if one verifyable path is valid.
+	 * Returns <code>true</code> if one verifiable path is valid or
+	 * in case there is no verifiable path, one unverifiable path is valid
 	 * @param a_date
 	 * @return if a MultiCertPath is valid for the time in question
 	 */
 	public boolean isValid(Date a_date)
 	{
-		CertPath path = getPath();
-		if(path != null)
+		synchronized (m_certPaths)
 		{
-			return path.checkValidity(a_date);
-		}
-		return false;
+			//check if we have a verified path
+			boolean checkOnlyVerfied = this.getFirstVerifiedPath() != null;
+			
+			for(int i=0; i<m_certPaths.length; i++)
+			{	
+				//look for a verified (or unverified) path that is valid
+				if(((checkOnlyVerfied && m_certPaths[i].verify()) || !checkOnlyVerfied) 
+						&& m_certPaths[i].checkValidity(a_date))
+				{
+					return true;
+				}
+			}
+			return false;
+		}	
 	}
 	
 	/**
@@ -125,7 +136,7 @@ public class MultiCertPath implements IXMLEncodable
 	{
 		synchronized (m_certPaths)
 		{
-			CertPath path = getFirstVerifiedPath();
+			CertPath path = this.getFirstVerifiedPath();
 			if(path == null)
 			{
 				path = m_certPaths[0];

@@ -5030,11 +5030,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 			  JAPConstants.CERTSPATH + JAPConstants.CERT_JAPINFOSERVICEMESSAGES));
 		if (updateMessagesCert != null)
 		{
-			//changed this back to add updateCert as CERTIFICATE_TYPE_ROOT_UPDATE for new CertPath implementation. rh
-			//SignatureVerifier.getInstance().getVerificationCertificateStore().
-				//addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_UPDATE, true, true);
 			SignatureVerifier.getInstance().getVerificationCertificateStore().
-				addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_ROOT_UPDATE, true, true);
+				addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_UPDATE, true, true);
+			//SignatureVerifier.getInstance().getVerificationCertificateStore().
+				//addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_ROOT_UPDATE, true, true);
 		}
 		else
 		{

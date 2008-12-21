@@ -61,6 +61,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.SignatureException;
 import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -1167,12 +1168,27 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		if (m_serverCertPaths != null && m_serverInfo != null)
 		{
 			boolean bVerified = isServerCertVerified();
-			//boolean bValid = m_serverCertPaths.isValid(new Date());
+			boolean bValid = m_serverCertPaths.isValid(new Date());
 			
 			m_viewCertLabel.setText(JAPMessages.getString(MSG_X_OF_Y_CERTS_TRUSTED, 
 					new Object[]{new Integer(m_serverCertPaths.countVerifiedPaths()),
 								new Integer(m_serverCertPaths.countPaths())}));
-			m_viewCertLabel.setForeground(bVerified ? Color.GREEN.darker().darker() : Color.RED);
+			if(bVerified)
+			{
+				if(m_serverCertPaths.countVerifiedPaths() > 1)
+				{
+					m_viewCertLabel.setForeground(Color.GREEN.darker().darker());
+				}
+				else
+				{
+					m_viewCertLabel.setForeground(Color.BLUE);
+				}
+			}
+			else
+			{
+				m_viewCertLabel.setForeground(Color.RED);
+			}
+			
 
 			/*m_viewCertLabel.setText((bVerified ? JAPMessages.getString(CertDetailsDialog.MSG_CERT_VERIFIED) + "," :
 				JAPMessages.getString(CertDetailsDialog.MSG_CERT_NOT_VERIFIED) + ","));

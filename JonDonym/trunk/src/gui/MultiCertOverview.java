@@ -140,10 +140,13 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		m_multiCertPath = a_multiCertPath;
 		m_pathInfos = m_multiCertPath.getPathInfos();
 		m_graph = new MultiCertTrustGraph(m_pathInfos);
-		m_name = a_name;
-		if(m_name == null)
+		if(m_multiCertPath.getSubject().getCommonName().startsWith("<Mix id=") || a_name == null)
 		{
 			m_name = m_multiCertPath.getSubject().getCommonName();
+		}
+		else
+		{
+			m_name = a_name;
 		}
 		
 		m_buttonsAndNodes = new Hashtable();
@@ -252,6 +255,10 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		if(count == 0)
 		{
 			mlabel = new JAPMultilineLabel(info, Color.RED);
+		}
+		else if (count == 1)
+		{
+			mlabel = new JAPMultilineLabel(info);
 		}
 		else
 		{
@@ -523,20 +530,20 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 				{
 					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK));
 					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK_DARK));
-					radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK_DARK));
+					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK_DARK));
 				}
 				else
 				{
 					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID));
 					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID_DARK));
-					radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID_DARK));
+					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID_DARK));
 				}
 			}
 			else
 			{
 				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK));
 				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK_DARK));
-				radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK_DARK));
+				//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK_DARK));
 			}
 			
 		}
@@ -549,20 +556,20 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 				{
 					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK));
 					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK_DARK));
-					radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK_DARK));
+					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK_DARK));
 				}
 				else
 				{
 					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID));
 					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID_DARK));
-					radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID_DARK));
+					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID_DARK));
 				}
 			}
 			else
 			{
 				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK));
 				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK_DARK));
-				radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK_DARK));
+				//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK_DARK));
 			}
 		}
 		else //certs with DSA or unknown keys
@@ -573,20 +580,20 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 				{
 					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK));
 					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK_DARK));
-					radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK_DARK));
+					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK_DARK));
 				}
 				else
 				{
 					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID));
 					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID_DARK));
-					radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID_DARK));
+					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID_DARK));
 				}
 			}
 			else
 			{
 				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK));
 				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK_DARK));
-				radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK_DARK));
+				//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK_DARK));
 			}
 		}
 		radioButton.setToolTipText(getToolTipText(cert));
