@@ -59,6 +59,9 @@ public class RevokedCertificate
 	public static final Class[] CRL_ENTRY_EXTENSIONS = 
 		{X509CertificateIssuer.class}; //TODO: not implemented: X509ReasonCode, X509InvalidityDate
 	
+	private static BigInteger ZERO = BigInteger.valueOf(0); // BigInteger.ZERO is private in JDK 1.1
+	private static BigInteger ONE = BigInteger.valueOf(1); // BigInteger.ONE is private in JDK 1.1
+	
 	private BigInteger m_serial;
 	private Date m_revocationDate;
 	private X509Extensions m_extensions;
@@ -94,7 +97,7 @@ public class RevokedCertificate
 	 */
 	protected static BigInteger getUniqueSerial(JAPCertificate a_cert)
 	{
-		if(a_cert.getSerialNumber().equals(BigInteger.ZERO) || a_cert.getSerialNumber().equals(BigInteger.ONE))
+		if (a_cert.getSerialNumber().equals(ZERO) || a_cert.getSerialNumber().equals(ONE))
 		{
 			return createPseudoSerial(a_cert.toByteArray());
 		}

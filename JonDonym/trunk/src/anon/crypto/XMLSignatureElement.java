@@ -268,7 +268,7 @@ public class XMLSignatureElement implements IXMLEncodable
 				if(verify(a_node, currentCertificate.getPublicKey()))
 				{
 					Vector appendedCertificates = (Vector)this.getCertificates().clone();
-					appendedCertificates.remove(currentCertificate);
+					appendedCertificates.removeElement(currentCertificate);
 					m_certPath = CertPath.getInstance(currentCertificate, a_documentType, appendedCertificates);
 					return true;
 				}

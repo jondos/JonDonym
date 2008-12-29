@@ -228,4 +228,10 @@ final public class MyRSAPublicKey extends AbstractPublicKey implements IMyPublic
 		return (int) m_hashValue;
 	}
 
+	public String toString()
+	{
+		String e=(m_e==null?"(not set)":m_e.toString()); 
+		String n=(m_n==null?"(not set)":m_n.toString());
+		return "e="+e+" ; n="+n;
+	}
 }

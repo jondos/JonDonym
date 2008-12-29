@@ -75,7 +75,7 @@ public class X509BasicConstraints extends AbstractX509Extension
 	{
 		super(IDENTIFIER, true, createDEROctets(pathLenConstraint));
 		m_cA = true;
-		m_pathLenConstraint = new Integer(pathLenConstraint);
+		m_pathLenConstraint = pathLenConstraint;
 	}
 	
 	/**
@@ -125,7 +125,7 @@ public class X509BasicConstraints extends AbstractX509Extension
 			BigInteger pathLenConstraint = bc.getPathLenConstraint();
 			if(pathLenConstraint != null)
 			{
-				m_pathLenConstraint = new Integer(bc.getPathLenConstraint().intValue());
+				m_pathLenConstraint = bc.getPathLenConstraint().intValue();
 			}
 		} catch (Exception a_e)
 		{
@@ -166,10 +166,10 @@ public class X509BasicConstraints extends AbstractX509Extension
 	{
 		Vector v = new Vector();;
 		
-		v.add(new String("cA="+m_cA));
+		v.addElement(new String("cA="+m_cA));
 		if(m_pathLenConstraint != -1)
 		{
-			v.add(new String("pathLenConstraint="+m_pathLenConstraint));
+			v.addElement(new String("pathLenConstraint="+m_pathLenConstraint));
 		}
 		return v;
 	}

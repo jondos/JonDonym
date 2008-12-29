@@ -59,6 +59,7 @@ import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.MyECPublicKey;
 import anon.crypto.MyRSAPublicKey;
+import anon.util.Util;
 
 /**
  * 
@@ -216,7 +217,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		}
 		if(verified == 0)
 		{
-			mlabel = new JAPMultilineLabel(info, Color.RED);
+			mlabel = new JAPMultilineLabel(info, Color.red);
 		}
 		else
 		{
@@ -254,7 +255,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		}
 		if(count == 0)
 		{
-			mlabel = new JAPMultilineLabel(info, Color.RED);
+			mlabel = new JAPMultilineLabel(info, Color.red);
 		}
 		else if (count == 1)
 		{
@@ -262,7 +263,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		}
 		else
 		{
-			mlabel = new JAPMultilineLabel(info, Color.GREEN.darker().darker());
+			mlabel = new JAPMultilineLabel(info, Color.green.darker().darker());
 		}
 		
 		c.gridy = 1;
@@ -339,12 +340,12 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		Insets norm = new Insets(10, 10, 10, 10);
 		
 		overview.setBorder(BorderFactory.createLoweredBevelBorder());
-		overview.setBackground(Color.WHITE);
+		overview.setBackground(Color.white);
 		
 		//first column
 		//root
 		panel = new JPanel(new GridLayout(2, 1));
-		panel.setBackground(Color.WHITE);
+		panel.setBackground(Color.white);
 		label = new JLabel(JAPMessages.getString(MSG_ROOT_CERTS));
 		label.setToolTipText(JAPMessages.getString(HINT_ROOT_CERTS));
 		panel.add(label);
@@ -358,7 +359,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		/*for(int i=0; i<m_multiCertPath.getMaxLength()-3; i++)
 		{
 			mlabel = new JAPMultilineLabel("SubCA-\nZertifikate");
-			mlabel.setBackground(Color.WHITE);
+			mlabel.setBackground(Color.white);
 			mlabel.setToolTipText("Zertifikate zum Aufbau der Vertrauenskette.");
 			c.gridy = c.gridy+2;
 			overview.add(mlabel, c);
@@ -366,7 +367,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		
 		//operator or infoService
 		panel = new JPanel(new GridLayout(2, 1));
-		panel.setBackground(Color.WHITE);
+		panel.setBackground(Color.white);
 		
 		if(isInfoService)
 		{
@@ -391,7 +392,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		if(!isInfoService)
 		{
 			panel = new JPanel(new GridLayout(2, 1));
-			panel.setBackground(Color.WHITE);
+			panel.setBackground(Color.white);
 			label = new JLabel(JAPMessages.getString(MSG_MIX_CERTS));
 			panel.add(label);
 			country = new CountryMapper(m_multiCertPath.getSubject().getCountryCode(), JAPMessages.getLocale());
@@ -608,7 +609,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		certPanel.add(radioButton, c);
 				
 		//add panel to parent
-		certPanel.setBackground(Color.WHITE);
+		certPanel.setBackground(Color.white);
 		c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.CENTER;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -676,7 +677,8 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	{
 		String[] details = new String[10];
 		
-		details[0] = a_cert.getSubject().getCommonName().replace("<", "&lt;").replace(">", "&gt;");
+		
+		details[0] = Util.replaceAll(Util.replaceAll(a_cert.getSubject().getCommonName(), "<", "&lt;"), ">", "&gt;");
 		details[1] = a_cert.getSubject().getOrganisation() != null ? a_cert.getSubject().getOrganisation() : "";
 		details[2] = a_cert.getIssuer().getCommonName();
 		details[3] = a_cert.getIssuer().getOrganisation() != null ? a_cert.getIssuer().getOrganisation() : ""; 
