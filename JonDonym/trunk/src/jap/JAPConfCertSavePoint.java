@@ -91,33 +91,55 @@ public class JAPConfCertSavePoint implements IJAPConfSavePoint
 	 */
 	public void restoreSavePoint()
 	{
-		/* first: remove all persistent certificates, which are added without verification */
+		Enumeration originalCertificates;
 		Enumeration allCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
 			getAllCertificates().elements();
+		CertificateInfoStructure currentCertificate, originalCertificate;
+		boolean newCert;
+		
 		while (allCertificates.hasMoreElements())
 		{
-			CertificateInfoStructure currentCertificate = (CertificateInfoStructure) (allCertificates.
+			currentCertificate = (CertificateInfoStructure) (allCertificates.
 				nextElement());
+			newCert = true;
 			if ( (currentCertificate.getCertificateNeedsVerification() == false) &&
 				(currentCertificate.isOnlyHardRemovable() == true))
 			{
 				/* this is a persistent certificate without the need of verification -> remove it */
-				SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificate(currentCertificate);
+				originalCertificates = m_unverifiedPersisitentCertificates.elements();
+				while(originalCertificates.hasMoreElements())
+				{
+					originalCertificate = (CertificateInfoStructure) originalCertificates.nextElement();
+					if(originalCertificate.getCertificate().equals(currentCertificate.getCertificate()))
+					{
+						/* this cert is not new, it was in the store at the last savePoint */
+						newCert = false;
+						m_unverifiedPersisitentCertificates.remove(originalCertificate);
+						/* restore the cert's state */
+						SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(originalCertificate, originalCertificate.isEnabled());
+						break;
+					}
+				}
+				if(newCert)
+				{
+					/* this cert was not in the store before -> remove it! */
+					SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificate(currentCertificate);
+				}
 			}
 		}
-		/* second: add the persistent certificates which don't need verification (they were stored by
+		/* second: add the persistent certificates which don't need verification and were deleted (they were stored by
 		 * the last call of createSavePoint())
 		 */
-		Enumeration oldCertificates = m_unverifiedPersisitentCertificates.elements();
-		while (oldCertificates.hasMoreElements())
+		originalCertificates = m_unverifiedPersisitentCertificates.elements();
+		while (originalCertificates.hasMoreElements())
 		{
-			CertificateInfoStructure currentCertificate = (CertificateInfoStructure) (oldCertificates.
+			originalCertificate = (CertificateInfoStructure) (originalCertificates.
 				nextElement());
 			SignatureVerifier.getInstance().getVerificationCertificateStore().
-				addCertificateWithoutVerification(currentCertificate.getCertificate(),
-												  currentCertificate.getCertificateType(), true,false);
+				addCertificateWithoutVerification(originalCertificate.getCertificate(),
+						originalCertificate.getCertificateType(), true,false);
 			/* also restore the enabled/disabled state */
-			SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(currentCertificate, currentCertificate.isEnabled());
+			SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(originalCertificate, originalCertificate.isEnabled());
 		}
 	}
 
