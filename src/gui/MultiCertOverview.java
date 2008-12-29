@@ -140,13 +140,13 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		m_multiCertPath = a_multiCertPath;
 		m_pathInfos = m_multiCertPath.getPathInfos();
 		m_graph = new MultiCertTrustGraph(m_pathInfos);
-		if(m_multiCertPath.getSubject().getCommonName().startsWith("<Mix id=") || a_name == null)
+		if(m_multiCertPath.getSubject().getCommonName().startsWith("<Mix id=") && a_name != null)
 		{
-			m_name = m_multiCertPath.getSubject().getCommonName();
+			m_name = a_name;
 		}
 		else
 		{
-			m_name = a_name;
+			m_name = m_multiCertPath.getSubject().getCommonName();			
 		}
 		
 		m_buttonsAndNodes = new Hashtable();
