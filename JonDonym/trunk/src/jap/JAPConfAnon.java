@@ -2097,6 +2097,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						
 						value = entry.getBound(PerformanceEntry.SPEED).getBound();
 						best = entry.getBestBound(PerformanceEntry.SPEED);
+						if (best < value)
+						{
+							// this might happen if not all InfoServices send best bounds
+							best = value;
+						}
 						if (value < 0 || value == Integer.MAX_VALUE)
 						{
 							m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
@@ -2155,6 +2160,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						
 						value = entry.getBound(PerformanceEntry.DELAY).getBound();
 						best = entry.getBestBound(PerformanceEntry.DELAY);
+						if (best > value)
+						{
+							// this might happen if not all InfoServices send best bounds
+							best = value;
+						}
 						if (value <= 0)
 						{
 							m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));

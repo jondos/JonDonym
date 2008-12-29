@@ -50,7 +50,11 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 	{
 		public void run()
 		{
-			onUpdateValues();
+			// synchronize with pack() of config dialog so that update and pack events do not overlap
+			synchronized (JAPConf.getInstance())
+			{
+				onUpdateValues();
+			}
 		}
 	});
 
