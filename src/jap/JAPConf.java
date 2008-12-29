@@ -373,8 +373,9 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 
 	}
 
-	protected void doPack()
+	protected synchronized void doPack()
 	{
+		// synchronize with updateValues of AbstractJAPConfModul AWT thread so that updates and pack events do not overlap
 		for (int i = 0; i < 2; i++)
 		{
 			pack();

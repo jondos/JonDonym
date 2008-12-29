@@ -41,12 +41,16 @@ public abstract class AbstractJAPMainView extends JFrame implements IJAPMainView
 
 	private boolean m_bChangingTitle = false;
 	private final Object SYNC_TITLE = new Object();
+	private final Object SYNC_PACK = new Object();
 
 	private final AWTUpdateQueue AWT_UPDATE_QUEUE = new AWTUpdateQueue(new Runnable()
 	{
 		public void run()
 		{
-			onUpdateValues();
+			synchronized (SYNC_PACK)
+			{
+				onUpdateValues();
+			}
 		}
 	});
 
@@ -58,6 +62,14 @@ public abstract class AbstractJAPMainView extends JFrame implements IJAPMainView
 		m_Title = s;
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		//setName(Double.toString(Math.random()));
+	}
+	
+	public void pack()
+	{
+		synchronized (SYNC_PACK)
+		{
+			super.pack();
+		}
 	}
 
 	public abstract void saveWindowPositions();

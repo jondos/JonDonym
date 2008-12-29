@@ -1685,7 +1685,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	public void update(Observable a_observable, final Object a_message)
 	{
 		Runnable run = null;
-		final JAPNewView view = this;
 
 		if (a_observable == Database.getInstance(StatusInfo.class))
 		{
@@ -2652,7 +2651,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		 */
 		Enumeration entries =
 			Database.getInstance(JAPVersionInfo.class).getEntrySnapshotAsEnumeration();
-		String strTemp;
 		JAPVersionInfo vi = null;
 		while (entries.hasMoreElements())
 		{
@@ -2925,6 +2923,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				
 				value = entry.getBound(PerformanceEntry.SPEED).getBound();
 				best = entry.getBestBound(PerformanceEntry.SPEED);
+				if (best < value)
+				{
+					// this might happen if not all InfoServices send best bounds
+					best = value;
+				}
 				if (value < 0 || value == Integer.MAX_VALUE)
 				{
 					m_labelSpeed.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
@@ -2980,6 +2983,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				
 				value = entry.getBound(PerformanceEntry.DELAY).getBound();
 				best = entry.getBestBound(PerformanceEntry.DELAY);
+				if (best > value)
+				{
+					// this might happen if not all InfoServices send best bounds
+					best = value;
+				}
 				if (value <= 0)
 				{
 					m_labelDelay.setText(JAPMessages.getString(MSG_UNKNOWN_PERFORMANCE));
