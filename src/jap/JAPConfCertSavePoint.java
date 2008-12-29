@@ -114,7 +114,7 @@ public class JAPConfCertSavePoint implements IJAPConfSavePoint
 					{
 						/* this cert is not new, it was in the store at the last savePoint */
 						newCert = false;
-						m_unverifiedPersisitentCertificates.remove(originalCertificate);
+						m_unverifiedPersisitentCertificates.removeElement(originalCertificate);
 						/* restore the cert's state */
 						SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(originalCertificate, originalCertificate.isEnabled());
 						break;

@@ -756,6 +756,9 @@ final public class JAPDll {
 		return false;
 	}
 
+	/* Warning: This method is accessed using reflections from platform.WindowsOS!
+	 * Have this in mind if you change the interface of this method!
+	 */
 	public static boolean xcopy(File a_file, File a_directory, boolean a_asAdmin)
 	{
 		if (a_file == null || a_directory == null || !a_directory.isDirectory())

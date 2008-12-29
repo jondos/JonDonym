@@ -119,7 +119,7 @@ public class X509KeyUsage extends AbstractX509Extension
 		{
 			if((USAGES[i] & m_usage) == USAGES[i])
 			{
-				v.add(getUsageString(USAGES[i]));
+				v.addElement(getUsageString(USAGES[i]));
 			}
 		}
 		

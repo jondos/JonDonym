@@ -167,7 +167,7 @@ public class X509AuthorityKeyIdentifier extends AbstractX509KeyIdentifier {
 	public Vector getValues()
 	{
 		Vector v = new Vector();
-		v.add(m_value);
+		v.addElement(m_value);
 		if(m_names != null)
 		{
 			GeneralName[] names = m_names.getNames();
@@ -183,12 +183,12 @@ public class X509AuthorityKeyIdentifier extends AbstractX509KeyIdentifier {
 					name = new String(names[i].getName().getDERObject().getDEREncoded()).trim();
 					//name = name+" ("+AbstractX509AlternativeName.getTagAsString(names[i].getTagNo())+")";
 				}
-				v.add(name);	
+				v.addElement(name);	
 			}
 		}
 		if(m_serial != null)
 		{
-			v.add("authorityCertSerialNumber: "+m_serial);
+			v.addElement("authorityCertSerialNumber: "+m_serial);
 		}
 		return v;
 	}

@@ -1177,16 +1177,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				if(m_serverCertPaths.countVerifiedPaths() > 1)
 				{
-					m_viewCertLabel.setForeground(Color.GREEN.darker().darker());
+					m_viewCertLabel.setForeground(Color.green.darker().darker());
 				}
 				else
 				{
-					m_viewCertLabel.setForeground(Color.BLUE);
+					m_viewCertLabel.setForeground(Color.blue);
 				}
 			}
 			else
 			{
-				m_viewCertLabel.setForeground(Color.RED);
+				m_viewCertLabel.setForeground(Color.red);
 			}
 			
 
