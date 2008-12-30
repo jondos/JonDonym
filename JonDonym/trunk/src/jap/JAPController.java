@@ -77,7 +77,6 @@ import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.CascadeIDEntry;
 import anon.infoservice.Database;
 import anon.infoservice.IServiceContextContainer;
-import anon.infoservice.PerformanceEntry;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
@@ -134,7 +133,6 @@ import jap.pay.AccountUpdater;
 import jap.TermsAndConditionsUpdater;
 import anon.infoservice.ClickedMessageIDDBEntry;
 import anon.client.TrustException;
-import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
 import anon.infoservice.TermsAndConditions;
 
 /* This is the Controller of All. It's a Singleton!*/
@@ -4267,6 +4265,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 		return m_InfoServiceUpdater.update();
 	}
+	
+	public boolean updatePerformanceInfo(boolean a_bDoOnlyIfNotYetUpdated)
+	{
+		if (a_bDoOnlyIfNotYetUpdated && m_perfInfoUpdater.isFirstUpdateDone())
+		{
+			return true;
+		}
+		return m_perfInfoUpdater.update();
+	}
 
 	/**
 	 * Get all available mixcascades from the infoservice and store it in the database.
@@ -4274,11 +4281,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 * @param a_bDoOnlyIfNotYetUpdated only updates the cascades if not at least one successful update
 	 * has been done yet
 	 */
-	public void fetchMixCascades(boolean bShowError, Component a_view, boolean a_bDoOnlyIfNotYetUpdated)
+	public boolean fetchMixCascades(boolean bShowError, Component a_view, boolean a_bDoOnlyIfNotYetUpdated)
 	{
 		if (a_bDoOnlyIfNotYetUpdated && m_MixCascadeUpdater.isFirstUpdateDone())
 		{
-			return;
+			return true;
 		}
 
 		LogHolder.log(LogLevel.INFO, LogType.MISC, "Trying to fetch mixcascades from infoservice.");
@@ -4322,8 +4329,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 											  LogType.NET);
 				}
 			}
-			break;
+			return false;
 		}
+		return true;
 	}
 
 	/**
