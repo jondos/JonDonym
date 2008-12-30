@@ -136,7 +136,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	public static final String MSG_UNKNOWN_PERFORMANCE = JAPNewView.class.getName() + "_unknownPerformance";
 
 	public static final String MSG_USERS = JAPNewView.class.getName() + "_users";
-	protected static final String MSG_SERVICE_NAME = JAPNewView.class.getName() + "_ngAnonymisierungsdienst";
+	public static final String MSG_SERVICE_NAME = JAPNewView.class.getName() + "_ngAnonymisierungsdienst";
 	private static final String MSG_ANONYMETER_TOOL_TIP = JAPNewView.class.getName() + "_anonymeterToolTip";	
 	private static final String MSG_ERROR_DISCONNECTED = JAPNewView.class.getName() + "_errorDisconnected";
 	private static final String MSG_ERROR_PROXY = JAPNewView.class.getName() + "_errorProxy";
@@ -3297,6 +3297,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				//setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				m_Controller.updateInfoServices(!bShowError);
 				m_Controller.updatePaymentInstances(!bShowError);
+				m_Controller.updatePerformanceInfo(!bShowError);
 				m_Controller.fetchMixCascades(bShowError, JAPController.getInstance().getViewWindow(),
 											  !bShowError);
 				//setCursor(Cursor.getDefaultCursor());

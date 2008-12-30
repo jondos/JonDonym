@@ -823,12 +823,14 @@ public class PaymentMainPanel extends FlippingPanel
 						{
 							optionType = JAPDialog.OPTION_TYPE_OK_CANCEL;
 						}
-						
+
 						int answer = JAPDialog.showConfirmDialog(
 							JAPController.getInstance().getViewWindow(),
 							strMessage + JAPMessages.getString(MSG_WITH_COSTS, formatCascadeName(cascade)) + " " + 
-							JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION, 
-									formatOrganisation(fstrOrganisation)),
+							JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION, new String[]{
+									formatOrganisation(fstrOrganisation), 
+									JAPMessages.getString(JAPNewView.MSG_SERVICE_NAME),
+									JAPMessages.getString(TrustModel.MSG_SERVICES_WITHOUT_COSTS)}),
 							optionType, JAPDialog.MESSAGE_TYPE_QUESTION, adapter);
 						
 						if (answer == JAPDialog.RETURN_VALUE_YES)
@@ -882,7 +884,10 @@ public class PaymentMainPanel extends FlippingPanel
 							else
 							{
 								message += JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION, 
-											formatOrganisation(fstrOrganisation));
+										new String[]{
+										formatOrganisation(fstrOrganisation), 
+										JAPMessages.getString(JAPNewView.MSG_SERVICE_NAME),
+										JAPMessages.getString(TrustModel.MSG_SERVICES_WITHOUT_COSTS)});
 							}
 							JAPController.getInstance().setAnonMode(false);
 							int optionType;
@@ -1020,7 +1025,10 @@ public class PaymentMainPanel extends FlippingPanel
 							message += "<br><br>" +
 								JAPMessages.getString(MSG_WITH_COSTS, formatCascadeName(cascade)) + " " +
 								JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION, 
-										formatOrganisation(fstrOrganisation));
+										new String[]{
+										formatOrganisation(fstrOrganisation), 
+										JAPMessages.getString(JAPNewView.MSG_SERVICE_NAME),
+										JAPMessages.getString(TrustModel.MSG_SERVICES_WITHOUT_COSTS)});
 							int optionType;
 							if (JAPModel.getInstance().isCascadeAutoSwitched() &&
 								!TrustModel.getCurrentTrustModel().isPaymentForced())

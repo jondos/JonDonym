@@ -50,7 +50,7 @@ public class XMLParseException extends Exception
 
 	/**
 	 * Creates a new exception.
-	 * @param a_strTagName the name of the tag where the exception occured
+	 * @param a_strTagName the name of the tag where the exception occurred
 	 * @param a_strMessage an additional message for a detailed description of this exception
 	 */
 	public XMLParseException(String a_strTagName, String a_strMessage)
