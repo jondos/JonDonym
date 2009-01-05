@@ -237,12 +237,6 @@ public class PayAccount implements IXMLEncodable
 		if (elemAccInfo != null)
 		{
 			m_accountInfo = new XMLAccountInfo(elemAccInfo);
-			Enumeration ccS = m_accountInfo.getCCs();
-			while(ccS.hasMoreElements())
-			{
-				XMLEasyCC cc = (XMLEasyCC) ccS.nextElement();
-				m_mySpent += cc.getTransferredBytes();
-			}
 		}
 
 	    //set terms
@@ -372,12 +366,12 @@ public class PayAccount implements IXMLEncodable
 	/**
 	 * This is not just a setter method. If an accountInfo is already present,
 	 * only older information is overwritten with newer information.
-	 * (i.e. does NOT replace the old saved balance, only those parts you eplicitly set)
+	 * (i.e. does NOT replace the old saved balance, only those parts you explicitly set)
 	 *
 	 * @param info
 	 *          XMLAccountInfo
 	 */
-	public void setAccountInfo(XMLAccountInfo info) throws Exception
+	private void setAccountInfo(XMLAccountInfo info) throws Exception
 	{
 		boolean fire = false;
 		if (m_accountInfo == null)
@@ -387,71 +381,73 @@ public class PayAccount implements IXMLEncodable
 		}
 		else
 		{
-
-			// compare balance timestamps, use the newer one
-			XMLBalance retrievedBalance = info.getBalance();
-
-			XMLBalance savedBalance = m_accountInfo.getBalance();
-
-			//get saved message (so we can check the new balance for changes)
-			PayMessage oldMessage = savedBalance.getMessage();
-			PayMessage newMessage = retrievedBalance.getMessage();
-
-			if (retrievedBalance.getTimestamp().after(savedBalance.getTimestamp()))
+			synchronized(m_accountInfo)
 			{
-				m_accountInfo.setBalance(retrievedBalance);
-				fire = true;
-
-				//do we have a message?
-				if (newMessage != null && !newMessage.getShortMessage().equals("")  )
+				// compare balance timestamps, use the newer one
+				XMLBalance retrievedBalance = info.getBalance();
+	
+				XMLBalance savedBalance = m_accountInfo.getBalance();
+	
+				//get saved message (so we can check the new balance for changes)
+				PayMessage oldMessage = savedBalance.getMessage();
+				PayMessage newMessage = retrievedBalance.getMessage();
+	
+				if (retrievedBalance.getTimestamp().after(savedBalance.getTimestamp()))
 				{
-					//none before? just show this one
-					if (oldMessage == null)
+					m_accountInfo.setBalance(retrievedBalance);
+					fire = true;
+	
+					//do we have a message?
+					if (newMessage != null && !newMessage.getShortMessage().equals("")  )
 					{
-						fireMessageReceived(newMessage);
-					}
-					else //there already was a message before
-					{
-						if (newMessage.equals(oldMessage) )
+						//none before? just show this one
+						if (oldMessage == null)
 						{
-							; //same message? just leave it
+							fireMessageReceived(newMessage);
+						}
+						else //there already was a message before
+						{
+							if (newMessage.equals(oldMessage) )
+							{
+								; //same message? just leave it
+							}
+							else
+							{
+								//different message? replace old with new message
+								fireMessageRemoved(oldMessage);
+								fireMessageReceived(newMessage);
+							}
+						}
+					}
+					else //no message received
+					{
+						//remove old message if present
+						if ( (oldMessage != null && !oldMessage.getShortMessage().equals("")))
+						{
+							fireMessageRemoved(oldMessage);
+						}
+					}
+				}
+	
+				savedBalance.setMessage(newMessage);
+	
+				// compare CCs
+				Enumeration en = m_accountInfo.getCCs();
+				while (en.hasMoreElements())
+				{
+					XMLEasyCC myCC = (XMLEasyCC) en.nextElement();
+					XMLEasyCC newCC = info.getCC(myCC.getConcatenatedPriceCertHashes());
+					if ( (newCC != null) && (newCC.getTransferredBytes() > myCC.getTransferredBytes()))
+					{
+						if (newCC.verify(m_accountCertificate.getPublicKey()))
+						{
+							addCostConfirmation(newCC);
+							fire = false; // the event is fired by ^^
 						}
 						else
 						{
-							//different message? replace old with new message
-							fireMessageRemoved(oldMessage);
-							fireMessageReceived(newMessage);
+							throw new Exception("The BI is trying to betray you with faked CostConfirmations");
 						}
-					}
-				}
-				else //no message received
-				{
-					//remove old message if present
-					if ( (oldMessage != null && !oldMessage.getShortMessage().equals("")))
-					{
-						fireMessageRemoved(oldMessage);
-					}
-				}
-			}
-
-			savedBalance.setMessage(newMessage);
-
-			// compare CCs
-			Enumeration en = m_accountInfo.getCCs();
-			while (en.hasMoreElements())
-			{
-				XMLEasyCC myCC = (XMLEasyCC) en.nextElement();
-				XMLEasyCC newCC = info.getCC(myCC.getConcatenatedPriceCertHashes());
-				if ( (newCC != null) && (newCC.getTransferredBytes() > myCC.getTransferredBytes()))
-				{
-					if (newCC.verify(m_accountCertificate.getPublicKey()))
-					{
-						addCostConfirmation(newCC);
-						fire = false; // the event is fired by ^^
-					}
-					else
-					{
-						throw new Exception("The BI is trying to betray you with faked CostConfirmations");
 					}
 				}
 			}
@@ -663,18 +659,21 @@ public class PayAccount implements IXMLEncodable
 	{
 		if (m_accountInfo != null)
 		{
-			long jonDoCountedCredit = 
-				(m_accountInfo.getBalance().getSpent() + 
-				 m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
-				m_accountInfo.getAllCCsTransferredBytes();
-			jonDoCountedCredit /= 1000;
-			if((jonDoCountedCredit) > getBalance().getVolumeKBytesLeft())
+			synchronized(m_accountInfo)
 			{
-				return getBalance().getVolumeKBytesLeft();
-			}
-			else
-			{
-				return (jonDoCountedCredit < 0) ? 0l : jonDoCountedCredit;
+				long jonDoCountedCredit = 
+					(m_accountInfo.getBalance().getSpent() + 
+					 m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
+					m_accountInfo.getAllCCsTransferredBytes();
+				jonDoCountedCredit /= 1000;
+				if((jonDoCountedCredit) > getBalance().getVolumeKBytesLeft())
+				{
+					return getBalance().getVolumeKBytesLeft();
+				}
+				else
+				{
+					return (jonDoCountedCredit < 0) ? 0l : jonDoCountedCredit;
+				}
 			}
 		}
 		return 0L;
@@ -683,7 +682,7 @@ public class PayAccount implements IXMLEncodable
 	 * returns totalBytes - getCurrentCredit() in BYTES or 0 if no accountInfo is given.
 	 * (the methods getCurentSpent and getCurrentCredit are 
 	 * self calculated counterparts of the PI-determined getBalance().getSpent()
-	 * and getBalance.getVolumeKBytesLeft(). Because one of them returns kbxtes and the other bytes
+	 * and getBalance.getVolumeKBytesLeft(). Because one of them returns kbytes and the other bytes
 	 * getCurentSpent and getCurrentCredit have to behave the same way)
 	 * @return
 	 */
@@ -691,9 +690,12 @@ public class PayAccount implements IXMLEncodable
 	{
 		if (m_accountInfo != null)
 		{
-			return (m_accountInfo.getBalance().getSpent() + 
-					m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
-					(getCurrentCredit()*1000l);
+			synchronized(m_accountInfo)
+			{
+				return (m_accountInfo.getBalance().getSpent() + 
+						m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
+						(getCurrentCredit()*1000l);
+			}
 		}
 		return 0L;
 	}
@@ -1062,7 +1064,7 @@ public class PayAccount implements IXMLEncodable
 		m_transCerts.addElement(transcert);
 		return transcert;
 	}
-
+	 
 	/**
 	 * Marks the account as updated so a ChangeEvent gets fired
 	 */

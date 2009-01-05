@@ -226,6 +226,12 @@ public class BIConnection implements ICaptchaSender
 				{
 					tls.setSoTimeout(a_connectionTimeout);
 				}
+				
+				if(m_theBI.getCertPath().getFirstVerifiedPath() == null)
+				{
+					//TODO: handle case
+				}
+					
 				tls.setRootKey(m_theBI.getCertPath().getFirstVerifiedPath().getFirstCertificate().getPublicKey());
 				tls.startHandshake();
 
