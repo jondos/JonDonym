@@ -49,7 +49,6 @@ import anon.pay.xml.XMLPayRequest;
 import anon.pay.xml.XMLResponse;
 import anon.pay.xml.XMLPriceCertificate;
 import anon.util.XMLUtil;
-import jap.JAPController;
 
 import java.util.Vector;
 import java.util.Enumeration;
