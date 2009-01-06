@@ -59,6 +59,9 @@ public class HTTPProxyCallback implements ProxyCallback
 	final static String CRLF = "\r\n";
 	final static String HTTP_HEADER_END = CRLF+CRLF; //end of http message headers
 	final static byte[] HTTP_HEADER_END_BYTES = {13, 10, 13, 10};
+	
+	
+	
 	final static String HTTP_HEADER_DELIM = ": ";
 	final static String HTTP_START_LINE_KEY = "start-line";
 	final static String HTTP_VERSION_PREFIX = "HTTP/";
@@ -189,20 +192,10 @@ public class HTTPProxyCallback implements ProxyCallback
 		{
 			throw new NullPointerException("AnonProxyRequest must not be null!");
 		}
-		/* get the startindex of the CRLFCRLF end delimiter header */		
 		int headerEndLength = HTTP_HEADER_END.length();
-		int headerEndIndex = indexOfHTTPHeaderEnd(chunk);
-		
-		/* this specifies how many bytes of the chunk may contain header data 
-		 * (if the chunk contain header data at all)
-		 */
-		int endLen = (headerEndIndex == -1) ? len : Math.min((headerEndIndex+headerEndLength), len);
-		if(headerEndIndex == -1)
-		{
-			
-		}
-		int contentBytes = len;
-		String chunkData = null;
+		int headerEndIndex = -1;
+		//preceding bytes of that chunk possibly containing line termination bytes
+		byte[] prefixBytes = null;
 		
 		Hashtable unfinishedMessages =
 			(a_messageType == MESSAGE_TYPE_REQUEST) ? 
@@ -218,7 +211,33 @@ public class HTTPProxyCallback implements ProxyCallback
 			unfinishedHeaderPart = (String) unfinishedMessages.get(anonRequest);
 		}
 		
-		/* only if header data is contained by this chunk, we need to turn it into a string */
+		if(unfinishedHeaderPart != null)
+		{
+			//take care, as there may be some HTTP header ending bytes in the previous extracted part
+			if(unfinishedHeaderPart.length() > (HTTP_HEADER_END_BYTES.length-1) )
+			{
+				prefixBytes = 
+					unfinishedHeaderPart.substring(
+						unfinishedHeaderPart.length() - (HTTP_HEADER_END_BYTES.length-1)).getBytes();
+			}
+			else
+			{
+				prefixBytes = unfinishedHeaderPart.getBytes();
+			}
+		}
+		
+		/* get the startindex of the CRLFCRLF end delimiter header */		
+		headerEndIndex = indexOfHTTPHeaderEnd(prefixBytes, chunk);
+		
+		/* this specifies how many bytes of the chunk may contain header data 
+		 * (if the chunk contain header data at all)
+		 */
+		int endLen = (headerEndIndex == -1) ? len : Math.min(headerEndIndex, len);
+		
+		int contentBytes = len;
+		String chunkData = null;
+		
+		/* only if this chunk contains http headers, we need to turn it into a string */
 		if( (unfinishedHeaderPart != null) || hasAlignedHTTPStartLine(chunk, endLen, a_messageType) )
 		{
 			contentBytes = len - endLen;
@@ -376,7 +395,11 @@ public class HTTPProxyCallback implements ProxyCallback
 				(messageType == MESSAGE_TYPE_REQUEST) ? 
 					m_unfinishedRequests : m_unfinishedResponses;
 			
-			if(!checkValidity(chunkData))
+			int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
+			String headerFragment = ( off_headers_end == -1 ) ? chunkData : 
+				chunkData.substring(0,  off_headers_end);
+			
+			if(!checkValidity(headerFragment))
 			{
 				String errorMsgKey = null;
 				if(messageType == MESSAGE_TYPE_REQUEST)
@@ -398,11 +421,11 @@ public class HTTPProxyCallback implements ProxyCallback
 						m_messages.getMessage(errorMsgKey));
 			}
 			
-			int off_headers_end = chunkData.indexOf(HTTP_HEADER_END);
+			
 			if((off_headers_end != -1))
 			{
 				//Because it is assumed that the chunk is aligned: the HTTP message starts at index 0
-				parseHTTPHeader(chunkData.substring(0, off_headers_end), connHeader, messageType);
+				parseHTTPHeader(headerFragment, connHeader, messageType);
 				if(messageType == MESSAGE_TYPE_REQUEST)
 				{
 					connHeader.setRequestFinished(true);
@@ -552,26 +575,86 @@ public class HTTPProxyCallback implements ProxyCallback
 		{
 			return 0l;
 		}
-		System.out.println("payload check: "+chunkData.length());
+		
 		return (long) (chunkData.length() - (off_headers_end+HTTP_HEADER_END.length())); 
 		//}
 		return (long) chunkData.length();
 	}*/
 	
-	private int indexOfHTTPHeaderEnd(byte[] chunk)
+	public static int indexOfHTTPHeaderEnd(byte[] chunk)
 	{
-		for (int i = 0; i < (chunk.length-HTTP_HEADER_END_BYTES.length); i++) 
+		boolean match = false;
+		for (int i = 0; i < (chunk.length - (HTTP_HEADER_END_BYTES.length-1)); i++) 
 		{
-			if( (chunk[i] == HTTP_HEADER_END_BYTES[0]) &&  
-				(chunk[i+1] == HTTP_HEADER_END_BYTES[1]) &&
-				(chunk[i+2] == HTTP_HEADER_END_BYTES[2]) &&
-				(chunk[i+3] == HTTP_HEADER_END_BYTES[3]) )
+			match = true;
+			for (int j = 0; j < HTTP_HEADER_END_BYTES.length; j++) 
 			{
-				return i;
+				if(chunk[i+j] != HTTP_HEADER_END_BYTES[j])
+				{
+					match = false;
+					break;
+				}
 			}
-					
+			if(match) return (i+HTTP_HEADER_END_BYTES.length);
+			
 		}
 		return -1;
+	}
+	
+	public static int indexOfHTTPHeaderEnd(byte[] prefix, byte[] chunk)
+	{
+		if(prefix != null)
+		{
+			boolean match = false;
+			int prefixLength = prefix.length;
+			int chunkLength = chunk.length;
+			int startIndex = (prefixLength >= (HTTP_HEADER_END_BYTES.length - 1) ) ?
+					prefixLength - (HTTP_HEADER_END_BYTES.length - 1) : 0;
+			if(chunkLength + prefixLength < HTTP_HEADER_END_BYTES.length)
+			{
+				return -1;
+			}
+			for(int i = startIndex; i < prefixLength; i++)
+			{
+				
+				//This index determines how many of the cunk bytes have to be compared
+				int chunkCheckLength = 
+					HTTP_HEADER_END_BYTES.length - (prefixLength - i);
+				if(chunkCheckLength > chunkLength)
+				{
+					//not enough chunk bytes available for check
+					return -1;
+				}
+				
+				match = true;
+				int j = 0;
+				/* Part 1 check prefix bytes to match pattern */
+				for (; ((i+j) < prefixLength); j++) 
+				{
+					if(prefix[i+j] != HTTP_HEADER_END_BYTES[j])
+					{
+						
+						match = false;
+						break;
+					}
+				}
+				if(match) 
+				{
+					/* Part 2 continue pattern check with the chunk array. */
+					int k = 0;
+					for(; (k < chunkCheckLength || j < HTTP_HEADER_END_BYTES.length); k++)
+					{
+						if(chunk[k] != HTTP_HEADER_END_BYTES[j++])
+						{
+							match = false;
+							break;
+						}
+					}
+					if(match) return k;
+				}
+			}
+		}
+		return indexOfHTTPHeaderEnd(chunk);
 	}
 	
 	private synchronized void parseHTTPHeader(String headerData, HTTPConnectionHeader connHeader, int headerType)

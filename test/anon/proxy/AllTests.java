@@ -15,6 +15,7 @@ public class AllTests
 	{
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		suite.addTest(HTTPValidityCheckerTest.suite());
+		suite.addTest(HeaderParsingTest.suite());
 		return suite;
 	}
 }
