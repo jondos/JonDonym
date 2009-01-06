@@ -56,9 +56,13 @@ public class BalanceTest extends TestCase
 		assertNotNull(accountInfo);
 		
 		long totalBytes = balance.getVolumeKBytesLeft()*1000 + balance.getSpent();
+		//System.out.println("balance: "+balance.getVolumeKBytesLeft()*1000+" nr. "+testAccount.getAccountNumber());
+		//System.out.println("spent: "+balance.getSpent());
 		long currentCredit = testAccount.getCurrentCredit();
 		long currentSpent = testAccount.getCurrentSpent();
 		long sumOfAllCCTransBytes = accountInfo.getAllCCsTransferredBytes();
+		//System.out.println("sumCC: "+sumOfAllCCTransBytes);
+		//System.out.println("current Credit: "+(totalBytes - sumOfAllCCTransBytes));
 		
 		assertEquals(totalBytes, currentCredit*1000+currentSpent);
 		assertTrue(currentCredit >= 0); /* credit must not be less than 0 */
