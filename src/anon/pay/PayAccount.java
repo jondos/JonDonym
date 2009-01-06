@@ -30,6 +30,7 @@ package anon.pay;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
@@ -432,12 +433,39 @@ public class PayAccount implements IXMLEncodable
 				savedBalance.setMessage(newMessage);
 	
 				// compare CCs
-				Enumeration en = m_accountInfo.getCCs();
+				Enumeration[] compareCCs = new Enumeration[]
+				{
+					m_accountInfo.getCCs(), info.getCCs()
+				};
+				Hashtable allCCKeys = new Hashtable();
+				
+				//get all concatenated price cert hashes
+				for (int i = 0; i < compareCCs.length; i++) 
+				{
+					while(compareCCs[i].hasMoreElements())
+					{
+						String ccKey = 
+							((XMLEasyCC)compareCCs[i].nextElement()).getConcatenatedPriceCertHashes();
+						allCCKeys.put(ccKey, ccKey);
+					}
+				}
+				
+				Enumeration en = allCCKeys.keys();
+			
 				while (en.hasMoreElements())
 				{
-					XMLEasyCC myCC = (XMLEasyCC) en.nextElement();
-					XMLEasyCC newCC = info.getCC(myCC.getConcatenatedPriceCertHashes());
-					if ( (newCC != null) && (newCC.getTransferredBytes() > myCC.getTransferredBytes()))
+					//
+					String ccKey = (String) en.nextElement();
+					XMLEasyCC myCC = m_accountInfo.getCC(ccKey);
+					XMLEasyCC newCC = info.getCC(ccKey);
+					
+					if( (myCC == null) && (newCC == null) )
+					{
+						throw new NullPointerException("no CC available for "+ccKey+" This must NEVER happen!");
+					}
+					
+					if ( (newCC != null) &&
+							(myCC == null || (newCC.getTransferredBytes() > myCC.getTransferredBytes())) )
 					{
 						if (newCC.verify(m_accountCertificate.getPublicKey()))
 						{
