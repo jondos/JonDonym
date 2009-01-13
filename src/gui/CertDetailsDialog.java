@@ -522,15 +522,14 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 	private void setSize()
 	{
 		this.pack();
-		/*
-		if (this.getSize().height > 600)
+		if (this.getSize().height > 480)
 		{
-			this.setSize(getSize().width, 600);
+			this.setSize(getSize().width, 480);
 		}
-		if (this.getSize().width > 800)
+		if (this.getSize().width > 640)
 		{
-			this.setSize(800, getSize().height);
-		}*/
+			this.setSize(640, getSize().height);
+		}
 	}
 	/**
 	 * Translates a Vector of numerical identifiers into human readable names

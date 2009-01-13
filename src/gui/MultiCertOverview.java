@@ -45,6 +45,7 @@ import java.util.Hashtable;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -120,8 +121,8 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	private static final String IMG_ARROW_NORTH_EAST_NOK = IMG_PATH + "arrow_north_east_nok.png";
 	private static final String IMG_ARROW_NORTH_WEST = IMG_PATH + "arrow_north_west_ok.png";
 	private static final String IMG_ARROW_NORTH_WEST_NOK = IMG_PATH + "arrow_north_west_nok.png";
-	private static final String IMG_NOT_TRUSTED = IMG_PATH + "not_trusted.png";
-	private static final String IMG_INVALID = IMG_PATH + "invalid.png";
+	public static final String IMG_NOT_TRUSTED = IMG_PATH + "not_trusted.png";
+	public static final String IMG_INVALID = IMG_PATH + "invalid.png";
 	private static final String IMG_BOX_ORANGE = IMG_PATH + "box_orange.png";
 	private static final String IMG_BOX_PURPLE = IMG_PATH + "box_purple.png";
 	private static final String IMG_BOX_BLUE = IMG_PATH + "box_blue.png";
@@ -129,7 +130,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	private MultiCertPath m_multiCertPath;
 	private String m_name;
 	private Hashtable m_buttonsAndNodes;
-	private ButtonGroup m_certButtons;
+	//private ButtonGroup m_certButtons;
 	//private JButton m_closeButton;
 	private CertPathInfo[] m_pathInfos;
 	private MultiCertTrustGraph m_graph;
@@ -151,7 +152,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		}
 		
 		m_buttonsAndNodes = new Hashtable();
-		m_certButtons = new ButtonGroup();
+		//m_certButtons = new ButtonGroup();
 		
 		JPanel rootPanel = new JPanel();
 		rootPanel.setLayout(new GridBagLayout());
@@ -174,7 +175,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		rootPanel.add(tabbedPane, c);
 		
 		//Close Button
-		/*m_closeButton = new JButton("Schlie§en");
+		/*m_closeButton = new JButton("Schliessen");
 		m_closeButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -513,8 +514,9 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	{
 		JPanel certPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		JRadioButton radioButton;
+		JButton radioButton;
 		JAPCertificate cert = node.getCertificate();
+		Color colorBackground = Color.white;
 		
 		//cert button
 		if(cert == null)
@@ -522,8 +524,8 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			return;
 		}
 		
-		radioButton = new JRadioButton();
-		if(cert.getPublicKey() instanceof MyRSAPublicKey)
+		radioButton = new JButton();
+		if (cert.getPublicKey() instanceof MyRSAPublicKey)
 		{
 			if(node.isTrusted())
 			{
@@ -598,7 +600,10 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			}
 		}
 		radioButton.setToolTipText(getToolTipText(cert));
-		m_certButtons.add(radioButton);
+		radioButton.setBorder(BorderFactory.createEmptyBorder());
+		radioButton.setBackground(colorBackground);
+		
+		//m_certButtons.add(radioButton);
 		m_buttonsAndNodes.put(radioButton, node);
 		radioButton.addMouseListener(this);
 		
@@ -609,7 +614,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		certPanel.add(radioButton, c);
 				
 		//add panel to parent
-		certPanel.setBackground(Color.white);
+		certPanel.setBackground(colorBackground);
 		c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.CENTER;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -694,11 +699,11 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 
 	public void mouseClicked(MouseEvent e)
 	{
-		if(m_buttonsAndNodes.containsKey(e.getSource()))
+		if (m_buttonsAndNodes.containsKey(e.getSource()))
 		{
 			MultiCertTrustGraph.Node node = (MultiCertTrustGraph.Node) m_buttonsAndNodes.get(e.getSource());
 			
-			if(e.getClickCount() == 1)
+			if (e.getClickCount() == 1)
 			{
 				CertDetailsDialog dialog = new CertDetailsDialog(this.getParentComponent(), node.getCertificate(), node.isTrusted(), JAPMessages.getLocale());
 				dialog.setVisible(true);

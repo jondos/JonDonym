@@ -483,13 +483,13 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		public OperatorBlacklistAttribute(int a_trustCondtion, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
 		{
 			// MUST always be TRUST_IF_NOT_IN_LIST and value must be a vector
-			super(TRUST_IF_NOT_IN_LIST, (a_conditionValue == null || 
+			super (TRUST_IF_NOT_IN_LIST, (a_conditionValue == null || 
 					!(a_conditionValue instanceof Vector)) ? new Vector() : a_conditionValue, a_bIgnoreNoDataAvailable);
 		}
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
-			if(getTrustCondition() == TRUST_IF_NOT_IN_LIST)
+			if (getTrustCondition() == TRUST_IF_NOT_IN_LIST)
 			{
 				for(int i = 0; i < a_cascade.getNumberOfMixes(); i++)
 				{
@@ -562,6 +562,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(a_cascade.getId());
 			int maxDelay = ((Integer) getConditionValue()).intValue();
+			
+			if (maxDelay == Integer.MAX_VALUE)
+			{
+				// do not test delay, as all delay values are accepted
+				return;
+			}
 			
 			if (entry == null || entry.getBound(PerformanceEntry.DELAY).getBound() == 0)
 			{
