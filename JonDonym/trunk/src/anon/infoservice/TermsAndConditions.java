@@ -20,6 +20,7 @@ import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.X509SubjectKeyIdentifier;
 import anon.crypto.XMLSignature;
+import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
@@ -126,7 +127,10 @@ public class TermsAndConditions extends AbstractDistributableCertifiedDatabaseEn
 			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- signature is NULL!");
 			return false;
 		}
-		return  (m_ski != null) && m_ski.equals(m_signature.getXORofSKIs());
+		String ski = m_signature.getMultiCertPath().getPath().getSecondCertificate().getSubjectKeyIdentifier();
+		
+		ski = (ski != null) ?  Util.replaceAll(ski, ":", "") : "";
+		return  (m_ski != null) && m_ski.equalsIgnoreCase(ski);
 	}
 
 

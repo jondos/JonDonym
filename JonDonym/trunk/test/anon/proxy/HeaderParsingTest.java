@@ -123,8 +123,6 @@ public class HeaderParsingTest extends TestCase
 		
 		static TestConfig getRandomTestConfig()
 		{
-			//TestConfig config = null; new TestConfig();
-			
 			boolean split = random.nextBoolean();
 			if(split)
 			{
@@ -187,6 +185,9 @@ public class HeaderParsingTest extends TestCase
 		suite.addTest(new HeaderParsingTest(new TestConfig("bla", "i\r\n\r\nusw", 5)));
 		suite.addTest(new HeaderParsingTest(new TestConfig(null, "i\r\n\r\nusw", 5)));
 		
+		suite.addTest(new HeaderParsingTest(new TestConfig("\r", "\n\r\n", 3)));
+		suite.addTest(new HeaderParsingTest(new TestConfig("\r\n", "\r\n", 2)));
+		suite.addTest(new HeaderParsingTest(new TestConfig("\r\n\r", "\n", 1)));
 		return suite;
 	}
 }
