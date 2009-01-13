@@ -36,7 +36,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 {
 	private static final String XML_ELEMENT_VENUE = "Venue";
 
-	private static final String XML_ELEMENT_LOCATION = "Location";
+	//private static final String XML_ELEMENT_CI = "Location";
 
 	private static final String XML_ELEMENT_OPERATIONAL_AGREEMENT_URL = "OperationalAgreementUrl";
 
@@ -208,7 +208,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			replaceNodeFromTC(a_data, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
 			
 			// replace Location
-			replaceNodeFromTC(a_data, XML_ELEMENT_LOCATION);
+			replaceNodeFromTC(a_data, XML_ELEMENT_OPERATOR_CITY);
 			
 			// replace Venue
 			replaceNodeFromTC(a_data, XML_ELEMENT_VENUE);

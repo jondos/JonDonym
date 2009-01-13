@@ -121,6 +121,7 @@ public class JAPConfServices extends AbstractJAPConfModule
 			{
 				m_tabsAnon.addTab(anonModule.getTabTitle(), anonModule.getRootPanel());
 				m_tabbedModules.addElement(anonModule);
+				//uncomment to enable the T&C tabs.
 				//m_tabsAnon.addTab(tcModule.getTabTitle(), tcModule.getRootPanel());
 				//m_tabbedModules.addElement(tcModule);
 				if (!JAPConstants.m_bReleasedVersion)
