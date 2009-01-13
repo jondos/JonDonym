@@ -581,6 +581,10 @@ public class HTTPProxyCallback implements ProxyCallback
 		return (long) chunkData.length();
 	}*/
 	
+	/**
+	 * Returns the index of the first char after the first occurence of the CRLFCRLF termination
+	 * in the array 'chunk' or -1 if such a termination sequence was not found.
+	 */
 	public static int indexOfHTTPHeaderEnd(byte[] chunk)
 	{
 		boolean match = false;
@@ -601,6 +605,13 @@ public class HTTPProxyCallback implements ProxyCallback
 		return -1;
 	}
 	
+	/**
+	 * Returns the index of the first char after the first occurence of the CRLFCRLF termination
+	 * in the array 'chunk' or -1 if such a termination sequence was not found. Also considers that 
+	 * some of the line termination charatcters are stored at the end of the array 'prefix' which
+	 * are followed by the corresponding characters in 'chunk' to complete the CRLFCRLF
+	 * sequence. The index returned is refers to the array 'chunk'.
+	 */
 	public static int indexOfHTTPHeaderEnd(byte[] prefix, byte[] chunk)
 	{
 		if(prefix != null)
@@ -617,7 +628,7 @@ public class HTTPProxyCallback implements ProxyCallback
 			for(int i = startIndex; i < prefixLength; i++)
 			{
 				
-				//This index determines how many of the cunk bytes have to be compared
+				//This index determines how many of the chunk bytes have to be compared
 				int chunkCheckLength = 
 					HTTP_HEADER_END_BYTES.length - (prefixLength - i);
 				if(chunkCheckLength > chunkLength)
@@ -798,12 +809,12 @@ public class HTTPProxyCallback implements ProxyCallback
 		
 		private boolean responseExpected = false;
 		
-		public synchronized boolean isResponseExpected() 
+		private synchronized boolean isResponseExpected() 
 		{
 			return responseExpected;
 		}
 
-		public synchronized void setResponseExpected(boolean responseExpected) 
+		private synchronized void setResponseExpected(boolean responseExpected) 
 		{
 			this.responseExpected = responseExpected;
 		}
@@ -813,12 +824,12 @@ public class HTTPProxyCallback implements ProxyCallback
 			return responseFinished;
 		}
 
-		public synchronized void setResponseFinished(boolean responseFinished) 
+		private synchronized void setResponseFinished(boolean responseFinished) 
 		{
 			this.responseFinished = responseFinished;
 		}
 
-		public synchronized boolean isRequestFinished() 
+		private synchronized boolean isRequestFinished() 
 		{
 			return requestFinished;
 		}
