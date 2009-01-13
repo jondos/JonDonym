@@ -28,11 +28,13 @@
 package jap;
 
 import gui.CertDetailsDialog;
+import gui.CountryMapper;
 import gui.GUIUtils;
 import gui.JAPHelpContext;
 import gui.JAPJIntField;
 import gui.JAPMessages;
 import gui.MapBox;
+import gui.MixDetailsDialog;
 import gui.MultiCertOverview;
 import gui.OperatorsCellRenderer;
 import gui.dialog.JAPDialog;
@@ -139,7 +141,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_BUTTONEDITSHOW = JAPConfAnon.class.
 		getName() + "_buttoneditshow";
 	private static final String MSG_PAYCASCADE = JAPConfAnon.class.getName() + "_paycascade";
-	private static final String MSG_MIX_X_OF_Y = JAPConfAnon.class.getName() + "_mixXOfY";
 	private static final String MSG_MIX_POSITION = JAPConfAnon.class.getName() + "_mixPosition";
 	private static final String MSG_MIX_FIRST = JAPConfAnon.class.getName() + "_mixFirst";
 	private static final String MSG_MIX_SINGLE = JAPConfAnon.class.getName() + "_singleMix";
@@ -938,12 +939,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				//m_payLabel.setText(JAPMessages.getString(MSG_NOT_TRUSTWORTHY) + " (" + buff.toString() + ")");
 				m_payLabel.setText(buff.toString());
-				m_payLabel.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
-					TrustModel.getCurrentTrustModel().getName()));
+				m_payLabel.setToolTipText("<html>" + JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
+					TrustModel.getCurrentTrustModel().getName()) + "</html>");
 				m_blacklist = false;
 				m_unknownPI = false;
 			}
-
 		}
 		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 75)
 		{
@@ -1066,7 +1066,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 			mixType = JAPMessages.getString(mixType);
 
-			m_nrLabel.setText(JAPMessages.getString(MSG_MIX_X_OF_Y, new Object[]{new Integer(server + 1),
+			m_nrLabel.setText(JAPMessages.getString(MixDetailsDialog.MSG_MIX_X_OF_Y, new Object[]{new Integer(server + 1),
 													new Integer(m_serverList.getNumberOfMixes())}));
 			m_nrLblExplain.setText(mixType);
 		}
@@ -1173,15 +1173,19 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_viewCertLabel.setText(JAPMessages.getString(MSG_X_OF_Y_CERTS_TRUSTED, 
 					new Object[]{new Integer(m_serverCertPaths.countVerifiedPaths()),
 								new Integer(m_serverCertPaths.countPaths())}));
-			if(bVerified)
+			if (bVerified)
 			{
-				if(m_serverCertPaths.countVerifiedPaths() > 1)
+				if (m_serverCertPaths.countVerifiedPaths() > 2)
 				{
 					m_viewCertLabel.setForeground(Color.green.darker().darker());
 				}
-				else
+				else if (m_serverCertPaths.countVerifiedPaths() > 1)
 				{
 					m_viewCertLabel.setForeground(Color.blue);
+				}
+				else
+				{
+					m_viewCertLabel.setForeground(m_nrLabel.getForeground());
 				}
 			}
 			else
@@ -2865,6 +2869,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			ServiceOperator operator = getServiceOperator(a_cascade, a_mixId);
 			String strOperator = null;
+			String country = null;
+			
 			if (operator != null)
 			{
 				strOperator = operator.getOrganization();
@@ -2873,17 +2879,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				return "N/A";
 			}
-			/*
+			
 			if(operator.getCertificate() != null && operator.getCertificate().getSubject() != null)
 			{
 				country = operator.getCertificate().getSubject().getCountryCode();
 			}
 			
-			
 			if (country != null && country.trim().length() > 0)
 			{
-				strOperator += ", ";
-				
+				strOperator += "  (";
 
 				try
 				{
@@ -2894,7 +2898,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				{
 					strOperator += country.trim();
 				}
-			}*/
+				strOperator += ")";
+			}
 			
 			return strOperator;
 		}
