@@ -91,7 +91,7 @@
 	
 	<xsl:template match="Sig">
 		<br />
-		<xsl:value-of select="Location" />, <xsl:value-of select="Date" />
+		<xsl:value-of select="City" />, <xsl:value-of select="Date" />
 	</xsl:template>
 	
 	<xsl:template match="Signature"></xsl:template>
