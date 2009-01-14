@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.JEditorPane;
@@ -81,6 +80,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 		c.gridy++;
 		
 		m_termsPane = new JEditorPane("text/html", "");
+		m_termsPane.addHyperlinkListener(new JAPHyperlinkAdapter());
 		m_termsPane.setEditable(false);
 		m_scrollingTerms = new JScrollPane(m_termsPane);
 		/**@todo make this dynamic */
@@ -130,7 +130,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 				}
 				
 				fr.importData(tc);
-				
+				//TODO: links don't work
 				m_termsPane.setText(fr.transform());
 			}
 		}
