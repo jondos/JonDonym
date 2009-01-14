@@ -29,6 +29,8 @@
 package jap.pay.wizardnew;
 
 import gui.dialog.DialogContentPane;
+import jap.JAPHyperlinkAdapter;
+
 import java.awt.GridBagConstraints;
 
 import gui.dialog.DialogContentPaneOptions;
@@ -60,7 +62,7 @@ import platform.AbstractOS;
  *
  * @author Elmar Schraml
  */
-public class TermsAndConditionsPane extends DialogContentPane implements IWizardSuitable, HyperlinkListener
+public class TermsAndConditionsPane extends DialogContentPane implements IWizardSuitable /*, HyperlinkListener */
 {
 	public static final String MSG_HEADING = TermsAndConditionsPane.class.getName() + "_heading";
 	private static final String MSG_TERMS = TermsAndConditionsPane.class.getName() + "_terms";
@@ -127,7 +129,7 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		String termsHtml = JAPMessages.getString(MSG_NO_TERMS_FOUND);
 		m_termsPane = new JEditorPane("text/html",termsHtml);
 		m_termsPane.setEditable(false);
-		m_termsPane.addHyperlinkListener(this);
+		m_termsPane.addHyperlinkListener(new JAPHyperlinkAdapter());
 		m_scrollingTerms = new JScrollPane(m_termsPane);
 		/**@todo make this dynamic */
 		m_scrollingTerms.setPreferredSize(new Dimension(400,200));
@@ -206,8 +208,9 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		return null;
 	}
 
-	public void hyperlinkUpdate(HyperlinkEvent e)
+	/*public void hyperlinkUpdate(HyperlinkEvent e)
 	{
+		System.out.println("click");
 		if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
 		{
 			URL urlToOpen = e.getURL();
@@ -220,6 +223,6 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 				AbstractOS.getInstance().openURL(urlToOpen);
 			}
 		}
-	}
+	}*/
 
 }
