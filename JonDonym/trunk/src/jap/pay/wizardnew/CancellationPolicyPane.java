@@ -29,6 +29,8 @@
 package jap.pay.wizardnew;
 
 import gui.dialog.DialogContentPane;
+import jap.JAPHyperlinkAdapter;
+
 import java.awt.GridBagConstraints;
 
 import gui.dialog.DialogContentPaneOptions;
@@ -60,7 +62,7 @@ import javax.swing.event.HyperlinkListener;
  *
  * @author Elmar Schraml
  */
-public class CancellationPolicyPane extends DialogContentPane implements IWizardSuitable, HyperlinkListener
+public class CancellationPolicyPane extends DialogContentPane implements IWizardSuitable /*, HyperlinkListener */
 {
 	private static final String MSG_HEADING = CancellationPolicyPane.class.getName() + "_heading";
 	private static final String MSG_ERROR_HAVE_TO_ACCEPT = CancellationPolicyPane.class.getName() + "_havetoaccept";
@@ -96,7 +98,7 @@ public class CancellationPolicyPane extends DialogContentPane implements IWizard
 	    String policyHtml = JAPMessages.getString(MSG_NO_POLICY_FOUND);
 		m_policyPane = new JEditorPane("text/html", policyHtml);
 		m_policyPane.setEditable(false);
-		m_policyPane.addHyperlinkListener(this);
+		m_policyPane.addHyperlinkListener(new JAPHyperlinkAdapter());
 		m_scrollingPolicy = new JScrollPane(m_policyPane);
 		/**@todo make this dynamic */
 		m_scrollingPolicy.setPreferredSize(new Dimension(200,200));
@@ -160,7 +162,7 @@ public class CancellationPolicyPane extends DialogContentPane implements IWizard
 		return null;
 	}
 
-	public void hyperlinkUpdate(HyperlinkEvent e)
+	/*public void hyperlinkUpdate(HyperlinkEvent e)
 	{
 		if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
 		{
@@ -174,7 +176,7 @@ public class CancellationPolicyPane extends DialogContentPane implements IWizard
 				AbstractOS.getInstance().openURL(urlToOpen);
 			}
 		}
-	}
+	}*/
 
 
 }
