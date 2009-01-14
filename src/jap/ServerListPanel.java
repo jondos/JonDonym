@@ -146,9 +146,9 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			constraints.gridheight = 1;
 			constraints.gridx = (i * 2) + 1;
 			constraints.weightx = 0;
-			m_operatorFlags[i] = new JLabel(" ");
-			m_operatorFlags[i].setFont(new Font("", Font.PLAIN, 10));
-			add(m_operatorFlags[i], constraints);
+			m_mixFlags[i] = new JLabel(" ");
+			m_mixFlags[i].setFont(new Font("", Font.PLAIN, 10));
+			add(m_mixFlags[i], constraints);			
 			
 			if(i != a_numberOfMixes - 1)
 			{
@@ -164,9 +164,9 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			constraints.gridheight = 1;
 			constraints.gridx = (i * 2) +1;
 			constraints.weightx = 0;
-			m_mixFlags[i] = new JLabel("");
-			m_mixFlags[i].setFont(new Font("", Font.PLAIN, 10));
-			add(m_mixFlags[i], constraints);
+			m_operatorFlags[i] = new JLabel("");
+			m_operatorFlags[i].setFont(new Font("", Font.PLAIN, 10));
+			add(m_operatorFlags[i], constraints);
 		}
 		
 		constraints.gridx = (a_numberOfMixes * 2);
@@ -217,12 +217,30 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	{
 		return m_mixButtons.length;
 	}
+	
+	public synchronized void moveToPrevious()
+	{
+		JRadioButton btn = setSelectedIndex(m_selectedIndex - 1);
+		if (btn != null)
+		{
+			actionPerformed(new ActionEvent(btn, ActionEvent.ACTION_PERFORMED, null));
+		}
+	}
+	
+	public synchronized void moveToNext()
+	{
+		JRadioButton btn = setSelectedIndex(m_selectedIndex + 1);
+		if (btn != null)
+		{
+			actionPerformed(new ActionEvent(btn, ActionEvent.ACTION_PERFORMED, null));
+		}		
+	}
 
 	/**
 	 * Determine which mix was clicked and set m_selectedMix accordingly
 	 * @param e ActionEvent
 	 */
-	public void actionPerformed(ActionEvent e)
+	public synchronized void actionPerformed(ActionEvent e)
 	{
 		Object source = e.getSource();
 		Enumeration mixes = m_bgMixe.getElements();
@@ -255,11 +273,12 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		m_itemListeners.removeElement(a_listener);
 	}
 
-	public void setSelectedIndex(int a_index)
+	public synchronized JRadioButton setSelectedIndex(int a_index)
 	{
+		JRadioButton btnAffected;
 		if (a_index < 0)
 		{
-			return;
+			return null;
 			//throw new IndexOutOfBoundsException("Invalid index: " + a_index);
 		}
 
@@ -271,11 +290,13 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		}
 		if (!mixes.hasMoreElements())
 		{
-			return;
+			return null;
 			//throw new IndexOutOfBoundsException("Invalid index: " + a_index);
 		}
 		m_selectedIndex = i;
-		((JRadioButton)mixes.nextElement()).setSelected(true);
+		btnAffected = (JRadioButton)mixes.nextElement();
+		btnAffected.setSelected(true);
+		return btnAffected;
 	}
 	
 	/**
@@ -285,7 +306,7 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	 * @param a_location		The new ServiceLocation
 	 * @param a_mixAndOperator	true, if Mix and Operator will have the same country code
 	 */
-	public void updateFlag(int a_mix, ServiceLocation a_location, boolean a_mixAndOperator)
+	public void updateFlag(int a_mix, ServiceLocation a_location)
 	{
 		if(a_location != null)
 		{
@@ -293,16 +314,7 @@ final public class ServerListPanel extends JPanel implements ActionListener
 				new CountryMapper(a_location.getCountryCode(), JAPMessages.getLocale());
 			
 			m_mixFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + county.getISOCode() + ".png"));
-			
-			if(a_mixAndOperator)
-			{
-				m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_AND_OPERATOR_COUNTRY, county.toString()));
-				updateOperatorFlag(a_mix, null);
-			}
-			else
-			{
-				m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_COUNTRY, county.toString()));
-			}
+			m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_COUNTRY, county.toString()));
 		}
 		else
 		{
@@ -316,14 +328,22 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	 * @param a_mix			The mix that should be updated
 	 * @param a_operator	The new ServiceOperator
 	 */
-	public void updateOperatorFlag(int a_mix, ServiceOperator a_operator)
+	public void updateOperatorFlag(int a_mix, ServiceOperator a_operator, boolean a_mixAndOperator)
 	{
 		if(a_operator != null && a_operator.getCertificate() != null && a_operator.getCertificate().getSubject() != null)
 		{
 			CountryMapper county = 
 				new CountryMapper(a_operator.getCertificate().getSubject().getCountryCode(), JAPMessages.getLocale());				
 			m_operatorFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + county.getISOCode() + ".png"));
-			m_operatorFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_OPERATOR_COUNTRY, county.toString()));
+			if (a_mixAndOperator)
+			{
+				m_operatorFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_AND_OPERATOR_COUNTRY, county.toString()));
+				updateFlag(a_mix, null);
+			}
+			else
+			{
+				m_operatorFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_OPERATOR_COUNTRY, county.toString()));
+			}
 		}
 		else
 		{
