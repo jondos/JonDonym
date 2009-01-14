@@ -51,7 +51,7 @@ import javax.swing.event.HyperlinkListener;
  *
  * @author Rolf Wendolsky
  */
-public class JAPAboutNew extends JAPDialog implements HyperlinkListener
+public class JAPAboutNew extends JAPDialog /* implements HyperlinkListener */
 {
 	private static final String MSG_VERSION = JAPAboutNew.class.getName() + "_version";
 	private static final String MSG_DLL_VERSION = JAPAboutNew.class.getName() + "_dllVersion";
@@ -73,7 +73,7 @@ public class JAPAboutNew extends JAPDialog implements HyperlinkListener
 
 		textArea = new JEditorPane();
 		textArea.setEditable(false);
-		textArea.addHyperlinkListener(this);
+		textArea.addHyperlinkListener(new JAPHyperlinkAdapter());
 		textArea.setDoubleBuffered(false);
 		setResizable(false);
 		textArea.setContentType("text/html");
@@ -95,7 +95,7 @@ public class JAPAboutNew extends JAPDialog implements HyperlinkListener
 		pack();
 	}
 
-	public void hyperlinkUpdate(HyperlinkEvent e)
+	/*public void hyperlinkUpdate(HyperlinkEvent e)
 {
 	if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
 	{
@@ -109,6 +109,6 @@ public class JAPAboutNew extends JAPDialog implements HyperlinkListener
 			AbstractOS.getInstance().openURL(urlToOpen);
 		}
 	}
-}
+}*/
 
 }
