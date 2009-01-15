@@ -46,6 +46,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -150,12 +152,19 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			m_mixFlags[i].setFont(new Font("", Font.PLAIN, 10));
 			add(m_mixFlags[i], constraints);			
 			
-			if(i != a_numberOfMixes - 1)
+			//if (i != a_numberOfMixes - 1)
 			{
 				constraints.gridx = (i * 2) + 1;
 				constraints.gridheight = 1;
 				constraints.gridy = 1;
-				constraints.weightx = 0.5 / (a_numberOfMixes - 1);
+				if (a_numberOfMixes == 1)
+				{
+					constraints.weightx = 0.5;
+				}
+				else
+				{
+					constraints.weightx = 0.5 / (a_numberOfMixes - 1);
+				}
 				JSeparator sep = new JSeparator();
 				add(sep, constraints);
 			}
@@ -168,33 +177,27 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			m_operatorFlags[i].setFont(new Font("", Font.PLAIN, 10));
 			add(m_operatorFlags[i], constraints);
 		}
-		
-		constraints.gridx = (a_numberOfMixes * 2);
-		constraints.gridy = 0;
-		constraints.weightx = 0.5;
-		constraints.gridheight = 3;
-		constraints.insets = new Insets(0, 10, 0, 0);
-		Color color = null;
-		if (!a_enabled)
-		{
-			color = getBackground();
-		}
 
 		
-		JAPMultilineLabel explain;
-		String text;
-		if (a_numberOfMixes > 1)
-		{
-			text = JAPMessages.getString(MSG_MIX_CLICK);
-		}
-		else
-		{
-			text = "";
-		}
-		explain = new JAPMultilineLabel(text, color);
+		constraints.gridx++;
+		constraints.gridy = 0;
+		constraints.weightx = 0;
+		constraints.gridheight = 3;
 		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.anchor = GridBagConstraints.EAST;
-		add(explain, constraints);
+		constraints.anchor = GridBagConstraints.EAST;	
+		
+		Icon icon = GUIUtils.createScaledIcon(GUIUtils.loadImageIcon("cloud.png", true), new GUIUtils.IIconResizer()
+		{
+			public double getResizeFactor()
+			{
+				return 0.6;
+			}
+		});
+		add(new JLabel(icon), constraints);
+		
+		constraints.gridx++;
+		constraints.weightx = 0.7;
+		add(new JLabel(""), constraints);
 		
 	}
 

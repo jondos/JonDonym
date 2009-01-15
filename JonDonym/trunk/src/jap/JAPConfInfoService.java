@@ -33,6 +33,7 @@ import gui.JAPHtmlMultiLineLabel;
 import gui.JAPJIntField;
 import gui.JAPMessages;
 import gui.JAPMultilineLabel;
+import gui.MixDetailsDialog;
 import gui.MultiCertOverview;
 import gui.dialog.JAPDialog;
 
@@ -50,6 +51,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Observer;
@@ -430,7 +432,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 
 	    final JButton viewCertButton =
-			new JButton(JAPMessages.getString(MSG_VIEW_CERT));
+			new JButton(JAPMessages.getString(MixDetailsDialog.MSG_CERTIFICATES));
 		viewCertButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent a_event)
@@ -790,12 +792,49 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 							settingsInfoServiceConfigBasicSettingsRemoveButton.setEnabled(true);
 							mb_newInfoService = false;
 							viewCertButton.setEnabled(false);
+							viewCertButton.setIcon(null);
+							viewCertButton.setToolTipText(null);
 						}
 						else
 						{
 							addInfoServicePanel.setVisible(false);
 							descriptionPanel.setVisible(true);
-							viewCertButton.setEnabled(selectedInfoService.getCertPath() != null);
+							MultiCertPath certPath = selectedInfoService.getCertPath();
+							if (certPath == null)
+							{
+								viewCertButton.setEnabled(false);
+								viewCertButton.setIcon(null);
+								viewCertButton.setForeground(settingsInfoServiceConfigBasicSettingsRemoveButton.getForeground());
+							}
+							else
+							{
+								viewCertButton.setEnabled(true);
+								if (!certPath.isVerified())
+								{
+									viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_NOT_TRUSTED));
+									viewCertButton.setForeground(Color.red);
+								}
+								else
+								{
+									viewCertButton.setForeground(settingsInfoServiceConfigBasicSettingsRemoveButton.getForeground());
+									if (!certPath.isValid(new Date()))
+									{
+										viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID));
+									}
+									else if (certPath.countVerifiedPaths() > 2)
+									{
+										viewCertButton.setIcon(null);
+									}
+									else if (certPath.countVerifiedPaths() > 1)
+									{
+										viewCertButton.setIcon(null);
+									}
+									else
+									{
+										viewCertButton.setIcon(null);
+									}
+								}
+							}
 						}
 					}
 
@@ -865,6 +904,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		buttonPanel.add(settingsInfoServiceConfigBasicSettingsAddButton, buttonPanelConstraints);
 
 	  	buttonPanelConstraints.gridx = 4;
+	  	buttonPanelConstraints.weightx = 1.0;
 		  buttonPanelConstraints.gridy = 0;
 		  buttonPanel.add(settingsInfoServiceConfigBasicSettingsRemoveButton, buttonPanelConstraints);
 
@@ -937,10 +977,10 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		configPanelConstraints.gridy = 9;
 		configPanelConstraints.gridwidth = 5;
 		configPanelConstraints.weighty = 0.0;
-		configPanelConstraints.weightx = 0.0;
+		configPanelConstraints.weightx = 1.0;
 		configPanelConstraints.insets = new Insets(10, 0, 5, 0);
 		configPanelConstraints.anchor = GridBagConstraints.NORTHWEST;
-		configPanelConstraints.fill = GridBagConstraints.NONE;
+		configPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
 		configPanelLayout.setConstraints(buttonPanel, configPanelConstraints);
 		configPanel.add(buttonPanel);
 
@@ -1172,7 +1212,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 		basicPanelConstraints.gridx = 0;
 		basicPanelConstraints.gridy = 2;
-		basicPanelConstraints.weighty = 0.0;
+		basicPanelConstraints.weighty = 1.0;
 		basicPanelConstraints.insets = new Insets(0, 0, 0, 0);
 		basicPanelLayout.setConstraints(switchPanel, basicPanelConstraints);
 		basicPanel.add(switchPanel);
@@ -1180,6 +1220,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		basicPanelConstraints.gridx = 0;
 		basicPanelConstraints.gridy = 1;
 		basicPanelConstraints.weighty = 0.0;
+		basicPanelConstraints.weightx = 1.0;
+		basicPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
 		basicPanelConstraints.insets = new Insets(0, 0, 0, 0);
 		basicPanel.add(new JSeparator(), basicPanelConstraints);
 

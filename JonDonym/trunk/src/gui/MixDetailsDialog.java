@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Insets;
 import java.awt.GridBagConstraints;
@@ -131,6 +132,7 @@ public class MixDetailsDialog extends JAPDialog
 			{
 				m_btnCertificates.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_NOT_TRUSTED));
 				m_btnCertificates.setToolTipText(JAPMessages.getString(MSG_NOT_VERIFIED));
+				m_btnCertificates.setForeground(Color.red);
 
 			}
 			else if (!m_mixInfo.getCertPath().isValid(new Date()))
