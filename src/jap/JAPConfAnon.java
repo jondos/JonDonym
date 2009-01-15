@@ -138,6 +138,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		getName() + "_buttoneditshow";
 	private static final String MSG_PAYCASCADE = JAPConfAnon.class.getName() + "_paycascade";
 	private static final String MSG_MIX_POSITION = JAPConfAnon.class.getName() + "_mixPosition";
+	private static final String MSG_OF_THE_SERVICE = JAPConfAnon.class.getName() + "_ofTheService";
 	private static final String MSG_MIX_FIRST = JAPConfAnon.class.getName() + "_mixFirst";
 	private static final String MSG_MIX_SINGLE = JAPConfAnon.class.getName() + "_singleMix";
 	private static final String MSG_MIX_MIDDLE = JAPConfAnon.class.getName() + "_mixMiddle";
@@ -240,6 +241,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private GridBagConstraints m_rootPanelConstraints;
 
 	private JLabel m_lblMix;
+	private JLabel m_lblMixOfService;
 
 	private JPanel m_nrPanel;
 	private JLabel m_nrLabel;
@@ -338,6 +340,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		////m_lblCascadeInfo = new JLabel(JAPMessages.getString("infoAboutCascade"));
 
 		m_lblMix = new JLabel();
+		m_lblMixOfService = new JLabel();
 		m_lblMix.setForeground(Color.blue);
 		m_lblMix.addMouseListener(new MouseAdapter()
 		{
@@ -1080,6 +1083,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_lblMix.setText(JAPMessages.getString(MixDetailsDialog.MSG_MIX_X_OF_Y, new Object[]{new Integer(server + 1),
 													new Integer(m_serverList.getNumberOfMixes())}));
+			
+			if (cascade != null)
+			{
+				m_lblMixOfService.setText(JAPMessages.getString(MSG_OF_THE_SERVICE, "\"" + cascade.getName() + "\""));
+			}			
+			else
+			{
+				m_lblMixOfService.setText("");
+			}
 			m_moveMixLeft.setVisible(true);
 			m_moveMixRight.setVisible(true);
 			m_lblMix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -1090,10 +1102,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_lblMix.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			m_lblMix.setToolTipText(null);
 			m_lblMix.setText(" ");
+			m_lblMixOfService.setText("");
 			m_moveMixLeft.setVisible(false);
 			m_moveMixRight.setVisible(false);
 		}
-		m_nrLabel.setToolTipText(m_nrLabel.getText());
 
 
 		for(int i = 0; i < m_serverList.getNumberOfMixes() && i < cascade.getMixIds().size(); i++)
@@ -1119,9 +1131,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 		}
 		
-		//m_nrLabel.setToolTipText(m_infoService.getOperator(selectedMixId));
 		m_operatorLabel.setText(GUIUtils.trim(m_infoService.getOperator(cascade, selectedMixId)));
-		//m_operatorLabel.setToolTipText(m_infoService.getOperator(selectedMixId));
+		m_operatorLabel.setToolTipText(m_operatorLabel.getText());
 		ServiceOperator operator = m_infoService.getServiceOperator(cascade, selectedMixId);
 		if (operator != null && operator.getCertificate() != null && operator.getCertificate().getSubject() != null)
 		{
@@ -1183,32 +1194,44 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			boolean bVerified = isServerCertVerified();
 			boolean bValid = m_serverCertPaths.isValid(new Date());
 			
+			/*
 			m_btnViewCert.setToolTipText(JAPMessages.getString(MSG_X_OF_Y_CERTS_TRUSTED, 
 					new Object[]{new Integer(m_serverCertPaths.countVerifiedPaths()),
-								new Integer(m_serverCertPaths.countPaths())}));
+								new Integer(m_serverCertPaths.countPaths())}));*/
 			if (!bVerified)
 			{
 				//m_btnViewCert.setForeground(Color.red);
 				m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_NOT_TRUSTED));
+				m_btnViewCert.setForeground(Color.red);
+				m_btnViewCert.setToolTipText(JAPMessages.getString(MixDetailsDialog.MSG_NOT_VERIFIED));
 			}
 			else if (!bValid)
 			{
 				m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID));
+				m_btnViewCert.setForeground(m_btnEmail.getForeground());
+				m_btnViewCert.setToolTipText(JAPMessages.getString(MixDetailsDialog.MSG_INVALID));
 			}
 			else
 			{
+				m_btnViewCert.setForeground(m_btnEmail.getForeground());
+				
 				if (m_serverCertPaths.countVerifiedPaths() > 2)
 				{
 					//m_btnViewCert.setForeground(Color.green.darker().darker());
 					m_btnViewCert.setIcon(null);
+					m_btnViewCert.setToolTipText(JAPMessages.getString(
+							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, m_serverCertPaths.countVerifiedPaths()));
 				}
 				else if (m_serverCertPaths.countVerifiedPaths() > 1)
 				{
 					//m_btnViewCert.setForeground(Color.blue);
 					m_btnViewCert.setIcon(null);
+					m_btnViewCert.setToolTipText(JAPMessages.getString(
+							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, m_serverCertPaths.countVerifiedPaths()));
 				}
 				else
 				{
+					m_btnViewCert.setToolTipText(JAPMessages.getString(MixDetailsDialog.MSG_VALID));
 					//m_btnViewCert.setForeground(m_nrLabel.getForeground());
 					m_btnViewCert.setIcon(null);
 				}				
@@ -3344,6 +3367,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_moveMixRight.addMouseListener(a_listener);
 			pnlContrs.gridx++;
 			pnlPosition.add(m_moveMixRight, pnlContrs);
+			
+			pnlContrs.gridx++;			
+			pnlPosition.add(m_lblMixOfService, pnlContrs);
 
 
 			l = new JLabel(JAPMessages.getString(MixDetailsDialog.MSG_MIX_NAME) +":");
