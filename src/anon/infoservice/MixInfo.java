@@ -46,6 +46,8 @@ import logging.LogLevel;
 import logging.LogType;
 import anon.crypto.IVerifyable;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -91,6 +93,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
      * This is the type of the mix
      */
     private int m_type;
+    
+    private boolean m_bTemporaryDataRetentionVariable = false;
     
     private boolean m_bPayment = false;
 
@@ -429,6 +433,15 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 	  
+	  if (m_mixOperator.getOrganization() != null)
+	  {
+		  if (m_mixOperator.getOrganization().indexOf("JAP-Team") >= 0 ||
+				  m_mixOperator.getOrganization().indexOf("Independent Centre") >= 0)
+		  {
+			  m_bTemporaryDataRetentionVariable = true;
+		  }
+	  }
+	  
 	  /*
 	   * Store the Service Operator if
 	   * - it doesn't exist yet or
@@ -620,7 +633,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    *
    * @return The ID of this mix.
    */
-  public String getId() {
+  public String getId() 
+  {
     return m_mixId;
   }
 
@@ -669,6 +683,32 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
   {
     return m_name;
   }
+  
+	public URL getDataRetentionURL(String a_language)
+	{
+		try 
+		{
+			if (m_bTemporaryDataRetentionVariable)
+			{
+				if (a_language == null || !a_language.equals("de"))
+				{
+					return new URL("http://anon.inf.tu-dresden.de/dataretention_en.html");
+				}
+				else
+				{
+					return new URL("http://anon.inf.tu-dresden.de/dataretention_de.html");
+				}
+			}
+		}
+		catch (MalformedURLException e) 
+		{
+			
+			e.printStackTrace();
+		}
+		
+		return null;
+		
+	}
 
   public boolean isVerified()
   {

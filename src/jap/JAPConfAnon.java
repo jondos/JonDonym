@@ -37,6 +37,7 @@ import gui.MixDetailsDialog;
 import gui.MultiCertOverview;
 import gui.OperatorsCellRenderer;
 import gui.dialog.JAPDialog;
+import gui.help.JAPHelp;
 import jap.forward.JAPRoutingMessage;
 
 import java.awt.Color;
@@ -69,6 +70,7 @@ import java.util.Observer;
 import java.util.Vector;
 
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -90,6 +92,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -250,6 +253,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JButton m_btnEmail;
 	private JButton m_btnHomepage;
 	private JButton m_btnMap;
+	private JButton m_btnDataRetention;
 	private JButton m_moveMixLeft;
 	private JButton m_moveMixRight;
 	private JLabel m_locationLabel;
@@ -1248,6 +1252,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_btnViewCert.setEnabled(false);
 			//m_btnViewCert.setForeground(m_nrLabel.getForeground());
 		}
+		
+		URL urlDataRetention = m_serverInfo.getDataRetentionURL(JAPMessages.getLocale().getLanguage());
+		if (urlDataRetention == null)
+		{
+			m_btnDataRetention.setVisible(false);
+			m_btnDataRetention.setToolTipText(null);
+		}
+		else
+		{
+			m_btnDataRetention.setVisible(true);
+			m_btnDataRetention.setToolTipText(urlDataRetention.toString());
+		}
 
 
 		pRoot.validate();
@@ -1789,9 +1805,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	public void mouseClicked(MouseEvent e)
 	{
-		if (e.getSource() == m_btnHomepage)
+		if (e.getSource() == m_btnHomepage || e.getSource() == m_btnDataRetention)
 		{
-			String url = getUrlFromLabel(m_btnHomepage);
+			String url = getUrlFromLabel((JButton)e.getSource());
 			if (url == null)
 			{
 				return;
@@ -1940,11 +1956,19 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	public void mousePressed(MouseEvent e)
 	{
 		maybeShowPopup(e);
+		if (e.getSource() == m_moveMixRight || e.getSource() == m_moveMixLeft)
+		{
+			((JButton)e.getSource()).setBorder(BorderFactory.createLoweredBevelBorder());
+		}
 	}
 
 	public void mouseReleased(MouseEvent e)
 	{
 		maybeShowPopup(e);
+		if (e.getSource() == m_moveMixRight || e.getSource() == m_moveMixLeft)
+		{
+			((JButton)e.getSource()).setBorder(BorderFactory.createRaisedBevelBorder());
+		}
 	}
 	
 	private void maybeShowPopup(MouseEvent e) {
@@ -3343,31 +3367,61 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridwidth = 3;
 			c.fill = GridBagConstraints.NONE;
 			c.anchor = GridBagConstraints.NORTHWEST;
-			c.insets = new Insets(5, 20, 5, 5);
+			c.insets = new Insets(5, 20, 5, 0);
 			add(pnlPosition, c);
 			
 			pnlContrs.gridx = 0;
 			pnlContrs.gridy = 0;
-			pnlContrs.weightx = 0;
+			pnlContrs.weightx = 1.0;
 			pnlContrs.fill = GridBagConstraints.NONE;
 			pnlContrs.anchor = GridBagConstraints.WEST;
 			pnlContrs.insets = new Insets(5, 0, 5, 5);
 			
-			m_moveMixLeft = new BasicArrowButton(BasicArrowButton.WEST);
+			//m_moveMixLeft = new BasicArrowButton(BasicArrowButton.WEST);
+			/*m_moveMixLeft = new JButton(GUIUtils.createScaledIcon(GUIUtils.loadImageIcon(JAPHelp.IMG_PREVIOUS, true),
+					new GUIUtils.IIconResizer()
+			{
+				public double getResizeFactor()
+				{
+					return 0.8;
+				}
+			}));*/
+			m_moveMixLeft = new JButton(GUIUtils.loadImageIcon("arrowLeft.png", true));
+			m_moveMixLeft.setBorder(BorderFactory.createRaisedBevelBorder());
 			m_moveMixLeft.addMouseListener(a_listener);
 			pnlPosition.add(m_moveMixLeft, pnlContrs);
 			
 			pnlContrs.gridx++;
-			pnlContrs.insets = new Insets(5, 5, 5, 5);
+			pnlContrs.weightx = 0.0;
+			pnlContrs.insets = new Insets(5, 5, 5, 0);
 			pnlPosition.add(m_lblMix, pnlContrs);
 			
 			
-			m_moveMixRight = new BasicArrowButton(BasicArrowButton.EAST);
+			/*m_moveMixRight = new JButton(GUIUtils.createScaledIcon(GUIUtils.loadImageIcon(JAPHelp.IMG_NEXT, true),
+					new GUIUtils.IIconResizer()
+			{
+				public double getResizeFactor()
+				{
+					return 0.8;
+				}
+			}));*/
+			m_moveMixRight = new JButton(GUIUtils.loadImageIcon("arrowRight.png", true));
+			m_moveMixRight.setBorder(BorderFactory.createRaisedBevelBorder());
+		
+			
+			
+			//m_moveMixRight = new BasicArrowButton(BasicArrowButton.EAST);
+
+			
+			//m_moveMixRight.setPreferredSize(new Dimension(20,20));
+			//m_moveMixRight.setMinimumSize(new Dimension(20,20));
 			m_moveMixRight.addMouseListener(a_listener);
 			pnlContrs.gridx++;
+			pnlContrs.weightx = 1.0;
 			pnlPosition.add(m_moveMixRight, pnlContrs);
 			
-			pnlContrs.gridx++;			
+			pnlContrs.gridx++;	
+			pnlContrs.weightx = 0.0;
 			pnlPosition.add(m_lblMixOfService, pnlContrs);
 
 
@@ -3413,6 +3467,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_locationLabel.addMouseListener(a_listener);
 			c.gridx = 1;
 			c.gridwidth = 2;
+			c.insets = new Insets(5, 30, 5, 0);
 			add(m_locationLabel, c);
 			
 			
@@ -3420,7 +3475,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridy++;
 			c.weightx = 0;
 			c.gridx = 0;
-			c.gridwidth = 1;			
+			c.gridwidth = 1;	
+			c.insets = new Insets(5, 30, 5, 5);
 			add(l, c);
 
 			m_operatorLabel = new JLabel();
@@ -3428,6 +3484,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.weightx = 1;
 			c.gridx = 1;
 			c.fill = GridBagConstraints.HORIZONTAL;
+			c.insets = new Insets(5, 30, 5, 0);
 			c.gridwidth = 2;
 			add(m_operatorLabel, c);
 
@@ -3448,7 +3505,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.gridwidth = 1;
 			c.insets = new Insets(5, 30, 5, 0);
 			add(m_viewCertLabel, c);*/
-		    certConstraints.insets = new Insets(5, 30, 5, 0);
+		    certConstraints.insets = new Insets(5, 15, 5, 0);
 		    m_pnlMixInfoButtons.add(m_btnViewCert, certConstraints);
 
 		    m_btnEmail = new JButton(JAPMessages.getString(MixDetailsDialog.MSG_E_MAIL));
@@ -3467,6 +3524,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			certConstraints.gridx++;
 			m_pnlMixInfoButtons.add(m_btnMap, certConstraints);
 			
+			m_btnDataRetention = new JButton(JAPMessages.getString(MixDetailsDialog.MSG_BTN_DATA_RETENTION),
+					GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID, true));
+			m_btnDataRetention.addMouseListener(a_listener);
+			certConstraints.gridx++;
+			m_pnlMixInfoButtons.add(m_btnDataRetention, certConstraints);
+			
 			certConstraints.gridx++;
 			certConstraints.weightx = 1.0;
 			l = new JLabel("");
@@ -3480,7 +3543,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.insets = new Insets(0, 0, 0, 0);
 			c.weightx = 1.0;
 			c.anchor = GridBagConstraints.WEST;
-			c.fill = GridBagConstraints.HORIZONTAL;
+			c.fill = GridBagConstraints.NONE;
 			add(m_pnlMixInfoButtons, c);
 			/*
 			c.weightx = 1.0;

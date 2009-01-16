@@ -39,6 +39,7 @@ public class MixDetailsDialog extends JAPDialog
 	public static String MSG_HOMEPAGE = MixDetailsDialog.class.getName() + "_operatorHomepage";
 	public static String MSG_E_MAIL = MixDetailsDialog.class.getName() + "_email";
 	public static String MSG_CERTIFICATES = MixDetailsDialog.class.getName() + "_certificates";
+	public static String MSG_BTN_DATA_RETENTION = MixDetailsDialog.class.getName() + "_btnDataRetention";
 	
 	private static String MSG_TITLE = MixDetailsDialog.class.getName() + "_title";
 	

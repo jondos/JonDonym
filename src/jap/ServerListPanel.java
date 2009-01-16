@@ -45,6 +45,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -147,9 +148,9 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			constraints.gridy = 0;
 			constraints.gridheight = 1;
 			constraints.gridx = (i * 2) + 1;
-			constraints.weightx = 0;
+			constraints.weightx = 0;			
 			m_mixFlags[i] = new JLabel(" ");
-			m_mixFlags[i].setFont(new Font("", Font.PLAIN, 10));
+			m_mixFlags[i].setFont(new Font("", Font.PLAIN, (int)(14.0 * (1.0 + JAPModel.getInstance().getFontSize() * 0.1))));
 			add(m_mixFlags[i], constraints);			
 			
 			//if (i != a_numberOfMixes - 1)
@@ -174,8 +175,22 @@ final public class ServerListPanel extends JPanel implements ActionListener
 			constraints.gridx = (i * 2) +1;
 			constraints.weightx = 0;
 			m_operatorFlags[i] = new JLabel("");
-			m_operatorFlags[i].setFont(new Font("", Font.PLAIN, 10));
-			add(m_operatorFlags[i], constraints);
+			//m_operatorFlags[i].setBorder(BorderFactory.createLineBorder(Color.black, 2));
+			m_operatorFlags[i].setFont(new Font("", Font.PLAIN, (int)(10.0 * (1.0 + JAPModel.getInstance().getFontSize() * 0.1))));
+			
+			/* create a dummy panel so that we can put a border around the image if we want */
+			JPanel pnlDummy = new JPanel(new GridBagLayout());
+			GridBagConstraints dummyConstraints = new GridBagConstraints();
+			dummyConstraints.gridx = 0;
+			dummyConstraints.gridy = 0;
+			dummyConstraints.fill = GridBagConstraints.NONE;
+			dummyConstraints.anchor = GridBagConstraints.WEST;
+			pnlDummy.add(m_operatorFlags[i], dummyConstraints);
+			dummyConstraints.weightx = 1.0;
+			dummyConstraints.gridx = 1;
+			dummyConstraints.fill = GridBagConstraints.HORIZONTAL;
+			pnlDummy.add(new JLabel(), dummyConstraints);
+			add(pnlDummy, constraints);
 		}
 
 		
@@ -186,13 +201,15 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.anchor = GridBagConstraints.EAST;	
 		
+		/*
 		Icon icon = GUIUtils.createScaledIcon(GUIUtils.loadImageIcon("cloud.png", true), new GUIUtils.IIconResizer()
 		{
 			public double getResizeFactor()
 			{
 				return 0.6;
 			}
-		});
+		});*/
+		Icon icon = GUIUtils.loadImageIcon("cloud.png", true);
 		add(new JLabel(icon), constraints);
 		
 		constraints.gridx++;
@@ -333,6 +350,8 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	 */
 	public void updateOperatorFlag(int a_mix, ServiceOperator a_operator, boolean a_mixAndOperator)
 	{
+		// m_operatorFlags[i].setBorder(BorderFactory.createLineBorder(Color.black, 2));
+		
 		if(a_operator != null && a_operator.getCountryCode() != null)
 		{
 			CountryMapper county = 
