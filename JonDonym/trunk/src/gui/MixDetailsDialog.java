@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -52,6 +53,7 @@ public class MixDetailsDialog extends JAPDialog
 		
 		GridBagConstraints c = new GridBagConstraints();
 		JPanel p = (JPanel) getContentPane();
+		JPanel pnlButtons = new JPanel(new FlowLayout());
 		p.setLayout(new GridBagLayout());
 		JLabel lbl;
 		String strText;
@@ -72,33 +74,28 @@ public class MixDetailsDialog extends JAPDialog
 		lbl = new JLabel(JAPMessages.getString(MSG_MIX_NAME) + ":");
 		c.gridy = 0;
 		c.gridx = 0;
-		c.gridwidth = 1;
 		c.insets = new Insets(15, 15, 10, 15);
 		c.anchor = GridBagConstraints.WEST;
 		p.add(lbl, c);
 		
 		lbl = new JLabel(a_mixInfo.getName());
 		c.gridx = 1;
-		c.gridwidth = 2;
 		p.add(lbl, c);
 		
 		lbl = new JLabel(JAPMessages.getString(MSG_LOCATION) + ":");
 		c.gridy = 1;
 		c.gridx = 0;
-		c.gridwidth = 1;
 		c.insets = new Insets(0, 15, 10, 15);
 		p.add(lbl, c);
 		
 		lbl = new JLabel(GUIUtils.getCountryFromServiceLocation(loc));
 		c.gridy = 1;
-		c.gridwidth = 2;
 		c.gridx++;
 		lbl.setIcon(GUIUtils.loadImageIcon("flags/" + loc.getCountryCode() + ".png"));
 		p.add(lbl, c);
 		
 		lbl = new JLabel(JAPMessages.getString("mixOperator"));
 		c.gridx = 0;
-		c.gridwidth = 1;
 		c.gridy++;
 		c.anchor = GridBagConstraints.WEST;
 		p.add(lbl, c);		
@@ -106,23 +103,24 @@ public class MixDetailsDialog extends JAPDialog
 		strText = op.getOrganization();
 		lbl = new JLabel();	
 		
-		if (op.getCertificate() != null && op.getCertificate().getSubject() != null)
+		if (op.getCountryCode() != null)
 		{
 			strText += "  (" + (new CountryMapper(
-					op.getCertificate().getSubject().getCountryCode(), 
+					op.getCountryCode(), 
 					JAPMessages.getLocale()).toString()) + ")";
-			lbl.setIcon(GUIUtils.loadImageIcon("flags/" + op.getCertificate().getSubject().getCountryCode() + ".png"));
+			lbl.setIcon(GUIUtils.loadImageIcon("flags/" + op.getCountryCode() + ".png"));
 		}
 		
 		lbl.setText(strText);
-		c.gridwidth = 2;
 		c.gridx = 1;
 		p.add(lbl, c);
 		
 		m_buttonListener = new MyButtonListener();
 		c.gridx = 0;
-		c.gridwidth = 1;
 		c.gridy++;
+		c.gridwidth = 2;
+		p.add(pnlButtons, c);
+		
 		
 		if (m_mixInfo.getCertPath() != null)
 		{
@@ -146,19 +144,20 @@ public class MixDetailsDialog extends JAPDialog
 						m_mixInfo.getCertPath().countVerifiedPaths()));
 				if (m_mixInfo.getCertPath().countVerifiedPaths() > 2)
 				{
-					// TODO set green check mark icon here					
+					m_btnCertificates.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_THREE_CERTS));				
 				}
 				else
 				{
-					// TODO set blue check mark icon here
-				}
+					m_btnCertificates.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_DOUBLE));
+				}				
 			}
 			else 
 			{
 				m_btnCertificates.setToolTipText(JAPMessages.getString(MSG_VALID));
+				m_btnCertificates.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED));
 			}
 			
-			p.add(m_btnCertificates, c);
+			pnlButtons.add(m_btnCertificates, c);
 		}
 		
 		if (op.getEMail() != null)
@@ -166,8 +165,7 @@ public class MixDetailsDialog extends JAPDialog
 			m_btnEMail = new JButton(JAPMessages.getString(MSG_E_MAIL));
 			m_btnEMail.setToolTipText(op.getEMail());
 			m_btnEMail.addActionListener(m_buttonListener);
-			c.gridx++;
-			p.add(m_btnEMail, c);			
+			pnlButtons.add(m_btnEMail, c);			
 		}
 		
 		if (op.getUrl() != null)
@@ -175,8 +173,7 @@ public class MixDetailsDialog extends JAPDialog
 			m_btnHomepage = new JButton(JAPMessages.getString(MSG_HOMEPAGE));
 			m_btnHomepage.setToolTipText(op.getUrl());
 			m_btnHomepage.addActionListener(m_buttonListener);
-			c.gridx ++;
-			p.add(m_btnHomepage, c);
+			pnlButtons.add(m_btnHomepage, c);
 		}
 		
 		this.pack();

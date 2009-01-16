@@ -31,7 +31,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 		m_panel = new TermsAndConditionsPane(this, false);
 		
 		// try to find the TnC
-		TermsAndConditions tc = TermsAndConditions.getById(a_op.getSKI(), JAPMessages.getLocale());
+		TermsAndConditions tc = TermsAndConditions.getById(a_op.getId(), JAPMessages.getLocale());
 		
 		if(tc == null)
 		{

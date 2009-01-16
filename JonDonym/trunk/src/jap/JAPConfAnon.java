@@ -1114,29 +1114,31 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			ServiceLocation location = m_infoService.getServiceLocation(cascade, mixId);
 			ServiceOperator operator = m_infoService.getServiceOperator(cascade, mixId);
-			
-			if(location == null || operator == null || operator.getCertificate() == null || operator.getCertificate().getSubject() == null) 
+			if (operator != null && operator.getCountryCode() != null)
 			{
-				continue;
-			}
-			
-			if(!location.getCountryCode().equals(operator.getCertificate().getSubject().getCountryCode()))
-			{
-				m_serverList.updateFlag(i, location);
-				m_serverList.updateOperatorFlag(i, operator, false);
+				if (location != null && location.getCountryCode() != null && !location.getCountryCode().equals(operator.getCountryCode()))
+				{
+					m_serverList.updateFlag(i, location);
+					m_serverList.updateOperatorFlag(i, operator, false);
+				}
+				else
+				{
+					m_serverList.updateOperatorFlag(i, operator, true);
+				}
 			}
 			else
 			{
-				m_serverList.updateOperatorFlag(i, operator, true);
+				m_serverList.updateOperatorFlag(i, operator, false);
+				m_serverList.updateFlag(i, location);
 			}
 		}
 		
 		m_operatorLabel.setText(GUIUtils.trim(m_infoService.getOperator(cascade, selectedMixId)));
 		m_operatorLabel.setToolTipText(m_operatorLabel.getText());
 		ServiceOperator operator = m_infoService.getServiceOperator(cascade, selectedMixId);
-		if (operator != null && operator.getCertificate() != null && operator.getCertificate().getSubject() != null)
+		if (operator != null && operator.getCountryCode() != null)
 		{
-			m_operatorLabel.setIcon(GUIUtils.loadImageIcon("flags/" + operator.getCertificate().getSubject().getCountryCode() + ".png"));
+			m_operatorLabel.setIcon(GUIUtils.loadImageIcon("flags/" + operator.getCountryCode() + ".png"));
 		}
 		else
 		{
@@ -1218,14 +1220,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				if (m_serverCertPaths.countVerifiedPaths() > 2)
 				{
 					//m_btnViewCert.setForeground(Color.green.darker().darker());
-					m_btnViewCert.setIcon(null);
+					m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_THREE_CERTS));
 					m_btnViewCert.setToolTipText(JAPMessages.getString(
 							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, m_serverCertPaths.countVerifiedPaths()));
 				}
 				else if (m_serverCertPaths.countVerifiedPaths() > 1)
 				{
 					//m_btnViewCert.setForeground(Color.blue);
-					m_btnViewCert.setIcon(null);
+					m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_DOUBLE));
 					m_btnViewCert.setToolTipText(JAPMessages.getString(
 							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, m_serverCertPaths.countVerifiedPaths()));
 				}
@@ -1233,7 +1235,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				{
 					m_btnViewCert.setToolTipText(JAPMessages.getString(MixDetailsDialog.MSG_VALID));
 					//m_btnViewCert.setForeground(m_nrLabel.getForeground());
-					m_btnViewCert.setIcon(null);
+					m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED));
 				}				
 			}
 			m_btnViewCert.setEnabled(true);
@@ -2902,11 +2904,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				return "N/A";
 			}
 			
-			if(operator.getCertificate() != null && operator.getCertificate().getSubject() != null)
-			{
-				country = operator.getCertificate().getSubject().getCountryCode();
-			}
 			
+			country = operator.getCountryCode();
 			if (country != null && country.trim().length() > 0)
 			{
 				strOperator += "  (";
@@ -4114,17 +4113,19 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public synchronized void update()
 		{
 			if(m_trustModelCopy != null)
+			{
 				m_vecBlacklist = (Vector) ((Vector) m_trustModelCopy.getAttribute(TrustModel.OperatorBlacklistAttribute.class).getConditionValue()).clone();
+			}
 			
 			m_vecOperators = Database.getInstance(ServiceOperator.class).getSortedEntryList(new Comparable()
 			{
 				public int compare(Object a_obj1, Object a_obj2)
 				{
-					if(a_obj1 == null || a_obj2 == null || ((ServiceOperator) a_obj1).getOrganization() == null || ((ServiceOperator) a_obj2).getOrganization() == null) return 0;
+					if (a_obj1 == null || a_obj2 == null || ((ServiceOperator) a_obj1).getOrganization() == null || ((ServiceOperator) a_obj2).getOrganization() == null) return 0;
 					boolean b1 = m_vecBlacklist.contains(a_obj1);
 					boolean b2 = m_vecBlacklist.contains(a_obj2);
 					
-					if(b1 == b2) 
+					if (b1 == b2) 
 					{
 						return ((ServiceOperator) a_obj1).getOrganization().compareTo(((ServiceOperator)a_obj2).getOrganization());
 					}

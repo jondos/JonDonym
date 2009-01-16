@@ -160,21 +160,13 @@ public final class XMLSignature
 	 */
 	private void calculateXORofSKIs()
 	{
-		byte[] raw = new byte[20];
-		JAPCertificate cert;
+		Vector certificates = new Vector();
 		Enumeration signatureElements = m_signatureElements.elements();
-		
 		while(signatureElements.hasMoreElements())
 		{
-			cert = ((XMLSignatureElement) signatureElements.nextElement()).getCertPath().getFirstCertificate();
-			byte[] ski = cert.getRawSubjectKeyIdentifier();
-			
-			for(int j=0; j<raw.length; j++)
-			{
-				raw[j] = (byte) (raw[j] ^ ski[j]);
-			}
+			certificates.addElement(((XMLSignatureElement) signatureElements.nextElement()).getCertPath().getFirstCertificate());
 		}
-		m_xoredID = new String(Hex.encode(raw));
+		m_xoredID = JAPCertificate.calculateXORofSKIs(certificates);
 	}
 	
 	/**

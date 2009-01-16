@@ -15,17 +15,17 @@ public class OperatorsCellRenderer extends DefaultTableCellRenderer
 
 	public void setValue(Object value)
 	{
-		if(value == null)
+		if (value == null)
 		{
 			setText("");
 			return;
 		}
-		else if(value instanceof ServiceOperator)
+		else if (value instanceof ServiceOperator)
 		{
 			ServiceOperator op = (ServiceOperator) value;
 			setForeground(Color.black);
 			
-			if(op.getCertificate() == null)
+			if (op.getCertificate() == null)
 			{
 				setForeground(Color.gray);
 			}

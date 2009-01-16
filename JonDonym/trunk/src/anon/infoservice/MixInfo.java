@@ -229,7 +229,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_serial = 0;
 	  CertPath path = a_certPath.getPath();
 	  m_mixLocation = new ServiceLocation(null, path.getFirstCertificate());
-	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
+	  m_mixOperator = new ServiceOperator(null, a_certPath, 0);
 	  m_freeMix = false;
 	  m_prepaidInterval = AIControlChannel.MAX_PREPAID_INTERVAL;
   }
@@ -248,7 +248,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_serial = 0;
 	  CertPath path = a_certPath.getPath();
 	  m_mixLocation = new ServiceLocation(null, path.getFirstCertificate());
-	  m_mixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0);
+	  m_mixOperator = new ServiceOperator(null, a_certPath, 0);
 	  m_freeMix = false;
 	  //
 	  m_priceCert = a_priceCert;
@@ -421,7 +421,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  if (path != null)
 	  {
 		  m_mixLocation = new ServiceLocation(locationNode, path.getFirstCertificate());
-		  m_mixOperator = new ServiceOperator(operatorNode, path.getSecondCertificate(), m_lastUpdate);	
+		  m_mixOperator = new ServiceOperator(operatorNode, m_mixCertPath, m_lastUpdate);	
 	  }
 	  else
 	  {
@@ -438,12 +438,42 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	   */
 	  ServiceOperator currentSO =
 		  (ServiceOperator)Database.getInstance(ServiceOperator.class).getEntryById(m_mixOperator.getId());
-	  if ( m_mixOperator.getOrganization() != null && ((currentSO == null || currentSO.getCertificate() == null) ||
-		  (m_mixOperator.getCertificate() != null &&
-		   m_mixOperator.getCertificate().getValidity().getValidTo().after(
-			   currentSO.getCertificate().getValidity().getValidTo()))))
+	  if (m_mixOperator.getOrganization() != null && ((currentSO == null || m_mixOperator.getOrganization() == null)) ||
+		  currentSO.getCertPath() == null)
 	  {
 		  Database.getInstance(ServiceOperator.class).update(m_mixOperator);
+	  }
+	  else if (m_mixOperator.getCertPath() != null)		   
+	  {
+		  Vector vecNewCertPaths = m_mixOperator.getCertPath().getPaths();
+		  Vector vecOldCertPaths = currentSO.getCertPath().getPaths();
+		  JAPCertificate certNew, certCurrent;
+		  
+		  if (vecNewCertPaths.size() < vecOldCertPaths.size())
+		  {
+			  LogHolder.log(LogLevel.ALERT, LogType.DB, 
+					  "Illegal DB object state: ServiceOperator object have same ID but different cert path lengths!");
+			  Database.getInstance(ServiceOperator.class).update(m_mixOperator);
+		  }
+		  else
+		  {		  
+			  /* Look whether any of the "new" paths has a longer validity as the current paths */ 
+			  for (int i = 0; i < vecNewCertPaths.size(); i++)
+			  {
+				  certNew = ((CertPath)vecNewCertPaths.elementAt(i)).getSecondCertificate();
+				  certCurrent =  ((CertPath)vecOldCertPaths.elementAt(i)).getSecondCertificate();
+				  if (certNew == null)
+				  {
+					  break;
+				  }
+				  else if (certCurrent == null || (certNew.getValidity().getValidTo().after(
+						   certCurrent.getValidity().getValidTo())))
+				  {
+					  Database.getInstance(ServiceOperator.class).update(m_mixOperator);
+					  break;
+				  }
+			  }
+		  }
 	  }
 
 
@@ -891,7 +921,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		XMLUtil.createChildElementWithValue(rootElement, XML_ELEMENT_MIX_NAME, getName());
 		
 		CertPath path = getCertPath().getPath();
-		currentMixOperatorElement = new ServiceOperator(null, path.getSecondCertificate(), 0l).toXMLElement(webInfoDoc);
+		currentMixOperatorElement = new ServiceOperator(null, getCertPath(), 0l).toXMLElement(webInfoDoc);
 		currentMixLocationElement = new ServiceLocation(null, path.getFirstCertificate()).toXMLElement(webInfoDoc);
 		
 		if(currentMixOperatorElement != null)

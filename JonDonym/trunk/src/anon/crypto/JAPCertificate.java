@@ -454,6 +454,41 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 						   a_keyPair.getPublic(), a_validity, a_extensions,
 						   new BigInteger("1"));
 	}
+	
+	public static String calculateXORofSKIs(Vector a_certificates)
+	{
+		byte[] raw;
+		Enumeration enumCertificates;
+		String strXoredID;
+		
+		if (a_certificates == null)
+		{
+			return null;
+		}
+		
+		synchronized (a_certificates)
+		{
+			if (a_certificates.size() == 0)
+			{
+				return null;
+			}
+		
+			raw = new byte[20];
+			enumCertificates = a_certificates.elements();
+			while(enumCertificates.hasMoreElements())
+			{
+				byte[] ski = ((JAPCertificate) enumCertificates.nextElement()).getRawSubjectKeyIdentifier();
+				
+				for (int j=0; j<raw.length; j++)
+				{
+					raw[j] = (byte) (raw[j] ^ ski[j]);
+				}
+			}
+			strXoredID = new String(Hex.encode(raw));
+		}
+		
+		return strXoredID;
+	}
 
 	public boolean equals(Object a_certificate)
 	{

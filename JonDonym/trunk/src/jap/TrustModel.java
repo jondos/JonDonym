@@ -489,23 +489,36 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 		{
+			ServiceOperator mixOperator;
+			ServiceOperator blacklistedOperator;
+			
 			if (getTrustCondition() == TRUST_IF_NOT_IN_LIST)
 			{
 				for(int i = 0; i < a_cascade.getNumberOfMixes(); i++)
 				{
 					Vector list = (Vector) getConditionValue();
-
-					if(list.contains(a_cascade.getMixInfo(i).getServiceOperator()))
+					
+					mixOperator = a_cascade.getMixInfo(i).getServiceOperator();
+					if (list.contains(mixOperator))
 					{
 						throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_BLACKLISTED));
 					}
-					/*for(int j = 0; j < ((Vector)m_conditionValue).size(); j++)
+					if (mixOperator.getOrganization() != null)
 					{
-						if(((Vector)m_conditionValue).elementAt(j).equals(a_cascade.getMixInfo(i).getServiceOperator()))
+						// additionally, test if this operator is known with another ID but the same name
+						for (int j = 0; j < list.size(); j++)
 						{
-							throw new TrustException("This cascade has a blacklisted mix!");
+							blacklistedOperator = (ServiceOperator)list.elementAt(j);
+							if (blacklistedOperator.getOrganization() == null)
+							{
+								continue;
+							}
+							if (blacklistedOperator.getOrganization().equals(mixOperator.getOrganization()))
+							{
+								throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_BLACKLISTED));
+							}
 						}
-					}*/
+					}
 				}
 			}
 		}

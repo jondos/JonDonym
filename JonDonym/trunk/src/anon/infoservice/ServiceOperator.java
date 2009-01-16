@@ -31,7 +31,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;
+import anon.crypto.MultiCertPath;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509SubjectAlternativeName;
 import anon.crypto.X509SubjectKeyIdentifier;
@@ -40,6 +42,10 @@ import anon.util.XMLUtil;
 import java.util.Vector;
 import anon.crypto.AbstractX509Extension;
 import java.net.URL;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 /**
  * Holds the information about the operator of a service.
@@ -81,11 +87,13 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 * The last update time.
 	 */
 	private long m_lastUpdate;
+	
+	private String m_strID;
 
 	/**
 	 * The operators certificate
 	 */
-	private JAPCertificate m_certificate;
+	private MultiCertPath m_certPath;
 	
 	/**
 	 * The XML data.
@@ -100,20 +108,21 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 * @param a_certificate The operator certificate
 	 * @param a_lastUpdate Last update time.
 	 */
-	public ServiceOperator(Node a_node, JAPCertificate a_certificate, long a_lastUpdate)
+	public ServiceOperator(Node a_node, MultiCertPath a_certPath, long a_lastUpdate)
 	{
 		super(Long.MAX_VALUE);
 
-		Node node;
 		X509DistinguishedName subject;
+		CertPath path;
 
 		m_node = a_node;
-		m_certificate = a_certificate;
+		m_certPath = a_certPath;
 		m_lastUpdate = a_lastUpdate;
 
-	    if(a_certificate != null)
+	    if (m_certPath != null && (path = m_certPath.getPath()) != null &&
+	    	path.getSecondCertificate() != null	)
 		{
-			subject = a_certificate.getSubject();
+			subject = path.getSecondCertificate().getSubject();
 			/* get the organization name */
 			m_strOrganization = subject.getOrganisation();
 			if(m_strOrganization == null || m_strOrganization.trim().length() == 0)
@@ -126,14 +135,14 @@ public class ServiceOperator extends AbstractDatabaseEntry
 			
 			/* get the e-mail address */
 			m_strEmail = subject.getE_EmailAddress();
-			if(m_strEmail == null || m_strEmail.trim().length() == 0)
+			if (m_strEmail == null || m_strEmail.trim().length() == 0)
 			{
 			   m_strEmail = subject.getEmailAddress();
 			}
 			
 			// get the URL
 			AbstractX509Extension extension =
-				a_certificate.getExtensions().getExtension(X509SubjectAlternativeName.IDENTIFIER);
+				path.getSecondCertificate().getExtensions().getExtension(X509SubjectAlternativeName.IDENTIFIER);
 			if (extension != null && extension instanceof X509SubjectAlternativeName)
 			{
 				X509SubjectAlternativeName alternativeName = (X509SubjectAlternativeName) extension;
@@ -158,32 +167,26 @@ public class ServiceOperator extends AbstractDatabaseEntry
 					}
 				}
 			}
+			
+			/** Create ID */
+			Vector vecCertPaths = m_certPath.getPaths();
+			Vector vecCertificates = new Vector();
+			JAPCertificate certTemp;
+			for (int i = 0; i < vecCertPaths.size(); i++)
+			{
+				certTemp = ((CertPath)vecCertPaths.elementAt(i)).getSecondCertificate();
+				if (certTemp != null)
+				{
+					vecCertificates.addElement(certTemp);
+				}
+			}
+			m_strID = JAPCertificate.calculateXORofSKIs(vecCertificates);			
 		}
-
-	    /**
-	     * @todo remove - Backwards compatibility only
-	     *
-	     * older mixes seem to send no operator certificate
-	     *
-	     * check if the the information from the cert is valid (not null oder empty)
-		 * and take the information from the XML-Structure if not
-	     */
-		if(m_strOrganization == null || m_strOrganization.trim().length() == 0)
+	    
+	    if (m_strID == null)
 		{
-			node = XMLUtil.getFirstChildByName(a_node, "Organisation");
-		    m_strOrganization = XMLUtil.parseValue(node, null);
-		}
-
-		if(m_strEmail == null || m_strEmail.trim().length() == 0 ||
-		   !X509SubjectAlternativeName.isValidEMail(m_strEmail))
-		{
-			node = XMLUtil.getFirstChildByName(a_node, XML_ELEMENT_EMAIL);
-		    m_strEmail = XMLUtil.parseValue(node, null);
-		}
-		if (m_strUrl == null)
-		{
-			node = XMLUtil.getFirstChildByName(a_node, "URL");
-			m_strUrl = XMLUtil.parseValue(node, null);
+			LogHolder.log(LogLevel.ALERT, LogType.DB, "Could not create ID for ServiceOperator entry!");
+			m_strID = "";
 		}
 	}
 
@@ -215,13 +218,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 */
 	public String getId()
 	{
-		if(m_certificate != null)
-		{
-			X509SubjectKeyIdentifier id = ((X509SubjectKeyIdentifier)m_certificate.getExtensions().getExtension(X509SubjectKeyIdentifier.IDENTIFIER));
-			return id != null ? id.getValue() : m_certificate.getId();
-		}
-
-		return "";
+		return m_strID;
 	}
 
 	/**
@@ -260,14 +257,26 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		return m_strOrgUnit;
 	}
 
+	public MultiCertPath getCertPath()
+	{
+		return m_certPath;
+	}
+	
 	/**
-	 * Returns the operator certificate.
-	 *
+	 * Returns the operator certificate. 
+	 * TODO return the first certificate that is found; instead, only the cert path should be used to
+	 * get the operator data, as this may also return an unverified certificate...
 	 * @return The operator certificate.
 	 */
 	public JAPCertificate getCertificate()
 	{
-		return m_certificate;
+		JAPCertificate cert;
+		if (m_certPath == null || m_certPath.getPath() == null || 
+			(cert = m_certPath.getPath().getSecondCertificate()) == null)
+		{
+			return null;
+		}
+		return cert;
 	}
 
 	/**
@@ -331,19 +340,9 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	
 	public boolean hasTermsAndConditions()
 	{
-		return Database.getInstance(TermsAndConditions.class).getEntryById(getSKI()) != null;
+		return Database.getInstance(TermsAndConditions.class).getEntryById(getId()) != null;
 	}
 	
-	public String getSKI()
-	{
-		if(getCertificate() == null || getCertificate().getPublicKey() == null)
-		{
-			return null;
-		}
-		
-		return new X509SubjectKeyIdentifier(
-				 getCertificate().getPublicKey()).getValueWithoutColon();
-	}
 	/* creates a DOM-Tree with the data which will be owned by
 	 * ownerDocument but not appended to it.
 	 * if spamSafe is true than the Email-Tag as well as the content are 
@@ -392,15 +391,16 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		return mixOperatorElement;
 	}
 	
-	
-	
-	
+	public int hashCode()
+	{
+		return getId().hashCode();
+	}
 	
 	public boolean equals(Object a_obj)
 	{
-		if(a_obj == null || m_certificate == null) return false;
+		if(a_obj == null || !(a_obj instanceof ServiceOperator)) return false;
 
 		ServiceOperator op = (ServiceOperator) a_obj;
-		return m_certificate.equals(op.m_certificate);
+		return getId().equals(op.getId());
 	}
 }
