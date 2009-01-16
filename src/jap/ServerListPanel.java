@@ -333,10 +333,10 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	 */
 	public void updateOperatorFlag(int a_mix, ServiceOperator a_operator, boolean a_mixAndOperator)
 	{
-		if(a_operator != null && a_operator.getCertificate() != null && a_operator.getCertificate().getSubject() != null)
+		if(a_operator != null && a_operator.getCountryCode() != null)
 		{
 			CountryMapper county = 
-				new CountryMapper(a_operator.getCertificate().getSubject().getCountryCode(), JAPMessages.getLocale());				
+				new CountryMapper(a_operator.getCountryCode(), JAPMessages.getLocale());				
 			m_operatorFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + county.getISOCode() + ".png"));
 			if (a_mixAndOperator)
 			{

@@ -122,6 +122,9 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	private static final String IMG_ARROW_NORTH_WEST = IMG_PATH + "arrow_north_west_ok.png";
 	private static final String IMG_ARROW_NORTH_WEST_NOK = IMG_PATH + "arrow_north_west_nok.png";
 	public static final String IMG_NOT_TRUSTED = IMG_PATH + "not_trusted.png";
+	public static final String IMG_TRUSTED = IMG_PATH + "trusted_black.png";
+	public static final String IMG_TRUSTED_DOUBLE = IMG_PATH + "trusted_blue.png";
+	public static final String IMG_TRUSTED_THREE_CERTS = IMG_PATH + "trusted_green.png";
 	public static final String IMG_INVALID = IMG_PATH + "invalid.png";
 	private static final String IMG_BOX_ORANGE = IMG_PATH + "box_orange.png";
 	private static final String IMG_BOX_PURPLE = IMG_PATH + "box_purple.png";

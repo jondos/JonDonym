@@ -823,15 +823,15 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 									}
 									else if (certPath.countVerifiedPaths() > 2)
 									{
-										viewCertButton.setIcon(null);
+										viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_THREE_CERTS));
 									}
 									else if (certPath.countVerifiedPaths() > 1)
 									{
-										viewCertButton.setIcon(null);
+										viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_DOUBLE));
 									}
 									else
 									{
-										viewCertButton.setIcon(null);
+										viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED));
 									}
 								}
 							}

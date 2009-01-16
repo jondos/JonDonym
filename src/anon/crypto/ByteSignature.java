@@ -130,12 +130,23 @@ public final class ByteSignature
 	 */
 	public static String toHexString(byte[] a_bytes)
 	{
+		return toHexString(a_bytes, ":");
+	}
+	
+	public static String toHexString(byte[] a_bytes, String a_separator)
+	{
 		String currentValue;
 		String value = "";
+		String separator;
 
 		if (a_bytes == null || a_bytes.length == 0)
 		{
 			return value;
+		}
+		
+		if (a_separator == null || (separator = a_separator.trim()).length() == 0)
+		{
+			separator = "";
 		}
 
 		for (int i = 0; i < a_bytes.length; i++)
@@ -149,10 +160,13 @@ public final class ByteSignature
 			value += currentValue;
 			if (i + 1 < a_bytes.length)
 			{
-				value += ":";
+				value += separator;
 			}
 		}
 		currentValue = null; // for the garbage collector
 		return value;
 	}
+	
+	
+	
 }

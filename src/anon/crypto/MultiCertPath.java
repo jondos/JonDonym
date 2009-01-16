@@ -114,7 +114,7 @@ public class MultiCertPath implements IXMLEncodable
 	}
 	
 	/**
-	 * At the moment we try to find a single verifiyable CertPath and return
+	 * At the moment we try to find a single verifiable CertPath and return
 	 * <code>true</code> if there is one, or if signature verification is disabled.
 	 * @return if this MultiCertPath is verified
 	 */
@@ -128,7 +128,7 @@ public class MultiCertPath implements IXMLEncodable
 	}
 	
 	/**
-	 * Trys to return the first verified CertPath. If there is
+	 * Tries to return the first verified CertPath. If there is
 	 * none the first (unverified) Path is returned.
 	 * @return
 	 */
@@ -146,8 +146,24 @@ public class MultiCertPath implements IXMLEncodable
 	}
 	
 	/**
+	 * Returns all CertPath objects, no matter if verified or not.
+	 * @return
+	 */
+	public Vector getPaths()
+	{
+		Vector vecPaths = new Vector();
+		
+		for (int i = 0; i < m_certPaths.length; i++)
+		{
+			vecPaths.addElement(m_certPaths[i]);
+		}
+		
+		return vecPaths;
+	}
+	
+	/**
 	 * Gets the first verified CertPath of this MultiCertPath.
-	 * @return the first veriefied CertPath or null if there is none
+	 * @return the first verified CertPath or null if there is none
 	 */
 	public CertPath getFirstVerifiedPath()
 	{

@@ -1316,11 +1316,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				continue;
 			}
 			currentName = getMixInfo(i).getCertPath().getIssuer();
-			if (currentName != null && 
-					!operators.contains(currentName.toString())					
+			if (currentName != null && currentName.getOrganisation() != null &&
+				!operators.contains(currentName.getOrganisation())					
 				&& !mixIDs.contains(getMixInfo(i).getId()))
 			{
-				// this Mix seems to be operated by an organisation independent from others in the cascade
+				// this Mix seems to be operated by an organization independent from others in the cascade
 
 				// country bonus
 				operatorCountryCode = currentName.getCountryCode();
@@ -1346,8 +1346,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				}
 
 				// operator bonus
-				operators.put(currentName.toString(), 
-						currentName.toString());
+				operators.put(currentName.getOrganisation(), currentName.getOrganisation());
 				mixIDs.put(getMixInfo(i).getId(), getMixInfo(i).getId());
 				m_nrOperators++;
 			}
@@ -1538,7 +1537,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					return null;
 				}
 				CertPath path = currentMixInfo.getCertPath().getPath();
-				currentMixOperator = new ServiceOperator(null, path.getSecondCertificate(), 0l);
+				currentMixOperator = new ServiceOperator(null, currentMixInfo.getCertPath(), 0l);
 				currentMixLocation = new ServiceLocation(null, path.getFirstCertificate());
 				currentMixName = currentMixInfo.getName();
 				
