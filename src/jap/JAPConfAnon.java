@@ -1253,7 +1253,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			//m_btnViewCert.setForeground(m_nrLabel.getForeground());
 		}
 		
-		URL urlDataRetention = m_serverInfo.getDataRetentionURL(JAPMessages.getLocale().getLanguage());
+		URL urlDataRetention = null;
+		if (m_serverInfo != null)
+		{
+			urlDataRetention = m_serverInfo.getDataRetentionURL(JAPMessages.getLocale().getLanguage());
+		}
 		if (urlDataRetention == null)
 		{
 			m_btnDataRetention.setVisible(false);

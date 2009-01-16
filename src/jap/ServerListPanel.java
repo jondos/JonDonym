@@ -326,7 +326,7 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	 * @param a_location		The new ServiceLocation
 	 * @param a_mixAndOperator	true, if Mix and Operator will have the same country code
 	 */
-	public void updateFlag(int a_mix, ServiceLocation a_location)
+	public synchronized void updateFlag(int a_mix, ServiceLocation a_location)
 	{
 		if(a_location != null)
 		{
@@ -348,7 +348,7 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	 * @param a_mix			The mix that should be updated
 	 * @param a_operator	The new ServiceOperator
 	 */
-	public void updateOperatorFlag(int a_mix, ServiceOperator a_operator, boolean a_mixAndOperator)
+	public synchronized void updateOperatorFlag(int a_mix, ServiceOperator a_operator, boolean a_mixAndOperator)
 	{
 		// m_operatorFlags[i].setBorder(BorderFactory.createLineBorder(Color.black, 2));
 		
