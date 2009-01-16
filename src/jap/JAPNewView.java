@@ -2985,7 +2985,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					m_labelSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
 							PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1], 
 							JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
-					bTrusted = false;
+					//bTrusted = false;
 				}
 				else
 				{										
@@ -3045,7 +3045,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					m_labelDelay.setText("> " + 
 							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
 							PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
-					bTrusted = false;
+					//bTrusted = false;
 				}
 				else
 				{

@@ -2182,7 +2182,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1],
 									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
-							bTrusted = false;							;
+							//bTrusted = false;
 						}
 						else
 						{
@@ -2245,7 +2245,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							m_lblDelay.setText("> " + 
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
-							bTrusted = false;
+							//bTrusted = false;
 						}
 						else
 						{
