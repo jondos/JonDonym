@@ -2925,14 +2925,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 							borderColor = Color.green;
 							strTooltip += ", " + 
 								JAPMessages.getString(MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, 
-										certPath.countVerifiedPaths());
+										"" + certPath.countVerifiedPaths());
 						}
 						else if (certPath.countVerifiedPaths() > 1)
 						{
 							borderColor = new Color(100, 215, 255);
 							strTooltip += ", " +
 								JAPMessages.getString(MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, 
-										certPath.countVerifiedPaths());
+										"" + certPath.countVerifiedPaths());
 						}
 					}
 					else
