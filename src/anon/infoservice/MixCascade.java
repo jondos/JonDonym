@@ -27,6 +27,8 @@
  */
 package anon.infoservice;
 
+import gui.JAPMessages;
+
 import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -92,6 +94,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private boolean m_bImplicitTrust = false;
 
 	private boolean m_bSock5Support = false;
+	
+	private boolean m_bDataRetention = false;
 
 	/**
 	 * This is the ID of the mixcascade.
@@ -384,6 +388,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			m_mixNodes.addElement(mixNode);
 		}
 		m_mixInfos = new MixInfo[mixNodes.getLength()];
+		boolean bNullMixInfo = false;
+		int countDataRetentionMixes = 0;
 		for (int i = 0; i < mixNodes.getLength(); i++)
 		{
 			try
@@ -409,11 +415,21 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 												 m_mixInfos[i].getPriceCertificate().getHashValue());
 					m_nrPriceCerts++;
 				}
+				if (m_mixInfos[i].getDataRetentionURL("en") != null)
+				{
+					countDataRetentionMixes++;
+				}
 			}
 			catch (XMLParseException a_e)
 			{
+				bNullMixInfo = true;
 				m_mixInfos[i] = null;
 			}
+		}
+		if (countDataRetentionMixes == mixNodes.getLength() || 
+			(countDataRetentionMixes > 0 && bNullMixInfo))
+		{
+			m_bDataRetention = true;
 		}
 		
 		/* get the name */
@@ -1271,6 +1287,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			return m_certPath.isValid(new Date());
 		}
 		return false;
+	}
+	
+	public boolean isDataRetentionActive()
+	{
+		return m_bDataRetention;
 	}
 	
 	public boolean isActiveStudy()
