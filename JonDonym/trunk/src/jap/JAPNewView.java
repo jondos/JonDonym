@@ -115,7 +115,6 @@ import gui.dialog.JAPDialog;
 import gui.dialog.JAPDialog.LinkedInformationAdapter;
 import gui.dialog.JAPDialog.Options;
 import gui.help.JAPHelp;
-import jap.TrustModel.DelayAttribute;
 import jap.forward.JAPRoutingMessage;
 import jap.forward.JAPRoutingRegistrationStatusObserver;
 import jap.forward.JAPRoutingServerStatisticsListener;
@@ -178,6 +177,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_VIEW_MESSAGE = JAPNewView.class.getName() + "_viewMessage";
 	private static final String MSG_ANTI_CENSORSHIP = JAPNewView.class.getName() + "_antiCensorship";
 
+	private static final String MSG_DATA_RETENTION_EXPLAIN = JAPNewView.class.getName() + "_dataRetentionExplain";
 	private static final String MSG_OBSERVABLE_EXPLAIN = JAPNewView.class.getName() + "_observableExplain";
 	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";	
 
@@ -2254,16 +2254,28 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 		if (a_serverDescription != null && a_serverDescription instanceof MixCascade)
 		{
-			Database.getInstance(NewCascadeIDEntry.class).remove(
-						 ( (MixCascade) a_serverDescription).getMixIDsAsString());
-			if (((MixCascade)a_serverDescription).getNumberOfOperators() <= 1)
+			final MixCascade cascade = (MixCascade) a_serverDescription;
+			Database.getInstance(NewCascadeIDEntry.class).remove(cascade.getMixIDsAsString());
+			
+			if (cascade.getNumberOfOperators() <= 1 || cascade.isDataRetentionActive())
 			{
 				m_msgIDInsecure = m_StatusPanel.addStatusMsg(JAPMessages.getString(MSG_OBSERVABLE_TITLE),
 					JAPDialog.MESSAGE_TYPE_WARNING, false, new ActionListener()
 				{
 					public void actionPerformed(ActionEvent a_event)
 					{
-						JAPDialog.showWarningDialog(JAPNewView.this, JAPMessages.getString(MSG_OBSERVABLE_EXPLAIN));
+						if (cascade.isDataRetentionActive())
+						{
+							JAPDialog.showWarningDialog(JAPNewView.this, 
+									JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN, 
+											new String[]{"<b>" + cascade.getName() + "</b>",
+											"<i>" + JAPMessages.getString("ngBttnAnonDetails") + "</i>"}));
+						}
+						else
+						{
+							JAPDialog.showWarningDialog(JAPNewView.this, 
+									JAPMessages.getString(MSG_OBSERVABLE_EXPLAIN, "<b>" + cascade.getName() + "</b>"));
+						}
 						doClickOnCascadeChooser();
 					}
 				});

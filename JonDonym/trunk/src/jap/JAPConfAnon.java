@@ -192,6 +192,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_UNREACHABLE = JAPConfAnon.class.getName() + "_availabilityUnreachable";
 	private static final String MSG_BAD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityBad";
 	private static final String MSG_GOOD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityGood";
+	private static final String MSG_DATA_RETENTION_ABBREVIATION = 
+		JAPConfAnon.class.getName() + "_DataRetentionAbbreviation";
+	private static final String MSG_DATA_RETENTION_EXPLAIN_SHORT = 
+		JAPConfAnon.class.getName() + "_DataRetentionExplainShort";
+	private static final String MSG_DATA_RETENTION_EXPLAIN = 
+		JAPConfAnon.class.getName() + "_DataRetentionExplain";
 
 	private static final int FILTER_SPEED_MAJOR_TICK = 100;
 	private static final int FILTER_SPEED_MAX = 400;
@@ -232,6 +238,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	private JLabel m_anonLevelLabel;
 	private JLabel m_numOfUsersLabel;
+	private JLabel m_lblVDS;
 	
 	/*private GridBagConstraints m_constrHosts, m_constrPorts;
 	private JLabel m_lblHosts;
@@ -799,11 +806,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_anonLevelLabel, c);
 		
+		m_lblVDS = new JLabel(JAPMessages.getString(MSG_DATA_RETENTION_ABBREVIATION));
+		m_lblVDS.setToolTipText(JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN_SHORT));
+		m_lblVDS.setForeground(Color.red);
+		m_lblVDS.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		m_lblVDS.addMouseListener(this);
+		c.gridx++;
+		m_cascadesPanel.add(m_lblVDS, c);
+		
+		
 		c.insets = new Insets(5, 20, 0, 5);
 		l = new JLabel(JAPMessages.getString("numOfUsersOnCascade") + ":");
 		c.gridx = 2;
 		c.gridy = 2;
 		c.weightx = 0;
+		c.gridwidth = 1;
 		c.fill = GridBagConstraints.NONE;
 		m_cascadesPanel.add(l, c);
 		
@@ -812,6 +829,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridx = 3;
 		c.gridy = 2;
 		c.weightx = 0;
+		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_numOfUsersLabel, c);
 
@@ -820,6 +838,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridx = 2;
 		c.gridy = 3;
 		c.weightx = 0;
+		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(l, c);
 
@@ -828,6 +847,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridx = 3;
 		c.gridy = 3;
 		c.weightx = 0;		
+		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_lblSpeed, c);
 		
@@ -837,6 +857,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridx = 2;
 		c.gridy = 4;
 		c.weightx = 0;
+		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(l, c);
 
@@ -845,6 +866,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridx = 3;
 		c.gridy = 4;
 		c.weightx = 0;
+		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_lblDelay, c);
 		
@@ -853,12 +875,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridx = 2;
 		c.gridy = 5;
 		c.weightx = 0;
+		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(l, c);
 		
 		c.insets = new Insets(5, 5, 0, 0);
 		c.gridx = 3;
-		c.gridy = 5;		
+		c.gridy = 5;
+		c.gridwidth = 2;
 		m_payLabel = new JLabel("");
 		m_payLabel.addMouseListener(new MouseAdapter()
 		{
@@ -901,7 +925,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.insets = new Insets(5, 20, 0, 5);
 		c.gridy = 6;
 		c.gridx = 2;
-		c.gridwidth = 3;
+		c.gridwidth = 4;
 		m_lblSocks = new JLabel(JAPMessages.getString(MSG_SUPPORTS_SOCKS));
 		m_lblSocks.setIcon(GUIUtils.loadImageIcon("socks_icon.gif", true));
 		m_cascadesPanel.add(m_lblSocks, c);
@@ -1904,6 +1928,13 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_serverList.moveToNext();
 		}
+		else if (e.getSource() == m_lblVDS)
+		{
+			JAPDialog.showWarningDialog(m_lblVDS,
+					JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN_SHORT) + " " +
+					JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN,
+					"<b>" + JAPMessages.getString(MixDetailsDialog.MSG_BTN_DATA_RETENTION) + "</b>"));
+		}
 	}
 
 	private int convertDelayValue(int a_delay, boolean a_bFromUtilToReal)
@@ -2265,6 +2296,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					
 					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));
 					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
+					m_lblVDS.setVisible(cascade.isDataRetentionActive());
+					
 					
 					setPayLabel(cascade, entry);
 					m_lblSocks.setVisible(cascade.isSocks5Supported());

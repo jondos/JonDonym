@@ -45,7 +45,7 @@ public class MixDetailsDialog extends JAPDialog
 	
 	private MixInfo m_mixInfo;
 	private ActionListener m_buttonListener;
-	private JButton m_btnHomepage, m_btnEMail, m_btnCertificates;
+	private JButton m_btnHomepage, m_btnEMail, m_btnCertificates, m_btnDataRetention;
 	
 	public MixDetailsDialog(Component a_parent, MixInfo a_mixInfo, int a_mixType)
 	{
@@ -177,6 +177,16 @@ public class MixDetailsDialog extends JAPDialog
 			pnlButtons.add(m_btnHomepage, c);
 		}
 		
+		URL urlDataRetention = a_mixInfo.getDataRetentionURL(JAPMessages.getLocale().getLanguage());
+		if (urlDataRetention != null)
+		{
+			m_btnDataRetention = new JButton(JAPMessages.getString(MSG_BTN_DATA_RETENTION),
+					GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID));
+			m_btnDataRetention.setToolTipText(urlDataRetention.toString());
+			m_btnDataRetention.addActionListener(m_buttonListener);
+			pnlButtons.add(m_btnDataRetention, c);
+		}
+		
 		this.pack();
 		this.setResizable(false);
 		p.setVisible(true);
@@ -187,9 +197,9 @@ public class MixDetailsDialog extends JAPDialog
 	{
 		public void actionPerformed(ActionEvent a_event)
 		{
-			if (a_event.getSource() == m_btnHomepage)
+			if (a_event.getSource() == m_btnHomepage || a_event.getSource() == m_btnDataRetention)
 			{
-				String url = m_btnHomepage.getToolTipText();
+				String url = ((JButton)a_event.getSource()).getToolTipText();
 				if (url == null)
 				{
 					return;
