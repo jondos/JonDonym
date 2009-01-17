@@ -30,6 +30,7 @@ package jap;
 
 
 
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Vector;
@@ -326,7 +327,7 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	 * @param a_location		The new ServiceLocation
 	 * @param a_mixAndOperator	true, if Mix and Operator will have the same country code
 	 */
-	public synchronized void updateFlag(int a_mix, ServiceLocation a_location)
+	private synchronized void updateFlag(int a_mix, ServiceLocation a_location)
 	{
 		if(a_location != null)
 		{
@@ -342,16 +343,61 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		}
 	}
 	
+	public synchronized void update(int a_mix, ServiceOperator a_operator, ServiceLocation a_location)
+	{
+		if (a_operator != null && a_operator.getCountryCode() != null)
+		{
+			if (a_location != null && a_location.getCountryCode() != null && 
+				!a_location.getCountryCode().equals(a_operator.getCountryCode()))
+			{
+				updateFlag(a_mix, a_location);
+				updateOperatorFlag(a_mix, a_operator, false);
+			}
+			else
+			{
+				updateOperatorFlag(a_mix, a_operator, true);
+			}
+			
+			/* Show certification status. */
+			if (a_operator.getCertPath().isVerified())
+			{
+				if (!a_operator.getCertPath().isValid(new Date()))
+				{
+					m_operatorFlags[a_mix].setBorder(BorderFactory.createLineBorder(Color.yellow, 2));
+				}
+				else if (a_operator.getCertPath().countVerifiedPaths() > 2)
+				{
+					m_operatorFlags[a_mix].setBorder(BorderFactory.createLineBorder(Color.green, 2));
+				}
+				else if (a_operator.getCertPath().countVerifiedPaths() > 1)
+				{
+					m_operatorFlags[a_mix].setBorder(BorderFactory.createLineBorder(new Color(100, 215, 255), 2));
+				}
+				else
+				{
+					m_operatorFlags[a_mix].setBorder(BorderFactory.createEmptyBorder());
+				}
+			}
+			else
+			{
+				m_operatorFlags[a_mix].setBorder(BorderFactory.createLineBorder(Color.red, 2));
+			}
+		}
+		else
+		{
+			updateOperatorFlag(a_mix, a_operator, false);
+			updateFlag(a_mix, a_location);
+		}
+	}
+	
 	/**
 	 * Updates the mix operator flag
 	 * 
 	 * @param a_mix			The mix that should be updated
 	 * @param a_operator	The new ServiceOperator
 	 */
-	public synchronized void updateOperatorFlag(int a_mix, ServiceOperator a_operator, boolean a_mixAndOperator)
-	{
-		// m_operatorFlags[i].setBorder(BorderFactory.createLineBorder(Color.black, 2));
-		
+	private synchronized void updateOperatorFlag(int a_mix, ServiceOperator a_operator, boolean a_mixAndOperator)
+	{	
 		if(a_operator != null && a_operator.getCountryCode() != null)
 		{
 			CountryMapper county = 

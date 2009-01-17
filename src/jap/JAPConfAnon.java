@@ -1118,23 +1118,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			ServiceLocation location = m_infoService.getServiceLocation(cascade, mixId);
 			ServiceOperator operator = m_infoService.getServiceOperator(cascade, mixId);
-			if (operator != null && operator.getCountryCode() != null)
-			{
-				if (location != null && location.getCountryCode() != null && !location.getCountryCode().equals(operator.getCountryCode()))
-				{
-					m_serverList.updateFlag(i, location);
-					m_serverList.updateOperatorFlag(i, operator, false);
-				}
-				else
-				{
-					m_serverList.updateOperatorFlag(i, operator, true);
-				}
-			}
-			else
-			{
-				m_serverList.updateOperatorFlag(i, operator, false);
-				m_serverList.updateFlag(i, location);
-			}
+			m_serverList.update(i, operator, location);
 		}
 		
 		m_operatorLabel.setText(GUIUtils.trim(m_infoService.getOperator(cascade, selectedMixId)));
