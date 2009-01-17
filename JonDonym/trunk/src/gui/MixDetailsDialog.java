@@ -142,7 +142,7 @@ public class MixDetailsDialog extends JAPDialog
 			else if (m_mixInfo.getCertPath().countVerifiedPaths() > 1)
 			{
 				m_btnCertificates.setToolTipText(JAPMessages.getString(MSG_INDEPENDENT_CERTIFICATIONS, 
-						m_mixInfo.getCertPath().countVerifiedPaths()));
+						"" + m_mixInfo.getCertPath().countVerifiedPaths()));
 				if (m_mixInfo.getCertPath().countVerifiedPaths() > 2)
 				{
 					m_btnCertificates.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_THREE_CERTS));				

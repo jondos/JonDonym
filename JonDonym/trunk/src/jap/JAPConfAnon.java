@@ -1234,14 +1234,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					//m_btnViewCert.setForeground(Color.green.darker().darker());
 					m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_THREE_CERTS));
 					m_btnViewCert.setToolTipText(JAPMessages.getString(
-							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, m_serverCertPaths.countVerifiedPaths()));
+							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, 
+							"" + m_serverCertPaths.countVerifiedPaths()));
 				}
 				else if (m_serverCertPaths.countVerifiedPaths() > 1)
 				{
 					//m_btnViewCert.setForeground(Color.blue);
 					m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_DOUBLE));
 					m_btnViewCert.setToolTipText(JAPMessages.getString(
-							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, m_serverCertPaths.countVerifiedPaths()));
+							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, 
+							"" + m_serverCertPaths.countVerifiedPaths()));
 				}
 				else
 				{
@@ -3396,7 +3398,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			pnlContrs.weightx = 1.0;
 			pnlContrs.fill = GridBagConstraints.NONE;
 			pnlContrs.anchor = GridBagConstraints.WEST;
-			pnlContrs.insets = new Insets(5, 0, 5, 5);
+			pnlContrs.insets = new Insets(5, 0, 5, 0);
 			
 			//m_moveMixLeft = new BasicArrowButton(BasicArrowButton.WEST);
 			/*m_moveMixLeft = new JButton(GUIUtils.createScaledIcon(GUIUtils.loadImageIcon(JAPHelp.IMG_PREVIOUS, true),

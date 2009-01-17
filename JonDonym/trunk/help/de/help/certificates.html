@@ -8,28 +8,28 @@
 <body>
 <!--#include virtual="/header.html"-->
 
-<p class="navipar"><span class="prevlink"><a
-href="about.html"><img src="prev.gif" alt="&lt;-">
-JonDo</a></span> <span class="midlink"><a name="doctop"
-href="index.html#mi_toc">Inhalt </a><a href="index.html#mi_intro"><img
-src="next.gif" alt="-&gt;"> Einf&uuml;hrung </a><a href="about.html"><img
-src="next.gif" alt="-&gt;"> JonDo</a></span> <span class="nextlink"><a
-href="about.html">JonDo <img src="next.gif" alt="-&gt;"></a></span> </p>
+<p class="navipar"><span class="prevlink"><a href="about.html"><img
+src="prev.gif" alt="&lt;-"> JonDo</a></span> <span class="midlink"><a
+name="doctop" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_intro"><img src="next.gif" alt="-&gt;"> Einf&uuml;hrung
+</a><a href="about.html"><img src="next.gif" alt="-&gt;"> JonDo</a></span>
+<span class="nextlink"><a href="about.html">JonDo <img src="next.gif"
+alt="-&gt;"></a></span> </p>
 <hr>
 
 <h2>JonDonym-Zertifikate und ihre Bedeutung </h2>
 
 <p>Zertifikate dienen dazu, die Betreiber von JonDonym-Diensten zu
-identifizieren. Eine Mix-Kaskade besteht &uuml;blicherweise aus zwei oder
-mehr hintereinandergeschalteten Mix-Servern, die von verschiedenen
-Organisationen betrieben werden. Nur wenn alle diese Betreiber
-zusammenarbeiten, kann die Identit&auml;t von Nutzern aufgedeckt werden.
-Nutzer von JonDo sollen selbst entscheiden k&ouml;nnen, ob sie den Betreibern
-einer Kaskade vertrauen, und sich entsprechend dieser Entscheidung entweder
-mit dem Dienst verbinden oder nicht. Deshalb ist es immens wichtig, dass</p>
+identifizieren. Eine Mix-Kaskade besteht &uuml;blicherweise aus zwei oder mehr
+hintereinandergeschalteten Mix-Servern, die von verschiedenen Organisationen
+betrieben werden. Nur wenn alle diese Betreiber zusammenarbeiten, kann die
+Identit&auml;t von Nutzern aufgedeckt werden. Nutzer von JonDo sollen selbst
+entscheiden k&ouml;nnen, ob sie den Betreibern einer Kaskade vertrauen, und
+sich entsprechend dieser Entscheidung entweder mit dem Dienst verbinden oder
+nicht. Deshalb ist es immens wichtig, dass</p>
 <ul>
-  <li>die einzelnen Mixe von unterschiedlichen Organisationen betrieben
-    werden und </li>
+  <li>die einzelnen Mixe von unterschiedlichen Organisationen betrieben werden
+    und </li>
   <li>die Informationen &uuml;ber diese Organisationen zuverl&auml;ssig
   sind.</li>
 </ul>
@@ -42,49 +42,34 @@ dritten gelangen, da jeder damit solche Signaturen ausstellen k&ouml;nnte.
 Mithilfe eines frei verf&uuml;gbaren &ouml;ffentlichen Schl&uuml;ssels
 k&ouml;nnen andere diese Signaturen &uuml;berpr&uuml;fen und feststellen, ob
 sie wirklich mit der entsprechenden Organisation kommunizieren. Der
-Zusammenhang von Identit&auml;t und &ouml;ffentlichen Schl&uuml;ssel wird
-durch ein <em>digitales Zertifikat</em> sichergestellt. Das ist ein
-elektronisches Dokument, das von einer sogenannten Zertifizierungsstelle
-ebenfalls digital unterzeichnet wurde. Es wird sehr empfohlen sich die
-Zertifikate der einzelnen Server einer Mix-Kaskade anzusehen (auf die
-einzelnen Mix-Icons klicken und dort jeweils das Zertifikat anklicken.). </p>
+Zusammenhang von Identit&auml;t und &ouml;ffentlichen Schl&uuml;ssel wird durch
+ein <em>digitales Zertifikat</em> sichergestellt. Das ist ein elektronisches
+Dokument, das von einer sogenannten Zertifizierungsstelle ebenfalls digital
+unterzeichnet wurde. Es wird sehr empfohlen sich die Zertifikate der einzelnen
+Server einer Mix-Kaskade anzusehen (auf die einzelnen Mix-Icons klicken und
+dort jeweils das Zertifikat anklicken.). </p>
 
 <h3>Zertifizierungsstellen</h3>
 
 <p>Der JonDonym Dienst wird gegen&uuml;ber dem Betreiber unsicher, wenn die
 genutzte Mix-Kaskade nominell von unterschiedlichen Instanzen betrieben wird,
-faktisch aber alle Mixe der Kaskade in der Hand derselben Organisation
-liegen. Durch vertrauensw&uuml;rdige Zertifizierungsstellen (CAs) soll
-sichergestellt werden, dass Betreiber, die unterschiedliche Namen haben, auch
-wirklich als m&ouml;glichst unabh&auml;ngige Einheiten existieren. Ohne eine
-Identit&auml;tspr&uuml;fung durch eine dieser Stellen sind Mixe f&uuml;r
-JonDo nicht benutzbar. Letztlich muss aber auch den Zertifizierungsstellen
-selbst vertraut werden, denn diese w&auml;ren in der Lage, nicht existierende
+faktisch aber alle Mixe der Kaskade in der Hand derselben Organisation liegen.
+Durch vertrauensw&uuml;rdige Zertifizierungsstellen (CAs) soll sichergestellt
+werden, dass Betreiber, die unterschiedliche Namen haben, auch wirklich als
+m&ouml;glichst unabh&auml;ngige Einheiten existieren. Ohne eine
+Identit&auml;tspr&uuml;fung durch eine dieser Stellen sind Mixe f&uuml;r JonDo
+nicht benutzbar. Letztlich muss aber auch den Zertifizierungsstellen selbst
+vertraut werden, denn diese w&auml;ren in der Lage, nicht existierende
 Betreiber zu "generieren" und damit im fremden Namen zu handeln. </p>
 
 <p>Bei JonDonym gibt es momentan nur zwei Wurzel-Zertifizierungsstellen (<a
 href="http://www.jondos.de/de">JonDos GmbH</a> und <a
-href="http://anon.inf.tu-dresden.de">TU Dresden JAP-Team</a>), die sich
+href="http://anon.inf.tu-dresden.de/">TU Dresden JAP-Team</a>), die sich
 jeweils zu h&ouml;chster Sorgsamkeit bei der Zertifizierung von Betreibern
-verpflichtet haben. Daneben ist, nach Genehmigung durch JonDos, die
-Zertifizierung von Mixbetreibern auch durch sogenannte
-Unter-Zertifizierungsstellen (Sub-CAs) m&ouml;glich, deren Identit&auml;t
-selber von einer Wurzel-CA best&auml;tigt ist, und die selbst eigene
-Zertifizierungsverfahren durchf&uuml;hren. Sub-CAs sind dann notwendig, wenn
-die JonDonym-CA die Identit&auml;t von der Sub-CA bekannten Betreibern nicht
-selbst eindeutig feststellen kann, diesen aber dennoch den Zugang zum
-JonDonym-System nicht verwehren will. Letzlich k&ouml;nnen die Nutzer dann
-selbst entscheiden, ob sie den Sub-CAs vertrauen m&ouml;chten oder nicht. </p>
-
-<p>F&uuml;r die Zukunft ist au&szlig;erdem <a
-href="http://www.jondos.de/de/development">geplant</a>, eine
-Mehr-Parteien-Zertifizierung durchzuf&uuml;hren. Dann sind jeweils mindestens
-zwei Zertifizierungsstellen n&ouml;tig, um ein vertrauensw&uuml;rdiges
-Zertifikat auszustellen. Dadurch muss nicht mehr einer einzigen
-Zertifizierungsstelle vertraut werden. Auch wenn das geheime Zertifikat einer
-Zertifizierungsstelle verloren gehen sollte oder anderweitig ung&uuml;ltig
-wurde, k&ouml;nnen bei drei oder mehr Zertifizierungstellen dennoch alle
-anderen Zertifikate Ihre G&uuml;ltigkeit behalten.</p>
+verpflichtet haben. Betreiber k&ouml;nnen sich auch von mehr als einer CA
+zertifizieren lassen. Solche eine mehrfache Zertifizierung hebt die
+Notwendigkeit auf, einer einzigen Zertifizierungsstelle vertrauen zu
+m&uuml;ssen.</p>
 
 <h3>Mix-Zertifikate und Betreiber-Zertifikate</h3>
 
@@ -97,34 +82,44 @@ Mix-Zertifikaten enthaltenen Informationen &uuml;ber den Standort eines Mixes
 werden also vom Betreiber selbst zertifiziert, und sind deshalb nicht so
 zuverl&auml;ssig wie die Informationen &uuml;ber die Betreiber. </p>
 
-<h3>Zust&auml;nde von Zertifikaten</h3>
+<h3><a name="status" id="status">Zust&auml;nde von Zertifikaten</a></h3>
 
-<p>Ein Zertifikat gilt nur dann als <strong>verifiziert</strong>, wenn Sie
-der Zertifizierungsstelle vertrauen, die dieses Zertifikat ausgestellt hat.
-Nicht-verifizierbare Zertifikate sind grunds&auml;tzlich <strong>nicht
-vertrauensw&uuml;rdig</strong>, da jeder, der &uuml;ber geringes Wissen im
+<p>Ein Zertifikat gilt nur dann als <strong>verifiziert</strong>&nbsp;<img
+alt="" src="img/certs/trusted_black.png">, wenn Sie der Zertifizierungsstelle
+vertrauen, die dieses Zertifikat ausgestellt hat. Zertifikate k&ouml;nnen auch
+<strong>gleichzeitig von zwei</strong>&nbsp;<img alt=""
+src="img/certs/trusted_blue.png">, <strong>drei oder mehr</strong>&nbsp;<img
+alt="" src="img/certs/trusted_green.png"> unabh&auml;ngigen
+Zertifizierungsstellen gleichzeitig ausgestellt werden, was eine h&ouml;here
+Sicherheit bedeutet, dass Identit&auml;t und Zuverl&auml;ssigkeit des
+jeweiligen Betreibers korrekt &uuml;berpr&uuml;ft wurden. Nicht-verifizierbare
+Zertifikate sind grunds&auml;tzlich <strong>nicht
+vertrauensw&uuml;rdig</strong>&nbsp;<img alt=""
+src="img/certs/not_trusted.png">, da jeder, der &uuml;ber geringes Wissen im
 Bereich der IT verf&uuml;gt, selbst solche Zertifikate generieren kann. Die
 <strong>G&uuml;ltigkeit</strong> eines Zertifikats ist davon abh&auml;ngig,
 f&uuml;r welchen Zeitraum ein Zertifikat ausgestellt wurde. Normalerweise
-sollte einem <strong>abgelaufenen</strong> Zertifikat nicht mehr vertraut
-werden, da nicht klar ist, ob der Besitzer noch eine Berechtigung hat, den
-Dienst anzubieten. Zertifikate k&ouml;nnen auch
-<strong>zur&uuml;ckgerufen</strong> werden, z.B. wenn deren
+sollte einem <strong>abgelaufenen</strong>&nbsp;<img alt=""
+src="img/certs/invalid.png"> Zertifikat nicht mehr vertraut werden, da nicht
+klar ist, ob der Besitzer noch eine Berechtigung hat, den Dienst anzubieten.
+Zertifikate k&ouml;nnen auch <strong>zur&uuml;ckgerufen</strong>&nbsp;<img
+alt="" src="img/certs/not_trusted.png"> werden, z.B. wenn deren
 Verschl&uuml;sselung gebrochen wurde, der Betreiber sich als unseri&ouml;s
 herausgestellt hat oder das private Zertifikat in falsche H&auml;nde geraten
 ist. </p>
 
-<p>JonDo verbietet momentan die Verbindung zu Mixkaskaden, in denen
-mindestens ein <em>nicht vertrauensw&uuml;rdiger</em> Mix steht. Abgelaufene
-oder zur&uuml;ckgerufene Zertifikate werden dagegen noch nicht
-ber&uuml;cksichtigt, nur als solche angezeigt. Ein Kaskaden-Filter mit
-wesentlich feingranulareren Einstellungen ist gerade in Entwicklung. <!--#include virtual="/footer.html"-->
- </p>
+<p>JonDo verbietet die Verbindung zu Mixkaskaden, in denen mindestens ein
+<em>nicht vertrauensw&uuml;rdiger</em> oder <em>zur&uuml;ckgerufener</em> Mix
+steht. <em>Abgelaufene</em> Zertifikate f&uuml;hren dazu, dass <a
+href="services_anon.html">Dienstfilter</a> und das <a
+href="jap.JAPNewView_anonymometer.html">Anonym-O-Meter</a> einen solchen Mix
+nicht mehr als Teil des Dienstes z&auml;hlen. Die Verbindung zum Dienst bleibt
+aber m&ouml;glich, solange mindestens ein Mix des Dienstes noch
+vertrauensw&uuml;rdig ist.</p>
 <hr>
 
-<p class="navipar"><span class="prevlink"><a
-href="about.html"><img src="prev.gif" alt="&lt;-">
-JonDo</a></span> <span class="midlink"><a
+<p class="navipar"><span class="prevlink"><a href="about.html"><img
+src="prev.gif" alt="&lt;-"> JonDo</a></span> <span class="midlink"><a
 name="docbottom" href="index.html#mi_toc">Inhalt </a><a
 href="index.html#mi_intro"><img src="next.gif" alt="-&gt;"> Einf&uuml;hrung
 </a><a href="about.html"><img src="next.gif" alt="-&gt;"> JonDo</a></span>
