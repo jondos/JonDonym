@@ -27,9 +27,10 @@
  */
 package jap;
 
-import java.util.Enumeration;
-import java.util.Observable;
-import java.util.Observer;
+import gui.CAListCellRenderer;
+import gui.CertDetailsDialog;
+import gui.JAPMessages;
+import gui.dialog.JAPDialog;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -40,6 +41,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Enumeration;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Vector;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -54,13 +60,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import anon.crypto.CertPath;
 import anon.crypto.CertificateInfoStructure;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
-import gui.CAListCellRenderer;
-import gui.CertDetailsDialog;
-import gui.JAPMessages;
-import gui.dialog.JAPDialog;
 
 /**
  * This is the configuration GUI for the cert.
@@ -72,8 +75,6 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 
 	private static final String MSG_DETAILS = JAPConfCert.class.getName() + "_details";
 
-
-
 	private TitledBorder m_borderCert;
 	private CertDetailsDialog.CertShortInfoPanel m_shortInfoPanel;
 	private JButton m_bttnCertInsert, m_bttnCertRemove, m_bttnCertStatus, m_bttnCertDetails;
@@ -83,6 +84,7 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 	private Enumeration m_enumCerts;
 	private JCheckBox m_cbCertCheckEnabled;
 	private JPanel  m_panelCAList;
+	private Vector m_deletedCerts;
 
 	public JAPConfCert()
 	{
@@ -93,6 +95,7 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 		update(SignatureVerifier.getInstance().getVerificationCertificateStore(), null);
 		/* set the selected index of the list to the first item to avoid exceptions */
 	    //m_listCert.setSelectedIndex(0);
+		m_deletedCerts = new Vector();
 	}
 
 	/**
@@ -314,9 +317,11 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 				}
 				if (cert != null)
 				{
-
-					SignatureVerifier.getInstance().getVerificationCertificateStore().
-						addCertificateWithoutVerification(cert, JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX, true, false);
+					CertificateInfoStructure j = new CertificateInfoStructure(CertPath.getRootInstance(cert), null, JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX, true, false, true, false);
+					m_listmodelCertList.addElement(j);
+					m_listCert.setSelectedIndex(m_listmodelCertList.getSize());
+					/*SignatureVerifier.getInstance().getVerificationCertificateStore().
+						addCertificateWithoutVerification(cert, JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX, true, false); */
 				}
 			}
 		});
@@ -328,13 +333,15 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 			{
 				if (m_listmodelCertList.getSize() > 0)
 				{
-					CertificateInfoStructure certActual = (CertificateInfoStructure) m_listCert.
+					m_deletedCerts.addElement(m_listmodelCertList.getElementAt(m_listCert.getSelectedIndex()));
+					m_listmodelCertList.remove(m_listCert.getSelectedIndex());
+					/*CertificateInfoStructure certActual = (CertificateInfoStructure) m_listCert.
 						getSelectedValue();
 					if (certActual != null)
 					{
 						SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificate(
 							certActual);
-					}
+					}*/
 				}
 				if (m_listmodelCertList.getSize() == 0)
 				{
@@ -359,18 +366,18 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 			public void actionPerformed(ActionEvent e)
 			{
 				CertificateInfoStructure certActual = (CertificateInfoStructure) m_listCert.getSelectedValue();
-				boolean enabled = certActual.isEnabled();
 
-				if (enabled)
+				if (certActual.isEnabled())
 				{
-					SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(certActual, false);
+					certActual.setEnabled(false);
 					m_bttnCertStatus.setText(JAPMessages.getString("certBttnEnable"));
 				}
 				else
 				{
-					SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(certActual, true);
+					certActual.setEnabled(true);
 					m_bttnCertStatus.setText(JAPMessages.getString("certBttnDisable"));
 				}
+				m_listCert.repaint();
 			}
 		});
 
@@ -462,7 +469,7 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 										(int)(a_dummyLabel.getFont().getSize() * 1.2)));
 								 */
 	}
-
+	
 	protected void onUpdateValues()
 	{
 		if (m_cbCertCheckEnabled.isSelected() != SignatureVerifier.getInstance().isCheckSignatures())
@@ -473,9 +480,53 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 
 	protected boolean onOkPressed()
 	{
+		CertificateInfoStructure currentCertificate, storedCertificate;
+		Enumeration certificates;
 		//Cert seetings
 		SignatureVerifier.getInstance().setCheckSignatures(m_cbCertCheckEnabled.isSelected());
+		
+		//remove deleted certs from store
+		certificates = m_deletedCerts.elements();
+		while(certificates.hasMoreElements())
+		{
+			currentCertificate = (CertificateInfoStructure) certificates.nextElement();
+			SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificate(currentCertificate);
+		}
+		m_deletedCerts.removeAllElements();
+		
+		//change cert status and add new ones
+		certificates = m_listmodelCertList.elements();
+		while(certificates.hasMoreElements())
+		{
+			currentCertificate = (CertificateInfoStructure) certificates.nextElement();
+			storedCertificate = SignatureVerifier.getInstance().getVerificationCertificateStore().
+				getCertificateInfoStructure(currentCertificate.getCertificate(), JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX);
+			
+			if(storedCertificate != null)
+			{
+				if(storedCertificate.isEnabled() != currentCertificate.isEnabled())
+				{
+					SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(currentCertificate, currentCertificate.isEnabled());
+				}
+			}
+			else
+			{
+				SignatureVerifier.getInstance().getVerificationCertificateStore().
+					addCertificateWithoutVerification(currentCertificate.getCertificate(), JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX, true, false);
+				SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(currentCertificate, currentCertificate.isEnabled());
+			}
+		}
+		
+		//store current stettings if cancel is pressed later
+		super.m_savePoint.createSavePoint();
 		return true;
+	}
+	
+	protected void onCancelPressed()
+	{
+		m_cbCertCheckEnabled.setSelected(SignatureVerifier.getInstance().isCheckSignatures());
+		this.update(SignatureVerifier.getInstance().getVerificationCertificateStore(), null);
+		m_deletedCerts.removeAllElements();
 	}
 
 	protected void onResetToDefaultsPressed()

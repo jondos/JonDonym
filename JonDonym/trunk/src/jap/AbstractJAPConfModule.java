@@ -68,7 +68,7 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 	 * The savepoint for this module. It is needed for restoring the old configuration, if the user
 	 * presses "Cancel" or the default configuration, if the user presses "Reset to defaults".
 	 */
-	private IJAPConfSavePoint m_savePoint;
+	protected IJAPConfSavePoint m_savePoint;
 
 	/**
 	 * Helper class for creating a onRootPanelShown call when the root panel (the whole configuration

@@ -124,7 +124,7 @@ public class CertPath implements IXMLEncodable
 		}
 	}
 	
-	protected static CertPath getRootInstance(JAPCertificate a_rootCert)
+	public static CertPath getRootInstance(JAPCertificate a_rootCert)
 	{
 		//TODO check extensions!
 		CertPath rootCertPath = new CertPath(a_rootCert, JAPCertificate.CERTIFICATE_TYPE_UNKNOWN);
