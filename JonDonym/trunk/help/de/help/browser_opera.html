@@ -12,8 +12,8 @@
 src="prev.gif" alt="&lt;-"> Alternative Browser</a></span> <span
 class="midlink"><a name="doctop" href="index.html#mi_toc">Inhalt </a><a
 href="index.html#mi_browser"><img src="next.gif" alt="-&gt;">
-Browservorbereitung </a><a href="browser.html"><img src="next.gif"
-alt="-&gt;"> andere Browser </a></span> <span class="nextlink"><a
+Browservorbereitung </a><a href="browser.html"><img src="next.gif" alt="-&gt;">
+andere Browser </a></span> <span class="nextlink"><a
 href="browser.html">Alternative Browser <img src="next.gif"
 alt="-&gt;"></a></span> </p>
 <hr>
@@ -39,16 +39,37 @@ vor: </p>
     Feld dahinter die Serveradresse <i>127.0.0.1</i> ein. Als Port wird
     <i>4001</i> eingetragen. </p>
     <img src="opera2.jpg" alt="Opera2"> 
-    <p>Wollen Sie Adressen festlegen, f&uuml;r die JonDo nicht verwendet
-    werden soll, so k&ouml;nnen Sie im Feld <i>Proxyserver f&uuml;r folgende
-    Adressen nicht benutzen:</i> Ausnahmen festlegen. Aktivieren Sie die
-    Ausnahmeregeln, indem Sie in dieses Feld den Haken dazu setzen. </p>
+    <p>Wollen Sie Adressen festlegen, f&uuml;r die JonDo nicht verwendet werden
+    soll, so k&ouml;nnen Sie im Feld <i>Proxyserver f&uuml;r folgende Adressen
+    nicht benutzen:</i> Ausnahmen festlegen. Aktivieren Sie die Ausnahmeregeln,
+    indem Sie in dieses Feld den Haken dazu setzen. </p>
     <p><b>Hinweis:</b><br>
     Falls Sie im JonDo einen anderen <a href="net.html">Listenerport</a>
     eingestellt haben, m&uuml;ssen Sie diesen anstatt <i>4001</i> eintragen.
     </p>
   </li>
 </ol>
+
+<h3>Geschwindigkeitsoptimierung</h3>
+
+<p>Folgende Konfigurations&auml;nderungen werden zus&auml;tzlich empfohlen,
+damit Opera ohne unn&ouml;tige Verz&ouml;gerungen beim Laden von Webseiten mit
+JonDo zusammenarbeitet:</p>
+<ul>
+  <li>In der Adresszeile eingeben: opera:config + Enter (bei eingeschaltetem
+    Javascript).</li>
+  <li>Dann scrollt man runter zu *Performance*.</li>
+  <li>Die *Network Buffer Size* auf 256 stellen, Haken raus bei *Reduce Max
+    Persistent HTTP Connections*. Speichern. Dann noch zu *Proxy* scrollen und
+    einen Haken setzen bei *Enable start with HTTP 1.1 for proxy*. Speichern.
+    Opera beenden und wieder neustarten.</li>
+  <li>Dann noch in Opera oben bei Extras, Einstellungen, Erweitert, bei
+    *Netzwerk* die *Max. Verbindungen zum Server* auf 16 stellen und die *Max.
+    Verbindungen gesamt* auf 20. Etwas dar&uuml;ber noch auf "Proxyserver..."
+    klicken und HTTP 1.1 f&uuml;r Proxy-Verbindungen einschalten. </li>
+</ul>
+
+<p>Diese Optimierung wurde getestet mit Opera 9.63.10476.</p>
 <!--#include virtual="/footer.html"-->
 <hr>
 
@@ -56,8 +77,8 @@ vor: </p>
 src="prev.gif" alt="&lt;-"> Alternative Browser</a></span> <span
 class="midlink"><a name="docbottom" href="index.html#mi_toc">Inhalt </a><a
 href="index.html#mi_browser"><img src="next.gif" alt="-&gt;">
-Browservorbereitung </a><a href="browser.html"><img src="next.gif"
-alt="-&gt;"> andere Browser </a></span> <span class="nextlink"><a
+Browservorbereitung </a><a href="browser.html"><img src="next.gif" alt="-&gt;">
+andere Browser </a></span> <span class="nextlink"><a
 href="browser.html">Alternative Browser <img src="next.gif"
 alt="-&gt;"></a></span> </p>
 </body>

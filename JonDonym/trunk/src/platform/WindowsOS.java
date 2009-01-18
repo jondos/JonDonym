@@ -41,6 +41,8 @@ import logging.LogType;
 import java.lang.reflect.Method;
 import java.net.URL;
 
+import platform.AbstractOS.IRetry;
+
 import anon.util.IMiscPasswordReader;
 
 /**
@@ -187,11 +189,10 @@ public class WindowsOS extends AbstractOS
 		return getEnvPath(a_applicationName, "APPDATA");
 	}
 
-	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory,
-			IMiscPasswordReader a_passwordReader)
+	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, IRetry a_checkRetry)
 	{
 		/*
-		 * Removed dependency to JAPDll --> otherwise we will need the whol JAP
+		 * Removed dependency to JAPDll --> otherwise we will need the whole JAP
 		 * Code for the MixConfig Tool..
 		 * 
 		 * The original call was: return JAPDll.xcopy(a_sourceFile,

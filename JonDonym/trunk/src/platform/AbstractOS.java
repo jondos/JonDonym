@@ -451,8 +451,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	 * @return true if copying the file was successful; false is an error occurred or if this
 	 * operation is not supported on this platform
 	 */
-	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, 
-			IMiscPasswordReader a_passwordReader)
+	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, IRetry a_checkRetry)
 	{
 		return false;
 	}
@@ -538,6 +537,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		}
 		
 		return env;
+	}
+	
+	public interface IRetry
+	{
+		public boolean checkRetry();
 	}
 	
 	protected void initEnv(String a_envCommand)

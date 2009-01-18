@@ -1016,7 +1016,7 @@ final public class JAPDll {
 			result = shellExecute_dll(a_command, a_parameters, a_bAsAdmin);
 		}
 		catch (Throwable a_e)
-		{a_e.printStackTrace();
+		{
 			result = false;
 		}
 		return result;		
