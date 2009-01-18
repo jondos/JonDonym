@@ -42,7 +42,6 @@ import logging.LogType;
  */
 public class JAPConfCertSavePoint implements IJAPConfSavePoint
 {
-
 	/**
 	 * Stores all unverified persistent certificates of the verification certificate store. This is
 	 * enough, because the user can only add unverified persistent certificates and nothing else. So
@@ -64,11 +63,11 @@ public class JAPConfCertSavePoint implements IJAPConfSavePoint
 	public void createSavePoint()
 	{
 		/* clear the Vector of unverified certificates */
-		m_unverifiedPersisitentCertificates.removeAllElements();
+		//m_unverifiedPersisitentCertificates.removeAllElements();
 		/* store all certificates which don't need verification in the vector of unverified
 		 * certificates
 		 */
-		Enumeration allCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
+		/*Enumeration allCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
 			getAllCertificates().elements();
 		while (allCertificates.hasMoreElements())
 		{
@@ -78,9 +77,9 @@ public class JAPConfCertSavePoint implements IJAPConfSavePoint
 				(currentCertificate.isOnlyHardRemovable() == true))
 			{
 				/* this is a persistent certificate without the need of verification -> store it */
-				m_unverifiedPersisitentCertificates.addElement(currentCertificate);
-			}
-		}
+				//m_unverifiedPersisitentCertificates.addElement(currentCertificate);
+			/*}
+		}*/
 		/* that's it -> now it is possible to restore all persistent certificates not depending on
 		 * other certificates
 		 */
@@ -91,11 +90,14 @@ public class JAPConfCertSavePoint implements IJAPConfSavePoint
 	 */
 	public void restoreSavePoint()
 	{
-		Enumeration originalCertificates;
+		/*Enumeration originalCertificates;
 		Enumeration allCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
 			getAllCertificates().elements();
 		CertificateInfoStructure currentCertificate, originalCertificate;
 		boolean newCert;
+		
+		/* restore global Signature verification state */
+		/*SignatureVerifier.getInstance().setCheckSignatures(m_checkSignatures);
 		
 		while (allCertificates.hasMoreElements())
 		{
@@ -106,31 +108,31 @@ public class JAPConfCertSavePoint implements IJAPConfSavePoint
 				(currentCertificate.isOnlyHardRemovable() == true))
 			{
 				/* this is a persistent certificate without the need of verification -> remove it */
-				originalCertificates = m_unverifiedPersisitentCertificates.elements();
+				/*originalCertificates = m_unverifiedPersisitentCertificates.elements();
 				while(originalCertificates.hasMoreElements())
 				{
 					originalCertificate = (CertificateInfoStructure) originalCertificates.nextElement();
 					if(originalCertificate.getCertificate().equals(currentCertificate.getCertificate()))
 					{
 						/* this cert is not new, it was in the store at the last savePoint */
-						newCert = false;
+						/*newCert = false;
 						m_unverifiedPersisitentCertificates.removeElement(originalCertificate);
 						/* restore the cert's state */
-						SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(originalCertificate, originalCertificate.isEnabled());
+						/*SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(originalCertificate, originalCertificate.isEnabled());
 						break;
 					}
 				}
 				if(newCert)
-				{
+				{*/
 					/* this cert was not in the store before -> remove it! */
-					SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificate(currentCertificate);
+				/*	SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificate(currentCertificate);
 				}
 			}
-		}
+		}/*
 		/* second: add the persistent certificates which don't need verification and were deleted (they were stored by
 		 * the last call of createSavePoint())
 		 */
-		originalCertificates = m_unverifiedPersisitentCertificates.elements();
+		/*originalCertificates = m_unverifiedPersisitentCertificates.elements();
 		while (originalCertificates.hasMoreElements())
 		{
 			originalCertificate = (CertificateInfoStructure) (originalCertificates.
@@ -139,8 +141,8 @@ public class JAPConfCertSavePoint implements IJAPConfSavePoint
 				addCertificateWithoutVerification(originalCertificate.getCertificate(),
 						originalCertificate.getCertificateType(), true,false);
 			/* also restore the enabled/disabled state */
-			SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(originalCertificate, originalCertificate.isEnabled());
-		}
+			/*SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(originalCertificate, originalCertificate.isEnabled());
+		}*/
 	}
 
 	/**
@@ -150,6 +152,9 @@ public class JAPConfCertSavePoint implements IJAPConfSavePoint
 	{
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 					  "JAPConfCertSavePoint: restoreDefaults: Restoring default certificate settings.");
+		/* enable global Signature verification */
+		SignatureVerifier.getInstance().setCheckSignatures(true);
+		
 		Enumeration allCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
 			getAllCertificates().elements();
 		/* first: remove all certificates, which are added without verification */

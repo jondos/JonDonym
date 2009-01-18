@@ -112,5 +112,14 @@ public class CertificateInfoStructure
 	{
 		return m_enabled;
 	}
-
+	
+	/**
+	 * Note: To enable/disable a CertificateInfoStructure does not habe any effect
+	 * on the corresponding CertificateContainer in the CertificateStore!
+	 * @param enabled
+	 */
+	public void setEnabled(boolean enabled)
+	{
+		m_enabled = enabled;
+	}
 }
