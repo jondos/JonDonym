@@ -121,52 +121,44 @@ public class LinuxOS extends AbstractOS
 	 */
 	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, IRetry a_checkRetry)
 	{
-        String cmd;
-        boolean fileEx = false;
-        boolean usedXterm = false;
-        String sourcePath = a_sourceFile.getPath();
-        String targetPath = a_targetDirectory.getPath()+"/";
-        File terminalk = new File("/usr/bin/kdesu");
-		fileEx = terminalk.exists();
-		if (fileEx == true)
-		{	
-			
+		if (a_sourceFile == null || a_targetDirectory == null || !a_targetDirectory.isDirectory())
+		{
+			return false;
+		}
+		
+		String cmd;
+		boolean bUsedXterm = false;
+		String sourcePath = a_sourceFile.getPath();
+		String targetPath = a_targetDirectory.getPath() + "/";
+
+		if (m_bKDE)
+		{
 			cmd = "kdesu 'cp -r " + sourcePath + " " + targetPath + "'";
 			executeShell(cmd);
 		}
+		else if (m_bGnome)
+		{
+			cmd = "gksu 'cp -r " + sourcePath + " " + targetPath + "'";
+		    executeShell(cmd);
+		}
 		else
 		{
-			File terminalg = new File("/usr/bin/gksu");
-			fileEx = terminalg.exists();
-		   	if (fileEx == true)
-			{	
-		   		cmd = "gksu 'cp -r " + sourcePath + " " + targetPath + "'";
-		        executeShell(cmd);
-			}
-			else
-			{
-				cmd = "xterm -e su -c 'cp -r " + sourcePath + " " + targetPath + "'";
-				executeShell(cmd);
-				usedXterm = true;
-			}   
+			cmd = "xterm -e su -c 'cp -r " + sourcePath + " " + targetPath + "'";
+			executeShell(cmd);
+			bUsedXterm = true;
 		}   
-		fileEx = false;
-		File target = new File(targetPath+a_sourceFile.getName());
-		fileEx = target.exists();
-		if ((fileEx == false) && (usedXterm == true))
-		{
-		   while ((fileEx == false))
-		   {	
-		      if (a_checkRetry == null || !a_checkRetry.checkRetry())
-		      {
-		    	  break;
-		      }
-		      
-		      executeShell(cmd);
-		      fileEx = target.exists();
-		   }
+
+		File target = new File(targetPath + a_sourceFile.getName());
+		while (bUsedXterm && !target.exists())
+		{	
+			if (a_checkRetry == null || !a_checkRetry.checkRetry())
+			{
+				break;
+			}
+			executeShell(cmd);
 		}
-		return fileEx;
+		
+		return target.exists();
 	}
 	   	
 	private void executeShell(String a_cmd) 
@@ -183,8 +175,7 @@ public class LinuxOS extends AbstractOS
 		}
 		catch (Exception e)
 		{
-			System.err.println(e.toString());
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
 		}
-	   	
 	}
 }
