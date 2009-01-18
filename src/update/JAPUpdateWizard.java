@@ -795,21 +795,21 @@ private boolean checkSignature()
 			}
 			else
 			{
-				JAPDialog dialog = new JAPDialog(downloadPage, 
-						JAPMessages.getString(PasswordContentPane.MSG_ENTER_PASSWORD_TITLE));
-				PasswordContentPane pane = 
-					new PasswordContentPane(dialog, PasswordContentPane.PASSWORD_ENTER,
-							JAPMessages.getString(MSG_ENTER_ADMIN_PASSWORD));
-				pane.updateDialog();
-				dialog.pack();
-				dialog.setResizable(false);
-				if (!AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, 
-						new File(m_fileAktJapJar.getParent()), pane))
+				AbstractOS.IRetry retryDialog = new AbstractOS.IRetry()
 				{
-					dialog.dispose();
+					public boolean checkRetry()
+					{
+						return JAPDialog.showYesNoDialog(downloadPage, 
+								JAPMessages.getString(MSG_ENTER_ADMIN_PASSWORD));
+					}
+				};
+				
+				if (!AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, 
+						new File(m_fileAktJapJar.getParent()), retryDialog))
+				{
 					throw new Exception ("Administrator copy failed!");
 				}
-				dialog.dispose();
+				
 				int i = 0;
 				for (; i < 9; i++)
 				{					

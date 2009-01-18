@@ -30,7 +30,13 @@ package platform;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
+
+import java.io.File;
 import java.util.Properties;
+
+import platform.AbstractOS.IRetry;
+
+import anon.util.IMiscPasswordReader;
 
 /**
  * This class is instantiated by AbstractOS if the current OS is Linux
@@ -108,5 +114,77 @@ public class LinuxOS extends AbstractOS
 	{
 		//Return path in user's home directory with hidden file (preceded by ".")
 		return System.getProperty("user.home", "") + "/.";
+	}
+	
+	/**
+	 * @author G. Koppen
+	 */
+	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, IRetry a_checkRetry)
+	{
+        String cmd;
+        boolean fileEx = false;
+        boolean usedXterm = false;
+        String sourcePath = a_sourceFile.getPath();
+        String targetPath = a_targetDirectory.getPath()+"/";
+        File terminalk = new File("/usr/bin/kdesu");
+		fileEx = terminalk.exists();
+		if (fileEx == true)
+		{	
+			
+			cmd = "kdesu 'cp -r " + sourcePath + " " + targetPath + "'";
+			executeShell(cmd);
+		}
+		else
+		{
+			File terminalg = new File("/usr/bin/gksu");
+			fileEx = terminalg.exists();
+		   	if (fileEx == true)
+			{	
+		   		cmd = "gksu 'cp -r " + sourcePath + " " + targetPath + "'";
+		        executeShell(cmd);
+			}
+			else
+			{
+				cmd = "xterm -e su -c 'cp -r " + sourcePath + " " + targetPath + "'";
+				executeShell(cmd);
+				usedXterm = true;
+			}   
+		}   
+		fileEx = false;
+		File target = new File(targetPath+a_sourceFile.getName());
+		fileEx = target.exists();
+		if ((fileEx == false) && (usedXterm == true))
+		{
+		   while ((fileEx == false))
+		   {	
+		      if (a_checkRetry == null || !a_checkRetry.checkRetry())
+		      {
+		    	  break;
+		      }
+		      
+		      executeShell(cmd);
+		      fileEx = target.exists();
+		   }
+		}
+		return fileEx;
+	}
+	   	
+	private void executeShell(String a_cmd) 
+	{
+		try
+		{
+	        String[] command = new String[3];
+		    command[0] = "sh";
+		    command[1] = "-c";
+		    command[2] = a_cmd;
+		    Runtime rt = Runtime.getRuntime();
+		    Process pr = rt.exec(command);
+		    pr.waitFor();
+		}
+		catch (Exception e)
+		{
+			System.err.println(e.toString());
+		}
+	   	
 	}
 }
