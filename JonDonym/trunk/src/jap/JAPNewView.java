@@ -2918,12 +2918,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_progressAnonLevel.setValue(0);
 			}
 			
-			int numMixes = currentMixCascade.getNumberOfMixes();
-			if (currentMixCascade.getNumberOfOperators() <= 1)
-			{
-				numMixes = 1;
-			}
-			
+			int numMixes = currentMixCascade.getNumberOfOperatorsShown();
 			for (int i = 0; i < numMixes && i < m_labelOperatorFlags.length; i++)
 			{
 				MixInfo mixInfo = currentMixCascade.getMixInfo(i);

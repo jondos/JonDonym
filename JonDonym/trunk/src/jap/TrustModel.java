@@ -360,8 +360,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			int minMixes = ((Integer) getConditionValue()).intValue();
 			
-			if(getTrustCondition() == TRUST_IF_AT_LEAST && (a_cascade == null ||  
-					a_cascade.getNumberOfOperators() < minMixes))
+			if (getTrustCondition() == TRUST_IF_AT_LEAST && (a_cascade == null ||  
+				a_cascade.getNumberOfOperators() < minMixes))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_MIXES)));
 			}

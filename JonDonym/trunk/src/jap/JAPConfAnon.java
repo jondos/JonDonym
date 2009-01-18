@@ -2146,7 +2146,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else
 						{
-							if (!cascade.isUserDefined() && cascade.getNumberOfOperators() <= 1)
+							if (!cascade.isUserDefined() && cascade.getNumberOfOperatorsShown() <= 1)
 							{
 								// this cascade is run by only one operator!
 								drawServerPanel(1, cascade.getName(), true, selectedMix);
