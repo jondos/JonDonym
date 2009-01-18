@@ -109,6 +109,7 @@ import gui.JAPHelpContext;
 import gui.JAPMessages;
 import gui.JAPProgressBar;
 import gui.MixDetailsDialog;
+import gui.MultiCertOverview;
 import gui.PopupMenu;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
@@ -249,6 +250,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	
 	private JLabel m_labelOperatorFlags[];
 	private MixMouseAdapter m_adapterOperator[];
+	private JLabel m_lawFlags[];
 	
 	private JLabel m_labelOwnTraffic, m_labelOwnTrafficSmall;
 	private JLabel m_labelOwnActivity, m_labelForwarderActivity;
@@ -800,7 +802,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.gridy = 1;
 		c1.gridx = 1;
-		c1.gridwidth = 3;
+		c1.gridwidth = 4;
 		p.add(m_lblUsers, c1);
 		
 		m_labelSpeed = new JLabel("1500 - 1500 kbit/s", SwingConstants.LEFT);
@@ -815,12 +817,24 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 		m_labelOperatorFlags = new JLabel[3];
 		m_adapterOperator = new MixMouseAdapter[3];
+		m_lawFlags = new JLabel[3];
+		
+		MouseAdapter lawListener = new MouseAdapter()
+		{
+			public void mouseClicked(MouseEvent a_event)
+			{
+				JAPDialog.showWarningDialog(JAPNewView.this,
+						JAPMessages.getString(JAPConfAnon.MSG_DATA_RETENTION_EXPLAIN_SHORT) + " " + 
+						JAPMessages.getString(JAPConfAnon.MSG_DATA_RETENTION_EXPLAIN,
+								"<b>" + JAPMessages.getString(MixDetailsDialog.MSG_BTN_DATA_RETENTION) + "</b>"));
+			}
+		};
 		
 		c1.gridwidth = 1;
-		c1.insets = new Insets(5, 2, 0, 5);
 		c1.fill = GridBagConstraints.NONE;
 		for (int i = 0; i < m_labelOperatorFlags.length; i++)
 		{
+			c1.insets = new Insets(5, 2, 0, 5);
 			c1.gridx = i + 1;
 			c1.gridy = 4;
 			m_labelOperatorFlags[i] = new JLabel("");
@@ -830,7 +844,21 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_labelOperatorFlags[i].addMouseListener(m_adapterOperator[i] =
 				new MixMouseAdapter(null, i, m_labelOperatorFlags[i]));
 			m_labelOperatorFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			
+			c1.gridx++;
+			m_lawFlags[i] = new JLabel(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID, true));
+			m_lawFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			m_lawFlags[i].setToolTipText(JAPMessages.getString(JAPConfAnon.MSG_DATA_RETENTION_EXPLAIN_SHORT));
+			m_lawFlags[i].addMouseListener(lawListener);
+			c1.insets = new Insets(3, 2, 0, 5);
+			p.add(m_lawFlags[i], c1);
+			if (i < m_labelOperatorFlags.length - 1)
+			{
+				// hide all labels except for the last one, as they overlap with the flags
+				m_lawFlags[i].setVisible(false);
+			}
 		}
+		
 		c1.fill = GridBagConstraints.HORIZONTAL;
 		
 		m_labelAnonMeter = new JLabel(getMeterImage(3));
@@ -845,7 +873,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				JAPHelp.getInstance().setVisible(true);
 			}
 		});
-		c1.gridx = 4;
+		c1.gridx++;
 		c1.gridy = 0;
 		c1.gridheight = 5;
 		c1.anchor = GridBagConstraints.EAST;
@@ -877,7 +905,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c2.gridy = 2;
 		p2.add(m_rbAnonOff, c2);
 
-		c1.gridx = 5;
+		c1.gridx++;
 		c1.weightx = 0;
 		c1.anchor = GridBagConstraints.WEST;
 		c1.insets = new Insets(0, 10, 0, 0);
@@ -2952,6 +2980,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 					m_labelOperatorFlags[i].setBorder(BorderFactory.createLineBorder(borderColor, 2));
 				}
+				
 			}
 			
 			// clear the unused labels
@@ -2960,6 +2989,20 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_labelOperatorFlags[i].setIcon(null);
 				m_labelOperatorFlags[i].setBorder(BorderFactory.createLineBorder(m_panelAnonService.getBackground(), 2));
 			}
+			
+			// show or hide the last warning label
+			for (int i = 0; i < m_lawFlags.length; i++)
+			{
+				if (i == numMixes - 1 && currentMixCascade.isDataRetentionActive())
+				{
+					m_lawFlags[i].setVisible(true);
+				}
+				else
+				{	
+					m_lawFlags[i].setVisible(false);
+				}
+			}
+			
 			
 			PerformanceEntry entry = PerformanceInfo.getLowestCommonBoundEntry(currentMixCascade.getId());
 			

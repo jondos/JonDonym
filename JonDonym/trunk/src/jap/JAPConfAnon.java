@@ -194,9 +194,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_GOOD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityGood";
 	private static final String MSG_DATA_RETENTION_ABBREVIATION = 
 		JAPConfAnon.class.getName() + "_DataRetentionAbbreviation";
-	private static final String MSG_DATA_RETENTION_EXPLAIN_SHORT = 
+	public static final String MSG_DATA_RETENTION_EXPLAIN_SHORT = 
 		JAPConfAnon.class.getName() + "_DataRetentionExplainShort";
-	private static final String MSG_DATA_RETENTION_EXPLAIN = 
+	public static final String MSG_DATA_RETENTION_EXPLAIN = 
 		JAPConfAnon.class.getName() + "_DataRetentionExplain";
 
 	private static final int FILTER_SPEED_MAJOR_TICK = 100;
@@ -806,7 +806,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.fill = GridBagConstraints.HORIZONTAL;
 		m_cascadesPanel.add(m_anonLevelLabel, c);
 		
-		m_lblVDS = new JLabel(JAPMessages.getString(MSG_DATA_RETENTION_ABBREVIATION));
+		m_lblVDS = new JLabel();//JAPMessages.getString(MSG_DATA_RETENTION_ABBREVIATION));
+		m_lblVDS.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID, true));
 		m_lblVDS.setToolTipText(JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN_SHORT));
 		m_lblVDS.setForeground(Color.red);
 		m_lblVDS.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
