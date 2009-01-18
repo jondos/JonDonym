@@ -139,7 +139,7 @@ public class LinuxOS extends AbstractOS
 		else if (m_bGnome)
 		{
 			cmd = "gksu 'cp -r " + sourcePath + " " + targetPath + "'";
-		    executeShell(cmd);
+			executeShell(cmd);
 		}
 		else
 		{
@@ -165,7 +165,7 @@ public class LinuxOS extends AbstractOS
 	{
 		try
 		{
-	        String[] command = new String[3];
+			String[] command = new String[3];
 		    command[0] = "sh";
 		    command[1] = "-c";
 		    command[2] = a_cmd;
