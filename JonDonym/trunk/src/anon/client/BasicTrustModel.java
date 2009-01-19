@@ -29,6 +29,8 @@ package anon.client;
 
 import java.security.SignatureException;
 import anon.client.TrustException;
+
+import java.util.Date;
 import java.util.Observable;
 
 import anon.infoservice.MixCascade;
@@ -66,6 +68,19 @@ public class BasicTrustModel extends Observable implements ITrustModel
 	{
 		if (a_cascade == null || !a_cascade.isVerified())
 		{
+			throw (new SignatureException(m_messages.getMessage("invalidSignature")));
+		}
+		else
+		{
+			// check whether at least one of the certificates is valid
+			for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
+			{
+				if (a_cascade.getMixInfo(i) != null && a_cascade.getMixInfo(i).getCertPath() != null &&
+					a_cascade.getMixInfo(i).getCertPath().isValid(new Date()))
+				{
+					return;
+				}
+			}
 			throw (new SignatureException(m_messages.getMessage("invalidSignature")));
 		}
 	}
