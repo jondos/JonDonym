@@ -146,6 +146,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private int m_nrCountries = 0;
 	private int m_nrOperators = 0;
 	private int m_nrOperatorsShown = 0;
+	private int m_distributionPoints = 0;
 	private boolean[] m_mixCertVerifiedAndValid;
 	private Object SYNC_OPERATORS_AND_COUNTRIES = new Object();
 
@@ -1312,6 +1313,17 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return m_nrCountries;
 	}
 	
+	/**
+	 * Returns a number that tells how distributed this service is. The higher, the better.
+	 * Numbers range from 0 to 6, where 0 is an unknown state.
+	 * @return a number that tells how distributed this service is
+	 */
+	public int getDistribution()
+	{
+		calculateOperatorsAndCountries();
+		return m_distributionPoints;
+	}
+	
 	private void calculateOperatorsAndCountries()
 	{
 		synchronized (SYNC_OPERATORS_AND_COUNTRIES)
@@ -1385,15 +1397,19 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 							m_nrCountries++;
 						}
 					}
-					if (operatorCountryCode != null)
+					
+					if (m_mixCertVerifiedAndValid[i])
 					{
-						//operatorCountries.put(operatorCountryCode, operatorCountryCode);
-						countries.put(operatorCountryCode, operatorCountryCode);
-					}
-					if (mixCountryCode != null)
-					{
-						//mixCountries.put(mixCountryCode, mixCountryCode);
-						countries.put(mixCountryCode, mixCountryCode);
+						if (operatorCountryCode != null)
+						{
+							//operatorCountries.put(operatorCountryCode, operatorCountryCode);
+							countries.put(operatorCountryCode, operatorCountryCode);
+						}
+						if (mixCountryCode != null)
+						{
+							//mixCountries.put(mixCountryCode, mixCountryCode);
+							countries.put(mixCountryCode, mixCountryCode);
+						}
 					}
 		
 					// operator bonus
@@ -1407,18 +1423,46 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				}
 				else
 				{
-					// This Cascade has at least two operators which are the same. Assume only one operator!
-					m_nrOperators = 1;
+					// This Cascade has at least two operators which are the same. Assume only one operator at maximum!
+					if (m_nrOperators <= 0)
+					{
+						for (int j = 0; j < getNumberOfMixes(); j++)
+						{
+							if (m_mixCertVerifiedAndValid[j])
+							{
+								m_nrOperators = 1;
+								break;
+							}
+						}
+					}
+					else
+					{
+						m_nrOperators = 1;
+					}
 					m_nrOperatorsShown = 1;
-					m_nrCountries = 1;
+					m_nrCountries = Math.min(m_nrOperators, 1);
 					break;
 				}
 			}
-			if (m_nrCountries == 0)
+			// calculate distribution points
+			if (m_nrOperators == 2 && m_nrCountries == 2)
 			{
-				// no Mix seems to have information both about operator and Mix country; assume 1 country
-				m_nrCountries = 1;
+				m_distributionPoints = 3;
 			}
+			else if (m_nrOperators == 2 && m_nrCountries == 1)
+			{
+				m_distributionPoints = 2;
+			}
+			else if (m_nrOperators == 1)
+			{
+				m_distributionPoints = 1;
+			}
+			else
+			{
+				m_distributionPoints = m_nrOperators + m_nrCountries;
+			}
+				
+			
 			
 			// Test is trust has changed meanwhile and recalculate if needed.
 			calculateOperatorsAndCountries();

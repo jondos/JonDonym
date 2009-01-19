@@ -136,8 +136,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String MSG_EXCEPTION_NOT_ENOUGH_ANON = TrustModel.class.getName() + "_exceptionNotEnoughAnon";
 	private static final String MSG_EXCEPTION_BLACKLISTED = TrustModel.class.getName() + "_exceptionBlacklisted";
 	private static final String MSG_EXCEPTION_NOT_ENOUGH_SPEED = TrustModel.class.getName() + "_exceptionNotEnoughSpeed";
-	private static final String MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH = TrustModel.class.getName() + "_exceptionResponseTimeTooHigh";
-	private static final String MSG_EXCEPTION_NO_VALID_SIGNATURE = TrustModel.class.getName() + "_exceptionNoValidSignature";
+	private static final String MSG_EXCEPTION_RESPONSE_TIME_TOO_HIGH = TrustModel.class.getName() + "_exceptionResponseTimeTooHigh";	
 	
 	private static Vector ms_trustModels = new Vector();
 	private static TrustModel ms_currentTrustModel;
@@ -1142,22 +1141,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 		}
 
-		if (!a_cascade.isUserDefined())
-		{
-			super.checkTrust(a_cascade);
-		}
-
-
-		// test if all mixes have valid certificates.
-		MixInfo info;
-		for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
-		{
-			info = a_cascade.getMixInfo(i);
-			if (info == null || !info.isVerified())
-			{
-				throw new SignatureException(JAPMessages.getString(MSG_EXCEPTION_NO_VALID_SIGNATURE, new Integer(i+1)));
-			}
-		}
+		
+		super.checkTrust(a_cascade);
+				
 
 		synchronized(m_trustAttributes)
 		{

@@ -75,6 +75,11 @@ public final class JAPMessages implements IMessages
 		return getString(a_key);
 	}
 	
+	public String getMessage(String a_key, Object a_argument)
+	{
+		return getString(a_key, a_argument);
+	}
+	
 	public static Locale getSystemLocale()
 	{
 		return SYSTEM_LOCALE;

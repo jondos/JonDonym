@@ -2297,7 +2297,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
 					}
 					
-					m_anonLevelLabel.setText(m_infoService.getAnonLevel(cascadeId));
+					m_anonLevelLabel.setText(cascade.getDistribution()  + "," +  
+							m_infoService.getAnonLevel(cascadeId) + " / 6,6");
 					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
 					m_lblVDS.setVisible(cascade.isDataRetentionActive());
 					
@@ -2796,11 +2797,11 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
 			if (statusInfo != null && statusInfo.getAnonLevel() >= 0)
 			{
-				return "" + statusInfo.getAnonLevel() + " / " + StatusInfo.ANON_LEVEL_MAX;
+				return "" + statusInfo.getAnonLevel();// + " / " + StatusInfo.ANON_LEVEL_MAX;
 			}
 					
 			//return "N/A";
-			return "? / " + StatusInfo.ANON_LEVEL_MAX;
+			return "?";// / " + StatusInfo.ANON_LEVEL_MAX;
 		}
 
 

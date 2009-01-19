@@ -1447,11 +1447,11 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		StatusInfo info;
 		if (a_timeout > 0)
 		{
-			info = new StatusInfo(mixCascadeStatusNode, a_cascade, a_timeout);
+			info = new StatusInfo(mixCascadeStatusNode, a_timeout);
 		}
 		else
 		{
-			info = new StatusInfo(mixCascadeStatusNode, a_cascade);
+			info = new StatusInfo(mixCascadeStatusNode);
 		}
 		/* check the signature */
 		if (!info.isVerified())
