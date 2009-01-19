@@ -146,7 +146,7 @@ public class LinuxOS extends AbstractOS
 			cmd = "xterm -e su -c 'cp -r " + sourcePath + " " + targetPath + "'";
 			executeShell(cmd);
 			bUsedXterm = true;
-		}   
+		}
 
 		File target = new File(targetPath + a_sourceFile.getName());
 		while (bUsedXterm && !target.exists())
