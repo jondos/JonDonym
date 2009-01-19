@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.Observable;
 
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixInfo;
 import anon.util.IMessages;
 
 
@@ -60,12 +61,48 @@ public class BasicTrustModel extends Observable implements ITrustModel
 				{
 					return "Invalid Signature";
 				}
+				
+				public String getMessage(String a_key, Object a_argument)
+				{
+					return getMessage(a_key);
+				}
 			};
 		}
 	}
 
 	public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 	{
+		
+		// test if all mixes have verified certificates.
+		MixInfo info;
+		int countUnverified = 0;
+		SignatureException exception = null;
+		for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
+		{
+			info = a_cascade.getMixInfo(i);
+			if (info == null || !info.isVerified())
+			{
+				countUnverified++;
+				if (exception == null)
+				{
+					exception = new SignatureException(m_messages.getMessage("invalidSignature") + " (Mix " + (i+1) + ")");
+				}
+			}
+		}
+		if (exception != null)
+		{
+			if (countUnverified > 1 || a_cascade.getNumberOfOperatorsShown() == 1 || a_cascade.getNumberOfMixes() <= 1)
+			{
+				throw new SignatureException(m_messages.getMessage("invalidSignature"));
+			}
+			else
+			{
+				throw exception;
+			}
+		}
+		
+		
+		
 		if (a_cascade == null || !a_cascade.isVerified())
 		{
 			throw (new SignatureException(m_messages.getMessage("invalidSignature")));

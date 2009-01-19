@@ -2809,7 +2809,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_rbAnonOff.setSelected(!m_Controller.getAnonMode());
 			m_cbAnonymityOn.setSelected(m_Controller.getAnonMode());
 			StatusInfo currentStatus = currentMixCascade.getCurrentStatus();
-			int anonLevel = currentStatus.getAnonLevel();
+			/** TODO temporary calculate the anonymity level like this, but only until we have the new graphics */
+			int anonLevel = (int)
+				((((double)currentStatus.getAnonLevel()) + ((double)currentMixCascade.getDistribution())) / 12.0 * (double)StatusInfo.ANON_LEVEL_MAX);
+			
 			if (!GUIUtils.isLoadingImagesStopped())
 			{
 				/** @todo check if this helps against update freeze */
@@ -2858,24 +2861,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				//m_bShowConnecting = false;
 				if (currentStatus.getNrOfActiveUsers() > -1)
 				{
-					if (anonLevel >= StatusInfo.ANON_LEVEL_MIN)
-					{
-						strSystrayTooltip += "\n" + JAPMessages.getString(JAPViewIconified.MSG_ANON) + ": ";
-						//strSystrayTooltip += "\n" + "Test" + ": ";
-						//strSystrayTooltip += "\n" + "T";
-						if (anonLevel < StatusInfo.ANON_LEVEL_FAIR)
-						{
-							strSystrayTooltip += JAPMessages.getString(JAPViewIconified.MSG_ANON_LOW);
-						}
-						else if (anonLevel < StatusInfo.ANON_LEVEL_HIGH)
-						{
-							strSystrayTooltip += JAPMessages.getString(JAPViewIconified.MSG_ANON_FAIR);
-						}
-						else
-						{
-							strSystrayTooltip += JAPMessages.getString(JAPViewIconified.MSG_ANON_HIGH);
-						}
-					}
+					strSystrayTooltip += "\n" + JAPMessages.getString(JAPViewIconified.MSG_ANON) + ": ";
+					strSystrayTooltip += currentMixCascade.getDistribution() + "," + currentStatus.getAnonLevel() + " / 6,6";
+					
 					//userProgressBar.setString(String.valueOf(currentStatus.getNrOfActiveUsers()));
 					if (!isChangingTitle())
 					{

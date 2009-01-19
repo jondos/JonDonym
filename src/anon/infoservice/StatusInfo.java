@@ -170,12 +170,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 */
 	public StatusInfo(Element a_statusNode) throws Exception
 	{
-		this(a_statusNode, null);
-	}
-	
-	public StatusInfo(Element a_statusNode, MixCascade a_cascade) throws Exception
-	{
-		this(a_statusNode, a_cascade, -1);
+		this(a_statusNode, -1);
 	}
 
 	/**
@@ -188,7 +183,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 *                           -1.
 	 * @param a_timeout	A timeout.                     
 	 */
-	public StatusInfo(Element a_statusNode, MixCascade a_cascade, long a_timeout) throws Exception
+	public StatusInfo(Element a_statusNode, long a_timeout) throws Exception
 	{
 		/* use always the timeout for the infoservice context, because the JAP client currently does
 		 * not have a database of status entries -> no timeout for the JAP client necessary
@@ -209,18 +204,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	
 		/* Temporarily add the MixCascade certificate to the certificate store when loading from the XML file */		
 		int certificateLock = -1;
-		if(a_cascade == null)
-		{
-			a_cascade = (MixCascade) Database.getInstance(MixCascade.class).getEntryById(m_mixCascadeId);
-			
-			/*if (a_cascade != null && a_cascade.getCertPath() != null && a_cascade.getCertPath().getFirstCertificate() != null && a_cascade.getCertPath().verify())
-			{
-				/* add the cascade certificate to the certificate store */
-				/*certificateLock = SignatureVerifier.getInstance().getVerificationCertificateStore().
-					addCertificateWithoutVerification(a_cascade.getCertPath(),
-					JAPCertificate.CERTIFICATE_TYPE_MIX, false, false);
-			}*/
-		}
+		
 
 		// verify the signature
 		try
@@ -260,26 +244,9 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		
 		/* calculate the anonymity level */
 		m_anonLevel = -1;
-		if (a_cascade != null && a_cascade.getNumberOfMixes() > 0 &&
-			getNrOfActiveUsers() >= 0 && getTrafficSituation() >= 0)
+		if (getNrOfActiveUsers() >= 0 && getTrafficSituation() >= 0)
 		{
-			double userFactor = Math.min( ( (double) getNrOfActiveUsers()) / 500.0, 1.0);
-			//double trafficFactor = Math.min( ( (double) getTrafficSituation()) / 100.0, 1.0);
-
-			double countryFactor = Math.max(Math.min((double)a_cascade.getNumberOfCountries(), 3.0), 1.0);
-			double operatorFactor = Math.max(Math.min((double)a_cascade.getNumberOfOperators(), 3.0), 1.0);
-
-
-
-			/* get the integer part of the product -> 0 <= anonLevel <= 10 */
-			m_anonLevel = (int) (userFactor * (countryFactor + operatorFactor) +
-								  // "good" cascades always get a 40% minimum
-								(countryFactor - 1.0 + operatorFactor - 1.0));
-
-			// do not supersede the maximum or minimum anonymity level
-			m_anonLevel = Math.min(m_anonLevel, ANON_LEVEL_MAX);
-			m_anonLevel = Math.max(m_anonLevel, ANON_LEVEL_MIN);
-
+			m_anonLevel = (int)((Math.min((double) getNrOfActiveUsers(), 500)) / 500.0 * 6.0);
 		}
 		m_statusXmlData = XMLUtil.toString(a_statusNode);
 		m_statusXmlDataBytes=m_statusXmlData.getBytes();
@@ -393,7 +360,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	/**
 	 * Returns the calculated anonymity level (from number of active users, current traffic
 	 * and cascade length). It is a value between ANON_LEVEL_MIN and ANON_LEVEL_MAX. If it is < 0,
-	 * the anony level is unknown.
+	 * the anonymity level is unknown.
 	 *
 	 * @return The current anonymity level.
 	 */

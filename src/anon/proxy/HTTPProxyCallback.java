@@ -145,6 +145,11 @@ public class HTTPProxyCallback implements ProxyCallback
 				{
 					return "A proxy message error occured!";
 				}
+				
+				public String getMessage(String a_key, Object a_argument)
+				{
+					return getMessage(a_key);
+				}
 			};
 		}
 		
