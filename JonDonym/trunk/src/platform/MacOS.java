@@ -28,6 +28,11 @@
 package platform;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import platform.AbstractOS.AbstractRetryCopyProcess;
+
 import anon.util.ClassUtil;
 import anon.util.Util;
 
@@ -47,6 +52,15 @@ public class MacOS extends AbstractOS
 	final static String BUNDLE_MAC_OS_EXECUTABLES = BUNDLE_CONTENTS+"MacOS"+File.separator;
 	final static String BUNDLE_PROPERTY_FILE_NAME = "Info.plist";
 	final static String BUNDLE_EXECUTABLE_PROPERTY_KEY = "CFBundleExecutable";
+	
+	/* some constants for the root copy method which is based on
+	 * a interpreted apple script
+	 */
+	final static String OSASCRIPT_CMD = "osascript";
+	final static String ROOT_SHELLSCRIPT_NAME = "rootShellScript";
+	final static String OSA_EXEC_SHELLSCRIPT_STMT = 
+		"do shell script " + ROOT_SHELLSCRIPT_NAME + 
+		" with administrator privileges";
 	
 	//private HashMap m_bundleProperties = null;
 	private String m_bundlePath = null;
@@ -224,5 +238,34 @@ public class MacOS extends AbstractOS
 		}
 		return getBundlePath()+File.separator+BUNDLE_MAC_OS_EXECUTABLES+bundleExecutable;*/
 		return null;
+	}
+
+	public boolean copyAsRoot(File file, File directory, AbstractRetryCopyProcess a_checkRetry) 
+	{
+		String osaShellscript_stmt = 
+			"set " + ROOT_SHELLSCRIPT_NAME + " to "+
+			"\"cp "+file.getAbsolutePath()+" "+directory.getAbsolutePath()+"\"";
+		try
+		{
+			Runtime runtime = Runtime.getRuntime();
+			Process osascriptInterpreter = runtime.exec(OSASCRIPT_CMD);
+			//Write Applescript statements to the interpreters stdin
+			PrintWriter stdinWriter = new PrintWriter(osascriptInterpreter.getOutputStream());
+			stdinWriter.println(osaShellscript_stmt);
+			stdinWriter.println(OSA_EXEC_SHELLSCRIPT_STMT);		
+			stdinWriter.flush();
+			stdinWriter.close();
+			return (osascriptInterpreter.waitFor() == 0);
+		}
+		catch(IOException ioe)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Mac OS root copy failed: ", ioe);
+			return false;
+		}
+		catch(InterruptedException ie)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Interrupted while waiting for root copy process ", ie);
+			return false;
+		}
 	}	
 }

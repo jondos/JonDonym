@@ -116,7 +116,7 @@ public class SocketConnection implements IStreamConnection {
 
 	public synchronized int getTimeout() throws ConnectionException {
 		if (m_internalState == ConnectionState_CLOSE)
-			throw new ConnectionException("Connection is allready closed");
+			throw new ConnectionException("Connection is already closed");
 		try {
 			return m_underlyingSocket.getSoTimeout();
 		} catch (SocketException e) {
@@ -126,7 +126,7 @@ public class SocketConnection implements IStreamConnection {
 
 	public synchronized void setTimeout(int value) throws ConnectionException {
 		if (m_internalState == ConnectionState_CLOSE)
-			throw new ConnectionException("Connection is allready closed");
+			throw new ConnectionException("Connection is already closed");
 		try {
 			m_underlyingSocket.setSoTimeout(value);
 		} catch (SocketException e) {
