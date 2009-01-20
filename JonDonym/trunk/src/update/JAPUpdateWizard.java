@@ -795,35 +795,34 @@ private boolean checkSignature()
 			}
 			else
 			{
-				AbstractOS.IRetry retryDialog = new AbstractOS.IRetry()
+				AbstractOS.AbstractRetryCopyProcess retryDialog = new AbstractOS.AbstractRetryCopyProcess(9)
 				{
 					public boolean checkRetry()
 					{
 						return JAPDialog.showYesNoDialog(downloadPage, 
 								JAPMessages.getString(MSG_ENTER_ADMIN_PASSWORD));
 					}
+					
+					public boolean incrementProgress()
+					{
+						if (super.incrementProgress())
+						{
+							downloadPage.progressBar.setValue(491 + getCurrentStep());
+							downloadPage.progressBar.repaint();
+							return true;
+						}
+						return false;
+					}
+					
+					public void reset()
+					{
+						super.reset();
+						downloadPage.progressBar.setValue(490);
+					}
 				};
 				
 				if (!AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, 
 						new File(m_fileAktJapJar.getParent()), retryDialog))
-				{
-					throw new Exception ("Administrator copy failed!");
-				}
-				
-				int i = 0;
-				for (; i < 9; i++)
-				{					
-					downloadPage.progressBar.setValue(491 + i);
-					downloadPage.progressBar.repaint();
-					if (m_fileNewJapJar.length() == m_fileAktJapJar.length() &&
-						m_fileNewJapJar.lastModified() == m_fileAktJapJar.lastModified())
-						/* TODO get version number of the JAP.jar file by a java shell call */
-					{
-						break;
-					}
-					Thread.sleep(500);
-				}
-				if (i == 9)
 				{
 					throw new Exception ("Administrator copy failed!");
 				}

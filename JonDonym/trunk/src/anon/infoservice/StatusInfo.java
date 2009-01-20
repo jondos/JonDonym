@@ -60,10 +60,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	public static final String XML_ELEMENT_CONTAINER_NAME = "MixCascadeStatusList";
 
 	public static final int ANON_LEVEL_MIN = 0;
-	public static final int ANON_LEVEL_LOW = 2;
-	public static final int ANON_LEVEL_FAIR = 3;
-	public static final int ANON_LEVEL_HIGH = 8;
-	public static final int ANON_LEVEL_MAX = 10;
+	public static final int ANON_LEVEL_MAX = 6;
 
 	/**
 	 * This is the ID of the mixcascade to which this status belongs.

@@ -270,7 +270,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JLabel m_labelForwarderConnections;
 	private JLabel m_labelForwardingErrorSmall, m_labelForwardingError;
 	private JAPProgressBar m_progressOwnTrafficActivity, m_progressOwnTrafficActivitySmall,
-		m_progressAnonLevel;
+		m_progressAnonLevel, m_progressDistribution;
 	private JButton m_bttnAnonDetails, m_bttnReload;
 	private JButton m_firefox;
 	private JCheckBox m_cbAnonymityOn;
@@ -861,7 +861,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		
 		c1.fill = GridBagConstraints.HORIZONTAL;
 		
-		m_labelAnonMeter = new JLabel(getMeterImage(3));
+		m_labelAnonMeter = new JLabel(getMeterImage(null, null));
 		m_labelAnonMeter.setToolTipText(JAPMessages.getString(MSG_ANONYMETER_TOOL_TIP));
 		m_labelAnonMeter.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		m_labelAnonMeter.addMouseListener(new MouseAdapter()
@@ -935,23 +935,37 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.anchor = GridBagConstraints.EAST;
 		p.add(m_labelAnonymityLow, c1);
+		m_progressDistribution = new JAPProgressBar();
+		m_progressDistribution.setMinimum(MixCascade.DISTRIBUTION_MIN);
+		m_progressDistribution.setMaximum(MixCascade.DISTRIBUTION_MAX);
+		m_progressDistribution.setBorderPainted(false);
+		c1.weightx = 0.75;
+		c1.fill = GridBagConstraints.HORIZONTAL;
+		c1.anchor = GridBagConstraints.WEST;
+		c1.insets = new Insets(0, 0, 0, 0);
+		c1.gridx++;
+		p.add(m_progressDistribution, c1);
+		
+		
+		m_labelAnonymityHigh = new JLabel(JAPMessages.getString("ngAnonymityHigh"));
+		c1.gridx++;
+		c1.weightx = 0.5;
+		c1.insets = new Insets(0, 20, 0, 5);
+		c1.fill = GridBagConstraints.HORIZONTAL;
+		c1.anchor = GridBagConstraints.EAST;
+		p.add(m_labelAnonymityHigh, c1);
+		
+		
 		m_progressAnonLevel = new JAPProgressBar();
 		m_progressAnonLevel.setMinimum(StatusInfo.ANON_LEVEL_MIN);
 		m_progressAnonLevel.setMaximum(StatusInfo.ANON_LEVEL_MAX);
 		m_progressAnonLevel.setBorderPainted(false);
+		c1.gridx++;
 		c1.weightx = 0.75;
-		c1.fill = GridBagConstraints.HORIZONTAL;
-		c1.anchor = GridBagConstraints.CENTER;
-		c1.insets = new Insets(0, 0, 0, 0);
-		c1.gridx = 3;
-		p.add(m_progressAnonLevel, c1);
-		m_labelAnonymityHigh = new JLabel(JAPMessages.getString("ngAnonymityHigh"));
-		c1.gridx = 4;
-		c1.weightx = 0.5;
-		c1.insets = new Insets(0, 0, 0, 0);
-		c1.fill = GridBagConstraints.HORIZONTAL;
 		c1.anchor = GridBagConstraints.WEST;
-		p.add(m_labelAnonymityHigh, c1);
+		c1.insets = new Insets(0, 0, 0, 0);
+		p.add(m_progressAnonLevel, c1);
+		
 		m_flippingpanelAnon.setSmallPanel(p);
 
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -1637,13 +1651,25 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	  }
 	 }*/
 
-	/**Anon Level is >=0 and <=5. If -1 no measure is available*/
-	private Icon getMeterImage(int iAnonLevel)
+	/**Anon Level is >=0 and <=5. If -1 no measure is available
+	 * TODO Update with new images!! 
+	 */
+	private Icon getMeterImage(MixCascade a_cascade, StatusInfo a_statusInfo)
 	{
 		boolean bAnonMode = m_Controller.getAnonMode();
 		boolean bConnected = m_Controller.isAnonConnected();
 		boolean bConnectionErrorShown = m_bShowConnecting;
-
+		int iAnonLevel;
+		
+		if (a_cascade == null || a_statusInfo == null)
+		{
+			iAnonLevel = 0;
+		}
+		else
+		{
+			iAnonLevel = (int)((((double)a_statusInfo.getAnonLevel()) + ((double)a_cascade.getDistribution())) / 12.0 * 10.0);
+		}
+		
 		if (bAnonMode && bConnected)
 		{
 			//System.out.println("anon level");
@@ -2811,12 +2837,12 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			StatusInfo currentStatus = currentMixCascade.getCurrentStatus();
 			/** TODO temporary calculate the anonymity level like this, but only until we have the new graphics */
 			int anonLevel = (int)
-				((((double)currentStatus.getAnonLevel()) + ((double)currentMixCascade.getDistribution())) / 12.0 * (double)StatusInfo.ANON_LEVEL_MAX);
+				((((double)currentStatus.getAnonLevel()) + ((double)currentMixCascade.getDistribution())) / 12.0 * 6.0);
 			
 			if (!GUIUtils.isLoadingImagesStopped())
 			{
 				/** @todo check if this helps against update freeze */
-				m_labelAnonMeter.setIcon(getMeterImage(anonLevel));
+				m_labelAnonMeter.setIcon(getMeterImage(currentMixCascade, currentStatus));
 			}
 			Color color = Color.red;
 			if (anonLevel > 7)
@@ -2878,26 +2904,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						}
 					}
 				}
-				
-				/*int t = currentStatus.getTrafficSituation();
-				if (t > -1)
-				{
-					//map 0..100 --> 0..5
-					//0 --> 0
-					//1..20 --> 1
-					//21..40 --> 2
-					//41..60 --> 3
-					//61..80 --> 4
-					//81..100 --> 5
-					//m_progressAnonTraffic.setValue( (t + 19) / 20);
-				}
-				else
-				{
-					// no value from InfoService
-					// TODO: labelFlags
-					//m_progressAnonTraffic.setValue(0);
-
-				}*/
 			}
 			else
 			{
