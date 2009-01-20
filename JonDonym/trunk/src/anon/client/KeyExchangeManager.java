@@ -43,6 +43,7 @@ import java.security.SignatureException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import anon.ErrorCodes;
@@ -88,6 +89,7 @@ public class KeyExchangeManager {
   private SymCipher m_firstMixSymmetricCipher;
 
   private boolean m_chainProtocolWithFlowControl;
+  private int m_upstreamSendMe,m_downstreamSendMe;
 
   private FixedRatioChannelsDescription m_fixedRatioChannelsDescription;
 
@@ -336,9 +338,29 @@ public class KeyExchangeManager {
 				  {
 					  /* no modification of the default settings required */
 				  }
-				  else if (chainMixProtocolVersionValue.equals("0.4"))
+				  else if (chainMixProtocolVersionValue.equals("0.6"))
 				  {
 					  m_chainProtocolWithFlowControl = true;
+					  Node elemFlowControl=XMLUtil.getFirstChildByName(currentMixNode,"FlowControl");
+					  if(elemFlowControl==null)
+						  throw (new XMLParseException(XMLParseException.NODE_NULL_TAG,
+						  "FlowControl node expected in received XML structure."));
+					  Node elemUpstreamSendMe=XMLUtil.getFirstChildByName(elemFlowControl,"UpstreamSendMe");	
+					  if(elemUpstreamSendMe==null)
+						  throw (new XMLParseException(XMLParseException.NODE_NULL_TAG,
+						  "UpstreamSendMe node expected in received XML structure."));
+					  Node elemDownstreamSendMe=XMLUtil.getFirstChildByName(elemFlowControl,"DownstreamSendMe");	
+					  if(elemDownstreamSendMe==null)
+						  throw (new XMLParseException(XMLParseException.NODE_NULL_TAG,
+						  "DownstreamSendMe node expected in received XML structure."));
+					  m_upstreamSendMe=XMLUtil.parseValue(elemUpstreamSendMe,-1);
+					  if(m_upstreamSendMe<=0)
+						  throw (new XMLParseException(XMLParseException.NODE_NULL_TAG,
+						  "Got wrong value for UpstreamSendMe in received XML structure."));
+					  m_downstreamSendMe=XMLUtil.parseValue(elemDownstreamSendMe,-1);
+					  if(m_downstreamSendMe<=0)
+						  throw (new XMLParseException(XMLParseException.NODE_NULL_TAG,
+						  "Got wrong value for DownstreamSendMe in received XML structure."));
 				  }
 				  else if (chainMixProtocolVersionValue.equals("0.5"))
 				  {
@@ -568,6 +590,16 @@ public class KeyExchangeManager {
   public boolean isChainProtocolWithFlowControl() {
     return m_chainProtocolWithFlowControl;
   }
+  
+  public int getUpstreamSendMe()
+  	{
+  		return m_upstreamSendMe;
+  	}
+
+  public int getDownstreamSendMe()
+  	{
+  		return m_downstreamSendMe;
+  	}
 
   public FixedRatioChannelsDescription getFixedRatioChannelsDescription() {
     return m_fixedRatioChannelsDescription;

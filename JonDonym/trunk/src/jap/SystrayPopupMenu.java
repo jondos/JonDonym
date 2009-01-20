@@ -107,7 +107,7 @@ public class SystrayPopupMenu extends PopupMenu
 			users += 
 			
 			users += ", " + JAPMessages.getString(MSG_ANONYMITY) + ": " + cascade.getDistribution() + "," + 
-			(info == null || info.getAnonLevel() < StatusInfo.ANON_LEVEL_MIN ? "?" : info.getAnonLevel()) + 
+			(info == null || info.getAnonLevel() < StatusInfo.ANON_LEVEL_MIN ? "?" : "" + info.getAnonLevel()) + 
 			" / " + MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX;
 
 			connected = JAPMessages.getString(MSG_CONNECTED);

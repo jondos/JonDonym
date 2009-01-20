@@ -1375,7 +1375,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			m_nrOperatorsShown = 0;
 			m_nrCountries = 0;
 			for (int i = 0; i < getNumberOfMixes(); i++)
-			{				
+			{
 				if (getMixInfo(i) == null || getMixInfo(i).getCertPath() == null)
 				{
 					continue;

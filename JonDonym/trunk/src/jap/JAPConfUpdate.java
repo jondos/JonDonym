@@ -501,7 +501,7 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 				new JAPUpdateWizard(m_releaseVersion, getRootPanel());
 			}
 			else
-			{				
+			{
 				new JAPUpdateWizard(m_devVersion, getRootPanel());
 			}
 		}

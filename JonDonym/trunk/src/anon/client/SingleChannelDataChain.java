@@ -38,6 +38,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 /**
  * @author Stefan Lieske
  */
@@ -55,6 +59,9 @@ public class SingleChannelDataChain extends AbstractDataChain
 	private AbstractDataChannel m_associatedChannel;
 
 	private boolean m_firstUpstreamPacket;
+	
+	private int m_downstreamSendMeCount;
+	private int m_downstreamSendMeLimit;
 
 	private class InvalidChainCellException extends Exception
 	{
@@ -156,7 +163,7 @@ public class SingleChannelDataChain extends AbstractDataChain
 
 	public SingleChannelDataChain(IDataChannelCreator a_channelCreator,
 								  DataChainErrorListener a_errorListener, int a_chainType,
-								  boolean a_supportFlowControl)
+								  boolean a_supportFlowControl,int upstreamSendMe,int downstreamSendMe)
 	{
 		super(a_channelCreator, a_errorListener);
 		m_chainType = a_chainType;
@@ -166,6 +173,8 @@ public class SingleChannelDataChain extends AbstractDataChain
 		/* observe the channel-message queue */
 		m_associatedChannel.getChannelMessageQueue().addObserver(this);
 		m_firstUpstreamPacket = true;
+		m_downstreamSendMeCount=0;
+		m_downstreamSendMeLimit=downstreamSendMe;
 	}
 
 	public int getOutputBlockSize()
@@ -183,6 +192,7 @@ public class SingleChannelDataChain extends AbstractDataChain
 		if (a_order.getOrderData() != null)
 		{
 			int dataLength = Math.min(a_order.getOrderData().length, a_order.getChannelCell().length - 3);
+			int dataLengthField=dataLength;
 			if (m_supportFlowControl)
 			{
 				/* check whether we shall send a flow-control flag */
@@ -191,7 +201,7 @@ public class SingleChannelDataChain extends AbstractDataChain
 					if ( ( (Boolean) (a_order.getAdditionalProtocolData())).booleanValue())
 					{
 						/* we shall send a packet with flow-control flag */
-						dataLength = dataLength | FLAG_FLOW_CONTROL;
+						dataLengthField = dataLengthField | FLAG_FLOW_CONTROL;
 					}
 				}
 			}
@@ -199,7 +209,7 @@ public class SingleChannelDataChain extends AbstractDataChain
 			DataOutputStream dataStream = new DataOutputStream(byteStream);
 			try
 			{
-				dataStream.writeShort(dataLength);
+				dataStream.writeShort(dataLengthField);
 				dataStream.flush();
 				if (m_firstUpstreamPacket)
 				{
@@ -251,14 +261,17 @@ public class SingleChannelDataChain extends AbstractDataChain
 					{
 						try
 						{
+							m_downstreamSendMeCount++;
 							ChainCell dataCell = new ChainCell(currentMessage.getMessageData());
-							if (m_supportFlowControl && dataCell.isFlowControlFlagSet())
+							if (m_supportFlowControl && /*dataCell.isFlowControlFlagSet()*/m_downstreamSendMeCount>=m_downstreamSendMeLimit)
 							{
+								LogHolder.log(LogLevel.DEBUG, LogType.NET,"got sendme - and packet counter is: "+m_downstreamSendMeCount);
 								/* send a response-packet with the flow-control flag */
 								DataChainSendOrderStructure order = new DataChainSendOrderStructure(new byte[
 									0]);
 								order.setAdditionalProtocolData(new Boolean(true));
 								orderPacket(order);
+								m_downstreamSendMeCount=0;
 							}
 							/* add data to the datastream */
 							addInputStreamQueueEntry(new DataChainInputStreamQueueEntry(
