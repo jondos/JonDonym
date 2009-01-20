@@ -487,15 +487,21 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 			{
 				m_threadGetVersionInfo.join();
 			}
+			catch (NullPointerException ex)
+			{
+				// ignore	
+			}
 			catch (Exception ex)
-			{}
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, ex);	
+			}
 			// User' wants to Update --> give the version Info and the jnlp-file
 			if (m_comboType.getSelectedIndex() == 0)
 			{
 				new JAPUpdateWizard(m_releaseVersion, getRootPanel());
 			}
 			else
-			{
+			{				
 				new JAPUpdateWizard(m_devVersion, getRootPanel());
 			}
 		}

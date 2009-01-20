@@ -451,7 +451,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	 * @return true if copying the file was successful; false is an error occurred or if this
 	 * operation is not supported on this platform
 	 */
-	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, IRetry a_checkRetry)
+	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, AbstractRetryCopyProcess a_checkRetry)
 	{
 		return false;
 	}
@@ -539,9 +539,47 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		return env;
 	}
 	
-	public interface IRetry
+	public static abstract class AbstractRetryCopyProcess
 	{
-		public boolean checkRetry();
+		private int m_maxSteps;
+		private int m_currentStep;
+		public AbstractRetryCopyProcess(int a_maxSteps)
+		{
+			if (a_maxSteps <= 0)
+			{
+				throw new IllegalArgumentException("Max steps <=0! Value: " + a_maxSteps);
+			}
+			m_maxSteps = a_maxSteps;
+			m_currentStep = 0;
+		}
+		public abstract boolean checkRetry();
+		public final int getMaxProgressSteps()
+		{
+			return m_maxSteps;
+		}
+		
+		public final int getCurrentStep()
+		{
+			return m_currentStep;
+		}
+		
+		public void reset()
+		{
+			m_currentStep = 0;
+		}
+		
+		public boolean incrementProgress()
+		{
+			if (m_currentStep < m_maxSteps)
+			{
+				m_currentStep++;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 	}
 	
 	protected void initEnv(String a_envCommand)

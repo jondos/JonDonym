@@ -60,6 +60,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	implements AnonServerDescription, IVerifyable, IServiceContextContainer, Database.IWebInfo
 {
 	public static final String SUPPORTED_PAYMENT_PROTOCOL_VERSION = "2.0";
+	
+	public static final int DISTRIBUTION_MIN = 0;
+	public static final int DISTRIBUTION_MAX = 6;
 
 	public static final String XML_ELEMENT_NAME = "MixCascade";
 	public static final String XML_ELEMENT_CONTAINER_NAME = "MixCascades";
@@ -145,6 +148,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 
 	private int m_nrCountries = 0;
 	private int m_nrOperators = 0;
+	private int m_nrOperatorsCountForDistribution = 0;
 	private int m_nrOperatorsShown = 0;
 	private int m_distributionPoints = 0;
 	private boolean[] m_mixCertVerifiedAndValid;
@@ -1366,11 +1370,12 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				return;
 			}
 		
+			m_nrOperatorsCountForDistribution = 0;
 			m_nrOperators = 0;
 			m_nrOperatorsShown = 0;
 			m_nrCountries = 0;
 			for (int i = 0; i < getNumberOfMixes(); i++)
-			{
+			{				
 				if (getMixInfo(i) == null || getMixInfo(i).getCertPath() == null)
 				{
 					continue;
@@ -1394,7 +1399,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 						// operator and Mix are located in different countries than the others in the cascade
 						if (m_mixCertVerifiedAndValid[i])
 						{
-							m_nrCountries++;
+							if (i <= 1 || (i + 1 == getNumberOfMixes()))
+							{
+								// do not count more than one middle Mix to get a maximum of 6 distribution points
+								m_nrCountries++;
+							}
 						}
 					}
 					
@@ -1418,6 +1427,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					if (m_mixCertVerifiedAndValid[i])
 					{
 						m_nrOperators++;
+						if (i <= 1 || (i + 1 == getNumberOfMixes()))
+						{
+							// do not count more than one middle Mix to get a maximum of 6 distribution points
+							m_nrOperatorsCountForDistribution++;
+						}
 					}
 					m_nrOperatorsShown++;
 				}
@@ -1431,6 +1445,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 							if (m_mixCertVerifiedAndValid[j])
 							{
 								m_nrOperators = 1;
+								m_nrOperatorsCountForDistribution = 1;
 								break;
 							}
 						}
@@ -1438,33 +1453,32 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					else
 					{
 						m_nrOperators = 1;
+						m_nrOperatorsCountForDistribution = 1;
 					}
 					m_nrOperatorsShown = 1;
-					m_nrCountries = Math.min(m_nrOperators, 1);
+					m_nrCountries = Math.min(m_nrOperatorsCountForDistribution, 1);
 					break;
 				}
 			}
 			// calculate distribution points
-			if (m_nrOperators == 2 && m_nrCountries == 2)
+			if (m_nrOperatorsCountForDistribution == 2 && m_nrCountries == 2)
 			{
 				m_distributionPoints = 3;
 			}
-			else if (m_nrOperators == 2 && m_nrCountries == 1)
+			else if (m_nrOperatorsCountForDistribution == 2 && m_nrCountries == 1)
 			{
 				m_distributionPoints = 2;
 			}
-			else if (m_nrOperators == 1)
+			else if (m_nrOperatorsCountForDistribution == 1)
 			{
 				m_distributionPoints = 1;
 			}
 			else
 			{
-				m_distributionPoints = m_nrOperators + m_nrCountries;
+				m_distributionPoints = m_nrOperatorsCountForDistribution + m_nrCountries;
 			}
-				
 			
-			
-			// Test is trust has changed meanwhile and recalculate if needed.
+			// Test is trust has changed meanwhile and recalculate distribution if it has.
 			calculateOperatorsAndCountries();
 		}
 	}

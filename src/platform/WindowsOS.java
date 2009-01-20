@@ -41,9 +41,7 @@ import logging.LogType;
 import java.lang.reflect.Method;
 import java.net.URL;
 
-import platform.AbstractOS.IRetry;
-
-import anon.util.IMiscPasswordReader;
+import anon.util.RecursiveFileTool;
 
 /**
  * This class is instantiated by AbstractOS if the current OS is Windows
@@ -189,14 +187,15 @@ public class WindowsOS extends AbstractOS
 		return getEnvPath(a_applicationName, "APPDATA");
 	}
 
-	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, IRetry a_checkRetry)
+	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, AbstractRetryCopyProcess a_checkRetry)
 	{
 		/*
 		 * Removed dependency to JAPDll --> otherwise we will need the whole JAP
 		 * Code for the MixConfig Tool..
 		 * 
-		 * The original call was: return JAPDll.xcopy(a_sourceFile,
-		 * a_targetDirectory, true);
+		 * Note that xcopy copies asynchronous, so that we have to wait for it finishing in a loop.
+		 * 
+		 * The original call was: return JAPDll.xcopy(a_sourceFile, a_targetDirectory, true);
 		 */
 		try
 		{
@@ -210,11 +209,91 @@ public class WindowsOS extends AbstractOS
 			args[0] = a_sourceFile;
 			args[1] = a_targetDirectory;
 			args[2] = Boolean.TRUE;
-			Object ret = methodXcopy.invoke(null, args);
-			return ((Boolean) ret).booleanValue();
+			
+			boolean ret = ((Boolean) methodXcopy.invoke(null, args)).booleanValue();
+			boolean bChanceToRetry = false;
+			long lastSize, currentSize;
+			File fileToCopy = new File(a_targetDirectory.getPath() + File.separator + a_sourceFile.getName());
+			
+			//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Started copy: " + fileToCopy.getAbsolutePath() + " Exists: " + fileToCopy.exists());
+			
+			if (!ret)
+			{
+				if (a_checkRetry != null && a_checkRetry.checkRetry())
+				{
+					return copyAsRoot(a_sourceFile, a_targetDirectory, a_checkRetry);
+				}
+				
+				return false;
+			}
+			
+			if (a_checkRetry == null || a_checkRetry.getMaxProgressSteps() <= 0)
+			{
+				// we cannot be sure whether we succeeded, but ok...
+				return true;
+			}
+			
+			//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Waiting for copy...");
+			
+			lastSize = -1;
+			while (a_checkRetry.incrementProgress())
+			{
+				try
+				{
+					currentSize = RecursiveFileTool.getFileSize(fileToCopy);
+					if (currentSize == RecursiveFileTool.getFileSize(a_sourceFile))
+					{
+						if (RecursiveFileTool.equals(fileToCopy, a_sourceFile, true))
+						{
+							// Copy successful!
+							while (a_checkRetry.incrementProgress());
+							return true;
+						}
+						else
+						{//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "failed compare");
+							// Copying failed!
+							bChanceToRetry = true;
+							break;
+						}
+					}
+					else if (((a_checkRetry.getCurrentStep() > 1 || a_checkRetry.getMaxProgressSteps() == 1) &&
+							 currentSize <= lastSize) || // file size did not change since last run
+							 currentSize >  RecursiveFileTool.getFileSize(a_sourceFile))
+					{//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "failed size; Current: " + currentSize + " Last: " + lastSize + " Source: " + RecursiveFileTool.getFileSize(a_sourceFile) + " Step: " + a_checkRetry.getCurrentStep());
+						// invalid file size state; copying seems to have failed
+						bChanceToRetry = true;
+						break;
+					}				
+					lastSize = currentSize; // check if file size has changed in next loop
+				}
+				catch (SecurityException a_e)
+				{
+					// copying may have succeeded, but we cannot verify that
+					LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
+					bChanceToRetry = true;
+					break;
+				}
+			
+				Thread.sleep(500);
+			}
+			
+			//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Finished copy loop!");
+			
+			if (RecursiveFileTool.equals(fileToCopy, a_sourceFile, true))
+			{
+				return true;
+			}
+			else if (bChanceToRetry && a_checkRetry.checkRetry())
+			{
+				a_checkRetry.reset();
+				return copyAsRoot(a_sourceFile, a_targetDirectory, a_checkRetry);
+			}
+			
+			// timeout; we are unsure whether copying succeeded, but we should not interrupt it
 		}
 		catch (Throwable t)
 		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, t);
 		}
 		return false;
 	}

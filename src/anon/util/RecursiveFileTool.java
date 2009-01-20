@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.bouncycastle.crypto.digests.MD5Digest;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -210,5 +212,71 @@ public class RecursiveFileTool {
 		{
 			throw ex;
 		}
+	}
+	
+	/**
+	 * Compares two files. May optionally do a comparison of MD5 hashes if speed does not matter.
+	 * @param a_oneFile
+	 * @param a_otherFile
+	 * @param a_hashComparison if true, the MD5 hashes of the two files are compared if they seem to
+	 *                         be equal after a quick check; false otherwise
+	 * @return
+	 */
+	public static boolean equals(File a_oneFile, File a_otherFile, boolean a_doHashComparison)
+	{
+		if (a_oneFile == null || a_otherFile == null)
+		{
+			return false;
+		}
+		
+		try
+		{
+			if (!a_oneFile.exists() || !a_otherFile.exists() || 
+				a_oneFile.length() != a_otherFile.length())
+			{
+				return false;
+			}
+			
+			if (!a_doHashComparison)
+			{
+				// this was a quick comparison only, do not read the files
+				return true;
+			}
+			
+			if (!Util.arraysEqual(createMD5Digest(a_oneFile), createMD5Digest(a_otherFile)))
+			{
+				return false;
+			}
+		}
+		catch (Exception a_e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public static long getFileSize(File a_file) throws SecurityException
+	{
+		if (a_file == null || !a_file.exists())
+		{
+			return -1;
+		}
+		return a_file.length();
+	}
+	
+	public static byte[] createMD5Digest(File a_file) throws IOException, SecurityException
+	{
+		byte[] content;
+		MD5Digest digest;
+		byte[] hash;
+		
+		content = ResourceLoader.getStreamAsBytes(new FileInputStream(a_file));
+		digest = new MD5Digest();
+		hash = new byte[digest.getDigestSize()];
+		digest.update(content, 0, content.length);
+		digest.doFinal(hash, 0);
+		return hash;
 	}
 }

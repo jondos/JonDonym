@@ -34,9 +34,7 @@ import logging.LogType;
 import java.io.File;
 import java.util.Properties;
 
-import platform.AbstractOS.IRetry;
-
-import anon.util.IMiscPasswordReader;
+import anon.util.RecursiveFileTool;
 
 /**
  * This class is instantiated by AbstractOS if the current OS is Linux
@@ -119,7 +117,7 @@ public class LinuxOS extends AbstractOS
 	/**
 	 * @author G. Koppen
 	 */
-	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, IRetry a_checkRetry)
+	public boolean copyAsRoot(File a_sourceFile, File a_targetDirectory, AbstractRetryCopyProcess a_checkRetry)
 	{
 		if (a_sourceFile == null || a_targetDirectory == null || !a_targetDirectory.isDirectory())
 		{
@@ -131,6 +129,7 @@ public class LinuxOS extends AbstractOS
 		String sourcePath = a_sourceFile.getPath();
 		String targetPath = a_targetDirectory.getPath() + "/";
 
+		a_checkRetry.incrementProgress();
 		if (m_bKDE)
 		{
 			cmd = "kdesu 'cp -r " + sourcePath + " " + targetPath + "'";
@@ -149,16 +148,18 @@ public class LinuxOS extends AbstractOS
 		}
 
 		File target = new File(targetPath + a_sourceFile.getName());
-		while (bUsedXterm && !target.exists())
-		{	
-			if (a_checkRetry == null || !a_checkRetry.checkRetry())
-			{
-				break;
-			}
-			executeShell(cmd);
+		if (RecursiveFileTool.equals(target, a_sourceFile, true))
+		{
+			while (a_checkRetry.incrementProgress());
+			return true;
+		}
+		else if (bUsedXterm && a_checkRetry != null && a_checkRetry.checkRetry())
+		{
+			a_checkRetry.reset();
+			return copyAsRoot(a_sourceFile, a_targetDirectory, a_checkRetry);
 		}
 		
-		return target.exists();
+		return false;
 	}
 	   	
 	private void executeShell(String a_cmd) 
