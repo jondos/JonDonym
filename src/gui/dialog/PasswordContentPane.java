@@ -244,7 +244,7 @@ public class PasswordContentPane extends DialogContentPane implements IMiscPassw
 
 	/**
 	 * Updates the content pane and shows the dialog. You will have to define the size of the
-	 * dialog before, for example by a pack() operation. getValue() will return RETURN_VALUE_CLOSED,
+	 * dialog before, for example by a pack() operation. getButtonValue() will return RETURN_VALUE_CLOSED,
 	 * RETURN_VALUE_CANCEL or RETURN_VALUE_OK after this call.
 	 * @param a_message a message (optional); if given, a_message.toString() will be shown to the user
 	 * @return the password entered by the user or null if the user canceled

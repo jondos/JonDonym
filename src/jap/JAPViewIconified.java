@@ -423,7 +423,7 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 					StatusInfo currentStatus = currentMixCascade.getCurrentStatus();
 					int anonLevel = currentStatus.getAnonLevel();
 					m_labelAnon.setText(currentMixCascade.getDistribution() + "," + 
-							(anonLevel < 0 ? "?" : anonLevel) + " / " + 
+							(anonLevel < StatusInfo.ANON_LEVEL_MIN ? "?" : "" + anonLevel) + " / " + 
 							MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX);
 
 					if (currentStatus.getNrOfActiveUsers() != -1)
