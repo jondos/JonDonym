@@ -87,7 +87,7 @@ public class ClosedInputStream extends InputStream {
 	public void close() throws IOException {
 		if (m_multibleClose)
 			return;
-		throw new IOException("InputStream allready closed");
+		throw new IOException("InputStream already closed");
 	}
 
 }
