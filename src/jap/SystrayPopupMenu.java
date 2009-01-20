@@ -80,6 +80,7 @@ public class SystrayPopupMenu extends PopupMenu
 	private static final String MSG_USER_NUMBER = SystrayPopupMenu.class.getName() + "_userNumber";
 	private static final String MSG_SHOW_DETAILS = SystrayPopupMenu.class.getName() + "_showDetails";
 	private static final String MSG_OPEN_BROWSER = SystrayPopupMenu.class.getName() + "_openBrowser";
+	private static final String MSG_ANONYMITY = SystrayPopupMenu.class.getName() + "_anonymity";
 
 
 	private MainWindowListener m_mainWindowListener;
@@ -103,10 +104,11 @@ public class SystrayPopupMenu extends PopupMenu
 		{
 			StatusInfo info =
 				(StatusInfo)Database.getInstance(StatusInfo.class).getEntryById(cascade.getId());
-			if (info != null)
-			{
-				users = ", " + JAPMessages.getString(MSG_USER_NUMBER, new Integer(info.getNrOfActiveUsers()));
-			}
+			users += 
+			
+			users += ", " + JAPMessages.getString(MSG_ANONYMITY) + ": " + cascade.getDistribution() + "," + 
+			(info == null || info.getAnonLevel() < StatusInfo.ANON_LEVEL_MIN ? "?" : info.getAnonLevel()) + 
+			" / " + MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX;
 
 			connected = JAPMessages.getString(MSG_CONNECTED);
 		}
@@ -114,7 +116,6 @@ public class SystrayPopupMenu extends PopupMenu
 		{
 			connected = JAPMessages.getString(MSG_NOT_CONNECTED);
 		}
-
 
 		if (cascade.isPayment())
 		{
@@ -138,6 +139,7 @@ public class SystrayPopupMenu extends PopupMenu
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.weightx = 1.0;
+		constraints.insets = new Insets(0, 0, 0, 5);
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.anchor = GridBagConstraints.WEST;
 		panel.add(label, constraints);
@@ -150,7 +152,7 @@ public class SystrayPopupMenu extends PopupMenu
 		constraints.weightx = 1.0;
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.anchor = GridBagConstraints.WEST;
-		constraints.insets = new Insets(0, icon.getIconWidth() + label.getIconTextGap(), 0, 0);
+		constraints.insets = new Insets(0, icon.getIconWidth() + label.getIconTextGap(), 0, 5);
 		label = new JLabel("(" + connected + users + ")");
 		panel.add(label, constraints);
 		add(panel);

@@ -2298,7 +2298,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					}
 					
 					m_anonLevelLabel.setText(cascade.getDistribution()  + "," +  
-							m_infoService.getAnonLevel(cascadeId) + " / 6,6");
+							m_infoService.getAnonLevel(cascadeId) + " / " + 
+							MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX);
 					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
 					m_lblVDS.setVisible(cascade.isDataRetentionActive());
 					

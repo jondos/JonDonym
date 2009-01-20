@@ -28,15 +28,15 @@ operators have to abide by strict provisions which prohibit saving connection
 data or exchanging such data with other operators in a cascade. Every
 connection from a user is re-encrypted by every mix server within a cascade and
 transferred through the cascade to the target, e.g. a website. The aim of
-multiple encryption and processing is to make sure no mix operator can by
-himself alone expose the user, and that eavesdropping on the connection
-(Internet provider, WLAN) produces zero useful content. Also, since a lot of
-users surf the anonymization service simultaneously, and thus share the same <a
-href="wwwprivacy.html#ip">IP address</a>, all connections of every user are
-concealed amidst each other: any user could have been the source of a certain
-connection. This procedure ensures that no mix operator or external party
-(Internet provider, WLAN sniffers, websites) can discover who has initiated a
-certain connection or what connections a certain user has made.</p>
+multiple encryption, distribution and processing is to make sure no mix
+operator can by himself alone expose the user, and that eavesdropping on the
+connection (Internet provider, WLAN) produces zero useful content. Also, since
+a lot of users surf the anonymization service simultaneously, and thus share
+the same <a href="wwwprivacy.html#ip">IP address</a>, all connections of every
+user are concealed amidst each other: any user could have been the source of a
+certain connection. This procedure ensures that no mix operator or external
+party (Internet provider, WLAN sniffers, websites) can discover who has
+initiated a certain connection or what connections a certain user has made.</p>
 
 <p>JonDonym has some very specific advantages to other anonymization
 services:</p>
@@ -87,8 +87,9 @@ Tor network in order to secretly attain unencrypted information like passwords,
 bank accounts and credit cards. Certain tricks can enable the Tor server to
 concentrate much of the traffic on itself, making the exploit even more
 effective. Tor may be set as <a href="net.html">proxy in JonDo</a> though,
-making surfing slower but even more secure than with JonDonym alone because the
-last servers in this chain will be part of the verified JonDonym network.</p>
+making surfing slower but, in some cases, even more secure than with JonDonym
+alone because the last servers in this chain will be part of the verified
+JonDonym network.</p>
 
 <p>But as a matter of fact, every last mix server in a JonDonym cascade could
 record data which is not separately secured by HTTPS/SSL. Unlike Tor and other
@@ -152,7 +153,11 @@ accuracy.</p>
 
 <p><strong>Notice: The premium services are not available in all versions of
 the program. You can download compatible software at the <a
-href="https://www.jondos.de/">JonDos website</a>.</strong></p>
+href="https://www.jondos.de/">JonDos website</a>. If you are a Java programmer,
+you may moreover compile and modify the software, and specifically activate
+those features which are useful for you (<a
+href="https://svn.jondos.de/">SVN-Repository</a> or <a
+href="http://anon.inf.tu-dresden.de/develop/sources_en.html">CVS-Repository</a>).</strong></p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="wwwprivacy.html"><img
