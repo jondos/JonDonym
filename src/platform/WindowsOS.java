@@ -274,7 +274,7 @@ public class WindowsOS extends AbstractOS
 					break;
 				}
 			
-				Thread.sleep(500);
+				Thread.sleep(a_checkRetry.getProgressLoopWaitMilliseconds());
 			}
 			
 			//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Finished copy loop!");
