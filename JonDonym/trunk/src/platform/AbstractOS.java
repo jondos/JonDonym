@@ -558,6 +558,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			return m_maxSteps;
 		}
 		
+		public final long getProgressLoopWaitMilliseconds()
+		{
+			return 500;
+		}
+		
 		public final int getCurrentStep()
 		{
 			return m_currentStep;
