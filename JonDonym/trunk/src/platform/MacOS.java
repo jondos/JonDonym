@@ -259,7 +259,7 @@ public class MacOS extends AbstractOS
 		}
 		catch(IOException ioe)
 		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Mac OS root copy failed: ", ioe);
+			LogHolder.log(LogLevel.INFO, LogType.MISC, "Mac OS root copy failed: ", ioe);
 			return false;
 		}
 		catch(InterruptedException ie)
