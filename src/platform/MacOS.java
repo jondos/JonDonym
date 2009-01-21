@@ -70,7 +70,7 @@ public class MacOS extends AbstractOS
 	final static String[] OSASCRIPT_CMD  = new String[]{"osascript"};
 	/** Mac OS X built-in command for compiling AppleScript code */
 	final static String[] OSACOMPILE_CMD  
-		= (OSA_APPLET_PATH != null) ? new String[]{"osacompile","-o", OSA_APPLET_PATH} : null;
+		= (OSA_APPLET_PATH != null) ? new String[]{"osacompile","-xo", OSA_APPLET_PATH} : null;
 	final static String[] OPEN_UPDATER_CMD
 		= (OSA_APPLET_PATH != null) ? new String[]{OSA_APPLET_PATH+File.separator+
 													BUNDLE_MAC_OS_EXECUTABLES+"applet"} : null;
@@ -304,7 +304,7 @@ public class MacOS extends AbstractOS
 												BUNDLE_RESOURCES+"applet.icns");
 					oldImage.delete();
 					//TODO: better use a proper update icon.
-					archiver.extractSingleEntry("images/JonDo.icns", 
+					archiver.extractSingleEntry("images/JUpdate.icns", 
 													OSA_APPLET_PATH+File.separator+
 													BUNDLE_RESOURCES+"applet.icns");	
 				}

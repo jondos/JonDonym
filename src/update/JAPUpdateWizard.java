@@ -260,6 +260,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		{
 			downloadPage.showInformationDialog(JAPMessages.getString("updateInformationMsgStep5") + " " +
 					JAPMessages.getString(MSG_ADMIN_RIGHTS_NEEDED));
+			host.doCancel();
 			return;
 		}
 		try
@@ -821,8 +822,11 @@ private boolean checkSignature()
 					}
 				};
 				
-				if (!AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, 
-						new File(m_fileAktJapJar.getParent()), retryDialog))
+				host.lockDialog();
+				boolean copySuccess = AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, 
+						new File(m_fileAktJapJar.getParent()), retryDialog);
+				host.unlockDialog();
+				if (!copySuccess)
 				{
 					throw new Exception ("Administrator copy failed!");
 				}
