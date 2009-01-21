@@ -30,11 +30,12 @@ package platform;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import platform.AbstractOS.AbstractRetryCopyProcess;
+import java.util.zip.ZipFile;
 
 import anon.util.ClassUtil;
+import anon.util.RecursiveFileTool;
 import anon.util.Util;
+import anon.util.ZipArchiver;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -49,18 +50,30 @@ public class MacOS extends AbstractOS
 {
 	public static final String OS_NAME = "Mac OS";
 	final static String BUNDLE_CONTENTS = "Contents"+File.separator;
+	final static String BUNDLE_RESOURCES = BUNDLE_CONTENTS+"Resources"+File.separator;
 	final static String BUNDLE_MAC_OS_EXECUTABLES = BUNDLE_CONTENTS+"MacOS"+File.separator;
 	final static String BUNDLE_PROPERTY_FILE_NAME = "Info.plist";
 	final static String BUNDLE_EXECUTABLE_PROPERTY_KEY = "CFBundleExecutable";
 	
 	/* some constants for the root copy method which is based on
 	 * a interpreted apple script
-	 */
-	final static String OSASCRIPT_CMD = "osascript";
+	 */	
 	final static String ROOT_SHELLSCRIPT_NAME = "rootShellScript";
 	final static String OSA_EXEC_SHELLSCRIPT_STMT = 
 		"do shell script " + ROOT_SHELLSCRIPT_NAME + 
 		" with administrator privileges";
+	
+	final static String OSA_APPLET_NAME = "JonDoUpdater.app";
+	final static String OSA_APPLET_PATH = (getDefaultTempPath() != null) ? getDefaultTempPath()+OSA_APPLET_NAME : null;
+											
+	/** Mac OS X built-in command for interpreting AppleScript statements */
+	final static String[] OSASCRIPT_CMD  = new String[]{"osascript"};
+	/** Mac OS X built-in command for compiling AppleScript code */
+	final static String[] OSACOMPILE_CMD  
+		= (OSA_APPLET_PATH != null) ? new String[]{"osacompile","-o", OSA_APPLET_PATH} : null;
+	final static String[] OPEN_UPDATER_CMD
+		= (OSA_APPLET_PATH != null) ? new String[]{OSA_APPLET_PATH+File.separator+
+													BUNDLE_MAC_OS_EXECUTABLES+"applet"} : null;
 	
 	//private HashMap m_bundleProperties = null;
 	private String m_bundlePath = null;
@@ -73,9 +86,7 @@ public class MacOS extends AbstractOS
 		}
 		//m_bundleProperties = new HashMap();
 		setBundlePath();
-		//loadBundleProperties();
-		
-		
+		//loadBundleProperties();	
 	}
 
 	/*
@@ -240,22 +251,80 @@ public class MacOS extends AbstractOS
 		return null;
 	}
 
-	public boolean copyAsRoot(File file, File directory, AbstractRetryCopyProcess a_checkRetry) 
+	/**
+	 * handle some AppleScriptStatements by passing them to the stdin of the specified
+	 * handler process. The process can be either an osacript-Process which interpretes and
+	 * executes the statements immediately or a osacompile-process which creates and executable
+	 * outputfile
+	 * @return returns the exit value of the handler process
+	 */
+	private static int handleAppleScriptCmds(String[] statements, Process handler) 
+		throws IOException, InterruptedException
+		
+	{
+		PrintWriter stdinWriter = new PrintWriter(handler.getOutputStream());
+		for (int i = 0; i < statements.length; i++) 
+		{
+			stdinWriter.println(statements[i]);
+		}
+		stdinWriter.flush();
+		stdinWriter.close();
+		return handler.waitFor();
+	}
+	
+	public boolean copyAsRoot(File src, File destDir, AbstractRetryCopyProcess a_checkRetry) 
 	{
 		String osaShellscript_stmt = 
 			"set " + ROOT_SHELLSCRIPT_NAME + " to "+
-			"\"cp "+file.getAbsolutePath()+" "+directory.getAbsolutePath()+"\"";
+			"\"cp "+src.getAbsolutePath()+" "+destDir.getAbsolutePath()+"\"";
+		
+		String[] allStmts = 
+			new String[]
+			{
+				osaShellscript_stmt, 
+				OSA_EXEC_SHELLSCRIPT_STMT
+			};
+		
 		try
 		{
 			Runtime runtime = Runtime.getRuntime();
-			Process osascriptInterpreter = runtime.exec(OSASCRIPT_CMD);
-			//Write Applescript statements to the interpreters stdin
-			PrintWriter stdinWriter = new PrintWriter(osascriptInterpreter.getOutputStream());
-			stdinWriter.println(osaShellscript_stmt);
-			stdinWriter.println(OSA_EXEC_SHELLSCRIPT_STMT);		
-			stdinWriter.flush();
-			stdinWriter.close();
-			return (osascriptInterpreter.waitFor() == 0);
+			int exitValue = 1;
+			if(OSACOMPILE_CMD != null)
+			{
+				Process osaCompiler = runtime.exec(OSACOMPILE_CMD);
+				exitValue = handleAppleScriptCmds(allStmts, osaCompiler);
+			}
+			if(exitValue == 0)
+			{
+				ZipFile japArchive = ClassUtil.getJarFile();
+				if(japArchive != null)
+				{
+					ZipArchiver archiver = new ZipArchiver(japArchive);
+					File oldImage = new File(OSA_APPLET_PATH+File.separator+
+												BUNDLE_RESOURCES+"applet.icns");
+					oldImage.delete();
+					//TODO: better use a proper update icon.
+					archiver.extractSingleEntry("images/JonDo.icns", 
+													OSA_APPLET_PATH+File.separator+
+													BUNDLE_RESOURCES+"applet.icns");	
+				}
+				
+				Process execCopy = runtime.exec(OPEN_UPDATER_CMD);
+				exitValue = execCopy.waitFor();
+			}
+			else
+			{
+				Process osaInterpreter = runtime.exec(OSASCRIPT_CMD);
+				exitValue = handleAppleScriptCmds(allStmts, osaInterpreter);
+			}
+			
+			
+			File appletFile = new File(OSA_APPLET_PATH);
+			if(appletFile.exists())
+			{
+				RecursiveFileTool.deleteRecursion(appletFile);
+			}
+			return RecursiveFileTool.equals(src, new File(destDir.getAbsolutePath()+File.separator+src.getName()), true);
 		}
 		catch(IOException ioe)
 		{
@@ -267,5 +336,5 @@ public class MacOS extends AbstractOS
 			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Interrupted while waiting for root copy process ", ie);
 			return false;
 		}
-	}	
+	}
 }

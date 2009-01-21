@@ -47,6 +47,26 @@ public class ZipArchiver extends Observable
 		m_archive = archive;
 	}
 	
+	public boolean extractSingleEntry(String entryName, String destinationName)
+	{
+		try
+		{
+			ZipEntry entry = m_archive.getEntry(entryName);
+			if(entry == null)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.MISC, "Entry "+entryName+" not found.");
+				return false;
+			}
+			RecursiveFileTool.copySingleFile(m_archive.getInputStream(entry), new File(destinationName));
+			return true;
+		}
+		catch(IOException ioe)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Extracting entry "+entryName+" failed", ioe);
+			return false;
+		}
+	}
+	
 	public boolean extractArchive(String pathName, String destination)
 	{	
 		String dest = destination;

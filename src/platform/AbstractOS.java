@@ -457,6 +457,11 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 	}
 	
 	public String getTempPath()
+	{	
+		return getDefaultTempPath();
+	}
+	
+	public static String getDefaultTempPath()
 	{
 		String tempDir = null;
 		
