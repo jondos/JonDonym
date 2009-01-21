@@ -37,7 +37,6 @@ import gui.MixDetailsDialog;
 import gui.MultiCertOverview;
 import gui.OperatorsCellRenderer;
 import gui.dialog.JAPDialog;
-import gui.help.JAPHelp;
 import jap.forward.JAPRoutingMessage;
 
 import java.awt.Color;
@@ -92,11 +91,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
@@ -105,6 +102,8 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
+import anon.AnonServerDescription;
+import anon.AnonServiceEventListener;
 import anon.client.TrustException;
 import anon.crypto.AbstractX509AlternativeName;
 import anon.crypto.CertPath;
@@ -185,6 +184,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
 	
+	private static final String MSG_CONNECTED =  JAPConfAnon.class.getName() + "_connected";
 	private static final String MSG_LBL_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityLbl";
 	private static final String MSG_USER_LIMIT = JAPConfAnon.class.getName() + "_availabilityUserLimit";
 	private static final String MSG_UNSTABLE = JAPConfAnon.class.getName() + "_availabilityUnstable";
@@ -264,7 +264,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JButton m_moveMixLeft;
 	private JButton m_moveMixRight;
 	private JLabel m_locationLabel;
-	private JLabel m_payLabel;
+	private JLabel m_lblAvailability;
 	private boolean m_blacklist;
 	private boolean m_unknownPI;
 	private JButton m_btnViewCert;
@@ -339,6 +339,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 			}).start();
 		}
+		JAPController.getInstance().addEventListener(new LocalAnonServiceEventListener());
 	}
 
 	public void recreateRootPanel()
@@ -884,31 +885,31 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		c.gridx = 3;
 		c.gridy = 5;
 		c.gridwidth = 2;
-		m_payLabel = new JLabel("");
-		m_payLabel.addMouseListener(new MouseAdapter()
+		m_lblAvailability = new JLabel("");
+		m_lblAvailability.addMouseListener(new MouseAdapter()
 		{
 			public void mouseClicked(MouseEvent a_event)
 			{
-				if (m_payLabel.getCursor() != Cursor.getDefaultCursor())
+				if (m_lblAvailability.getCursor() != Cursor.getDefaultCursor())
 				{
-					if (m_payLabel.getForeground() == Color.red)
+					if (m_lblAvailability.getForeground() == Color.red)
 					{
 						if (m_blacklist)
 						{
-							JAPDialog.showMessageDialog(m_payLabel,
+							JAPDialog.showMessageDialog(m_lblAvailability,
 								JAPMessages.getString(MSG_EXPLAIN_BLACKLISTED));
 						}
 						else if (m_unknownPI)
 						{
-							JAPDialog.showMessageDialog(m_payLabel,
+							JAPDialog.showMessageDialog(m_lblAvailability,
 								JAPMessages.getString(MSG_EXPLAIN_PI_UNAVAILABLE));
 						}
 						else
 						{
-							JAPDialog.showMessageDialog(m_payLabel,
+							JAPDialog.showMessageDialog(m_lblAvailability,
 								JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 								TrustModel.getCurrentTrustModel().getName()),
-								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName())); //,
+								new JAPDialog.LinkedHelpContext("services_anon")); //,
 						}
 
 					}
@@ -921,7 +922,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 			}
 		});
-		m_cascadesPanel.add(m_payLabel, c);
+		m_cascadesPanel.add(m_lblAvailability, c);
 
 		c.insets = new Insets(5, 20, 0, 5);
 		c.gridy = 6;
@@ -979,28 +980,36 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		drawServerInfoPanel();
 	}
 
-	private void setPayLabel(MixCascade cascade, PerformanceEntry a_entry)
+	private void setAvailabilityLabel(MixCascade cascade, PerformanceEntry a_entry)
 	{
 		StringBuffer buff = new StringBuffer();
 		PerformanceEntry.StabilityAttributes attributes = a_entry.getStabilityAttributes();		
+		MixCascade cascadeConnected = JAPController.getInstance().getConnectedCascade();
 		
-		if (!TrustModel.getCurrentTrustModel().isTrusted(cascade, buff))
+		if (cascadeConnected != null && cascadeConnected.equals(cascade))
 		{
-			m_payLabel.setForeground(Color.red);
-			m_payLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			m_lblAvailability.setCursor(Cursor.getDefaultCursor());		
+			m_lblAvailability.setForeground(m_anonLevelLabel.getForeground());
+			m_lblAvailability.setText(JAPMessages.getString(MSG_CONNECTED));
+			m_lblAvailability.setToolTipText(null);
+		}
+		else if (!TrustModel.getCurrentTrustModel().isTrusted(cascade, buff))
+		{
+			m_lblAvailability.setForeground(Color.red);
+			m_lblAvailability.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			if (Database.getInstance(BlacklistedCascadeIDEntry.class).getEntryById(
 				cascade.getMixIDsAsString()) != null)
 			{
-				m_payLabel.setText(JAPMessages.getString(MSG_BLACKLISTED));
-				m_payLabel.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_BLACKLISTED,
+				m_lblAvailability.setText(JAPMessages.getString(MSG_BLACKLISTED));
+				m_lblAvailability.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_BLACKLISTED,
 					TrustModel.getCurrentTrustModel().getName()));
 				m_blacklist = true;
 				m_unknownPI = false;
 			}
 			else if (cascade.isPayment() && PayAccountsFile.getInstance().getBI(cascade.getPIID()) == null)
 			{
-				m_payLabel.setText(JAPMessages.getString(MSG_PI_UNAVAILABLE));
-				m_payLabel.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_PI_UNAVAILABLE,
+				m_lblAvailability.setText(JAPMessages.getString(MSG_PI_UNAVAILABLE));
+				m_lblAvailability.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_PI_UNAVAILABLE,
 					TrustModel.getCurrentTrustModel().getName()));
 				m_blacklist = false;
 				m_unknownPI = true;
@@ -1008,8 +1017,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			else
 			{
 				//m_payLabel.setText(JAPMessages.getString(MSG_NOT_TRUSTWORTHY) + " (" + buff.toString() + ")");
-				m_payLabel.setText(buff.toString());
-				m_payLabel.setToolTipText("<html>" + JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
+				m_lblAvailability.setText(buff.toString());
+				m_lblAvailability.setToolTipText("<html>" + JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 					TrustModel.getCurrentTrustModel().getName()) + "</html>");
 				m_blacklist = false;
 				m_unknownPI = false;
@@ -1017,54 +1026,54 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 75)
 		{
-			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			m_lblAvailability.setCursor(Cursor.getDefaultCursor());
 			//m_payLabel.setForeground(m_anonLevelLabel.getForeground());
-			m_payLabel.setForeground(Color.red);
-			m_payLabel.setText(JAPMessages.getString(MSG_UNREACHABLE));
-			m_payLabel.setToolTipText(null);
+			m_lblAvailability.setForeground(Color.red);
+			m_lblAvailability.setText(JAPMessages.getString(MSG_UNREACHABLE));
+			m_lblAvailability.setToolTipText(null);
 		}
 		else if (m_infoService.isUserLimitReached(cascade.getId()))
 		{
-			m_payLabel.setCursor(Cursor.getDefaultCursor());
-			m_payLabel.setForeground(Color.red);
-			m_payLabel.setText(JAPMessages.getString(MSG_USER_LIMIT));
-			m_payLabel.setToolTipText(null);
+			m_lblAvailability.setCursor(Cursor.getDefaultCursor());
+			m_lblAvailability.setForeground(Color.red);
+			m_lblAvailability.setText(JAPMessages.getString(MSG_USER_LIMIT));
+			m_lblAvailability.setToolTipText(null);
 		}
 		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 25)
 		{
-			m_payLabel.setCursor(Cursor.getDefaultCursor());
+			m_lblAvailability.setCursor(Cursor.getDefaultCursor());
 			//m_payLabel.setForeground(m_anonLevelLabel.getForeground());
-			m_payLabel.setForeground(Color.red);
-			m_payLabel.setText(JAPMessages.getString(MSG_HARDLY_REACHABLE));
-			m_payLabel.setToolTipText(null);
+			m_lblAvailability.setForeground(Color.red);
+			m_lblAvailability.setText(JAPMessages.getString(MSG_HARDLY_REACHABLE));
+			m_lblAvailability.setToolTipText(null);
 		}
 		else if (attributes.getBoundResets() > 5 || attributes.getBoundErrors() > 10)
 		{
-			m_payLabel.setCursor(Cursor.getDefaultCursor());
-			m_payLabel.setForeground(Color.red);
-			m_payLabel.setText(JAPMessages.getString(MSG_UNSTABLE));
-			m_payLabel.setToolTipText(null);
+			m_lblAvailability.setCursor(Cursor.getDefaultCursor());
+			m_lblAvailability.setForeground(Color.red);
+			m_lblAvailability.setText(JAPMessages.getString(MSG_UNSTABLE));
+			m_lblAvailability.setToolTipText(null);
 		}
 		else if (attributes.getBoundUnknown() + attributes.getBoundErrors() > 5)
 		{
-			m_payLabel.setCursor(Cursor.getDefaultCursor());
-			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
-			m_payLabel.setText(JAPMessages.getString(MSG_BAD_AVAILABILITY));
-			m_payLabel.setToolTipText(null);
+			m_lblAvailability.setCursor(Cursor.getDefaultCursor());
+			m_lblAvailability.setForeground(m_anonLevelLabel.getForeground());
+			m_lblAvailability.setText(JAPMessages.getString(MSG_BAD_AVAILABILITY));
+			m_lblAvailability.setToolTipText(null);
 		}
 		else if (attributes.getValueSize() == 0)
 		{
-			m_payLabel.setCursor(Cursor.getDefaultCursor());
-			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
-			m_payLabel.setToolTipText(null);
-			m_payLabel.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+			m_lblAvailability.setCursor(Cursor.getDefaultCursor());
+			m_lblAvailability.setForeground(m_anonLevelLabel.getForeground());
+			m_lblAvailability.setToolTipText(null);
+			m_lblAvailability.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
 		}
 		else
 		{
-			m_payLabel.setCursor(Cursor.getDefaultCursor());
-			m_payLabel.setForeground(m_anonLevelLabel.getForeground());
-			m_payLabel.setToolTipText(null);
-			m_payLabel.setText(JAPMessages.getString(MSG_GOOD_AVAILABILITY));
+			m_lblAvailability.setCursor(Cursor.getDefaultCursor());
+			m_lblAvailability.setForeground(m_anonLevelLabel.getForeground());
+			m_lblAvailability.setToolTipText(null);
+			m_lblAvailability.setText(JAPMessages.getString(MSG_GOOD_AVAILABILITY));
 		}
 	}
 
@@ -1481,13 +1490,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			}
 			if (newCascade != null)
 			{
-				if(!TrustModel.getCurrentTrustModel().isTrusted(newCascade))
+				if (!TrustModel.getCurrentTrustModel().isTrusted(newCascade))
 				{
-					JAPDialog.showMessageDialog(m_payLabel,
+					JAPDialog.showMessageDialog(m_lblAvailability,
 							JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 							TrustModel.getCurrentTrustModel().getName()),
-							new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName()));
-				} else {
+							new JAPDialog.LinkedHelpContext("services_anon"));
+				} 
+				else 
+				{
 					JAPController.getInstance().setCurrentMixCascade(newCascade);
 					m_selectCascadeButton.setEnabled(false);
 					m_tableMixCascade.repaint();
@@ -1875,16 +1886,17 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				{
 					if(!TrustModel.getCurrentTrustModel().isTrusted(c))
 					{
-						JAPDialog.showMessageDialog(m_payLabel,
+						JAPDialog.showMessageDialog(m_lblAvailability,
 								JAPMessages.getString(MSG_EXPLAIN_NOT_TRUSTWORTHY,
 								TrustModel.getCurrentTrustModel().getName()),
-								new JAPDialog.LinkedHelpContext(JAPConfAnon.class.getName()));
+								new JAPDialog.LinkedHelpContext("services_anon"));
 					} 
 					else 
 					{
 						JAPController.getInstance().setCurrentMixCascade(c);
 						m_deleteCascadeButton.setEnabled(false);
 						m_showEditPanelButton.setEnabled(false);
+						m_selectCascadeButton.setEnabled(false);
 
 						m_tableMixCascade.repaint();
 					}
@@ -2117,7 +2129,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			bUpdateServerPanel = m_bUpdateServerPanel;
 		}
 
-		if (!e.getValueIsAdjusting() && bUpdateServerPanel)
+		if (e == null // 'null' means we have called this method separately for updates
+			|| !e.getValueIsAdjusting() && bUpdateServerPanel)
 		{
 			MixCascade cascade = (MixCascade) m_tableMixCascade.getValueAt(
 				 m_tableMixCascade.getSelectedRow(), 1);
@@ -2304,7 +2317,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					m_lblVDS.setVisible(cascade.isDataRetentionActive());
 					
 					
-					setPayLabel(cascade, entry);
+					setAvailabilityLabel(cascade, entry);
 					m_lblSocks.setVisible(cascade.isSocks5Supported());
 				}
 				if(m_filterPanel == null || !m_filterPanel.isVisible())
@@ -2325,7 +2338,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 
 				MixCascade current = JAPController.getInstance().getCurrentMixCascade();
-				if (current != null && current.getName().equalsIgnoreCase(cascade.getName()))
+				if (current != null && current.equals(cascade))
 				{
 					m_selectCascadeButton.setEnabled(false);
 				}
@@ -4285,6 +4298,37 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		public Vector getBlacklist()
 		{
 			return m_vecBlacklist;
+		}
+	}
+	
+	private class LocalAnonServiceEventListener implements AnonServiceEventListener
+	{
+		public void connectionError()
+		{
+		}
+
+		public void disconnected()
+		{
+			// this is needed to show the "connected" status in "availability"
+			updateValues(false);
+		}
+
+		public void connecting(AnonServerDescription a_serverDescription)
+		{
+		}
+
+		public void connectionEstablished(AnonServerDescription a_serverDescription)
+		{
+			// this is needed to show the "connected" status in "availability"
+			updateValues(false);
+		}
+
+		public void packetMixed(long a_totalBytes)
+		{
+		}
+
+		public void dataChainErrorSignaled()
+		{
 		}
 	}
 }

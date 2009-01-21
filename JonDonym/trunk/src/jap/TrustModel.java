@@ -45,7 +45,6 @@ import anon.client.BasicTrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.ServiceOperator;
-import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.PerformanceInfo;

@@ -30,20 +30,25 @@ connection from a user is re-encrypted by every mix server within a cascade and
 transferred through the cascade to the target, e.g. a website. The aim of
 multiple encryption, distribution and processing is to make sure no mix
 operator can by himself alone expose the user, and that eavesdropping on the
-connection (Internet provider, WLAN) produces zero useful content. Also, since
-a lot of users surf the anonymization service simultaneously, and thus share
-the same <a href="wwwprivacy.html#ip">IP address</a>, all connections of every
-user are concealed amidst each other: any user could have been the source of a
-certain connection. This procedure ensures that no mix operator or external
-party (Internet provider, WLAN sniffers, websites) can discover who has
-initiated a certain connection or what connections a certain user has made.</p>
+connection produces zero useful content. Also, since a lot of users surf the
+anonymization service simultaneously, and thus share the same <a
+href="wwwprivacy.html#ip">IP address</a>, all connections of every user are
+concealed amidst each other: any user could have been the source of a certain
+connection. <em></em></p>
+
+<p><strong>This procedure thereby prevents others, except for the user himself,
+from discovering which user has initiated a certain connection or what
+connections a certain user has made. THe specific characteristic of this system
+is that it does not only protect against external parties / outsiders (Internet
+provider, WLAN sniffers, websites), but also against anonymity service
+providers themselves (mix operators, billing providers).</strong></p>
 
 <p>JonDonym has some very specific advantages to other anonymization
 services:</p>
 <ul>
   <li><b>Strong encryption and authentication:</b> Nobody can read the traffic
-    between your PC and the JonDonym service. (Encrypted with RSA 2048 and AES
-    128; signed with DSA, RSA or ECDSA; realized with the BouncyCaslte and
+    between your PC and the JonDonym service. (Encrypted with RSA 1024 and AES
+    128; signed with DSA, RSA or ECDSA; realized with the BouncyCastle and
     OpenSSL libraries)</li>
   <li><b>Protection from the mix operator:</b> Unless all mix operators in a
     JonDonym cascade are forced separately to monitor you, your internet
@@ -77,7 +82,7 @@ services:</p>
     forum, email support.</li>
 </ul>
 
-<p>A similar standard of anonymization can only be offered by the
+<p>A comparable standard of anonymization can only be offered by the
 non-commercial system <a href="http://tor.eff.org/">Tor</a>, which we recommend
 to advanced Internet users in addition to JonDonym. Internet beginners and
 computer novices should be careful with Tor: there is no control over who runs
@@ -129,11 +134,11 @@ JonDo:</p>
     any Internet ports (except email ports, if needed for spam defense).</li>
 </ul>
 
-<p>Excluded from these guarantees are software errors that we discharge from
-liability in our <a
-href="https://www.jondos.de/de/termsAndConditions">GTCT</a>. Further possible
-exclusions concerning the performance of a single service may be found in the
-GTCTs of the respective mix operators.</p>
+<p>Excluded from these guarantees are software errors that are discharged from
+liability in the <a href="https://www.jondos.de/de/termsAndConditions">General
+Terms and Conditions</a> of the billing provider and software maintainer
+JonDos. Further possible exclusions concerning the performance of a single
+service may be found in the GTCTs of the respective mix operators.</p>
 
 <p>If you would like to use premium services, create a <a
 href="payment.html">disposable account</a> and activate it by an anonymous or
@@ -145,11 +150,11 @@ activate another disposable account any time.</p>
 
 <p>Advice on protection of personal information: for accurate clearing of data
 volumes with the mix operators it is saved how much volume an account has used
-cumulatively on a mix cascade. These clearings happen no sooner than on a daily
-basis. An allocation of accounts to user identities is not saved. It is
-technically impossible to recognize requested websites by the deducted data
-volumes alone, even when monitoring accurately to the second or at maximum
-accuracy.</p>
+cumulatively on a mix cascade. The statistical evaluation of the data volume
+transferred per account is done with daily accuracy. An allocation of accounts
+to user identities is not saved. It is technically impossible to recognize
+requested websites by the deducted data volumes alone, even when monitoring
+accurately to the second or at maximum accuracy.</p>
 
 <p><strong>Notice: The premium services are not available in all versions of
 the program. You can download compatible software at the <a
@@ -157,7 +162,8 @@ href="https://www.jondos.de/">JonDos website</a>. If you are a Java programmer,
 you may moreover compile and modify the software, and specifically activate
 those features which are useful for you (<a
 href="https://svn.jondos.de/">SVN-Repository</a> or <a
-href="http://anon.inf.tu-dresden.de/develop/sources_en.html">CVS-Repository</a>).</strong></p>
+href="http://anon.inf.tu-dresden.de/develop/sources_en.html">CVS-Repository</a>,
+<a href="http://www.jondos.de/en/licence">open source licence</a>).</strong></p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="wwwprivacy.html"><img

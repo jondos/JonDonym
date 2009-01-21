@@ -14,13 +14,10 @@ package anon.infoservice;
 public interface IServiceContextContainer 
 {
 	
-	/* possible service contexts */
+	/* default service contexts */
 	
 	/** context for all JonDonym services. this is the default context for all services*/ 
 	public static final String CONTEXT_JONDONYM = "de.jondos.jondonym";
-	
-	/** context for the services provided by the ISP Manioq */
-	public static final String CONTEXT_MANIOQ = "org.manioq";
 	
 	public final String XML_ATTR_CONTEXT = "context";
 	
