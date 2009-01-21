@@ -111,7 +111,7 @@ public class JAP
 	
 	
 	private final static String WHITESPACE_ENCODED = "%20";
-	private static final String OPTION_MANIOQ = "--manioq";
+	private static final String OPTION_CONTEXT = "--context";
 	
 	private JAPController m_controller;
 	
@@ -226,6 +226,7 @@ public class JAP
 			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
 			System.out.println("--portable-help-path         Path of external html help files for portable use.");
 			System.out.println("--config, -c {Filename}:     Force JonDo to use a specific configuration file.");
+			System.out.println("--context {Context}:         Start JonDo with a specific service provider context.");
 			System.exit(0);
 		}
 
@@ -343,9 +344,10 @@ public class JAP
 		// Set path to Firefox for portable JAP
 		boolean bPortable = isArgumentSet("--portable");
 		m_controller.setPortableMode(bPortable);
-		if (isArgumentSet(OPTION_MANIOQ))
+		String context =  getArgumentValue(OPTION_CONTEXT);
+		if (context != null)
 		{
-			JAPModel.getInstance().setContext(IServiceContextContainer.CONTEXT_MANIOQ);
+			JAPModel.getInstance().setContext(context);
 		}
 		
 		String configFileName = null;

@@ -45,10 +45,19 @@ available to you: </p>
     Hides all services that are not free and unlikely to offer sufficient
     performance.</p>
   </li>
-  <li><p><b>Own services </b><br>
+  <li><p><b>Services added by yourself </b><br>
     This filter shows only those services that you have <a
-    href="#manuell">created yourself</a>, for example for testing a specific
-    service.</p>
+    href="#manuell">added by yourself</a>, for example for testing a specific
+    service that is not automatically propagated by the <a
+    href="infoservice.html">InfoService</a>. <strong>Please note that manually
+    added services are, if you are using the filter "Services added by
+    yourself", not checked for <a href="certificates.html">valid
+    certificates</a> upon connection to them. Third parties with access to your
+    internet connection may then forge a connection to such services, and may
+    thereby launch a man-in-the-middle attack on you while decrypting all of
+    your connections through them. You therefore should use this filter for the
+    very first connection only in order to get the service data, and switch to
+    another filter afterwards.</strong></p>
   </li>
 </ul>
 
@@ -139,7 +148,10 @@ about the selected service: </p>
   <li><p><b>Availability</b><br>
     You can recognize from this information how reliable and stable the
     selected service works. The value is measured by the InfoServices and is
-    calculated across all measurements from within the last hour.</p>
+    calculated across all measurements from within the last hour. Also if this
+    service is for some reason not available for you information about this
+    will be shown here. If you click on the message, a dialog with further
+    explanations will open.</p>
   </li>
 </ul>
 
@@ -213,11 +225,14 @@ buttons with which the following actions can be conducted: </p>
     will open for account creation, and no connection will be made to the
     service.</p>
   </li>
-  <li><p><b><a name="manuell">Add</a></b><br>
+  <li><p><b><a name="manuell">Add</a></b> (enter service information
+    manually)<br>
     Here you can manually add a service which has not been reported available
     by the InfoService but that you know the access data of.</p>
     <p><em>This function is rarely needed, e.g. if you can not connect to an
-    InfoService to receive information about services automatically.</em></p>
+    InfoService to receive information about services automatically.
+    </em><strong>Please also note the about warning for the <a
+    href="#filter">filter "Services added by yourself"</a>.</strong></p>
     <p>After clicking the button you will be presented the following fields in
     the lower part of the window: </p>
     <ul>

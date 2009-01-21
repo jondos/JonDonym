@@ -37,6 +37,7 @@ import anon.util.ThreadPool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import anon.crypto.SignatureVerifier;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.ClassUtil;
 import anon.util.IXMLEncodable;
@@ -439,7 +440,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 						Math.abs(random.nextInt()) % infoServiceList.size()));
 				}
 
-				if (currentInfoService.getCertPath() != null && !currentInfoService.getCertPath().isVerified())
+				if ((currentInfoService.getCertPath() != null && !currentInfoService.getCertPath().isVerified()) ||
+					(SignatureVerifier.getInstance().isCheckSignatures() && !currentInfoService.isValid()))
 				{
 					LogHolder.log(LogLevel.NOTICE, LogType.NET,
 								  "Skipped non-verifyable InfoService: " + currentInfoService.getName(), true);
@@ -447,6 +449,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					currentInfoService = null;
 					continue;
 				}
+				
 				//if (functionNumber == GET_LATEST_JAVA_SERIALS)
 				{
 					LogHolder.log(LogLevel.NOTICE, LogType.NET,

@@ -32,23 +32,27 @@ auszutauschen. Jede Internetverbindung eines Nutzers wird f&uuml;r jeden Mix
 einer Kaskade einzeln verschl&uuml;sselt und &uuml;ber die Mixkaskade bis zum
 Ziel, z.B. zu einer Webseite, gesendet. Ziel dieser mehrfachen
 Verschl&uuml;sselung, Verteilung und Weiterleitung ist, dass kein Mixbetreiber
-alleine den Nutzer enttarnen kann, und dass Lauscher auf den Verbindungen
-(Provider, W-LAN) keine Inhaltsdaten abgreifen k&ouml;nnen. Da au&szlig;erdem
-viele Benutzer gleichzeitig den Anonymisierungsdienst nutzen und sich dabei
-alle dieselbe <a href="wwwprivacy.html#ip">IP-Adresse</a> teilen, werden die
+alleine den Nutzer enttarnen kann, und dass Lauscher auf den Verbindungen keine
+brauchbaren Inhaltsdaten abgreifen k&ouml;nnen. Da au&szlig;erdem viele
+Benutzer gleichzeitig den Anonymisierungsdienst nutzen und sich dabei alle
+dieselbe <a href="wwwprivacy.html#ip">IP-Adresse</a> teilen, werden die
 Internetverbindungen jedes Benutzers unter denen aller anderen Benutzer auf
 derselben Kaskade versteckt: jeder Benutzer k&ouml;nnte der Urheber einer
-bestimmten Verbindung gewesen sein. Dieses Verfahren verhindert, dass
-Mixbetreiber oder Au&szlig;enstehende (Provider, WLAN-Lauscher, Webseiten)
-erfahren, welche Verbindungen ein bestimmter Benutzer aufgebaut hat oder von
-welchem Benutzer eine bestimmte Verbindung stammt.</p>
+bestimmten Verbindung gewesen sein. </p>
+
+<p><strong>Dieses Verfahren verhindert also, jemand anderes als der Benutzer
+erf&auml;hrt, welche Verbindungen ein bestimmter Benutzer aufgebaut hat oder
+von welchem Benutzer eine bestimmte Verbindung stammt. Die Besonderheit dieses
+Anonymisierungssystems ist, das es nicht nur gegen Au&szlig;enstehende
+sch&uuml;tzt (Provider, WLAN-Lauscher, Webseiten), sondern auch gegen Anbieter
+des Systems selbst (Mixbetreiber, Abrechnungsdienstleister).</strong></p>
 
 <p>JonDonym bietet im Vergleich zu anderen Anonymisierungsdiensten einige
 konkrete Vorteile:</p>
 <ul>
   <li><b>Starke Verschl&uuml;sselung und Authentisierung:</b> Niemand kann den
     Datenverkehr zwischen Ihrem Rechner und dem JonDonym-Dienst mitlesen.
-    (Verschl&uuml;sselt mit RSA 2048 und AES 128; signiert mit DSA, RSA oder
+    (Verschl&uuml;sselt mit RSA 1024 und AES 128; signiert mit DSA, RSA oder
     ECDSA; realisiert mit den Bibliotheken BouncyCastle und OpenSSL)</li>
   <li><b>Schutz vor dem Dienstbetreiber:</b> Solange nicht alle Dienstbetreiber
     von JonDonym unabh&auml;ngig voneinander gezwungen werden, Sie zu
@@ -85,7 +89,7 @@ konkrete Vorteile:</p>
     Hilfefunktion, betreute Nutzerforen, E-Mail-Support.</li>
 </ul>
 
-<p>Eine &auml;hnlich starke Anonymisierung kann nur das nicht-kommerzielle
+<p>Eine vergleichbar starke Anonymisierung kann nur das nicht-kommerzielle
 System <a href="http://tor.eff.org/">Tor</a> bieten, welches f&uuml;r
 Internet-Profis als Erg&auml;nzung zu JonDonym sehr empfehlenswert ist.
 Internet-Anf&auml;nger und Computer-Unerfahrene sollten mit Tor jedoch
@@ -148,9 +152,9 @@ folgende Vorteile:</p>
 
 <p>Von diesen Garantien ausgenommen sind Softwarefehler, f&uuml;r die
 gem&auml;&szlig; <a href="https://www.jondos.de/de/termsAndConditions">AGB</a>
-nicht gehaftet wird. Weitere m&ouml;gliche Einschr&auml;nkungen bei den
-Leistungen einzelner Dienste entnehmen Sie bitte den AGB der jeweiligen
-Mixbetreiber.</p>
+des Abrechnungsdienstleisters und Softwareentwicklers JonDos nicht gehaftet
+wird. Weitere m&ouml;gliche Einschr&auml;nkungen bei den Leistungen einzelner
+Dienste entnehmen Sie bitte den AGB der jeweiligen Mixbetreiber.</p>
 
 <p>Wenn Sie die Premiumdienste nutzen m&ouml;chten, erstellen Sie in Ihrem
 JonDo-Programm ein <a href="payment.html">Einmalkonto</a> und aktivieren es
@@ -164,11 +168,12 @@ neues Einmalkonto erzeugen und aktivieren.</p>
 
 <p>Hinweise zum Datenschutz: Zur Abrechnung des Datenvolumens mit den
 Mixbetreibern wird jeweils kumulativ gespeichert, wie viel Volumen ein Konto
-auf welcher Mixkaskade verbraucht. Eine mehr als tagesgenaue Abrechnung erfolgt
-dabei nicht. Eine Zuordnung von Konten zu Nutzeridentit&auml;ten wird nicht
-gespeichert. &Uuml;ber das abgerechnete Datenvolumen ist es technisch nicht
-m&ouml;glich, aufgerufene Internetseiten zu erkennen, selbst bei
-sekundengenauer bzw. maximal genauer Speicherung. </p>
+auf welcher Mixkaskade verbraucht. Eine mehr als tagesgenaue statistische
+Erfassung des &uuml;bertragenen Datenvolumens je Konto erfolgt dabei nicht.
+Eine Zuordnung von Konten zu Nutzeridentit&auml;ten wird nicht gespeichert.
+&Uuml;ber das abgerechnete Datenvolumen ist es technisch nicht m&ouml;glich,
+aufgerufene Internetseiten zu erkennen, selbst wenn eine sekundengenaue bzw.
+maximal genaue Speicherung angewandt w&uuml;rde. </p>
 
 <p><strong>Hinweis: Die Premiumdienste sind nicht mit allen Versionen des
 Programms erreichbar. Sie erhalten eine kompatible Software auf den <a
@@ -177,7 +182,8 @@ Java-Programmierer sind, k&ouml;nnen Sie die Software jedoch auch selbst
 &uuml;bersetzen, ver&auml;ndern und speziell die f&uuml;r Sie n&uuml;tzlichen
 Funktionen aktivieren (<a href="https://svn.jondos.de">SVN-Repository</a> oder
 <a
-href="http://anon.inf.tu-dresden.de/develop/sources_de.html">CVS-Repository</a>).</strong></p>
+href="http://anon.inf.tu-dresden.de/develop/sources_de.html">CVS-Repository</a>,
+<a href="http://www.jondos.de/de/licence">quelloffene Lizenz</a>).</strong></p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="wwwprivacy.html"><img

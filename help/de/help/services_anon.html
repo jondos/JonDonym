@@ -50,10 +50,20 @@ vordefinierte Filter stehen Ihnen zur Verf&uuml;gung: </p>
     verbliebenen nur jene an, die mit hoher Wahrscheinlichkeit eine
     ausreichende Leistung bieten.</p>
   </li>
-  <li><p><b>Eigene Dienste</b><br>
+  <li><p><b>Selbst eingetragene Dienste</b><br>
     Dieser Filter zeigt nur Dienste an, die von Ihnen <a href="#manuell">selbst
     angelegt</a> wurden, etwa um die Verbindung zu einem speziellen Dienst zu
-    testen. </p>
+    testen der vom <a href="infoservice.html">InfoService</a> nicht automatisch
+    gemeldet wird. <strong>Bitte beachten Sie, dass Dienste, die Sie von Hand
+    eintragen, beim Verbindungsaufbau &uuml;ber den Filter "Selbst eingetragene
+    Dienste" nicht auf <a href="certificates.html">g&uuml;ltige Zertifikate</a>
+    &uuml;berpr&uuml;ft werden. Dritte, die Zugriff auf Ihre Internetverbindung
+    haben, k&ouml;nnen dann eine Verbindung zu solchen Diensten
+    vort&auml;uschen und somit einen Man-in-the-Middle-Angriff
+    durchf&uuml;hren, wobei sie ihre gesamte Kommunikation &uuml;ber diese
+    Dienste abh&ouml;ren k&ouml;nnen. Sie sollten diesen Filter deshalb nur zum
+    ersten Verbindungsaufbau anwenden um die Dienst-Daten zu erhalten und
+    danach auf einen Standardfilter schalten.</strong></p>
   </li>
 </ul>
 
@@ -159,7 +169,10 @@ sehen Sie zudem noch folgende Informationen zum ausgew&auml;hlten Dienst: </p>
     Wie zuverl&auml;ssig und stabil der ausgew&auml;hlte Dienst arbeitet,
     k&ouml;nnen Sie anhand dieser Information erkennen. Dieser Wert wird durch
     die InfoServices gemessen und &uuml;ber alle Messungen innerhalb der letzte
-    Stunde berechnet.</p>
+    Stunde berechnet. Auch falls dieser Dienst aus irgendeinem Grund f&uuml;r
+    Sie nicht erreichbar ist werden an dieser Stelle entsprechende
+    Informationen dazu angezeigt. Ein Klick auf die Nachricht &ouml;ffnet einen
+    Dialog mit weiteren Erkl&auml;rungen.</p>
   </li>
 </ul>
 
@@ -242,13 +255,16 @@ k&ouml;nnen: </p>
     &ouml;ffnet sich ein Dialog zur Kontoerzeugung und es wird keine Verbindung
     zum Dienst hergestellt.</p>
   </li>
-  <li><p><b><a name="manuell">Hinzuf&uuml;gen</a></b><br>
+  <li><p><b><a name="manuell">Hinzuf&uuml;gen</a></b> (Dienst-Informationen von
+    Hand eintragen) <br>
     Hiermit k&ouml;nnen Sie selbst einen Dienst eintragen dessen Zugangsdaten
     Sie kennen, der aber nicht vom InfoService als verf&uuml;gbar gemeldet
     wurde.</p>
     <p><em>Diese Funktion wird nur in Ausnahmef&auml;llen ben&ouml;tigt, etwa
     dann, wenn Sie zu keinem InfoService eine Verbindung aufbauen k&ouml;nnen
-    um Informationen &uuml;ber Dienste automatisch abzurufen..</em></p>
+    um Informationen &uuml;ber Dienste automatisch abzurufen.</em> Bitte
+    beachten Sie auch den obigen Warnhinweis zum <a href="#filter">Filter
+    "Selbst eingetragene Dienste"</a>.</p>
     <p>Nach einem Klick auf diese Schaltfl&auml;che erscheinen im unteren Teil
     des Fensters folgende Felder: </p>
     <ul>

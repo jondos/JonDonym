@@ -3641,6 +3641,25 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_bShowConfigAssistant = false;
 	}
 
+	public MixCascade getConnectedCascade()
+	{
+		// don't think this needs to be synhronized; would cause deadlocks if it was...
+		AnonProxy proxy = m_proxyAnon;
+		if (proxy == null)
+		{
+			return null;
+		}
+		MixCascade currentCascade = getCurrentMixCascade();
+		MixCascade proxyCascade = proxy.getMixCascade();
+
+		if (proxy != null && proxy.isConnected() && currentCascade != null && proxyCascade != null &&
+			proxyCascade.equals(currentCascade))
+		{
+			return currentCascade;
+		}
+		return null;
+	}
+	
 	public boolean isAnonConnected()
 	{
 		// don't think this needs to be synhronized; would cause deadlocks if it was...
