@@ -377,14 +377,26 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		{
 			label = new JLabel(JAPMessages.getString(MSG_IS_CERTS));
 			country = new CountryMapper(m_multiCertPath.getSubject().getCountryCode(), JAPMessages.getLocale());
-			label2 = new JLabel(m_name, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
+			
+			String infoservice = m_name;
+			if(infoservice.length() > 35)
+			{
+				infoservice = infoservice.substring(0, 32) + "...";
+			}
+			label2 = new JLabel(infoservice, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
 			label2.setToolTipText(JAPMessages.getString(HINT_IS, new Object[] {m_name, country.toString()}));
 		}
 		else
 		{
 			label = new JLabel(JAPMessages.getString(MSG_OP_CERTS));
 			country = new CountryMapper(m_multiCertPath.getIssuer().getCountryCode(), JAPMessages.getLocale());
-			label2 = new JLabel(m_multiCertPath.getIssuer().getOrganisation(), GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
+			String organisation = m_multiCertPath.getIssuer().getOrganisation();
+			
+			if(organisation.length() > 35)
+			{
+				organisation = organisation.substring(0, 32) + "...";
+			}
+			label2 = new JLabel(organisation, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
 			label2.setToolTipText(JAPMessages.getString(HINT_OP, new Object[] {m_multiCertPath.getIssuer().getOrganisation(), country.toString()}));
 		}
 		panel.add(label);
@@ -400,7 +412,13 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			label = new JLabel(JAPMessages.getString(MSG_MIX_CERTS));
 			panel.add(label);
 			country = new CountryMapper(m_multiCertPath.getSubject().getCountryCode(), JAPMessages.getLocale());
-			label = new JLabel(m_name, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
+			
+			String mix = m_name;
+			if(mix.length() > 35)
+			{
+				mix = mix.substring(0, 32) + "...";
+			}
+			label = new JLabel(mix, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
 			label.setToolTipText(JAPMessages.getString(HINT_MIX, new Object[] {m_name, country.toString()}));
 			panel.add(label);
 			c.gridy = c.gridy+2;
