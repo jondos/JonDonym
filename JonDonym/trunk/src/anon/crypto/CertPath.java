@@ -153,7 +153,13 @@ public class CertPath implements IXMLEncodable
 		
 		if(cachedPath != null && cachedPath.getCertPath().m_valid)
 		{
-			return cachedPath.getCertPath();
+			//check if the cached Path is valid and if not 
+			//check if we may be able to build a valid one now
+			if(cachedPath.getCertPath().checkValidity(new Date())
+					|| !isPossiblyValid(a_firstCert, a_pathCertificates))
+			{
+				return cachedPath.getCertPath();
+			}
 		}
 
 		//build and validate a new CertPath
@@ -176,6 +182,37 @@ public class CertPath implements IXMLEncodable
 		return certPath; 
 	}
 	
+	
+	/**
+	 * Checks if it may be possible to build a (timely) valid CertPath from the
+	 * given certificates. To return <code>true</code> the first cert has to be 
+	 * valid an at least one of the path certs, too.
+	 * @param a_firstCert the certificate to verify
+	 * @param a_pathCertificates the possible path certificates
+	 * @return <code>true</code> if it is generally possible to build a (timely)
+	 * 		   valid CertPath
+	 */
+	private static boolean isPossiblyValid(JAPCertificate a_firstCert,
+			Vector a_pathCertificates)
+	{
+		Enumeration certs;
+		JAPCertificate nextCert;
+		
+		if(a_firstCert.getValidity().isValid(new Date()))
+		{
+			certs = a_pathCertificates.elements();
+			while(certs.hasMoreElements())
+			{
+				nextCert = (JAPCertificate) certs.nextElement();
+				if(nextCert.getValidity().isValid(new Date()))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private boolean buildAndValidate(Vector a_pathCertificates)
 	{	
 		Enumeration certificates;
