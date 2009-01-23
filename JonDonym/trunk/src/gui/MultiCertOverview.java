@@ -301,30 +301,30 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		c.fill = GridBagConstraints.NONE;
 		explanation.add(label, c);
 				
-		label = new JLabel(GUIUtils.loadImageIcon(IMG_NOT_TRUSTED));
+		label = new JLabel(GUIUtils.loadImageIcon(IMG_NOT_TRUSTED, true, false));
 		label.setText(JAPMessages.getString(MSG_NOT_TRUSTED));
 		c.insets.left = 7;
 		c.gridy = 3;
 		c.gridwidth = 1;
 		explanation.add(label, c);
 				
-		label = new JLabel(GUIUtils.loadImageIcon(IMG_INVALID));
+		label = new JLabel(GUIUtils.loadImageIcon(IMG_INVALID, true, false));
 		label.setText(JAPMessages.getString(MSG_INVALID));
 		c.gridy = 4;
 		explanation.add(label, c);
 		
-		label = new JLabel(GUIUtils.loadImageIcon(IMG_BOX_PURPLE));
+		label = new JLabel(GUIUtils.loadImageIcon(IMG_BOX_PURPLE, true, false));
 		label.setText("DSA");
 		c.gridx = 2;
 		c.gridy = 2;
 		explanation.add(label, c);
 		
-		label = new JLabel(GUIUtils.loadImageIcon(IMG_BOX_ORANGE));
+		label = new JLabel(GUIUtils.loadImageIcon(IMG_BOX_ORANGE, true, false));
 		label.setText("RSA");
 		c.gridy = 3;
 		explanation.add(label, c);
 		
-		label = new JLabel(GUIUtils.loadImageIcon(IMG_BOX_BLUE));
+		label = new JLabel(GUIUtils.loadImageIcon(IMG_BOX_BLUE, true, false));
 		label.setText("ECC");
 		c.gridy = 4;
 		explanation.add(label, c);
@@ -383,7 +383,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			{
 				infoservice = infoservice.substring(0, 32) + "...";
 			}
-			label2 = new JLabel(infoservice, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
+			label2 = new JLabel(infoservice, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png", true, false), SwingConstants.LEFT);
 			label2.setToolTipText(JAPMessages.getString(HINT_IS, new Object[] {m_name, country.toString()}));
 		}
 		else
@@ -396,7 +396,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			{
 				organisation = organisation.substring(0, 32) + "...";
 			}
-			label2 = new JLabel(organisation, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
+			label2 = new JLabel(organisation, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png", true, false), SwingConstants.LEFT);
 			label2.setToolTipText(JAPMessages.getString(HINT_OP, new Object[] {m_multiCertPath.getIssuer().getOrganisation(), country.toString()}));
 		}
 		panel.add(label);
@@ -418,7 +418,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			{
 				mix = mix.substring(0, 32) + "...";
 			}
-			label = new JLabel(mix, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png"), SwingConstants.LEFT);
+			label = new JLabel(mix, GUIUtils.loadImageIcon("flags/" + country.getISOCode() + ".png", true, false), SwingConstants.LEFT);
 			label.setToolTipText(JAPMessages.getString(HINT_MIX, new Object[] {m_name, country.toString()}));
 			panel.add(label);
 			c.gridy = c.gridy+2;
@@ -552,21 +552,21 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			{
 				if(cert.getValidity().isValid(new Date()))
 				{
-					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK));
-					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK_DARK));
+					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK, true, false));
+					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK_DARK, true, false));
 					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK_DARK));
 				}
 				else
 				{
-					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID));
-					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID_DARK));
+					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID, true, false));
+					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID_DARK, true, false));
 					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID_DARK));
 				}
 			}
 			else
 			{
-				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK));
-				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK_DARK));
+				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK, true, false));
+				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK_DARK, true, false));
 				//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK_DARK));
 			}
 			
@@ -578,21 +578,21 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			{
 				if(cert.getValidity().isValid(new Date()))
 				{
-					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK));
-					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK_DARK));
+					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK, true, false));
+					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK_DARK, true, false));
 					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK_DARK));
 				}
 				else
 				{
-					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID));
-					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID_DARK));
+					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID, true, false));
+					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID_DARK, true, false));
 					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID_DARK));
 				}
 			}
 			else
 			{
-				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK));
-				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK_DARK));
+				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK, true, false));
+				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK_DARK, true, false));
 				//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK_DARK));
 			}
 		}
@@ -602,21 +602,21 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 			{
 				if(cert.getValidity().isValid(new Date()))
 				{
-					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK));
-					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK_DARK));
+					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK, true, false));
+					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK_DARK, true, false));
 					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK_DARK));
 				}
 				else
 				{
-					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID));
-					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID_DARK));
+					radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID, true, false));
+					radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID_DARK, true, false));
 					//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID_DARK));
 				}
 			}
 			else
 			{
-				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK));
-				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK_DARK));
+				radioButton.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK, true, false));
+				radioButton.setRolloverIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK_DARK, true, false));
 				//radioButton.setSelectedIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK_DARK));
 			}
 		}
@@ -657,33 +657,33 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		{
 			if(trusted)
 			{
-				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH));
+				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH, true, false));
 			}
 			else
 			{
-				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_NOK));
+				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_NOK, true, false));
 			}
 		}
 		else if(orientation == SwingConstants.NORTH_WEST)
 		{
 			if(trusted)
 			{
-				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_WEST));
+				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_WEST, true, false));
 			}
 			else
 			{
-				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_WEST_NOK));
+				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_WEST_NOK, true, false));
 			}
 		}
 		else if(orientation == SwingConstants.NORTH_EAST)
 		{
 			if(trusted)
 			{
-				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_EAST));
+				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_EAST, true, false));
 			}
 			else
 			{
-				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_EAST_NOK));
+				label = new JLabel(GUIUtils.loadImageIcon(IMG_ARROW_NORTH_EAST_NOK, true, false));
 			}
 		}
 		else
