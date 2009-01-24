@@ -1239,21 +1239,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				m_btnViewCert.setForeground(m_btnEmail.getForeground());
 				
-				if (m_serverCertPaths.countVerifiedPaths() > 2)
+				if (m_serverCertPaths.countVerifiedAndValidPaths() > 2)
 				{
 					//m_btnViewCert.setForeground(Color.green.darker().darker());
 					m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_THREE_CERTS));
 					m_btnViewCert.setToolTipText(JAPMessages.getString(
 							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, 
-							"" + m_serverCertPaths.countVerifiedPaths()));
+							"" + m_serverCertPaths.countVerifiedAndValidPaths()));
 				}
-				else if (m_serverCertPaths.countVerifiedPaths() > 1)
+				else if (m_serverCertPaths.countVerifiedAndValidPaths() > 1)
 				{
 					//m_btnViewCert.setForeground(Color.blue);
 					m_btnViewCert.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_DOUBLE));
 					m_btnViewCert.setToolTipText(JAPMessages.getString(
 							MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, 
-							"" + m_serverCertPaths.countVerifiedPaths()));
+							"" + m_serverCertPaths.countVerifiedAndValidPaths()));
 				}
 				else
 				{

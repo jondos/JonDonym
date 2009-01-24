@@ -139,11 +139,11 @@ public class MixDetailsDialog extends JAPDialog
 				m_btnCertificates.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID));
 				m_btnCertificates.setToolTipText(JAPMessages.getString(MSG_INVALID));
 			}
-			else if (m_mixInfo.getCertPath().countVerifiedPaths() > 1)
+			else if (m_mixInfo.getCertPath().countVerifiedAndValidPaths() > 1)
 			{
 				m_btnCertificates.setToolTipText(JAPMessages.getString(MSG_INDEPENDENT_CERTIFICATIONS, 
-						"" + m_mixInfo.getCertPath().countVerifiedPaths()));
-				if (m_mixInfo.getCertPath().countVerifiedPaths() > 2)
+						"" + m_mixInfo.getCertPath().countVerifiedAndValidPaths()));
+				if (m_mixInfo.getCertPath().countVerifiedAndValidPaths() > 2)
 				{
 					m_btnCertificates.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_THREE_CERTS));				
 				}

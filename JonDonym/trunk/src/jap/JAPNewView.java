@@ -2964,19 +2964,19 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 							strTooltip += ", " + 
 								JAPMessages.getString(MixDetailsDialog.MSG_INVALID);
 						}
-						else if (certPath.countVerifiedPaths() > 2)
+						else if (certPath.countVerifiedAndValidPaths() > 2)
 						{
 							borderColor = Color.green;
 							strTooltip += ", " + 
 								JAPMessages.getString(MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, 
-										"" + certPath.countVerifiedPaths());
+										"" + certPath.countVerifiedAndValidPaths());
 						}
-						else if (certPath.countVerifiedPaths() > 1)
+						else if (certPath.countVerifiedAndValidPaths() > 1)
 						{
 							borderColor = new Color(100, 215, 255);
 							strTooltip += ", " +
 								JAPMessages.getString(MixDetailsDialog.MSG_INDEPENDENT_CERTIFICATIONS, 
-										"" + certPath.countVerifiedPaths());
+										"" + certPath.countVerifiedAndValidPaths());
 						}
 					}
 					else

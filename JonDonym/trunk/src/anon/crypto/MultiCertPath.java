@@ -293,6 +293,33 @@ public class MultiCertPath implements IXMLEncodable
 		}	
 	}
 	
+	/**
+	 * Returns the number of paths that are verified and timely valid.
+	 * The return value is at least 1 if at least one verified path exists,
+	 * no matter whether any of the paths is valid or not.
+	 * @return the number of paths that are verified and timely valid
+	 */
+	public int countVerifiedAndValidPaths()
+	{
+		int count = 0;
+		
+		synchronized (m_certPaths)
+		{
+			for(int i=0; i<m_certPaths.length; i++)
+			{
+				if (!this.needsVerification() || m_certPaths[i].verify())
+				{
+					if (count == 0 || // count at least 1 verified path
+						m_certPaths[i].checkValidity(new Date()))
+					{
+						count++;
+					}
+				}
+			}
+			return count;
+		}	
+	}
+	
 	public int getMaxLength() 
 	{
 		int maxLength = 0;
