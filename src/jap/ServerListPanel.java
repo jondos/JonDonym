@@ -365,11 +365,11 @@ final public class ServerListPanel extends JPanel implements ActionListener
 				{
 					m_operatorFlags[a_mix].setBorder(BorderFactory.createLineBorder(Color.yellow, 2));
 				}
-				else if (a_operator.getCertPath().countVerifiedPaths() > 2)
+				else if (a_operator.getCertPath().countVerifiedAndValidPaths() > 2)
 				{
 					m_operatorFlags[a_mix].setBorder(BorderFactory.createLineBorder(Color.green, 2));
 				}
-				else if (a_operator.getCertPath().countVerifiedPaths() > 1)
+				else if (a_operator.getCertPath().countVerifiedAndValidPaths() > 1)
 				{
 					m_operatorFlags[a_mix].setBorder(BorderFactory.createLineBorder(new Color(100, 215, 255), 2));
 				}
