@@ -305,7 +305,7 @@ public class MultiCertPath implements IXMLEncodable
 		
 		synchronized (m_certPaths)
 		{
-			for(int i=0; i<m_certPaths.length; i++)
+			for(int i=0; i < m_certPaths.length; i++)
 			{
 				if (!this.needsVerification() || m_certPaths[i].verify())
 				{
@@ -316,8 +316,9 @@ public class MultiCertPath implements IXMLEncodable
 					}
 				}
 			}
-			return count;
-		}	
+		}
+		
+		return count;
 	}
 	
 	public int getMaxLength() 
