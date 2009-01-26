@@ -1138,10 +1138,20 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest(a_getter.m_postFile),
 									  HTTPConnectionFactory.HTTP_ENCODING_ZLIB);
 
-		if (!SignatureVerifier.getInstance().verifyXml(doc, SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+		if (doc == null)
 		{
-			// signature could not be verified
 			throw new SignatureException("Document could not be verified!");
+		}
+		else if (SignatureVerifier.getInstance().isCheckSignatures() &&  
+				SignatureVerifier.getInstance().isCheckSignatures(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+		{
+			XMLSignature signature = SignatureVerifier.getInstance().getVerifiedXml(doc.getDocumentElement(), 
+					SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+			
+			if (signature == null || !signature.isVerified() || !signature.getMultiCertPath().isValid(new Date()))
+			{
+				throw new SignatureException("Document could not be verified!");
+			}
 		}
 
 		NodeList infoServicesNodes =

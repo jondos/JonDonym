@@ -621,16 +621,16 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 			{
 				if(a_cert.getValidity().isValid(new Date()))
 				{
-					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK));
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_OK, true, false));
 				}
 				else
 				{
-					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID));
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_INVALID, true, false));
 				}
 			}
 			else
 			{
-				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK));
+				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_ORANGE_NOK, true, false));
 			}
 			
 		}
@@ -641,16 +641,16 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 			{
 				if(a_cert.getValidity().isValid(new Date()))
 				{
-					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK));
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_OK, true, false));
 				}
 				else
 				{
-					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID));
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_INVALID, true, false));
 				}
 			}
 			else
 			{
-				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK));
+				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_BLUE_NOK, true, false));
 			}
 		}
 		else //certs with DSA or unknown keys
@@ -659,16 +659,16 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 			{
 				if(a_cert.getValidity().isValid(new Date()))
 				{
-					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK));
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_OK, true, false));
 				}
 				else
 				{
-					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID));
+					lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_INVALID, true, false));
 				}
 			}
 			else
 			{
-				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK));
+				lbl_summaryIcon.setIcon(GUIUtils.loadImageIcon(IMG_CERT_PURPLE_NOK, true, false));
 			}
 		}
 		/*if (a_bIsVerifyable)
@@ -1056,12 +1056,12 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 		constraints.insets = new Insets(5, 15, 5, 5);
 		constraints.gridy++;
 		JLabel lbl_verified = new JLabel(JAPMessages.getString(MSG_CERTVALID),
-										 GUIUtils.loadImageIcon(IMG_CERTENABLEDICON, false), JLabel.LEFT);
+										 GUIUtils.loadImageIcon(IMG_CERTENABLEDICON, false, false), JLabel.LEFT);
 		certPathPanel.add(lbl_verified, constraints);
 
 		constraints.gridy++;
 		JLabel lbl_invalid = new JLabel(JAPMessages.getString(MSG_CERTNOTVALID),
-										GUIUtils.loadImageIcon(IMG_WARNING, false), JLabel.LEFT);
+										GUIUtils.loadImageIcon(IMG_WARNING, false, false), JLabel.LEFT);
 		//lbl_invalid.setForeground(Color.orange);
 	    certPathPanel.add(lbl_invalid, constraints);
 
@@ -1069,7 +1069,7 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 		constraints.insets = new Insets(5, 15, 20, 5);
 		JLabel lbl_unverified =
 			new JLabel(JAPMessages.getString(MSG_CERT_NOT_VERIFIED),
-					   GUIUtils.loadImageIcon(IMG_CERTDISABLEDICON, false), JLabel.LEFT);
+					   GUIUtils.loadImageIcon(IMG_CERTDISABLEDICON, false, false), JLabel.LEFT);
 		lbl_unverified.setForeground(Color.red);
 	    certPathPanel.add(lbl_unverified, constraints);
 
@@ -1296,18 +1296,18 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 			{
 				if (j.getCertificate().getValidity().isValid(new Date()))
 				{
-					certIconLabel.setIcon(GUIUtils.loadImageIcon(CertDetailsDialog.IMG_CERTENABLEDICON, false));
+					certIconLabel.setIcon(GUIUtils.loadImageIcon(CertDetailsDialog.IMG_CERTENABLEDICON, false, false));
 				}
 				else
 				{
 					//setForeground(Color.orange);
-					certIconLabel.setIcon(GUIUtils.loadImageIcon(CertDetailsDialog.IMG_WARNING, false));
+					certIconLabel.setIcon(GUIUtils.loadImageIcon(CertDetailsDialog.IMG_WARNING, false, false));
 				}
 			}
 			else
 			{
 				certTextLabel.setForeground(Color.red);
-				certIconLabel.setIcon(GUIUtils.loadImageIcon(CertDetailsDialog.IMG_CERTDISABLEDICON, false));
+				certIconLabel.setIcon(GUIUtils.loadImageIcon(CertDetailsDialog.IMG_CERTDISABLEDICON, false, false));
 			}
 			//if the element is the last element in the cert Path (the mix certificate) the text is bold
 			if (j.equals(list.getModel().getElementAt( (list.getModel().getSize()) - 1)))
