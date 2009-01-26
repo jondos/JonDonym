@@ -376,6 +376,21 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			{
 				/* get the whole infoservice list */
 				infoServiceList = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
+				
+				Vector copyList = (Vector)infoServiceList.clone();
+				InfoServiceDBEntry isTemp;
+				
+				for (int i = 0; i <  copyList.size(); i++)
+				{
+					isTemp = (InfoServiceDBEntry)copyList.elementAt(i);
+					if ((isTemp.getCertPath() != null && (!isTemp.getCertPath().isVerified()) ||
+						(SignatureVerifier.getInstance().isCheckSignatures() &&
+								SignatureVerifier.getInstance().isCheckSignatures(
+									SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE) && !isTemp.isValid())))
+					{
+						infoServiceList.removeElement(isTemp);
+					}
+				}
 			}
 			else
 			{
@@ -430,7 +445,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				 */
 				currentInfoService = null;
 			}
-			while ( ( (infoServiceList.size() > 0) || (currentInfoService != null)) &&
+			while (((infoServiceList.size() > 0) || (currentInfoService != null)) &&
 				   !Thread.currentThread().isInterrupted())
 			{
 				if (currentInfoService == null)
@@ -440,8 +455,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 						Math.abs(random.nextInt()) % infoServiceList.size()));
 				}
 
-				if ((currentInfoService.getCertPath() != null && !currentInfoService.getCertPath().isVerified()) ||
-					(SignatureVerifier.getInstance().isCheckSignatures() && !currentInfoService.isValid()))
+				if ((currentInfoService.getCertPath() != null && !currentInfoService.getCertPath().isVerified()))// ||
+					//(SignatureVerifier.getInstance().isCheckSignatures() && !currentInfoService.isValid()))
 				{
 					LogHolder.log(LogLevel.NOTICE, LogType.NET,
 								  "Skipped non-verifyable InfoService: " + currentInfoService.getName(), true);

@@ -531,7 +531,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	public void update(Observable a_object, final Object a_argument)
 	{
 		if ( (a_object == m_socketHandler) && (a_argument instanceof IOException))
-		{new Exception().printStackTrace();
+		{
 			/* shutdown everything */
 			new Thread(new Runnable()
 			{
