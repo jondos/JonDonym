@@ -77,6 +77,7 @@ public class AIControlChannel extends XmlControlChannel
 	public static final long AI_LOGIN_TIMEOUT = 120000; // 2 minutes
 	private static final long NO_CHARGED_ACCOUNT_UPDATE = 1000 * 60 * 5; // 5 minutes
 
+	public static final boolean REVERT_PRE_PREPAID = true;
   //codes for AI events that can be fired
   //private static final int EVENT_UNREAL = 1;
 
@@ -163,8 +164,8 @@ public class AIControlChannel extends XmlControlChannel
 			  {
 				  // find an account that is not empty - if possible...
 
-				  /*getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
-				  processErrorMessage(new XMLErrorMessage(elemRoot));*/
+				  //getServiceContainer().keepCurrentService(false); // reconnect to another cascade if possible
+				  //processErrorMessage(new XMLErrorMessage(elemRoot));
 
 
 				  updateBalance(PayAccountsFile.getInstance().getActiveAccount(), false); // show that account is empty
@@ -212,6 +213,34 @@ public class AIControlChannel extends XmlControlChannel
 	  }
   }
 
+  private synchronized void handlePrepaidBytesReceived(int prepaidBytes, PayAccount activeAccount, boolean revertPrevious)
+  {
+	  if(activeAccount == null)
+	  {
+		  throw new NullPointerException("Active Account must not be null!");
+	  }
+	  if ( prepaidBytes > 0 )	 
+	  {
+		 if(m_bPrepaidReceived && revertPrevious)
+		 {
+			 System.out.println("Overwrite old Prepaidbytes: old: "+m_prepaidBytes+", new: "+prepaidBytes);
+			 //revert
+			 activeAccount.updateCurrentBytes(m_prepaidBytes);
+			 m_prepaidBytes = prepaidBytes;
+			 activeAccount.updateCurrentBytes(prepaidBytes * ( -1));
+			 
+		 }
+		 else if (!m_bPrepaidReceived)
+		 {
+			 m_prepaidBytes = prepaidBytes;
+			 m_bPrepaidReceived = true;
+			 // ignore prepaid bytes smaller than zero
+			 activeAccount.updateCurrentBytes(prepaidBytes * ( -1)); // substract from transferred bytes
+			 System.out.println("Prepaidbytes: "+m_prepaidBytes);
+		 }
+	  }
+  }
+  
   /**
    * processChallenge
    *
@@ -229,13 +258,9 @@ public class AIControlChannel extends XmlControlChannel
 	  {
 		  throw new Exception("Received Challenge from AI but ActiveAccount not set!");
 	  }
-	  if (!m_bPrepaidReceived && chal.getPrepaidBytes() > 0)
-	  {
-		  m_prepaidBytes = chal.getPrepaidBytes();
-		   m_bPrepaidReceived = true;
-		  // ignore prepaid bytes smaller than zero
-		  acc.updateCurrentBytes(chal.getPrepaidBytes() * ( -1)); // remove transferred bytes
-	  }
+	  //Although it is deprecated to receive the prepaid bytes with the challenge
+	  //they're still handled here for backward compatibility reasons.
+	  handlePrepaidBytesReceived(chal.getPrepaidBytes(), acc, !REVERT_PRE_PREPAID);
 
 	  byte[] arbSig = ByteSignature.sign(arbChal, acc.getPrivateKey());
 	  XMLResponse response = new XMLResponse(arbSig);
@@ -263,6 +288,12 @@ public class AIControlChannel extends XmlControlChannel
 
 
 	//if requested, send account certificate
+	if(request.isInitialCCRequest())
+	{
+		handlePrepaidBytesReceived(request.getPrepaidBytes(), PayAccountsFile.getInstance().getActiveAccount(), REVERT_PRE_PREPAID);
+		processInitialCC(request.getCC());
+		return;
+	}
 	if (request.isAccountRequest())
 	{
 		if (sendAccountCert() != ErrorCodes.E_SUCCESS)
@@ -769,10 +800,12 @@ public class AIControlChannel extends XmlControlChannel
 
 				long currentlyTransferedBytes = currentAccount.getCurrentBytes(); //currentAccount.updateCurrentBytes(m_packetCounter);
 				long bytesToPay =
-					m_connectedCascade.getPrepaidInterval() - (confirmedbytes - currentlyTransferedBytes);
+					m_connectedCascade.getPrepaidInterval() - (confirmedbytes - currentlyTransferedBytes); 
+				//NOTE: (confirmedbytes - currentlyTransferedBytes) in this case means: my prepaidBytes (on this cascade). 
 
-				//System.out.println("Initial CC transfered bytes: " + bytesToPay + " Old transfered: " + currentlyTransferedBytes + " Prepaid: " + m_prepaidBytes);
-
+				/*System.out.println("Initial CC bytesToPay: " + bytesToPay + ", Old transfered: " + currentlyTransferedBytes + ", Prepaid: " + m_prepaidBytes +
+						", CC confirmed bytes: "+confirmedbytes);*/
+			
 
 				long oldBytes = a_cc.getTransferredBytes();
 				XMLEasyCC newCC = new XMLEasyCC(a_cc);
