@@ -29,6 +29,7 @@ package jap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -203,24 +204,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JobQueue m_packetMixedJobs;
 
 	private static final String HLP_ANONYMETER = JAPNewView.class.getName() + "_anonymometer";
-
-	private static final String[] METERFNARRAY =
-		{
-		JAPNewView.class.getName() + "_meterAnonDeactivated.gif", // anonymity deactivated
-		JAPNewView.class.getName() + "_meterConnecting.gif", // connecting...
-		JAPNewView.class.getName() + "_meterNoMeasure.gif", // no measure available
-		JAPNewView.class.getName() + "_meter00.gif",
-		JAPNewView.class.getName() + "_meter01.gif",
-		JAPNewView.class.getName() + "_meter02.gif",
-		JAPNewView.class.getName() + "_meter03.gif",
-		JAPNewView.class.getName() + "_meter04.gif",
-		JAPNewView.class.getName() + "_meter05.gif",
-		JAPNewView.class.getName() + "_meter06.gif",
-		JAPNewView.class.getName() + "_meter07.gif",
-		JAPNewView.class.getName() + "_meter08.gif",
-		JAPNewView.class.getName() + "_meter09.gif",
-		JAPNewView.class.getName() + "_meter10.gif"
-	};
+	private static final String IMG_METER = "anonym-o-meter/JAP.NewView_m{0}.anim.gif";
+	private static final String IMG_METER_NO_MEASURE = "anonym-o-meter/JAP.no.measure.anim.gif";
+	private static final String IMG_METER_DEACTIVATED = "anonym-o-meter/JAP.deactivated.anim.gif";
+	private static final String IMG_METER_CONNECTING = "anonym-o-meter/JAP.connecting.anim.gif";
 	
 	private final Object FONT_UPDATE = new Object();
 	private boolean m_bFontsUpdated = false;
@@ -489,7 +476,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						JAPMessages.getString(MSG_IS_DISABLED_EXPLAIN),
 						JAPDialog.OPTION_TYPE_YES_NO,
 						JAPDialog.MESSAGE_TYPE_WARNING,
-						GUIUtils.loadImageIcon(METERFNARRAY[2], true, true))
+						GUIUtils.loadImageIcon(IMG_METER_NO_MEASURE, true, true))
 						== JAPDialog.RETURN_VALUE_YES)
 					{
 						JAPModel.getInstance().setInfoServiceDisabled(false);
@@ -1683,40 +1670,31 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		boolean bAnonMode = m_Controller.getAnonMode();
 		boolean bConnected = m_Controller.isAnonConnected();
 		boolean bConnectionErrorShown = m_bShowConnecting;
-		int iAnonLevel;
-		
-		if (a_cascade == null || a_statusInfo == null)
-		{
-			iAnonLevel = 0;
-		}
-		else
-		{
-			iAnonLevel = (int)((((double)a_statusInfo.getAnonLevel()) + ((double)a_cascade.getDistribution())) / 12.0 * 10.0);
-		}
 		
 		if (bAnonMode && bConnected)
 		{
-			//System.out.println("anon level");
-			if (iAnonLevel >= 0 && iAnonLevel <= 10)
+			if (a_cascade.getDistribution() > 0)
 			{
-				return GUIUtils.loadImageIcon(METERFNARRAY[iAnonLevel + 3], true, true);
+				return GUIUtils.loadImageIcon(
+						MessageFormat.format(IMG_METER, a_cascade.getDistribution() + "" + 
+								Math.max(0, a_statusInfo.getAnonLevel())), true, true);
 			}
 			else
 			{
-				return GUIUtils.loadImageIcon(METERFNARRAY[2], true, true); //No measure available
+				return GUIUtils.loadImageIcon(IMG_METER_NO_MEASURE, true, true); //No measure available
 			}
 		}
 		else if (bAnonMode && !bConnected && bConnectionErrorShown)
 		{
 			//System.out.println("connection lost");
-			return GUIUtils.loadImageIcon(METERFNARRAY[1], true, true); // connection lost
+			return GUIUtils.loadImageIcon(IMG_METER_CONNECTING, true, true); // connection lost
 		}
 		else
 		{
 			//System.out.println("AnonMode:" + bAnonMode + " " + "Connected:" + bConnected + " " +
 			//			   "ShowError:" + bConnectionErrorShown);
 			//System.out.println("deactivated");
-			return GUIUtils.loadImageIcon(METERFNARRAY[0], true, true); // Anon deactivated
+			return GUIUtils.loadImageIcon(IMG_METER_DEACTIVATED, true, true); // Anon deactivated
 		}
 	}
 
