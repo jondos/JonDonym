@@ -60,6 +60,9 @@ public class XMLPayRequest implements IXMLEncodable
 	private XMLEasyCC m_cc = null;
 	private java.sql.Timestamp m_balanceNewerThan = null;
 	private boolean m_bIsAccountRequest;
+	private boolean m_bInitialCCRequest = false;
+	private int prepaidBytes = 0;
+	
 	public static final Object XML_ELEMENT_NAME = "PayRequest";
 
 	public XMLPayRequest(String xml) throws Exception
@@ -119,7 +122,9 @@ public class XMLPayRequest implements IXMLEncodable
 		{
 			m_cc = null;
 		}
-
+		m_bInitialCCRequest = XMLUtil.parseAttribute(elemRoot, "initialCC", false);
+		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "PrepaidBytes");
+		prepaidBytes = XMLUtil.parseValue(elem, 0);
 		// look for accountrequest
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "AccountRequest");
 		if (elem != null)
@@ -158,4 +163,13 @@ public class XMLPayRequest implements IXMLEncodable
 		return m_bIsAccountRequest;
 	}
 
+	public boolean isInitialCCRequest() 
+	{
+		return m_bInitialCCRequest;
+	}
+	
+	public int getPrepaidBytes() 
+	{
+		return prepaidBytes;
+	}
 }

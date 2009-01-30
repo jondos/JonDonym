@@ -455,6 +455,13 @@ public class HTTPProxyCallback implements ProxyCallback
 		//return false;
 	}
 	
+	/**
+	 * checks whether the HTTP message headers fragment specified by headerData
+	 * contains invalid line terminations, i.e. all terminations other
+	 * than CRLF
+	 * @param headerData the fragment of the HTTP headers of a HTTP message
+	 * @return false if the fragment contains invalid line terminations, true otherwise.
+	 */
 	public static boolean checkValidity(String headerData)
 	{
 		int currentCRIndex = -1;
@@ -613,9 +620,9 @@ public class HTTPProxyCallback implements ProxyCallback
 	/**
 	 * Returns the index of the first char after the first occurence of the CRLFCRLF termination
 	 * in the array 'chunk' or -1 if such a termination sequence was not found. Also considers that 
-	 * some of the line termination charatcters are stored at the end of the array 'prefix' which
+	 * some of the line termination characters are stored at the end of the array 'prefix' which
 	 * are followed by the corresponding characters in 'chunk' to complete the CRLFCRLF
-	 * sequence. The index returned is refers to the array 'chunk'.
+	 * sequence. The index returned refers to the array 'chunk'.
 	 */
 	public static int indexOfHTTPHeaderEnd(byte[] prefix, byte[] chunk)
 	{
