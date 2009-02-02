@@ -82,9 +82,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	private static final int FAST_LOGIN_TIMEOUT = 4000; // try the fast timeout first
 	private static final int CONNECT_TIMEOUT = 8000;
 
-	private static final int FIRST_MIX = 0;
-	private static final String SYNCH_AI_LOGIN_MIXVERSION = "00.07.20";
-	
 	private static int m_loginTimeout = DEFAULT_LOGIN_TIMEOUT;
 	private static int m_loginTimeoutFastAvailable;
 
@@ -934,26 +931,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			new AIControlChannel(a_multiplexer, a_proxyInterface, a_packetCounter, a_serviceContainer, a_cascade);
 		m_paymentInstance = new Pay(aiControlChannel);
 		if (a_keyExchangeManager.isPaymentRequired())
-		{
-			
-			
-			MixCascade cascadeToConnectTo = a_keyExchangeManager.getConnectedCascade();
-			
-			String firstMixSoftwareVersion = 
-				cascadeToConnectTo.getMixInfo(FIRST_MIX).getServiceSoftware().getVersion();
-			
-			boolean synchedAILogin = false;
-			/* check the first mix software version to determine if client 
-			 * can already perform the new synchronized ai login procedure.
-			 * (for mix version >= 00.07.20)
-			 */
-			
-			if(firstMixSoftwareVersion!= null)
-			{
-				synchedAILogin =
-					firstMixSoftwareVersion.compareTo(SYNCH_AI_LOGIN_MIXVERSION) >= 0;
-			}
-			aiControlChannel.setSynchronizedAILogin(synchedAILogin, m_loginTimeout);
+		{	
+			aiControlChannel.setAILoginTimeout(m_loginTimeout);
 			return aiControlChannel.sendAccountCert();
 		}
 		return ErrorCodes.E_SUCCESS;
