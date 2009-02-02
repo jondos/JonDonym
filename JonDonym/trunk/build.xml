@@ -211,12 +211,9 @@
 		<filter token="APPNAME" value="${appname}"/>
 		<filter token="JARNAME" value="${jarfile.name}"/>
 		<copy file="install_jondo" todir="${dist.linux}/${appname}" filtering="true"/>
+		<!-- Copying with Ant doesn't preserve file permissions -->
+		<chmod file="${dist.linux}/${appname}/install_jondo" perm="755"/>
 		
-		<!-- Copying with Ant doesn't preserve file permissions !?! -->
-		<exec executable="chmod">
-			<arg value="755"/>
-			<arg value="${dist.linux}/${appname}/install_jondo"/>
-		</exec>
 	</target>
 	
 	<target name="linux-dist-archive" depends="linux-dist">
