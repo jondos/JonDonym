@@ -77,6 +77,10 @@ public class AIControlChannel extends XmlControlChannel
 	public static final long AI_LOGIN_TIMEOUT = 120000; // 2 minutes
 	private static final long NO_CHARGED_ACCOUNT_UPDATE = 1000 * 60 * 5; // 5 minutes
 
+	private static final int FIRST_MIX = 0;
+	private static final String SYNCH_AI_LOGIN_MIXVERSION = "00.07.20";
+	private static final String PREPAID_AMOUNT_IN_PAY_REQ_MIXVERSION = "00.08.42";
+	
 	public static final boolean REVERT_PRE_PREPAID = true;
   //codes for AI events that can be fired
   //private static final int EVENT_UNREAL = 1;
@@ -101,9 +105,17 @@ public class AIControlChannel extends XmlControlChannel
 
   private Vector m_aiLoginSyncObject;
 
+  /** indicates that the login to a mix cascade is synchronized. 
+   * (supported by mixes of version >= 00.07.20 )
+   */
   private volatile boolean m_synchronizedAILogin;
-
-  public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_proxy,
+  /**
+   * indicates that the prepaid Bytes are transmitted by a PayRequest 
+   * instead of a challenge. (supported by mixes of version >= 08.42 )
+   */
+  private boolean m_prepaidAmountInPayRequest = false;
+  
+public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_proxy,
 						  PacketCounter a_packetCounter, IServiceContainer a_serviceContainer,
 						  MixCascade a_connectedCascade) {
     super(ChannelTable.CONTROL_CHANNEL_ID_PAY, a_multiplexer, a_serviceContainer);
@@ -111,7 +123,35 @@ public class AIControlChannel extends XmlControlChannel
     m_packetCounter = a_packetCounter;
 	m_connectedCascade = a_connectedCascade;
 	m_aiLoginSyncObject = new Vector(1);
-	m_synchronizedAILogin =  true;
+	//m_synchronizedAILogin =  true;
+	
+	String firstMixSoftwareVersion = 
+		m_connectedCascade.getMixInfo(FIRST_MIX).getServiceSoftware().getVersion();
+	
+	
+	/* check the first mix software version to determine if client 
+	 * can already perform the new synchronized ai login procedure.
+	 * (for mix version >= 00.07.20) and transmitting of prepaid bytes 
+	 * in the PayRequest (for mix version >= 00.08.42). 
+	 */
+	
+	if(firstMixSoftwareVersion!= null)
+	{
+		m_synchronizedAILogin = 
+			firstMixSoftwareVersion.compareTo(SYNCH_AI_LOGIN_MIXVERSION) >= 0;
+		m_prepaidAmountInPayRequest =
+			firstMixSoftwareVersion.compareTo(PREPAID_AMOUNT_IN_PAY_REQ_MIXVERSION) >= 0;
+	}
+	
+	LogHolder.log(LogLevel.INFO, LogType.PAY,
+			"Mix "+m_connectedCascade.getMixInfo(FIRST_MIX).getName() + 
+			(m_synchronizedAILogin ? " supports " : " does not support ")+
+			"synchronized AI logins.");
+	LogHolder.log(LogLevel.INFO, LogType.PAY,
+			"Mix "+m_connectedCascade.getMixInfo(FIRST_MIX).getName() + 
+			(m_prepaidAmountInPayRequest ? " supports " : " does not support ")+
+			"improved prepaid bytes negotiation.");
+	
   }
 
   public void addAIListener(IAIEventListener a_aiListener) {
@@ -213,7 +253,7 @@ public class AIControlChannel extends XmlControlChannel
 	  }
   }
 
-  private synchronized void handlePrepaidBytesReceived(int prepaidBytes, PayAccount activeAccount, boolean revertPrevious)
+  private synchronized void handlePrepaidBytesReceived(int prepaidBytes, PayAccount activeAccount)
   {
 	  if(activeAccount == null)
 	  {
@@ -221,7 +261,7 @@ public class AIControlChannel extends XmlControlChannel
 	  }
 	  if ( prepaidBytes > 0 )	 
 	  {
-		 if(m_bPrepaidReceived && revertPrevious)
+		 /*if(m_bPrepaidReceived && revertPrevious)
 		 {
 			 System.out.println("Overwrite old Prepaidbytes: old: "+m_prepaidBytes+", new: "+prepaidBytes);
 			 //revert
@@ -230,7 +270,8 @@ public class AIControlChannel extends XmlControlChannel
 			 activeAccount.updateCurrentBytes(prepaidBytes * ( -1));
 			 
 		 }
-		 else if (!m_bPrepaidReceived)
+		 else*/ 
+		 if (!m_bPrepaidReceived)
 		 {
 			 m_prepaidBytes = prepaidBytes;
 			 m_bPrepaidReceived = true;
@@ -260,7 +301,18 @@ public class AIControlChannel extends XmlControlChannel
 	  }
 	  //Although it is deprecated to receive the prepaid bytes with the challenge
 	  //they're still handled here for backward compatibility reasons.
-	  handlePrepaidBytesReceived(chal.getPrepaidBytes(), acc, !REVERT_PRE_PREPAID);
+	  if(!m_prepaidAmountInPayRequest)
+	  {
+		  handlePrepaidBytesReceived(chal.getPrepaidBytes(), acc);
+	  }
+	  /*if (!m_bPrepaidReceived && chal.getPrepaidBytes() > 0)
+	  {
+		  m_prepaidBytes = chal.getPrepaidBytes();
+		 System.out.println("Prepaid bytes: "+m_prepaidBytes);
+		  m_bPrepaidReceived = true;
+		  // ignore prepaid bytes smaller than zero
+		  acc.updateCurrentBytes(chal.getPrepaidBytes() * ( -1)); // remove transferred bytes
+	  }*/
 
 	  byte[] arbSig = ByteSignature.sign(arbChal, acc.getPrivateKey());
 	  XMLResponse response = new XMLResponse(arbSig);
@@ -286,11 +338,13 @@ public class AIControlChannel extends XmlControlChannel
    */
   private synchronized void processPayRequest(XMLPayRequest request) {
 
-
+	 
 	//if requested, send account certificate
 	if(request.isInitialCCRequest())
 	{
-		handlePrepaidBytesReceived(request.getPrepaidBytes(), PayAccountsFile.getInstance().getActiveAccount(), REVERT_PRE_PREPAID);
+		System.out.println("initial CC PayRequest received: ");
+		if(m_prepaidAmountInPayRequest)
+		handlePrepaidBytesReceived(request.getPrepaidBytes(), PayAccountsFile.getInstance().getActiveAccount());
 		processInitialCC(request.getCC());
 		return;
 	}
@@ -382,7 +436,7 @@ public class AIControlChannel extends XmlControlChannel
 		PayAccount currentAccount = PayAccountsFile.getInstance().getActiveAccount();
 		long transferedBytes;
 		XMLEasyCC myLastCC;
-
+		
 		//check CC for proper account number
 		if ( (currentAccount == null) || (currentAccount.getAccountNumber() != cc.getAccountNumber()))
 		{
@@ -433,7 +487,7 @@ public class AIControlChannel extends XmlControlChannel
 	  // check if bytes asked for in CC match bytes transferred
 	  long newPrepaidBytes = //(cc.getTransferredBytes() - confirmedBytes) + m_prepaidBytes - transferedBytes;
 		  cc.getTransferredBytes() - transferedBytes;
-
+	  System.out.println("CC transBytes: "+cc.getTransferredBytes());
 	  long diff = newPrepaidBytes - m_connectedCascade.getPrepaidInterval();
 
 	  /*
@@ -464,7 +518,7 @@ public class AIControlChannel extends XmlControlChannel
 			  //this.fireAIEvent(EVENT_UNREAL, diff); // do not show this problem to the user...
 		  }
 	  }
-
+	  System.out.println("genius: "+(transferedBytes + m_connectedCascade.getPrepaidInterval())+"transferred bytes: "+transferedBytes);
 	  cc.setTransferredBytes(transferedBytes + m_connectedCascade.getPrepaidInterval());
 
 
@@ -803,8 +857,8 @@ public class AIControlChannel extends XmlControlChannel
 					m_connectedCascade.getPrepaidInterval() - (confirmedbytes - currentlyTransferedBytes); 
 				//NOTE: (confirmedbytes - currentlyTransferedBytes) in this case means: my prepaidBytes (on this cascade). 
 
-				/*System.out.println("Initial CC bytesToPay: " + bytesToPay + ", Old transfered: " + currentlyTransferedBytes + ", Prepaid: " + m_prepaidBytes +
-						", CC confirmed bytes: "+confirmedbytes);*/
+				System.out.println("Initial CC bytesToPay: " + bytesToPay + ", Old transfered: " + currentlyTransferedBytes + ", Prepaid: " + m_prepaidBytes +
+						", CC confirmed bytes: "+confirmedbytes);
 			
 
 				long oldBytes = a_cc.getTransferredBytes();
@@ -860,13 +914,30 @@ public class AIControlChannel extends XmlControlChannel
 		}
 	}
 
-	public void setSynchronizedAILogin(boolean synchronizedAILogin,
-										int aiLogin_timeout)
+	/*public void setSynchronizedAILogin(boolean synchronizedAILogin)
 	{
 		synchronized(m_aiLoginSyncObject)
 		{
 			m_synchronizedAILogin = synchronizedAILogin;
+		}
+	}*/
+	
+	/* only for synchronized login */
+	public void setAILoginTimeout(int aiLogin_timeout)
+	{
+		synchronized(m_aiLoginSyncObject)
+		{
 			m_aiLogin_timeout = aiLogin_timeout;
 		}
+	}
+	
+	public boolean isPrepaidAmountInPayRequest() 
+	{
+		return m_prepaidAmountInPayRequest;
+	}
+
+	public void setPrepaidAmountInPayRequest(boolean prepaidAmountInPayRequest) 
+	{
+		this.m_prepaidAmountInPayRequest = prepaidAmountInPayRequest;
 	}
 }
