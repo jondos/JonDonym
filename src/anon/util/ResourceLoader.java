@@ -414,6 +414,26 @@ public final class ResourceLoader
 										  boolean a_bRecursive)
 	{
 		Hashtable resources = new Hashtable();
+		
+		// check if this is just a file path seems to be a file path
+		try
+		{
+			Object resource = a_instantiator.getInstance(loadResourceAsStream(a_strResourceSearchPath));
+			if (resource != null)
+			{
+				resources.put(a_strResourceSearchPath, resource);
+				return resources;
+			}
+			else
+			{
+			}
+		}
+		catch (Exception a_e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+			// ignore, maybe this is no file
+		}
+		
 		Enumeration classPathFiles = readFilesFromClasspath(false).elements();
 
 		while (classPathFiles.hasMoreElements())
@@ -1257,14 +1277,19 @@ public final class ResourceLoader
 	 */
 	private final class ByteArrayInstantiator implements IResourceInstantiator
 	{
-		public Object getInstance(File a_file, File a_topDirectory) throws Exception
+		public Object getInstance(File a_file, File a_topDirectory) throws IOException
 		{
 				return getStreamAsBytes(new FileInputStream(a_file));
 		}
 
-		public Object getInstance(ZipEntry a_entry, ZipFile a_file) throws Exception
+		public Object getInstance(ZipEntry a_entry, ZipFile a_file) throws IOException
 		{
 			return getStreamAsBytes(a_file.getInputStream(a_entry));
+		}
+		
+		public Object getInstance(InputStream a_inputStream) throws IOException
+		{
+			return getStreamAsBytes(a_inputStream);
 		}
 	}
 
@@ -1282,6 +1307,11 @@ public final class ResourceLoader
 		public Object getInstance(ZipEntry a_entry, ZipFile a_file)
 		{
 			return SYSTEM_RESOURCE_TYPE_ZIP;
+		}
+		
+		public Object getInstance(InputStream a_inputStream)
+		{
+			return null;
 		}
 	}
 }

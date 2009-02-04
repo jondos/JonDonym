@@ -28,6 +28,7 @@
 package anon.util;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -60,6 +61,14 @@ public interface IResourceInstantiator
 	 */
 	public Object getInstance(ZipEntry a_entry, ZipFile a_file) throws Exception;
 
+	/**
+	 * Optional: may not be supported by all resource instantiators. You may not rely that this methods
+	 * returns results.
+	 * @param a_inputStream
+	 * @return
+	 * @throws Exception
+	 */
+	public Object getInstance(InputStream a_inputStream) throws Exception;
 
 	/**
 	 * An Exception that is thrown by a ResourceInstantiator if too much instantiations have failed.
