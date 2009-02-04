@@ -30,6 +30,7 @@ package anon.util;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -738,6 +739,11 @@ public final class ClassUtil
 			{
 				throw new IResourceInstantiator.ResourceInstantiationException();
 			}
+		}
+		
+		public Object getInstance(InputStream a_inputStream)
+		{
+			return null;
 		}
 	}
 }

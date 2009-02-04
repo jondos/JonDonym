@@ -452,6 +452,11 @@ public class CertificateRevocationList implements IXMLEncodable
 			}
 
 			return CertificateRevocationList.getInstance(a_file.getInputStream(a_entry));
-		}		
+		}
+		
+		public Object getInstance(InputStream a_inputStream)
+		{
+			return CertificateRevocationList.getInstance(a_inputStream);
+		}
 	}
 }
