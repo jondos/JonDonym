@@ -556,6 +556,11 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 		return m_subjectKeyIdentifier.getValue();
 	}
 	
+	public String getSubjectKeyIdentifierConcatenated()
+	{
+		return m_subjectKeyIdentifier.getValueWithoutColon();
+	}
+	
 	/**
 	 * Returns the byte representation of the X509SubjectKeyIdentifier
 	 * @return this certificate's SubjectKeyIdentifier as a raw byte-array
