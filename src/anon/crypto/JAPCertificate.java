@@ -479,6 +479,10 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 			{
 				byte[] ski = ((JAPCertificate) enumCertificates.nextElement()).getRawSubjectKeyIdentifier();
 				
+				if (ski == null)
+				{
+					continue;
+				}
 				for (int j=0; j<raw.length; j++)
 				{
 					raw[j] = (byte) (raw[j] ^ ski[j]);
@@ -567,7 +571,12 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 	 */
 	public byte[] getRawSubjectKeyIdentifier()
 	{
-		return Hex.decode(m_subjectKeyIdentifier.getValueWithoutColon());
+		String ski = m_subjectKeyIdentifier.getValueWithoutColon();
+		if (ski == null)
+		{
+			return null;
+		}
+		return Hex.decode(ski);
 	}
 	
 	/**

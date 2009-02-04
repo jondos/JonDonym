@@ -88,6 +88,10 @@ public abstract class AbstractX509KeyIdentifier extends AbstractX509Extension
 	 */
 	public String getValueWithoutColon()
 	{
+		if (m_value == null)
+		{
+			return null;
+		}
 		StringTokenizer tokenizer = new StringTokenizer(m_value, ":");
 		String value = "";
 
