@@ -1192,8 +1192,12 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 						(IServiceContextContainer) serviceObjects.get(currentKey);
 					
 					currentContext = currentEntry.getContext();
-					removeEntry = (currentContext == null) ? 
-									true : !currentContext.equals(context);
+					
+					// negate "add entry"
+					removeEntry = !((currentContext != null) && currentContext.equals(context) ||
+							(currentContext.startsWith(IServiceContextContainer.CONTEXT_JONDONYM) && 
+							currentContext.equals(IServiceContextContainer.CONTEXT_JONDONYM_PREMIUM)));
+					
 					if(removeEntry)
 					{
 						serviceObjects.remove(currentKey);

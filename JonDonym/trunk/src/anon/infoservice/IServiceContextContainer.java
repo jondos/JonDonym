@@ -17,7 +17,9 @@ public interface IServiceContextContainer
 	/* default service contexts */
 	
 	/** context for all JonDonym services. this is the default context for all services*/ 
-	public static final String CONTEXT_JONDONYM = "de.jondos.jondonym";
+	public static final String CONTEXT_JONDONYM_COMPATIBILITY = "de.jondos.jondonym";
+	public static final String CONTEXT_JONDONYM = "jondonym";
+	public static final String CONTEXT_JONDONYM_PREMIUM =  CONTEXT_JONDONYM + ".premium";
 	
 	public final String XML_ATTR_CONTEXT = "context";
 	

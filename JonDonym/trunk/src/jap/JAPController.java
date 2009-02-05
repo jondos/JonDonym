@@ -1326,14 +1326,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 							{
 								currentCascade = new MixCascade( (Element) nodeCascade, Long.MAX_VALUE);								
 								currentCascadeContext = currentCascade.getContext();
-								/* JonDonym is the defult service context */
-								if(currentCascadeContext == null)
-								{
-									currentCascadeContext = IServiceContextContainer.CONTEXT_JONDONYM;
-								}
 								
 								/* only add to database when the service context matches */
-								if ((currentCascadeContext == null && m_Model.getContext() == null) || 
+								if ((m_Model.getContext().startsWith(IServiceContextContainer.CONTEXT_JONDONYM) &&
+									currentCascadeContext.equals(IServiceContextContainer.CONTEXT_JONDONYM_PREMIUM)) || 
 									currentCascadeContext.equals(m_Model.getContext()))
 								{
 									try

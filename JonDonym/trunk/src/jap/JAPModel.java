@@ -116,6 +116,7 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	public static final Integer CHANGED_DLL_UPDATE = new Integer(10);
 	public static final Integer CHANGED_MACOSX_LIBRARY_UPDATE = new Integer(11);
 	public static final Integer CHANGED_ANONYMIZED_HTTP_HEADERS = new Integer(12);
+	public static final Integer CHANGED_CONTEXT = new Integer(13);
 	
 	private static final String[] MSG_CONNECTION_ANONYMOUS = new String[] {
 		JAPModel.class.getName() + "_anonymousConnectionAllow", 
@@ -1922,9 +1923,25 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	{
 		return m_context;
 	}
-
-	public void setContext(String context) 
+	
+	public synchronized void setContext(String context) 
 	{
-		this.m_context = context;
+		boolean bChanged = false;
+		if (m_context != context && context != null && (m_context == null || !m_context.equals(context)))
+		{
+			// changed!
+			if ((m_context == null && !context.equals(CONTEXT_JONDONYM)) || m_context != null)
+			{
+				//changed from default to other context or the other way round
+				bChanged = true;
+			}
+			m_context = context;
+		}
+
+		if (bChanged)
+		{
+			// did not work with an observer, I do not know why...
+			TrustModel.updateContext();
+		}
 	}
 }

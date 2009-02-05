@@ -43,6 +43,7 @@ import org.w3c.dom.NodeList;
 import gui.JAPMessages;
 import anon.client.BasicTrustModel;
 import anon.infoservice.Database;
+import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.MixCascade;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
@@ -76,10 +77,10 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String XML_ATTR_NAME = "name";
 
 	public static final TrustModel TRUST_MODEL_USER_DEFINED;
-	public static final TrustModel TRUST_MODEL_DEFAULT;
-	public static final TrustModel TRUST_MODEL_PREMIUM;
+	private static TrustModel TRUST_MODEL_DEFAULT;
+	private static TrustModel TRUST_MODEL_PREMIUM;
 
-	public static TrustModel TRUST_MODEL_CUSTOM_FILTER;
+	private static TrustModel TRUST_MODEL_CUSTOM_FILTER;
 	
 	/**
 	 * Always trust the cascade, regardless of the attribute
@@ -123,9 +124,13 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String MSG_SERVICES_USER_DEFINED = TrustModel.class.getName() + "_servicesUserDefined";
 	private static final String MSG_CASCADES_FILTER = TrustModel.class.getName() + "_servicesFilter";
 	private static final String MSG_ALL_SERVICES = TrustModel.class.getName() + "_allServices";
+	private static final String MSG_SERVICES_BUSINESS = TrustModel.class.getName() + "_servicesBusiness";
+	private static final String MSG_SERVICES_PREMIUM_PRIVATE = TrustModel.class.getName() + "_servicesPremiumPrivate";
+	
 	
 	private static final String MSG_EXCEPTION_PAY_CASCADE = TrustModel.class.getName() + "_exceptionPayCascade";
 	private static final String MSG_EXCEPTION_FREE_CASCADE = TrustModel.class.getName() + "_exceptionFreeCascade";
+	private static final String MSG_EXCEPTION_WRONG_SERVICE_CONTEXT = TrustModel.class.getName() + "_wrongServiceContext";
 	private static final String MSG_EXCEPTION_NOT_ENOUGH_MIXES = TrustModel.class.getName() + "_exceptionNotEnoughMixes";
 	private static final String MSG_EXCEPTION_EXPIRED_CERT = TrustModel.class.getName() + "_exceptionExpiredCert";
 	private static final String MSG_EXCEPTION_NOT_USER_DEFINED = TrustModel.class.getName() + "_exceptionNotUserDefined";
@@ -148,7 +153,13 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 	}
 	private static InnerObservable m_trustModelObservable = new InnerObservable();
-
+	
+	private static final TrustModel CONTEXT_MODEL_PREMIUM;
+	private static final TrustModel CONTEXT_MODEL_PREMIUM_PRIVATE;
+	private static final TrustModel CONTEXT_MODEL_BUSINESS;
+	private static final TrustModel CONTEXT_MODEL_FREE;
+	private static final TrustModel CONTEXT_MODEL_ALL;
+	
 	private Hashtable m_trustAttributes = new Hashtable();
 
 	private String m_strName;
@@ -323,6 +334,36 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		}
 	}
 
+	public static class ContextAttribute extends TrustAttribute
+	{
+		public ContextAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
+		{
+			super(a_trustCondition, a_conditionValue, a_bIgnoreNoDataAvailable);
+		}
+
+		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
+		{
+			String strContextCascade = a_cascade.getContext();
+			String strContextModel = JAPModel.getInstance().getContext();
+			
+			if (getTrustCondition() == TRUST_IF_TRUE && !strContextCascade.equals(strContextModel))
+			{
+				throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_WRONG_SERVICE_CONTEXT));
+			}
+			else if (getTrustCondition() == TRUST_IF_NOT_TRUE && strContextCascade.equals(strContextModel))
+			{
+				throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_WRONG_SERVICE_CONTEXT));
+			}
+			else if (!(strContextCascade.equals(strContextModel) ||
+					(strContextModel.startsWith(IServiceContextContainer.CONTEXT_JONDONYM) &&
+					strContextCascade.equals(IServiceContextContainer.CONTEXT_JONDONYM_PREMIUM))))
+			{
+				throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_WRONG_SERVICE_CONTEXT));
+			}
+		}
+	};
+	
+	
 	public static class PaymentAttribute extends TrustAttribute
 	{
 		public PaymentAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
@@ -362,25 +403,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				a_cascade.getNumberOfOperators() < minMixes))
 			{
 				throw (new TrustException(JAPMessages.getString(MSG_EXCEPTION_NOT_ENOUGH_MIXES)));
-			}
-		}
-	};
-
-	public static class ExpiredCertsAttribute extends TrustAttribute
-	{
-		public ExpiredCertsAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
-		{
-			super(a_trustCondition, a_conditionValue, a_bIgnoreNoDataAvailable);
-		}
-
-		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
-		{
-			if (a_cascade.getCertPath() != null && !a_cascade.getCertPath().isValid(new Date()))
-			{
-				if (getTrustCondition() == TRUST_IF_NOT_TRUE)
-				{
-					throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_EXPIRED_CERT));
-				}
 			}
 		}
 	};
@@ -613,26 +635,42 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		TrustModel model;
 
 		model = new TrustModel(MSG_ALL_SERVICES, 0);
-		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
+		model.setAttribute(ContextAttribute.class, TRUST_RESERVED);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50), true);
 		TRUST_MODEL_DEFAULT = model;
+		CONTEXT_MODEL_ALL = model;
 		ms_trustModels.addElement(model);
+		
+		model = new TrustModel(MSG_SERVICES_BUSINESS, 0);
+		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE); // this might be altered when we have hybrid services...
+		model.setAttribute(ContextAttribute.class, TRUST_IF_TRUE);
+		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000), true);
+		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50), true);
+		CONTEXT_MODEL_BUSINESS = model;
+
+		model = new TrustModel(MSG_SERVICES_PREMIUM_PRIVATE, 2);
+		model.setAttribute(PaymentAttribute.class, TRUST_IF_TRUE);
+		model.setAttribute(ContextAttribute.class, TRUST_IF_NOT_TRUE);
+		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000), true);
+		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100), true);
+		model.setAttribute(NumberOfMixesAttribute.class, TRUST_IF_AT_LEAST, 3);
+		CONTEXT_MODEL_PREMIUM_PRIVATE = model;
 
 		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_TRUE);
-		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100), true);
 		model.setAttribute(NumberOfMixesAttribute.class, TRUST_IF_AT_LEAST, 3);
 		TRUST_MODEL_PREMIUM = model;
+		CONTEXT_MODEL_PREMIUM = model;
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);
 		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE);
-		model.setAttribute(ExpiredCertsAttribute.class, TRUST_RESERVED);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
+		CONTEXT_MODEL_FREE = model;
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_USER_DEFINED, 4)
@@ -657,6 +695,44 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		setCurrentTrustModel((TrustModel)ms_trustModels.elementAt(0));
 	}
 
+	protected static void updateContext()
+	{
+		synchronized (ms_trustModels)
+		{
+			TrustModel temp = ms_currentTrustModel;
+			
+			ms_trustModels.removeElement(CONTEXT_MODEL_ALL);
+			ms_trustModels.removeElement(CONTEXT_MODEL_PREMIUM);
+			ms_trustModels.removeElement(CONTEXT_MODEL_FREE);
+			ms_trustModels.removeElement(CONTEXT_MODEL_PREMIUM_PRIVATE);
+			ms_trustModels.removeElement(CONTEXT_MODEL_BUSINESS);
+			
+			if (JAPModel.getInstance().getContext().equals(JAPModel.CONTEXT_JONDONYM))
+			{
+				ms_trustModels.insertElementAt(CONTEXT_MODEL_FREE, 0);
+				ms_trustModels.insertElementAt(CONTEXT_MODEL_PREMIUM, 0);
+				ms_trustModels.insertElementAt(CONTEXT_MODEL_ALL, 0);
+				ms_currentTrustModel = CONTEXT_MODEL_ALL;
+				
+			}
+			else if (JAPModel.getInstance().getContext().startsWith(JAPModel.CONTEXT_JONDONYM))
+			{
+				ms_trustModels.insertElementAt(CONTEXT_MODEL_PREMIUM_PRIVATE, 0);
+				ms_trustModels.insertElementAt(CONTEXT_MODEL_BUSINESS, 0);
+				ms_currentTrustModel = CONTEXT_MODEL_BUSINESS;
+			}
+			else
+			{
+				ms_trustModels.insertElementAt(CONTEXT_MODEL_BUSINESS, 0);
+				ms_currentTrustModel = CONTEXT_MODEL_BUSINESS;
+				
+			}
+			
+			m_trustModelObservable.setChanged();
+			setCurrentTrustModel(temp.getId());
+		}
+	}
+	
 	/**
 	 * Creates a new TrustModel object with the specified name
 	 *
@@ -777,7 +853,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	{
 		if (!a_trustModel.isEditable())
 		{
-			// editable models must not be removed
+			// non-editable models must not be removed
 			return null;
 		}
 		synchronized (ms_trustModels)
@@ -941,6 +1017,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		return TRUST_MODEL_USER_DEFINED;
 	}
 	
+	public static TrustModel getTrustModelPremium()
+	{
+		return TRUST_MODEL_PREMIUM;
+	}
+	
 	public static TrustModel getTrustModelDefault()
 	{
 		return TRUST_MODEL_DEFAULT;
@@ -948,7 +1029,10 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	
 	public static TrustModel getCurrentTrustModel()
 	{
-		return ms_currentTrustModel;
+		synchronized (ms_trustModels)
+		{
+			return ms_currentTrustModel;
+		}
 	}
 
 	public static TrustModel getCustomFilter()

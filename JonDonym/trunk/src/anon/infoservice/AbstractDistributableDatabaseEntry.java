@@ -121,6 +121,11 @@ public abstract class AbstractDistributableDatabaseEntry extends AbstractDatabas
 					context = XMLUtil.parseAttribute(serialNodes.item(i), 
 												IServiceContextContainer.XML_ATTR_CONTEXT, 
 												IServiceContextContainer.CONTEXT_JONDONYM);
+					// TODO backwards compatibility; may be removed after release 00.11.001
+					if (context.equals(IServiceContextContainer.CONTEXT_JONDONYM_COMPATIBILITY))
+					{
+						context = IServiceContextContainer.CONTEXT_JONDONYM;
+					}
 				}
 				else
 				{
