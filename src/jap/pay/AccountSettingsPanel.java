@@ -2062,10 +2062,10 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					JAPModel.isAutomaticallyReconnected())
 				{
 					// switch the trust model to premium so that this user from now on connects to premium services only
-					if (TrustModel.getCurrentTrustModel() == TrustModel.TRUST_MODEL_DEFAULT &&
-						TrustModel.TRUST_MODEL_PREMIUM.isTrusted(currentCascade))
+					if (TrustModel.getCurrentTrustModel() == TrustModel.getTrustModelDefault() &&
+						TrustModel.getTrustModelPremium().isTrusted(currentCascade))
 					{
-						TrustModel.setCurrentTrustModel(TrustModel.TRUST_MODEL_PREMIUM);
+						TrustModel.setCurrentTrustModel(TrustModel.getTrustModelPremium());
 					}
 					// try to connect to the current Cascade if not yet connected
 					JAPController.getInstance().setAnonMode(true);

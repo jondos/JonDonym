@@ -175,6 +175,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	private static final String MSG_FILTER_ALL = JAPConfAnon.class.getName() + "_all";
 	private static final String MSG_FILTER_PAYMENT_ONLY = JAPConfAnon.class.getName() + "_paymentOnly";
+	private static final String MSG_FILTER_PREMIUM_PRIVATE_ONLY = JAPConfAnon.class.getName() + "_premiumPrivateOnly";
+	private static final String MSG_FILTER_BUSINESS_ONLY = JAPConfAnon.class.getName() + "_businessOnly";
 	private static final String MSG_FILTER_NO_PAYMENT_ONLY = JAPConfAnon.class.getName() + "_noPaymentOnly";
 	private static final String MSG_FILTER_AT_LEAST_3_MIXES = JAPConfAnon.class.getName() + "_atLeast3Mixes";
 	private static final String MSG_FILTER_AT_LEAST_2_MIXES = JAPConfAnon.class.getName() + "_atLeast2Mixes";
@@ -3842,11 +3844,25 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			r.setSelected(true);
 			p.add(r);
 			
-			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_NO_PAYMENT_ONLY));
+			if (JAPModel.getInstance().getContext().equals(JAPModel.CONTEXT_JONDONYM))
+			{
+				s = new JRadioButton(JAPMessages.getString(MSG_FILTER_NO_PAYMENT_ONLY));
+			}
+			else
+			{
+				s = new JRadioButton(JAPMessages.getString(MSG_FILTER_BUSINESS_ONLY));
+			}
 			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_NOT_TRUE));
 			p.add(s);
 			
-			t = new JRadioButton(JAPMessages.getString(MSG_FILTER_PAYMENT_ONLY));
+			if (JAPModel.getInstance().getContext().equals(JAPModel.CONTEXT_JONDONYM))
+			{
+				t = new JRadioButton(JAPMessages.getString(MSG_FILTER_PAYMENT_ONLY));
+			}
+			else
+			{
+				t = new JRadioButton(JAPMessages.getString(MSG_FILTER_PREMIUM_PRIVATE_ONLY));
+			}
 			t.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
 			p.add(t);			
 			

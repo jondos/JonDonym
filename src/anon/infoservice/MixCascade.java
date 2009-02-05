@@ -294,7 +294,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		
 		m_bStudy = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_STUDY, false);
 		
-		m_context = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_CONTEXT, CONTEXT_JONDONYM);
 		m_maxUsers = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_MAX_USERS, 0);
 		m_maxUsers = Math.min(m_maxUsers, 9999); // 10000 is seen as unlimited
 
@@ -330,6 +329,20 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		
 		m_prepaidInterval = XMLUtil.parseAttribute(payNode, "prepaidInterval", AIControlChannel.MAX_PREPAID_INTERVAL + 1);
 		m_piid = XMLUtil.parseAttribute(payNode, "piid", "");
+		
+		
+		m_context = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_CONTEXT, null);
+		if (m_context == null || m_context.equals(IServiceContextContainer.CONTEXT_JONDONYM_COMPATIBILITY))
+		{
+			if (m_isPayment)
+			{
+				m_context = IServiceContextContainer.CONTEXT_JONDONYM_PREMIUM;
+			}
+			else
+			{
+				m_context = IServiceContextContainer.CONTEXT_JONDONYM;
+			}
+		}
 
 		if (!m_bFromCascade)
 		{
@@ -1585,6 +1598,17 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 
 	public String getContext() 
 	{
+		if (m_context == null)
+		{
+			if (isPayment())
+			{
+				return IServiceContextContainer.CONTEXT_JONDONYM_PREMIUM;
+			}
+			else
+			{
+				return IServiceContextContainer.CONTEXT_JONDONYM;
+			}
+		}
 		return m_context;
 	}
 	
