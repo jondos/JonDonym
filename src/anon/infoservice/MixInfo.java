@@ -193,6 +193,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    */
   private boolean m_bFromCascade;
   
+  private TermsAndConditionsMixInfo m_mixTnCInfo;
+  
   /**
    * Creates a new MixInfo from XML description (Mix node). The state of the mix will be set to
    * non-free (only meaningful within the context of the infoservice).
@@ -415,6 +417,9 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 
 	  m_serial = XMLUtil.parseValue(lastUpdateNode, 0L);
 
+	  Node tncInfoRoot = XMLUtil.getFirstChildByName(a_mixNode, TermsAndConditionsMixInfo.TNC_MIX_INFO_ROOT);
+	  m_mixTnCInfo = (tncInfoRoot != null) ? new TermsAndConditionsMixInfo(tncInfoRoot) : null;
+	  
 	  if (softwareNode != null)
 	  {
 		  m_mixSoftware = new ServiceSoftware(softwareNode);
@@ -931,6 +936,10 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		m_nameFragmentForCascade = fragmentForCascade;
 	}
 	
+	public TermsAndConditionsMixInfo getTermsAndConditionMixInfo()
+	{
+		return m_mixTnCInfo;
+	}
 	
 	public Element getWebInfo(Document webInfoDoc)
 	{
