@@ -86,6 +86,8 @@ public class KeyExchangeManager {
 
   private boolean m_paymentRequired;
 
+  private boolean m_bEnhancedChannelEncryption; //uses 2 keys for symetric channel encryption
+  
   private SymCipher m_firstMixSymmetricCipher;
 
   private boolean m_chainProtocolWithFlowControl;
@@ -241,6 +243,7 @@ public class KeyExchangeManager {
 
 		  m_protocolWithTimestamp = false;
 		  m_protocolWithReplay = false;
+		  m_bEnhancedChannelEncryption=false;
 		  m_paymentRequired = m_cascade.isPayment();
 		  if (!m_cascade.isPaymentProtocolSupported())
 		  {
@@ -273,6 +276,11 @@ public class KeyExchangeManager {
 		  {
 			  m_firstMixSymmetricCipher = new SymCipher();
 		  }
+		  else if (m_cascade.getMixProtocolVersion().equalsIgnoreCase("0.10"))
+			  {
+				  m_firstMixSymmetricCipher = new SymCipher();
+				  m_bEnhancedChannelEncryption=true;
+			  }
 		  else
 		  {
 			  throw (new UnknownProtocolVersionException(
@@ -634,5 +642,11 @@ public class KeyExchangeManager {
       }
     }
   }
+
+	public boolean isProtocolWithEnhancedChannelEncryption()
+		{
+			// TODO Auto-generated method stub
+			return m_bEnhancedChannelEncryption;
+		}
 
 }

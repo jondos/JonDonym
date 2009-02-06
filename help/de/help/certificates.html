@@ -23,10 +23,10 @@ href="index.html#mi_intro"><img src="next.gif" alt="-&gt;"> Einf&uuml;hrung
 identifizieren. Eine Mix-Kaskade besteht &uuml;blicherweise aus zwei oder mehr
 hintereinandergeschalteten Mix-Servern, die von verschiedenen Organisationen
 betrieben werden. Nur wenn alle diese Betreiber zusammenarbeiten, kann die
-Identit&auml;t von Nutzern aufgedeckt werden. Nutzer von JonDo sollen selbst
-entscheiden k&ouml;nnen, ob sie den Betreibern einer Kaskade vertrauen, und
-sich entsprechend dieser Entscheidung entweder mit dem Dienst verbinden oder
-nicht. Deshalb ist es immens wichtig, dass</p>
+Identit&auml;t der Nutzer aufgedeckt werden. Nutzer von JonDo sollen deshalb
+selbst entscheiden k&ouml;nnen, ob sie den Mix-Betreibern einer Kaskade
+vertrauen, und sich entsprechend dieser Entscheidung entweder mit dieser
+Kaskade verbinden. Deshalb ist es immens wichtig, dass</p>
 <ul>
   <li>die einzelnen Mixe von unterschiedlichen Organisationen betrieben werden
     und </li>
@@ -34,7 +34,7 @@ nicht. Deshalb ist es immens wichtig, dass</p>
   sind.</li>
 </ul>
 
-<p>Zertifikate sind Teil von sogenannten kryptographischen
+<p>Zertifikate sind Teile von sogenannten kryptographischen
 Public-Key-Verfahren: Die durch ein Zertifikat identifizierte Organisation
 besitzt einen privaten Schl&uuml;ssel, mit dem sie digitale Signaturen
 ausstellen kann. Dieser Schl&uuml;ssel darf niemals in die H&auml;nde von
@@ -49,38 +49,26 @@ unterzeichnet wurde. Es wird sehr empfohlen sich die Zertifikate der einzelnen
 Server einer Mix-Kaskade anzusehen (auf die einzelnen Mix-Icons klicken und
 dort jeweils das Zertifikat anklicken.). </p>
 
-<h3>Zertifizierungsstellen</h3>
+<h3>Zertifizierungsstellen (CAs)</h3>
 
-<p>Der JonDonym Dienst wird gegen&uuml;ber dem Betreiber unsicher, wenn die
-genutzte Mix-Kaskade nominell von unterschiedlichen Instanzen betrieben wird,
-faktisch aber alle Mixe der Kaskade in der Hand derselben Organisation liegen.
-Durch vertrauensw&uuml;rdige Zertifizierungsstellen (CAs) soll sichergestellt
-werden, dass Betreiber, die unterschiedliche Namen haben, auch wirklich als
-m&ouml;glichst unabh&auml;ngige Einheiten existieren. Ohne eine
-Identit&auml;tspr&uuml;fung durch eine dieser Stellen sind Mixe f&uuml;r JonDo
-nicht benutzbar. Letztlich muss aber auch den Zertifizierungsstellen selbst
-vertraut werden, denn diese w&auml;ren in der Lage, nicht existierende
-Betreiber zu "generieren" und damit im fremden Namen zu handeln. </p>
-
-<p>Bei JonDonym gibt es momentan nur zwei Wurzel-Zertifizierungsstellen (<a
-href="http://www.jondos.de/de">JonDos GmbH</a> und <a
-href="http://anon.inf.tu-dresden.de/">TU Dresden JAP-Team</a>), die sich
-jeweils zu h&ouml;chster Sorgsamkeit bei der Zertifizierung von Betreibern
-verpflichtet haben. Betreiber k&ouml;nnen sich auch von mehr als einer CA
-zertifizieren lassen. Solche eine mehrfache Zertifizierung hebt die
+<p>Als Zertifizierungsstellen bezeichnet man Organisationen die Zertifikate
+ausstellen. Sie verkn&uuml;pfen die Identit&auml;t des Zertifikatsinhabers und
+dessen &ouml;ffentlichen Schl&uuml;ssel mittels einer elektronischen Signatur.
+Die <a href="cert.html">Organisationen, welche JonDonym-Zertifikate
+ausstellen</a>, haben sich jeweils zu gro&szlig;er Sorgfalt bei der
+Zertifizierung von Betreibern verpflichtet. Betreiber k&ouml;nnen sich auch von
+mehr als einer CA zertifizieren lassen. Mehrfache Zertifizierungen heben die
 Notwendigkeit auf, einer einzigen Zertifizierungsstelle vertrauen zu
 m&uuml;ssen.</p>
 
 <h3>Mix-Zertifikate und Betreiber-Zertifikate</h3>
 
-<p>Sowohl die Mixe als auch die Betreiber von Mixen erhalten Zertifikate. Die
-Betreiber-Zertifikate werden dabei von einer CA auf die Identit&auml;t eines
-Betreibers ausgestellt, der mithilfe dieses Zertifikats dann selbst beliebig
-viele Mix-Zertifikate generieren kann. Diese Mixe bzw. Mix-Zertifikate
-k&ouml;nnen dann ihm als Betreiber eindeutig zugeordnet werden. Die in den
-Mix-Zertifikaten enthaltenen Informationen &uuml;ber den Standort eines Mixes
-werden also vom Betreiber selbst zertifiziert, und sind deshalb nicht so
-zuverl&auml;ssig wie die Informationen &uuml;ber die Betreiber. </p>
+<p>Sowohl die Mixe als auch die Betreiber von Mixen erhalten Zertifikate. Ein
+Betreiber-Zertifikat wird dabei von einer CA auf die Identit&auml;t eines
+Betreibers ausgestellt. Dieser wiederum kann mithilfe dieses Zertifikats selbst
+Zertifikate f&uuml;r seine Mixe generieren. Diese Mixe bzw. Mix-Zertifikate
+k&ouml;nnen dann ihm als Betreiber eindeutig zugeordnet werden und nicht auf
+eine gef&auml;lschte bzw. Schein-Identit&auml;t verweisen.</p>
 
 <h3><a name="status" id="status">Zust&auml;nde von Zertifikaten
 (Zertifizierungsstatus)</a></h3>
@@ -91,35 +79,36 @@ vertrauen, die dieses Zertifikat ausgestellt hat. Zertifikate k&ouml;nnen auch
 <strong>gleichzeitig von zwei</strong>&nbsp;<img alt=""
 src="img/certs/trusted_blue.png">, <strong>drei oder mehr</strong>&nbsp;<img
 alt="" src="img/certs/trusted_green.png"> unabh&auml;ngigen
-Zertifizierungsstellen gleichzeitig ausgestellt werden, was eine h&ouml;here
-Sicherheit bedeutet, dass Identit&auml;t und Zuverl&auml;ssigkeit des
-jeweiligen Betreibers korrekt &uuml;berpr&uuml;ft wurden. Nicht-verifizierbare
+Zertifizierungsstellen gleichzeitig ausgestellt werden. Dies bewirkt eine
+h&ouml;here Sicherheit hinsichtlich der Korrektheit der Identit&auml;t und der
+Zuverl&auml;ssigkeit des jeweiligen Betreibers. Nicht-verifizierbare
 Zertifikate sind grunds&auml;tzlich <strong>nicht
 vertrauensw&uuml;rdig</strong>&nbsp;<img alt=""
-src="img/certs/not_trusted.png">, da jeder, der &uuml;ber geringes Wissen im
-Bereich der IT verf&uuml;gt, selbst solche Zertifikate generieren kann. Die
-<strong>G&uuml;ltigkeit</strong> eines Zertifikats ist davon abh&auml;ngig,
-f&uuml;r welchen Zeitraum ein Zertifikat ausgestellt wurde. Normalerweise
-sollte einem <strong>abgelaufenen</strong>&nbsp;<img alt=""
+src="img/certs/not_trusted.png">, da jeder, der &uuml;ber Grundkenntnisse im
+Bereich der Computertechnik verf&uuml;gt, selbst solche Zertifikate generieren
+kann. Die <strong>G&uuml;ltigkeit</strong> eines Zertifikats ist davon
+abh&auml;ngig, f&uuml;r welchen Zeitraum ein Zertifikat ausgestellt wurde.
+Normalerweise sollte einem <strong>abgelaufenen</strong>&nbsp;<img alt=""
 src="img/certs/invalid.png"> Zertifikat nicht mehr vertraut werden, da nicht
-klar ist, ob der Besitzer noch eine Berechtigung hat, den Dienst anzubieten.
-Zertifikate k&ouml;nnen auch <strong>zur&uuml;ckgerufen</strong>&nbsp;<img
-alt="" src="img/certs/not_trusted.png"> werden, z.B. wenn deren
-Verschl&uuml;sselung gebrochen wurde, der Betreiber sich als unseri&ouml;s
-herausgestellt hat oder das private Zertifikat in falsche H&auml;nde geraten
-ist. </p>
+klar ist, ob der Besitzer noch eine Berechtigung hat, den Dienst weiterhin
+anzubieten. Zertifikate k&ouml;nnen auch
+<strong>zur&uuml;ckgerufen</strong>&nbsp;<img alt=""
+src="img/certs/not_trusted.png"> werden, z.B. wenn deren Verschl&uuml;sselung
+gebrochen wurde, der Betreiber sich als unseri&ouml;s herausgestellt hat oder
+das private Zertifikat in falsche H&auml;nde geraten ist. </p>
 
-<p>JonDo verbietet die Verbindung zu Mixkaskaden, in denen mindestens ein
+<p>JonDo blockiert die Verbindung zu Mixkaskaden, in denen mindestens ein
 <em>nicht vertrauensw&uuml;rdiger</em> oder <em>zur&uuml;ckgerufener</em> Mix
 steht. <em>Abgelaufene</em> Zertifikate f&uuml;hren dazu, dass <a
 href="services_anon.html">Dienstfilter</a> und das <a
 href="jap.JAPNewView_anonymometer.html">Anonym-O-Meter</a> einen solchen Mix
 nicht mehr als Teil des Dienstes z&auml;hlen. Die Verbindung zum Dienst bleibt
-aber m&ouml;glich, solange mindestens ein Mix des Dienstes noch
-vertrauensw&uuml;rdig ist. Au&szlig;erdem verbietet JonDo Verbindungen zu
-InfoServices mit nicht vertrauensw&uuml;rdigen, zur&uuml;ckgerufenen oder
-abgelaufenen Zertifikaten, und &uuml;berpr&uuml;ft Programm-Aktualisierungen
-und Bezahl-Verbindungen auf vertrauensw&uuml;rdige Zertifikate.</p>
+aber m&ouml;glich, solange mindestens der erste oder der letzte Mix des
+Dienstes noch vollst&auml;ndig vertrauensw&uuml;rdig ist. Au&szlig;erdem
+verhindert JonDo Verbindungen zu InfoServices mit nicht
+vertrauensw&uuml;rdigen, zur&uuml;ckgerufenen oder abgelaufenen Zertifikaten.
+Auch Programm-Aktualisierungen und Bezahl-Verbindungen werden immer auf
+vertrauensw&uuml;rdige Zertifikate &uuml;berpr&uuml;ft.</p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="jondonym.html"><img

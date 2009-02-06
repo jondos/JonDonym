@@ -63,6 +63,8 @@ public class SingleChannelDataChain extends AbstractDataChain
 	private int m_downstreamSendMeCount;
 	private int m_downstreamSendMeLimit;
 
+	private boolean m_bEnhancedChannelEncryption;
+
 	private class InvalidChainCellException extends Exception
 	{
 
@@ -163,11 +165,13 @@ public class SingleChannelDataChain extends AbstractDataChain
 
 	public SingleChannelDataChain(IDataChannelCreator a_channelCreator,
 								  DataChainErrorListener a_errorListener, int a_chainType,
-								  boolean a_supportFlowControl,int upstreamSendMe,int downstreamSendMe)
+								  boolean a_supportFlowControl,int upstreamSendMe,int downstreamSendMe,
+								  boolean a_enhancedChannelEncryption)
 	{
 		super(a_channelCreator, a_errorListener);
 		m_chainType = a_chainType;
 		m_supportFlowControl = a_supportFlowControl;
+		m_bEnhancedChannelEncryption=a_enhancedChannelEncryption;
 		/* create the channel */
 		m_associatedChannel = createDataChannel();
 		/* observe the channel-message queue */

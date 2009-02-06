@@ -32,27 +32,29 @@ import org.bouncycastle.crypto.params.KeyParameter;
 
 public class SymCipher
 {
-	AESFastEngine aesEngine;
+	AESFastEngine m_aesEngine1;
+	AESFastEngine m_aesEngine2;
 
-	byte[] iv = null;
+	byte[] m_iv1 = null;
 
-	byte[] iv2 = null;
+	byte[] m_iv2 = null;
 
-	byte[] m_aesKey;
+	byte[] m_aesKeys;
 
 	public SymCipher()
 	{
-		aesEngine = new AESFastEngine();
-		m_aesKey = null;
-		iv = new byte[16];
+		m_aesEngine1 = new AESFastEngine();
+		m_aesEngine2 = new AESFastEngine();
+		m_aesKeys = null;
+		m_iv1 = new byte[16];
 		for (int i = 0; i < 16; i++)
 		{
-			iv[i] = 0;
+			m_iv1[i] = 0;
 		}
-		iv2 = new byte[16];
+		m_iv2 = new byte[16];
 		for (int i = 0; i < 16; i++)
 		{
-			iv2[i] = 0;
+			m_iv2[i] = 0;
 		}
 	}
 
@@ -75,23 +77,24 @@ public class SymCipher
 	{
 		try
 		{
-			m_aesKey = new byte[16];
-			System.arraycopy(key, offset, m_aesKey, 0, 16);
-			aesEngine.init(true, new KeyParameter(m_aesKey));
+			m_aesKeys = new byte[16];
+			System.arraycopy(key, offset, m_aesKeys, 0, 16);
+			m_aesEngine1.init(true, new KeyParameter(m_aesKeys));
+			m_aesEngine2.init(true, new KeyParameter(m_aesKeys));
 			if (len == 16)
 			{
 				for (int i = 0; i < 16; i++)
 				{
-					iv[i] = 0;
-					iv2[i] = 0;
+					m_iv1[i] = 0;
+					m_iv2[i] = 0;
 				}
 			}
 			else
 			{
 				for (int i = 0; i < 16; i++)
 				{
-					iv[i] = key[i + 16 + offset];
-					iv2[i] = key[i + 16 + offset];
+					m_iv1[i] = key[i + 16 + offset];
+					m_iv2[i] = key[i + 16 + offset];
 				}
 			}
 
@@ -99,66 +102,103 @@ public class SymCipher
 		}
 		catch (Exception e)
 		{
-			m_aesKey = null;
+			m_aesKeys = null;
+
+			return -1;
+		}
+	}
+
+	/** Set both keys to different value, if keys.length==2* KEY_SIZe, else set both keys to the same value
+	 * 
+	 * @param keys
+	 *            byte[]
+	 * @return int
+	 */
+	synchronized public int setEncryptionKeysAES(byte[] keys)
+	{
+		try
+		{
+			if(keys.length==16)
+				{
+				return setEncryptionKeyAES(keys);
+				}
+			else
+				{
+			m_aesKeys = new byte[32];
+			System.arraycopy(keys, 0, m_aesKeys, 0, 32);
+			m_aesEngine1.init(true, new KeyParameter(m_aesKeys,0,16));
+			m_aesEngine2.init(true, new KeyParameter(m_aesKeys,16,16));
+			for (int i = 0; i < 16; i++)
+			{
+				m_iv1[i] = 0;
+				m_iv2[i] = 0;
+			}
+
+			return 0;
+				}
+		}
+		catch (Exception e)
+		{
+			m_aesKeys = null;
 
 			return -1;
 		}
 	}
 
 	/**
-	 * Returns the currently used key for encryption.
+	 * Returns the currently used key(s) for encryption. If both keys are set, than an array of 32 byte is returned, otherwise an array of 16 bytes
 	 * 
-	 * @return The current key used for encryption or null, if no key is set.
+	 * @return The current key(s) used for encryption or null, if no key is set.
 	 */
-	public byte[] getKey()
+	public byte[] getKeys()
 	{
-		return m_aesKey;
+		return m_aesKeys;
 	}
 
 	synchronized public void setIV2(byte[] buff)
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			iv2[i] = buff[i];
+			m_iv2[i] = buff[i];
 		}
 	}
 
-	public int encryptAES(byte[] from, int ifrom, byte[] to, int ito, int len)
+	public int encryptAES1(byte[] from, int ifrom, byte[] to, int ito, int len)
 	{
 		len = ifrom + len;
 		while (ifrom < len - 15)
 		{
-			synchronized (aesEngine)
+			synchronized (m_aesEngine1)
 			{
-				aesEngine.processBlock(iv, 0, iv, 0);
+				m_aesEngine1.processBlock(m_iv1, 0, m_iv1, 0);
 			}
-			to[ito++] = (byte) (from[ifrom++] ^ iv[0]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[1]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[2]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[3]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[4]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[5]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[6]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[7]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[8]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[9]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[10]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[11]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[12]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[13]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[14]);
-			to[ito++] = (byte) (from[ifrom++] ^ iv[15]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[0]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[1]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[2]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[3]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[4]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[5]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[6]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[7]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[8]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[9]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[10]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[11]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[12]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[13]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[14]);
+			to[ito++] = (byte) (from[ifrom++] ^ m_iv1[15]);
 		}
 		if (ifrom < len)
 		{
-			synchronized (aesEngine)
+			synchronized (m_aesEngine1)
 			{
-				aesEngine.processBlock(iv, 0, iv, 0);
+				m_aesEngine1.processBlock(m_iv1, 0, m_iv1, 0);
 			}
 			len -= ifrom;
 			for (int k = 0; k < len; k++)
 			{
-				to[ito++] = (byte) (from[ifrom++] ^ iv[k]);
+				to[ito++] = (byte) (from[ifrom++] ^ m_iv1[k]);
 			}
 		}
 		return 0;
@@ -170,37 +210,37 @@ public class SymCipher
 		int len = buff.length;
 		while (i < len - 15)
 		{
-			synchronized (aesEngine)
+			synchronized (m_aesEngine2)
 			{
-				aesEngine.processBlock(iv2, 0, iv2, 0);
+				m_aesEngine2.processBlock(m_iv2, 0, m_iv2, 0);
 			}
-			buff[i++] ^= iv2[0];
-			buff[i++] ^= iv2[1];
-			buff[i++] ^= iv2[2];
-			buff[i++] ^= iv2[3];
-			buff[i++] ^= iv2[4];
-			buff[i++] ^= iv2[5];
-			buff[i++] ^= iv2[6];
-			buff[i++] ^= iv2[7];
-			buff[i++] ^= iv2[8];
-			buff[i++] ^= iv2[9];
-			buff[i++] ^= iv2[10];
-			buff[i++] ^= iv2[11];
-			buff[i++] ^= iv2[12];
-			buff[i++] ^= iv2[13];
-			buff[i++] ^= iv2[14];
-			buff[i++] ^= iv2[15];
+			buff[i++] ^= m_iv2[0];
+			buff[i++] ^= m_iv2[1];
+			buff[i++] ^= m_iv2[2];
+			buff[i++] ^= m_iv2[3];
+			buff[i++] ^= m_iv2[4];
+			buff[i++] ^= m_iv2[5];
+			buff[i++] ^= m_iv2[6];
+			buff[i++] ^= m_iv2[7];
+			buff[i++] ^= m_iv2[8];
+			buff[i++] ^= m_iv2[9];
+			buff[i++] ^= m_iv2[10];
+			buff[i++] ^= m_iv2[11];
+			buff[i++] ^= m_iv2[12];
+			buff[i++] ^= m_iv2[13];
+			buff[i++] ^= m_iv2[14];
+			buff[i++] ^= m_iv2[15];
 		}
 		if (i < len)
 		{
-			synchronized (aesEngine)
+			synchronized (m_aesEngine2)
 			{
-				aesEngine.processBlock(iv2, 0, iv2, 0);
+				m_aesEngine2.processBlock(m_iv2, 0, m_iv2, 0);
 			}
 			len -= i;
 			for (int k = 0; k < len; k++)
 			{
-				buff[i++] ^= iv2[k];
+				buff[i++] ^= m_iv2[k];
 			}
 		}
 		return 0;

@@ -497,7 +497,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			/* old protocol with unlimited channels */
 			return (new SingleChannelDataChain(multiplexer.getChannelTable(), this, a_type,
 											   keyExchangeManager.isChainProtocolWithFlowControl(),keyExchangeManager.getUpstreamSendMe(),
-											   keyExchangeManager.getDownstreamSendMe()));
+											   keyExchangeManager.getDownstreamSendMe(),
+											   keyExchangeManager.isProtocolWithEnhancedChannelEncryption()));
 		}
 		return (new TypeFilterDataChain(new SequentialChannelDataChain(multiplexer.getChannelTable(), this,
 			channelsDescription.getChainTimeout()), a_type));

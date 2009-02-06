@@ -57,21 +57,30 @@ below.</p>
 <a href="#doctop"> Beginn &uarr; </a><a href="#docbottom"> &darr; Ende </a>
 </div>-->
 
-<h3>Active Web content</h3>
+<h3><a name="active" id="active">Active Web Contents</a></h3>
 
 <p>Webcontent accessible by browser plugins such as Flash, Java, ActiveX and
 Silverlight renders the Web more dynamic and colorful but also more dangerous,
-for they allow websites to execute code on your PC. By certain manipulations
-these plugins can read and edit files on your machine and in an extreme case
-even gain complete control over it. Especially beware signed Java applets: by
-accepting its signature the applet and thereby the visited webserver
-automatically receive all user rights on your machine. It does not help to only
-surf websites you deem trustworthy either. This concept is outdated since
-nowadays even numerous large and notorious websites are being hacked and filled
-with malicious code. The browser scripting language JavaScript is better
-protected against attacks on your privacy than the aforementioned plugins but
-not completely safe. Therefore we recommend you turn on JavaScript only as
-needed and switch it off otherwise. </p>
+for they allow websites to execute code on your PC. If executed, these plugin
+contents are able to read some details about your computer and network
+configuration and send it to the web server. By certain manipulations they
+moreover can read and edit files on your machine and in an extreme case even
+gain complete control over it. Especially beware signed Java applets: by
+accepting its signature, the applet, and thereby the visited webserver,
+automatically receives all user rights on your machine. In particular, it may
+then read your <a href="#ip">IP address</a>, your <a href="#mac">MAC
+address</a> and even hard disk contents. It does not help to only surf websites
+you deem trustworthy either. This concept is outdated since nowadays even
+numerous large and notorious websites are being hacked and filled with
+malicious code. Only blocking/deactivating these plugin contents provides real
+security.</p>
+
+<p>The browser scripting language <em>JavaScript</em> is better protected
+against attacks on your privacy than the aforementioned plugins but not
+completely safe. Therefore we recommend you to only activate JavaScript
+contents if needed and to block them otherwise. JavaScript is not to be
+confused with <em>Java</em> or the <em>active Java plugin</em>, repsective,
+which is a completely different thing despite the similar name (see above).</p>
 
 <p>You should not surf the Internet without a well secured browser, as your PC
 is otherwise in danger of being attacked quite soon. Instead of configuring the
@@ -108,7 +117,7 @@ latest, delete cookies after your browser session. Modern browsers usually
 integrate an optional function for this, but it has to be activated by the user
 first. In <a href="jondofox.html">JonDoFox</a> it has been made default.</p>
 
-<h3>Browser Header</h3>
+<h3><a name="header" id="header">Browser (HTTP) Header</a></h3>
 
 <p>With every request for a webpage, browsers send information within the
 framework of the HTTP protocol that can be analyzed by the visited site:
@@ -204,7 +213,28 @@ webbug filters, you are never able to reliably prevent this. The only effective
 protection against this are anonymisation services like <a
 href="jondonym.html">JonDonym</a>. </p>
 
-<h3><a name="ip" id="ip">IP address</a></h3>
+<h3><a name="mac" id="mac">MAC Address</a></h3>
+
+<p>The MAC address (MAC=Media-Access-Control, sometimes also called
+<em>Ethernet-ID</em>, <em>Airport-ID</em> or <em>physical address</em>) is the
+hardware address of each individual network device. Each computer may have
+several of such physical or virtual network devices (bound to a cable,
+wireless, UMTS, VPS, ...). The MAC address serves as a unique identifier for
+the respective device in a local area network. On the internet, it is solely
+used by your access provider in order to allocate an <a href="#ip">IP
+address</a> to you. It is only visible for your provider and is neither used
+not transmitted while using the internet.</p>
+
+<p>If you are using a notebook and connect to the internet while travelling,
+the respective provider (if he not already recognizes you by your access data)
+may use the MAC address in order to track and protocol your current position.
+Therefore, you might want to change your MAC address always before connecting
+to an alien computer network. <a
+href="http://translate.google.com/translate?hl=en&amp;sl=de&amp;tl=en&amp;u=http://de.wikipedia.org/wiki/MAC-Adresse">This
+is quite easy on Windows Linux and Mac OS X (look for <em>Query and set a MAC
+address</em>)</a>.</p>
+
+<h3><a name="ip" id="ip">IP Address</a></h3>
 
 <p>The IP address is given to you by your provider on dialing into the
 Internet, and it is then saved for months or even years together with your

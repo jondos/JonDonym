@@ -21,15 +21,16 @@ src="next.gif" alt="-&gt;"></a></span> </p>
 <p>Certificates are used to identify operators of JonDonym services. Typically,
 a mix cascade consists of two or more consecutive mix servers operated by
 different organizations. Only if all of these operators cooperate could the
-anonymity of users be revoked. Users of JonDo should consider for themselves
-whether they trust the operators of a cascade and whether they connect to the
-service. It is therefore crucial that</p>
+anonymity of the users be revoked. Users of JonDo should therefore consider for
+themselves whether they trust the mix operators of a cascade and whether they
+connect to this cascade according to this decision. It is therefore crucial
+that</p>
 <ul>
   <li>the individual mixes are run by independent organizations and that </li>
   <li>the information about these organizations is reliable. </li>
 </ul>
 
-<p>Certificates are part of the so-called cryptographic public key method: the
+<p>Certificates are parts of the so-called cryptographic public key method: the
 organization identified by a certificate owns a private key that it uses to
 create digital signatures. This key must always be kept secret since everyone
 could otherwise use it to create signatures. By comparision to the openly
@@ -41,33 +42,23 @@ recommended to inspect the certificates of each individual server of a mix
 cascade (click on the different mix icons and then on the respective
 certificate). </p>
 
-<h3>Certification authorities </h3>
+<h3>Certification authorities (CAs)</h3>
 
-<p>The JonDonym service may be compromised by the operator if a mix cascade is
-only nominally run by different operators, while in fact all mixes are under
-the control of a single organization. Trustworthy certification authorities
-(CAs) should ensure that operators with different names really are independent
-entities. Without an identity check by one of these authorities mixes are
-useless for JonDo. But in the end, you will also have to trust the
-certification authorities themselves, as they could in theory invent
-non-existent operators and thereby run mixes under false flag. </p>
-
-<p>In JonDonym, there are several root certification authorities (e.g. <a
-href="http://www.jondos.de/en">JonDos GmbH</a> and <a
-href="http://anon.inf.tu-dresden.de/index_en.html">TU Dresden JAP Team</a>).
-They have committed themselves to be very careful when certifying operators.
-Operators may also get certified more than one CA. Such a multiple
+<p>Organisations that issue certificates are called certification authorities.
+They connect the identity of the certificate owner to his public key using an
+electronic signature. The <a href="cert.html">organisations issuing JonDonym
+certificates</a> have committed themselves to be very careful when certifying
+operators. Operators may also get certified by more than one CA. Multiple
 certification takes the need for trusting a single certification authority.</p>
 
 <h3>Mix certificates and operator certificates</h3>
 
 <p>Both mixes and operators of mixes receive certificates. A CA issues an
-operator certificates that are attached to its identity. An operator may then
-generate as many mix certificates as he likes with his certificate. These
-mixes, or mix certificates respectively, can then be associated with their
-operators beyond a doubt. But it also means that information about the location
-of mixes is in the end certified by an operator himself and is therefore not as
-reliable as the information about the operator himself.</p>
+operator certificate that is attached to his/her identity. By using this
+certificate, the operator may then generate mix certificates him/herself for
+his/her mixes . These mixes, or mix certificates respectively, can then be
+associated with their operator beyond a doubt and cannot refer to a faked
+identity.</p>
 
 <h3><a name="status" id="status">Certification status</a></h3>
 
@@ -76,12 +67,12 @@ src="img/certs/trusted_black.png">only if you trust the certification authority
 who has issued this certificate. Certificates may also be <strong>verified by
 two</strong>&#xa0;<img alt="" src="img/certs/trusted_blue.png">, <strong>three
 or more</strong>&#xa0;<img alt="" src="img/certs/trusted_green.png">
-independent certification authorities at once, which means a much higher
-security that the identity and reliability of the respective operator was
-correctly verified. Non-verifiable certificates are generally <strong>not
+independent certification authorities at once. Thus, the correctness of the
+identity and the reliability of the respective operator is better secured.
+Non-verifiable certificates are generally <strong>not
 trusted</strong>&#xa0;<img alt="" src="img/certs/not_trusted.png"> as anyone
-who knows a little about computer technology can generate such certificates by
-himself. The <strong>validity</strong> of a certificate depends on the time
+with basic knowledge about computer technology can generate such certificates
+by himself. The <strong>validity</strong> of a certificate depends on the time
 period for which the certificate has been issued. Typically, you should not
 trust an <strong>expired / invalid</strong>&#xa0;<img alt=""
 src="img/certs/invalid.png"> certificate any longer, as it is not clear whether
@@ -90,15 +81,15 @@ the owner still has the right to offer the service. Certificates may also be
 example if their encryption was broken, the operator turned out to be dubious
 or if the private certificate got into the hands of unauthorized persons.</p>
 
-<p>JonDo does not permit connections to mix cascades with at least one
+<p>JonDo blocks connections to mix cascades with at least one
 <em>untrusted</em> or <em>revoked</em> mix. <em>Expired</em> certificates cause
 <a href="services_anon.html">service filters</a> and the <a
 href="jap.JAPNewView_anonymometer.html">Anonym-O-Meter</a> not to count such a
 mix as part of the service. However, a connection to the service is still
-possible if at least one mix in the service is still trusted. Moreover, JonDo
-forbids connections to InfoServices with untrusted, revoked or expired
-certificates, and checks program updates and payment connections for trusted
-certificates.</p>
+possible if at least the first or the last mix in the service is still fully
+trusted. Moreover, JonDo prevents connections to InfoServices with untrusted,
+revoked or expired certificates. Program updates and payment connections are
+also always checked for trusted certificates.</p>
 <!--#include virtual="/footer_en.html"-->
 <hr>
 

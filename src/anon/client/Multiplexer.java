@@ -179,7 +179,7 @@ public class Multiplexer extends Observable implements Runnable
 		/* do stream-encoding */
 		if (m_outputStreamCipher != null)
 		{
-			m_outputStreamCipher.encryptAES(packetData, 0, packetData, 0, 16);
+			m_outputStreamCipher.encryptAES1(packetData, 0, packetData, 0, 16);
 		}
 		/* now we can send the packet */
 		try
