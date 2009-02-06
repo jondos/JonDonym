@@ -56,6 +56,7 @@ import anon.crypto.XMLSignature;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
+import anon.infoservice.TermsAndConditionsMixInfo;
 import anon.util.Base64;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
@@ -103,6 +104,7 @@ public class KeyExchangeManager {
 
   private MixCascade m_cascade;
 
+  private XMLTermsAndConditionsRequest m_tnCRequest;
 
   /**
    * @todo allow to connect if one or more mixes (user specified) cannot be verified
@@ -288,10 +290,26 @@ public class KeyExchangeManager {
 		  }
 
 		 m_mixParameters = new MixParameters[m_cascade.getNumberOfMixes()];
-		  for (int i = 0; i < m_cascade.getNumberOfMixes(); i++)
+		 m_tnCRequest = new XMLTermsAndConditionsRequest();
+		 
+		 for (int i = 0; i < m_cascade.getNumberOfMixes(); i++)
 		  {
 			  MixInfo mixinfo = m_cascade.getMixInfo(i);
-
+			  //+++++++++++++++++++++++++++++++++++++++++++++++++++
+			  TermsAndConditionsMixInfo tncInfo = mixinfo.getTermsAndConditionMixInfo();
+			  if(tncInfo != null)
+			  {
+				  //TODO: check if tnc items are already available
+				  
+				  String templateRefID = tncInfo.getTemplateRefId(tncInfo.getDefaultLanguage());
+				  /*if(templateRefID == null)
+				  {
+					  templateRefID = tncInfo.getTemplateRefId("en");
+				  }*/
+				  m_tnCRequest.addTemplateRequest(tncInfo.getId(), tncInfo.getDefaultLanguage(), templateRefID);
+				  m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), tncInfo.getDefaultLanguage());
+			  }
+			  //+++++++++++++++++++++++++++++++++++++++++++++++++++++
 			  if (mixinfo == null)
 			  {
 				  // should not happen
@@ -578,6 +596,45 @@ public class KeyExchangeManager {
 				  throw (new SignatureException("Invalid symmetric keys signature received."));
 			  }
 		  }
+		 
+		  if(false && m_cascade.getMixInfo(0).getServiceSoftware().getVersion().compareTo("00.08.52") >= 0)
+		  {
+				  //send T&C stuff
+				  Document tcRequestDoc = XMLUtil.createDocument();
+				  Element tcRequestRoot = m_tnCRequest.toXmlElement(tcRequestDoc);
+				  //tcRequestDoc.appendChild(tcRequestRoot);
+				  String tcRequest = XMLUtil.toString(tcRequestDoc);
+				  if(tcRequest != null)
+				  {
+					  byte[] tcRequestBytes = tcRequest.getBytes();
+					  ByteArrayOutputStream bout = new ByteArrayOutputStream();
+					  
+					  DataOutputStream tcReqStream = new DataOutputStream(bout);
+					  tcReqStream.writeShort(tcRequestBytes.length);
+					  tcReqStream.writeBytes(tcRequest);
+					  
+					  //tcReqStream.writeShort(tcRequestBytes.length);
+					  a_outputStream.write(bout.toByteArray());
+					  a_outputStream.flush();
+					  
+					 int answerBytes = dataStreamFromMix.readInt();
+					 byte[] answerData = new byte[answerBytes];
+					 //System.out.println("expected answer: "+answerBytes+ " bytes");
+					
+					 a_inputStream.read(answerData, 0, answerBytes);
+					 /* try
+					 {
+						 
+					 }
+				  	catch (Exception e)
+				  	{
+					  e.printStackTrace();
+				  	}*/
+					 System.out.println("answer received: "+new String(answerData));
+				  }
+			  
+		  }
+		  
 	  }
 	  catch (SignatureException e)
 	  {
