@@ -65,9 +65,19 @@ public class DefaultDataChannelFactory implements IDataChannelFactory {
       if ((i == 0) && (m_keyExchangeManager.getFirstMixSymmetricCipher() != null)) {
         /* first mix is using symmetric cipher */
         SymCipher channelCipher = new SymCipher();
-        byte[] channelKey = new byte[SYMMETRIC_CIPHER_KEY_LENGTH];
-        KeyPool.getKey(channelKey);
-        channelCipher.setEncryptionKeyAES(channelKey);
+        byte[] channelKeys;
+        if(m_keyExchangeManager.isProtocolWithEnhancedChannelEncryption())
+        			{
+        				channelKeys= new byte[SYMMETRIC_CIPHER_KEY_LENGTH*2];
+    	   				//KeyPool.getKey(channelKeys);
+    	   				//KeyPool.getKey(channelKeys,SYMMETRIC_CIPHER_KEY_LENGTH);
+        			}
+    	     else
+    	    	 {
+        	channelKeys= new byte[SYMMETRIC_CIPHER_KEY_LENGTH];
+    	   KeyPool.getKey(channelKeys);
+    	    	 }
+        channelCipher.setEncryptionKeysAES(channelKeys);
         /* initialize the internal buffer of the cipher with a non-standard
          * value
          * Attention: The encryption key must not be modified after this
@@ -85,10 +95,20 @@ public class DefaultDataChannelFactory implements IDataChannelFactory {
       else {
         /* current mix is using asymmetric cipher */
         SymCipher channelCipher = new SymCipher();
-        byte[] channelKey = new byte[SYMMETRIC_CIPHER_KEY_LENGTH];
-        KeyPool.getKey(channelKey);
-        channelCipher.setEncryptionKeyAES(channelKey);
-        /* Attention: Maybe the key is modified again by the MixCipher
+        byte[] channelKeys;
+        if(m_keyExchangeManager.isProtocolWithEnhancedChannelEncryption())
+        			{
+        				channelKeys= new byte[SYMMETRIC_CIPHER_KEY_LENGTH*2];
+    	   				//KeyPool.getKey(channelKeys);
+    	   				//KeyPool.getKey(channelKeys,SYMMETRIC_CIPHER_KEY_LENGTH);
+        			}
+    	     else
+    	    	 {
+        	channelKeys= new byte[SYMMETRIC_CIPHER_KEY_LENGTH];
+    	   KeyPool.getKey(channelKeys);
+    	    	 }
+        channelCipher.setEncryptionKeysAES(channelKeys);
+      /* Attention: Maybe the key is modified again by the MixCipher
          * implementation because of necessary adaption to RSA (m < n -> key
          * shouldn't start with a 1) and the current timestamp (can only be
          * done when the first packet is sent). But this is no problem because

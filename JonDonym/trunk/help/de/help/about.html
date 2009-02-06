@@ -24,11 +24,11 @@ alt="-&gt;"></a></span> </p>
 <p>Das Programm JonDo (eine Weiterentwicklung von <a
 href="http://anon.inf.tu-dresden.de">JAP</a>) erm&ouml;glicht es Ihrem
 Webbrowser, Webseiten &uuml;ber eine <a
-href="wwwprivacy.html#ip">IP-Adresse</a> des <a
-href="jondonym.html">JonDonym</a>-Systems zu kontaktieren. Das bedeutet,
-da&szlig; weder der angefragte Server, noch ein Lauscher auf den Verbindungen,
-noch die Betreiber des JonDonym-Dienstes selbst mitbekommen, welche Webseiten
-Sie aufrufen. Die Verbindung zu <a
+href="wwwprivacy.html#ip">IP-Adresse</a> im <a
+href="jondonym.html">JonDonym</a>-System zu besuchen. Das bedeutet, da&szlig;
+weder der angefragte Server, noch ein Lauscher auf den Verbindungen, noch die
+Betreiber des JonDonym-Dienstes selbst mitbekommen, welche Webseiten Sie
+aufrufen. Die Verwendung von <a
 href="jondonym.html#premiumservices">Premiumdiensten</a> gestattet es Ihnen
 au&szlig;erdem neben dem Browser noch folgende weitere Anwendungen zu
 anonymisieren:</p>
@@ -40,32 +40,33 @@ anonymisieren:</p>
     href="http://www.jabber.org/">Jabber</a>-Protokoll und dem <a
     href="http://www.cypherpunks.ca/otr/#downloads">OTR-Plugin</a>) und</li>
   <li>prinzipiell alle Programme, die f&uuml;r einen HTTP-Proxy konfiguriert
-    werden k&ouml;nnen und die &uuml;ber Ihre Netzwerk-Protokolle nichts
-    &uuml;ber Ihre Identit&auml;t verraten.</li>
+    werden k&ouml;nnen.</li>
 </ul>
 
-<p>E-Mail-Programme und VoIP werden derzeit nicht unterst&uuml;tzt. Zum
-Versenden anonymer E-Mails empfehlen wir, auf ein E-Mail-Programm zu verzichten
-und stattdessen Web-basierte E-Mail-Dienste direkt &uuml;ber den Browser zu
-benutzen. Fast alle E-Mail-Anbieter verf&uuml;gen &uuml;ber einen solchen
-Webmail-Zugang.</p>
+<p>E-Mail-Programme und VoIP werden noch nicht unterst&uuml;tzt. Zum Versenden
+anonymer E-Mails empfehlen wir, auf ein E-Mail-Programm zu verzichten und
+stattdessen Web-basierte E-Mail-Dienste direkt &uuml;ber den Browser zu
+benutzen.</p>
 
-<h3>Was JonDo ist</h3>
+<h3>Was ist JonDo?</h3>
 <ul>
   <li>JonDo ist eine Anwendung zur Verschleierung der eigenen IP-Adresse bei
-    Webzugriffen &uuml;ber anonymisierte Anwendungen (z.B. &uuml;ber den
+    Internet-Zugriffen &uuml;ber bestimmte Anwendungen (z.B. &uuml;ber den
     Webbrowser).</li>
   <li>JonDo ist eine <a
     href="forwarding_client.html">Anti-Zensur-Anwendung</a>, die den Zugriff
-    auf ansonsten gesperrte Internetseiten erm&ouml;glicht. "JonDonauten"
-    k&ouml;nnen au&szlig;erdem ihren JonDo als <a
+    auf ansonsten gesperrte Internetseiten erm&ouml;glicht. Nutzer k&ouml;nnen
+    au&szlig;erdem ihren JonDo als <a
     href="forwarding_server.html">Weiterleitung (Forwarding-Server)</a>
     konfigurieren, um damit anderen Surfen wiederum den Zugriff auf den
     JonDonym-Dienst zu erm&ouml;glichen.</li>
-  <li>JonDo ist quelloffen und kostenlos, erlaubt aber den Zugriff sowohl auf
-    kostenfreie als auch auf kostenpflichtige (Premium-)Dienste.</li>
-  <li>JonDo filtert und anonymisiert HTTP-Header - allerdings nur auf
-    unverschl&uuml;sselten Verbindungen (nicht HTTPS).</li>
+  <li>JonDo ist quelloffen und kostenlos. Das Programm erlaubt den Zugriff
+    sowohl auf kostenfreie als auch auf kostenpflichtige (Premium-)Dienste.</li>
+  <li>JonDo filtert und anonymisiert <a
+    href="wwwprivacy.html#header">HTTP-Header</a> - allerdings nur auf
+    unverschl&uuml;sselten Verbindungen (nicht HTTPS). Zur Filterung von
+    verschl&uuml;sselten Verbindungen sollte zus&auml;tzlich <a
+    href="jondofox.html">JonDoFox</a> eingesetzt werden.</li>
   <li>JonDo ist f&uuml;r alle g&auml;ngigen Betriebssysteme verf&uuml;gbar
     (Windows, Mac OS X, Linux).</li>
   <li>JonDo wurde und wird von der <a href="http://www.jondos.de/de">JonDos
@@ -77,16 +78,16 @@ Webmail-Zugang.</p>
     f&uuml;r Datenschutz Schleswig-Holstein</a>) weiterentwickelt.</li>
 </ul>
 
-<h3>Was JonDo nicht ist</h3>
+<h3>Was ist JonDo nicht?</h3>
 <ul>
   <li>JonDo macht die IP-Adresse Ihres Rechners/Routers NICHT unsichtbar. Ihre
     IP-Adresse wird Ihnen durch Ihren Provider zugeteilt und ist durch Dritte
-    unver&auml;nderlich. Sie ben&ouml;tigen diese IP-Adresse, damit JonDo sich
-    mit Anonymisierungsdiensten im Internet verbinden kann. Wenn Sie JonDo
-    einsetzen, surfen Sie aber &uuml;ber Rechner (Mixe) im Internet, welche
-    jeweils eine eigene IP-Adresse haben. Die von Ihnen aufgerufenen Webseiten
-    sehen deshalb jeweils diese ausgehende IP-Adresse und nicht Ihre
-  eigene.</li>
+    unver&auml;nderlich. Sie ben&ouml;tigen diese IP-Adresse, damit der
+    JonDo-Client sich mit JonDonym-Diensten im Internet verbinden kann. Wenn
+    Sie JonDo einsetzen, surfen Sie aber &uuml;ber Rechner (Mixe) im Internet,
+    welche jeweils eine eigene IP-Adresse haben. Die von Ihnen aufgerufenen
+    Webseiten sehen deshalb jeweils diese ausgehende IP-Adresse und nicht Ihre
+    eigene.</li>
   <li>JonDo wechselt NICHT regelm&auml;&szlig;ig die ausgehende IP-Adresse,
     sondern beh&auml;lt die gleiche Ausgangs-IP-Adresse, solange er mit
     derselben Mixkaskade verbunden ist. Dies k&ouml;nnen Minuten, Stunden oder
@@ -99,15 +100,15 @@ Webmail-Zugang.</p>
   <li>JonDo ist KEIN Filesharing-Anonymisierungstool. Sie k&ouml;nnen manche
     Filesharing-Anwendungen &uuml;ber JonDo laufen lassen, k&ouml;nnen aber
     selbst keine Dateien anbieten.</li>
-  <li>JonDo kann KEINE E-Mail-Programme anonymisieren (au&szlig;er
-    E-Mail-Dienste auf Webseiten). Dazu w&auml;re zus&auml;tzlich eine
-    spezielle Datenfilterung im E-Mail-Programm selbst notwendig.</li>
-  <li>JonDo bindet sich NICHT transparent in Ihr Betriebssystem ein, sondern
-    muss f&uuml;r jede anonymisierte Anwendung separat <a
+  <li>JonDo kann KEINE E-Mail-Programme anonymisieren. Dazu w&auml;re
+    zus&auml;tzlich eine spezielle, zus&auml;tzliche Datenfilterung im
+    E-Mail-Programm selbst notwendig.</li>
+  <li>JonDo bindet sich NICHT in Ihr Betriebssystem ein, sondern muss f&uuml;r
+    jede anonymisierte Anwendung separat <a
     href="browser.html">konfiguriert</a> werden.</li>
   <li>JonDo beschleunigt NICHT Ihren Internetzugriff. Bei den kostenpflichtigen
-    Diensten werden Sie in der Regel jedoch keinen Geschwindigkeitsverlust beim
-    Websurfen bemerken.</li>
+    Diensten werden Sie in der Regel jedoch keinen gro&szlig;en
+    Geschwindigkeitsverlust beim Websurfen bemerken.</li>
   <li>JonDo ist NICHT JonDonym. JonDonym fasst die &uuml;ber JonDo erreichbaren
     Dienste in einem Begriff zusammen und beschreibt die Technologie.</li>
   <li>JonDo ist NICHT JonDos. JonDos ist das Unternehmen, das JonDo
@@ -115,7 +116,7 @@ Webmail-Zugang.</p>
   <li>JonDo kann KEINE beliebigen "anonymen" Proxies (z.B. von Listen offener
     Proxies) nutzen, um eine anonyme Verbindung herzustellen. Dies w&auml;re
     eine <a href="otherServices.html#networkproxies">v&ouml;llig unsichere
-    Methode</a> und w&uuml;rde zu keiner echten Anonymisierung f&uuml;hren.</li>
+    Methode</a> und w&uuml;rde zu keiner Anonymisierung f&uuml;hren.</li>
   <li>JonDo filtert KEINE Plugins, Skripte oder HTTPS-Webseiten. Um den Browser
     vollst&auml;ndig abzusichern benutzen Sie am Besten <a
     href="jondofox.html">JonDoFox.</a></li>

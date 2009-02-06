@@ -19,86 +19,100 @@ features <img src="next.gif" alt="-&gt;"></a></span> </p>
 <h2>VPN services and Proxies</h2>
 
 <h3>Additional safety with VPN services like Relakks, Steganos Anonym VPN,
-Perfect Privacy, Cyber Ghost VPN, XeroBank VPN</h3>
+Perfect Privacy, Cyber Ghost VPN, XeroBank VPN, ...</h3>
 
 <p>JonDonym and Tor may be the best anonymization systems technically, but both
-share small disadvantages from concept that should be considered when using
+share small restrictions from concept that should be considered when using
 them:</p>
 <ul>
-  <li>Browser plugins (Java/Flash/Silverlight/ActiveX) must be deactivated at
-    the moment. Otherwise, your PC's/router's true IP can be revealed by a
-    website.</li>
-  <li>In principle, transfer speed will be clearly below ADSL capacity (maximum
-    of 1-2 MBit/s possible). This is enough for surfing but maybe not for other
-    scenarios such as huge downloads.</li>
-  <li>Applications are not transparently anonymized but each has to be
-    configured first (the <a href="jondofox.html">JonDoFox browser</a> is
-    preconfigured though).</li>
-  <li>Not all applications can be anonymized (HTTP/SOCKS proxies must be
-    supported by the application).</li>
+  <li>Browser plugins for <a href="wwwprivacy.html#active">active contents</a>
+    (Java/Flash/Silverlight/ActiveX) must be blocked, e.g. by using <a
+    href="jondofox.html">JonDoFox</a>. Otherwise, your PC's/router's true IP
+    can be revealed by a website which secretly or visibly embeds such
+  programs.</li>
+  <li>While all web browsers do, some internet applications do not support
+    HTTP/SOCKS proxy settings. They may then only be anonymized by the use of
+    further software.</li>
 </ul>
 
-<p>If JonDo is not compatible with a certain application, or if you wish for
-less strong anonymization in favor of speed, it can be helpful to use a VPN
-(Virtual Private Network) system at the side of JonDonym for an additional
-layer of security. A VPN can at least offer limited protection to your IP
-address if you use (unsigned) Java or Flash applets from time to time. But in
-this case, you should take care that your computer is behind a router or
-running in a virtual machine to protect against automated hacker attacks
-through browser plugins. JonDos is preparing its own supplementary VPN offer
-until the end of 2009, which will be integrated in JonDo as a combi-package.</p>
+<p>The combination of JonDo with a so-called VPN system (virtual private
+network) may slightly fix these restrictions: VPN software creates a single,
+encrypted connection to a certain VPN provider. This one accepts, similar to an
+access provider, your whole internet data traffic (also the separately
+encrypted JonDonym data traffic), and forwards it to the itnernet (or to
+JonDonym cascades, respective), while all users get the same exit IP address,
+similar to JonDonym. Of course, this provider may thereby observe your whole
+internet communication, except for what is transferred over JonDonym. Hence pay
+attention to choose a reputable VPN provider, in particular with a reputable
+company address and similar contact persons. If possible, you should also use a
+VPN software directly integrated in your internet router instead of executing a
+VPN program on your own computer. Thereby the provider's software cannot harm
+your computer. In addition to that, only the router then "knows" your real IP
+address, and <a href="wwwprivacy.html#active">active contents</a> cannot read
+it any more. However, please note that <a href="wwwprivacy.html#active">active
+contents</a> may still read a lot of data about your computer and network
+configuration. Moreover, in specific computer configurations or if the VPN
+connection shortly goes down, VPN programs that work without a separate user
+hardware sometimes "leak" connection data to the internet.</p>
 
-<p>For web surfing, except bigger downloads maybe, VPN services should not be
-used. On one hand, their hosts usually do not ensure that users also have an
-uniform appearance on the Web aside their IP address (<a
-href="wwwprivacy.html">see last chapter</a>). The users are thus
-distinguishable and easily identifiable by merging the data. And on the other
-hand, a local observer on your network (ISP, WLAN) could guesstimate websites
-requested over VPN quite well by analyzing size and timing of the encrypted VPN
-data stream. JonDonym and Tor are quite resilient against this attack (a
-scientific article which demonstrates the attack and lists experimental results
-is in preparation; the success rates are over 90% for VPNs). You should also
-keep in mind that VPN hosts can, unlike JonDonym and Tor, track and save every
-step of yours since they control all servers in the VPN. Nevertheless,
-protection by the VPN of a professional and reputable host is most of the time
-better than no protection at all. </p>
+<p>For web surfing, VPN services should not be used. On one hand, their hosts
+usually do not ensure that users also have an uniform appearance on the Web
+aside their IP address (<a href="wwwprivacy.html">see last chapter</a>). The
+users are thus distinguishable and easily identifiable by merging the data. And
+on the other hand, a local observer on your network (ISP, WLAN) could
+guesstimate websites requested over VPN simply by analyzing size and timing of
+the encrypted VPN data stream. JonDonym and Tor are quite resilient against
+this attack (a scientific article which demonstrates the attack and lists <a
+href="https://www.jondos.de/de/node/1434">experimental results</a> is in
+preparation; the success rates are over 90% for VPNs). You should also keep in
+mind that VPN hosts can, unlike JonDonym and Tor, track and save every step of
+yours since they control all servers in the VPN. Nevertheless, protection by
+the VPN of a professional and reputable host is typically better than no
+protection at all. </p>
 
 <h3><a name="networkproxies" id="networkproxies">Network proxies and web
 proxies</a></h3>
 
 <p>Proxy services are particularly famous for this kind of "anonymization on
-demand", besides the already mentioned services. Proxies are literally proxy
-PCs which take upon communication between your PC and the Internet, relay it to
-the target and send the answer back to your PC. Huge lists of the so-called
-network proxies or "anonymous" proxies are offered for free download on the
-Internet and can be entered in most browsers without much of a hassle. Some
-software providers distribute programs with which these lists can be updated
-automatically. In addition to these proxies, there are webproxy services,
-Internet pages with a form field, in which the user can input the target
-address that he want's to visit anonymously. The webproxy subsequently delivers
-the content of the requested website and automatically patches all links to use
-the webproxy when clicked. For using webproxy services the browser
-configuration does not have to be changed.</p>
+demand", besides the already mentioned services. They are literally "proxy PCs"
+which switch communication between your PC and the Internet. They relay your
+data traffic to the target and send the answer back to your PC so that the web
+site cannot see your IP address.</p>
 
-<p>Apart from compatibility problems of webproxies with JavaScript (JavaScript
-URLs can often not be substituted correctly), proxies are commonly unsafe: many
-proxies are PCs hijacked by hackers or criminals. Some give your IP away to the
-target webserver. Connections with proxies are almost always unencrypted, so
-that an eavesdropper on your connection could observe your surfing behavior.
-Moreover, the proxy operator can, of course, watch exactly what you are doing.
-Proxies offer thus, if at all, only some protection from the website's host but
-not from third parties.</p>
+<p>Unfortunately, proxies have a <em>high susceptibility to misuse and user
+data theft</em>: many proxies are PCs hijacked by hackers or criminals, or even
+exclusively offered for the purpose of user observation. Some automatically
+give your IP address away to the target webserver. Connections with proxies are
+almost always unencrypted, so that an eavesdropper on your connection could
+observe your surfing behavior. Moreover, the proxy operator can, of course,
+watch exactly what you are doing. Proxies offer thus, if at all, only weak
+protection from the website's host but not from third parties. Their usage is
+risky.</p>
+
+<p>Huge lists of the so-called <em>network proxies</em> or "anonymous" proxies
+are offered for free download on the Internet and can be entered in most
+browsers without much of a hassle. Some software providers distribute programs
+with which these lists can be updated automatically. In addition to these
+proxies, there are <em>webproxy services</em>, Internet pages with a form field
+in which the user can input the target address that he want's to visit
+anonymously. The webproxy subsequently delivers the content of the requested
+website and automatically patches all links to use the webproxy when clicked.
+For using webproxy services the browser configuration does not have to be
+changed. Compared to network proxies, they have the disadvantage not to be able
+to replace each link correctly, in particular on web sites with JavaScript
+code. This makes it easier that the user IP address gets "leaked" to the web
+server, which the proxy should acutally prevent.</p>
 
 <h3>Local proxies</h3>
 
-<p>The program JonDo works as a local proxy directly on your PC. Just as with
-normal proxies your browser (or other applications on your PC configured for
-JonDo resp.) has to connect to it in order to access the Internet indirectly.
-But since JonDo runs on your own PC, instead of on a third party server, it is
-not affected by the generic proxy security flaws mentioned above. JonDo itself
-relays communication of your configured Internet applications over a
-multi-encrypted, direct TCP connection to a <a href="jondonym.html">JonDonym
-mix cascade</a>.</p>
+<p>The program JonDo works as a local proxy (pseudo proxy) directly on your PC.
+Just as with normal proxies your browser (or other applications on your PC
+configured for JonDo resp.) has to connect to it in order to access the
+Internet indirectly. But since JonDo runs on your own PC, instead of on a third
+party server, it is not affected by the generic proxy security flaws mentioned
+above. JonDo itself relays communication of your configured Internet
+applications over a multi-encrypted, direct TCP connection to a <a
+href="jondonym.html">JonDonym mix cascade</a>.</p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="certificates.html"><img

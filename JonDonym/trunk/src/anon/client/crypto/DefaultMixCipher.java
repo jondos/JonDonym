@@ -63,7 +63,7 @@ public class DefaultMixCipher implements IMixCipher {
     byte[] encryptedPacket = null;
     if (m_firstEncryptionPacket) {
       /* add the symmetric encryption key to the packet */
-      realPacketLength = realPacketLength + m_symCipher.getKey().length;
+      realPacketLength = realPacketLength + m_symCipher.getKeys().length;
       if (a_virtualPacketLength > realPacketLength) {
         /* we shall encrypt some more dummy bytes to keep the stream cipher synchronized */
         packet = new byte[a_virtualPacketLength];       
@@ -71,7 +71,7 @@ public class DefaultMixCipher implements IMixCipher {
       else {
         packet = new byte[realPacketLength];
       }
-      byte[] symmetricKey = m_symCipher.getKey();
+      byte[] symmetricKey = m_symCipher.getKeys();
       /* ensure that m < n for RSA -> symmetric key is the first part of the
        * message and should start with a 0-bit to be sure
        */
@@ -102,9 +102,9 @@ public class DefaultMixCipher implements IMixCipher {
         System.arraycopy(currentTimestamp, 0, symmetricKey, symmetricKey.length - currentTimestamp.length, currentTimestamp.length);
       }
       /* all modifications are done -> initialize the cipher again */
-      m_symCipher.setEncryptionKeyAES(symmetricKey);
-      System.arraycopy(m_symCipher.getKey(), 0, packet, 0, m_symCipher.getKey().length);
-      System.arraycopy(a_packet, 0, packet, m_symCipher.getKey().length, a_packet.length);
+      m_symCipher.setEncryptionKeysAES(symmetricKey);
+      System.arraycopy(m_symCipher.getKeys(), 0, packet, 0, m_symCipher.getKeys().length);
+      System.arraycopy(a_packet, 0, packet, m_symCipher.getKeys().length, a_packet.length);
       encryptedPacket = new byte[packet.length];
       /* do asymmetric encryption on the first part of the packet */
       alreadyEncryptedBytes = m_mixParameters.getMixCipher().encrypt(packet, 0, encryptedPacket, 0);
@@ -123,7 +123,7 @@ public class DefaultMixCipher implements IMixCipher {
       encryptedPacket = new byte[packet.length];
     }
     /* do symmetric encryption */
-    m_symCipher.encryptAES(packet, alreadyEncryptedBytes, encryptedPacket, alreadyEncryptedBytes, packet.length - alreadyEncryptedBytes);
+    m_symCipher.encryptAES1(packet, alreadyEncryptedBytes, encryptedPacket, alreadyEncryptedBytes, packet.length - alreadyEncryptedBytes);
     if (realPacketLength < encryptedPacket.length) {
       /* cut off the dummy bytes */
       byte[] tempPacket = encryptedPacket;
@@ -140,7 +140,7 @@ public class DefaultMixCipher implements IMixCipher {
   public int getNextPacketEncryptionOverhead() {
     int overhead = 0;
     if (m_firstEncryptionPacket) {
-      overhead = m_symCipher.getKey().length;
+      overhead = m_symCipher.getKeys().length;
     }
     return overhead;
   }

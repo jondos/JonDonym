@@ -121,7 +121,7 @@ public class MixPacket {
     }
     	/* do stream-decryption */
     if (a_inputStreamCipher != null) {
-      a_inputStreamCipher.encryptAES(rawPacket, 0, rawPacket, 0, 16);
+      a_inputStreamCipher.encryptAES1(rawPacket, 0, rawPacket, 0, 16);
     }
     /* read channel-id and channel-flags from the packet */
     DataInputStream packetDataStream = new DataInputStream(new ByteArrayInputStream(rawPacket, 0, NON_DATA_LENGTH));

@@ -1676,8 +1676,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			if (a_cascade.getDistribution() > 0)
 			{
 				return GUIUtils.loadImageIcon(
-						MessageFormat.format(IMG_METER, a_cascade.getDistribution() + "" + 
-								Math.max(0, a_statusInfo.getAnonLevel())), true, true);
+						MessageFormat.format(IMG_METER, new Object[]{a_cascade.getDistribution() + "" + 
+								Math.max(0, a_statusInfo.getAnonLevel())}), true, true);
 			}
 			else
 			{

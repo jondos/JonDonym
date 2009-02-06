@@ -64,7 +64,7 @@ public class FirstMixCipher implements IMixCipher {
       /* it's a little bit nasty because we have to know the position to encrypt in the
        * MixPacket (currently the first bytes of the payload data)
        */
-      m_mixStreamCipher.encryptAES(a_mixPacket.getPayloadData(), 0, a_mixPacket.getPayloadData(), 0, m_bytesToEncrypt);
+      m_mixStreamCipher.encryptAES1(a_mixPacket.getPayloadData(), 0, a_mixPacket.getPayloadData(), 0, m_bytesToEncrypt);
     }
   }
   
@@ -83,7 +83,7 @@ public class FirstMixCipher implements IMixCipher {
     byte[] encryptedPacket = null;
     if (m_firstEncryptionPacket) {
       /* add the symmetric encryption key of the channel-cipher to the packet */
-      realPacketLength = realPacketLength + m_channelSymCipher.getKey().length;
+      realPacketLength = realPacketLength + m_channelSymCipher.getKeys().length;
       if (a_virtualPacketLength > realPacketLength) {
         /* we shall encrypt some more dummy bytes to keep the stream cipher synchronized */
         packet = new byte[a_virtualPacketLength];       
@@ -91,16 +91,16 @@ public class FirstMixCipher implements IMixCipher {
       else {
         packet = new byte[realPacketLength];
       }
-      System.arraycopy(m_channelSymCipher.getKey(), 0, packet, 0, m_channelSymCipher.getKey().length);
-      System.arraycopy(a_packet, 0, packet, m_channelSymCipher.getKey().length, a_packet.length);
+      System.arraycopy(m_channelSymCipher.getKeys(), 0, packet, 0, m_channelSymCipher.getKeys().length);
+      System.arraycopy(a_packet, 0, packet, m_channelSymCipher.getKeys().length, a_packet.length);
       encryptedPacket = new byte[packet.length];
       /* symmetric encryption on the first part (channel key) of the packet is done later
        * with the mix-cipher (because it depends on the position of the packet in the
        * mix-data-stream) -> for now copy only the plaintext and create a callback
        * handler for later encryption
        */
-      System.arraycopy(packet, 0, encryptedPacket, 0, m_channelSymCipher.getKey().length);
-      alreadyEncryptedBytes = m_channelSymCipher.getKey().length;
+      System.arraycopy(packet, 0, encryptedPacket, 0, m_channelSymCipher.getKeys().length);
+      alreadyEncryptedBytes = m_channelSymCipher.getKeys().length;
       a_sendCallbackHandlers.addElement(new MixEncryptionHandler(m_mixCipher, alreadyEncryptedBytes));
       m_firstEncryptionPacket = false;
     }
@@ -117,7 +117,7 @@ public class FirstMixCipher implements IMixCipher {
       encryptedPacket = new byte[packet.length];
     }
     /* do symmetric encryption for the channel */
-    m_channelSymCipher.encryptAES(packet, alreadyEncryptedBytes, encryptedPacket, alreadyEncryptedBytes, packet.length - alreadyEncryptedBytes);
+    m_channelSymCipher.encryptAES1(packet, alreadyEncryptedBytes, encryptedPacket, alreadyEncryptedBytes, packet.length - alreadyEncryptedBytes);
     if (realPacketLength < encryptedPacket.length) {
       /* cut off the dummy bytes */
       byte[] tempPacket = encryptedPacket;
@@ -134,7 +134,7 @@ public class FirstMixCipher implements IMixCipher {
   public int getNextPacketEncryptionOverhead() {
     int overhead = 0;
     if (m_firstEncryptionPacket) {
-      overhead = m_channelSymCipher.getKey().length;
+      overhead = m_channelSymCipher.getKeys().length;
     }
     return overhead;
   }

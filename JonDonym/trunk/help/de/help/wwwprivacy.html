@@ -66,22 +66,31 @@ sich die Datensammler im Web bedienen, werden im Folgenden kurz vorgestellt.</p>
 
 <h3><a name="active" id="active">Aktive Webinhalte</a></h3>
 
-<p>Webseiteninhalte, die &uuml;ber die aktiven Browser-Plugins Flash, Java,
-ActiveX und Silverlight zug&auml;nglich sind, machen das Web dynamisch und bunt
-- aber auch gef&auml;hrlich. Denn Sie erlauben Webseiten, Code auf Ihrem
-Rechner auszuf&uuml;hren. Mithilfe einiger Tricks k&ouml;nnen diese dann auf
-Ihrem Rechner Dateien lesen und &auml;ndern und im Extremfall die
+<p>Webseiteninhalte, die &uuml;ber die <em>aktiven Browser-Plugins</em> Flash,
+Java, ActiveX und Silverlight zug&auml;nglich sind, machen das Web dynamisch
+und bunt - aber auch gef&auml;hrlich. Denn Sie erlauben Webseiten, Code auf
+Ihrem Rechner auszuf&uuml;hren. Wenn sie ausgef&uuml;hrt werden, k&ouml;nnen
+diese Plugin-Inhalte einige details Ihrer Rechenr- und Netzwerkkonfiguration
+auslesen und an den Webserver senden. Mithilfe einiger Tricks k&ouml;nnen diese
+sogar auf Ihrem Rechner Dateien lesen und &auml;ndern und im Extremfall die
 vollst&auml;ndige Kontrolle &uuml;ber diesen erhalten. Vorsicht ist vor allem
 vor signierten Java-Applets geboten: Wenn Sie deren Signatur akzeptieren, hat
 das Applet und damit auch der besuchte Web-Server automatisch alle
-Benutzerrechte auf Ihrem Rechner. Es hilft auch nichts, nur Webseiten zu
-besuchen, die als "vertrauensw&uuml;rdig" gelten. Dieses Konzept ist
-&uuml;berholt, da mittlerweile auch zahlreiche gro&szlig;e und bekannte
-Webseiten gehackt und mit Schadcode gef&uuml;llt werden. Die Browsersprache
-JavaScript ist gegen Angriffe auf Ihre Pivatsph&auml;re besser gesch&uuml;tzt
-als die genannten Plugins, aber nicht v&ouml;llig sicher. Wir empfehlen
-deshalb, JavaScript nur bei Bedarf in Ihrem Browser zu aktivieren, und
-ansonsten ausgeschaltet zu lassen. </p>
+Benutzerrechte auf Ihrem Rechner. Er kann also insbesondere Ihre <a
+href="#ip">IP-Adresse</a>, Ihre <a href="#mac">MAC-Adresse</a>, weitere Details
+Ihrer Rechner- und Netzwerkkonfiguration und sogar Festplatteninhalte auslesen.
+Es hilft auch nichts, nur Webseiten zu besuchen, die als
+"vertrauensw&uuml;rdig" gelten. Dieses Konzept ist &uuml;berholt, da
+mittlerweile auch zahlreiche gro&szlig;e und bekannte Webseiten gehackt und mit
+Schadcode gef&uuml;llt werden. Nur das Blockieren/Deaktivieren der
+Plugin-Inhalte bringt wirkliche Sicherheit.</p>
+
+<p>Die Browsersprache <em>JavaScript</em> ist gegen Angriffe auf Ihre
+Pivatsph&auml;re besser gesch&uuml;tzt als die genannten Plugins, aber nicht
+v&ouml;llig sicher. Wir empfehlen deshalb, JavaScript-Inhalte nur bei Bedarf in
+Ihrem Browser zu aktivieren und ansonsten zu blockieren. JavaScript ist nicht
+zu verwechseln mit <em>Java</em> bzw. dem <em>aktiven Java-Plugin</em> was
+trotz &auml;hnlichem Namen etwas v&ouml;llig anderes ist (siehe oben).</p>
 
 <p>Ohne einen gut abgesicherten Browser sollten Sie sich daher nicht im
 Internet bewegen, da Ihr Rechner ansonsten Gefahr l&auml;uft, angegriffen zu
@@ -126,7 +135,7 @@ Browser haben daf&uuml;r meist eine optionale Funktion integriert welche der
 Nutzer aber erst aktivieren muss. In <a href="jondofox.html">JonDoFox</a> ist
 dies bereits voreingestellt.</p>
 
-<h3>Browser-Header</h3>
+<h3><a name="header" id="header">Browser(HTTP)-Header</a></h3>
 
 <p>Bei jedem Aufruf einer Webseite senden Browser bestimmte Informationen im
 Rahmen des sogenannten HTTP-Protokolls die von der besuchten Seite ausgewertet
@@ -238,6 +247,29 @@ Browserkonfiguration, dem Abschalten von Cookies und automatischen
 Webbug-Filtern k&ouml;nnen Sie dies niemals zuverl&auml;ssig verhindern.
 Dagegen hilft nur die Verwendung eines Anonymisierungsdienstes wie <a
 href="jondonym.html">JonDonym</a>. </p>
+
+<h3><a name="mac" id="mac">MAC-Adresse</a></h3>
+
+<p>Die MAC-Adresse (MAC=Media-Access-Control, manchmal auch
+<em>Ethernet-ID</em>, <em>Airport-ID</em> oder <em>physikalische Adresse</em>
+genannt) ist die Hardware-Adresse jedes einzelnen Netzwerkger&auml;tes. Jeder
+Rechner kann &uuml;ber mehrere solcher physischer oder virtueller
+Netzwerkger&auml;te verf&uuml;gen (dabelgebunden, drahtlos, UMTS, VPN, ...).
+Die MAC-Adresse dient zur eindeutigen Identifizierung des jeweiligen
+Ger&auml;ts in einem lokalen Rechnernetz. Im Internet wird sie lediglich
+ben&ouml;tigt, damit Ihr Zugangsprovider Ihrem Rechner bzw. Router eine <a
+href="#ip">IP-Adresse</a> zuweisen kann. Sie ist nur f&uuml;r Ihren Provider
+sichtbar und wird bei der Kommunikation mit Internet-Servern weder
+ben&ouml;tigt noch &uuml;bermittelt.</p>
+
+<p>Sofern Sie ein Notebook benutzen und damit auf Reisen eine
+Internetverbindung aufbauen, kann der jeweils genutzte Provider (sofern er Sie
+nicht ohnehin an den Zugangsdaten erkennt) die MAC-Adresse benutzen, um Ihren
+aktuellen Standort zur&uuml;ckzuverfolgen und zu protokollieren. Wenn Sie sich
+davor sch&uuml;tzen m&ouml;chten, sollten Sie Ihre MAC-Adresse vor dem
+Anschluss an ein fremdes Rechnernetz immer wieder selbst &auml;ndern. <a
+href="http://de.wikipedia.org/wiki/MAC-Adresse#Abfrage_und_Setzen_einer_MAC-Adresse">Dies
+ist bei Windows, Linux und Mac OS X leicht m&ouml;glich</a>.</p>
 
 <h3><a name="ip" id="ip">IP-Adresse</a></h3>
 

@@ -12,9 +12,8 @@
 src="prev.gif" alt="&lt;-"> VPN services and Proxies</a></span> <span
 class="midlink"><a name="doctop" href="index.html#mi_toc">TOC </a><a
 href="index.html#mi_intro"><img src="next.gif" alt="-&gt;">
-Introduction</a></span> <span class="nextlink"><a
-href="firststeps.html">First steps <img src="next.gif"
-alt="-&gt;"></a></span> </p>
+Introduction</a></span> <span class="nextlink"><a href="firststeps.html">First
+steps <img src="next.gif" alt="-&gt;"></a></span> </p>
 <hr>
 
 <h2>JonDo's features</h2>
@@ -22,43 +21,42 @@ alt="-&gt;"></a></span> </p>
 <h3>JonDo - The Privacy Generator</h3>
 
 <p>The program JonDo (a branch of <a
-href="http://anon.inf.tu-dresden.de">JAP</a>) allows your browser to contact
+href="http://anon.inf.tu-dresden.de">JAP</a>) allows your browser to visit
 websites through an <a href="wwwprivacy.html#ip">IP address</a> within the <a
-href="jondonym.html">JonDonym</a> system. This means that neither the
-contacted server, nor any eavesdropper on your connections, nor the operators
-of the JonDonym service themselves can realize which websites you surf. The
-connection to <a href="jondonym.html#premiumservices">premium services</a>
-allow for an additional anonymization of the following applications besides
+href="jondonym.html">JonDonym</a> system. This means that neither the contacted
+server, nor any eavesdropper on your connections, nor the operators of the
+JonDonym service themselves can realize which websites you surf. The usage of
+<a href="jondonym.html#premiumservices">premium services</a> moreover allows
+for an additional anonymization of the following applications besides
 browsers:</p>
 <ul>
   <li>IRC Chat Clients (e.g. Chatzilla, integrated in <a
     href="jondofox.html">JonDoFox</a>).</li>
   <li>Messengers (e.g. <a href="http://pidgin.im/download/">Pidgin</a>,
-    recommend with the <a href="http://www.jabber.org/">Jabber</a> protocol
-    and the <a href="http://www.cypherpunks.ca/otr/#downloads">OTR
-    plugin</a>).</li>
-  <li>And basically all programs for which you can configure a HTTP proxy and
-    that do not give away your identity in their network protocols.</li>
+    recommend with the <a href="http://www.jabber.org/">Jabber</a> protocol and
+    the <a href="http://www.cypherpunks.ca/otr/#downloads">OTR plugin</a>).</li>
+  <li>And basically all programs for which you can configure a HTTP proxy.</li>
 </ul>
 
-<p>Email clients and VoIP are currently not supported. To send anonymous
-emails we recommend you dispense with email clients and resort to web based
-mail services over the browser. Almost all email providers offer such webmail
-access.</p>
+<p>Email clients and VoIP are not yet supported. To send anonymous emails we
+recommend you dispense with email clients and resort to web based mail services
+over the browser.</p>
 
-<h3>What JonDo is</h3>
+<h3>What is JonDo?</h3>
 <ul>
-  <li>JonDo is an application that spoofs your own IP for web access by
-    anonymized applications (e.g. by the web browser).</li>
+  <li>JonDo is an application that spoofs your own IP for internet access using
+    certain applications (e.g. by the web browser).</li>
   <li>JonDo is an <a
     href="forwarding_client.html">Anti-Censorship-Application</a> that allows
-    access to otherwise blocked Internet sites. "JonDonauts" may also
-    configure their JonDo as a <a href="forwarding_server.html">forwarding
-    server</a> in order to allow others access to the JonDonym service.</li>
-  <li>JonDo is open source and free, but it offers access to free and paid
-    (premium) services.</li>
-  <li>JonDo filters and anonymizes HTTP headers - but only for unencrypted
-    connections (not HTTPS).</li>
+    access to otherwise blocked Internet sites. Users may configure their JonDo
+    as a <a href="forwarding_server.html">forwarding server</a> in order to
+    allow others access to the JonDonym service.</li>
+  <li>JonDo is open source and free. The program offers access to both free and
+    paid (premium) services.</li>
+  <li>JonDo filters and anonymizes <a href="wwwprivacy.html#header">HTTP
+    headers</a> - but only for unencrypted connections (not HTTPS). You should
+    additionally use <a href="jondofox.html">JonDoFox</a> in order to also
+    filter encrypted connections.</li>
   <li>JonDo is available on all major systems (Windows, Mac OS X, Linux).</li>
   <li>JonDo was and is developed by the <a
     href="http://www.jondos.de/en">JonDos GmbH</a> in cooperation with German
@@ -69,42 +67,41 @@ access.</p>
     f&uuml;r Datenschutz Schleswig-Holstein</a>).</li>
 </ul>
 
-<h3>What JonDo is not</h3>
+<h3>What is not JonDo?</h3>
 <ul>
   <li>JonDo does NOT make your router's IP invisible. Your IP address is
     assigned to you by your ISP, and it is inalterable by third parties. You
-    need the IP for JonDo to successfully connect to anonymization services
-    on the Internet. When using JonDo, you are surfing with servers (mixes)
-    on the Internet that all have their own separate IP address. The websites
-    accessed by you will only see this respective outgoing address and not
-    yours.</li>
-  <li>JonDo does NOT regularly change the outgoing IP address, but retains
-    the same outgoing IP as long as it stays connected to the same mix
-    cascade. This could be minutes, hours or even days. The IPs of JonDonym
-    mixes are public anyways. Changing the outgoing IP would therefore not
-    achieve additional security.</li>
-  <li>JonDo does NOT hide the MAC address of your PC or router. The MAC
-    address is used by your ISP to assign you your IP address in the first
-    place, and it should not be visible on the Internet besides that
-  anyhow.</li>
+    need the IP so that the JonDo client may successfully connect to JonDonym
+    services on the Internet. When using JonDo, you are surfing with servers
+    (mixes) on the Internet that all have their own separate IP address. The
+    websites accessed by you will only see this respective outgoing address and
+    not yours.</li>
+  <li>JonDo does NOT regularly change the outgoing IP address, but retains the
+    same outgoing IP as long as it stays connected to the same mix cascade.
+    This could be minutes, hours or even days. The IPs of JonDonym mixes are
+    public anyways. Changing the outgoing IP would therefore not achieve
+    additional security.</li>
+  <li>JonDo does NOT hide the MAC address of your PC or router. The MAC address
+    is used by your ISP to assign you your IP address in the first place, and
+    it should not be visible on the Internet besides that anyhow.</li>
   <li>JonDo is NOT a filesharing anonymization tool. You may run certain P2P
     applications with JonDo, but you will not be able to upload data
   yourself.</li>
-  <li>JonDo can NOT anonymize emails (except web based email services). This
-    would require special data filtering in the email client.</li>
-  <li>JonDo does NOT transparently integrate with your operating system, i.e.
-    every application has to be <a href="browser.html">configured</a>
-    separately for it.</li>
+  <li>JonDo can NOT anonymize emails. This would require special, additional
+    data filtering in the email client itself.</li>
+  <li>JonDo does NOT integrate with your operating system, i.e. every
+    application has to be <a href="browser.html">configured</a> separately for
+    it.</li>
   <li>JonDo does NOT accelerate Internet access. When surfing with premium
-    services you probably won't notice any loss in speed though.</li>
-  <li>JonDo is NOT JonDonym. JonDonym summarizes all the accessible services
-    in JonDo in one term and describes the technology itself.</li>
+    services you probably won't notice any big loss in speed though.</li>
+  <li>JonDo is NOT JonDonym. JonDonym summarizes all the accessible services in
+    JonDo in one term and describes the technology itself.</li>
   <li>JonDo is NOT JonDos. JonDos is the company that develops most of
   JonDo.</li>
-  <li>JonDo can NOT use random "anonymous" proxies (e.g. those on lists of
-    open proxies) to create an anonymous connection. This would be a totally
-    <a href="otherServices.html#networkproxies">unsafe method</a> that does
-    not lead to actual anonymization.</li>
+  <li>JonDo can NOT use random "anonymous" proxies (e.g. those on lists of open
+    proxies) to create an anonymous connection. This would be a totally <a
+    href="otherServices.html#networkproxies">unsafe method</a> that does not
+    lead to anonymization.</li>
   <li>JonDo filters No plugins, scripts or HTTPS websites. To secure your
     browser as a whole you best use <a href="jondofox.html">JonDoFox.</a></li>
   <li>JonDo is NO One-Click-Anonymization-Tool - something like that can and
@@ -120,9 +117,8 @@ access.</p>
 src="prev.gif" alt="&lt;-"> VPN services and Proxies</a></span> <span
 class="midlink"><a name="doctop" href="index.html#mi_toc">TOC </a><a
 href="index.html#mi_intro"><img src="next.gif" alt="-&gt;">
-Introduction</a></span> <span class="nextlink"><a
-href="firststeps.html">First steps <img src="next.gif"
-alt="-&gt;"></a></span> </p>
+Introduction</a></span> <span class="nextlink"><a href="firststeps.html">First
+steps <img src="next.gif" alt="-&gt;"></a></span> </p>
 <!--#include virtual="/footer_en.html"-->
 </body>
 </html>
