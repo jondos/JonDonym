@@ -2868,10 +2868,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_progressDistribution.setValue(currentMixCascade.getDistribution());
 			
 			String strSystrayTooltip = "JonDo";
+			/*
 			if (m_Controller.isAnonConnected())
 			{
 				strSystrayTooltip += " (" + JAPMessages.getString(MSG_CONNECTED) + ")";
-			}
+			}*/
 			strSystrayTooltip += "\n" + GUIUtils.trim(currentMixCascade.getName(), 25);
 
 			if (currentStatus.getNrOfActiveUsers() > -1)
@@ -2898,7 +2899,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				//m_bShowConnecting = false;
 				if (currentStatus.getNrOfActiveUsers() > -1)
 				{
-					strSystrayTooltip += "\n" + JAPMessages.getString(JAPViewIconified.MSG_ANON) + ": ";
+					strSystrayTooltip += "\n" + JAPMessages.getString(SystrayPopupMenu.MSG_ANONYMITY) + ": ";
 					strSystrayTooltip += currentMixCascade.getDistribution() + "," + currentStatus.getAnonLevel() + " / 6,6";
 					
 					//userProgressBar.setString(String.valueOf(currentStatus.getNrOfActiveUsers()));
@@ -2906,8 +2907,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					{
 						if (m_bIsIconified)
 						{
-							setTitle("JAP (" + Integer.toString(currentStatus.getNrOfActiveUsers()) + " " +
-									 JAPMessages.getString("iconifiedviewUsers") + ")");
+							setTitle("JAP (" + JAPMessages.getString(SystrayPopupMenu.MSG_ANONYMITY) + ": " +
+									currentMixCascade.getDistribution() + "," + currentStatus.getAnonLevel() + " / 6,6" + ")");
 						}
 						else
 						{

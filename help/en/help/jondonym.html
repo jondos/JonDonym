@@ -19,108 +19,114 @@ alt="-&gt;"></a></span> </p>
 
 <h2>JonDonym, AN.ON and Tor</h2>
 
-<p>The anonymization service JonDonym is a branch of the <a
+<p>The anonymization service JonDonym is a development branch of the <a
 href="http://anon.inf.tu-dresden.de">AN.ON Project</a>. It consists of multiple
-user selectable mix cascades. A cascade consists of three mix servers operated
-by independent and non interrelated organizations or private individuals who
-all <a href="certificates.html">publish their identity</a>. The operators have
-to abide by strict provisions which prohibit saving connection data or
-exchanging such data with other operators in a cascade. Every connection from a
-user is re-encrypted by every mix server within a cascade and transferred
-through the cascade to the target, e.g. a website. The aim of <em>multiple
-encryption, distribution and processing</em> is to make sure no mix operator
-can by himself alone expose the user, and that eavesdropping on the connection
-produces zero useful content. Also, since a lot of users surf the anonymization
-service simultaneously, and thus share the same <a href="wwwprivacy.html#ip">IP
-address</a>, all connections of every user are concealed amidst each other: any
-user could have been the source of a certain connection. <em></em></p>
+user selectable mix cascades. A cascade consists of two or three mix servers
+operated by independent and non interrelated organizations or private
+individuals who all <a href="certificates.html">publish their identity</a>. The
+operators have to abide by strict provisions which prohibit saving connection
+data or exchanging such data with other operators in a cascade. Every
+connection from a user is differently encrypted for every mix server within a
+cascade and transferred through the cascade to the target, e.g. a website. The
+aim of <em>multiple encryption, distribution and processing</em> is to make
+sure no mix operator can by himself alone expose the user, and that
+eavesdropping on the connection produces zero useful content. Also, since a lot
+of users surf the anonymization service simultaneously, and thus share the same
+<a href="wwwprivacy.html#ip">IP address</a>, all connections of every user are
+concealed amidst each other: a correlation is not possible any more.
+<em></em></p>
 
-<p><strong>This procedure thereby prevents others, except for the user himself,
-from discovering which user has initiated a certain connection or what
-connections a certain user has made. The specific characteristic of this system
-is that it does not only protect against observation by external parties /
-outsiders (Internet provider, WLAN sniffers, websites), but also against the
-anonymity service providers themselves (mix operators, billing
-providers).</strong></p>
+<p><strong>JonDonym thereby prevents that others, except for the user himself,
+may discover which internet connections he initiates . The specific
+characteristic of this procedure is that it does not only protect against
+observation by external parties / outsiders (access provider, WLAN sniffers,
+websites), but also against the different JonDonym providers themselves (mix
+operators, billing providers). The technology is based on a principle of
+multiple encryption, distribution and processing.</strong></p>
 
-<p>JonDonym has some very specific advantages to other anonymization
-services:</p>
+<p>JonDonym has many advantages to other anonymization services:</p>
 <ul>
   <li><b>Strong encryption and authentication:</b> Nobody can read the traffic
     between your PC and the JonDonym service. (Encrypted with RSA 1024 and AES
     128; signed with DSA, RSA or ECDSA; realized with the BouncyCastle and
     OpenSSL libraries)</li>
   <li><b>Protection from the mix operator:</b> Unless all mix operators in a
-    JonDonym cascade are forced separately to monitor you, your internet
-    connections are safe. The mix operators are revaluated regularly concerning
-    seriosity and professionalism. Their identity is made public also. Even in
-    the highly improbable case that they all are forced to unmask a certain
-    connection, this function would have to be compiled into each server
-    software first.</li>
-  <li><b>No logfiles:</b> Saving any logfiles with IP addresses, even for
-    seconds, is forbidden to the mix operators by contract. The same holds true
-    for the actual contents of the data. Exceptions caused by national laws are
-    marked clearly.</li>
-  <li><b>Transparent functionality:</b> Informative GUI, published concepts,
-    open/OSI compliant sourcecode of all software components.</li>
+    JonDonym cascade are separately forced by a court order, blackmail or a
+    hacker attack to monitor you, your JonDonym connections are safe. The mix
+    operators are revaluated regularly concerning seriosity and
+    professionalism. Their identity is made public also. Even in the highly
+    improbable case that they all are forced to unmask a certain connection,
+    this function would have to be compiled into each server software
+  first.</li>
+  <li><b>No logfiles:</b> Saving any logfiles with IP addresses is forbidden to
+    the mix operators by contract. The same holds true for the actual contents
+    of the data. Exceptions caused by national prescriptions are marked and
+    described clearly.</li>
+  <li><b>Transparent functionality:</b>The program user interface has an
+    informative design. The source codes of all program components are
+    published according to an <a href="http://www.jondos.de/en/licence">OSI
+    compliant licence</a>.</li>
   <li><b>No software backdoor:</b> There is no possibility to inspect single
     connections in the <a href="about.html">JonDo</a> client. The software runs
     completely on your PC and can not be manipulated without your approval. No
     identity, serial number or account number is transmitted during update to
-    exclude any directed update manipulations by the developer himself. Updates
-    may be done entirely through an anonymized connection.</li>
-  <li><b>Secure browser profile:</b> With <a href="jondofox.html">JonDoFox</a>
-    you are given a Firefox profile for free which has been especially
-    developed for anonymous and secure surfing with JonDonym.</li>
+    impede any directed update manipulations by hackers or the developers
+    themselves. Updates may be done entirely through an anonymized
+  connection.</li>
+  <li><b>Secure browser profile:</b> With the <a
+    href="jondofox.html">JonDoFox</a> you are given a Firefox profile for free
+    which has been especially developed for anonymous and secure surfing with
+    JonDonym.</li>
   <li><b>Portable anonymity:</b> <a href="../../de/help/about.html">JonDo</a>
-    runs without installation on the PC directly from a portable USB stick
+    also runs without installation on the PC directly from a portable USB stick
     (Windows / Mac OS X).</li>
   <li><b>Easy combination with other products:</b> You may easily combine JonDo
     with other anonymization products, for example with Tor or <a
     href="otherServices.html">VPN services</a>.</li>
   <li><b>Evolution by research:</b> Scientific work conducted at the Technical
     University of Dresden (AN.ON), the University of Regensburg (AN.ON) and at
-    the JonDos GmbH (JonDonym) enhances and improves the system.</li>
-  <li><b>Competent, fast and at no charge:</b> Detailed help, monitored user
-    forum, email support.</li>
+    the JonDos GmbH (JonDonym) enhances and constantly improves the system.</li>
+  <li><b>Competent, fast and at no charge:</b> Very comprehensive help texts
+    describe the application and its context detailed and understandably.
+    Moreover, an administered user forum and e-mail support may be used for
+    free.</li>
 </ul>
 
-<p>A comparable standard of anonymization can only be offered by the
-non-commercial system <a href="http://tor.eff.org/">Tor</a>, which we recommend
-to advanced Internet users in addition to JonDonym. Internet beginners and
-computer novices should be careful with Tor: there is no control over who runs
-the servers in this service over which your data travels. In the past, there
-has been ongoing suspicion that criminals and intelligence agencies exploit the
-Tor network in order to secretly attain unencrypted information like passwords,
-bank accounts and credit cards. Certain tricks can enable the Tor server to
-concentrate much of the traffic on itself, making the exploit even more
-effective. Tor may be set as <a href="net.html">proxy in JonDo</a> though,
-making surfing slower but, in some cases, even more secure than with JonDonym
-alone because the last servers in this chain will be part of the verified
-JonDonym network.</p>
+<p>A similar anonymization can only be offered by the non-commercial system <a
+href="http://tor.eff.org/">Tor</a>. Internet beginners should be careful with
+Tor, though: there is no control over who runs the servers in this service over
+which your data travels. In the past, there has been ongoing suspicion that
+criminals and intelligence agencies exploit the Tor network in order to
+secretly attain unencrypted information like passwords, bank accounts and
+credit cards. Certain tricks can enable the Tor server to concentrate much of
+the traffic on itself, making the exploit even more effective. Tor may be set
+as <a href="net.html">proxy in JonDo</a> though, making surfing considerably
+slower but, in some individual cases, even more secure than with JonDonym alone
+because the last servers in this chain will be part of the verified JonDonym
+network.</p>
 
-<p>But as a matter of fact, every last mix server in a JonDonym cascade could
-record data which is not separately secured by HTTPS/SSL. Unlike Tor and other
-services, in JonDonym only seriosity certified and publicized persons and
-organizations may operate a mix server. The user may then decide for himself on
-whether he trusts the operator or not. All this makes it highly improbable for
-criminal operators to infiltrate JonDonym and go about unpunished.</p>
+<p>Also the respective last mix server in a JonDonym cascade could record data
+which is not separately secured by HTTPS/SSL. Unlike Tor and other services,
+however, in JonDonym only certified and publicized persons and organizations
+may operate a mix server. The user may then decide for himself on whether he
+trusts the operator or not. If needed, they may simply choose other operators.
+All this makes it highly improbable for criminal operators to infiltrate
+JonDonym.</p>
 
 <h3><a name="premium" id="premium">Premium services</a></h3>
 
 <p>With JonDonym you can choose between free services and the chargeable
-premium services. To pay for premium services you need an account. <b>By this
-voluntary prepaid payment for premium services you support the continuation of
-the JonDonym system and the improvement of the JonDo software</b>. Using
-premium services offers these additional advantages to the basic features of
-JonDo:</p>
+premium services. For premium services, you need a billing account with costs.
+<b>This capital is used for extension and maintenance of the JonDonym system
+and for improving the JonDo software</b>. Using premium services offers a lot
+of additional advantages to the basic features of JonDo:</p>
 <ul>
   <li><b>Guaranteed access</b>: A connection to at least one of the premium
     services is guaranteed for a minimum of 90% of the annual average.</li>
   <li><b>Guaranteed performance:</b> Within the framework of the above
     guaranteed access, at least one service with a speed of at least 100 kbit/s
     and latencies of 4 seconds maximum will be available during 90% of the
-    daily average. Free services, also Tor, are usually much slower.</li>
+    daily average (Free services, also Tor, are usually much slower).</li>
   <li><b>Legal certainty:</b> Development, support and billing addresses are
     all located in Germany and not at some anonymous offshore company without a
     summonable address. Germany sets worldwide standards in customer
@@ -129,7 +135,7 @@ JonDo:</p>
     independently run by three different organizations or individuals.</li>
   <li><b>Guaranteed internationality:</b> Mixes and operators of a premium
     cascade are spread over at least two countries. This ensures that no large
-    network node (CIX) can monitor all data traffic. And it cripples every
+    network node (CIX) can monitor all data traffic. Besides, it cripples every
     national data retention since a situation where all mixes in a cascade do
     log never occurs.</li>
   <li><b>Guaranteed connection:</b> The mix operators generally do not block
@@ -137,35 +143,28 @@ JonDo:</p>
 </ul>
 
 <p>Excluded from these guarantees are software errors that are discharged from
-liability in the <a href="https://www.jondos.de/de/termsAndConditions">General
-Terms and Conditions</a> of the billing provider and software maintainer
-JonDos. Further possible exclusions concerning the performance of a single
-service may be found in the GTCTs of the respective mix operators.</p>
+liability in the <a href="credits.html">licence</a> and <a
+href="https://www.jondos.de/de/termsAndConditions">General Terms and
+Conditions</a> of the software maintainers. Further possible exclusions
+concerning the performance of a single service may be found in the GTCTs of the
+respective mix operators.</p>
 
 <p>If you would like to use premium services, create a <a
 href="payment.html">disposable account</a> and activate it by an anonymous or
 non anonymous <a href="https://www.jondos.de/en/payment">payment of your
 choice</a>. After that you will have a certain amount of data volume at your
 disposal, <a href="https://www.jondos.de/en/payment">depending on your chosen
-rate,</a> to pay for premium services. Once it is depleted, you can create and
-activate another disposable account any time.</p>
+rate,</a> to pay for premium services. Once it is depleted and you would like
+to use the JonDonym services any further, you can create and activate another
+disposable account any time.</p>
 
 <p>Advice on protection of personal information: for accurate clearing of data
 volumes with the mix operators it is saved how much volume an account has used
-cumulatively on a mix cascade. The statistical evaluation of the data volume
-transferred per account is done with daily accuracy. An allocation of accounts
-to user identities is not saved. It is technically impossible to recognize
-requested websites by the deducted data volumes alone, even when monitoring
-accurately to the second or at maximum accuracy.</p>
-
-<p><strong>Notice: The premium services are not available in all versions of
-the program. You can download compatible software at the <a
-href="https://www.jondos.de/">JonDos website</a>. If you are a Java programmer,
-you may moreover compile and modify the software, and specifically activate
-those features which are useful for you (<a
-href="https://svn.jondos.de/">SVN-Repository</a> or <a
-href="http://anon.inf.tu-dresden.de/develop/sources_en.html">CVS-Repository</a>,
-<a href="http://www.jondos.de/en/licence">open source licence</a>).</strong></p>
+cumulatively on a mix cascade. Moreover, a statistical evaluation of the data
+volume transferred per account is done with daily accuracy. An allocation of
+accounts to user identities is not saved. It is technically impossible to
+recognize requested websites by the deducted data volumes alone, even when
+monitoring accurately to the second or at maximum accuracy.</p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="wwwprivacy.html"><img
