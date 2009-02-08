@@ -969,6 +969,26 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		return (Vector)ms_trustModels.clone();
 	}
 
+	public static void forceFreeTrustModel()
+	{
+		synchronized (ms_trustModels)
+		{
+			for (int i = 0; i < ms_trustModels.size(); i++)
+			{
+				if (ms_trustModels.elementAt(i) == CONTEXT_MODEL_BUSINESS)
+				{
+					setCurrentTrustModel(CONTEXT_MODEL_BUSINESS);
+					break;
+				}
+				if (ms_trustModels.elementAt(i) == CONTEXT_MODEL_FREE)
+				{
+					setCurrentTrustModel(CONTEXT_MODEL_FREE);
+					break;
+				}
+			}
+		}
+	}
+	
 	public static void setCurrentTrustModel(long a_id)
 	{
 		if (a_id < 0)
