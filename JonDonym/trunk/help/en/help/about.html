@@ -44,8 +44,9 @@ over the browser.</p>
 
 <h3>What is JonDo?</h3>
 <ul>
-  <li>JonDo is an application that spoofs your own IP for internet access using
-    certain applications (e.g. by the web browser).</li>
+  <li>JonDo is an application that spoofs your own <a
+    href="wwwprivacy.html#ip">IP address</a> for internet access using certain
+    applications (e.g. by the web browser).</li>
   <li>JonDo multiply encrypts the data sent over JonDonym. Neither your access
     provider nor JonDonym operators (except for the last one in each <a
     href="jondonym.html">cascade</a>) can see your plaintext data.</li>
@@ -72,21 +73,22 @@ over the browser.</p>
 
 <h3>What is not JonDo?</h3>
 <ul>
-  <li>JonDo does NOT make your router's IP invisible. Your IP address is
-    assigned to you by your ISP, and it is inalterable by third parties. You
-    need the IP so that the JonDo client may successfully connect to JonDonym
-    services on the Internet. When using JonDo, you are surfing with servers
-    (mixes) on the Internet that all have their own separate IP address. The
-    websites accessed by you will only see this respective outgoing address and
-    not yours.</li>
+  <li>JonDo does NOT make your PC or router's <a href="wwwprivacy.html#ip">IP
+    address</a> invisible. Your IP address is assigned to you by your ISP, and
+    it is inalterable by third parties. You need the IP so that the JonDo
+    client may successfully connect to JonDonym services on the Internet. When
+    using JonDo, you are surfing with servers (mixes) on the Internet that all
+    have their own separate IP address. The websites accessed by you will only
+    see this respective outgoing address and not yours.</li>
   <li>JonDo does NOT regularly change the outgoing IP address, but retains the
     same outgoing IP as long as it stays connected to the same mix cascade.
     This could be minutes, hours or even days. The IPs of JonDonym mixes are
     public anyways. Changing the outgoing IP would therefore not achieve
     additional security.</li>
-  <li>JonDo does NOT hide the MAC address of your PC or router. The MAC address
-    is used by your ISP to assign you your IP address in the first place, and
-    it should not be visible on the Internet besides that anyhow.</li>
+  <li>JonDo does NOT hide the <a href="wwwprivacy.html#mac">MAC address</a> of
+    your PC or router. The MAC address is used by your ISP to assign you your
+    IP address in the first place, and it is not visible on the Internet
+    besides that anyhow.</li>
   <li>JonDo is NOT a filesharing anonymization tool. You may run certain P2P
     applications with JonDo, but you will not be able to upload data
   yourself.</li>
@@ -105,7 +107,7 @@ over the browser.</p>
     proxies) to create an anonymous connection. This would be a totally <a
     href="otherServices.html#networkproxies">unsafe method</a> that does not
     lead to anonymization.</li>
-  <li>JonDo filters No plugins, scripts or HTTPS websites. To secure your
+  <li>JonDo does NOT filter plugins, scripts or HTTPS websites. To secure your
     browser as a whole you best use <a href="jondofox.html">JonDoFox.</a></li>
   <li>JonDo is NO One-Click-Anonymization-Tool - something like that can and
     will not really ever exist! Prudence is and remains maxim for Internet

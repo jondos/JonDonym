@@ -80,7 +80,7 @@ public class SystrayPopupMenu extends PopupMenu
 	private static final String MSG_USER_NUMBER = SystrayPopupMenu.class.getName() + "_userNumber";
 	private static final String MSG_SHOW_DETAILS = SystrayPopupMenu.class.getName() + "_showDetails";
 	private static final String MSG_OPEN_BROWSER = SystrayPopupMenu.class.getName() + "_openBrowser";
-	private static final String MSG_ANONYMITY = SystrayPopupMenu.class.getName() + "_anonymity";
+	public static final String MSG_ANONYMITY = SystrayPopupMenu.class.getName() + "_anonymity";
 
 
 	private MainWindowListener m_mainWindowListener;
@@ -110,7 +110,8 @@ public class SystrayPopupMenu extends PopupMenu
 			(info == null || info.getAnonLevel() < StatusInfo.ANON_LEVEL_MIN ? "?" : "" + info.getAnonLevel()) + 
 			" / " + MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX;
 
-			connected = JAPMessages.getString(MSG_CONNECTED);
+			connected = users;//JAPMessages.getString(MSG_CONNECTED);
+			users = "";
 		}
 		else
 		{
