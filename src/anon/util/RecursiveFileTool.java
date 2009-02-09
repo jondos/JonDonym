@@ -214,6 +214,26 @@ public class RecursiveFileTool {
 		}
 	}
 	
+	public static boolean equals(File a_oneFile, byte[] a_md5HashSecond, long a_sizeSecond) 
+	{
+		try 
+		{
+			if (Util.arraysEqual(createMD5Digest(a_oneFile), a_md5HashSecond))
+			{
+				return true;
+			}
+		}
+		catch (Exception a_e) 
+		{
+			if (a_oneFile.length() == a_sizeSecond)
+			{
+				return true;
+			}
+		} 
+		
+		return false;
+	}
+	
 	/**
 	 * Compares two files. May optionally do a comparison of MD5 hashes if speed does not matter.
 	 * @param a_oneFile
@@ -251,7 +271,11 @@ public class RecursiveFileTool {
 		catch (Exception a_e)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
-			return false;
+			if (a_oneFile.length() == a_otherFile.length())
+			{
+				// maybe we succeeded, but we cannot be sure...
+				return true;
+			}
 		}
 		
 		return true;
