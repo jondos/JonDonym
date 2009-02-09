@@ -109,14 +109,14 @@ public final class Util
 		}
 
 		if (arrayOne == null || arrayTwo == null)
-			{
+		{
 			return false;
-			}
+		}
 
 		if (arrayOne.length != arrayTwo.length)
-			{
+		{
 				return false;
-			}
+		}
 
 		for (int i = 0; i < arrayOne.length; i++)
 		{

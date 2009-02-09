@@ -209,11 +209,25 @@ public class WindowsOS extends AbstractOS
 			args[0] = a_sourceFile;
 			args[1] = a_targetDirectory;
 			args[2] = Boolean.TRUE;
-			
+						
+			File fileToCopy = new File(a_targetDirectory.getPath() + File.separator + a_sourceFile.getName());
+			byte[] md5OldFile;
+			long sizeSource = RecursiveFileTool.getFileSize(a_sourceFile);
+			long sizeOldFile = fileToCopy.length();
+			try
+			{
+				md5OldFile = RecursiveFileTool.createMD5Digest(fileToCopy);
+			}
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+				md5OldFile = null;
+			}
+		
 			boolean ret = ((Boolean) methodXcopy.invoke(null, args)).booleanValue();
 			boolean bChanceToRetry = false;
 			long lastSize, currentSize;
-			File fileToCopy = new File(a_targetDirectory.getPath() + File.separator + a_sourceFile.getName());
+			
 			
 			//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Started copy: " + fileToCopy.getAbsolutePath() + " Exists: " + fileToCopy.exists());
 			
@@ -223,6 +237,7 @@ public class WindowsOS extends AbstractOS
 				{
 					return copyAsRoot(a_sourceFile, a_targetDirectory, a_checkRetry);
 				}
+				LogHolder.log(LogLevel.ERR, LogType.MISC, "Root copy failed!");
 				
 				return false;
 			}
@@ -235,13 +250,23 @@ public class WindowsOS extends AbstractOS
 			
 			//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Waiting for copy...");
 			
-			lastSize = -1;
+			lastSize = -1 * a_checkRetry.getMaxProgressSteps();
+			currentSize = lastSize;
 			while (a_checkRetry.incrementProgress())
 			{
 				try
 				{
-					currentSize = RecursiveFileTool.getFileSize(fileToCopy);
-					if (currentSize == RecursiveFileTool.getFileSize(a_sourceFile))
+					
+					if (currentSize > 0 || !RecursiveFileTool.equals(fileToCopy, md5OldFile, sizeOldFile))
+					{
+						currentSize = RecursiveFileTool.getFileSize(fileToCopy);
+					}
+					else
+					{
+						currentSize++;
+					}
+				
+					if (currentSize == sizeSource)
 					{
 						if (RecursiveFileTool.equals(fileToCopy, a_sourceFile, true))
 						{
@@ -252,18 +277,19 @@ public class WindowsOS extends AbstractOS
 						else
 						{//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "failed compare");
 							// Copying failed!
+							LogHolder.log(LogLevel.ERR, LogType.MISC, "Root copy failed!");
 							bChanceToRetry = true;
 							break;
 						}
 					}
 					else if (((a_checkRetry.getCurrentStep() > 1 || a_checkRetry.getMaxProgressSteps() == 1) &&
-							 currentSize <= lastSize) || // file size did not change since last run
-							 currentSize >  RecursiveFileTool.getFileSize(a_sourceFile))
+							 currentSize <= lastSize)) // file size did not change since last run)
 					{//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "failed size; Current: " + currentSize + " Last: " + lastSize + " Source: " + RecursiveFileTool.getFileSize(a_sourceFile) + " Step: " + a_checkRetry.getCurrentStep());
 						// invalid file size state; copying seems to have failed
+						LogHolder.log(LogLevel.ERR, LogType.MISC, "Root copy failed!");
 						bChanceToRetry = true;
 						break;
-					}				
+					}		
 					lastSize = currentSize; // check if file size has changed in next loop
 				}
 				catch (SecurityException a_e)
