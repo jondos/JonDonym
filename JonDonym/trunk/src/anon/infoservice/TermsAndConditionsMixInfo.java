@@ -30,6 +30,7 @@ package anon.infoservice;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Locale;
 
 import org.w3c.dom.Node;
 
@@ -94,14 +95,34 @@ public class TermsAndConditionsMixInfo
 		return id;
 	}
 	
+	public String getDate() 
+	{
+		return date;
+	}
+	
+	public String getTemplateRefId(Locale locale)
+	{
+		return getTemplateRefId(locale.getLanguage());
+	}
+	
 	public String getTemplateRefId(String langCode)
 	{
 		return (String) templates.get(langCode.trim().toLowerCase());
 	}
 	
+	public String getDefaultTemplateRefId()
+	{
+		return (String) templates.get(getDefaultLanguage());
+	}
+	
 	public boolean hasTranslation(String langCode)
 	{
 		return templates.get(langCode.trim().toLowerCase()) != null;
+	}
+	
+	public boolean hasTranslation(Locale locale)
+	{
+		return hasTranslation(locale.getLanguage());
 	}
 	
 	public String getDefaultLanguage()

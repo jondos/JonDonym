@@ -511,14 +511,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					{
 						result = currentInfoService.getTCFramework((String) (arguments.elementAt(0)));
 					}
-					else if (functionNumber == GET_TCS)
+					/*else if (functionNumber == GET_TCS)
 					{
 						tempHashtable = currentInfoService.getTermsAndConditions();
 					}
 					else if (functionNumber == GET_TC_SERIALS)
 					{
 						tempHashtable = currentInfoService.getTermsAndConditionSerials();
-					}
+					}*/
 					else if (functionNumber == GET_PERFORMANCE_INFO)
 					{
 						AbstractDatabaseEntry dbEntry = currentInfoService.getPerformanceInfo();

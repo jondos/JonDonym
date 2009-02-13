@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Vector;
+
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
@@ -25,6 +28,7 @@ import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.infoservice.TermsAndConditions.Translation;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.Util;
@@ -160,14 +164,15 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}
 	
-	public void importData(TermsAndConditions a_data)
+	public void importData(Translation tcTranslation)
 	{
-		Document doc = a_data.getDocument();
 		
+		//Document doc = a_data.getDocument();
 		try
 		{
 			// find the ServiceOperator object to our T&C
-			ServiceOperator op = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(Util.colonizeSKI(a_data.getSKI()));
+			ServiceOperator op = (ServiceOperator) 
+				Database.getInstance(ServiceOperator.class).getEntryById(tcTranslation.getId());
 			
 			if(op == null)
 			{
@@ -175,56 +180,69 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			}
 			
 			// create the operator node
-			Element operator = doc.createElement(XML_ELEMENT_OPERATOR);
+			Element operator = (Element) XMLUtil.getFirstChildByName(tcTranslation.getTranslationElement(), XML_ELEMENT_OPERATOR);
+			if(operator == null)
+			{
+				throw new XMLParseException("Operator must not be null. Mix violates T&C protocol.");
+			}
 			
+			/*Element elemOpName = m_docWorkingCopy.createElement(XML_ELEMENT_OPERATOR_NAME);
+			Element elemOpEmail = m_docWorkingCopy.createElement(XML_ELEMENT_OPERATOR_EMAIL);
+			elemOpName.setNodeValue(op.getOrganization());
+			elemOpEmail.setNodeValue(op.getEMail());
+			
+			replaceNode(elemOpName, XML_ELEMENT_OPERATOR_NAME);
+			replaceNode(elemOpEmail, XML_ELEMENT_OPERATOR_EMAIL);*/
+			
+			//TODO: perhaps move somewhere else
 			XMLUtil.createChildElementWithValue(operator, XML_ELEMENT_OPERATOR_NAME, op.getOrganization());
 			XMLUtil.createChildElementWithValue(operator, XML_ELEMENT_OPERATOR_EMAIL, op.getEMail());
 			
 			// get country from country code
 			Locale loc = new Locale(op.getCountryCode(), op.getCountryCode());
-			Locale tcLoc = new Locale(a_data.getLocale(), "", "");
+			Locale tcLoc = new Locale(tcTranslation.getLocale(), "", "");
 			
-			Element country = doc.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
+			Element country = m_docWorkingCopy.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
 			XMLUtil.setValue(country, loc.getDisplayCountry(tcLoc));
-			operator.appendChild(country);
+			//operator.appendChild(country);
 			
-			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_STREET);
-			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_POSTAL_CODE);
-			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_CITY);
-			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_VAT);
-			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_FAX);
-			appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_EMAIL);
+			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_STREET);
+			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_POSTAL_CODE);
+			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_CITY);
+			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_VAT);
+			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_FAX);
+			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_EMAIL);
 			
 			replaceNode(operator, XML_ELEMENT_OPERATOR);
 			replaceNode(country, XML_ELEMENT_OPERATOR_COUNTRY);
 			
 			// replace PrivacyPolicyUrl
-			replaceNodeFromTC(a_data, XML_ELEMENT_PRIVACY_POLICY_URL);
+			replaceNodeFromTC(tcTranslation, XML_ELEMENT_PRIVACY_POLICY_URL);
 			
 			// replace LegalOpinionsUrl
-			replaceNodeFromTC(a_data, XML_ELEMENT_LEGAL_OPINIONS_URL);
+			replaceNodeFromTC(tcTranslation, XML_ELEMENT_LEGAL_OPINIONS_URL);
 			
 			// replace OperationalAgreementUrl
-			replaceNodeFromTC(a_data, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
+			replaceNodeFromTC(tcTranslation, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
 			
 			// replace Location
-			replaceNodeFromTC(a_data, XML_ELEMENT_OPERATOR_CITY);
+			replaceNodeFromTC(tcTranslation, XML_ELEMENT_OPERATOR_CITY);
 			
 			// replace Venue
-			replaceNodeFromTC(a_data, XML_ELEMENT_VENUE);
+			replaceNodeFromTC(tcTranslation, XML_ELEMENT_VENUE);
 			
 			// ExtendedOperatorCountry
-			replaceNodeFromTC(a_data, "ExtendedOperatorCountry");
+			replaceNodeFromTC(tcTranslation, "ExtendedOperatorCountry");
 			
-			Element date = doc.createElement("Date");
+			Element date = m_docWorkingCopy.createElement("Date");
 			DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, tcLoc);
-			XMLUtil.setValue(date, df.format(a_data.getDate()));
+			XMLUtil.setValue(date, df.format(tcTranslation.getDate()));
 			
 			// replace Date
 			replaceNode(date, "Date");
 			
 			// loop through all Paragraph nodes in our import document
-			NodeList paragraphs = doc.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
+			NodeList paragraphs = tcTranslation.getTranslationElement().getElementsByTagName(XML_ELEMENT_PARAGRAPH);
 			for(int i = 0; i < paragraphs.getLength(); i++)
 			{
 				Node importParagraph = XMLUtil.importNode(m_docWorkingCopy, paragraphs.item(i), true);
@@ -267,36 +285,36 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}
 
-	private void appendChildNodeFromTC(TermsAndConditions a_tc, Element a_elem, String a_nodeName) 
+	/*private void appendChildNodeFromTC(TermsAndConditions a_tc, Element a_elem, String a_nodeName) 
 	{
 		Node node = importNodeFromTC(a_tc, a_nodeName);
 		if(node != null)
 		{
 			a_elem.appendChild(node);
 		}
-	}
+	}*/
 	
-	private void replaceNodeFromTC(TermsAndConditions a_tc, String a_nodeName) throws XMLParseException
+	private void replaceNodeFromTC(Translation tcTranslation, String a_nodeName) throws XMLParseException
 	{
-		Node node = importNodeFromTC(a_tc, a_nodeName);
+		Node node = importNodeFromTC(tcTranslation, a_nodeName);
 		if(node != null)
 		{
 			replaceNode(node, a_nodeName);
 		}
 	}
 	
-	private Node importNodeFromTC(TermsAndConditions a_tc, String a_nodeName)
+	private Node importNodeFromTC(Translation tcTranslation, String a_nodeName)
 	{
 		// look for node
-		Node node = XMLUtil.getFirstChildByName(a_tc.getDocument().getDocumentElement(), a_nodeName);
+		Node node = XMLUtil.getFirstChildByNameUsingDeepSearch(tcTranslation.getTranslationElement(), a_nodeName);
 		if(node != null)
 		{
 			return node;
 		}
-		else if(!a_tc.getLocale().equals("en"))
+		/*else if(!tcTranslation.getLocale().equals("en"))
 		{
 			// look in the English version of this T&C
-			TermsAndConditions tcDefault = TermsAndConditions.getById(a_tc.getSKI(), Locale.ENGLISH);
+			TermsAndConditions tcDefault = TermsAndConditions.getById(tcTranslation.getSKI(), Locale.ENGLISH);
 			
 			if(tcDefault != null)
 			{
@@ -305,7 +323,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 				{
 					try
 					{
-						return XMLUtil.importNode(a_tc.getDocument(), node, true);
+						return XMLUtil.importNode(tcTranslation.getDocument(), node, true);
 					}
 					catch (XMLParseException a_e)
 					{
@@ -314,7 +332,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 					}
 				}
 			}
-		}
+		}*/
 		
 		return null;
 	}
@@ -371,9 +389,12 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			}
 		}
 		
-		// import it in to our document
-		node = XMLUtil.importNode(m_docWorkingCopy, node, true);
-		
+		// import it in to our document only if it is not already the owner
+		Document srcOwnerDoc = node.getOwnerDocument();
+		if((srcOwnerDoc == null) || !m_docWorkingCopy.equals(srcOwnerDoc) )
+		{
+			node = XMLUtil.importNode(m_docWorkingCopy, node, true);
+		}
 		// replace all nodes in the original document with it
 		NodeList list = m_docWorkingCopy.getElementsByTagName(a_elementToReplace);
 		for(int i = 0; i < list.getLength(); i++)

@@ -261,23 +261,12 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 	  }
 	  if ( prepaidBytes > 0 )	 
 	  {
-		 /*if(m_bPrepaidReceived && revertPrevious)
-		 {
-			 System.out.println("Overwrite old Prepaidbytes: old: "+m_prepaidBytes+", new: "+prepaidBytes);
-			 //revert
-			 activeAccount.updateCurrentBytes(m_prepaidBytes);
-			 m_prepaidBytes = prepaidBytes;
-			 activeAccount.updateCurrentBytes(prepaidBytes * ( -1));
-			 
-		 }
-		 else*/ 
 		 if (!m_bPrepaidReceived)
 		 {
 			 m_prepaidBytes = prepaidBytes;
 			 m_bPrepaidReceived = true;
 			 // ignore prepaid bytes smaller than zero
 			 activeAccount.updateCurrentBytes(prepaidBytes * ( -1)); // substract from transferred bytes
-			 System.out.println("Prepaidbytes: "+m_prepaidBytes);
 		 }
 	  }
   }
@@ -342,7 +331,6 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 	//if requested, send account certificate
 	if(request.isInitialCCRequest())
 	{
-		System.out.println("initial CC PayRequest received: ");
 		if(m_prepaidAmountInPayRequest)
 		handlePrepaidBytesReceived(request.getPrepaidBytes(), PayAccountsFile.getInstance().getActiveAccount());
 		processInitialCC(request.getCC());
@@ -487,7 +475,6 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 	  // check if bytes asked for in CC match bytes transferred
 	  long newPrepaidBytes = //(cc.getTransferredBytes() - confirmedBytes) + m_prepaidBytes - transferedBytes;
 		  cc.getTransferredBytes() - transferedBytes;
-	  System.out.println("CC transBytes: "+cc.getTransferredBytes());
 	  long diff = newPrepaidBytes - m_connectedCascade.getPrepaidInterval();
 
 	  /*
@@ -518,7 +505,6 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 			  //this.fireAIEvent(EVENT_UNREAL, diff); // do not show this problem to the user...
 		  }
 	  }
-	  System.out.println("genius: "+(transferedBytes + m_connectedCascade.getPrepaidInterval())+"transferred bytes: "+transferedBytes);
 	  cc.setTransferredBytes(transferedBytes + m_connectedCascade.getPrepaidInterval());
 
 
@@ -856,9 +842,6 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 				long bytesToPay =
 					m_connectedCascade.getPrepaidInterval() - (confirmedbytes - currentlyTransferedBytes); 
 				//NOTE: (confirmedbytes - currentlyTransferedBytes) in this case means: my prepaidBytes (on this cascade). 
-
-				System.out.println("Initial CC bytesToPay: " + bytesToPay + ", Old transfered: " + currentlyTransferedBytes + ", Prepaid: " + m_prepaidBytes +
-						", CC confirmed bytes: "+confirmedbytes);
 			
 
 				long oldBytes = a_cc.getTransferredBytes();

@@ -33,10 +33,15 @@ import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
+import anon.infoservice.Database;
+import anon.infoservice.TermsAndConditions;
+import anon.infoservice.TermsAndConditionsFramework;
 import anon.util.IXMLEncodable;
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
 /**
@@ -87,6 +92,11 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 			requestedItems.put(opski, entry);
 		}
 		entry.items.add(XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT);
+	}
+	
+	public boolean hasResourceRequests()
+	{
+		return !requestedItems.isEmpty();
 	}
 	
 	public Element toXmlElement(Document a_doc) 
