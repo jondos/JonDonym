@@ -319,7 +319,7 @@ public class JAPConfServices extends AbstractJAPConfModule
 		{
 			if (m_tcModule == null)
 			{
-				m_tcModule = new JAPConfTC(null);
+				m_tcModule = new JAPConfTC(null, JAPController.getInstance());
 			}
 		}
 		return m_tcModule;
