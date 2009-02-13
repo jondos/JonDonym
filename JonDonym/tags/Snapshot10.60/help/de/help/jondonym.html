@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <title>JonDo-Hilfe: JonDonym</title>
+  <link rel="stylesheet" type="text/css" href="../../xhelpfrms.css">
+</head>
+
+<body lang="de">
+<!--#include virtual="/header.html"-->
+
+<p class="navipar"><span class="prevlink"><a href="wwwprivacy.html"><img
+src="prev.gif" alt="&lt;-"> WWW-Privatsph&auml;re</a></span> <span
+class="midlink"><a name="doctop" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_intro"><img src="next.gif" alt="-&gt;">
+Einf&uuml;hrung</a></span> <span class="nextlink"><a
+href="certificates.html">Zertifikate <img src="next.gif"
+alt="-&gt;"></a></span> </p>
+<hr>
+
+<h2>JonDonym, AN.ON und Tor</h2>
+
+<p>Der Anonymisierungsdienst JonDonym ist ein Entwicklungszweig des <a
+href="http://anon.inf.tu-dresden.de">AN.ON-Projekts</a>. Er besteht aus
+mehreren einzeln w&auml;hlbaren Mixkaskaden. Diese setzen sich aus zwei bis
+drei Mix-Servern zusammen, die von jeweils unabh&auml;ngigen Organisationen
+oder Privatpersonen betrieben werden, <a href="certificates.html">deren
+Identit&auml;t ver&ouml;ffentlicht wird</a>. Die Betreiber m&uuml;ssen sich an
+strikte Betriebsrichtlinien halten, die ihnen verbieten, Verbindungsdaten zu
+speichern oder mit den anderen Mix-Betreibern in der Kaskade oder mit einer
+dritten Organisation Surfdaten von Nutzern auszutauschen. Jede
+Internetverbindung eines Nutzers wird f&uuml;r jeden Mix einer Kaskade
+unterschiedlich verschl&uuml;sselt und &uuml;ber die Mixkaskade bis zum Ziel,
+z.B. zu einer Webseite, gesendet. Ziel dieser <em>mehrfachen
+Verschl&uuml;sselung, Verteilung und Weiterleitung</em> ist, dass kein
+Mixbetreiber alleine den Nutzer enttarnen kann, und dass Lauscher auf den
+Verbindungen keine brauchbaren Inhaltsdaten abgreifen k&ouml;nnen. Da
+au&szlig;erdem viele Benutzer gleichzeitig den Anonymisierungsdienst nutzen und
+sich dabei alle dieselbe <a href="wwwprivacy.html#ip">IP-Adresse</a> teilen,
+werden die Internetverbindungen jedes Benutzers unter denen aller anderen
+Benutzer auf derselben Kaskade versteckt: eine Zuordnung ist somit nicht mehr
+m&ouml;glich. </p>
+
+<p><strong>JonDonym verhindert also, dass jemand anderes als der Benutzer
+selbst erf&auml;hrt welche Internet-Verbindungen von ihm aufgebaut werden. Die
+Besonderheit dieses Verfahrens ist, dass es nicht nur gegen eine Beobachtung
+durch Au&szlig;enstehende sch&uuml;tzt (Zugangs-Provider, WLAN-Lauscher,
+Webseiten), sondern auch gegen die verschiedenen Anbieter von JonDonym selbst
+(Mixbetreiber, Abrechnungsdienstleister). Die JonDonym/AN.ON-Technik basiert
+auf dem Prinzip der mehrfachen Verschl&uuml;sselung, Verteilung und
+Weiterleitung.</strong></p>
+
+<p>JonDonym bietet im Vergleich zu anderen Anonymisierungsdiensten viele
+Vorteile:</p>
+<ul>
+  <li><b>Starke Verschl&uuml;sselung und Authentisierung:</b> Niemand kann den
+    Datenverkehr zwischen Ihrem Rechner und dem JonDonym-Dienst mitlesen.
+    (Verschl&uuml;sselt mit RSA 1024 und AES 128; signiert mit DSA, RSA oder
+    ECDSA; realisiert mit den Bibliotheken BouncyCastle und OpenSSL)</li>
+  <li><b>Schutz vor dem Dienstbetreiber:</b> Solange nicht alle Dienstbetreiber
+    einer JonDonym-Kaskade einzeln per Gerichtsbeschluss, Erpressung oder einem
+    Hacker-Angriff gezwungen werden Sie zu &uuml;berwachen, sind Ihre
+    JonDonym-Verbindungen sicher. Die Mixbetreiber werden regelm&auml;&szlig;ig
+    auf ihre Seriosit&auml;t und Professionalit&auml;t gepr&uuml;ft.
+    Au&szlig;erdem wird ihre Identit&auml;t ver&ouml;ffentlicht.</li>
+  <li><b>Keine Logdaten:</b> Den Mixbetreibern ist es vertraglich untersagt,
+    Logdaten &uuml;ber die IP-Adressen der Nutzer zu speichern. Dies gilt auch
+    f&uuml;r Inhaltsdaten. Durch nationale Vorschriften bedingte Ausnahmen
+    werden deutlich markiert und beschrieben.</li>
+  <li><b>Transparente Funktionalit&auml;t:</b> Die Programmoberfl&auml;che ist
+    besonders informativ gestaltet. Die Quelltexte aller Programmkomponenten
+    sind unter einer <a href="http://www.jondos.de/de/licence">OSI-Konformen
+    Lizenz</a> offengelegt (<a href="https://svn.jondos.de">SVN-Repository</a>
+    oder <a
+    href="http://anon.inf.tu-dresden.de/develop/sources_de.html">CVS-Repository</a>).</li>
+  <li><b>Keine Software-Hintert&uuml;r:</b> Es gibt keine M&ouml;glichkeit,
+    einzelne Verbindungen im <a href="about.html">JonDo</a>-Client zu
+    &uuml;berwachen. Die Software l&auml;uft vollst&auml;ndig auf dem Rechner
+    des Benutzers, und kann nicht ohne dessen Zustimmung manipuliert werden.
+    Beim Update werden keinerlei Identit&auml;tsinformationen, Serien- oder
+    Kontonummern &uuml;bertragen, um gezielte Update-Manipulation durch Hacker
+    oder die Entwickler selbst zu erschweren. Updates k&ouml;nnen
+    vollst&auml;ndig &uuml;ber eine anonyme Verbindung durchgef&uuml;hrt
+  werden.</li>
+  <li><b>Sicheres Browserprofil:</b> Mit dem <a
+    href="jondofox.html">JonDoFox</a> steht Ihnen ein speziell f&uuml;r
+    anonymes und sicheres Surfen mit JonDonym entwickeltes Firefox-Profil
+    kostenlos zur Verf&uuml;gung.</li>
+  <li><b>Anonymit&auml;t zum Mitnehmen:</b> <a href="about.html">JonDo</a> ist
+    auch ohne Installation auf dem Rechner direkt von einem tragbaren USB-Stick
+    lauff&auml;hig (Windows / Mac OS X).</li>
+  <li><b>Kombinierbar mit anderen Produkten:</b> JonDo l&auml;sst sich
+    problemlos mit anderen Anonymisierungsprodukten kombinieren, etwa mit Tor
+    oder <a href="otherServices.html">VPN-Diensten</a>.</li>
+  <li><b>Weiterentwicklung durch Forschung:</b> Wissenschaftliche Arbeiten an
+    der Technischen Universit&auml;t Dresden (AN.ON), der Universit&auml;t
+    Regensburg (AN.ON) und bei der JonDos GmbH (JonDonym) erweitern und
+    verbessern st&auml;ndig das System.</li>
+  <li><b>Kompetenter, schneller und kostenloser Support:</b> Sehr umfangreiche
+    Hilfetexte beschreiben die Anwendung und deren Kontext detailliert und
+    verst&auml;ndlich. Zus&auml;tzlich k&ouml;nnen ein betreutes Nutzerforum
+    und E-Mail-Support kostenlos genutzt werden.</li>
+</ul>
+
+<p>Eine &auml;hnliche Anonymisierung kann nur das nicht-kommerzielle System <a
+href="http://tor.eff.org/">Tor</a> bieten. Internet-Anf&auml;nger sollten mit
+Tor jedoch vorsichtig sein: bei diesem Dienst wird nicht kontrolliert, welche
+Menschen die Server betreiben, &uuml;ber die ihre Daten laufen. In der
+Vergangenheit gab es immer wieder den Verdacht, dass Kriminelle und
+Geheimdienste das Tor-Netzwerk missbrauchen, um unbemerkt unverschl&uuml;sselt
+&uuml;bertragene Informationen wie Passw&ouml;rter, Kontoverbindungen und
+Kreditkartendaten abzufangen und zu missbrauchen. Mit bestimmten Tricks
+k&ouml;nnen einzelne Tor-Server besonders viel Datenverkehr auf sich leiten um
+diese Angriffe effektiver zu machen. Tor kann aber gefahrlos als <a
+href="net.html">Proxy in JonDo eingetragen</a> werden, wodurch das Surfen zwar
+deutlich langsamer, aber in Einzelf&auml;llen noch sicherer wird als mit JonDo
+allein. Denn die letzten Server in der Kette sind dann Teil des verifizierten
+JonDonym-Netzwerkes.</p>
+
+<p>Auch der jeweils letzte Mix-Server einer JonDonym-Kaskade k&ouml;nnte
+Datenverkehr, der nicht zus&auml;tzlich &uuml;ber HTTPS/SSL gesichert ist,
+mitschneiden. Im Gegensatz zu Tor und anderen Diensten d&uuml;rfen allerdings
+nur von JonDos und eventuell weiteren Zertifizierungsstellen gepr&uuml;fte und
+namentlich ver&ouml;ffentlichte Personen und Organisationen einen Mix-Server
+betreiben. Die Nutzer k&ouml;nnen dann selbst entscheiden, ob sie den
+jeweiligen Betreibern vertrauen m&ouml;chten oder nicht. Bei Bedarf k&ouml;nnen
+sie einfach andere Betreiber w&auml;hlen. Dadurch wird es sehr
+unwahrscheinlich, dass sich kriminelle Betreiber in JonDonym einschleichen.</p>
+<hr>
+
+<p class="navipar"><span class="prevlink"><a href="wwwprivacy.html"><img
+src="prev.gif" alt="&lt;-"> WWW-Privatsph&auml;re</a></span> <span
+class="midlink"><a name="docbottom" href="index.html#mi_toc">Inhalt </a><a
+href="index.html#mi_intro"><img src="next.gif" alt="-&gt;">
+Einf&uuml;hrung</a></span> <span class="nextlink"><a
+href="certificates.html">Zertifikate <img src="next.gif"
+alt="-&gt;"></a></span> </p>
+<!--#include virtual="/footer.html"-->
+</body>
+</html>
