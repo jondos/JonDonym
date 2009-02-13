@@ -32,6 +32,10 @@
 package anon.client;
 
 
+import gui.JAPMessages;
+
+import jap.JAPConf;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -47,6 +51,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import anon.ErrorCodes;
+import anon.client.TermsAndConditionsResponseHandler.TCRequestException;
 import anon.client.crypto.ASymCipher;
 import anon.client.crypto.KeyPool;
 import anon.client.crypto.SymCipher;
@@ -56,6 +61,8 @@ import anon.crypto.XMLSignature;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
+import anon.infoservice.TermsAndConditions;
+import anon.infoservice.TermsAndConditionsFramework;
 import anon.infoservice.TermsAndConditionsMixInfo;
 import anon.util.Base64;
 import anon.util.XMLParseException;
@@ -105,7 +112,7 @@ public class KeyExchangeManager {
   private MixCascade m_cascade;
 
   private XMLTermsAndConditionsRequest m_tnCRequest;
-
+  
   /**
    * @todo allow to connect if one or more mixes (user specified) cannot be verified
    * @param a_inputStream InputStream
@@ -115,12 +122,13 @@ public class KeyExchangeManager {
    * @throws SignatureException
    * @throws IOException
    * @throws UnknownProtocolVersionException
+ * @throws TCRequestException 
    * @todo remove MixInfo entries when changes in the certificate ID of a mix are discovered
    */
   public KeyExchangeManager(InputStream a_inputStream, OutputStream a_outputStream, MixCascade a_cascade,
-							ITrustModel a_trustModel)
+							ITrustModel a_trustModel, ITermsAndConditionsContainer a_tcContainer)
 	  throws XMLParseException, SignatureException, IOException, UnknownProtocolVersionException,
-	  TrustException
+	  TrustException, TCRequestException
   {
 	  try
 	  {
@@ -293,23 +301,44 @@ public class KeyExchangeManager {
 		 m_tnCRequest = new XMLTermsAndConditionsRequest();
 		 
 		 for (int i = 0; i < m_cascade.getNumberOfMixes(); i++)
-		  {
-			  MixInfo mixinfo = m_cascade.getMixInfo(i);
-			  //+++++++++++++++++++++++++++++++++++++++++++++++++++
-			  TermsAndConditionsMixInfo tncInfo = mixinfo.getTermsAndConditionMixInfo();
-			  if(tncInfo != null)
-			  {
-				  //TODO: check if tnc items are already available
+		 {
+			MixInfo mixinfo = m_cascade.getMixInfo(i);
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++
+			TermsAndConditionsMixInfo tncInfo = mixinfo.getTermsAndConditionMixInfo();
+			if(tncInfo != null)
+			{
+				TermsAndConditions tc = TermsAndConditions.getById(tncInfo.getId());
+				if(tc == null)
+				{
+					tc = new TermsAndConditions(tncInfo.getId(), tncInfo.getDate());
+					TermsAndConditions.storeTermsAndConditions(tc);
+				}
 				  
-				  String templateRefID = tncInfo.getTemplateRefId(tncInfo.getDefaultLanguage());
-				  /*if(templateRefID == null)
-				  {
-					  templateRefID = tncInfo.getTemplateRefId("en");
-				  }*/
-				  m_tnCRequest.addTemplateRequest(tncInfo.getId(), tncInfo.getDefaultLanguage(), templateRefID);
-				  m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), tncInfo.getDefaultLanguage());
-			  }
-			  //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+				String langCode = 
+					tncInfo.hasTranslation(JAPMessages.getLocale()) ? 
+					JAPMessages.getLocale().getLanguage().trim().toLowerCase(): tncInfo.getDefaultLanguage();
+				  
+				String templateRefID = tncInfo.getTemplateRefId(langCode);
+				if(TermsAndConditionsFramework.getById(templateRefID, false) == null)
+				{
+					m_tnCRequest.addTemplateRequest(tncInfo.getId(), langCode, templateRefID);
+				}
+				//else
+				//{
+				//	System.out.println("Already stored template "+TermsAndConditionsFramework.getById(templateRefID, false).getId());
+				//}
+				
+				  
+				if(!tc.hasTranslation(langCode))
+				{
+					m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), langCode);
+				}
+				//else
+				//{
+				//	System.out.println("Already stored customized sections "+tc.getId());
+				//}
+			}
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++
 			  if (mixinfo == null)
 			  {
 				  // should not happen
@@ -597,42 +626,53 @@ public class KeyExchangeManager {
 			  }
 		  }
 		 
-		  if(false && m_cascade.getMixInfo(0).getServiceSoftware().getVersion().compareTo("00.08.52") >= 0)
+		  if(m_cascade.getMixInfo(0).getServiceSoftware().getVersion().compareTo("00.08.54") >= 0)
 		  {
-				  //send T&C stuff
+			  //send T&C stuff
+			  if(m_tnCRequest.hasResourceRequests())
+			  {
 				  Document tcRequestDoc = XMLUtil.createDocument();
 				  Element tcRequestRoot = m_tnCRequest.toXmlElement(tcRequestDoc);
-				  //tcRequestDoc.appendChild(tcRequestRoot);
 				  String tcRequest = XMLUtil.toString(tcRequestDoc);
 				  if(tcRequest != null)
 				  {
-					  byte[] tcRequestBytes = tcRequest.getBytes();
-					  ByteArrayOutputStream bout = new ByteArrayOutputStream();
-					  
-					  DataOutputStream tcReqStream = new DataOutputStream(bout);
-					  tcReqStream.writeShort(tcRequestBytes.length);
+					  ByteArrayOutputStream tcRequestBytesOut = new ByteArrayOutputStream();
+					  DataOutputStream tcReqStream = new DataOutputStream(tcRequestBytesOut);
+					  tcReqStream.writeShort(tcRequest.length());
 					  tcReqStream.writeBytes(tcRequest);
-					  
-					  //tcReqStream.writeShort(tcRequestBytes.length);
-					  a_outputStream.write(bout.toByteArray());
+					  a_outputStream.write(tcRequestBytesOut.toByteArray());
 					  a_outputStream.flush();
 					  
 					 int answerBytes = dataStreamFromMix.readInt();
 					 byte[] answerData = new byte[answerBytes];
-					 //System.out.println("expected answer: "+answerBytes+ " bytes");
-					
 					 a_inputStream.read(answerData, 0, answerBytes);
-					 /* try
+					 Document answerDoc = XMLUtil.toXMLDocument(answerData);
+					 if(answerDoc != null)
 					 {
-						 
+						 a_tcContainer.getTermsAndConditionsRepsonseHandler().handleXMLResourceResponse(answerDoc);
 					 }
-				  	catch (Exception e)
-				  	{
-					  e.printStackTrace();
-				  	}*/
-					 System.out.println("answer received: "+new String(answerData));
+					 throw new TCRequestException();
+				 //
+				 //System.out.println("expected answer: "+answerBytes+ " bytes");
+				  //System.out.println("answer received: "+new String(answerData, "UTF-8"));
 				  }
+			  }
 			  
+			  //TODO: accept or reject.
+			  Document confirmDoc = XMLUtil.createDocument();
+			  Element confirmDocRoot = confirmDoc.createElement("TermsAndConditionsConfirm");
+			  XMLUtil.setAttribute(confirmDocRoot, "accepted", false);
+			  
+			  confirmDoc.appendChild(confirmDocRoot);
+			  
+			  String acceptMsg = XMLUtil.toString(confirmDoc);
+			  ByteArrayOutputStream tcConfirmBytesOut = new ByteArrayOutputStream();
+			  DataOutputStream tcConfirmStream = new DataOutputStream(tcConfirmBytesOut);
+			  tcConfirmStream.writeShort(acceptMsg.length());
+			  
+			  tcConfirmStream.writeBytes(acceptMsg);
+			  a_outputStream.write(tcConfirmBytesOut.toByteArray());
+			  a_outputStream.flush();
 		  }
 		  
 	  }

@@ -2,6 +2,8 @@ package jap;
 
 import java.awt.Component;
 import java.text.DateFormat;
+import java.util.Locale;
+
 import javax.swing.JEditorPane;
 
 import jap.pay.wizardnew.TermsAndConditionsPane;
@@ -31,15 +33,21 @@ public class TermsAndConditionsDialog extends JAPDialog
 		m_panel = new TermsAndConditionsPane(this, false);
 		
 		// try to find the TnC
-		TermsAndConditions tc = TermsAndConditions.getById(a_op.getId(), JAPMessages.getLocale());
-		
+		TermsAndConditions tc = TermsAndConditions.getById(a_op.getId());
 		if(tc == null)
 		{
 			return;
 		}
+	
+		String htmlText = tc.getHTMLText(JAPMessages.getLocale());
+		if(htmlText == null)
+		{
+			return;
+		}
+		//TermsAndConditions.getTranslationById(a_op.getId(), JAPMessages.getLocale());
 		
 		// try to find the TnC framework
-		TermsAndConditionsFramework fr = 
+		/*TermsAndConditionsFramework fr = 
 			TermsAndConditionsFramework.getById(tc.getReferenceId(), a_bUpdateFromInfoService);
 		
 		if(fr == null)
@@ -47,9 +55,9 @@ public class TermsAndConditionsDialog extends JAPDialog
 			return;
 		}
 		
-		fr.importData(tc);
+		fr.importData(tc);*/
 		
-		m_panel.setText(fr.transform());
+		m_panel.setText(htmlText);
 		
 		m_panel.updateDialog();
 		pack();

@@ -56,6 +56,7 @@ import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.NotConnectedToMixException;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
+import anon.client.TermsAndConditionsResponseHandler.TCRequestException;
 import anon.client.replay.ReplayControlChannel;
 import anon.client.replay.TimestampUpdater;
 import anon.infoservice.HTTPConnectionFactory;
@@ -172,7 +173,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		int cascadeLength = mixCascade.getNumberOfMixes();
 		ITermsAndConditionsContainer tcc = m_serviceContainer.getTCContainer();
 		
-		if(tcc != null)
+		/*if(tcc != null)
 		{
 			for (int i = 0; i < cascadeLength; i++) 
 			{
@@ -206,7 +207,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 					}
 				}
 			}
-		}
+		}*/
 		
 		StatusThread run = new StatusThread()
 		{
@@ -739,14 +740,43 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				{
 					public void run()
 					{
+						boolean tcRetry = true;
+						int tctry = 0;
 						try
 						{
-							m_keyExchangeManager = new KeyExchangeManager(m_socketHandler.getInputStream(),
-								m_socketHandler.getOutputStream(), (MixCascade) a_mixCascade,
-								a_serviceContainer);
+							while(tcRetry)
+							{
+								try
+								{
+									m_keyExchangeManager = new KeyExchangeManager(m_socketHandler.getInputStream(),
+											m_socketHandler.getOutputStream(), (MixCascade) a_mixCascade,
+											a_serviceContainer, a_serviceContainer.getTCContainer());
+									tcRetry = false;
+								}
+								catch(TCRequestException tce)
+								{
+									//TODO: show dialog here!
+									//now the user has all the time he needs to read the Terms and conditions.
+									//and needs not to worry about the mix timeouts.
+									
+									//try to establish a new connection. for the second try to accept Terms and Conditions
+									m_socketHandler =
+										new SocketHandler(
+												connectMixCascade( (MixCascade) a_mixCascade,
+														m_proxyInterface.getProxyInterface(false).getProxyInterface()));
+									if(tctry > 1)
+									{
+										LogHolder.log(LogLevel.ERR, LogType.NET, 
+												"Still requested  t&cs afetr the second try? this must not happen.");
+										//TODO: throw a more specific Exception
+										throw new Exception("Second tc request must never be sent.");
+									}
+								}
+							}
 						}
 						catch (Exception a_e)
 						{
+							a_e.printStackTrace();
 							exceptionCache.addElement(a_e);
 						}
 					}

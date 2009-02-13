@@ -70,6 +70,7 @@ import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.client.AnonClient;
 import anon.client.ITermsAndConditionsContainer;
+import anon.client.TermsAndConditionsResponseHandler;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.AbstractMixCascadeContainer;
@@ -267,7 +268,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private JavaVersionUpdater m_javaVersionUpdater;
 	private MessageUpdater m_messageUpdater;
 	private PerformanceInfoUpdater m_perfInfoUpdater;
-	private TermsAndConditionsUpdater m_termsUpdater;
+	//private TermsAndConditionsUpdater m_termsUpdater;
+	private TermsAndConditionsResponseHandler m_tcResponseHandler;
 	
 	private Object LOCK_VERSION_UPDATE = new Object();
 	private boolean m_bShowingVersionUpdate = false;
@@ -376,8 +378,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_minVersionUpdater = new MinVersionUpdater();
 		m_javaVersionUpdater = new JavaVersionUpdater();
 		m_messageUpdater = new MessageUpdater();
-		m_termsUpdater = new TermsAndConditionsUpdater();
-
+		//m_termsUpdater = new TermsAndConditionsUpdater();
+		m_tcResponseHandler = new TermsAndConditionsResponseHandler();
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
 		InfoServiceDBEntry.setMutableProxyInterface(m_Model.getInfoServiceProxyInterface());
@@ -661,7 +663,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				if (JAPModel.isInfoServiceDisabled())
 				{
 					m_InfoServiceUpdater.start(false);
-					m_termsUpdater.start(false);
+					//m_termsUpdater.start(false);
 					m_perfInfoUpdater.start(false);
 					m_paymentInstanceUpdater.start(false);
 					m_MixCascadeUpdater.start(false);
@@ -671,10 +673,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 				}
 				else
 				{
-					if (!m_termsUpdater.isFirstUpdateDone())
+					/*if (!m_termsUpdater.isFirstUpdateDone())
 					{
 						m_termsUpdater.updateAsync();
-					}
+					}*/
 					if (!m_InfoServiceUpdater.isFirstUpdateDone())
 					{
 						m_InfoServiceUpdater.updateAsync();
@@ -2954,9 +2956,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 				elemAcceptedTCs.appendChild(elemTC);
 			}
 
+			//TODO: change
 			e.appendChild(elemAcceptedTCs);
-			
-			e.appendChild(Database.getInstance(TermsAndConditions.class).toXmlElement(doc));
+			//TODO: store received T&Cs (not using the Infoservice interface)
+			//e.appendChild(Database.getInstance(TermsAndConditions.class).toXmlElement(doc));
 			e.appendChild(Database.getInstance(TermsAndConditionsFramework.class).toXmlElement(doc));
 
 			return doc;
@@ -4113,7 +4116,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							m_Controller.m_javaVersionUpdater.stop();
 							m_Controller.m_messageUpdater.stop();
 							m_Controller.m_perfInfoUpdater.stop();
-							m_Controller.m_termsUpdater.stop();
+							//m_Controller.m_termsUpdater.stop();
 						}
 					}, "Finish IS threads");
 					finishIS.start();
@@ -4607,10 +4610,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 	
-	public TermsAndConditionsUpdater getTermsUpdater()
+	/*public TermsAndConditionsUpdater getTermsUpdater()
 	{
 		return m_termsUpdater;
-	}
+	}*/
 
 	public IJAPMainView getView()
 	{
@@ -5552,5 +5555,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			return JAPController.this;
 		}
+	}
+
+	public TermsAndConditionsResponseHandler getTermsAndConditionsRepsonseHandler() 
+	{
+		return m_tcResponseHandler;
 	}
 }

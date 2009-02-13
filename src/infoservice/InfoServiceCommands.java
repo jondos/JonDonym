@@ -430,7 +430,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		return httpResponse;
 	}
 	
-	private HttpResponseStructure tcopdataPost(byte[] a_postData)
+	/*private HttpResponseStructure tcopdataPost(byte[] a_postData)
 	{
 		HttpResponseStructure httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_OK);
 
@@ -438,7 +438,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		{
 			//LogHolder.log(LogLevel.DEBUG, LogType.NET, "TCOpData recvd XML: " + (new String(a_postData)));
 			TermsAndConditions entry = new TermsAndConditions(XMLUtil.toXMLDocument(a_postData), false);
-			/* verify the signature */
+			
 			if (entry.isVerified())
 			{
 				Database.getInstance(TermsAndConditions.class).update(entry);
@@ -464,7 +464,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_BAD_REQUEST);
 		}
 		return httpResponse;
-	}
+	}*/
 
 	private abstract class HTTPResponseGetter
 	{
@@ -2167,14 +2167,14 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		{
 			httpResponse = japGetTCFramework(command.substring(13));
 		}
-		else if((command.equals(TermsAndConditions.HTTP_SERIALS_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
+		/*else if((command.equals(TermsAndConditions.HTTP_SERIALS_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			httpResponse = m_tcResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
 		else if((command.equals(TermsAndConditions.HTTP_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			httpResponse = m_tcResponseGetter.fetchResponse(a_supportedEncodings, false);
-		}
+		}*/
 		else if ((command.startsWith("/status")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full Command: GET /status
@@ -2302,10 +2302,10 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 */
 			httpResponse = messagePost(postData, a_supportedEncodings);
 		}
-		else if ( (command.equals(TermsAndConditions.POST_FILE)) && (method == Constants.REQUEST_METHOD_POST))
+		/*else if ( (command.equals(TermsAndConditions.POST_FILE)) && (method == Constants.REQUEST_METHOD_POST))
 		{
 			httpResponse = tcopdataPost(postData);
-		}
+		}*/
 		else if ( (command.startsWith("/cascadeinfo/")) && (method == Constants.REQUEST_METHOD_GET))
 		{
 			/** Full command: GET /cascadeinfo/[cascadeid]

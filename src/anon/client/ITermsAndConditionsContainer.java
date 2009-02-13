@@ -11,6 +11,8 @@ public interface ITermsAndConditionsContainer
 	public void revokeTermsAndConditions(ServiceOperator a_op);
 	public void acceptTermsAndConditions(ServiceOperator a_op);
 	
+	public TermsAndConditionsResponseHandler getTermsAndConditionsRepsonseHandler();
+	
 	public class TermsAndConditonsDialogReturnValues
 	{
 		private boolean m_bError = true;
