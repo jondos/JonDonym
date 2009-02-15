@@ -103,6 +103,7 @@ import anon.proxy.IProxyListener;
 import anon.util.JobQueue;
 import anon.util.Util;
 import gui.CountryMapper;
+import gui.DataRetentionDialog;
 import gui.FlippingPanel;
 import gui.GUIUtils;
 import gui.JAPDll;
@@ -240,6 +241,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	
 	private JLabel m_labelOperatorFlags[];
 	private MixMouseAdapter m_adapterOperator[];
+	private LawListener m_lawListener;
 	private JLabel m_lawFlags[];
 	
 	private JLabel m_labelOwnTraffic, m_labelOwnTrafficSmall;
@@ -808,17 +810,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_labelOperatorFlags = new JLabel[3];
 		m_adapterOperator = new MixMouseAdapter[3];
 		m_lawFlags = new JLabel[3];
+		m_lawListener = new LawListener();
 		
-		MouseAdapter lawListener = new MouseAdapter()
-		{
-			public void mouseClicked(MouseEvent a_event)
-			{
-				JAPDialog.showWarningDialog(JAPNewView.this,
-						JAPMessages.getString(JAPConfAnon.MSG_DATA_RETENTION_EXPLAIN_SHORT) + " " + 
-						JAPMessages.getString(JAPConfAnon.MSG_DATA_RETENTION_EXPLAIN,
-								"<b>" + JAPMessages.getString(MixDetailsDialog.MSG_BTN_DATA_RETENTION) + "</b>"));
-			}
-		};
 		
 		c1.gridwidth = 1;
 		c1.fill = GridBagConstraints.NONE;
@@ -832,14 +825,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			p.add(m_labelOperatorFlags[i], c1);
 			
 			m_labelOperatorFlags[i].addMouseListener(m_adapterOperator[i] =
-				new MixMouseAdapter(null, i, m_labelOperatorFlags[i]));
+				new MixMouseAdapter(m_labelOperatorFlags[i]));
 			m_labelOperatorFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			
 			c1.gridx++;
 			m_lawFlags[i] = new JLabel(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID, true));
 			m_lawFlags[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			m_lawFlags[i].setToolTipText(JAPMessages.getString(JAPConfAnon.MSG_DATA_RETENTION_EXPLAIN_SHORT));
-			m_lawFlags[i].addMouseListener(lawListener);
+			m_lawFlags[i].setToolTipText(JAPMessages.getString(
+					DataRetentionDialog.MSG_DATA_RETENTION_EXPLAIN_SHORT));
+			m_lawFlags[i].addMouseListener(m_lawListener);
 			c1.insets = new Insets(3, 2, 0, 5);
 			p.add(m_lawFlags[i], c1);
 			if (i < m_labelOperatorFlags.length - 1)
@@ -2313,14 +2307,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			final MixCascade cascade = (MixCascade) a_serverDescription;
 			Database.getInstance(NewCascadeIDEntry.class).remove(cascade.getMixIDsAsString());
 			
-			if (cascade.getNumberOfOperators() <= 1 || cascade.isDataRetentionActive())
+			if (cascade.getNumberOfOperators() <= 1 || cascade.getDataRetentionInformation() != null)
 			{
 				m_msgIDInsecure = m_StatusPanel.addStatusMsg(JAPMessages.getString(MSG_OBSERVABLE_TITLE),
 					JAPDialog.MESSAGE_TYPE_WARNING, false, new ActionListener()
 				{
 					public void actionPerformed(ActionEvent a_event)
 					{
-						if (cascade.isDataRetentionActive())
+						if (cascade.getDataRetentionInformation() != null)
 						{
 							JAPDialog.showWarningDialog(JAPNewView.this, 
 									JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN, 
@@ -2899,7 +2893,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				//m_bShowConnecting = false;
 				if (currentStatus.getNrOfActiveUsers() > -1)
 				{
-					strSystrayTooltip += "\n" + JAPMessages.getString(SystrayPopupMenu.MSG_ANONYMITY) + ": ";
+					strSystrayTooltip += "\n" + JAPMessages.getString(SystrayPopupMenu.MSG_ANONYMITY_ASCII) + ": ";
 					strSystrayTooltip += currentMixCascade.getDistribution() + "," + currentStatus.getAnonLevel() + " / 6,6";
 					
 					//userProgressBar.setString(String.valueOf(currentStatus.getNrOfActiveUsers()));
@@ -2918,6 +2912,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 			}
 			
+			m_lawListener.setCascadeInfo(currentMixCascade);
 			int numMixes = currentMixCascade.getNumberOfOperatorsShown();
 			for (int i = 0; i < numMixes && i < m_labelOperatorFlags.length; i++)
 			{
@@ -2933,7 +2928,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					String operatorCountry = certPath.getIssuer().getCountryCode();	
 					String strTooltip = new CountryMapper(operatorCountry, JAPMessages.getLocale()).toString();
 					m_labelOperatorFlags[i].setIcon(GUIUtils.loadImageIcon("flags/" + operatorCountry + ".png"));
-					m_adapterOperator[i].setMixInfo(mixInfo);
+					m_adapterOperator[i].setMixInfo(currentMixCascade, i);
 					
 					if (certPath.isVerified())
 					{
@@ -2988,7 +2983,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			// show or hide the last warning label
 			for (int i = 0; i < m_lawFlags.length; i++)
 			{
-				if (i == numMixes - 1 && currentMixCascade.isDataRetentionActive())
+				if (i == numMixes - 1 && currentMixCascade.getDataRetentionInformation() != null)
 				{
 					m_lawFlags[i].setVisible(true);
 				}
@@ -3578,23 +3573,37 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 	}
 	
-	private final class MixMouseAdapter extends MouseAdapter
+	private final class LawListener extends MouseAdapter
 	{
-		private MixInfo m_mixInfo;
-		private int m_mixType;
-		private JLabel m_registeredLabel;
-		private LineBorder m_borderOriginal;
-		
-		public MixMouseAdapter(MixInfo a_mixInfo, int a_mixType, JLabel a_registeredLabel)
-		{
-			m_mixInfo = a_mixInfo;
-			m_mixType = a_mixType;
-			m_registeredLabel = a_registeredLabel;
-		}
+		private MixCascade m_cascade;
 		
 		public void mouseClicked(MouseEvent a_event)
 		{
-			MixDetailsDialog dialog = new MixDetailsDialog(JAPNewView.this, m_mixInfo, m_mixType);
+			DataRetentionDialog.show(JAPNewView.this, m_cascade);
+		}
+		
+		public void setCascadeInfo(MixCascade a_cascade)
+		{
+			m_cascade = a_cascade;
+		}
+	};
+	
+	private final class MixMouseAdapter extends MouseAdapter
+	{
+		private MixCascade m_mixInfo;
+		private int m_mixPosition;
+		private JLabel m_registeredLabel;
+		private LineBorder m_borderOriginal;
+		
+		public MixMouseAdapter(JLabel a_registeredLabel)
+		{
+			m_registeredLabel = a_registeredLabel;
+		}
+		
+		public synchronized void mouseClicked(MouseEvent a_event)
+		{
+			MixDetailsDialog dialog = new MixDetailsDialog(JAPNewView.this, 
+					m_mixInfo, m_mixPosition);
 			dialog.pack();
 			dialog.setVisible(true);
 		}
@@ -3634,9 +3643,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 		}
 		
-		public void setMixInfo(MixInfo a_mixInfo)
+		public synchronized void setMixInfo(MixCascade a_mixInfo, int a_mixPosition)
 		{
 			m_mixInfo = a_mixInfo;
+			m_mixPosition = a_mixPosition;
 		}
 	}
 }

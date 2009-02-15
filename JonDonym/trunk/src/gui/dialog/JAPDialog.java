@@ -410,6 +410,8 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 * @return if a click on the close button of the dialog closes the window
 		 */
 		public boolean isCloseWindowActive();
+		
+		public String getTooltipText();
 	}
 
 	/**
@@ -542,6 +544,11 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	 */
 	public static class LinkedInformationAdapter implements ILinkedInformation
 	{
+		public String getTooltipText()
+		{
+			return null;
+		}
+		
 		/**
 		 * Returns null
 		 * @return null
@@ -597,11 +604,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		public abstract URL getUrl();
 		private static final String MAILTO = "mailto:";
 
-		/**
-		 * Returns the URL that may be clicked.
-		 * @return the URL that may be clicked
-		 */
-		public String getMessage()
+		public String getTooltipText()
 		{
 			URL url = getUrl();
 			String strMsg;
@@ -615,6 +618,15 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				return strMsg;
 			}
 			return null;
+		}
+		
+		/**
+		 * Returns the URL that may be clicked.
+		 * @return the URL that may be clicked
+		 */
+		public String getMessage()
+		{
+			return getTooltipText();
 		}
 		/**
 		 * Opens the URL.
@@ -1422,6 +1434,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		String cancelText = null;
 		String noText = null;
 		Vector vecOptions = new Vector();
+		String strToolTip = null;
 
 		if (ms_bConsoleOnly)
 		{
@@ -1459,6 +1472,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			bForceApplicationModality = a_linkedInformation.isApplicationModalityForced();
 			bOnTop = a_linkedInformation.isOnTop();
 			bIsCloseWindowActive = a_linkedInformation.isCloseWindowActive();
+			strToolTip = a_linkedInformation.getTooltipText();
 
 			/*
 			 * If the linked information contains a help context, display the help button instead of a link
@@ -1752,7 +1766,14 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			}
 			else
 			{
-				currentWidth = bestWidth + (int) (bestDelta / (3.0 * (failed + 1.0)));
+				if (label.getSize().width < minLabelWidth)
+				{
+					currentWidth += minLabelWidth - label.getSize().width + failed + 1.0;
+				}
+				else
+				{
+					currentWidth = bestWidth + (int) (bestDelta / (3.0 * (failed + 1.0)));
+				}
 				failed++;
 			}
 
@@ -1836,7 +1857,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				linkLabel.addMouseListener(new LinkedInformationClickListener(a_linkedInformation));
 				linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			}
-
+			linkLabel.setToolTipText(strToolTip);
 			dummyBox.add(linkLabel);
 		}
 

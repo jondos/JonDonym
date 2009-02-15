@@ -56,7 +56,7 @@ public class DatabaseTest extends PrivateTestCase
 	{
 		m_distributor = new MockDistributor();
 		m_DatabaseObject = Database.getInstance(AbstractDatabaseEntry.class);
-		m_DatabaseObject.registerDistributor(m_distributor);
+		Database.registerDistributor(m_distributor);
 
 		invoke(m_DatabaseObject, "unregisterInstances", NOARGS);
 	}
@@ -109,7 +109,7 @@ public class DatabaseTest extends PrivateTestCase
 		Vector expectedJobs = new Vector();
 		DummyDatabaseEntry dbEntry, dbEntry_sameID, dbEntry_otherID;
 		Database database = Database.getInstance(DummyDatabaseEntry.class);
-		database.registerDistributor(m_distributor);
+		Database.registerDistributor(m_distributor);
 
 		dbEntry = new DummyDatabaseEntry();
 		dbEntry.setId("123456");

@@ -38,6 +38,7 @@ import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.util.IXMLEncodable;
 import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
@@ -94,7 +95,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
      */
     private int m_type;
     
-    private boolean m_bTemporaryDataRetentionVariable = false;
+    private DataRetentionInformation m_drInfo;
     
     private boolean m_bPayment = false;
 
@@ -438,14 +439,46 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  m_mixOperator = new ServiceOperator(operatorNode, null, m_lastUpdate);
 	  }
 	  
-	  if (m_mixOperator.getOrganization() != null)
+	  
+	  Node nodeDR = XMLUtil.getFirstChildByName(a_mixNode, DataRetentionInformation.XML_ELEMENT_NAME);
+	  if (nodeDR != null)
 	  {
-		  if (m_mixOperator.getOrganization().indexOf("JAP-Team") >= 0 ||
-				  m_mixOperator.getOrganization().indexOf("Independent Centre") >= 0)
+		  // TODO patch for currently missing tag... Remove if no longer needed, that means when the mixes send it!
+		  if (m_mixOperator.getOrganization() != null)
 		  {
-			  m_bTemporaryDataRetentionVariable = true;
+			  if (m_mixOperator.getOrganization().indexOf("JAP-Team") >= 0 ||
+					  m_mixOperator.getOrganization().indexOf("Independent Centre") >= 0)
+			  {				  
+				  if (XMLUtil.getFirstChildByName(nodeDR, DataRetentionInformation.XML_ELEMENT_DESCRIPTION) == null)
+				  {
+					  nodeDR = XMLUtil.importNode(XMLUtil.createDocument(), nodeDR, true);
+					  
+					  Element elemDesc = nodeDR.getOwnerDocument().createElement(
+							  DataRetentionInformation.XML_ELEMENT_DESCRIPTION);
+					  XMLUtil.setAttribute(elemDesc, IXMLEncodable.XML_ATTR_LANGUAGE, "en");
+					  Element elemURL = nodeDR.getOwnerDocument().createElement(
+							  DataRetentionInformation.XML_ELEMENT_URL);
+					 
+					  XMLUtil.setValue(elemURL, "http://anon.inf.tu-dresden.de/dataretention_en.html");
+					  elemDesc.appendChild(elemURL);
+					  nodeDR.appendChild(elemDesc);
+					  
+					  elemDesc = nodeDR.getOwnerDocument().createElement(
+							  DataRetentionInformation.XML_ELEMENT_DESCRIPTION);
+					  XMLUtil.setAttribute(elemDesc, IXMLEncodable.XML_ATTR_LANGUAGE, "de");
+					  elemURL = nodeDR.getOwnerDocument().createElement(
+							  DataRetentionInformation.XML_ELEMENT_URL);
+					  XMLUtil.setValue(elemURL, "http://anon.inf.tu-dresden.de/dataretention_de.html");
+					  elemDesc.appendChild(elemURL);
+					  nodeDR.appendChild(elemDesc);
+				  }
+			  }
 		  }
+		  
+		  m_drInfo = new DataRetentionInformation((Element)nodeDR);
 	  }
+	  
+	  
 	  
 	  /*
 	   * Store the Service Operator if
@@ -689,30 +722,9 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
     return m_name;
   }
   
-	public URL getDataRetentionURL(String a_language)
+	public DataRetentionInformation getDataRetentionInformation()
 	{
-		try 
-		{
-			if (m_bTemporaryDataRetentionVariable)
-			{
-				if (a_language == null || !a_language.equals("de"))
-				{
-					return new URL("http://anon.inf.tu-dresden.de/dataretention_en.html");
-				}
-				else
-				{
-					return new URL("http://anon.inf.tu-dresden.de/dataretention_de.html");
-				}
-			}
-		}
-		catch (MalformedURLException e) 
-		{
-			
-			e.printStackTrace();
-		}
-		
-		return null;
-		
+		return m_drInfo;
 	}
 
   public boolean isVerified()

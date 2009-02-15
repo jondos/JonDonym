@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DummyElement id="encodableAK33#3">
     <!--This xml structure has been created by anon.util.test.DummyXMLEncodable.-->
+
     <!--The calling test class was anon.util.test.XMLUtilTest.-->
+
     <TextNode BooleanAttribute="false">dummy</TextNode>
     <ContainerNode IntAttribute="682">
         <NumberNode>142</NumberNode>

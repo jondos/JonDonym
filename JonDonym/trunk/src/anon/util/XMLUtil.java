@@ -532,6 +532,16 @@ public class XMLUtil
 		return entries;
 	}
 
+	public static NodeList getElementsByTagName(Node a_elementName, String a_tagName)
+	{
+		if (a_elementName == null || !(a_elementName instanceof Element) || a_tagName == null || a_tagName.trim().length() == 0)
+		{
+			return null;
+		}
+		
+		return ((Element)a_elementName).getElementsByTagName(a_tagName);
+	}
+	
 	/**
 	 * Returns the child node of the given node with the given name.
 	 * @param a_node the node from that the search starts

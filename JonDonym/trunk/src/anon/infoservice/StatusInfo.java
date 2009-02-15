@@ -243,7 +243,34 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		m_anonLevel = -1;
 		if (getNrOfActiveUsers() >= 0 && getTrafficSituation() >= 0)
 		{
-			m_anonLevel = (int)((Math.min((double) getNrOfActiveUsers(), 500)) / 500.0 * 6.0);
+			if (getNrOfActiveUsers() < 40)
+			{
+				m_anonLevel = 0;
+			}
+			else if (getNrOfActiveUsers() < 90)
+			{
+				m_anonLevel = 1;
+			}
+			else if (getNrOfActiveUsers() < 200)
+			{
+				m_anonLevel = 2;
+			}
+			else if (getNrOfActiveUsers() < 300)
+			{
+				m_anonLevel = 3;
+			}
+			else if (getNrOfActiveUsers() < 400)
+			{
+				m_anonLevel = 4;
+			}
+			else if (getNrOfActiveUsers() < 500)
+			{
+				m_anonLevel = 5;
+			}
+			else
+			{
+				m_anonLevel = 6;
+			}
 		}
 		m_statusXmlData = XMLUtil.toString(a_statusNode);
 		m_statusXmlDataBytes=m_statusXmlData.getBytes();

@@ -63,7 +63,7 @@ public class HTTPConnectionFactoryTest extends PrivateTestCase
 	public void testTimeout()
 	{
 		HTTPConnectionFactory.getInstance().setTimeout(50);
-		this.assertEquals(50, HTTPConnectionFactory.getInstance().getTimeout());
+		assertEquals(50, HTTPConnectionFactory.getInstance().getTimeout());
 	}
 
 	public void testCreateHTTPConnection() throws Exception

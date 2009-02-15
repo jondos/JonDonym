@@ -1023,7 +1023,16 @@ public class PaymentMainPanel extends FlippingPanel
 							public boolean isOnTop()
 							{
 								return true;
-							}			
+							}
+						};
+						
+						final JAPDialog.LinkedInformationAdapter onTopadapter =			
+							new JAPDialog.LinkedInformationAdapter()
+						{
+							public boolean isOnTop()
+							{
+								return true;
+							}
 						};
 
 						if (!GUIUtils.getParentWindow(parent).isVisible())
@@ -1087,14 +1096,14 @@ public class PaymentMainPanel extends FlippingPanel
 							if (JAPDialog.RETURN_VALUE_YES == 
 								JAPDialog.showConfirmDialog(parent, message, JAPMessages.getString(JAPDialog.MSG_TITLE_WARNING), 
 										JAPDialog.OPTION_TYPE_YES_NO,
-										JAPDialog.MESSAGE_TYPE_WARNING,  adapter))
+										JAPDialog.MESSAGE_TYPE_WARNING,  onTopadapter))
 							{
 								JAPModel.getInstance().setCascadeAutoSwitch(true);
 							}
 						}
 						else
 						{
-							JAPDialog.showErrorDialog(parent, message, LogType.PAY, adapter);
+							JAPDialog.showErrorDialog(parent, message, LogType.PAY, onTopadapter);
 						}
 						m_bShowingError = false;
 					}

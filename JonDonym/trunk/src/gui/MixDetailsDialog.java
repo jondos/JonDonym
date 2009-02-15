@@ -1,5 +1,6 @@
 package gui;
 
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Color;
@@ -17,6 +18,8 @@ import javax.swing.JPanel;
 
 import platform.AbstractOS;
 
+import anon.infoservice.DataRetentionInformation;
+import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.ServiceLocation;
 import anon.infoservice.ServiceOperator;
@@ -43,14 +46,17 @@ public class MixDetailsDialog extends JAPDialog
 	
 	private static String MSG_TITLE = MixDetailsDialog.class.getName() + "_title";
 	
+	private MixCascade m_mixCascade;
 	private MixInfo m_mixInfo;
+	private int m_mixPosition;
 	private ActionListener m_buttonListener;
 	private JButton m_btnHomepage, m_btnEMail, m_btnCertificates, m_btnDataRetention;
 	
-	public MixDetailsDialog(Component a_parent, MixInfo a_mixInfo, int a_mixType)
+	public MixDetailsDialog(Component a_parent, MixCascade a_mixCascade, int a_mixPosition)
 	{
 		super(a_parent, JAPMessages.getString(MSG_TITLE));
-		m_mixInfo = a_mixInfo;
+		m_mixCascade = a_mixCascade;
+		m_mixPosition = a_mixPosition;
 		
 		GridBagConstraints c = new GridBagConstraints();
 		JPanel p = (JPanel) getContentPane();
@@ -59,10 +65,11 @@ public class MixDetailsDialog extends JAPDialog
 		JLabel lbl;
 		String strText;
 		
-		if(m_mixInfo == null)
+		if (m_mixCascade == null || a_mixCascade.getMixInfo(a_mixPosition) == null)
 		{
 			return;
 		}
+		m_mixInfo = a_mixCascade.getMixInfo(a_mixPosition);
 		
 		ServiceOperator op = m_mixInfo.getServiceOperator();
 		ServiceLocation loc = m_mixInfo.getServiceLocation();
@@ -79,7 +86,7 @@ public class MixDetailsDialog extends JAPDialog
 		c.anchor = GridBagConstraints.WEST;
 		p.add(lbl, c);
 		
-		lbl = new JLabel(a_mixInfo.getName());
+		lbl = new JLabel(m_mixInfo.getName());
 		c.gridx = 1;
 		p.add(lbl, c);
 		
@@ -177,15 +184,19 @@ public class MixDetailsDialog extends JAPDialog
 			pnlButtons.add(m_btnHomepage, c);
 		}
 		
-		URL urlDataRetention = a_mixInfo.getDataRetentionURL(JAPMessages.getLocale().getLanguage());
-		if (urlDataRetention != null)
+		
+		DataRetentionInformation drInfo = 
+			m_mixInfo.getDataRetentionInformation();
+		if (drInfo != null)
 		{
 			m_btnDataRetention = new JButton(JAPMessages.getString(MSG_BTN_DATA_RETENTION),
 					GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID));
-			m_btnDataRetention.setToolTipText(urlDataRetention.toString());
+			m_btnDataRetention.setToolTipText(JAPMessages.getString(
+					DataRetentionDialog.MSG_DATA_RETENTION_MIX_EXPLAIN_SHORT));
 			m_btnDataRetention.addActionListener(m_buttonListener);
 			pnlButtons.add(m_btnDataRetention, c);
 		}
+		
 		
 		this.pack();
 		this.setResizable(false);
@@ -197,7 +208,7 @@ public class MixDetailsDialog extends JAPDialog
 	{
 		public void actionPerformed(ActionEvent a_event)
 		{
-			if (a_event.getSource() == m_btnHomepage || a_event.getSource() == m_btnDataRetention)
+			if (a_event.getSource() == m_btnHomepage)
 			{
 				String url = ((JButton)a_event.getSource()).getToolTipText();
 				if (url == null)
@@ -214,6 +225,11 @@ public class MixDetailsDialog extends JAPDialog
 				{
 					LogHolder.log(LogLevel.ERR, LogType.MISC, "Error opening URL in browser");
 				}
+			}
+			else if (a_event.getSource() == m_btnDataRetention)
+			{
+				DataRetentionDialog.show(MixDetailsDialog.this.getContentPane(), 
+						m_mixCascade, m_mixPosition);
 			}
 			else if (a_event.getSource() == m_btnEMail)
 			{

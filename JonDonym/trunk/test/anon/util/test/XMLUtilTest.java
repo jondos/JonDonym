@@ -91,7 +91,7 @@ public class XMLUtilTest extends XtendedPrivateTestCase
 	}
 
 	/**
-	 * Test if a node can successfully be transormed to a byte array and back.
+	 * Test if a node can successfully be transformed to a byte array and back.
 	 * @throws Exception if an error occurs
 	 */
 	public void testToByteArray() throws Exception

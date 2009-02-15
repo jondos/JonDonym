@@ -37,8 +37,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -81,6 +80,7 @@ public class SystrayPopupMenu extends PopupMenu
 	private static final String MSG_SHOW_DETAILS = SystrayPopupMenu.class.getName() + "_showDetails";
 	private static final String MSG_OPEN_BROWSER = SystrayPopupMenu.class.getName() + "_openBrowser";
 	public static final String MSG_ANONYMITY = SystrayPopupMenu.class.getName() + "_anonymity";
+	public static final String MSG_ANONYMITY_ASCII = SystrayPopupMenu.class.getName() + "_anonymityOnlyAsciiCharacters";
 
 
 	private MainWindowListener m_mainWindowListener;
