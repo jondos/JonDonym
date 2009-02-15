@@ -30,24 +30,24 @@ speichern oder mit den anderen Mix-Betreibern in der Kaskade oder mit einer
 dritten Organisation Surfdaten von Nutzern auszutauschen. Jede
 Internetverbindung eines Nutzers wird f&uuml;r jeden Mix einer Kaskade
 unterschiedlich verschl&uuml;sselt und &uuml;ber die Mixkaskade bis zum Ziel,
-z.B. zu einer Webseite, gesendet. Ziel dieser <em>mehrfachen
-Verschl&uuml;sselung, Verteilung und Weiterleitung</em> ist, dass kein
-Mixbetreiber alleine den Nutzer enttarnen kann, und dass Lauscher auf den
-Verbindungen keine brauchbaren Inhaltsdaten abgreifen k&ouml;nnen. Da
-au&szlig;erdem viele Benutzer gleichzeitig den Anonymisierungsdienst nutzen und
-sich dabei alle dieselbe <a href="wwwprivacy.html#ip">IP-Adresse</a> teilen,
-werden die Internetverbindungen jedes Benutzers unter denen aller anderen
-Benutzer auf derselben Kaskade versteckt: eine Zuordnung ist somit nicht mehr
-m&ouml;glich. </p>
+z.B. zu einer Webseite, gesendet. Dadurch kann kein Mixbetreiber alleine den
+Nutzer enttarnen . Lauscher auf den Verbindungen zu JonDonym-Mixen k&ouml;nnen
+keine brauchbaren Inhaltsdaten abgreifen. Da au&szlig;erdem viele Benutzer
+gleichzeitig den Anonymisierungsdienst nutzen und sich dabei alle dieselbe <a
+href="wwwprivacy.html#ip">IP-Adresse</a> teilen, werden die
+Internetverbindungen jedes Benutzers unter denen aller anderen Benutzer auf
+derselben Kaskade versteckt: eine Zuordnung ist somit nicht mehr m&ouml;glich.
+</p>
 
-<p><strong>JonDonym verhindert also, dass jemand anderes als der Benutzer
-selbst erf&auml;hrt welche Internet-Verbindungen von ihm aufgebaut werden. Die
-Besonderheit dieses Verfahrens ist, dass es nicht nur gegen eine Beobachtung
-durch Au&szlig;enstehende sch&uuml;tzt (Zugangs-Provider, WLAN-Lauscher,
-Webseiten), sondern auch gegen die verschiedenen Anbieter von JonDonym selbst
-(Mixbetreiber, Abrechnungsdienstleister). Die JonDonym/AN.ON-Technik basiert
-auf dem Prinzip der mehrfachen Verschl&uuml;sselung, Verteilung und
-Weiterleitung.</strong></p>
+<p style="text-align:center;"><img alt="JonDonym" src="jondonym.jpg"
+width="515"></p>
+
+<p><strong>Die JonDonym/AN.ON-Technik basiert also auf dem Prinzip der
+mehrfachen Verschl&uuml;sselung, Verteilung und Weiterleitung. Dieses Verfahren
+sch&uuml;tzt Ihre Internet-Aktivit&auml;ten nicht nur gegen Beobachter von
+Dritter Seite (Zugangs-Provider, WLAN-Lauscher, Webseiten), sondern auch gegen
+eine Beobachtung durch die einzelnen Anbieter von JonDonym selbst
+(Mixbetreiber, Abrechnungsdienstleister).</strong></p>
 
 <p>JonDonym bietet im Vergleich zu anderen Anonymisierungsdiensten viele
 Vorteile:</p>
@@ -101,10 +101,10 @@ Vorteile:</p>
     und E-Mail-Support kostenlos genutzt werden.</li>
 </ul>
 
-<p>Eine &auml;hnliche Anonymisierung kann nur das nicht-kommerzielle System <a
-href="http://tor.eff.org/">Tor</a> bieten. Internet-Anf&auml;nger sollten mit
-Tor jedoch vorsichtig sein: bei diesem Dienst wird nicht kontrolliert, welche
-Menschen die Server betreiben, &uuml;ber die ihre Daten laufen. In der
+<p>Eine &auml;hnliche Anonymisierung kann nur die nicht-kommerzielle Software
+<a href="http://tor.eff.org/">Tor</a> bieten. Internet-Anf&auml;nger sollten
+mit Tor jedoch vorsichtig sein: bei diesem Dienst wird nicht kontrolliert,
+welche Menschen die Server betreiben, &uuml;ber die ihre Daten laufen. In der
 Vergangenheit gab es immer wieder den Verdacht, dass Kriminelle und
 Geheimdienste das Tor-Netzwerk missbrauchen, um unbemerkt unverschl&uuml;sselt
 &uuml;bertragene Informationen wie Passw&ouml;rter, Kontoverbindungen und
@@ -116,15 +116,17 @@ deutlich langsamer, aber in Einzelf&auml;llen noch sicherer wird als mit JonDo
 allein. Denn die letzten Server in der Kette sind dann Teil des verifizierten
 JonDonym-Netzwerkes.</p>
 
-<p>Auch der jeweils letzte Mix-Server einer JonDonym-Kaskade k&ouml;nnte
-Datenverkehr, der nicht zus&auml;tzlich &uuml;ber HTTPS/SSL gesichert ist,
-mitschneiden. Im Gegensatz zu Tor und anderen Diensten d&uuml;rfen allerdings
-nur von JonDos und eventuell weiteren Zertifizierungsstellen gepr&uuml;fte und
-namentlich ver&ouml;ffentlichte Personen und Organisationen einen Mix-Server
-betreiben. Die Nutzer k&ouml;nnen dann selbst entscheiden, ob sie den
-jeweiligen Betreibern vertrauen m&ouml;chten oder nicht. Bei Bedarf k&ouml;nnen
-sie einfach andere Betreiber w&auml;hlen. Dadurch wird es sehr
-unwahrscheinlich, dass sich kriminelle Betreiber in JonDonym einschleichen.</p>
+<p>Wie bei Tor k&ouml;nnte auch der jeweils letzte Mix-Server einer
+JonDonym-Kaskade Datenverkehr, der nicht zus&auml;tzlich &uuml;ber eine
+verschl&uuml;sselte Verbindung wie HTTPS/SSL gesichert ist (muss von der
+Webseite selbst angeboten werden), mitschneiden. Im Gegensatz zu Tor und
+anderen Diensten d&uuml;rfen allerdings nur von JonDos und eventuell weiteren
+Zertifizierungsstellen gepr&uuml;fte und namentlich ver&ouml;ffentlichte
+Personen und Organisationen einen Mix-Server betreiben. Die Nutzer k&ouml;nnen
+dann selbst entscheiden, ob sie den jeweiligen Betreibern vertrauen
+m&ouml;chten oder nicht. Bei Bedarf k&ouml;nnen sie einfach andere Betreiber
+w&auml;hlen. Dadurch wird es sehr unwahrscheinlich, dass sich kriminelle
+Betreiber in JonDonym einschleichen.</p>
 <hr>
 
 <p class="navipar"><span class="prevlink"><a href="wwwprivacy.html"><img

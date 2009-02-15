@@ -29,6 +29,7 @@ package jap;
 
 import gui.CertDetailsDialog;
 import gui.CountryMapper;
+import gui.DataRetentionDialog;
 import gui.GUIUtils;
 import gui.JAPJIntField;
 import gui.JAPMessages;
@@ -112,6 +113,7 @@ import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.X509SubjectAlternativeName;
 import anon.infoservice.BlacklistedCascadeIDEntry;
+import anon.infoservice.DataRetentionInformation;
 import anon.infoservice.Database;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.InfoServiceHolder;
@@ -194,12 +196,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_UNREACHABLE = JAPConfAnon.class.getName() + "_availabilityUnreachable";
 	private static final String MSG_BAD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityBad";
 	private static final String MSG_GOOD_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityGood";
-	private static final String MSG_DATA_RETENTION_ABBREVIATION = 
-		JAPConfAnon.class.getName() + "_DataRetentionAbbreviation";
-	public static final String MSG_DATA_RETENTION_EXPLAIN_SHORT = 
-		JAPConfAnon.class.getName() + "_DataRetentionExplainShort";
-	public static final String MSG_DATA_RETENTION_EXPLAIN = 
-		JAPConfAnon.class.getName() + "_DataRetentionExplain";
 
 	private static final int FILTER_SPEED_MAJOR_TICK = 100;
 	private static final int FILTER_SPEED_MAX = 400;
@@ -314,6 +310,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	/** the Certificate of the selected Mix-Server */
 	private MultiCertPath m_serverCertPaths;
 	private MixInfo m_serverInfo;
+	private MixCascade m_cascadeInfo;
 	
 	private Vector m_locationCoordinates;
 	private TrustModel m_previousTrustModel;
@@ -811,7 +808,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		
 		m_lblVDS = new JLabel();//JAPMessages.getString(MSG_DATA_RETENTION_ABBREVIATION));
 		m_lblVDS.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID, true));
-		m_lblVDS.setToolTipText(JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN_SHORT));
+		m_lblVDS.setToolTipText(JAPMessages.getString(
+				DataRetentionDialog.MSG_DATA_RETENTION_EXPLAIN_SHORT));
 		m_lblVDS.setForeground(Color.red);
 		m_lblVDS.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		m_lblVDS.addMouseListener(this);
@@ -1083,6 +1081,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	{
 		int server = m_serverList.getSelectedIndex();
 		MixCascade cascade = (MixCascade)m_tableMixCascade.getValueAt(m_tableMixCascade.getSelectedRow(), 1);
+		m_cascadeInfo = cascade;
 		String selectedMixId = null;
 		
 		if (cascade != null)
@@ -1275,12 +1274,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			//m_btnViewCert.setForeground(m_nrLabel.getForeground());
 		}
 		
-		URL urlDataRetention = null;
+		DataRetentionInformation drInfo = null;
 		if (m_serverInfo != null)
 		{
-			urlDataRetention = m_serverInfo.getDataRetentionURL(JAPMessages.getLocale().getLanguage());
+			drInfo = m_serverInfo.getDataRetentionInformation();
 		}
-		if (urlDataRetention == null)
+		if (drInfo == null)
 		{
 			m_btnDataRetention.setVisible(false);
 			m_btnDataRetention.setToolTipText(null);
@@ -1288,7 +1287,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		else
 		{
 			m_btnDataRetention.setVisible(true);
-			m_btnDataRetention.setToolTipText(urlDataRetention.toString());
+			m_btnDataRetention.setToolTipText(JAPMessages.getString(
+					DataRetentionDialog.MSG_DATA_RETENTION_MIX_EXPLAIN_SHORT));
 		}
 
 
@@ -1833,7 +1833,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	public void mouseClicked(MouseEvent e)
 	{
-		if (e.getSource() == m_btnHomepage || e.getSource() == m_btnDataRetention)
+		if (e.getSource() == m_btnHomepage)
 		{
 			String url = getUrlFromLabel((JButton)e.getSource());
 			if (url == null)
@@ -1851,13 +1851,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				LogHolder.log(LogLevel.ERR, LogType.MISC, "Error opening URL in browser");
 			}
 		}
+		else if (e.getSource() == m_btnDataRetention)
+		{
+			DataRetentionDialog.show(getRootPanel().getParent(), m_cascadeInfo, 
+					m_serverList.getSelectedIndex());
+		}
 		else if (e.getSource() == m_btnEmail)
 		{
 			AbstractOS.getInstance().openEMail(getEMailFromLabel(m_btnEmail));
 		}
 		else if (e.getSource() == m_listOperators)
 		{
-			if(e.getClickCount() == 2)
+			if (e.getClickCount() == 2)
 			{
 				ServiceOperator op = null;
 				synchronized(m_listOperators.getModel())
@@ -1947,10 +1952,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 		else if (e.getSource() == m_lblVDS)
 		{
-			JAPDialog.showWarningDialog(m_lblVDS,
-					JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN_SHORT) + " " +
-					JAPMessages.getString(MSG_DATA_RETENTION_EXPLAIN,
-					"<b>" + JAPMessages.getString(MixDetailsDialog.MSG_BTN_DATA_RETENTION) + "</b>"));
+			DataRetentionDialog.show(getRootPanel().getParent(), m_cascadeInfo);
 		}
 	}
 
@@ -2316,7 +2318,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							m_infoService.getAnonLevel(cascadeId) + " / " + 
 							MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX);
 					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
-					m_lblVDS.setVisible(cascade.isDataRetentionActive());
+					m_lblVDS.setVisible(cascade.getDataRetentionInformation() != null);
 					
 					
 					setAvailabilityLabel(cascade, entry);

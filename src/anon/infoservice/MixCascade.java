@@ -94,7 +94,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 
 	private boolean m_bSock5Support = false;
 	
-	private boolean m_bDataRetention = false;
+	private DataRetentionInformation m_dataRetentionInfo;
 
 	/**
 	 * This is the ID of the mixcascade.
@@ -426,7 +426,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 												 m_mixInfos[i].getPriceCertificate().getHashValue());
 					m_nrPriceCerts++;
 				}
-				if (m_mixInfos[i].getDataRetentionURL("en") != null)
+				if (m_mixInfos[i].getDataRetentionInformation() != null)
 				{
 					countDataRetentionMixes++;
 				}
@@ -436,12 +436,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				bNullMixInfo = true;
 				m_mixInfos[i] = null;
 			}
-		}
-		if (countDataRetentionMixes == mixNodes.getLength() || 
-			(countDataRetentionMixes > 0 && bNullMixInfo))
-		{
-			m_bDataRetention = true;
-		}
+		}		
 		
 		/* get the name */
 		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
@@ -531,6 +526,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		}
 		m_prepaidInterval = Math.min(m_prepaidInterval, AIControlChannel.MAX_PREPAID_INTERVAL);
 		m_prepaidInterval = Math.max(m_prepaidInterval, AIControlChannel.MIN_PREPAID_INTERVAL);
+		
+		
+		m_dataRetentionInfo = DataRetentionInformation.getCascadeDataRetentionInformation(this);
 	}
 
 	/**
@@ -1286,9 +1284,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return false;
 	}
 	
-	public boolean isDataRetentionActive()
+	public DataRetentionInformation getDataRetentionInformation()
 	{
-		return m_bDataRetention;
+		return m_dataRetentionInfo;
 	}
 	
 	public boolean isActiveStudy()
