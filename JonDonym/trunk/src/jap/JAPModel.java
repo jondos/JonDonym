@@ -183,6 +183,8 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 
 	private String m_context = CONTEXT_JONDONYM;
 	
+	private String m_strRelativeBrowserPath;
+	
 	private int m_fontSize = 0;
 
 	private GUIUtils.IIconResizer m_resizer = new GUIUtils.IIconResizer()
@@ -322,6 +324,23 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		}
 
 		return ms_TheModel;
+	}
+	
+	public String getPortableBrowserpath()
+	{
+		return m_strRelativeBrowserPath;
+	}
+	
+	public void setPortableBrowserpath(String a_strRelativeBrowserPath)
+	{
+		if (a_strRelativeBrowserPath == null || a_strRelativeBrowserPath.trim().length() <= 0)
+		{
+			m_strRelativeBrowserPath = null;
+		}
+		else
+		{
+			m_strRelativeBrowserPath = a_strRelativeBrowserPath;
+		}
 	}
 
 	public static String[] getMsgConnectionAnonymous()

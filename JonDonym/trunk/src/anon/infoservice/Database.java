@@ -66,12 +66,12 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	/**
 	 * The registered databases.
 	 */
-	private static Hashtable m_databases = new Hashtable();
+	private static Hashtable ms_databases = new Hashtable();
 
 	/**
 	 * The distributor that forwards new database entries.
 	 */
-	private static IDistributor m_distributor;
+	private static IDistributor ms_distributor;
 
 	private static boolean ms_bShutdown = false;
 
@@ -99,7 +99,7 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	 */
 	public static void registerDistributor(IDistributor a_distributor)
 	{
-		m_distributor = a_distributor;
+		ms_distributor = a_distributor;
 	}
 
 	/**
@@ -112,11 +112,11 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	 */
 	private static Database registerInstance(Database a_Database)
 	{
-		Database database = (Database) m_databases.get(a_Database.getEntryClass());
+		Database database = (Database) ms_databases.get(a_Database.getEntryClass());
 
 		if (database == null && a_Database != null)
 		{
-			m_databases.put(a_Database.getEntryClass(), a_Database);
+			ms_databases.put(a_Database.getEntryClass(), a_Database);
 			database = a_Database;
 		}
 
@@ -133,7 +133,7 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	 */
 	private static Database unregisterInstance(Class a_DatabaseEntryClass)
 	{
-		return (Database) m_databases.remove(a_DatabaseEntryClass);
+		return (Database) ms_databases.remove(a_DatabaseEntryClass);
 	}
 
 	/**
@@ -142,7 +142,7 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	 */
 	private static void unregisterInstances()
 	{
-		m_databases.clear();
+		ms_databases.clear();
 	}
 
 	/**
@@ -158,13 +158,13 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		Database database = null;
 		synchronized (Database.class)
 		{
-			database = (Database) m_databases.get(a_DatabaseEntryClass);
+			database = (Database) ms_databases.get(a_DatabaseEntryClass);
 			if (database == null)
 			{
 				database = new Database(a_DatabaseEntryClass);
 				if (!ms_bShutdown)
 				{
-					m_databases.put(a_DatabaseEntryClass, database);
+					ms_databases.put(a_DatabaseEntryClass, database);
 				}
 			}
 		}
@@ -233,7 +233,7 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		synchronized (Database.class)
 		{
 			ms_bShutdown = true;
-			Enumeration databases = m_databases.elements();
+			Enumeration databases = ms_databases.elements();
 			Database currentDB;
 			while (databases.hasMoreElements())
 			{
@@ -244,7 +244,7 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 					Thread.yield();
 				}
 			}
-			m_databases.clear();
+			ms_databases.clear();
 		}
 	}
 
@@ -274,7 +274,6 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 			m_dbThread.start();
 		}
 	}
-
 
 	/**
 	 * This is the garbage collector for the database. If an entry becomes
@@ -475,9 +474,9 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 				if (newEntry instanceof IDistributable && a_bDistribute)
 				{
 					// forward new entries
-					if (m_distributor != null)
+					if (ms_distributor != null)
 					{
-						m_distributor.addJob( (IDistributable) newEntry);
+						ms_distributor.addJob( (IDistributable) newEntry);
 					}
 					else
 					{

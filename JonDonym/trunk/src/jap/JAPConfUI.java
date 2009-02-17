@@ -105,8 +105,19 @@ final class JAPConfUI extends AbstractJAPConfModule
 	private static final String MSG_DIALOG_FORMAT_GOLDEN_RATIO = JAPConfUI.class.getName()
 		+ "_dialogFormatGoldenRatio";
 	
+	private static final String MSG_TEST_BROWSER_PATH = JAPConfUI.class.getName() + "_testBrowserPath";
+	private static final String MSG_BROWSER_SHOULD_OPEN = JAPConfUI.class.getName() + "_browserShouldOpen";
+	private static final String MSG_BROWSER_DOES_NOT_OPEN = JAPConfUI.class.getName() + "_browserDoesNotStart";
+	private static final String MSG_BROWSER_TEST_PATH = JAPConfUI.class.getName() + "_browserTestPath";
+	private static final String MSG_BROWSER_NEW_PATH = JAPConfUI.class.getName() + "_browserNewPath";
+	private static final String MSG_BROWSER_TEST_BUTTON = JAPConfUI.class.getName() + "_browserTestBtn";
+	private static final String MSG_BROWSER_TEST_EXPLAIN = JAPConfUI.class.getName() + "_browserTestExplain";
+	
 	private static final String MSG_HELP_PATH = JAPConfUI.class.getName() + "_helpPath";
 	private static final String MSG_HELP_PATH_CHOOSE = JAPConfUI.class.getName() + "_helpPathChange";
+	
+	private static final String MSG_BROWSER_PATH = JAPConfUI.class.getName() + "_browserPath";
+	private static final String MSG_BROWSER_PATH_CHOOSE = JAPConfUI.class.getName() + "_browserPathChange";
 	
 	private static final String MSG_NO_NATIVE_LIBRARY = JAPConfUI.class.getName() + "_noNativeLibrary";
 	private static final String MSG_NO_NATIVE_WINDOWS_LIBRARY = JAPConfUI.class.getName() +
@@ -132,6 +143,9 @@ final class JAPConfUI extends AbstractJAPConfModule
 	private File m_currentDirectory;
 	private JTextField m_helpPathField;
 	private JButton m_helpPathButton;
+	
+	private JTextField m_portableBrowserPathField;
+	private JButton m_portableBrowserPathButton;
 	private Observer m_modelObserver;
 
 	public JAPConfUI()
@@ -164,6 +178,14 @@ final class JAPConfUI extends AbstractJAPConfModule
 		JAPModel.getInstance().addObserver(m_modelObserver);
 	}
 
+	public void chooseBrowserPath()
+	{
+		if (m_portableBrowserPathButton != null)
+		{
+			m_portableBrowserPathButton.doClick();
+		}
+	}
+	
 	public void recreateRootPanel()
 	{
 		JPanel panelRoot = getRootPanel();
@@ -224,18 +246,17 @@ final class JAPConfUI extends AbstractJAPConfModule
 		c1.fill = GridBagConstraints.BOTH;
 		c1.weighty = 1;
 		c1.gridwidth = 2;
-		tempPanel =  createHelpPathPanel(); //new JPanel();
+		tempPanel = null;
+		if (JAPModel.getInstance().isHelpPathChangeable())
+		{
+			tempPanel =  createHelpPathPanel();
+		}
+		else if (JAPController.getInstance().isPortableMode())
+		{
+			tempPanel = createBrowserPathPanel();
+		}
 		
 		panelRoot.add(tempPanel, c1);
-		
-		/*c1.gridx = 0;
-		c1.gridy++;
-		//c1.anchor = GridBagConstraints.NORTHWEST;
-		c1.fill = GridBagConstraints.BOTH;
-		//c1.gridheight = 1;
-		c1.weighty = 1;
-		tempPanel =  new JPanel();
-		panelRoot.add(tempPanel, c1);*/
 	}
 
 	/**
@@ -810,6 +831,145 @@ final class JAPConfUI extends AbstractJAPConfModule
 		return p;
 	}
 	
+	private JPanel createBrowserPathPanel()
+	{
+		GridBagConstraints c = new GridBagConstraints();
+		JPanel p = new JPanel(new GridBagLayout());
+		p.setBorder(new TitledBorder(JAPMessages.getString(MSG_BROWSER_PATH)));
+		
+		c.weightx = 1;
+		m_portableBrowserPathField = new JTextField(10);
+		m_portableBrowserPathField.setEditable(false);		
+		m_portableBrowserPathButton = new JButton(JAPMessages.getString(MSG_BROWSER_PATH_CHOOSE));
+		
+		if (JAPModel.getInstance().getPortableBrowserpath() != null)
+		{
+			m_portableBrowserPathField.setText(JAPModel.getInstance().getPortableBrowserpath());
+		}
+		else if (AbstractOS.getInstance().getDefaultBrowserPath() != null)
+		{
+			m_portableBrowserPathField.setText(AbstractOS.getInstance().getDefaultBrowserPath());
+		}		
+		else
+		{				
+			m_portableBrowserPathField.setText("");
+		}
+		
+		ActionListener buttonActionListener = 
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent aev)
+				{
+					File browserFile = null;
+					JFileChooser chooser;
+					
+					if (aev.getActionCommand() != null && new File(aev.getActionCommand()).exists())
+					{
+						chooser = new JFileChooser(aev.getActionCommand());
+					}
+					else if (JAPModel.getInstance().getPortableBrowserpath() != null)
+					{
+						chooser = new JFileChooser(JAPModel.getInstance().getPortableBrowserpath());
+					}
+					else if (AbstractOS.getInstance().getDefaultBrowserPath() != null)
+					{
+						chooser = new JFileChooser(AbstractOS.getInstance().getDefaultBrowserPath());
+					}
+					else
+					{
+						chooser = new JFileChooser(System.getProperty("user.dir"));
+					}
+					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					
+					if (chooser.showOpenDialog(JAPConfUI.this.getRootPanel()) == JFileChooser.APPROVE_OPTION)
+					{
+						browserFile = chooser.getSelectedFile();
+					}
+					if (browserFile != null)
+					{
+						final String filePath = AbstractOS.toRelativePath(browserFile.getPath());						
+						JAPDialog browserTestDialog = new JAPDialog(JAPConfUI.this.getRootPanel(),
+								JAPMessages.getString(MSG_TEST_BROWSER_PATH));
+						final DialogContentPane pane = new DialogContentPane(browserTestDialog, 
+								JAPMessages.getString(MSG_BROWSER_TEST_EXPLAIN),
+								new DialogContentPaneOptions(JAPDialog.OPTION_TYPE_YES_NO_CANCEL))
+						{
+							private boolean m_bValid = false;
+							
+							public CheckError[] checkNo()
+							{
+								CheckError[] errors = null;
+								
+								if (AbstractOS.getInstance().openBrowser(
+										AbstractOS.createBrowserCommand(filePath)))
+								{
+									printStatusMessage(JAPMessages.getString(MSG_BROWSER_SHOULD_OPEN));
+									m_bValid = true;
+								}
+								else
+								{
+									errors = new CheckError[]{
+											new CheckError(JAPMessages.getString(MSG_BROWSER_DOES_NOT_OPEN), LogType.GUI)};
+								}
+								return errors;
+							}
+							
+							public CheckError[] checkYesOK()
+							{
+								CheckError[] errors = null;
+								
+								if (!m_bValid)
+								{
+									errors = new CheckError[]{new CheckError(JAPMessages.getString(MSG_BROWSER_TEST_PATH), LogType.GUI)};
+								}
+								
+								return errors;
+							}
+						};
+						
+						pane.getButtonNo().setText(JAPMessages.getString(MSG_BROWSER_TEST_BUTTON));
+						pane.getButtonCancel().setText(JAPMessages.getString(MSG_BROWSER_NEW_PATH));
+						pane.getButtonYesOK().setText(JAPMessages.getString(DialogContentPane.MSG_OK));
+					
+						pane.setDefaultButtonOperation(DialogContentPane.ON_YESOK_DISPOSE_DIALOG | 
+								DialogContentPane.ON_CANCEL_DISPOSE_DIALOG);
+						DialogContentPane.updateDialogOptimalSized(pane);
+						browserTestDialog.setVisible(true);
+						
+						if (pane.getButtonValue() == DialogContentPane.RETURN_VALUE_OK)
+						{
+							m_portableBrowserPathField.setText(filePath);
+							m_portableBrowserPathField.repaint();
+						}
+						else if (pane.getButtonValue() == DialogContentPane.RETURN_VALUE_CANCEL)
+						{
+							// choose another file
+							actionPerformed(new ActionEvent(aev.getSource(), aev.getID(), browserFile.getPath()));
+						}
+					}
+				}
+			};
+			
+		m_portableBrowserPathButton.addActionListener(buttonActionListener);
+		if(!JAPController.getInstance().isPortableMode())
+		{
+			m_portableBrowserPathButton.setEnabled(false);
+		}
+			
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.gridy = 0;
+		c.gridx = 0;
+		c.insets = new Insets(0, 10, 0, 10);
+		c.weightx = 1.0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		p.add(m_portableBrowserPathField, c);
+		c.gridx++;
+		c.weightx = 0.0;
+		p.add(m_portableBrowserPathButton, c);
+		
+		return p;
+	}
+	
 	private JPanel createHelpPathPanel()
 	{
 		GridBagConstraints c = new GridBagConstraints();
@@ -819,9 +979,9 @@ final class JAPConfUI extends AbstractJAPConfModule
 		c.weightx = 1;
 		
 		m_helpPathField = new JTextField(10);
-		m_helpPathField.setEditable(false);
+		m_helpPathField.setEditable(false);		
 		m_helpPathButton = new JButton(JAPMessages.getString(MSG_HELP_PATH_CHOOSE));
-		if(JAPModel.getInstance().isHelpPathDefined())
+		if (JAPModel.getInstance().isHelpPathDefined())
 		{
 			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
 		}
@@ -835,13 +995,12 @@ final class JAPConfUI extends AbstractJAPConfModule
 			{
 				public void actionPerformed(ActionEvent aev)
 				{
-					IJAPMainView mv = JAPController.getInstance().getView();
 					JAPModel model = JAPModel.getInstance();
 					File hpFile = null;
 					
 					JFileChooser chooser = new JFileChooser(model.getHelpPath());
 					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					if(chooser.showOpenDialog((JAPNewView)mv) == JFileChooser.APPROVE_OPTION)
+					if(chooser.showOpenDialog(JAPConfUI.this.getRootPanel()) == JFileChooser.APPROVE_OPTION)
 					{
 						hpFile = chooser.getSelectedFile();
 					}
@@ -884,6 +1043,11 @@ final class JAPConfUI extends AbstractJAPConfModule
 	
 	private void submitHelpPathChange()
 	{	
+		if (m_helpPathField == null)
+		{
+			return;
+		}
+		
 		final JAPModel model = JAPModel.getInstance();
 		String strCheck = JAPModel.getInstance().helpPathValidityCheck(m_helpPathField.getText());
 		
@@ -921,18 +1085,24 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 	private void resetHelpPath()
 	{
-		m_helpPathField.setText("");
+		if (m_helpPathField != null)
+		{
+			m_helpPathField.setText("");
+		}
 	}
 	
 	private void updateHelpPath()
 	{
-		if(JAPModel.getInstance().isHelpPathDefined() && JAPModel.getInstance().isHelpPathChangeable())
-		{
-			m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
-		}
-		else
-		{
-			m_helpPathField.setText("");
+		if (m_helpPathField != null)
+		{			
+			if(JAPModel.getInstance().isHelpPathDefined() && JAPModel.getInstance().isHelpPathChangeable())
+			{
+				m_helpPathField.setText(JAPModel.getInstance().getHelpPath());
+			}
+			else
+			{
+				m_helpPathField.setText("");
+			}
 		}
 	}
 	
@@ -1037,7 +1207,26 @@ final class JAPConfUI extends AbstractJAPConfModule
 					JAPController.getInstance().setDefaultView(defaultViewRestart);
 				}
 			});
+		}
+		
+		if (m_portableBrowserPathField.getText() != null && 
+			m_portableBrowserPathField.getText().trim().length() > 0 &&
+			!AbstractOS.toAbsolutePath(m_portableBrowserPathField.getText()).equals(
+					AbstractOS.toAbsolutePath(JAPModel.getInstance().getPortableBrowserpath())))
+		{
+			JAPConf.getInstance().addNeedRestart(
+				new JAPConf.AbstractRestartNeedingConfigChange()
+			{
+				public String getName()
+				{
+					return JAPMessages.getString(MSG_BROWSER_PATH);
+				}
 
+				public void doChange()
+				{
+					JAPModel.getInstance().setPortableBrowserpath(m_portableBrowserPathField.getText());
+				}
+			});
 		}
 
 		JAPDialog.setOptimizedFormat( ( (DialogFormat) m_comboDialogFormat.getSelectedItem()).getFormat());
@@ -1117,7 +1306,15 @@ final class JAPConfUI extends AbstractJAPConfModule
 	protected void onUpdateValues()
 	{
 		updateUICombo();
-
+		
+		if (JAPModel.getInstance().getPortableBrowserpath() != null)
+		{
+			m_portableBrowserPathField.setText(JAPModel.getInstance().getPortableBrowserpath());
+		}
+		else
+		{
+			m_portableBrowserPathField.setText(AbstractOS.getInstance().getDefaultBrowserPath());
+		}
 		m_slidFontSize.setValue(JAPModel.getInstance().getFontSize());
 		setLanguageComboIndex(JAPMessages.getLocale());
 		m_cbSaveWindowLocationMain.setSelected(JAPModel.isMainWindowLocationSaved());
@@ -1162,6 +1359,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 				break;
 			}
 		}
+
+		m_portableBrowserPathField.setText(AbstractOS.getInstance().getDefaultBrowserPath());
 		m_cbSaveWindowLocationConfig.setSelected(JAPConstants.DEFAULT_SAVE_CONFIG_WINDOW_POSITION);
 		m_cbSaveWindowLocationIcon.setSelected(JAPConstants.DEFAULT_SAVE_MINI_WINDOW_POSITION);
 		m_cbSaveWindowLocationMain.setSelected(JAPConstants.DEFAULT_SAVE_MAIN_WINDOW_POSITION);

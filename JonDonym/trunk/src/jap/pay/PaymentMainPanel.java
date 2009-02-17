@@ -105,8 +105,8 @@ public class PaymentMainPanel extends FlippingPanel
 		"_noActiveAccount";
 	private static final String MSG_ENABLE_AUTO_SWITCH = PaymentMainPanel.class.getName() +
 		"_enableAutoSwitch";
-	private static final String MSG_WITH_COSTS = PaymentMainPanel.class.getName() +
-	"_withCosts";
+	private static final String MSG_WITH_COSTS = PaymentMainPanel.class.getName() + "_withCosts";
+	private static final String MSG_CREATE_ACCOUNT_TITLE = PaymentMainPanel.class.getName() + "_createAccountTitle";
 	private static final String MSG_CHOOSE_FREE_SERVICES_ONLY = PaymentMainPanel.class.getName() +
 	"_chooseFreeServicesOnly";
 	
@@ -123,9 +123,7 @@ public class PaymentMainPanel extends FlippingPanel
 	private static final String MSG_FREE_OF_CHARGE = PaymentMainPanel.class.getName() + "_freeOfCharge";
 	private static final String MSG_OPEN_TRANSACTION = PaymentMainPanel.class.getName() + "_openTransaction";
 	private static final String MSG_CREATE_ACCOUNT_QUESTION = PaymentMainPanel.class.getName() + "_createAccountQuestion";
-
-
-
+	private static final String MSG_MAYBE_LATER = PaymentMainPanel.class.getName() + "_maybeLater";
 
 	private static final String[] MSG_PAYMENT_ERRORS = {"_xmlSuccess", "_xmlErrorInternal",
 		"_xmlErrorWrongFormat", "_xmlErrorWrongData", "_xmlErrorKeyNotFound", "_xmlErrorBadSignature",
@@ -764,9 +762,8 @@ public class PaymentMainPanel extends FlippingPanel
 			PaymentInstanceDBEntry piEntry;
 			String strOrganisation = null;
 
-			final JAPDialog.LinkedCheckBox adapter =			
-				new JAPDialog.LinkedCheckBox(JAPMessages.getString(MSG_CHOOSE_FREE_SERVICES_ONLY), 
-						false, "premium")
+			final JAPDialog.LinkedHelpContext helpAdapter =			
+				new JAPDialog.LinkedHelpContext("premium")
 			{
 				public boolean isOnTop()
 				{
@@ -796,40 +793,38 @@ public class PaymentMainPanel extends FlippingPanel
 				{
 					public void run()
 					{
-						int optionType;
-						JAPDialog.LinkedHelpContext helpAdapter;
+						JAPDialog.Options options;
 						if (JAPModel.getInstance().isCascadeAutoSwitched() &&
 							!TrustModel.getCurrentTrustModel().isPaymentForced())
 						{
-							optionType = JAPDialog.OPTION_TYPE_YES_NO_CANCEL;
-							helpAdapter = adapter;
+							options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
+							{
+								public String getCancelText()
+								{
+									return JAPMessages.getString(MSG_MAYBE_LATER);
+								}
+							};
 						}
 						else
 						{
-							optionType = JAPDialog.OPTION_TYPE_OK_CANCEL;
-							helpAdapter = new JAPDialog.LinkedHelpContext("premium")
-							{
-								public boolean isOnTop()
-								{
-									return true;
-								}			
-							};
+							options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL);
 						}
 
 						int answer = JAPDialog.showConfirmDialog(
 							JAPController.getInstance().getViewWindow(),
 							strMessage + JAPMessages.getString(MSG_WITH_COSTS, formatCascadeName(cascade)) + " " + 
-							JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION),
-							optionType, JAPDialog.MESSAGE_TYPE_QUESTION, helpAdapter);
+							JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION), 
+							JAPMessages.getString(MSG_CREATE_ACCOUNT_TITLE),
+							options, JAPDialog.MESSAGE_TYPE_QUESTION, helpAdapter);
 						
 						if (answer == JAPDialog.RETURN_VALUE_YES)
 						{
 							JAPController.getInstance().setAllowPaidServices(true);
 							m_view.showConfigDialog(JAPConf.PAYMENT_TAB, a_connectedCascade.getPIID());
 						}
-						else if (answer == JAPDialog.RETURN_VALUE_NO)
+						else if (options.getOptionType() == JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
 						{
-							if (adapter.getState())
+							if (answer == JAPDialog.RETURN_VALUE_NO)
 							{
 								// this user wants free services only... Choose the free trust model.
 								TrustModel.forceFreeTrustModel();
@@ -852,13 +847,9 @@ public class PaymentMainPanel extends FlippingPanel
 						public void run()
 						{
 							JAPDialog.showErrorDialog(JAPController.getInstance().getViewWindow(),
-								strMessage + JAPMessages.getString(MSG_NO_ACTIVE_ACCOUNT), LogType.PAY, adapter);
+								strMessage + JAPMessages.getString(MSG_NO_ACTIVE_ACCOUNT), LogType.PAY, 
+								helpAdapter);
 							m_view.showConfigDialog(JAPConf.PAYMENT_TAB, null);
-							if (adapter.getState())
-							{
-								// this user wants free services only... Choose the free trust model.
-								TrustModel.forceFreeTrustModel();
-							}
 						}
 					};
 				}
@@ -875,6 +866,7 @@ public class PaymentMainPanel extends FlippingPanel
 									formatCascadeName(cascade)) + " ";
 							boolean bOpenTransaction = false;
 							//if (account.getBalance().getSpent() <= 0 && !account.hasExpired())
+							String strTitle = null;
 							if (account.getCurrentSpent() <= 0 && !account.hasExpired())
 							{
 								message += JAPMessages.getString(MSG_OPEN_TRANSACTION);
@@ -883,30 +875,28 @@ public class PaymentMainPanel extends FlippingPanel
 							else
 							{
 								message += JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION);
+								strTitle = JAPMessages.getString(MSG_CREATE_ACCOUNT_TITLE);
 							}
 							JAPController.getInstance().setAnonMode(false);
-							int optionType;
-							JAPDialog.LinkedHelpContext helpAdapter;
+							JAPDialog.Options options;
 							if (JAPModel.getInstance().isCascadeAutoSwitched() &&
 								!TrustModel.getCurrentTrustModel().isPaymentForced())
 							{
-								helpAdapter = adapter;
-								optionType = JAPDialog.OPTION_TYPE_YES_NO_CANCEL;
+								options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
+								{
+									public String getCancelText()
+									{
+										return JAPMessages.getString(MSG_MAYBE_LATER);
+									}
+								};
 							}
 							else
 							{
-								optionType = JAPDialog.OPTION_TYPE_OK_CANCEL;
-								helpAdapter = new JAPDialog.LinkedHelpContext("premium")
-								{
-									public boolean isOnTop()
-									{
-										return true;
-									}			
-								};
+								options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL);
 							}
 							int answer = JAPDialog.showConfirmDialog(
-									JAPController.getInstance().getViewWindow(), message,
-									optionType, JAPDialog.MESSAGE_TYPE_QUESTION, helpAdapter);
+									JAPController.getInstance().getViewWindow(), message, strTitle,
+									options, JAPDialog.MESSAGE_TYPE_QUESTION, helpAdapter);
 							if (answer == JAPDialog.RETURN_VALUE_YES)
 							{
 								JAPController.getInstance().setAllowPaidServices(true);
@@ -920,9 +910,9 @@ public class PaymentMainPanel extends FlippingPanel
 								}
 								//m_view.showConfigDialog(JAPConf.PAYMENT_TAB, new Boolean(true));
 							}
-							else if (answer == JAPDialog.RETURN_VALUE_NO)
+							else if (options.getOptionType() == JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
 							{
-								if (adapter.getState())
+								if (answer == JAPDialog.RETURN_VALUE_NO)
 								{
 									// this user wants free services only... Choose the free trust model.
 									TrustModel.forceFreeTrustModel();
@@ -1016,9 +1006,8 @@ public class PaymentMainPanel extends FlippingPanel
 						String message = //JAPMessages.getString(MSG_FREE_OF_CHARGE) + "<br><br>" +
 							translateBIError(msg);
 						Component parent = PaymentMainPanel.this;
-						final JAPDialog.LinkedCheckBox adapter =			
-							new JAPDialog.LinkedCheckBox(JAPMessages.getString(MSG_CHOOSE_FREE_SERVICES_ONLY), 
-									false, "premium")
+						final JAPDialog.LinkedHelpContext adapter =			
+							new JAPDialog.LinkedHelpContext("premium")
 						{
 							public boolean isOnTop()
 							{
@@ -1045,18 +1034,25 @@ public class PaymentMainPanel extends FlippingPanel
 							message += "<br><br>" +
 								JAPMessages.getString(MSG_WITH_COSTS, formatCascadeName(cascade)) + " " +
 								JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION);
-							int optionType;
+							JAPDialog.Options options;
 							if (JAPModel.getInstance().isCascadeAutoSwitched() &&
 								!TrustModel.getCurrentTrustModel().isPaymentForced())
 							{
-								optionType = JAPDialog.OPTION_TYPE_YES_NO_CANCEL;
+								options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
+								{
+									public String getCancelText()
+									{
+										return JAPMessages.getString(MSG_MAYBE_LATER);
+									}
+								};
 							}
 							else
 							{
-								optionType = JAPDialog.OPTION_TYPE_OK_CANCEL;
+								options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL);
 							}
 							int answer = JAPDialog.showConfirmDialog(parent, message,
-								optionType, JAPDialog.MESSAGE_TYPE_QUESTION, adapter);							
+									JAPMessages.getString(MSG_CREATE_ACCOUNT_TITLE),
+									options, JAPDialog.MESSAGE_TYPE_QUESTION, adapter);							
 							
 							if (answer == JAPDialog.RETURN_VALUE_YES)
 							{
@@ -1077,9 +1073,9 @@ public class PaymentMainPanel extends FlippingPanel
 									}
 								}).start();																								
 							}
-							else if (answer == JAPDialog.RETURN_VALUE_NO)
+							else if (options.getOptionType() == JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
 							{
-								if (adapter.getState())
+								if (answer == JAPDialog.RETURN_VALUE_NO)
 								{
 									// this user wants free services only... Choose the free trust model.
 									TrustModel.forceFreeTrustModel();
