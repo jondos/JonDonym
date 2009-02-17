@@ -143,6 +143,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	/** Messages */
 	public static final String MSG_ERROR_SAVING_CONFIG = JAPController.class.getName() +
 		"_errorSavingConfig";
+	public static final String MSG_NO_WRITING = JAPController.class.getName() + "_noWriting";
+	public static final String MSG_NO_WRITING_PORTABLE = JAPController.class.getName() + "_noWritingPortable";
 	private static final String MSG_DIALOG_ACCOUNT_PASSWORD = JAPController.class.
 		getName() + "_dialog_account_password";
 	private static final String MSG_ACCOUNT_PASSWORD = JAPController.class.
@@ -4057,8 +4059,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 							!getInstance().m_restarter.hideWarnings() &&
 							result == JAPDialog.RETURN_VALUE_NO)
 					{
+						String strMessage = JAPMessages.getString(MSG_ERROR_SAVING_CONFIG, JAPModel.getInstance().getConfigFile());
+						strMessage += " " + JAPMessages.getString(MSG_NO_WRITING);
+						if (getInstance().isPortableMode())
+						{
+							strMessage += "<br><br><b>" +JAPMessages.getString(MSG_NO_WRITING_PORTABLE) + "</b>";
+						}
+						
 						result = JAPDialog.showConfirmDialog(parent, 
-									JAPMessages.getString(MSG_ERROR_SAVING_CONFIG, JAPModel.getInstance().getConfigFile()), 
+								strMessage, 
 									new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL){
 							public String getYesOKText()
 							{
