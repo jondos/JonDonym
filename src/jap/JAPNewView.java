@@ -2901,7 +2901,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					{
 						if (m_bIsIconified)
 						{
-							setTitle("JAP (" + JAPMessages.getString(SystrayPopupMenu.MSG_ANONYMITY) + ": " +
+							setTitle("JAP/JonDo (" + //JAPMessages.getString(SystrayPopupMenu.MSG_ANONYMITY) + ": " +
 									currentMixCascade.getDistribution() + "," + currentStatus.getAnonLevel() + " / 6,6" + ")");
 						}
 						else

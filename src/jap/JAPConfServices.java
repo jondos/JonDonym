@@ -144,10 +144,6 @@ public class JAPConfServices extends AbstractJAPConfModule
 				rootPanelConstraints.weighty = 1;
 				rootPanel.add(new JLabel(), rootPanelConstraints);
 			}
-
-
-
-
 		}
 	}
 

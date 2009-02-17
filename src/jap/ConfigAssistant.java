@@ -400,7 +400,7 @@ public class ConfigAssistant extends JAPDialog
 
 		constraints.gridy = 0;
 		addBrowserInstallationInfo(contentPane, constraints, BROWSER_JONDOFOX, "jondofox", true);
-		addBrowserInstallationInfo(contentPane, constraints, BROWSER_FIREFOX, "jondofox", true);
+		addBrowserInstallationInfo(contentPane, constraints, BROWSER_FIREFOX, "jondofox", false);
 		addBrowserInstallationInfo(contentPane, constraints,
 								   JAPMessages.getString(MSG_OTHER_BROWSERS), "browser", false);
 

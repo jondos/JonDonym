@@ -86,14 +86,6 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 	private Hashtable m_registratedModules;
 
 	/**
-	 * This table stores all node names of configuration components which are not included within an
-	 * instance of AbstractJAPConfModule. The key for each node name in the table is the node of the
-	 * associated node within the configuration tree. This table is only needed for compatibility
-	 * with some old configuration structures in JAP. It will be removed as soon as possible.
-	 */
-	private Hashtable m_registratedPanelTitleIdentifiers;
-
-	/**
 	 * This table stores all associations between the tree nodes of the configuration modules (keys)
 	 * and the symbolic names used to access the modules from outside.
 	 */
@@ -116,7 +108,6 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 	public JAPConfModuleSystem()
 	{
 		m_registratedModules = new Hashtable();
-		m_registratedPanelTitleIdentifiers = new Hashtable();
 		m_treeNodesToSymbolicNames = new Hashtable();
 		m_symbolicNamesToTreeNodes = new Hashtable();
 		m_symbolicNamesToHelpContext = new Hashtable();
@@ -265,7 +256,6 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 		synchronized (this)
 		{
 			a_parentNode.add(componentNode);
-			m_registratedPanelTitleIdentifiers.put(componentNode, a_nodeNameIdentifier);
 			if (a_component != null)
 			{
 				/* this node has an associated component -> it will be selectable */

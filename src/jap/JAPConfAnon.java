@@ -970,7 +970,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		pRoot.setLayout(m_rootPanelLayout);
 		if (JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED)
 		{
-			pRoot.setBorder(new TitledBorder(JAPMessages.getString("availableCascades")));
+			pRoot.setBorder(new TitledBorder(JAPMessages.getString("confAnonTab")));
 		}
 		m_rootPanelConstraints.anchor = GridBagConstraints.NORTHWEST;
 
