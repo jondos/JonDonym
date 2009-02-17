@@ -52,6 +52,7 @@ import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;
+import anon.util.Util;
 import gui.GUIUtils;
 import gui.JAPAWTMsgBox;
 import gui.JAPDll;
@@ -63,6 +64,7 @@ import jap.ConsoleJAPMainView;
 import jap.ConsoleSplash;
 import jap.IJAPMainView;
 import jap.ISplashResponse;
+import jap.JAPConf;
 import jap.JAPConstants;
 import jap.JAPController;
 import jap.JAPDebug;
@@ -81,7 +83,7 @@ import platform.WindowsOS;
 import platform.MacOS;
 
 /** This is the main class of the JAP project. It starts everything. It can be inherited by another
- *  class that wants to initialize platform dependend features, e.g. see
+ *  class that wants to initialize platform depending features, e.g. see
  *  <A HREF="JAPMacintosh.html">JAPMacintosh.html</A>
  *  as an example.
  */
@@ -107,10 +109,11 @@ public class JAP
 		JAP.class.getName() + "_explainNoFirefoxFound";
 	private static final String MSG_USE_DEFAULT_BROWSER = 
 		JAP.class.getName() + "_useDefaultBrowser";
+	private static final String MSG_CONFIGURE_BROWSER = 
+		JAP.class.getName() + "_configureBrowser";
+	
 	private static final String MSG_UNINSTALLING = JAP.class.getName() + "_uninstalling";
 	
-	
-	private final static String WHITESPACE_ENCODED = "%20";
 	private static final String OPTION_CONTEXT = "--context";
 	
 	private JAPController m_controller;
@@ -342,7 +345,7 @@ public class JAP
 		m_controller = JAPController.getInstance();
 		
 		// Set path to Firefox for portable JAP
-		boolean bPortable = isArgumentSet("--portable");
+		final boolean bPortable = isArgumentSet("--portable");
 		m_controller.setPortableMode(bPortable);
 		String context =  getArgumentValue(OPTION_CONTEXT);
 		if (context != null)
@@ -351,7 +354,8 @@ public class JAP
 		}
 		
 		String configFileName = null;
-		/* check, whether there is the -config parameter, which means the we use userdefined config
+		boolean bSetPortableConfig = false;
+		/* check, whether there is the -config parameter, which means the we use user defined config
 		 * file
 		 */
 		if ((configFileName = getArgumentValue("--config")) == null)
@@ -367,6 +371,7 @@ public class JAP
 				configFileName =
 					ClassUtil.getClassDirectory(JAP.class).getParent() +
 					File.separator + JAPConstants.XMLCONFFN;
+				bSetPortableConfig = true;
 			}
 		}
 
@@ -375,14 +380,18 @@ public class JAP
 			LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Loading config file '" + configFileName + "'.");
 		}
 		
+		String strErrorFileNotFound = null;
 		try 
 		{
 			m_controller.preLoadConfigFile(configFileName);
 		} 
-		catch (FileNotFoundException a_e) {
-			
+		catch (FileNotFoundException a_e) 
+		{
 			LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e);
-			System.exit(-1);
+			if (!bSetPortableConfig)
+			{
+				strErrorFileNotFound = "File not found: " + a_e.getMessage();
+			}
 		}
 		// Show splash screen
 		ISplashResponse splash;
@@ -401,7 +410,6 @@ public class JAP
 		{
 			splashText = "Nahr\u00E1v\u00E1m internacionalizaci";
 		}
-
 		else
 		{
 			splashText = "Loading internationalisation";
@@ -425,6 +433,20 @@ public class JAP
 			( (JAPSplash) splash).centerOnScreen();
 			( (JAPSplash) splash).setVisible(true);
 			GUIUtils.setAlwaysOnTop( ( (JAPSplash) splash), true);
+		}
+		
+		if (strErrorFileNotFound != null)
+		{
+			splash.setText(strErrorFileNotFound);
+			try 
+			{
+				Thread.sleep(5000);
+			} 
+			catch (InterruptedException e) 
+			{
+				// ignore
+			}
+			System.exit(-1);
 		}
 
 		// Init Messages....
@@ -618,7 +640,15 @@ public class JAP
 		{
 			for (int i = 0; i < m_temp.length; i++)
 			{
-				cmdArgs += " " + m_temp[i];
+				if (new StringTokenizer(m_temp[i]).countTokens() > 1)
+				{
+					// escape white spaces
+					cmdArgs += " \"" + m_temp[i] + "\"";
+				}
+				else
+				{
+					cmdArgs += " " + m_temp[i];
+				}
 			}
 			if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
 			{
@@ -659,9 +689,9 @@ public class JAP
 			}
 		},new AbstractOS.AbstractURLOpener()
 		{									
-			public boolean openURL(URL a_url)
+			public boolean openURL(URL a_url, String a_browerCommand)
 			{			
-				if (a_url == null || BROWSER_CMD == null)
+				if (a_url == null || !m_controller.isPortableMode())
 				{
 					// no valid url or no portable installation
 					return false;
@@ -669,8 +699,14 @@ public class JAP
 				
 				IJAPMainView view = JAPController.getInstance().getView();
 				
-				if (!super.openURL(a_url) && view instanceof AbstractJAPMainView)
+				if (!super.openURL(a_url, a_browerCommand) && view instanceof AbstractJAPMainView)
 				{
+					if (a_browerCommand != null && 
+						(getBrowserCommand() == null || !a_browerCommand.equals(getBrowserCommand())))
+					{
+						return false;
+					}
+					
 					JAPDialog.LinkedInformationAdapter adapter = 
 						new JAPDialog.LinkedInformationAdapter()
 					{
@@ -684,18 +720,28 @@ public class JAP
 							return true;
 						}
 					};
-					if(JAPDialog.showConfirmDialog(((AbstractJAPMainView)view).getCurrentView(),
+					int answer = JAPDialog.showConfirmDialog(((AbstractJAPMainView)view).getCurrentView(),
 							JAPMessages.getString(MSG_EXPLAIN_NO_FIREFOX_FOUND), 
-							new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL)
+							new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
 					{
 						public String getYesOKText()
 						{
 							return JAPMessages.getString(MSG_USE_DEFAULT_BROWSER);
 						}
-					},					
-							JAPDialog.MESSAGE_TYPE_WARNING, adapter) == JAPDialog.RETURN_VALUE_OK)
+						
+						public String getNoText()
+						{
+							return JAPMessages.getString(MSG_CONFIGURE_BROWSER);
+						}
+					}, JAPDialog.MESSAGE_TYPE_WARNING, adapter);
+					
+					if (answer == JAPDialog.RETURN_VALUE_OK)
 					{
 						return false; // try to open with system default browser												
+					}
+					else if (answer == JAPDialog.RETURN_VALUE_NO)
+					{
+						((AbstractJAPMainView)view).showConfigDialog(JAPConf.UI_TAB, this);
 					}
 				}
 				return true;
@@ -706,35 +752,22 @@ public class JAP
 				return JAPModel.getInstance().getHelpURL();
 			}
 			
+			public String getBrowserPath()
+			{
+				return getArgumentValue("--portable");
+			}
+			
 			public String getBrowserCommand()
 			{
 				return BROWSER_CMD;
 			}
-		});		
-		
+		});
 		
 		JAPModel.getInstance().setForwardingStateModuleVisible(forwardingStateVisible);
 		// load settings from config file
 		splash.setText(JAPMessages.getString(MSG_LOADING_SETTINGS));
-		try
-		{
-			m_controller.loadConfigFile(configFileName, splash);
-		} 
-		catch (FileNotFoundException a_e) 
-		{			
-			splash.setText(a_e.getMessage());
-			LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e);
-			try 
-			{
-				Thread.sleep(5000);
-			} 
-			catch (InterruptedException e) 
-			{
-				// ignore
-			}
-			System.exit(-1);
-		}
-		
+		m_controller.loadConfigFile(configFileName, splash);
+	
 		// configure forwarding server
 		String forwardingServerPort;
 		if ( (forwardingServerPort = getArgumentValue("--forwarder")) == null)
@@ -990,7 +1023,7 @@ public class JAP
 	
 	private String buildPortableFFCommand(ISplashResponse a_splash)
 	{
-		String pFFExecutable = null;
+		String pFFExecutable;
 		String pFFHelpPath = null;
 
 		if (!isArgumentSet("--portable") )
@@ -999,22 +1032,15 @@ public class JAP
 		}
 		
 		//check if portable is set
-		pFFExecutable = getArgumentValue("--portable");
+		pFFExecutable = JAPModel.getInstance().getPortableBrowserpath();
+		if (pFFExecutable == null)
+		{
+			pFFExecutable = getArgumentValue("--portable");
+			JAPModel.getInstance().setPortableBrowserpath(pFFExecutable);
+		}
 		if (pFFExecutable != null)
 		{
-			/*replace any white space encodings with white spaces */
-			StringBuffer pFFExecutableBuf = new StringBuffer("");
-			int whiteSpEnc = pFFExecutable.indexOf(WHITESPACE_ENCODED, 0);
-			int lastIx = 0;
-			while(whiteSpEnc != -1)
-			{
-				pFFExecutableBuf.append(pFFExecutable.substring(lastIx, whiteSpEnc));				
-				pFFExecutableBuf.append(" ");
-				lastIx = whiteSpEnc+WHITESPACE_ENCODED.length();
-				whiteSpEnc = pFFExecutable.indexOf(WHITESPACE_ENCODED, (whiteSpEnc+1));
-			}
-			pFFExecutableBuf.append(pFFExecutable.substring(lastIx));
-			pFFExecutable = toAbsolutePath(pFFExecutableBuf.toString());
+			pFFExecutable = AbstractOS.createBrowserCommand(pFFExecutable);
 					
 			if (isArgumentSet("--portable-help-path"))
 			{
@@ -1063,6 +1089,11 @@ public class JAP
 				{
 					pFFHelpPath = new File(jar.getName()).getParent();
 				}
+				else if (!JAPModel.getInstance().isHelpPathChangeable())
+				{
+					// maybe this is a test environment with local class files, but no jar file
+					pFFHelpPath = ClassUtil.getClassDirectory(this.getClass()).getParent();
+				}
 			}
 			
 	
@@ -1076,26 +1107,6 @@ public class JAP
 		}
 		
 		return pFFExecutable;
-	}
-	
-	public static String toAbsolutePath(String path)
-	{
-		if(path != null)
-		{
-			if(!(path.startsWith(File.separator)) && 
-			   !((path.substring(1,3)).equals(":"+File.separator)) )
-			{
-				//path is relative
-				return System.getProperty("user.dir") + File.separator + path;
-				
-			}
-			else
-			{
-				//path is already absolute
-				return path;
-			}
-		}
-		return null;
 	}
 	
 	public static void main(String[] argv)

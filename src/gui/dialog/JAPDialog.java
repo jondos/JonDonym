@@ -601,8 +601,9 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 	 */
 	public static abstract class AbstractLinkedURLAdapter extends LinkedInformationAdapter
 	{
-		public abstract URL getUrl();
 		private static final String MAILTO = "mailto:";
+		
+		public abstract URL getUrl();
 
 		public String getTooltipText()
 		{

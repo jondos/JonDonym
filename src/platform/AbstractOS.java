@@ -45,6 +45,7 @@ import logging.LogLevel;
 import logging.LogType;
 import anon.util.ClassUtil;
 import anon.util.IMiscPasswordReader;
+import anon.util.Util;
 
 /**
  * This abstract class provides access to OS-specific implementations of certain
@@ -66,6 +67,8 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		{
 		"firefox", "iexplore", "explorer", "mozilla", "konqueror", "mozilla-firefox", "opera"
 	};
+	
+	private final static String WHITESPACE_ENCODED = "%20";
 
 	/**
 	 * The instanciated operation system class.
@@ -99,17 +102,22 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		private Process m_portableFirefoxProcess = null;
 		private boolean m_bOneSessionOnly = false;
 		
-		public synchronized boolean openURL(URL a_url)
+		public final synchronized boolean openURL(URL a_url)
+		{
+			return openURL(a_url, getBrowserCommand());
+		}
+		
+		public synchronized boolean openURL(URL a_url, String a_browserCommand)
 		{
 			String[] cmd;
 			
-			if (getBrowserCommand() == null || a_url == null)
+			if (a_browserCommand == null || a_url == null)
 			{
 				// no path to portable browser was given; use default
 				return false;
 			}
 				
-			if(m_portableFirefoxProcess != null && m_bOneSessionOnly)
+			if (m_portableFirefoxProcess != null && m_bOneSessionOnly)
 			{
 				try
 				{
@@ -127,7 +135,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 				}
 			}
 			
-			cmd = new String[]{getBrowserCommand(), a_url.toString()};
+			cmd = new String[]{a_browserCommand, a_url.toString()};
 			try
 			{
 				m_portableFirefoxProcess = Runtime.getRuntime().exec(cmd);
@@ -136,7 +144,7 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			catch (SecurityException se)
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.MISC,
-						"You are not allowed to lauch portable firefox: ", se);
+						"You are not allowed to launch portable firefox: ", se);
 			}
 			catch (IOException ioe3) 
 			{
@@ -150,13 +158,20 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		
 		public abstract String getBrowserCommand();
 		
+		public abstract String getBrowserPath();
+		
 		public abstract URL getDefaultURL();
 		
 		public final synchronized boolean openBrowser()
 		{
+			return openBrowser(getBrowserCommand());
+		}
+		
+		public final synchronized boolean openBrowser(String a_browserCommand)
+		{
 			boolean bReturn;
 			m_bOneSessionOnly = true;
-			bReturn = openURL(getDefaultURL());
+			bReturn = openURL(getDefaultURL(), a_browserCommand);
 			m_bOneSessionOnly = false;
 			return bReturn;			
 		}
@@ -200,6 +215,93 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		}
 
 		return ms_operatingSystem;
+	}
+	
+	public static String createBrowserCommand(String pFFExecutable)
+	{
+		// replace path specifiers by system specific characters
+		pFFExecutable = Util.replaceAll(pFFExecutable, "/", File.separator);
+		
+		/*replace any white space encodings with white spaces */
+		StringBuffer pFFExecutableBuf = new StringBuffer("");
+		int whiteSpEnc = pFFExecutable.indexOf(WHITESPACE_ENCODED, 0);
+		int lastIx = 0;
+		while(whiteSpEnc != -1)
+		{
+			pFFExecutableBuf.append(pFFExecutable.substring(lastIx, whiteSpEnc));				
+			pFFExecutableBuf.append(" ");
+			lastIx = whiteSpEnc+WHITESPACE_ENCODED.length();
+			whiteSpEnc = pFFExecutable.indexOf(WHITESPACE_ENCODED, (whiteSpEnc+1));
+		}
+		pFFExecutableBuf.append(pFFExecutable.substring(lastIx));
+		pFFExecutable = toAbsolutePath(pFFExecutableBuf.toString());
+		
+		return pFFExecutable;
+	}
+	
+	public static String toRelativePath(String a_path)
+	{
+		if (a_path == null)
+		{
+			return null;
+		}
+		String strUserDir = System.getProperty("user.dir");
+		String strRelative = "";
+		int index;
+		
+		if (strUserDir.endsWith(File.separator))
+		{
+			strUserDir = strUserDir.substring(0, strUserDir.lastIndexOf(File.separator));
+		}
+		
+		while(true)
+		{
+			if (strUserDir.length() == 0 || a_path.indexOf(strUserDir) == 0)
+			{
+				a_path = a_path.substring(strUserDir.length(), a_path.length());
+				if (a_path.startsWith(File.separator))
+				{
+					a_path = a_path.substring(a_path.indexOf(File.separator) + 1, a_path.length());
+				}
+				a_path = strRelative + a_path;
+				break;
+			}
+			else
+			{
+				index = strUserDir.lastIndexOf(File.separator);
+				if (index >= 0)
+				{
+					strUserDir = strUserDir.substring(0, index);
+					strRelative += ".." + File.separator;
+				}
+				else
+				{
+					strUserDir = "";
+				}
+			}
+		}
+		
+		return a_path;
+	}
+	
+	public static String toAbsolutePath(String path)
+	{
+		if(path != null)
+		{
+			if ((File.separator.equals("\\") && !(path.startsWith(File.separator)) && 
+				path.length() >= 3 && !((path.substring(1,3)).equals(":" + File.separator)) ||
+				(File.separator.equals("/") && !path.startsWith(File.separator))))
+			{
+				//path is relative
+				return System.getProperty("user.dir") + File.separator + path;
+			}
+			else
+			{
+				//path is already absolute
+				return path;
+			}
+		}
+		return null;
 	}
 
 	public void init(IURLErrorNotifier a_notifier, AbstractURLOpener a_URLOpener)
@@ -268,6 +370,15 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 			return openLink(a_mailto);
 		}
 	}
+	
+	public final String getDefaultBrowserPath()
+	{
+		if (m_URLOpener != null)
+		{
+			return m_URLOpener.getBrowserPath();
+		}
+		return null;
+	}
 
 	public final boolean isDefaultURLAvailable()
 	{
@@ -288,6 +399,15 @@ public abstract class AbstractOS implements IExternalURLCaller, IExternalEMailCa
 		if (m_URLOpener != null)
 		{
 			return m_URLOpener.openBrowser();
+		}
+		return false;
+	}
+	
+	public final boolean openBrowser(String a_browserCommand)
+	{
+		if (m_URLOpener != null)
+		{
+			return m_URLOpener.openBrowser(a_browserCommand);
 		}
 		return false;
 	}

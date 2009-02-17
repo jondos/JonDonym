@@ -47,6 +47,19 @@ public class DataRetentionDialog
 	public static final String MSG_DATA_RETENTION_EXPLAIN = 
 		DataRetentionDialog.class.getName() + "_explain";
 	
+	public static final String MSG_RETENTION_PERIOD = DataRetentionDialog.class.getName() + "_retentionPeriod";
+	public static final String MSG_INFO_TITLE = DataRetentionDialog.class.getName() + "_info";
+	public static final String MSG_NO_LOGS = DataRetentionDialog.class.getName() + "_noLogs";
+	public static final String MSG_ENTRY_MIX_STORES = DataRetentionDialog.class.getName() + "_entryMixStores";
+	public static final String MSG_CASCADE_STORES = DataRetentionDialog.class.getName() + "_cascadeStores";
+	public static final String MSG_MIX_STORES = DataRetentionDialog.class.getName() + "_mixStores";
+	public static final String MSG_NO_CHANCE = DataRetentionDialog.class.getName() + "_noChance";
+	public static final String MSG_NO_TARGET_ADDRESSES = DataRetentionDialog.class.getName() + "_noTargetAdresses";
+	public static final String MSG_IN_THE_SCOPE = DataRetentionDialog.class.getName() + "_inTheScope";
+	public static final String MSG_WHETHER_CONNECTED = DataRetentionDialog.class.getName() + "_whetherConnected";
+	public static final String MSG_WHICH_TARGETED = DataRetentionDialog.class.getName() + "_whichTargeted";
+	public static final String MSG_WHETHER_TARGETED = DataRetentionDialog.class.getName() + "_whetherTargeted";
+	public static final String MSG_WHETHER_USED = DataRetentionDialog.class.getName() + "_whetherUsed";
 	
 	private DataRetentionDialog() 
 	{
@@ -101,7 +114,7 @@ public class DataRetentionDialog
 				
 				public String getMessage()
 				{
-					return "Weitere Informationen";
+					return JAPMessages.getString(JAPDialog.ILinkedInformation.MSG_MORE_INFO);
 				}
 			};
 		}
@@ -129,21 +142,28 @@ public class DataRetentionDialog
 		if (a_mixID < 0 && (drInfoFirstMix == null || drInfoFirstMix.isLogged(DataRetentionInformation.NOTHING)))
 		{
 			// nothing is logged!!
-			strMessage += "Die Mixe der Kaskade {0} erstellen keine Logdaten die Ihrer Anonymität schaden könnten.";
+			strMessage += JAPMessages.getString(MSG_NO_LOGS, "<i>" + a_cascade.getName() + "</i>");
 		}
 		else
 		{
 			if (bFirstMixOnly)
 			{
-				strMessage = "Der Eingangs-Mix der Kaskade {0} speichert die folgenden Verbindungsdaten auf Vorrat:";
+				strMessage = JAPMessages.getString(MSG_ENTRY_MIX_STORES, "<i>" + a_cascade.getName() + "</i>");
 			}
 			else if (a_mixID < 0)
 			{
-				strMessage = "Die Mixe der Kaskade {0} speichern die folgenden Verbindungsdaten auf Vorrat:";
+				strMessage = JAPMessages.getString(MSG_CASCADE_STORES, "<i>" + a_cascade.getName() + "</i>");
 			}
 			else
-			{
-				strMessage = "Der Mix {0} des Betreibers {1} speichert die folgenden Verbindungsdaten auf Vorrat:";
+			{	
+				String strOperator = "unknown";
+				if (a_cascade.getMixInfo(a_mixID).getServiceOperator() != null)
+				{
+					strOperator = a_cascade.getMixInfo(a_mixID).getServiceOperator().getOrganization();
+				}
+				
+				strMessage = JAPMessages.getString(MSG_MIX_STORES, new String[]{
+						"<i>" + a_cascade.getMixInfo(a_mixID).getName() + "</i>", "<i>" + strOperator + "</i>"});
 			}
 			
 			strMessage += "<ul>";
@@ -188,7 +208,7 @@ public class DataRetentionDialog
 			}
 			
 			strMessage += "</ul>";
-			strMessage += "<p>Speicherdauer: ";
+			strMessage += "<p>" + JAPMessages.getString(MSG_RETENTION_PERIOD)  + ": ";
 			if (bFirstMixOnly)
 			{
 				duration = drInfoFirstMix.getDuration();
@@ -216,7 +236,7 @@ public class DataRetentionDialog
 			if (drInfoCascade != null && drInfoFirstMix != null && 
 				drInfoFirstMix.isLogged(DataRetentionInformation.INPUT_SOURCE_IP_ADDRESS))
 			{
-				strMessage += "Im Rahmen einer Strafverfolgung unter Richtervorbehalt könnte dadurch nachvollzogen werden, ";
+				strMessage += JAPMessages.getString(MSG_IN_THE_SCOPE) + " ";
 				
 				if (bFirstMixOnly || !drInfoCascade.isLogged(DataRetentionInformation.INPUT_CHANNEL_ID) ||
 					!drInfoCascade.isLogged(DataRetentionInformation.OUTPUT_CHANNEL_ID))
@@ -224,11 +244,11 @@ public class DataRetentionDialog
 					if (drInfoFirstMix.isLogged(DataRetentionInformation.INPUT_TIME) ||
 						drInfoFirstMix.isLogged(DataRetentionInformation.INPUT_CHANNEL_ID))
 					{
-						strMessage += "ob Sie die Kaskade {0} zu einer bestimmten Zeit genutzt haben.";
+						strMessage += JAPMessages.getString(MSG_WHETHER_USED, "<i>" + a_cascade.getName() + "</i>");
 					}
 					else
 					{
-						strMessage += "ob Sie zu einer bestimmten Zeit mit der Kaskade {0} verbunden waren.";
+						strMessage += JAPMessages.getString(MSG_WHETHER_CONNECTED, "<i>" + a_cascade.getName() + "</i>");
 					}
 				}
 				else if (drInfoCascade.isLogged(DataRetentionInformation.INPUT_TIME))
@@ -237,31 +257,28 @@ public class DataRetentionDialog
 						drInfoLastMix.isLogged(DataRetentionInformation.OUTPUT_TARGET_IP_ADDRESS))
 					{
 						bDataAboutRequestedPages = true;
-						strMessage += "welche Internetadresse Sie zu einer bestimmten Zeit kontaktiert haben.";
+						strMessage += JAPMessages.getString(MSG_WHICH_TARGETED);
 					}
 					else if (drInfoLastMix.isLogged(DataRetentionInformation.OUTPUT_SOURCE_IP_PORT))
 					{
-						strMessage += "ob Sie zu einer bestimmten Zeit eine bestimmten Internetserver kontaktiert haben. " +
-								"Falls andere Nutzer gleichzeitig mit Ihnen Daten über die Kaskade ins Internet gesendet haben, wird diese Aufdeckung jedoch stark erschwert oder sogar unmöglich.";
+						strMessage += JAPMessages.getString(MSG_WHETHER_TARGETED, "<i>" + a_cascade.getName() + "</i>");
 					}
 				}
 				else
 				{
-					strMessage += "ob Sie zu einer bestimmten Zeit mit der Kaskade {0} verbunden waren.";
+					strMessage += JAPMessages.getString(MSG_WHETHER_CONNECTED, "<i>" + a_cascade.getName() + "</i>");
 				}
 				if (!bDataAboutRequestedPages)
 				{
-					strMessage += " <b>Es werden jedoch KEINE Daten über aufgerufene Internetadressen oder Webseiten gespeichert.</b>";
+					strMessage += " " + "<b>" + JAPMessages.getString(MSG_NO_TARGET_ADDRESSES) + "</b>";
 				}
 			}
 			else
 			{
-				strMessage += "<b>Mit diesen Daten kann keine Ihrer Verbindungen aufgedeckt werden</b>, da der erste Mix der Kaskade {0} Ihre IP-Adresse nicht speichert.";
+				strMessage += JAPMessages.getString(MSG_NO_CHANCE, "<i>" + a_cascade.getName() + "</i>");
 			}
 		}
 		
-		JAPDialog.showWarningDialog(component, strMessage, "Informationen zur Vorratsdatenspeicherung",
-				adapter);
+		JAPDialog.showWarningDialog(component, strMessage, JAPMessages.getString(MSG_INFO_TITLE), adapter);
 	}
-	
 }

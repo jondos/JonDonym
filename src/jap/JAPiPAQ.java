@@ -58,15 +58,8 @@ final public class JAPiPAQ
 		JAPDebug.getInstance().setLogType(LogType.NET + LogType.GUI + LogType.THREAD + LogType.MISC);
 		JAPDebug.getInstance().setLogLevel(LogLevel.WARNING);
 		// load settings from config file
-		try 
-		{
-			m_controller.loadConfigFile(strJapConfFile, null);
-		} 
-		catch (FileNotFoundException a_e) 
-		{
-			LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e);
-			System.exit(-1);
-		}
+		m_controller.loadConfigFile(strJapConfFile, null);
+
 		// Output some information about the system
 		// Create the view object
 		view = new JAPNewView(JAPConstants.TITLE, m_controller);

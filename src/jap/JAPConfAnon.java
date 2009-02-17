@@ -512,7 +512,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		// create a copy of the current trust model
 		m_trustModelCopy = new TrustModel(TrustModel.getCurrentTrustModel());		
 	
-		if(m_filterPanel == null)
+		if (m_filterPanel == null)
 		{
 			m_filterPanel = new FilterPanel(this);
 			m_rootPanelConstraints.anchor = GridBagConstraints.SOUTHEAST;
@@ -524,7 +524,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			pRoot.add(m_filterPanel, m_rootPanelConstraints);
 		}
 
-		if(m_trustModelCopy != null)
+		if (m_trustModelCopy != null)
 		{
 			m_filterNameField.setText(m_trustModelCopy.getName());
 						
@@ -585,7 +585,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			//m_filterAnonLevelSlider.setValue(((Integer)model.getAttribute(TrustModel.AnonLevelAttribute.class).getConditionValue()).intValue());
 		}
 		
-		m_showEditFilterButton.setText(JAPMessages.getString(MSG_FILTER_CANCEL));		
+		m_showEditFilterButton.setText(JAPMessages.getString(MSG_FILTER_CANCEL));
 		m_filterPanel.setVisible(true);
 		
 		pRoot.validate();
@@ -976,8 +976,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 		drawManualPanel("","");
 		drawCascadesPanel();
+		drawFilterPanel();
 		drawServerPanel(3, "", false, 0);
 		drawServerInfoPanel();
+		hideEditFilter();
 	}
 
 	private void setAvailabilityLabel(MixCascade cascade, PerformanceEntry a_entry)

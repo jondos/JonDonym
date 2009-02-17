@@ -213,6 +213,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static final String XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT = "isConnectionTimeout";
 	private static final String XML_ATTR_ASK_SAVE_PAYMENT = "askIfNotSaved";
 	private static final String XML_ATTR_SHOW_SPLASH_SCREEN = "ShowSplashScreen";
+	private static final String XML_ATTR_PORTABLE_BROWSER_PATH = "portableBrowserPath";
+	
 	private static final String XML_ATTR_HELP_PATH ="helpPath";
 
 	// store classpath as it may not be created successfully after update
@@ -991,11 +993,18 @@ public final class JAPController extends Observable implements IProxyListener, O
 	 *  @param loadPay does this JAP support Payment ?
 	 */
 	public synchronized void loadConfigFile(String a_strJapConfFile, 
-			final ISplashResponse a_splash)
-		throws FileNotFoundException
+			final ISplashResponse a_splash) 
 	{
-		// @todo: remove since we already looked for the config file in preLoadConfigFile
-		boolean success = lookForConfigFile(a_strJapConfFile);
+		boolean success = false;
+		
+		try
+		{
+			success = lookForConfigFile(a_strJapConfFile);
+		}
+		catch (FileNotFoundException a_e)
+		{
+			// ignore since we already looked for the config file in preLoadConfigFile
+		}
 		
 		if (a_strJapConfFile != null)
 		{
@@ -1258,18 +1267,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 				setDummyTraffic(XMLUtil.parseAttribute(root, JAPConstants.CONFIG_DUMMY_TRAFFIC_INTERVALL,
 					JAPConfAnonGeneral.DEFAULT_DUMMY_TRAFFIC_INTERVAL_SECONDS));
-				if (strVersion == null || strVersion.compareTo("0.24") < 0)
-				{
-					JAPModel.getInstance().setAutoConnect(
-									   XMLUtil.parseAttribute(root, "autoConnect", true));
-					// if auto-connect is not chosen, ask the user what to do
-					m_bAskAutoConnect =  !JAPModel.isAutoConnect();
-				}
-				else
-				{
-					JAPModel.getInstance().setAutoConnect(
-						XMLUtil.parseAttribute(root, JAPConstants.CONFIG_AUTO_CONNECT, true));
-				}
+				JAPModel.getInstance().setAutoConnect(
+					XMLUtil.parseAttribute(root, JAPConstants.CONFIG_AUTO_CONNECT, true));
+				
 				m_Model.setAutoReConnect(
 								XMLUtil.parseAttribute(root, JAPConstants.CONFIG_AUTO_RECONNECT, true));;
 				m_Model.setMinimizeOnStartup(
@@ -2175,6 +2175,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				Document doc = XMLUtil.toXMLDocument(line);
 				
 				m_Model.setShowSplashScreen(XMLUtil.parseAttribute(doc, XML_ATTR_SHOW_SPLASH_SCREEN, true));
+				m_Model.setPortableBrowserpath(XMLUtil.parseAttribute(doc, XML_ATTR_PORTABLE_BROWSER_PATH, null));
 			}
 			catch(Exception ex)
 			{
@@ -2615,6 +2616,13 @@ public final class JAPController extends Observable implements IProxyListener, O
 								 JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_CONFIG_ASSISTANT, m_bShowConfigAssistant);
 			XMLUtil.setAttribute(e, XML_ATTR_SHOW_SPLASH_SCREEN, m_Model.getShowSplashScreen());
+			if (m_Model.getPortableBrowserpath() != null && (AbstractOS.getInstance().getDefaultBrowserPath() == null || 
+				!AbstractOS.toAbsolutePath(AbstractOS.getInstance().getDefaultBrowserPath()).equals(
+						AbstractOS.toAbsolutePath(m_Model.getPortableBrowserpath()))))
+			{
+				// store the portable browserpath only if it differs from the default path
+				XMLUtil.setAttribute(e, XML_ATTR_PORTABLE_BROWSER_PATH, m_Model.getPortableBrowserpath());
+			}
 
 			XMLUtil.setAttribute(e, XML_ATTR_LOGIN_TIMEOUT, AnonClient.getLoginTimeout());
 			XMLUtil.setAttribute(e, XML_ATTR_INFOSERVICE_CONNECT_TIMEOUT,
@@ -2623,8 +2631,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			if(JAPModel.getInstance().isHelpPathDefined() && 
 					JAPModel.getInstance().isHelpPathChangeable())
 			{
-				XMLUtil.setAttribute(e, XML_ATTR_HELP_PATH, 
-									 JAPModel.getInstance().getHelpPath());
+				XMLUtil.setAttribute(e, XML_ATTR_HELP_PATH, JAPModel.getInstance().getHelpPath());
 			}
 			
 			try

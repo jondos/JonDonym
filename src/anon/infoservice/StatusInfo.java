@@ -243,7 +243,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		m_anonLevel = -1;
 		if (getNrOfActiveUsers() >= 0 && getTrafficSituation() >= 0)
 		{
-			if (getNrOfActiveUsers() < 40)
+			if (getNrOfActiveUsers() < 30)
 			{
 				m_anonLevel = 0;
 			}
