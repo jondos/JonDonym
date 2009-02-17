@@ -98,20 +98,15 @@ public class SystrayPopupMenu extends PopupMenu
 		ImageIcon icon;
 		MixCascade cascade = JAPController.getInstance().getCurrentMixCascade();
 		TrustModel currentModel = TrustModel.getCurrentTrustModel();
-		String connected;
-		String users = "";
+		String connected = "";
 		if (JAPController.getInstance().isAnonConnected())
 		{
 			StatusInfo info =
 				(StatusInfo)Database.getInstance(StatusInfo.class).getEntryById(cascade.getId());
-			users += 
 			
-			users += ", " + JAPMessages.getString(MSG_ANONYMITY) + ": " + cascade.getDistribution() + "," + 
+			connected = JAPMessages.getString(MSG_ANONYMITY) + ": " + cascade.getDistribution() + "," + 
 			(info == null || info.getAnonLevel() < StatusInfo.ANON_LEVEL_MIN ? "?" : "" + info.getAnonLevel()) + 
 			" / " + MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX;
-
-			connected = users;//JAPMessages.getString(MSG_CONNECTED);
-			users = "";
 		}
 		else
 		{
@@ -154,7 +149,7 @@ public class SystrayPopupMenu extends PopupMenu
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.anchor = GridBagConstraints.WEST;
 		constraints.insets = new Insets(0, icon.getIconWidth() + label.getIconTextGap(), 0, 5);
-		label = new JLabel("(" + connected + users + ")");
+		label = new JLabel("(" + connected + ")");
 		panel.add(label, constraints);
 		add(panel);
 
