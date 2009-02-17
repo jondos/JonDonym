@@ -243,20 +243,22 @@ final class JAPConfUI extends AbstractJAPConfModule
 		
 		c1.gridx = 0;
 		c1.gridy+=2;
-		c1.fill = GridBagConstraints.BOTH;
-		c1.weighty = 1;
+		c1.fill = GridBagConstraints.BOTH;		
 		c1.gridwidth = 2;
-		tempPanel = null;
+		tempPanel = createHelpPathPanel();
 		if (JAPModel.getInstance().isHelpPathChangeable())
 		{
-			tempPanel =  createHelpPathPanel();
+			panelRoot.add(tempPanel, c1);
 		}
-		else if (JAPController.getInstance().isPortableMode())
+		c1.gridy++;
+		tempPanel = createBrowserPathPanel();
+		if (JAPController.getInstance().isPortableMode())
 		{
-			tempPanel = createBrowserPathPanel();
+			panelRoot.add(tempPanel, c1);
 		}
-		
-		panelRoot.add(tempPanel, c1);
+		c1.gridy++;
+		c1.weighty = 1;
+		panelRoot.add(new JPanel(), c1);
 	}
 
 	/**

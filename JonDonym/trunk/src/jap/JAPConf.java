@@ -190,10 +190,11 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 
 
 		m_confServices = new JAPConfServices();
-		DefaultMutableTreeNode nodeAnon =
-			m_moduleSystem.addComponent(rootNode, null, "ngAnonymitaet", null, null);
+		
 		if (!m_bIsSimpleView)
 		{
+			DefaultMutableTreeNode nodeAnon =
+				m_moduleSystem.addComponent(rootNode, null, "ngAnonymitaet", null, null);
 			m_moduleSystem.addConfigurationModule(nodeAnon, m_confServices, ANON_SERVICES_TAB);
 			m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfInfoService(), INFOSERVICE_TAB);			
 			//m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfTrust(), ANON_TRUST_TAB);
@@ -210,16 +211,19 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 				m_moduleSystem.addConfigurationModule(debugNode, new JAPConfForwardingState(),
 					FORWARDING_STATE_TAB);
 			}
+			m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeAnon.getPath()));
 		}
 		else
 		{
-			m_moduleSystem.addConfigurationModule(nodeAnon, m_confServices, ANON_SERVICES_TAB);
+			DefaultMutableTreeNode dummy = 
+				m_moduleSystem.addConfigurationModule(rootNode, m_confServices, ANON_SERVICES_TAB);
+			m_moduleSystem.getConfigurationTree().expandPath(new TreePath(dummy.getPath()));
 			//m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfTrust(), ANON_TRUST_TAB);
 		}
 		
 		//JAPExtension.addOptOut(m_moduleSystem);
 
-		m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeAnon.getPath()));
+		
 
 		//m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeNet.getPath()));
 

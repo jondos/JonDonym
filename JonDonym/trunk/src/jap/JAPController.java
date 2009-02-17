@@ -344,7 +344,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	/** Holds the MsgID of the status message after the forwarding server was started.*/
 	private int m_iStatusPanelMsgIdForwarderServerStatus;
-	private boolean m_bisNewInstallation=false;
 
 	private JAPController()
 	{
@@ -610,11 +609,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		return m_bPortable;
 	}
-
-	public boolean isNewInstallation()
-		{
-			return m_bisNewInstallation;
-		}
 	
 	public void setCommandLineArgs(String a_cmdArgs)
 	{
@@ -767,7 +761,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				public void run()
 				{
 					if (JAPController.getInstance().isConfigAssistantShown() &&
-						!(JAPDialog.isConsoleOnly()||JAPModel.isSmallDisplay()))
+						!(JAPDialog.isConsoleOnly() || JAPModel.isSmallDisplay()))
 					{
 						showInstallationAssistant();
 					}
@@ -1056,7 +1050,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				JAPMessages.init(new Locale(strLocale, ""), JAPConstants.MESSAGESFN);
 
 				//
-				setDefaultView(JAPConstants.VIEW_NORMAL);
+				setDefaultView(JAPConstants.VIEW_SIMPLIFIED);
 
 				//Loading debug settings
 				Element elemDebug = (Element) XMLUtil.getFirstChildByName(root, JAPConstants.CONFIG_DEBUG);
@@ -1641,6 +1635,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					setDefaultView(JAPConstants.VIEW_SIMPLIFIED);
 				}
+				else
+				{
+					setDefaultView(JAPConstants.VIEW_NORMAL);
+				}
 
 				/* load the infoservice management settings */
 				try
@@ -2185,8 +2183,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 
-	private boolean lookForConfigFile(String a_strJapConfFile) throws
-		FileNotFoundException 
+	private boolean lookForConfigFile(String a_strJapConfFile) throws FileNotFoundException 
 	{
 		boolean success = false;
 		if (a_strJapConfFile != null)
@@ -2195,6 +2192,13 @@ public final class JAPController extends Observable implements IProxyListener, O
 			success = this.loadConfigFileCommandLine(a_strJapConfFile);
 			if (!success)
 			{
+				if (!isPortableMode() || AbstractOS.getInstance().getDefaultBrowserPath() == null) 
+				{
+					/* As this is the first JAP start, show the config assistant */
+					m_bShowConfigAssistant = true;
+					m_bAllowPaidServices = false; // forbid automatic connection to paid services
+				}
+				
 				throw new FileNotFoundException(
 						"Could not initialise with specified config file: " + a_strJapConfFile);
 			}
@@ -2222,10 +2226,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 			/* As this is the first JAP start, show the config assistant */
 			m_bShowConfigAssistant = true;
-			
 			m_bAllowPaidServices = false; // forbid automatic connection to paid services
-			
-			m_bisNewInstallation=true;
 		}
 		return success;
 	}
@@ -5515,7 +5516,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			}
 
 			if (a_cascade.isPayment() && !TrustModel.getCurrentTrustModel().isPaymentForced() &&
-				((isConfigAssistantShown() && !isPortableMode()) || !m_bAllowPaidServices))
+				((isConfigAssistantShown()) || !m_bAllowPaidServices))
 			{
 				// do not connect to payment for new users
 				return false;
