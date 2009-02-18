@@ -988,9 +988,17 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 			buff.append(m_bDllUpdatePath);
 			buff.append("\n");
 		}
-		buff.append("Command line arguments: ");
-		buff.append("'" + JAPController.getInstance().getCommandlineArgs() + "'");
-		buff.append("\n");
+		
+		buff.append("Command line arguments: '");
+		for (int i = 0; i < JAPController.getInstance().getCommandlineArgs().length; i++)
+		{
+			buff.append(JAPController.getInstance().getCommandlineArgs()[i]);
+			if (i < JAPController.getInstance().getCommandlineArgs().length - 1)
+			{
+				buff.append(" ");
+			}
+		}
+		buff.append("'\n");
 		
 		buff.append("HttpListenerPortNumber: ");
 		buff.append(m_HttpListenerPortNumber);
