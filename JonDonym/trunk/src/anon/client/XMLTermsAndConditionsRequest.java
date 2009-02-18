@@ -29,19 +29,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package anon.client;
 
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
-
-import anon.infoservice.Database;
-import anon.infoservice.TermsAndConditions;
-import anon.infoservice.TermsAndConditionsFramework;
 import anon.util.IXMLEncodable;
-import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
 /**
@@ -56,42 +50,47 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	public static final String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsRequest";
 	public final static String XML_ATTR_LOCALE = "locale";
 	
+	public final static String XML_ELEMENT_REQ_TRANSLATION = "Translation"; 
 	public final static String XML_ELEMENT_RESOURCE_TEMPLATE = "Template"; 
 	public final static String XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT = "CustomizedSections"; 
 	
 	private Vector requestedTemplates = null;
 	private Hashtable requestedItems = null;
+	private Hashtable resourceRootRefs = null;
 	
 	public XMLTermsAndConditionsRequest()
 	{
 		requestedTemplates = new Vector();
 		requestedItems = new Hashtable();
+		resourceRootRefs = new Hashtable();
 	}
 	
-	public void addTemplateRequest(String opski, String langCode, String templateRefID)
+	public void addTemplateRequest(String opSki, String langCode, String templateRefID)
 	{
 		if(!requestedTemplates.contains(templateRefID))
 		{
 			requestedTemplates.addElement(templateRefID);
-			RequestEntry entry = (RequestEntry) requestedItems.get(opski);
-			if(entry == null)
-			{
-				entry = new RequestEntry(langCode);
-				requestedItems.put(opski, entry);
-			}
-			entry.items.add(XML_ELEMENT_RESOURCE_TEMPLATE);
+			addResourceRequest(XML_ELEMENT_RESOURCE_TEMPLATE, opSki, langCode);
 		}
 	}
 	
-	public void addCustomizedSectionsRequest(String opski, String langCode)
+	public void addCustomizedSectionsRequest(String opSki, String langCode)
 	{
-		RequestEntry entry = (RequestEntry) requestedItems.get(opski);
-		if(entry == null)
+		addResourceRequest(XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT, opSki, langCode);
+	}
+	
+	private void addResourceRequest(String resourceType, String opSki, String langCode)
+	{
+		TCRequestKey reqKey = new TCRequestKey(opSki, langCode);
+		//DOMElementWrapper reqRoot = getResourceRootReference(opSki);
+		
+		TCRequestValue reqValue = (TCRequestValue) requestedItems.get(reqKey);
+		if(reqValue == null)
 		{
-			entry = new RequestEntry(langCode);
-			requestedItems.put(opski, entry);
+			reqValue = new TCRequestValue();
+			requestedItems.put(reqKey, reqValue);
 		}
-		entry.items.add(XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT);
+		reqValue.addResourceRequest(resourceType);
 	}
 	
 	public boolean hasResourceRequests()
@@ -112,35 +111,104 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 		
 		a_doc.appendChild(requestRoot);
 		Element currRequestElement = null;
-		RequestEntry currReqEntry = null;
+		Element currTranslationElement = null;
 		Enumeration currRequestItems = null;
+		
+		TCRequestKey opski = null;
 		
 		while (allReqs.hasMoreElements()) 
 		{
-			String opski = (String) allReqs.nextElement();
-			currRequestElement = a_doc.createElement(XML_ELEMENT_NAME);
-			currReqEntry = (RequestEntry) requestedItems.get(opski);
-			XMLUtil.setAttribute(currRequestElement, XML_ATTR_ID, opski);
-			XMLUtil.setAttribute(currRequestElement, XML_ATTR_LOCALE, currReqEntry.langCode);
-			currRequestItems = currReqEntry.items.elements();
+			opski = (TCRequestKey) allReqs.nextElement();
+			currRequestElement = (Element) resourceRootRefs.get(opski.getOpSki());
+			
+			if(currRequestElement == null)
+			{
+				currRequestElement = a_doc.createElement(XML_ELEMENT_NAME);
+				XMLUtil.setAttribute(currRequestElement, XML_ATTR_ID, opski.getOpSki());
+				resourceRootRefs.put(opski.getOpSki(), currRequestElement);
+			}
+		
+			currRequestItems = ((TCRequestValue)requestedItems.get(opski)).getAllResourceRequests();
+			if(currRequestItems.hasMoreElements())
+			{
+				currTranslationElement = a_doc.createElement(XML_ELEMENT_REQ_TRANSLATION);
+				XMLUtil.setAttribute(currTranslationElement, XML_ATTR_LOCALE, opski.getLangCode());
+				currRequestElement.appendChild(currTranslationElement);
+			}
 			while (currRequestItems.hasMoreElements()) 
 			{
-				currRequestElement.appendChild(a_doc.createElement((String) currRequestItems.nextElement()));
+				currTranslationElement.appendChild(a_doc.createElement((String) currRequestItems.nextElement()));
 			}
 			requestRoot.appendChild(currRequestElement);
 		}
 		return requestRoot;
 	}
 	
-	private static class RequestEntry
+	/**
+	 * simple class to build a key with language and opSki
+	 * to map a TC resource request 
+	 */
+	private static class TCRequestKey
 	{
+		String opSki = null;
 		String langCode = null;
-		Vector items = null;
 		
-		private RequestEntry(String langCode)
+		private TCRequestKey(String opSki, String langCode)
 		{
-			this.langCode = langCode.trim().toLowerCase();
-			items = new Vector();
+			this.opSki = opSki;
+			this.langCode = langCode;
 		}
+		
+		public String toString()
+		{
+			return (opSki+langCode);
+		}
+		
+		public int hashCode()
+		{
+			return toString().hashCode();
+		}
+		
+		public boolean equals(Object anotherKey)
+		{
+			return ((TCRequestKey)anotherKey).toString().equals(toString());
+		}
+
+		public String getLangCode() 
+		{
+			return langCode;
+		}
+
+		public String getOpSki() 
+		{
+			return opSki;
+		}
+	}
+	
+	/**
+	 * a corresponding value wrapper class for the resource hashtable
+	 */
+	private static class TCRequestValue
+	{
+		Vector requestEntries;
+		
+		private TCRequestValue()
+		{
+			
+			requestEntries = new Vector();
+		}
+		
+		private void addResourceRequest(String resourceType)
+		{
+			if(!requestEntries.contains(resourceType))
+			{
+				requestEntries.addElement(resourceType);
+			}
+		}
+		
+		private Enumeration getAllResourceRequests()
+		{
+			return requestEntries.elements();
+		}	
 	}
 }

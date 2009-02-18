@@ -20,8 +20,9 @@ public class TermsAndConditionsDialog extends JAPDialog
 	TermsAndConditionsPane m_panel;
 	TermsAndConditonsDialogReturnValues m_ret;
 	
-	public TermsAndConditionsDialog(Component a_parent, ServiceOperator a_op, 
-			boolean a_bUpdateFromInfoService)
+	/*public TermsAndConditionsDialog(Component a_parent, ServiceOperator a_op, 
+			boolean a_bUpdateFromInfoService)*/
+	public TermsAndConditionsDialog(Component a_parent, TermsAndConditions tc) 
 	{
 		super(a_parent, "T&C");
 		
@@ -33,7 +34,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 		m_panel = new TermsAndConditionsPane(this, false);
 		
 		// try to find the TnC
-		TermsAndConditions tc = TermsAndConditions.getById(a_op.getId());
+		//TermsAndConditions tc = TermsAndConditions.getById(a_op.getId());
 		if(tc == null)
 		{
 			return;

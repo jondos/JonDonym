@@ -1,17 +1,22 @@
 package anon.client;
 
+import java.util.Locale;
+
 import anon.infoservice.ServiceOperator;
+import anon.infoservice.TermsAndConditions;
 
 public interface ITermsAndConditionsContainer 
 {
-	public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(ServiceOperator a_op);
+	//public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(ServiceOperator a_op);
+	public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(TermsAndConditions tc);
 	
 	public boolean hasAcceptedTermsAndConditions(ServiceOperator a_op);
 	
 	public void revokeTermsAndConditions(ServiceOperator a_op);
 	public void acceptTermsAndConditions(ServiceOperator a_op);
 	
-	public TermsAndConditionsResponseHandler getTermsAndConditionsRepsonseHandler();
+	public TermsAndConditionsResponseHandler getTermsAndConditionsResponseHandler();
+	public Locale getDisplayLanguageLocale();
 	
 	public class TermsAndConditonsDialogReturnValues
 	{

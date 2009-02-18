@@ -27,11 +27,31 @@
  */
 package jap;
 
+import forward.server.ForwardServerManager;
+import gui.GUIUtils;
+import gui.JAPMessages;
+import gui.dialog.DialogContentPane;
+import gui.dialog.JAPDialog;
+import gui.dialog.PasswordContentPane;
+import jap.forward.JAPRoutingEstablishForwardedConnectionDialog;
+import jap.forward.JAPRoutingMessage;
+import jap.forward.JAPRoutingSettings;
+import jap.pay.AccountUpdater;
+
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -42,29 +62,27 @@ import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
-import java.util.StringTokenizer;
 import java.util.Vector;
-import java.io.BufferedReader;
-import java.io.FileReader;
-
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Point;
-import java.awt.Window;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.UIManager.LookAndFeelInfo;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+
+import platform.AbstractOS;
+import platform.MacOS;
+import proxy.DirectProxy;
+import update.JAPUpdateWizard;
 import anon.AnonServerDescription;
 import anon.AnonServiceEventAdapter;
 import anon.AnonServiceEventListener;
@@ -72,29 +90,32 @@ import anon.ErrorCodes;
 import anon.client.AnonClient;
 import anon.client.ITermsAndConditionsContainer;
 import anon.client.TermsAndConditionsResponseHandler;
+import anon.client.TrustException;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.AbstractMixCascadeContainer;
 import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.CascadeIDEntry;
+import anon.infoservice.ClickedMessageIDDBEntry;
 import anon.infoservice.Database;
-import anon.infoservice.IServiceContextContainer;
-import anon.infoservice.PerformanceInfo;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.IDistributable;
 import anon.infoservice.IDistributor;
+import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.JAPMinVersion;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
-import anon.infoservice.ServiceOperator;
-import anon.infoservice.StatusInfo;
+import anon.infoservice.PerformanceInfo;
 import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.infoservice.ProxyInterface;
+import anon.infoservice.ServiceOperator;
+import anon.infoservice.StatusInfo;
+import anon.infoservice.TermsAndConditions;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.mixminion.MixminionServiceDescription;
 import anon.mixminion.mmrdescription.MMRList;
@@ -115,27 +136,6 @@ import anon.util.JobQueue;
 import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.XMLUtil;
-import forward.server.ForwardServerManager;
-import gui.GUIUtils;
-import gui.JAPMessages;
-import gui.dialog.DialogContentPane;
-import gui.dialog.JAPDialog;
-import gui.dialog.PasswordContentPane;
-import jap.forward.JAPRoutingEstablishForwardedConnectionDialog;
-import jap.forward.JAPRoutingMessage;
-import jap.forward.JAPRoutingSettings;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-import platform.AbstractOS;
-import platform.MacOS;
-import proxy.DirectProxy;
-import update.JAPUpdateWizard;
-import jap.pay.AccountUpdater;
-import jap.TermsAndConditionsUpdater;
-import anon.infoservice.ClickedMessageIDDBEntry;
-import anon.client.TrustException;
-import anon.infoservice.TermsAndConditions;
 
 /* This is the Controller of All. It's a Singleton!*/
 public final class JAPController extends Observable implements IProxyListener, Observer,
@@ -2013,7 +2013,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				Database.getInstance(CascadeIDEntry.class).update(
 								new CascadeIDEntry(m_currentMixCascade));
 				
-				Element elemAcceptedTCs = (Element) XMLUtil.getFirstChildByName(root, JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
+				/*Element elemAcceptedTCs = (Element) XMLUtil.getFirstChildByName(root, JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
 				
 				if(elemAcceptedTCs != null)
 				{
@@ -2026,14 +2026,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 						
 						acceptTermsAndConditions(ski, timestamp);
 					}
-				}
-				
-				Database.getInstance(TermsAndConditions.class).loadFromXml((Element) XMLUtil.getFirstChildByName(root,TermsAndConditions.XML_ELEMENT_CONTAINER_NAME));
+				}*/
+				TermsAndConditions.loadTermsAndConditionsFromXMLElement((Element) XMLUtil.getFirstChildByName(root,TermsAndConditions.XML_ELEMENT_CONTAINER_NAME));
 				Database.getInstance(TermsAndConditionsFramework.class).loadFromXml((Element) XMLUtil.getFirstChildByName(root,TermsAndConditionsFramework.XML_ELEMENT_CONTAINER_NAME));
+				
 			}
 			catch (Exception e)
 			{
-				LogHolder.log(LogLevel.INFO, LogType.MISC,
+				LogHolder.log(LogLevel.ERR, LogType.MISC,
 							  "JAPModel:Error loading configuration! " + e.toString());
 			}
 		} //end if f!=null
@@ -2939,26 +2939,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			
 			e.appendChild(JAPModel.getInstance().getRoutingSettings().toXmlElement(doc));
 			
-			Element elemAcceptedTCs = doc.createElement(JAPConstants.CONFIG_ACCEPTED_TERMS_AND_CONDITIONS);
-			
-			Hashtable acceptedTCs = JAPModel.getInstance().getAcceptedTCs();
-			Enumeration keys = acceptedTCs.keys();
-			String ski;
-			
-			while(keys.hasMoreElements())
-			{
-				ski = (String) keys.nextElement();
-				Long timestamp = (Long) acceptedTCs.get(ski);
-				Element elemTC = doc.createElement(TermsAndConditions.XML_ELEMENT_NAME);
-				XMLUtil.setAttribute(elemTC, TermsAndConditions.XML_ATTR_ID, ski);
-				XMLUtil.setAttribute(elemTC, TermsAndConditions.XML_ATTR_TIME_ACCEPTED, timestamp.longValue());
-				elemAcceptedTCs.appendChild(elemTC);
-			}
-
-			//TODO: change
-			e.appendChild(elemAcceptedTCs);
-			//TODO: store received T&Cs (not using the Infoservice interface)
-			//e.appendChild(Database.getInstance(TermsAndConditions.class).toXmlElement(doc));
+			e.appendChild(TermsAndConditions.getAllTermsAndConditionsAsXMLElement(doc));
 			e.appendChild(Database.getInstance(TermsAndConditionsFramework.class).toXmlElement(doc));
 
 			return doc;
@@ -5327,10 +5308,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 	
-	public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(ServiceOperator a_op)
+	//public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(ServiceOperator a_op)
+	public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(TermsAndConditions tc)
 	{
-		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op, false); 
-		
+		//TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op, false); 
+		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), tc);
 		if(!dlg.hasError())
 		{
 			dlg.setVisible(true);
@@ -5563,8 +5545,13 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 
-	public TermsAndConditionsResponseHandler getTermsAndConditionsRepsonseHandler() 
+	public TermsAndConditionsResponseHandler getTermsAndConditionsResponseHandler() 
 	{
 		return m_tcResponseHandler;
+	}
+
+	public Locale getDisplayLanguageLocale() 
+	{
+		return JAPMessages.getLocale();
 	}
 }
