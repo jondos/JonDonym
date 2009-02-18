@@ -31,8 +31,8 @@
  */
 package anon.client;
 
-import java.io.InterruptedIOException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.security.SecureRandom;
@@ -42,38 +42,34 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
-
-import anon.transport.connection.ConnectionException;
-import anon.transport.connection.IStreamConnection;
-import anon.transport.connection.SocketConnection;
-import anon.util.JobQueue;
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+import HTTPClient.HTTPConnection;
 import HTTPClient.ThreadInterruptedIOException;
-
 import anon.AnonChannel;
 import anon.AnonServerDescription;
 import anon.AnonService;
 import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
+import anon.IServiceContainer;
 import anon.NotConnectedToMixException;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
-import anon.client.TermsAndConditionsResponseHandler.TCRequestException;
+import anon.client.TermsAndConditionsResponseHandler.TermsAndConditionsReadException;
 import anon.client.replay.ReplayControlChannel;
 import anon.client.replay.TimestampUpdater;
 import anon.infoservice.HTTPConnectionFactory;
+import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.MixCascade;
-import anon.infoservice.MixInfo;
-import anon.infoservice.ServiceOperator;
+import anon.infoservice.TermsAndConditions;
 import anon.pay.AIControlChannel;
 import anon.pay.Pay;
+import anon.transport.connection.ConnectionException;
+import anon.transport.connection.IStreamConnection;
+import anon.transport.connection.SocketConnection;
+import anon.util.JobQueue;
 import anon.util.XMLParseException;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-import HTTPClient.HTTPConnection;
-import anon.infoservice.IMutableProxyInterface;
-import anon.IServiceContainer;
-import anon.client.TrustException;
 /**
  * @author Stefan Lieske
  */
@@ -753,13 +749,28 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 											a_serviceContainer, a_serviceContainer.getTCContainer());
 									tcRetry = false;
 								}
-								catch(TCRequestException tce)
+								catch(TermsAndConditionsReadException tcie)
 								{
-									//TODO: show dialog here!
-									//now the user has all the time he needs to read the Terms and conditions.
-									//and needs not to worry about the mix timeouts.
+									//now the user gets all the time he needs to read the Terms and Conditions.
+									//after that the connection is reestablished
+									Enumeration tcsToshow = tcie.getTermsTermsAndConditonsToRead();
+									TermsAndConditions currentTCToShow = null;
+									TermsAndConditonsDialogReturnValues currentReturnValues = null;
+									while (tcsToshow.hasMoreElements()) 
+									{
+										currentTCToShow = 
+											(TermsAndConditions) tcsToshow.nextElement();
+										currentReturnValues =
+											a_serviceContainer.getTCContainer().showTermsAndConditionsDialog(currentTCToShow);
+										currentTCToShow.setAccepted(currentReturnValues.hasAccepted());
+										currentTCToShow.setRead(true);
+										if(!currentReturnValues.hasAccepted())
+										{
+											throw new IOException("Client rejected T&C aftzer reading.");
+										}
+									}
 									
-									//try to establish a new connection. for the second try to accept Terms and Conditions
+									//try to establish a new connection. for the second try to accept the Terms and Conditions
 									m_socketHandler =
 										new SocketHandler(
 												connectMixCascade( (MixCascade) a_mixCascade,
@@ -767,9 +778,9 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 									if(tctry > 1)
 									{
 										LogHolder.log(LogLevel.ERR, LogType.NET, 
-												"Still requested  t&cs afetr the second try? this must not happen.");
+												"Still requested  t&cs after the first try is not allowed!");
 										//TODO: throw a more specific Exception
-										throw new Exception("Second tc request must never be sent.");
+										throw new Exception("A second tc request must never be sent.");
 									}
 								}
 							}

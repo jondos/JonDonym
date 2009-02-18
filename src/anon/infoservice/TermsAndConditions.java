@@ -1,51 +1,34 @@
 package anon.infoservice;
 
-import java.text.DateFormat;
-import java.text.ParsePosition;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.StringTokenizer;
+import java.util.Hashtable;
 import java.util.Locale;
-
-import javax.swing.text.DateFormatter;
 
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import org.w3c.dom.Element;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
-
-import anon.crypto.CertPath;
-import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
-import anon.crypto.X509SubjectKeyIdentifier;
 import anon.crypto.XMLSignature;
 import anon.util.IXMLEncodable;
-import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
 public class TermsAndConditions implements IXMLEncodable
 {
-	//private Element m_xmlData;
-	//private Document m_doc;
-	
-	//public static int TERMS_AND_CONDITIONS_TTL = 1000*60*60*24;
-	
-	public static final String XML_ATTR_TIME_ACCEPTED = "timeAccepted";
+	public static final String XML_ATTR_ACCEPTED = "accepted";
 	public static final String XML_ATTR_DATE = "date";
 	
 	public final static String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsList";
 	public final static String XML_ELEMENT_NAME = "TermsAndConditions";
 	public final static String XML_ELEMENT_TRANSLATION_NAME = Translation.XML_ELEMENT_NAME;
-	
-	//public final static String LOCAL_TC_DEFAULT_LANG = "en";
 	
 	private static final String XML_ATTR_LOCALE = "locale";
 	private static final String XML_ATTR_DEFAULT_LOCALE = "default";
@@ -53,86 +36,60 @@ public class TermsAndConditions implements IXMLEncodable
 
 	private static final String DATE_FORMAT = "yyyyMMdd"; 
 	
-	/*public static String HTTP_REQUEST_STRING = "/tcs";
-	public static String HTTP_SERIALS_REQUEST_STRING = "/tcserials";
-	
-	public static String POST_FILE = "/tc";*/
-	
 	private String m_strId;
-	//public String m_ski;
-	
-	//public String m_referenceId;
-	
-	//public String m_locale;
 	private Date m_date;
 	
 	private Hashtable translations;
 	private Translation defaultTranslation = null;
-	/*public long m_lastUpdate;
-	public long m_serial;*/
-
-	//private XMLSignature m_signature = null;
-
-	//private MultiCertPath m_certPath = null;
+	
+	private boolean accepted;
+	private boolean read;
 	
 	private final static Hashtable tcHashtable = new Hashtable();
 	
 	/**
-	 * creates an empty Terms And Condtion object for the specified id and valid date
-	 * which contains no translations.
+	 * creates an empty Terms And Condition object for the specified id and validation date
+	 * which serves as a contianer for the different translations.
+	 * @throws ParseException 
 	 */
-	public TermsAndConditions(String id, String date) throws IllegalArgumentException
+	public TermsAndConditions(String id, String date) throws ParseException
 	{
 		if(id == null)
 		{
 			throw new IllegalArgumentException("ID of terms and conditions must not be null!");
 		}
-		m_strId = id.toLowerCase();
+		m_strId = id.trim().toLowerCase();
 		
 		if(date == null)
 		{
 			throw new IllegalArgumentException("Date must not be null!");
 		}
 		
-		ParsePosition p = new ParsePosition(0);
-		SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
-		m_date = df.parse(date, p);
+		m_date = new SimpleDateFormat(DATE_FORMAT).parse(date);
 		if(m_date == null)
 		{
 			throw new IllegalArgumentException("Date has not the valid format "+DATE_FORMAT);
 		}
 		translations = new Hashtable();
+		accepted = false;
+		read = false;
 	}
-	
-	/*public TermsAndConditions(Element a_elem) throws XMLParseException
+
+	public TermsAndConditions(Element termsAndConditionRoot) throws XMLParseException, ParseException
 	{
-		this(XMLUtil.createDocumentFromElement(a_elem), true);
-	}*/
-	
-	public TermsAndConditions(Element termsAndConditionRoot) throws XMLParseException
-	{
-		//super(a_bJAPContext ? Long.MAX_VALUE : System.currentTimeMillis() + TERMS_AND_CONDITIONS_TTL);
-		
-		//m_doc = a_doc;
-		//Element xmlData = a_doc.getDocumentElement();
-		
-		//m_serial = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_SERIAL, -1);
 		m_strId = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ID, null);
 		if(m_strId == null)
 		{
 			throw new XMLParseException("attribute 'id' of TermsAndConditions must not be null!");
 		}
-		m_strId = m_strId.toLowerCase();
-		//m_referenceId = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_REFERENCE_ID, "");
+		m_strId = m_strId.trim().toLowerCase();
 		
-		ParsePosition p = new ParsePosition(0);
-		SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
 		String dateStr = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_DATE, null);
 		if(dateStr == null)
 		{
 			throw new XMLParseException("attribute 'date' must not be null!");
 		}
-		m_date = df.parse(dateStr, p);
+		m_date = new SimpleDateFormat(DATE_FORMAT).parse(dateStr);
 		translations = new Hashtable();
 		
 		Element currentTranslation = 
@@ -145,44 +102,12 @@ public class TermsAndConditions implements IXMLEncodable
 				(Element) XMLUtil.getNextSiblingByName(currentTranslation, 
 									Translation.XML_ELEMENT_NAME);
 		}
-		//StringTokenizer token = new StringTokenizer(m_strId, "_");
-		
-		//int tokens = token.countTokens();
-		
-		//if (tokens >= 1)
-		//{
-			// extract the ski
-		//	m_ski = token.nextToken();
-		//}
-		//else
-		//{
-		//	m_ski = null;
-		//}
-		
-		//if(tokens >= 2)
-		//{
-			// extract the locale
-		//	m_locale = token.nextToken();
-		//}
-		//else
-		//{
-		//	m_locale = LOCAL_TC_DEFAULT_LANG;			
-		//}
-		
-		//m_lastUpdate = XMLUtil.parseAttribute(m_xmlData, XML_ATTR_LAST_UPDATE, -1L);
-		
-		// verify the signature
-		//m_signature = SignatureVerifier.getInstance().getVerifiedXml(m_xmlData,
-		//	SignatureVerifier.DOCUMENT_CLASS_MIX);
-		//if (m_signature != null)
-		//{
-		//	m_certPath = m_signature.getMultiCertPath();
-		//}
-		
-		//if (!checkId())
-		//{
-		//	throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed id for TermsAndConditons object: " + m_strId);
-		//}
+		if(!hasTranslations())
+		{
+			throw new XMLParseException("TC of operator "+m_strId+" is invalid because it has no translations");
+		}
+		read = termsAndConditionRoot.hasAttribute(XML_ATTR_ACCEPTED);
+		accepted = read ? Boolean.parseBoolean(termsAndConditionRoot.getAttribute(XML_ATTR_ACCEPTED)) : false;
 	}
 	
 	public String getDateString()
@@ -195,18 +120,22 @@ public class TermsAndConditions implements IXMLEncodable
 		addTranslation(new Translation(translationRoot));
 	}
 	
+	
 	public synchronized void addTranslation(Translation t)
 	{
 		if(!t.isVerified())
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC,"Translation ["+t.getLocale()+"] of "+m_strId+" is not verified" +
-					" and could be added.");
+					" and could not be added.");
 			return;
 		}
 		
-		if(t.isDefaultLocale())
+		synchronized (this)
 		{
-			defaultTranslation = t;
+			if(t.isDefaultLocale())
+			{
+				defaultTranslation = t;
+			}
 		}
 		translations.put(t.getLocale(), t);
 	}
@@ -216,134 +145,147 @@ public class TermsAndConditions implements IXMLEncodable
 		return defaultTranslation;
 	}
 	
-	public synchronized Translation getTranslation(String locale)
+	public Translation getTranslation(Locale locale)
+	{
+		return getTranslation(locale.getLanguage());
+	}
+	
+	public Translation getTranslation(String locale)
 	{
 		return (Translation) translations.get(locale.trim().toLowerCase());
 	}
 	
-	public synchronized boolean hasTranslation(String locale)
+	public boolean hasTranslation(String locale)
 	{
 		return translations.containsKey(locale.trim().toLowerCase());
 	}
 	
 	public boolean hasTranslation(Locale locale)
 	{
-		return hasTranslation(locale.getDisplayLanguage());
+		return hasTranslation(locale.getLanguage());
 	}
 	
-	/*public boolean checkId()
+	public boolean hasTranslations()
 	{
-		if(m_signature == null)
-		{
-			System.out.println(""i);
-			LogHolder.log(LogLevel.INFO,LogType.CRYPTO,"AbstractDistributableCertifiedDatabaseEntry::checkId() -- signature is NULL!");
-			return false;
-		}
-		String ski = m_signature.getMultiCertPath().getPath().getSecondCertificate().getSubjectKeyIdentifier();
-		
-		ski = (ski != null) ?  Util.replaceAll(ski, ":", "") : "";
-		System.out.println("m_ski: "+m_ski+", ski: "+ski);
-		return  (m_ski != null) && m_ski.equalsIgnoreCase(ski);
-		//Not needed anymore: Terms And Cnditions are direclty transmitted form the mix
-		
-	}*/
-
-
+		return !translations.isEmpty();
+	}
+	
+	public synchronized boolean hasDefaultTranslation()
+	{
+		return defaultTranslation != null;
+	}
+	
 	public String getId() 
 	{
-		return m_strId.toLowerCase();
+		return m_strId;
 	}
 
-	/*public String getSKI()
-	{
-		return m_ski;
-	}*/
-	
-	/*public long getLastUpdate()
-	{
-		return m_lastUpdate;
-	}
-	
-	public long getVersionNumber()
-	{
-		return m_serial;
-	}*/
-	
 	public Date getDate()
 	{
 		return m_date;
 	}
 	
-	/*public Element getXmlStructure()
+	public synchronized void setAccepted(boolean accepted)
 	{
-		return m_xmlData;
-	}*/
+		this.accepted = accepted;
+	}
 	
-	/*public String getPostFile()
+	public boolean isAccepted() 
 	{
-		return POST_FILE;
-	}*/
+		return accepted;
+	}
 	
-	/*public Document getDocument()
+	public boolean isRead() 
 	{
-		return m_doc;
-	}*/
-	
-	/*public boolean isVerified()
-	{
-		if (m_signature != null)
-		{
-			return m_signature.isVerified();
-		}
-		return false;
-	}*/
+		return read;
+	}
 
-	/*public boolean isValid()
+	public synchronized void setRead(boolean read) 
 	{
-		if (m_certPath != null)
-		{
-			return m_certPath.isValid(new Date());
-		}
-		return false;
-	}*/
+		this.read = read;
+	}
 	
-	public static synchronized void storeTermsAndConditions(TermsAndConditions tc)
+	public synchronized boolean isRejected() 
+	{
+		return read && !accepted;
+	}
+	
+	public static void storeTermsAndConditions(TermsAndConditions tc)
 	{
 		tcHashtable.put(tc.getId().toLowerCase(), tc);
 	}
 	
-	public static synchronized TermsAndConditions getById(String a_id)
+	public static TermsAndConditions getById(String a_id)
 	{
 		return (TermsAndConditions) tcHashtable.get(a_id.toLowerCase());
 	}
 	
-	/*public static synchronized Translation getTranslationById(String a_id, String language)
+	public static void removeTermsAndConditions(TermsAndConditions tc)
 	{
-		TermsAndConditions tc = (TermsAndConditions) tcHashtable.get(a_id);
-		if(tcHashtable.get(a_id) != null)
+		tcHashtable.remove(tc.getId());
+	}
+	
+	public static void removeTermsAndConditions(String opSki)
+	{
+		tcHashtable.remove(opSki);
+	}
+	
+	public static Element getAllTermsAndConditionsAsXMLElement(Document ownerDoc)
+	{
+		Enumeration allTermsAndConditions = null;
+		Element listRoot = ownerDoc.createElement(XML_ELEMENT_CONTAINER_NAME);
+		allTermsAndConditions = tcHashtable.elements();
+		TermsAndConditions currentTC = null;
+		while (allTermsAndConditions.hasMoreElements()) 
 		{
-			return tc.getTranslation(language.trim().toLowerCase());
+			currentTC = (TermsAndConditions) allTermsAndConditions.nextElement();
+			if(currentTC.hasTranslations())
+			{
+				listRoot.appendChild(currentTC.toXmlElement(ownerDoc));
+			}
 		}
-		return null;
-	}*/
+		return listRoot;
+	}
 	
-	/*public static Translation getTranslationById(String a_id, Locale locale)
+	public static void loadTermsAndConditionsFromXMLElement(Element listRoot)
 	{
-		return getTranslationById( a_id, locale.getLanguage().trim().toLowerCase());
-	}*/
-	
-	
+		if(listRoot == null)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, "TC list root is null!");
+			return;
+		}
+		Element currentTCNode = (Element) XMLUtil.getFirstChildByName(listRoot, XML_ELEMENT_NAME);
+		while(currentTCNode != null)
+		{
+			try 
+			{
+				storeTermsAndConditions(new TermsAndConditions(currentTCNode));
+			}
+			catch(XMLParseException xpe)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Could not parse the TC node:\n"+XMLUtil.toString(currentTCNode));
+			} 
+			catch (ParseException pe) 
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Could not parse the TC node due to invalid date format:\n"+XMLUtil.toString(currentTCNode));
+			}
+			currentTCNode = (Element) XMLUtil.getNextSiblingByName(currentTCNode, XML_ELEMENT_NAME);
+		}
+	}
 	
 	public String getHTMLText(Locale locale)
 	{
 		return getHTMLText(locale.getLanguage());
 	}
 	
-	
-	
-	/* if lanugae is not supported get the defaultLanguage text */
+	/* if language is not supported get the defaultLanguage text */
 	public String getHTMLText(String language)
 	{
+		if(!hasTranslations())
+		{
+			throw new IllegalStateException("BUG: T&C document "+m_strId+
+					" cannot be created while no translations are already loaded.");
+		}
 		Translation translation = getTranslation(language);
 		if(translation == null)
 		{
@@ -360,45 +302,10 @@ public class TermsAndConditions implements IXMLEncodable
 		return fr.transform();
 	}
 	
-	/*public static TermsAndConditions getById(String a_id, String lang)
-	{
-		Database db = Database.getInstance(TermsAndConditions.class);
-		
-		if(lang.equals(LOCAL_TC_DEFAULT_LANG))
-		{
-			return (TermsAndConditions) db.getEntryById(a_id);
-		}
-		
-		TermsAndConditions tc = (TermsAndConditions) db.getEntryById(a_id + "_" + lang);
-		
-		// localized version not found, try the English one
-		if(tc == null)
-		{
-			return (TermsAndConditions) db.getEntryById(a_id); 
-		}
-		
-		return tc;
-	}*/
-	
 	public boolean equals(Object a_object)
 	{
 		return this.getId().equals( ( (TermsAndConditions) a_object).getId());
 	}
-	
-	/*public int hashCode()
-	{
-		return (getId().toLowerCase().hashCode());
-	}*/
-
-	/*public XMLSignature getSignature()
-	{
-		return m_signature;
-	}
-
-	public MultiCertPath getCertPath()
-	{
-		return m_certPath;
-	}*/
 
 	/*
 	 compares the dates of this TermsAndCondition object
@@ -406,7 +313,7 @@ public class TermsAndConditions implements IXMLEncodable
 	 * 
 	 * (right now we can't implement
 	 *  java.lang.Comparable due to java 1.1 restrictions. 
-	 *  but perhaps someday we could so better use this method).  
+	 *  but perhaps someday we could so better implement this method).  
 	 */
 	public int compareTo(Object o)
 	{
@@ -414,12 +321,38 @@ public class TermsAndConditions implements IXMLEncodable
 		return m_date.equals(otherTc.getDate()) ? 0 : m_date.before(otherTc.getDate()) ? -1 : 1;
 	}
 	
+	public boolean isMostRecent(String toWhichDate) throws ParseException
+	{
+		return isMostRecent(new SimpleDateFormat(DATE_FORMAT).parse(toWhichDate));
+	}
+	
+	/**
+	 * true if the date of the T&Cs are equal or more recent than 'toWhichDate' 
+	 */
+	public boolean isMostRecent(Date toWhichDate)
+	{
+		return (m_date.equals(toWhichDate) || m_date.after(toWhichDate));
+	}
+	
 	public Element toXmlElement(Document a_doc) 
 	{
+		if(!hasTranslations())
+		{
+			return null;
+		}
 		Element tcRoot = a_doc.createElement(XML_ELEMENT_NAME);
 		XMLUtil.setAttribute(tcRoot, XML_ATTR_ID, m_strId);
 		XMLUtil.setAttribute(tcRoot, XML_ATTR_DATE, getDateString());
-		Enumeration allTranslations = translations.elements();
+		Enumeration allTranslations = null;
+		synchronized (this)
+		{
+			if(read)
+			{
+				XMLUtil.setAttribute(tcRoot, XML_ATTR_ACCEPTED, accepted);
+			}
+			allTranslations = translations.elements();
+		}
+		
 		while (allTranslations.hasMoreElements()) 
 		{
 			 tcRoot.appendChild(((Translation)allTranslations.nextElement()).toXmlElement(a_doc));	
@@ -486,11 +419,6 @@ public class TermsAndConditions implements IXMLEncodable
 		{
 			return translationElement;
 		}
-		
-		/*public int hashCode() 
-		{
-			return locale.hashCode();
-		}*/
 
 		public XMLSignature getSignature()
 		{

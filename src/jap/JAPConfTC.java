@@ -1,45 +1,34 @@
 package jap;
 
-import jap.pay.wizardnew.TermsAndConditionsPane;
+import gui.JAPMessages;
+import gui.OperatorsCellRenderer;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionListener;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
-import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-
 import anon.client.ITermsAndConditionsContainer;
 import anon.infoservice.Database;
-import anon.infoservice.MixCascade;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
-import anon.infoservice.TermsAndConditionsFramework;
-import anon.util.Util;
-
-import gui.OperatorsCellRenderer;
-import gui.JAPMessages;
 
 public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionListener, Observer
 {
@@ -52,7 +41,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 	protected JAPConfTC(IJAPConfSavePoint savePoint, ITermsAndConditionsContainer tcc)
 	{
 		super(null);
-		tcc.getTermsAndConditionsRepsonseHandler().addObserver(this);
+		tcc.getTermsAndConditionsResponseHandler().addObserver(this);
 	}
 	
 	public String getTabTitle() 
@@ -243,6 +232,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 			/*if(m_trustModelCopy != null)
 				m_vecBlacklist = (Vector) ((Vector) m_trustModelCopy.getAttribute(TrustModel.OperatorBlacklistAttribute.class).getConditionValue()).clone();*/
 			
+			m_vecOperators.removeAllElements();
 			Vector allOperators = Database.getInstance(ServiceOperator.class).getEntryList();
 			for (Enumeration enumeration = allOperators.elements(); enumeration.hasMoreElements();)
 			{
@@ -281,15 +271,17 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 					case DATE_COL:
 					{
 						ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
-						if(op == null) return null;
+						//if(op == null) return null;
 						TermsAndConditions tc = TermsAndConditions.getById(op.getId());
 						return (tc != null) ? tc.getDate() : null;
 					}
 					case ACCEPTED_COL:
 					{
-						//return new Boolean(!m_vecBlacklist.contains(m_vecOperators.elementAt(rowIndex)));
 						ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
-						return new Boolean(tncModel.hasAcceptedTermsAndConditions(op));
+						//if(op == null) return null; //must never happen
+						TermsAndConditions tc = TermsAndConditions.getById(op.getId());
+						//if(tc == null) return null; //must never happen
+						return new Boolean(tc.isAccepted());
 					}
 					default:
 					{
@@ -307,9 +299,35 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 		
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 		{
-			if(aValue instanceof Boolean)
+			switch (columnIndex)
 			{
-				boolean value = ((Boolean) aValue).booleanValue(); 
+				case OPERATOR_COL:
+				{
+					break;
+				}
+				case DATE_COL:
+				{
+					break;
+				}
+				case ACCEPTED_COL:
+				{
+					boolean value = ((Boolean) aValue).booleanValue(); 
+					ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
+					//if(op == null) return null; //must never happen
+					TermsAndConditions tc = TermsAndConditions.getById(op.getId());
+					//if(tc == null) return null; //must never happen
+					tc.setAccepted(value);
+					tc.setRead(true);
+					break;
+				}
+				default:
+				{
+					throw new IndexOutOfBoundsException("No definition for column "+columnIndex);
+				}
+			}
+			/*if(aValue instanceof Boolean)
+			{
+				
 				ServiceOperator currentOp = 
 					(ServiceOperator) getValueAt(rowIndex, OPERATOR_COL);
 				
@@ -323,7 +341,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 					tncModel.acceptTermsAndConditions(currentOp);
 					
 				}
-			}
+			}*/
 		}
 		
 		/*public void setValueAt(Object aValue, int rowIndex, int columnIndex)
@@ -363,6 +381,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 
 	public void update(Observable o, Object arg) 
 	{
-		onUpdateValues();
+		//System.out.println("Updating table");
+		//onUpdateValues();
 	}
 }
