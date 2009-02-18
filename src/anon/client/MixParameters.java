@@ -31,7 +31,7 @@
  */
 package anon.client;
 
-import anon.client.crypto.ASymCipher;
+import anon.client.crypto.IASymMixCipher;
 import anon.client.replay.ReplayTimestamp;
 
 
@@ -42,7 +42,7 @@ public class MixParameters {
 
   private String m_mixId;
 
-  private ASymCipher m_mixCipher;
+  private IASymMixCipher m_mixCipher;
 
   private ReplayTimestamp m_replayTimestamp;
   
@@ -53,7 +53,7 @@ public class MixParameters {
   public static long m_referenceTime;
   
   
-  public MixParameters(String a_mixId, ASymCipher a_mixCipher) {
+  public MixParameters(String a_mixId, IASymMixCipher a_mixCipher) {
     m_mixId = a_mixId;
     m_mixCipher = a_mixCipher;
     m_replayTimestamp = null;
@@ -66,7 +66,7 @@ public class MixParameters {
     return m_mixId;
   }
   
-  public ASymCipher getMixCipher() {
+  public IASymMixCipher getMixCipher() {
     return m_mixCipher;
   }
   
