@@ -58,12 +58,13 @@ public class DefaultMixCipher implements IMixCipher {
   
   public byte[] encrypt(byte[] a_packet, int a_virtualPacketLength, Vector a_sendCallbackHandlers) {
     int alreadyEncryptedBytes = 0;
+    int alreadyOutputBytes = 0;
     int realPacketLength = a_packet.length;
     byte[] packet = null;
     byte[] encryptedPacket = null;
     if (m_firstEncryptionPacket) {
       /* add the symmetric encryption key to the packet */
-      realPacketLength = realPacketLength + m_symCipher.getKeys().length;
+      realPacketLength = realPacketLength + m_symCipher.getKeys().length+m_mixParameters.getMixCipher().getPaddingSize();
       if (a_virtualPacketLength > realPacketLength) {
         /* we shall encrypt some more dummy bytes to keep the stream cipher synchronized */
         packet = new byte[a_virtualPacketLength];       
@@ -107,7 +108,9 @@ public class DefaultMixCipher implements IMixCipher {
       System.arraycopy(a_packet, 0, packet, m_symCipher.getKeys().length, a_packet.length);
       encryptedPacket = new byte[packet.length];
       /* do asymmetric encryption on the first part of the packet */
-      alreadyEncryptedBytes = m_mixParameters.getMixCipher().encrypt(packet, 0, encryptedPacket, 0);
+      m_mixParameters.getMixCipher().encrypt(packet, 0, encryptedPacket, 0);
+      alreadyEncryptedBytes=m_mixParameters.getMixCipher().getInputBlockSize();
+      alreadyOutputBytes=m_mixParameters.getMixCipher().getOutputBlockSize();
       m_firstEncryptionPacket = false;
     }
     else {
@@ -123,7 +126,7 @@ public class DefaultMixCipher implements IMixCipher {
       encryptedPacket = new byte[packet.length];
     }
     /* do symmetric encryption */
-    m_symCipher.encryptAES1(packet, alreadyEncryptedBytes, encryptedPacket, alreadyEncryptedBytes, packet.length - alreadyEncryptedBytes);
+    m_symCipher.encryptAES1(packet, alreadyEncryptedBytes, encryptedPacket, alreadyOutputBytes, a_packet.length - alreadyEncryptedBytes);
     if (realPacketLength < encryptedPacket.length) {
       /* cut off the dummy bytes */
       byte[] tempPacket = encryptedPacket;
@@ -140,7 +143,7 @@ public class DefaultMixCipher implements IMixCipher {
   public int getNextPacketEncryptionOverhead() {
     int overhead = 0;
     if (m_firstEncryptionPacket) {
-      overhead = m_symCipher.getKeys().length;
+      overhead = m_symCipher.getKeys().length+m_mixParameters.getMixCipher().getPaddingSize();
     }
     return overhead;
   }

@@ -53,6 +53,15 @@ public class MyRSA
 		}
 	}
 
+	/** encrypts/decrypts one  block using Plain RSA*/
+	public byte[] processBlock(byte[] plain, int offset, int len) throws Exception
+	{
+		synchronized (m_RSAEngine)
+		{
+			return m_RSAEngine.processBlock(plain, offset, len);
+		}
+	}
+
 	/** encrypts/decrypts one  block using OAEP padding*/
 	public byte[] processBlockOAEP(byte[] plain, int offset, int len) throws Exception
 	{
@@ -70,4 +79,6 @@ public class MyRSA
 			return m_PKCS1.processBlock(plain, offset, len);
 		}
 	}
+	
+	
 }

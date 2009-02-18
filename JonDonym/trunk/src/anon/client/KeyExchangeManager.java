@@ -52,7 +52,9 @@ import org.w3c.dom.NodeList;
 
 import anon.ErrorCodes;
 import anon.client.TermsAndConditionsResponseHandler.TCRequestException;
-import anon.client.crypto.ASymCipher;
+import anon.client.crypto.ASymMixCipherPlainRSA;
+import anon.client.crypto.ASymMixCipherRSAOAEP;
+import anon.client.crypto.IASymMixCipher;
 import anon.client.crypto.KeyPool;
 import anon.client.crypto.SymCipher;
 import anon.crypto.SignatureVerifier;
@@ -354,7 +356,18 @@ public class KeyExchangeManager {
 			  }
 
 			  Element currentMixNode = mixinfo.getXmlStructure();
-			  m_mixParameters[i] = new MixParameters(mixinfo.getId(), new ASymCipher());
+
+			  //setting AsymCipher
+			  IASymMixCipher asymCipher=null;
+			  if(m_bEnhancedChannelEncryption)
+			  	{
+			  		asymCipher=new ASymMixCipherRSAOAEP();
+			  	}
+			  else
+			  	{
+			  		asymCipher=new ASymMixCipherPlainRSA();			  		
+			  	}
+			  m_mixParameters[i] = new MixParameters(mixinfo.getId(), asymCipher);
 			  if (m_mixParameters[i].getMixCipher().setPublicKey(currentMixNode) != ErrorCodes.E_SUCCESS)
 			  {
 				  throw (new XMLParseException(
