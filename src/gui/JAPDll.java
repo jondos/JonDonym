@@ -554,7 +554,16 @@ final public class JAPDll {
 						command = "\"" + a_args[0] + "\"";
 						for (int i = 1; i < a_args.length; i++)
 						{
-							parameters += a_args[i];
+							if (new StringTokenizer(a_args[i]).countTokens() > 1)
+							{
+								// escape white spaces
+								parameters += " \"" + a_args[i] + "\"";
+							}
+							else
+							{
+								parameters += " " + a_args[i];
+							}
+							//parameters += a_args[i];
 						}
 						if (!m_bStartedAsAdmin)
 						{
@@ -1017,6 +1026,7 @@ final public class JAPDll {
 		}
 		catch (Throwable a_e)
 		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, a_e);
 			result = false;
 		}
 		return result;		

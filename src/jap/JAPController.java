@@ -42,6 +42,7 @@ import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -224,7 +225,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	private final Object PROXY_SYNC = new Object();
 
-	private String m_commandLineArgs = "";	
+	private String[] m_commandLineArgs = new String[0];
 	boolean m_firstPortableFFStart = false;
 	/**
 	 * Stores all MixCascades we know (information comes from infoservice or was entered by a user).
@@ -317,28 +318,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			return true;
 		}
-		
+	
 		public void exec(String[] a_args) throws IOException
 		{
-			String command = "";
-			if (a_args == null)
-			{
-				return;
-			}
-			
-			if (a_args.length > 2)
+			if (a_args != null)
 			{
 				Runtime.getRuntime().exec(a_args);
-				return;
 			}
 			
-			for (int i = 0; i < a_args.length; i++)
-			{
-				command += a_args[i] + " ";
-			}
-			command.trim();
-			
-			Runtime.getRuntime().exec(command);
+			return;
 		}
 	};
 
@@ -612,7 +600,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		return m_bPortable;
 	}
 	
-	public void setCommandLineArgs(String a_cmdArgs)
+	public void initCommandLineArgs(String[] a_cmdArgs)
 	{
 		if (a_cmdArgs != null)
 		{
@@ -620,7 +608,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	}
 	
-	public String getCommandlineArgs()
+	public String[] getCommandlineArgs()
 	{
 		return m_commandLineArgs;
 	}
@@ -2423,20 +2411,22 @@ public final class JAPController extends Observable implements IProxyListener, O
 		// restart command
 		MacOS macOS = (AbstractOS.getInstance() instanceof MacOS) ?
 							(MacOS) AbstractOS.getInstance() : null;
-		String strRestartCommand = "";
-		String JapMainClass = (macOS != null ) ?
-									"JAPMacintosh" : "JAP";
+		String[] strRestartCommand = new String[4 + m_commandLineArgs.length];
+		if (m_commandLineArgs.length > 0)
+		{
+			System.arraycopy(m_commandLineArgs, 0, strRestartCommand, 4, m_commandLineArgs.length);
+		}
+		strRestartCommand[2] = CLASS_PATH;
+		strRestartCommand[3] = (macOS != null ) ? "JAPMacintosh" : "JAP";
 		
 		//what is used: sun.java or JView?
 		String strJavaVendor = System.getProperty("java.vendor");
-		LogHolder.log(LogLevel.INFO, LogType.ALL, "Java vendor: " + strJavaVendor);
 
 		String javaExe = null;
 		String javaOptions = null;
-		String pathToJava = null;
+		String pathToJava = "";
 		if (strJavaVendor.toLowerCase().indexOf("microsoft") != -1)
 		{
-			//System.out.println("Java vendor :"+strJavaVendor.toLowerCase());
 			pathToJava = System.getProperty("com.ms.sysdir") + File.separator;
 			javaExe = "jview";
 			javaOptions = "/cp";
@@ -2444,41 +2434,40 @@ public final class JAPController extends Observable implements IProxyListener, O
 		else
 		{
 			pathToJava = AbstractOS.getInstance().getProperty("java.home") + 
-			File.separator + "bin" + File.separator;
+				File.separator + "bin" + File.separator;
 			javaExe = "javaw"; // for windows
 			javaOptions = "-cp";
 		}
-		strRestartCommand = " \"" + CLASS_PATH + "\" " +  JapMainClass + m_commandLineArgs;
 		
 		boolean isMacOSBundle = (macOS != null) ? macOS.isBundle() : false;
 		
 	    try
 		{
+	    	strRestartCommand[0] = pathToJava + javaExe;
+			strRestartCommand[1] = javaOptions;
+	    	
 	    	if(!isMacOSBundle)
 	    	{
-	    		m_restarter.exec(new String[]{pathToJava + javaExe, javaOptions + strRestartCommand});	
-	    		LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + 
-	    				pathToJava + javaExe + " " + javaOptions + strRestartCommand);
+	    		m_restarter.exec(strRestartCommand);	
+
 	    	}
 	    	else
 	    	{
 	    		String[] cmdArray = {"open", "-n", macOS.getBundlePath()};
 	    		m_restarter.exec(cmdArray);
 	    	}
-	    		
 		}
 		catch (Exception ex)
 		{
-			javaExe = "java"; // Linux/UNIX
+			javaExe = "java"; // Linux/UNIX or Windows when javaw is not available
 			javaOptions = "-cp";
 			
-			strRestartCommand = " \"" + CLASS_PATH + "\" "+ JapMainClass + m_commandLineArgs;
+			strRestartCommand[0] = pathToJava + javaExe;
+			strRestartCommand[1] = javaOptions;
 
-			LogHolder.log(LogLevel.INFO, LogType.ALL, "JAP restart command: " + 
-					pathToJava + javaExe + " " + javaOptions + strRestartCommand);
 			try
 			{
-				m_restarter.exec(new String[]{pathToJava + javaExe, javaOptions + strRestartCommand});
+				m_restarter.exec(strRestartCommand);
 			}
 			catch (Exception a_e)
 			{

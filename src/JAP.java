@@ -635,26 +635,26 @@ public class JAP
 		{
 			m_controller.setPresentationMode(true);
 		}
-		String cmdArgs = "";
-		if (m_temp != null)
+		
+		//if (m_temp != null)
 		{
-			for (int i = 0; i < m_temp.length; i++)
+			String[] cmdArgs = m_temp;
+			
+			if (m_temp == null || (!isArgumentSet("--allow-multiple") && !isArgumentSet("-a")))
 			{
-				if (new StringTokenizer(m_temp[i]).countTokens() > 1)
+				if (m_temp == null)
 				{
-					// escape white spaces
-					cmdArgs += " \"" + m_temp[i] + "\"";
+					cmdArgs = new String[1];
 				}
 				else
 				{
-					cmdArgs += " " + m_temp[i];
+					cmdArgs = new String[m_temp.length + 1];
+					System.arraycopy(m_temp, 0, cmdArgs, 0, m_temp.length);
 				}
+				cmdArgs[cmdArgs.length - 1] = "-a"; // important for automatic restart; it might block otherwise
 			}
-			if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
-			{
-				cmdArgs += " -a"; // important for automatic restart
-			}
-			m_controller.setCommandLineArgs(cmdArgs);
+			
+			m_controller.initCommandLineArgs(cmdArgs);
 		}
 
 		if (isArgumentSet("--portable-jre"))

@@ -206,8 +206,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private static final String HLP_ANONYMETER = JAPNewView.class.getName() + "_anonymometer";
 	private static final String IMG_METER = "anonym-o-meter/JAP.NewView_m{0}.anim.gif";
-	private static final String IMG_METER_NO_MEASURE = "anonym-o-meter/JAP.no.measure.anim.gif";
-	private static final String IMG_METER_DEACTIVATED = "anonym-o-meter/JAP.deactivated.anim.gif";
+	private static final String IMG_METER_NO_MEASURE = "anonym-o-meter/JAP.no.measure.anim{0}.gif";
+	private static final String IMG_METER_DEACTIVATED = "anonym-o-meter/JAP.deactivated.anim{0}.gif";
 	private static final String IMG_METER_CONNECTING = "anonym-o-meter/JAP.connecting.anim.gif";
 	
 	private final Object FONT_UPDATE = new Object();
@@ -474,11 +474,17 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				
 				if (JAPModel.isInfoServiceDisabled())
 				{
+					String lang = "";
+					if (JAPMessages.getLocale().getLanguage() == "de")
+					{
+						lang = "_de";
+					}
+					
 					if (JAPDialog.showConfirmDialog(JAPNewView.this,
 						JAPMessages.getString(MSG_IS_DISABLED_EXPLAIN),
 						JAPDialog.OPTION_TYPE_YES_NO,
 						JAPDialog.MESSAGE_TYPE_WARNING,
-						GUIUtils.loadImageIcon(IMG_METER_NO_MEASURE, true, true))
+						GUIUtils.loadImageIcon(MessageFormat.format(IMG_METER_NO_MEASURE, lang), true, true))
 						== JAPDialog.RETURN_VALUE_YES)
 					{
 						JAPModel.getInstance().setInfoServiceDisabled(false);
@@ -514,7 +520,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						
 						JAPModel.getInstance().setInfoServiceAnonymousConnectionSetting(
 								JAPModel.CONNECTION_ALLOW_ANONYMOUS);
-							
 					}
 				}
 			}
@@ -1664,6 +1669,12 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		boolean bAnonMode = m_Controller.getAnonMode();
 		boolean bConnected = m_Controller.isAnonConnected();
 		boolean bConnectionErrorShown = m_bShowConnecting;
+		String lang = "";
+		
+		if (JAPMessages.getLocale().getLanguage() == "de")
+		{
+			lang = "_de";
+		}
 		
 		if (bAnonMode && bConnected)
 		{
@@ -1675,7 +1686,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			else
 			{
-				return GUIUtils.loadImageIcon(IMG_METER_NO_MEASURE, true, true); //No measure available
+				return GUIUtils.loadImageIcon(MessageFormat.format(IMG_METER_NO_MEASURE, lang), true, true); //No measure available
 			}
 		}
 		else if (bAnonMode && !bConnected && bConnectionErrorShown)
@@ -1687,8 +1698,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			//System.out.println("AnonMode:" + bAnonMode + " " + "Connected:" + bConnected + " " +
 			//			   "ShowError:" + bConnectionErrorShown);
-			//System.out.println("deactivated");
-			return GUIUtils.loadImageIcon(IMG_METER_DEACTIVATED, true, true); // Anon deactivated
+			//System.out.println("deactivated");			
+			return GUIUtils.loadImageIcon(MessageFormat.format(IMG_METER_DEACTIVATED, lang), true, true); // Anon deactivated
 		}
 	}
 
