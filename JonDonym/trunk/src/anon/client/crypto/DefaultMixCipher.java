@@ -126,7 +126,7 @@ public class DefaultMixCipher implements IMixCipher {
       encryptedPacket = new byte[packet.length];
     }
     /* do symmetric encryption */
-    m_symCipher.encryptAES1(packet, alreadyEncryptedBytes, encryptedPacket, alreadyOutputBytes, a_packet.length - alreadyEncryptedBytes);
+    m_symCipher.encryptAES1(packet, alreadyEncryptedBytes, encryptedPacket, alreadyOutputBytes, packet.length - alreadyEncryptedBytes);
     if (realPacketLength < encryptedPacket.length) {
       /* cut off the dummy bytes */
       byte[] tempPacket = encryptedPacket;
