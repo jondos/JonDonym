@@ -1307,46 +1307,49 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 	protected void onUpdateValues()
 	{
-		updateUICombo();
-		
-		if (JAPModel.getInstance().getPortableBrowserpath() != null)
+		synchronized (JAPConf.getInstance())
 		{
-			m_portableBrowserPathField.setText(JAPModel.getInstance().getPortableBrowserpath());
-		}
-		else
-		{
-			m_portableBrowserPathField.setText(AbstractOS.getInstance().getDefaultBrowserPath());
-		}
-		m_slidFontSize.setValue(JAPModel.getInstance().getFontSize());
-		setLanguageComboIndex(JAPMessages.getLocale());
-		m_cbSaveWindowLocationMain.setSelected(JAPModel.isMainWindowLocationSaved());
-		m_cbSaveWindowLocationConfig.setSelected(JAPModel.getInstance().isConfigWindowLocationSaved());
-		m_cbSaveWindowLocationIcon.setSelected(JAPModel.getInstance().isIconifiedWindowLocationSaved());
-		m_cbSaveWindowLocationHelp.setSelected(JAPModel.getInstance().isHelpWindowLocationSaved());
-		m_cbSaveWindowSizeHelp.setSelected(JAPModel.getInstance().isHelpWindowSizeSaved());
-		m_cbSaveWindowSizeConfig.setSelected(JAPModel.getInstance().isConfigWindowSizeSaved());
-		m_rbViewNormal.setSelected(JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL);
-		m_rbViewSimplified.setSelected(JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED);
-		m_rbViewSystray.setSelected(JAPModel.getMoveToSystrayOnStartup());
-		m_rbViewMini.setSelected(JAPModel.getMinimizeOnStartup());
-		m_cbMiniOnTop.setSelected(JAPModel.getInstance().isMiniViewOnTop());
-		m_cbIgnoreDLLUpdate.setSelected(!JAPModel.getInstance().isDLLWarningActive());
-		m_cbWarnOnClose.setSelected(!JAPModel.getInstance().isNeverRemindGoodbye());
-		m_cbShowSplash.setSelected(JAPModel.getInstance().getShowSplashScreen());
-		m_cbStartPortableFirefox.setSelected(JAPModel.getInstance().getStartPortableFirefox());
-		
-		boolean b = JAPModel.getMoveToSystrayOnStartup() || JAPModel.getMinimizeOnStartup();
-		for (int i = 0; i < m_comboDialogFormat.getItemCount(); i++)
-		{
-			if ( ( (DialogFormat) m_comboDialogFormat.getItemAt(i)).getFormat() ==
-				JAPDialog.getOptimizedFormat())
+			updateUICombo();
+			
+			if (JAPModel.getInstance().getPortableBrowserpath() != null)
 			{
-				m_comboDialogFormat.setSelectedIndex(i);
-				break;
+				m_portableBrowserPathField.setText(JAPModel.getInstance().getPortableBrowserpath());
 			}
+			else
+			{
+				m_portableBrowserPathField.setText(AbstractOS.getInstance().getDefaultBrowserPath());
+			}
+			m_slidFontSize.setValue(JAPModel.getInstance().getFontSize());
+			setLanguageComboIndex(JAPMessages.getLocale());
+			m_cbSaveWindowLocationMain.setSelected(JAPModel.isMainWindowLocationSaved());
+			m_cbSaveWindowLocationConfig.setSelected(JAPModel.getInstance().isConfigWindowLocationSaved());
+			m_cbSaveWindowLocationIcon.setSelected(JAPModel.getInstance().isIconifiedWindowLocationSaved());
+			m_cbSaveWindowLocationHelp.setSelected(JAPModel.getInstance().isHelpWindowLocationSaved());
+			m_cbSaveWindowSizeHelp.setSelected(JAPModel.getInstance().isHelpWindowSizeSaved());
+			m_cbSaveWindowSizeConfig.setSelected(JAPModel.getInstance().isConfigWindowSizeSaved());
+			m_rbViewNormal.setSelected(JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL);
+			m_rbViewSimplified.setSelected(JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED);
+			m_rbViewSystray.setSelected(JAPModel.getMoveToSystrayOnStartup());
+			m_rbViewMini.setSelected(JAPModel.getMinimizeOnStartup());
+			m_cbMiniOnTop.setSelected(JAPModel.getInstance().isMiniViewOnTop());
+			m_cbIgnoreDLLUpdate.setSelected(!JAPModel.getInstance().isDLLWarningActive());
+			m_cbWarnOnClose.setSelected(!JAPModel.getInstance().isNeverRemindGoodbye());
+			m_cbShowSplash.setSelected(JAPModel.getInstance().getShowSplashScreen());
+			m_cbStartPortableFirefox.setSelected(JAPModel.getInstance().getStartPortableFirefox());
+			
+			boolean b = JAPModel.getMoveToSystrayOnStartup() || JAPModel.getMinimizeOnStartup();
+			for (int i = 0; i < m_comboDialogFormat.getItemCount(); i++)
+			{
+				if ( ( (DialogFormat) m_comboDialogFormat.getItemAt(i)).getFormat() ==
+					JAPDialog.getOptimizedFormat())
+				{
+					m_comboDialogFormat.setSelectedIndex(i);
+					break;
+				}
+			}
+			updateThirdPanel(b);
+			updateHelpPath();
 		}
-		updateThirdPanel(b);
-		updateHelpPath();
 	}
 
 	public void onResetToDefaultsPressed()

@@ -1449,28 +1449,31 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 	protected void onUpdateValues()
 	{
-		int index = InfoServiceHolder.getInstance().getNumberOfAskedInfoServices() - 1;
-		if (index < 0)
+		synchronized (JAPConf.getInstance())
 		{
-			index = 0;
+			int index = InfoServiceHolder.getInstance().getNumberOfAskedInfoServices() - 1;
+			if (index < 0)
+			{
+				index = 0;
+			}
+			else if (index >= m_cmbAskedInfoServices.getItemCount())
+			{
+				index = m_cmbAskedInfoServices.getItemCount() - 1;
+			}
+			m_cmbAskedInfoServices.setSelectedIndex(index);
+			m_allowAutomaticIS.setSelected(!JAPModel.isInfoServiceDisabled());
+			m_comboAnonymousConnection.setSelectedIndex(
+				  JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting());
+			//Select the preferred InfoService
+			m_listKnownInfoServices.setSelectedValue(InfoServiceHolder.getInstance().
+													 getPreferredInfoService(), true);
+			m_cmbAskedInfoServices.setEnabled(InfoServiceHolder.getInstance().isChangeInfoServices());
+	
+	
+			m_lblExplanation.setFont(new JLabel().getFont());
+			m_settingsInfoServiceConfigBasicSettingsDescriptionLabel.setFont(new JLabel().getFont());
+			setConnectionTimeout(InfoServiceDBEntry.getConnectionTimeout());
 		}
-		else if (index >= m_cmbAskedInfoServices.getItemCount())
-		{
-			index = m_cmbAskedInfoServices.getItemCount() - 1;
-		}
-		m_cmbAskedInfoServices.setSelectedIndex(index);
-		m_allowAutomaticIS.setSelected(!JAPModel.isInfoServiceDisabled());
-		m_comboAnonymousConnection.setSelectedIndex(
-			  JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting());
-		//Select the preferred InfoService
-		m_listKnownInfoServices.setSelectedValue(InfoServiceHolder.getInstance().
-												 getPreferredInfoService(), true);
-		m_cmbAskedInfoServices.setEnabled(InfoServiceHolder.getInstance().isChangeInfoServices());
-
-
-		m_lblExplanation.setFont(new JLabel().getFont());
-		m_settingsInfoServiceConfigBasicSettingsDescriptionLabel.setFont(new JLabel().getFont());
-		setConnectionTimeout(InfoServiceDBEntry.getConnectionTimeout());
 	}
 
 	public String getHelpContext()

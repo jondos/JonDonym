@@ -219,16 +219,6 @@ final public class ServerListPanel extends JPanel implements ActionListener
 		
 	}
 
-	public synchronized void fontSizeChanged(final JAPModel.FontResize a_resize, final JLabel a_dummyLabel)
-	{
-		for (int i = 0; i < m_mixButtons.length; i++)
-		{
-			m_mixButtons[i].setIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_SERVER, true));
-			m_mixButtons[i].setRolloverIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_SERVER_BLAU, true));
-			m_mixButtons[i].setSelectedIcon(GUIUtils.loadImageIcon(JAPConstants.IMAGE_SERVER_ROT, true));
-		}
-	}
-
 	public boolean areMixButtonsEnabled()
 	{
 		return m_bEnabled;

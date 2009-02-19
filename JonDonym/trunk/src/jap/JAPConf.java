@@ -77,7 +77,7 @@ import logging.LogType;
 import java.awt.Dimension;
 import anon.pay.PayAccount;
 
-final public class JAPConf extends JAPDialog implements ActionListener, Observer, WindowListener
+final public class JAPConf extends JAPDialog implements ActionListener, WindowListener
 {
 
 	/** Messages */
@@ -191,10 +191,10 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 
 		m_confServices = new JAPConfServices();
 		
+		DefaultMutableTreeNode nodeAnon =
+			m_moduleSystem.addComponent(rootNode, null, "ngAnonymitaet", null, null);
 		if (!m_bIsSimpleView)
 		{
-			DefaultMutableTreeNode nodeAnon =
-				m_moduleSystem.addComponent(rootNode, null, "ngAnonymitaet", null, null);
 			m_moduleSystem.addConfigurationModule(nodeAnon, m_confServices, ANON_SERVICES_TAB);
 			m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfInfoService(), INFOSERVICE_TAB);			
 			//m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfTrust(), ANON_TRUST_TAB);
@@ -211,15 +211,15 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 				m_moduleSystem.addConfigurationModule(debugNode, new JAPConfForwardingState(),
 					FORWARDING_STATE_TAB);
 			}
-			m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeAnon.getPath()));
 		}
 		else
 		{
-			DefaultMutableTreeNode dummy = 
-				m_moduleSystem.addConfigurationModule(rootNode, m_confServices, ANON_SERVICES_TAB);
-			m_moduleSystem.getConfigurationTree().expandPath(new TreePath(dummy.getPath()));
-			//m_moduleSystem.addConfigurationModule(nodeAnon, new JAPConfTrust(), ANON_TRUST_TAB);
+			//DefaultMutableTreeNode dummy = 
+				//m_moduleSystem.addConfigurationModule(rootNode, m_confServices, ANON_SERVICES_TAB);
+			//m_moduleSystem.getConfigurationTree().expandPath(new TreePath(dummy.getPath()));
+			m_moduleSystem.addConfigurationModule(nodeAnon, m_confServices, ANON_SERVICES_TAB);
 		}
+		m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeAnon.getPath()));
 		
 		//JAPExtension.addOptOut(m_moduleSystem);
 
@@ -316,7 +316,18 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		setContentPane(pContainer);
 		updateValues();
 		// largest tab to front
-		m_moduleSystem.selectNode(NETWORK_TAB); // Temp solution: UI is the largest!!!
+		//m_moduleSystem.selectNode(NETWORK_TAB); // Temp solution: UI is the largest!!!
+		
+		// select the last module (this may help against vanishing module entries after faulty pack operations)
+		if (JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED)
+		{
+			m_moduleSystem.selectNode(ANON_SERVICES_TAB);
+		}
+		else
+		{
+			m_moduleSystem.selectNode(DEBUG_TAB);
+		}
+		
 		if (JAPModel.isSmallDisplay())
 		{
 			setSize(240, 300);
@@ -340,7 +351,33 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		//setDockable(true);
 		this.addWindowListener(this);
 
-		JAPModel.getInstance().addObserver(this);
+		JAPModel.getInstance().addObserver(new Observer()
+		{
+			public void update(Observable a_observable, final Object a_message)
+			{
+				if (a_message instanceof JAPModel.FontResize)
+				{
+					Runnable run = new Runnable()
+					{
+						public void run()
+						{
+							// font changed
+							SwingUtilities.updateComponentTreeUI(getContentPane());
+							//m_bttnHelp.setIcon(GUIUtils.loadImageIcon(JAPHelp.IMG_HELP, true));
+						}
+					};
+					if (SwingUtilities.isEventDispatchThread())
+					{
+						run.run();
+					}
+					else
+					{
+						SwingUtilities.invokeLater(run);
+					}
+
+				}
+			}
+		});
 	}
 
 	public void windowClosed(WindowEvent e)
@@ -798,30 +835,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 		// ... manual settings stuff finished
 	}
 
-	public void update(Observable a_observable, final Object a_message)
-	{
-		if (a_message instanceof JAPModel.FontResize)
-		{
-			Runnable run = new Runnable()
-			{
-				public void run()
-				{
-					// font changed
-					SwingUtilities.updateComponentTreeUI(getContentPane());
-					//m_bttnHelp.setIcon(GUIUtils.loadImageIcon(JAPHelp.IMG_HELP, true));
-				}
-			};
-			if (SwingUtilities.isEventDispatchThread())
-			{
-				run.run();
-			}
-			else
-			{
-				SwingUtilities.invokeLater(run);
-			}
-
-		}
-	}
+	
 
 	/**
 	 * Brings the specified card of the tabbed pane of the configuration window to the foreground.
@@ -907,7 +921,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, Observer
 	}
 
 	/** Updates the shown Values from the Model.*/
-	public void updateValues()
+	public synchronized void updateValues()
 	{
 		m_moduleSystem.processUpdateValuesEvent();
 		/*		if (loadPay)

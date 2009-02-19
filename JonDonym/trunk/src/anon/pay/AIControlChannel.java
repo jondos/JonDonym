@@ -597,7 +597,7 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 				  }
 				  else if (openTransactionAccount == null && 
 						  //currentAccount.getSpent() == 0 &&
-						  activeAccount.getCurrentSpent() == 0 &&
+						  (activeAccount == null || activeAccount.getCurrentSpent() == 0) &&
 						  !currentAccount.hasExpired())
 				  {
 					  openTransactionAccount = currentAccount;

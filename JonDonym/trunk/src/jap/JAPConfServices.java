@@ -233,12 +233,15 @@ public class JAPConfServices extends AbstractJAPConfModule
 	 */
 	protected void onUpdateValues()
 	{
-		/* forward the event to all service modules */
-		m_anonModule.updateValues(false);
-		m_torModule.updateValues(false);
-		m_mixminionModule.updateValues(false);
-		m_anonGeneralModule.updateValues(false);
-		m_tcModule.updateValues(false);
+		synchronized (JAPConf.getInstance())
+		{
+			/* forward the event to all service modules */
+			m_anonModule.updateValues(false);
+			m_torModule.updateValues(false);
+			m_mixminionModule.updateValues(false);
+			m_anonGeneralModule.updateValues(false);
+			m_tcModule.updateValues(false);
+		}
 	}
 
 	/**

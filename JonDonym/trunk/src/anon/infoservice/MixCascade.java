@@ -436,7 +436,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				bNullMixInfo = true;
 				m_mixInfos[i] = null;
 			}
-		}		
+		}
 		
 		/* get the name */
 		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
