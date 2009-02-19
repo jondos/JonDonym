@@ -40,8 +40,30 @@ import anon.util.XMLUtil;
 
 /**
  * XML structure sent to the mix during login to request lacking TermsAndConditions items
- * which are required to be accepted before connecting to the corresponding cascade. 
- * @author Simon Pecher
+ * which are required to be accepted before connecting to the corresponding cascade.
+ * 
+ *  Resource requests are added by the corresponding add-methods
+ *  An example for a resulting XML request document:
+ *  
+ *  <TermsAndConditionsRequest>
+ *		<Resources id="(operator subject key identifier)">
+ *			<Translation locale="en">
+ *				<CustomizedSections/>
+ *				<Template/>
+ *			</Translation>
+ *			<Translation locale="de">
+ *				<CustomizedSections/>
+ *			</Translation>
+ *			...
+ *		</Resources>
+ *		<Resources id="(operator subject key identifier)">
+ *			<Translation locale="de">
+ *				<CustomizedSections/>
+ *				<Template/>
+ *			</Translation>
+ *			...
+ *		</Resources>
+ *	</TermsAndConditionsRequest>
  */
 public class XMLTermsAndConditionsRequest implements IXMLEncodable 
 {
@@ -54,17 +76,37 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	public final static String XML_ELEMENT_RESOURCE_TEMPLATE = "Template"; 
 	public final static String XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT = "CustomizedSections"; 
 	
+	public final static String XML_MSG_TC_INTERRUPT = "TermsAndConditionsInterrupt";
+	public final static String XML_MSG_TC_CONFIRM = "TermsAndConditionsConfirm";
+	
+	/** to remember which templates are already requested. Needed to 
+	 * ensure that the same template is only requested once.
+	 */
 	private Vector requestedTemplates = null;
+	/**
+	 * stores the requested T&C resources. the key that maps to the entries
+	 * is built by the operator subject key identifier and the language.
+	 */
 	private Hashtable requestedItems = null;
-	private Hashtable resourceRootRefs = null;
+	/**
+	 * stores the resource root elements for the operators.
+	 * needed when the XML document is created.
+	 */
+	private Hashtable resourceRootElements = null;
 	
 	public XMLTermsAndConditionsRequest()
 	{
 		requestedTemplates = new Vector();
 		requestedItems = new Hashtable();
-		resourceRootRefs = new Hashtable();
+		resourceRootElements = new Hashtable();
 	}
 	
+	/**
+	 * adds a template request for the given operator and language
+	 * the templateRefid needs to be specified to avoid 
+	 * multiple requests of the same template. (the same template can be used 
+	 * by multiple operators)
+	 */
 	public void addTemplateRequest(String opSki, String langCode, String templateRefID)
 	{
 		if(!requestedTemplates.contains(templateRefID))
@@ -74,16 +116,21 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 		}
 	}
 	
+	/**
+	 * adds a request for the individual T&C sections of the given operator in the
+	 * the specified language.
+	 */
 	public void addCustomizedSectionsRequest(String opSki, String langCode)
 	{
 		addResourceRequest(XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT, opSki, langCode);
 	}
 	
+	/**
+	 * private util function for adding a generic resource request.
+	 */
 	private void addResourceRequest(String resourceType, String opSki, String langCode)
 	{
 		TCRequestKey reqKey = new TCRequestKey(opSki, langCode);
-		//DOMElementWrapper reqRoot = getResourceRootReference(opSki);
-		
 		TCRequestValue reqValue = (TCRequestValue) requestedItems.get(reqKey);
 		if(reqValue == null)
 		{
@@ -99,8 +146,7 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	}
 	
 	public Element toXmlElement(Document a_doc) 
-	{
-		
+	{	
 		Enumeration allReqs = requestedItems.keys();
 		if(!allReqs.hasMoreElements())
 		{
@@ -114,25 +160,25 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 		Element currTranslationElement = null;
 		Enumeration currRequestItems = null;
 		
-		TCRequestKey opski = null;
+		TCRequestKey currTCReqKey = null;
 		
 		while (allReqs.hasMoreElements()) 
 		{
-			opski = (TCRequestKey) allReqs.nextElement();
-			currRequestElement = (Element) resourceRootRefs.get(opski.getOpSki());
+			currTCReqKey = (TCRequestKey) allReqs.nextElement();
+			currRequestElement = (Element) resourceRootElements.get(currTCReqKey.getOpSki());
 			
 			if(currRequestElement == null)
 			{
 				currRequestElement = a_doc.createElement(XML_ELEMENT_NAME);
-				XMLUtil.setAttribute(currRequestElement, XML_ATTR_ID, opski.getOpSki());
-				resourceRootRefs.put(opski.getOpSki(), currRequestElement);
+				XMLUtil.setAttribute(currRequestElement, XML_ATTR_ID, currTCReqKey.getOpSki());
+				resourceRootElements.put(currTCReqKey.getOpSki(), currRequestElement);
 			}
 		
-			currRequestItems = ((TCRequestValue)requestedItems.get(opski)).getAllResourceRequests();
+			currRequestItems = ((TCRequestValue)requestedItems.get(currTCReqKey)).getAllResourceRequests();
 			if(currRequestItems.hasMoreElements())
 			{
 				currTranslationElement = a_doc.createElement(XML_ELEMENT_REQ_TRANSLATION);
-				XMLUtil.setAttribute(currTranslationElement, XML_ATTR_LOCALE, opski.getLangCode());
+				XMLUtil.setAttribute(currTranslationElement, XML_ATTR_LOCALE, currTCReqKey.getLangCode());
 				currRequestElement.appendChild(currTranslationElement);
 			}
 			while (currRequestItems.hasMoreElements()) 
@@ -145,7 +191,8 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	}
 	
 	/**
-	 * simple class to build a key with language and opSki
+	 * simple class to build a key with language and 
+	 * the operator subject key identifier.
 	 * to map a TC resource request 
 	 */
 	private static class TCRequestKey
@@ -186,7 +233,7 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	}
 	
 	/**
-	 * a corresponding value wrapper class for the resource hashtable
+	 * a corresponding value wrapper class for the resource items hashtable
 	 */
 	private static class TCRequestValue
 	{

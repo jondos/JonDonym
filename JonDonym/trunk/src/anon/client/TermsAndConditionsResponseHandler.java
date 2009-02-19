@@ -1,3 +1,31 @@
+/*
+Copyright (c) 2008 The JAP-Team, JonDos GmbH
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation and/or
+       other materials provided with the distribution.
+    * Neither the name of the University of Technology Dresden, Germany, nor the name of
+       the JonDos GmbH, nor the names of their contributors may be used to endorse or
+       promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package anon.client;
 
 import java.io.IOException;
@@ -15,8 +43,25 @@ import anon.infoservice.TermsAndConditionsFramework;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
-
-
+/**
+ * Extracts the requested resources the mix sends back
+ * and stores them.
+ * 
+ * A mix tc response looks like this:
+ * <TermsAndConditionsResponse>
+ * 		<Resources id="(operator subject key identifier)" locale="de">
+ * 			<CustomizedSections>
+ * 				<TCTranslation locale="de" referenceId="(template_id)_(lang)_(date)">
+ *					...
+ *       		</TCTranslation>
+ *			</CustomizedSections>
+ *			<Template>
+ *			...
+ *			</Template>
+ *		</Resources>
+ *		...
+ *	</TermsAndConditionsResponse>
+ */
 public class TermsAndConditionsResponseHandler extends Observable
 {
 	public static final String XML_ELEMENT_INVALID_REQUEST_NAME = "InvalidTermsAndConditionsRequest";
@@ -36,11 +81,9 @@ public class TermsAndConditionsResponseHandler extends Observable
 				XMLTermsAndConditionsRequest.XML_ELEMENT_NAME);
 		Node currentResourceNode = null;
 		String currentID = "";
-		//String currentLang = "";
 		while(currentResourceParentNode != null)
 		{
 			currentID = XMLUtil.parseAttribute(currentResourceParentNode, XMLTermsAndConditionsRequest.XML_ATTR_ID, "");
-			//currentLang = XMLUtil.parseAttribute(currentResourceParentNode, XMLTermsAndConditionsRequest.XML_ATTR_LOCALE, "");
 			if(currentID.equals("")  )
 			{
 				throw new XMLParseException("invalid attributes: id not set");

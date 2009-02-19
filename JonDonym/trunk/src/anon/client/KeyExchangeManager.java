@@ -305,97 +305,12 @@ public class KeyExchangeManager {
 		 
 		 for (int i = 0; i < m_cascade.getNumberOfMixes(); i++)
 		 {
-			MixInfo mixinfo = m_cascade.getMixInfo(i);
-			//+++++++++++++++++++++++++++++++++++++++++++++++++++
-			if(a_tcContainer != null)
-			{
-				TermsAndConditionsMixInfo tncInfo = mixinfo.getTermsAndConditionMixInfo();
-				if(tncInfo != null)
-				{
-					try
-					{
-						TermsAndConditions tc = TermsAndConditions.getById(tncInfo.getId());
-						if( (tc == null) || !tc.isMostRecent(tncInfo.getDate()))
-						{
-							if(tc != null) 
-							{
-								//T & C is obsolete: get the new one.
-								TermsAndConditions.removeTermsAndConditions(tc);
-							}
-							tc = new TermsAndConditions(tncInfo.getId(), tncInfo.getDate());
-							if(tcrException == null)
-							{
-								tcrException = new TermsAndConditionsReadException();
-							}
-							tcrException.addTermsAndConditonsToRead(tc);
-							TermsAndConditions.storeTermsAndConditions(tc);
-						}
-						else
-						{
-							if(!tc.isAccepted())
-							{
-								if(tcrException == null)
-								{
-									tcrException = new TermsAndConditionsReadException();
-								}
-								tcrException.addTermsAndConditonsToRead(tc);
-							}
-							//tcOverallAccept = tcOverallAccept && tc.isAccepted(); 
-						}
-						
-						Locale currentLocale = a_tcContainer.getDisplayLanguageLocale();
-						
-						String langCode = 
-							tncInfo.hasTranslation(currentLocale) ? 
-									currentLocale.getLanguage().trim().toLowerCase(): tncInfo.getDefaultLanguage();
-						
-						//if no default translation is specified make sure it will be loaded from the mix.
-						if(!langCode.equals(tncInfo.getDefaultLanguage()) && !tc.hasDefaultTranslation())
-						{
-							//System.out.println("Must also append the defaultLang request ["+tncInfo.getDefaultLanguage()+"]");
-							m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), tncInfo.getDefaultLanguage());
-							if(TermsAndConditionsFramework.getById(tncInfo.getDefaultTemplateRefId(), false) == null)
-							{
-								m_tnCRequest.addTemplateRequest(tncInfo.getId(), 
-										tncInfo.getDefaultLanguage(), 
-										tncInfo.getDefaultTemplateRefId());
-							}
-						}
-						
-						String templateRefID = tncInfo.getTemplateRefId(langCode);
-						if(TermsAndConditionsFramework.getById(templateRefID, false) == null)
-						{
-							m_tnCRequest.addTemplateRequest(tncInfo.getId(), langCode, templateRefID);
-						}
-						//else
-						//{
-						//	System.out.println("Already stored template "+TermsAndConditionsFramework.getById(templateRefID, false).getId());
-						//}
-						
-						
-						if(!tc.hasTranslation(langCode))
-						{
-							m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), langCode);
-						}
-						//else
-						//{
-						//	System.out.println("Already stored customized sections "+tc.getId());
-						//}
-					}
-					catch(ParseException e)
-					{
-						LogHolder.log(LogLevel.ERR, LogType.NET, "tc mix info "+tncInfo.getId()+" has an invalid date format: "+tncInfo.getDate());
-					}
-				}
-			}
-			//+++++++++++++++++++++++++++++++++++++++++++++++++++++
+			  MixInfo mixinfo = m_cascade.getMixInfo(i);
 			  if (mixinfo == null)
 			  {
 				  // should not happen
 				  throw new XMLParseException("Could not get MixInfo object for Mix " + i + "!");
-
 			  }
-
 			  if (i > 0 && !mixinfo.isVerified())
 			  {
 				  throw (new SignatureException(
@@ -408,13 +323,13 @@ public class KeyExchangeManager {
 			  //setting AsymCipher
 			  IASymMixCipher asymCipher=null;
 			  if(m_bEnhancedChannelEncryption)
-			  	{
-			  		asymCipher=new ASymMixCipherRSAOAEP();
-			  	}
+			  {
+			  	asymCipher=new ASymMixCipherRSAOAEP();
+			  }
 			  else
-			  	{
-			  		asymCipher=new ASymMixCipherPlainRSA();			  		
-			  	}
+			  {
+			  	asymCipher=new ASymMixCipherPlainRSA();			  		
+			  }
 			  m_mixParameters[i] = new MixParameters(mixinfo.getId(), asymCipher);
 			  if (m_mixParameters[i].getMixCipher().setPublicKey(currentMixNode) != ErrorCodes.E_SUCCESS)
 			  {
@@ -422,6 +337,88 @@ public class KeyExchangeManager {
 					  "Received XML structure contains an invalid public key for Mix " + Integer.toString(i) +
 					  "."));
 			  }
+			  
+			  	// prepare request for Terms and Conditions resources, if necessary
+			  	if(m_cascade.isTermsAndConditionsConfirmationRequired())
+				{
+					if( a_tcContainer == null )
+					{
+						throw new NullPointerException("Terms and Conditions confirmation required but no tc container is specified!");
+					}
+					TermsAndConditionsMixInfo tncInfo = mixinfo.getTermsAndConditionMixInfo();
+					if(tncInfo != null)
+					{
+						try
+						{
+							TermsAndConditions tc = TermsAndConditions.getById(tncInfo.getId());
+							if( (tc == null) || !tc.isMostRecent(tncInfo.getDate()))
+							{
+								if(tc != null) 
+								{
+									//T & C is obsolete: get the new one.
+									TermsAndConditions.removeTermsAndConditions(tc);
+								}
+								tc = new TermsAndConditions(tncInfo.getId(), tncInfo.getDate());
+								if(tcrException == null)
+								{
+									tcrException = new TermsAndConditionsReadException();
+								}
+								tcrException.addTermsAndConditonsToRead(tc);
+								TermsAndConditions.storeTermsAndConditions(tc);
+							}
+							else
+							{
+								if(!tc.isAccepted())
+								{
+									if(tcrException == null)
+									{
+										tcrException = new TermsAndConditionsReadException();
+									}
+									tcrException.addTermsAndConditonsToRead(tc);
+								}
+							}
+							
+							Locale currentLocale = a_tcContainer.getDisplayLanguageLocale();
+							
+							String langCode = 
+								tncInfo.hasTranslation(currentLocale) ? 
+										currentLocale.getLanguage().trim().toLowerCase(): tncInfo.getDefaultLanguage();
+							
+							//if no default translation is specified make sure it will be loaded from the mix.
+							if(!langCode.equals(tncInfo.getDefaultLanguage()) && !tc.hasDefaultTranslation())
+							{
+								m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), tncInfo.getDefaultLanguage());
+								if(TermsAndConditionsFramework.getById(tncInfo.getDefaultTemplateRefId(), false) == null)
+								{
+									m_tnCRequest.addTemplateRequest(tncInfo.getId(), 
+											tncInfo.getDefaultLanguage(), 
+											tncInfo.getDefaultTemplateRefId());
+								}
+							}
+							
+							String templateRefID = tncInfo.getTemplateRefId(langCode);
+							if(TermsAndConditionsFramework.getById(templateRefID, false) == null)
+							{
+								m_tnCRequest.addTemplateRequest(tncInfo.getId(), langCode, templateRefID);
+							}
+							
+							if(!tc.hasTranslation(langCode))
+							{
+								m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), langCode);
+							}
+						}
+						catch(ParseException e)
+						{
+							LogHolder.log(LogLevel.ERR, LogType.NET, "tc mix info "+tncInfo.getId()+" has an invalid date format: "+tncInfo.getDate());
+						}
+					}
+					else
+					{
+						LogHolder.log(LogLevel.WARNING, LogType.NET, "Cascade requires Terms And Conditions confirmation but Mix "+
+								mixinfo.getName()+ " does not send any TC Infos!");
+					}
+				}
+			  
 			  if (i == (m_cascade.getNumberOfMixes() - 1))
 			  {
 				  /* get the chain protocol version from the last mix */
@@ -687,10 +684,9 @@ public class KeyExchangeManager {
 			  }
 		  }
 		 
-		  if( (a_tcContainer != null) && 
-			  (m_cascade.getMixInfo(0).getServiceSoftware().getVersion().compareTo("00.08.55") >= 0) )
+		  // T&C protocol data exchange.
+		  if( (m_cascade.isTermsAndConditionsConfirmationRequired()) )
 		  {
-			  //send T&C stuff
 			  if(m_tnCRequest.hasResourceRequests())
 			  {
 				  Document tcRequestDoc = XMLUtil.createDocument();
@@ -698,13 +694,12 @@ public class KeyExchangeManager {
 				  String tcRequest = XMLUtil.toString(tcRequestDoc);
 				  if(tcRequest != null)
 				  {
-					  ByteArrayOutputStream tcRequestBytesOut = new ByteArrayOutputStream();
-					  DataOutputStream tcReqStream = new DataOutputStream(tcRequestBytesOut);
-					  tcReqStream.writeShort(tcRequest.length());
-					  tcReqStream.writeBytes(tcRequest);
-					  a_outputStream.write(tcRequestBytesOut.toByteArray());
-					  a_outputStream.flush();
-					  //System.out.println("request: "+tcRequest);
+					 ByteArrayOutputStream tcRequestBytesOut = new ByteArrayOutputStream();
+					 DataOutputStream tcReqStream = new DataOutputStream(tcRequestBytesOut);
+					 tcReqStream.writeShort(tcRequest.length());
+					 tcReqStream.writeBytes(tcRequest);
+					 a_outputStream.write(tcRequestBytesOut.toByteArray());
+					 a_outputStream.flush();
 					 int answerBytes = dataStreamFromMix.readInt();
 					 byte[] answerData = new byte[answerBytes];
 					 a_inputStream.read(answerData, 0, answerBytes);
@@ -713,10 +708,6 @@ public class KeyExchangeManager {
 					 {
 						 a_tcContainer.getTermsAndConditionsResponseHandler().handleXMLResourceResponse(answerDoc);
 					 }
-					 //throw new TermsAndConditionsIncompleteException();
-				 //
-				 //System.out.println("expected answer: "+answerBytes+ " bytes");
-				  //System.out.println("answer received: "+new String(answerData, "UTF-8"));
 				  }
 			  }
 			  
@@ -724,15 +715,18 @@ public class KeyExchangeManager {
 			  Element confirmDocRoot = null;
 			  if( tcrException != null ) 
 			  {
-				  //interrupt to read the T & Cs
-				  confirmDocRoot = confirmDoc.createElement("TermsAndConditionsInterrupt");
+				  //interrupt to read the T&Cs
+				  confirmDocRoot = 
+					  confirmDoc.createElement(XMLTermsAndConditionsRequest.XML_MSG_TC_INTERRUPT);
 			  }
 			  else
 			  {
-				  //TODO: accept or reject and replace magic Strings
-				  confirmDocRoot = confirmDoc.createElement("TermsAndConditionsConfirm");
+				  confirmDocRoot = 
+					  confirmDoc.createElement(XMLTermsAndConditionsRequest.XML_MSG_TC_CONFIRM);
+				  //only if all necessary Terms And Conditions are accepted
+				  //we can reach this point.
 				  XMLUtil.setAttribute(confirmDocRoot, 
-						  TermsAndConditions.XML_ATTR_ACCEPTED, tcOverallAccept);
+						  TermsAndConditions.XML_ATTR_ACCEPTED, true);
 			  }
 			  confirmDoc.appendChild(confirmDocRoot);
 			  
@@ -748,10 +742,6 @@ public class KeyExchangeManager {
 			  if(tcrException != null)
 			  {
 				  throw tcrException;
-			  }
-			  else if(!tcOverallAccept)
-			  {
-				  throw new IOException("tc not accepted.");
 			  }
 		  }
 		  
@@ -821,9 +811,8 @@ public class KeyExchangeManager {
   }
 
 	public boolean isProtocolWithEnhancedChannelEncryption()
-		{
-			// TODO Auto-generated method stub
-			return m_bEnhancedChannelEncryption;
-		}
+	{
+		return m_bEnhancedChannelEncryption;
+	}
 
 }
