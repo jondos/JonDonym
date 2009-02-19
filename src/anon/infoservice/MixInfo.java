@@ -194,7 +194,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    */
   private boolean m_bFromCascade;
   
-  private TermsAndConditionsMixInfo m_mixTnCInfo;
+  private TermsAndConditionsMixInfo m_mixTnCInfo = null;
   
   /**
    * Creates a new MixInfo from XML description (Mix node). The state of the mix will be set to

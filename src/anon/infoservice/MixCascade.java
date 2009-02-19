@@ -61,6 +61,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 {
 	public static final String SUPPORTED_PAYMENT_PROTOCOL_VERSION = "2.0";
 	
+	public static final String TC_REQUIRED_VERSION_SUFFIX = "tc";
+	
 	public static final int DISTRIBUTION_MIN = 0;
 	public static final int DISTRIBUTION_MAX = 6;
 
@@ -153,6 +155,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	private int m_distributionPoints = 0;
 	private boolean[] m_mixCertVerifiedAndValid;
 	private Object SYNC_OPERATORS_AND_COUNTRIES = new Object();
+
+	private volatile boolean termsAndConditionsConfirmationRequired = false;
 
 	/**
 	 * True, if this MixCascade is user defined, false if the Information comes from the
@@ -320,6 +324,15 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		if (m_mixProtocolVersion != null)
 		{
 			m_mixProtocolVersion = m_mixProtocolVersion.trim();
+			//a suffix determines whether this mix requires a confirmation
+			//of his Terms And Conditions
+			if(m_mixProtocolVersion.endsWith(TC_REQUIRED_VERSION_SUFFIX))
+			{
+				m_mixProtocolVersion = 
+					m_mixProtocolVersion.substring(0, 
+							(m_mixProtocolVersion.length() - TC_REQUIRED_VERSION_SUFFIX.length()));
+				termsAndConditionsConfirmationRequired = true;
+			}
 		}
 		/* get payment info */
 		Node payNode = XMLUtil.getFirstChildByName(a_mixCascadeNode, "Payment");
@@ -1583,6 +1596,11 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	public boolean isPayment()
 	{
 		return m_isPayment;
+	}
+	
+	public boolean isTermsAndConditionsConfirmationRequired() 
+	{
+		return termsAndConditionsConfirmationRequired;
 	}
 
 	private void createMixIDString()

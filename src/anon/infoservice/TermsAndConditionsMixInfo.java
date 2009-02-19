@@ -37,6 +37,21 @@ import org.w3c.dom.Node;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
+/**
+ * Holds the Terms and Conditions resource infos that are part of the Cascade key info.
+ * It provides when the Terms And Conditions became valid, which translations are available,
+ * which templates are used and also which is the default language.
+ * The JonDo uses these infos to generate the T&C resource request.
+ * 
+ * This info class is stored in the context of the corresponding MixInfo.
+ * a sample XML structure:
+ * 
+ * 	<TermsAndConditionsInfos date="(date when it became valid)" defaultLang="en" id="(operator subject key identifier)">
+ *		<TermsAndConditionsInfo locale="en" referenceId="(template_id)_(language)_(date)"/>
+ *		<TermsAndConditionsInfo locale="de" referenceId="(template_id)_(language)_(date)"/>
+ *		...
+ *	</TermsAndConditionsInfos>
+ */
 public class TermsAndConditionsMixInfo 
 {
 	public final static String TNC_MIX_INFO_ROOT = "TermsAndConditionsInfos";
@@ -82,7 +97,6 @@ public class TermsAndConditionsMixInfo
 			currentInfoTemplateRefId = XMLUtil.parseAttribute(it, TNC_MIX_INFO_TEMPLATE_REFID, "");
 			if( !(currentInfoLang.equals("") || currentInfoTemplateRefId.equals("")) )
 			{
-				//System.out.println(id+"/"+date+" putting: "+currentInfoLang+" -> "+currentInfoTemplateRefId);
 				templates.put(currentInfoLang.trim().toLowerCase(), currentInfoTemplateRefId);
 			}
 			it = XMLUtil.getNextSiblingByName(it, TNC_MIX_INFO);
