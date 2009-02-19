@@ -389,9 +389,12 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 
 	protected void onUpdateValues()
 	{
-		m_comboAnonymousConnection.setSelectedIndex(JAPModel.getInstance().getUpdateAnonymousConnectionSetting());
-		m_cbxRemindOptionalUpdate.setSelected(JAPModel.getInstance().isReminderForOptionalUpdateActivated());
-		m_cbxRemindJavaUpdate.setSelected(JAPModel.getInstance().isReminderForJavaUpdateActivated());
+		synchronized (JAPConf.getInstance())
+		{
+			m_comboAnonymousConnection.setSelectedIndex(JAPModel.getInstance().getUpdateAnonymousConnectionSetting());
+			m_cbxRemindOptionalUpdate.setSelected(JAPModel.getInstance().isReminderForOptionalUpdateActivated());
+			m_cbxRemindJavaUpdate.setSelected(JAPModel.getInstance().isReminderForJavaUpdateActivated());
+		}
 	}
 
 	public void run()

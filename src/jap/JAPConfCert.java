@@ -472,9 +472,12 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 	
 	protected void onUpdateValues()
 	{
-		if (m_cbCertCheckEnabled.isSelected() != SignatureVerifier.getInstance().isCheckSignatures())
+		synchronized (JAPConf.getInstance())
 		{
-			m_cbCertCheckEnabled.setSelected(SignatureVerifier.getInstance().isCheckSignatures());
+			if (m_cbCertCheckEnabled.isSelected() != SignatureVerifier.getInstance().isCheckSignatures())
+			{
+				m_cbCertCheckEnabled.setSelected(SignatureVerifier.getInstance().isCheckSignatures());
+			}
 		}
 	}
 

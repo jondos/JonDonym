@@ -99,8 +99,10 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 	
 	protected void onUpdateValues()
 	{
-		
-		((OperatorsTableModel) m_tblOperators.getModel()).update();
+		synchronized (JAPConf.getInstance())
+		{
+			((OperatorsTableModel) m_tblOperators.getModel()).update();
+		}
 	}
 	
 	/**

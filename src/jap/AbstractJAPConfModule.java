@@ -38,6 +38,10 @@ import java.util.Observer;
 import java.util.Observable;
 import javax.swing.SwingUtilities;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import gui.AWTUpdateQueue;
 import gui.JAPHelpContext;
 
@@ -53,7 +57,14 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 			// synchronize with pack() of config dialog so that update and pack events do not overlap
 			synchronized (JAPConf.getInstance())
 			{
-				onUpdateValues();
+				try
+				{
+					onUpdateValues();
+				}
+				catch (Throwable a_e)
+				{
+					LogHolder.log(LogLevel.ALERT, LogType.GUI, a_e);
+				}
 			}
 		}
 	});

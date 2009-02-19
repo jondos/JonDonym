@@ -164,41 +164,44 @@ public final class JAPConfAnonGeneral extends AbstractJAPConfModule implements O
 
 	protected void onUpdateValues()
 	{
-		int iTmp = JAPModel.getDummyTraffic();
-		//m_cbDummyTraffic.setSelected(iTmp > -1);
-		if (iTmp > -1)
+		synchronized (JAPConf.getInstance())
 		{
-			int seconds = iTmp / 1000;
-			if (seconds < DT_INTERVAL_STEPLENGTH)
+			int iTmp = JAPModel.getDummyTraffic();
+			//m_cbDummyTraffic.setSelected(iTmp > -1);
+			if (iTmp > -1)
 			{
-				seconds = DT_INTERVAL_STEPLENGTH;
+				int seconds = iTmp / 1000;
+				if (seconds < DT_INTERVAL_STEPLENGTH)
+				{
+					seconds = DT_INTERVAL_STEPLENGTH;
+				}
+				else if (seconds > DT_INTERVAL_STEPLENGTH * DT_INTERVAL_STEPS)
+				{
+					seconds = DT_INTERVAL_STEPLENGTH * DT_INTERVAL_STEPS;
+				}
+				m_sliderDummyTrafficIntervall.setValue(seconds);
 			}
-			else if (seconds > DT_INTERVAL_STEPLENGTH * DT_INTERVAL_STEPS)
+			m_sliderDummyTrafficIntervall.setEnabled(iTmp > -1);
+			Dictionary d = m_sliderDummyTrafficIntervall.getLabelTable();
+			for (int i = 1; i <= DT_INTERVAL_STEPS; i++)
 			{
-				seconds = DT_INTERVAL_STEPLENGTH * DT_INTERVAL_STEPS;
+				( (JLabel) d.get(new Integer(i * DT_INTERVAL_STEPLENGTH))).setEnabled(
+							 m_sliderDummyTrafficIntervall.isEnabled());
 			}
-			m_sliderDummyTrafficIntervall.setValue(seconds);
+			m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
+			m_cbAnonymizedHttpHeaders.setSelected(JAPModel.getInstance().isAnonymizedHttpHeaders());
+			m_cbAutoConnect.setSelected(JAPModel.isAutoConnect());
+			m_cbAutoReConnect.setSelected(JAPModel.isAutomaticallyReconnected());
+			m_cbAutoBlacklist.setSelected(BlacklistedCascadeIDEntry.areNewCascadesInBlacklist());
+			m_cbAutoChooseCascades.setSelected(JAPModel.getInstance().isCascadeAutoSwitched());
+			m_cbAutoChooseCascadesOnStartup.setSelected(JAPModel.getInstance().isCascadeAutoChosenOnStartup());
+			m_cbAutoChooseCascadesOnStartup.setEnabled(m_cbAutoChooseCascades.isSelected());
+	
+			/*m_comboServices[2].setEnabled(JAPModel.getInstance().isMixMinionActivated());
+			m_comboServices[3].setEnabled(JAPModel.getInstance().isTorActivated());*/
+	
+			setLoginTimeout(AnonClient.getLoginTimeout());
 		}
-		m_sliderDummyTrafficIntervall.setEnabled(iTmp > -1);
-		Dictionary d = m_sliderDummyTrafficIntervall.getLabelTable();
-		for (int i = 1; i <= DT_INTERVAL_STEPS; i++)
-		{
-			( (JLabel) d.get(new Integer(i * DT_INTERVAL_STEPLENGTH))).setEnabled(
-						 m_sliderDummyTrafficIntervall.isEnabled());
-		}
-		m_cbDenyNonAnonymousSurfing.setSelected(JAPModel.getInstance().isAskForAnyNonAnonymousRequest());
-		m_cbAnonymizedHttpHeaders.setSelected(JAPModel.getInstance().isAnonymizedHttpHeaders());
-		m_cbAutoConnect.setSelected(JAPModel.isAutoConnect());
-		m_cbAutoReConnect.setSelected(JAPModel.isAutomaticallyReconnected());
-		m_cbAutoBlacklist.setSelected(BlacklistedCascadeIDEntry.areNewCascadesInBlacklist());
-		m_cbAutoChooseCascades.setSelected(JAPModel.getInstance().isCascadeAutoSwitched());
-		m_cbAutoChooseCascadesOnStartup.setSelected(JAPModel.getInstance().isCascadeAutoChosenOnStartup());
-		m_cbAutoChooseCascadesOnStartup.setEnabled(m_cbAutoChooseCascades.isSelected());
-
-		/*m_comboServices[2].setEnabled(JAPModel.getInstance().isMixMinionActivated());
-		m_comboServices[3].setEnabled(JAPModel.getInstance().isTorActivated());*/
-
-		setLoginTimeout(AnonClient.getLoginTimeout());
 	}
 
 

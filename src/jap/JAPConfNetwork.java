@@ -560,54 +560,57 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 
 	protected void onUpdateValues()
 	{
-		//m_descLabel.setFont(new JLabel().getFont());
-
-		// listener tab
-		m_tfListenerPortNumber.setInt(JAPModel.getHttpListenerPortNumber());
-		m_cbListenerIsLocal.setSelected(JAPModel.isHttpListenerLocal());
-		//m_tfListenerPortNumberSocks.setInt(JAPModel.getSocksListenerPortNumber());
-		//boolean bSocksVisible = JAPModel.isTorEnabled();
-		//m_tfListenerPortNumberSocks.setVisible(bSocksVisible);
-		//m_labelSocksPortNumber.setVisible(bSocksVisible);
-		//m_cbListenerSocks.setSelected(m_Controller.getUseSocksPort());
-		// firewall tab
-		ProxyInterface proxyInterface = JAPModel.getInstance().getProxyInterface();
-		boolean bEnableProxy = proxyInterface != null &&
-			proxyInterface.isValid();
-		m_cbProxy.setSelected(bEnableProxy);
-		m_tfProxyHost.setEnabled(bEnableProxy);
-		m_tfProxyPortNumber.setEnabled(bEnableProxy);
-		m_comboProxyType.setEnabled(bEnableProxy);
-		m_tfProxyAuthenticationUserID.setEnabled(bEnableProxy);
-		m_labelProxyHost.setEnabled(bEnableProxy);
-		m_labelProxyPort.setEnabled(bEnableProxy);
-		m_labelProxyType.setEnabled(bEnableProxy);
-		if (proxyInterface == null ||
-			proxyInterface.getProtocol() ==
-			ImmutableListenerInterface.PROTOCOL_TYPE_HTTP)
+		synchronized (JAPConf.getInstance())
 		{
-			m_comboProxyType.setSelectedIndex(0);
-		}
-		else
-		{
-			m_comboProxyType.setSelectedIndex(1);
-		}
-		m_cbProxyAuthentication.setEnabled(bEnableProxy);
-		if (proxyInterface != null)
-		{
-			m_tfProxyHost.setText(proxyInterface.getHost());
-			m_tfProxyPortNumber.setText(String.valueOf(
-				proxyInterface.getPort()));
-			m_tfProxyAuthenticationUserID.setText(
-				proxyInterface.getAuthenticationUserID());
-			m_cbProxyAuthentication.setSelected(
-				proxyInterface.isAuthenticationUsed());
-		}
-		m_labelProxyAuthUserID.setEnabled(m_cbProxyAuthentication.isSelected() & bEnableProxy);
-		m_tfProxyAuthenticationUserID.setEnabled(m_cbProxyAuthentication.isSelected() & bEnableProxy);
-		if (m_tfProxyPortNumber.getText().trim().equalsIgnoreCase("-1"))
-		{
-			m_tfProxyPortNumber.setText("");
+			//m_descLabel.setFont(new JLabel().getFont());
+	
+			// listener tab
+			m_tfListenerPortNumber.setInt(JAPModel.getHttpListenerPortNumber());
+			m_cbListenerIsLocal.setSelected(JAPModel.isHttpListenerLocal());
+			//m_tfListenerPortNumberSocks.setInt(JAPModel.getSocksListenerPortNumber());
+			//boolean bSocksVisible = JAPModel.isTorEnabled();
+			//m_tfListenerPortNumberSocks.setVisible(bSocksVisible);
+			//m_labelSocksPortNumber.setVisible(bSocksVisible);
+			//m_cbListenerSocks.setSelected(m_Controller.getUseSocksPort());
+			// firewall tab
+			ProxyInterface proxyInterface = JAPModel.getInstance().getProxyInterface();
+			boolean bEnableProxy = proxyInterface != null &&
+				proxyInterface.isValid();
+			m_cbProxy.setSelected(bEnableProxy);
+			m_tfProxyHost.setEnabled(bEnableProxy);
+			m_tfProxyPortNumber.setEnabled(bEnableProxy);
+			m_comboProxyType.setEnabled(bEnableProxy);
+			m_tfProxyAuthenticationUserID.setEnabled(bEnableProxy);
+			m_labelProxyHost.setEnabled(bEnableProxy);
+			m_labelProxyPort.setEnabled(bEnableProxy);
+			m_labelProxyType.setEnabled(bEnableProxy);
+			if (proxyInterface == null ||
+				proxyInterface.getProtocol() ==
+				ImmutableListenerInterface.PROTOCOL_TYPE_HTTP)
+			{
+				m_comboProxyType.setSelectedIndex(0);
+			}
+			else
+			{
+				m_comboProxyType.setSelectedIndex(1);
+			}
+			m_cbProxyAuthentication.setEnabled(bEnableProxy);
+			if (proxyInterface != null)
+			{
+				m_tfProxyHost.setText(proxyInterface.getHost());
+				m_tfProxyPortNumber.setText(String.valueOf(
+					proxyInterface.getPort()));
+				m_tfProxyAuthenticationUserID.setText(
+					proxyInterface.getAuthenticationUserID());
+				m_cbProxyAuthentication.setSelected(
+					proxyInterface.isAuthenticationUsed());
+			}
+			m_labelProxyAuthUserID.setEnabled(m_cbProxyAuthentication.isSelected() & bEnableProxy);
+			m_tfProxyAuthenticationUserID.setEnabled(m_cbProxyAuthentication.isSelected() & bEnableProxy);
+			if (m_tfProxyPortNumber.getText().trim().equalsIgnoreCase("-1"))
+			{
+				m_tfProxyPortNumber.setText("");
+			}
 		}
 	}
 
