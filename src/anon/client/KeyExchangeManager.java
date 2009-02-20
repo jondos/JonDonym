@@ -49,6 +49,7 @@ import org.w3c.dom.NodeList;
 
 import anon.ErrorCodes;
 import anon.client.TermsAndConditionsResponseHandler.TermsAndConditionsReadException;
+import anon.client.TermsAndConditionsRequest.IllegalTCRequestPostConditionException;
 import anon.client.crypto.ASymMixCipherPlainRSA;
 import anon.client.crypto.ASymMixCipherRSAOAEP;
 import anon.client.crypto.IASymMixCipher;
@@ -60,6 +61,7 @@ import anon.crypto.XMLSignature;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
+import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.infoservice.TermsAndConditionsMixInfo;
@@ -110,7 +112,7 @@ public class KeyExchangeManager {
 
   private MixCascade m_cascade;
 
-  private XMLTermsAndConditionsRequest m_tnCRequest;
+  private TermsAndConditionsRequest m_tnCRequest;
   
   private TermsAndConditionsReadException tcrException = null;
   
@@ -126,12 +128,13 @@ public class KeyExchangeManager {
    * @throws IOException
    * @throws UnknownProtocolVersionException
  * @throws TermsAndConditionsReadException 
+ * @throws IllegalTCRequestPostConditionException 
    * @todo remove MixInfo entries when changes in the certificate ID of a mix are discovered
    */
   public KeyExchangeManager(InputStream a_inputStream, OutputStream a_outputStream, MixCascade a_cascade,
 							ITrustModel a_trustModel, ITermsAndConditionsContainer a_tcContainer)
 	  throws XMLParseException, SignatureException, IOException, UnknownProtocolVersionException,
-	  TrustException, TermsAndConditionsReadException
+	  TrustException, TermsAndConditionsReadException, IllegalTCRequestPostConditionException
   {
 	  try
 	  {
@@ -301,7 +304,7 @@ public class KeyExchangeManager {
 		  }
 
 		 m_mixParameters = new MixParameters[m_cascade.getNumberOfMixes()];
-		 m_tnCRequest = new XMLTermsAndConditionsRequest();
+		 m_tnCRequest = new TermsAndConditionsRequest();
 		 
 		 for (int i = 0; i < m_cascade.getNumberOfMixes(); i++)
 		 {
@@ -341,7 +344,8 @@ public class KeyExchangeManager {
 			  	// prepare request for Terms and Conditions resources, if necessary
 			  	if(m_cascade.isTermsAndConditionsConfirmationRequired())
 				{
-					if( a_tcContainer == null )
+					ServiceOperator currentOperator = mixinfo.getServiceOperator();
+			  		if( a_tcContainer == null )
 					{
 						throw new NullPointerException("Terms and Conditions confirmation required but no tc container is specified!");
 					}
@@ -350,7 +354,7 @@ public class KeyExchangeManager {
 					{
 						try
 						{
-							TermsAndConditions tc = TermsAndConditions.getById(tncInfo.getId());
+							TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(currentOperator);
 							if( (tc == null) || !tc.isMostRecent(tncInfo.getDate()))
 							{
 								if(tc != null) 
@@ -358,7 +362,7 @@ public class KeyExchangeManager {
 									//T & C is obsolete: get the new one.
 									TermsAndConditions.removeTermsAndConditions(tc);
 								}
-								tc = new TermsAndConditions(tncInfo.getId(), tncInfo.getDate());
+								tc = new TermsAndConditions(currentOperator, tncInfo.getDate());
 								if(tcrException == null)
 								{
 									tcrException = new TermsAndConditionsReadException();
@@ -387,10 +391,10 @@ public class KeyExchangeManager {
 							//if no default translation is specified make sure it will be loaded from the mix.
 							if(!langCode.equals(tncInfo.getDefaultLanguage()) && !tc.hasDefaultTranslation())
 							{
-								m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), tncInfo.getDefaultLanguage());
+								m_tnCRequest.addCustomizedSectionsRequest(currentOperator, tncInfo.getDefaultLanguage());
 								if(TermsAndConditionsFramework.getById(tncInfo.getDefaultTemplateRefId(), false) == null)
 								{
-									m_tnCRequest.addTemplateRequest(tncInfo.getId(), 
+									m_tnCRequest.addTemplateRequest(currentOperator, 
 											tncInfo.getDefaultLanguage(), 
 											tncInfo.getDefaultTemplateRefId());
 								}
@@ -399,12 +403,12 @@ public class KeyExchangeManager {
 							String templateRefID = tncInfo.getTemplateRefId(langCode);
 							if(TermsAndConditionsFramework.getById(templateRefID, false) == null)
 							{
-								m_tnCRequest.addTemplateRequest(tncInfo.getId(), langCode, templateRefID);
+								m_tnCRequest.addTemplateRequest(currentOperator, langCode, templateRefID);
 							}
 							
 							if(!tc.hasTranslation(langCode))
 							{
-								m_tnCRequest.addCustomizedSectionsRequest(tncInfo.getId(), langCode);
+								m_tnCRequest.addCustomizedSectionsRequest(currentOperator, langCode);
 							}
 						}
 						catch(ParseException e)
@@ -706,7 +710,7 @@ public class KeyExchangeManager {
 					 Document answerDoc = XMLUtil.toXMLDocument(answerData);
 					 if(answerDoc != null)
 					 {
-						 a_tcContainer.getTermsAndConditionsResponseHandler().handleXMLResourceResponse(answerDoc);
+						 a_tcContainer.getTermsAndConditionsResponseHandler().handleXMLResourceResponse(answerDoc, m_tnCRequest);
 					 }
 				  }
 			  }
@@ -717,12 +721,12 @@ public class KeyExchangeManager {
 			  {
 				  //interrupt to read the T&Cs
 				  confirmDocRoot = 
-					  confirmDoc.createElement(XMLTermsAndConditionsRequest.XML_MSG_TC_INTERRUPT);
+					  confirmDoc.createElement(TermsAndConditionsRequest.XML_MSG_TC_INTERRUPT);
 			  }
 			  else
 			  {
 				  confirmDocRoot = 
-					  confirmDoc.createElement(XMLTermsAndConditionsRequest.XML_MSG_TC_CONFIRM);
+					  confirmDoc.createElement(TermsAndConditionsRequest.XML_MSG_TC_CONFIRM);
 				  //only if all necessary Terms And Conditions are accepted
 				  //we can reach this point.
 				  XMLUtil.setAttribute(confirmDocRoot, 

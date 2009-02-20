@@ -29,15 +29,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package anon.client;
 
 import java.io.IOException;
+import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Vector;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import anon.client.TermsAndConditionsRequest.IllegalTCRequestPostConditionException;
 import anon.infoservice.Database;
+import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.util.XMLParseException;
@@ -67,7 +74,7 @@ public class TermsAndConditionsResponseHandler extends Observable
 	public static final String XML_ELEMENT_INVALID_REQUEST_NAME = "InvalidTermsAndConditionsRequest";
 	public static final String XML_ELEMENT_RESPONSE_NAME = "TermsAndConditionsResponse";
 	
-	public void handleXMLResourceResponse(Document answerDoc) throws XMLParseException, IOException
+	public void handleXMLResourceResponse(Document answerDoc, TermsAndConditionsRequest request) throws XMLParseException, IOException, IllegalTCRequestPostConditionException
 	{
 		if(answerDoc.getDocumentElement().getTagName().equals(XML_ELEMENT_INVALID_REQUEST_NAME))
 		{
@@ -78,41 +85,62 @@ public class TermsAndConditionsResponseHandler extends Observable
 			throw new XMLParseException("No TC response.");
 		}
 		Node currentResourceParentNode = XMLUtil.getFirstChildByName(answerDoc.getDocumentElement(), 
-				XMLTermsAndConditionsRequest.XML_ELEMENT_NAME);
+				TermsAndConditionsRequest.XML_ELEMENT_NAME);
 		Node currentResourceNode = null;
 		String currentID = "";
 		while(currentResourceParentNode != null)
 		{
-			currentID = XMLUtil.parseAttribute(currentResourceParentNode, XMLTermsAndConditionsRequest.XML_ATTR_ID, "");
+			currentID = XMLUtil.parseAttribute(currentResourceParentNode, TermsAndConditionsRequest.XML_ATTR_ID, "");
 			if(currentID.equals("")  )
 			{
 				throw new XMLParseException("invalid attributes: id not set");
 			}
 			
 			currentResourceNode = XMLUtil.getFirstChildByName(currentResourceParentNode, 
-					XMLTermsAndConditionsRequest.XML_ELEMENT_RESOURCE_TEMPLATE);
+					TermsAndConditionsRequest.XML_ELEMENT_RESOURCE_TEMPLATE);
 			while(currentResourceNode != null)
 			{
 				TermsAndConditionsFramework fr = new TermsAndConditionsFramework((Element)currentResourceNode.getFirstChild());
 				Database db = Database.getInstance(TermsAndConditionsFramework.class);
 				db.update(fr);
 				currentResourceNode = (Element) XMLUtil.getNextSiblingByName(currentResourceNode, 
-						XMLTermsAndConditionsRequest.XML_ELEMENT_RESOURCE_TEMPLATE);
+						TermsAndConditionsRequest.XML_ELEMENT_RESOURCE_TEMPLATE);
 			}
 			
 			currentResourceNode = XMLUtil.getFirstChildByName(currentResourceParentNode, 
-					XMLTermsAndConditionsRequest.XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT);
+					TermsAndConditionsRequest.XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT);
 			while(currentResourceNode != null)
 			{
-				TermsAndConditions tc = TermsAndConditions.getById(currentID);
-				tc.addTranslation(((Element) XMLUtil.getFirstChildByName(currentResourceNode, TermsAndConditions.XML_ELEMENT_TRANSLATION_NAME)));
+				ServiceOperator operator = ((ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(currentID.toUpperCase()));
+				if(operator == null)
+				{
+					throw new XMLParseException("invalid id "+currentID+": no operator found with this subject key identifier");
+				}
+				
+				TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(operator);
+				if(tc == null)
+				{
+					throw new IllegalStateException("a tc container for operator "+operator.getOrganization()+" must exist but does not!");
+				}
+				try 
+				{
+					tc.addTranslation(((Element) XMLUtil.getFirstChildByName(currentResourceNode, TermsAndConditions.XML_ELEMENT_TRANSLATION_NAME)));
+				} 
+				catch (SignatureException e) 
+				{
+					LogHolder.log(LogLevel.ERR, LogType.MISC, "Signature validition error while receiving mix tc answer: ", e);
+					//leave error handling to request.checkRequestPostCondition() after all resources are received.
+				}
+				
 				currentResourceNode = (Element) XMLUtil.getNextSiblingByName(currentResourceNode, 
-						XMLTermsAndConditionsRequest.XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT);
+						TermsAndConditionsRequest.XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT);
 			}
 			
 			currentResourceParentNode = XMLUtil.getNextSiblingByName(currentResourceParentNode, 
-					XMLTermsAndConditionsRequest.XML_ELEMENT_NAME);
+					TermsAndConditionsRequest.XML_ELEMENT_NAME);
 		}
+		request.checkRequestPostCondition();
+		
 		setChanged();
 		notifyObservers();
 	}

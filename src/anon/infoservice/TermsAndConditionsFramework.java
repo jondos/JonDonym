@@ -171,12 +171,12 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		try
 		{
 			// find the ServiceOperator object to our T&C
-			ServiceOperator op = (ServiceOperator) 
-				Database.getInstance(ServiceOperator.class).getEntryById(tcTranslation.getId());
+			ServiceOperator op = tcTranslation.getOperator();
 			
 			if(op == null)
 			{
-				return;
+				//Must never happen!
+				throw new NullPointerException("The operator of a tc translation cannot be null. This must never happen. Please report!");
 			}
 			
 			// create the operator node

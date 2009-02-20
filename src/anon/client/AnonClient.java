@@ -766,7 +766,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 										currentTCToShow.setRead(true);
 										if(!currentReturnValues.hasAccepted())
 										{
-											throw new IOException("Client rejected T&C aftzer reading.");
+											throw new IOException("Client rejected T&C after reading.");
 										}
 									}
 									

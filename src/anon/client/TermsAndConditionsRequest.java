@@ -35,6 +35,9 @@ import java.util.Vector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import anon.infoservice.ServiceOperator;
+import anon.infoservice.TermsAndConditions;
+import anon.infoservice.TermsAndConditionsFramework;
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
 
@@ -65,7 +68,7 @@ import anon.util.XMLUtil;
  *		</Resources>
  *	</TermsAndConditionsRequest>
  */
-public class XMLTermsAndConditionsRequest implements IXMLEncodable 
+public class TermsAndConditionsRequest implements IXMLEncodable 
 {
 
 	public static final String XML_ELEMENT_NAME = "Resources";
@@ -94,7 +97,7 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	 */
 	private Hashtable resourceRootElements = null;
 	
-	public XMLTermsAndConditionsRequest()
+	public TermsAndConditionsRequest()
 	{
 		requestedTemplates = new Vector();
 		requestedItems = new Hashtable();
@@ -107,12 +110,12 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	 * multiple requests of the same template. (the same template can be used 
 	 * by multiple operators)
 	 */
-	public void addTemplateRequest(String opSki, String langCode, String templateRefID)
+	public void addTemplateRequest(ServiceOperator operator, String langCode, String templateRefID)
 	{
 		if(!requestedTemplates.contains(templateRefID))
 		{
 			requestedTemplates.addElement(templateRefID);
-			addResourceRequest(XML_ELEMENT_RESOURCE_TEMPLATE, opSki, langCode);
+			addResourceRequest(XML_ELEMENT_RESOURCE_TEMPLATE, operator, langCode);
 		}
 	}
 	
@@ -120,17 +123,17 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	 * adds a request for the individual T&C sections of the given operator in the
 	 * the specified language.
 	 */
-	public void addCustomizedSectionsRequest(String opSki, String langCode)
+	public void addCustomizedSectionsRequest(ServiceOperator operator, String langCode)
 	{
-		addResourceRequest(XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT, opSki, langCode);
+		addResourceRequest(XML_ELEMENT_RESOURCE_CUSTOMIZED_SECT, operator, langCode);
 	}
 	
 	/**
 	 * private util function for adding a generic resource request.
 	 */
-	private void addResourceRequest(String resourceType, String opSki, String langCode)
+	private void addResourceRequest(String resourceType, ServiceOperator operator, String langCode)
 	{
-		TCRequestKey reqKey = new TCRequestKey(opSki, langCode);
+		TCRequestKey reqKey = new TCRequestKey(operator, langCode);
 		TCRequestValue reqValue = (TCRequestValue) requestedItems.get(reqKey);
 		if(reqValue == null)
 		{
@@ -165,13 +168,13 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 		while (allReqs.hasMoreElements()) 
 		{
 			currTCReqKey = (TCRequestKey) allReqs.nextElement();
-			currRequestElement = (Element) resourceRootElements.get(currTCReqKey.getOpSki());
+			currRequestElement = (Element) resourceRootElements.get(currTCReqKey.getOperator());
 			
 			if(currRequestElement == null)
 			{
 				currRequestElement = a_doc.createElement(XML_ELEMENT_NAME);
-				XMLUtil.setAttribute(currRequestElement, XML_ATTR_ID, currTCReqKey.getOpSki());
-				resourceRootElements.put(currTCReqKey.getOpSki(), currRequestElement);
+				XMLUtil.setAttribute(currRequestElement, XML_ATTR_ID, currTCReqKey.getOperator().getId());
+				resourceRootElements.put(currTCReqKey.getOperator(), currRequestElement);
 			}
 		
 			currRequestItems = ((TCRequestValue)requestedItems.get(currTCReqKey)).getAllResourceRequests();
@@ -197,18 +200,18 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 	 */
 	private static class TCRequestKey
 	{
-		String opSki = null;
+		ServiceOperator operator = null;
 		String langCode = null;
 		
-		private TCRequestKey(String opSki, String langCode)
+		private TCRequestKey(ServiceOperator operator, String langCode)
 		{
-			this.opSki = opSki;
+			this.operator = operator;
 			this.langCode = langCode;
 		}
 		
 		public String toString()
 		{
-			return (opSki+langCode);
+			return (operator.getId()+langCode);
 		}
 		
 		public int hashCode()
@@ -226,10 +229,60 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 			return langCode;
 		}
 
-		public String getOpSki() 
+		public ServiceOperator getOperator() 
 		{
-			return opSki;
+			return operator;
 		}
+	}
+	
+	/**
+	 * To be called after the mix response was handled.
+	 * checks if the mix really has sent all requested resources.
+	 * This method performs the necessary cleanups when the the terms and conditions container are
+	 * not in a consistent state. 
+	 * @throws IllegalRequestPostConditionException if not all resources were sent
+	 * or the container are in an inconsistent state (e.g because of invalid signatures)
+	 */
+	public void checkRequestPostCondition() throws IllegalTCRequestPostConditionException
+	{
+		IllegalTCRequestPostConditionException irpce = 
+			new IllegalTCRequestPostConditionException();
+		
+		Enumeration allResourceRequests = requestedItems.keys();
+		TCRequestKey currentReqKey = null;
+		TermsAndConditions currentTnCs = null;
+		while (allResourceRequests.hasMoreElements()) 
+		{
+			currentReqKey = (TCRequestKey) allResourceRequests.nextElement();
+			currentTnCs = TermsAndConditions.getTermsAndConditions(currentReqKey.getOperator());
+			
+			if(currentTnCs != null)
+			{
+				if(!currentTnCs.hasTranslation(currentReqKey.getLangCode()))
+				{
+					irpce.addErrorMessage("Requested Translation ["+currentReqKey.getLangCode()+"] was not loaded for terms and conditions of operator "+
+							currentReqKey.getOperator().getOrganization());
+				}
+				else
+				{
+					String templateRefid = currentTnCs.getTemplateReferenceId(currentReqKey.getLangCode());
+					if(TermsAndConditionsFramework.getById(templateRefid, false) == null)
+					{
+						irpce.addErrorMessage("Template '"+templateRefid+"' for translation ["+
+								currentReqKey.getLangCode()+"] of terms and conditions of operator "+
+								currentReqKey.getOperator().getOrganization()+" was not loaded.");
+					}
+				}
+				if(!currentTnCs.hasDefaultTranslation())
+				{
+					irpce.addErrorMessage("No default translation for terms and conditions of operator "+
+							currentReqKey.getOperator().getOrganization()+" were loaded.");
+					//in this case remove the terms and conditions
+					TermsAndConditions.removeTermsAndConditions(currentReqKey.getOperator());
+				}
+			}
+		}
+		if(irpce.hasErrorMessages()) throw irpce;
 	}
 	
 	/**
@@ -257,5 +310,37 @@ public class XMLTermsAndConditionsRequest implements IXMLEncodable
 		{
 			return requestEntries.elements();
 		}	
+	}
+	
+	public static class IllegalTCRequestPostConditionException extends Exception
+	{
+
+		private StringBuffer errorMessages= new StringBuffer();
+		private int errorMessageNrs = 0;
+		
+		public IllegalTCRequestPostConditionException() 
+		{
+			super();
+		}
+		
+		public void addErrorMessage(String errorMessage)
+		{
+			errorMessages.append("\n");
+			errorMessages.append(++errorMessageNrs);
+			errorMessages.append(". ");
+			errorMessages.append(errorMessage);
+		}
+		
+		public boolean hasErrorMessages()
+		{
+			return errorMessageNrs > 0;
+		}
+		
+		public String getMessage()
+		{
+			return hasErrorMessages() ? errorMessages.toString() : null;
+		}
+		
+		
 	}
 }
