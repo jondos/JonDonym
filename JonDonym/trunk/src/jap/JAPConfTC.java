@@ -121,7 +121,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 			if(op != null)
 			{
 				//String opIdWithoutColons = Util.replaceAll(op.getId(),":", "");
-				TermsAndConditions tc = TermsAndConditions.getById(op.getId());
+				TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(op);
 				if(tc == null)
 				{
 					return;
@@ -274,14 +274,14 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 					{
 						ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
 						//if(op == null) return null;
-						TermsAndConditions tc = TermsAndConditions.getById(op.getId());
+						TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(op);
 						return (tc != null) ? tc.getDate() : null;
 					}
 					case ACCEPTED_COL:
 					{
 						ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
 						//if(op == null) return null; //must never happen
-						TermsAndConditions tc = TermsAndConditions.getById(op.getId());
+						TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(op);
 						//if(tc == null) return null; //must never happen
 						return new Boolean(tc.isAccepted());
 					}
@@ -316,7 +316,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 					boolean value = ((Boolean) aValue).booleanValue(); 
 					ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
 					//if(op == null) return null; //must never happen
-					TermsAndConditions tc = TermsAndConditions.getById(op.getId());
+					TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(op);
 					//if(tc == null) return null; //must never happen
 					tc.setAccepted(value);
 					tc.setRead(true);

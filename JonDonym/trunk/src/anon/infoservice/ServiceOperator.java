@@ -340,7 +340,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	
 	public boolean hasTermsAndConditions()
 	{
-		return TermsAndConditions.getById(getId()) != null;
+		return TermsAndConditions.getTermsAndConditions(this) != null;
 	}
 	
 	/* creates a DOM-Tree with the data which will be owned by

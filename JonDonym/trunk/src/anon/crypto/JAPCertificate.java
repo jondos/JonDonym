@@ -492,7 +492,7 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 			strXoredID = new String(Hex.encode(raw));
 		}
 		
-		return strXoredID;
+		return strXoredID.toUpperCase();
 	}
 
 	public boolean equals(Object a_certificate)
