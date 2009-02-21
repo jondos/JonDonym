@@ -59,7 +59,7 @@ import anon.util.XMLUtil;
  * will identify the reason of the notification, see the DatabaseMessage class for more
  * information.
  */
-public final class Database extends Observable implements Runnable, IXMLEncodable
+public final class Database extends Observable implements IXMLEncodable
 {
 	
 	private static String XML_ALL_DB_NAME = "InfoServiceDB";
@@ -82,6 +82,7 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 	private Class m_DatabaseEntryClass;
 
 	private Thread m_dbThread;
+	private Object SYNC_THREAD = new Object();
 
 	/**
 	 * Stores services we know.
@@ -238,10 +239,9 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 			while (databases.hasMoreElements())
 			{
 				currentDB = (Database) databases.nextElement();
-				while (currentDB.m_dbThread.isAlive())
+				synchronized (currentDB.SYNC_THREAD)
 				{
-					currentDB.m_dbThread.interrupt();
-					Thread.yield();
+					currentDB.stopThread();
 				}
 			}
 			ms_databases.clear();
@@ -267,93 +267,120 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		m_serviceDatabase = new Hashtable();
 		m_timeoutList = new Vector();
 
-		if (!ms_bShutdown)
+		//startThread();
+	}
+	
+	private void startThread()
+	{	
+		synchronized (SYNC_THREAD)
 		{
-			m_dbThread = new Thread(this, "Database Thread: " + a_DatabaseEntryClass.toString());
+			if (ms_bShutdown || (m_dbThread != null && m_dbThread.isAlive()))
+			{
+				return;
+			}
+			
+			m_dbThread = new Thread(new TimeoutThread(), 
+					"Database Thread: " + m_DatabaseEntryClass.toString());
 			m_dbThread.setDaemon(true);
 			m_dbThread.start();
 		}
 	}
-
-	/**
-	 * This is the garbage collector for the database. If an entry becomes
-	 * outdated, it will be automatically removed from the database.
-	 */
-	public void run()
-	{
-		while (!ms_bShutdown)
-		{
-			boolean moreOldEntrys = true;
-			synchronized (m_serviceDatabase)
+	
+	private void stopThread()
+	{	
+		synchronized (SYNC_THREAD)
+		{						
+			while (m_dbThread != null && m_dbThread.isAlive())
 			{
-				/* we need exclusive access to the database */
-				while (!ms_bShutdown && (m_timeoutList.size() > 0) && (moreOldEntrys))
-				{
-					AbstractDatabaseEntry entry = (AbstractDatabaseEntry) m_serviceDatabase.get(m_timeoutList.
-						firstElement());
-					if (System.currentTimeMillis() >= entry.getExpireTime())
-					{
-						/* we remove the old entry now, because it has reached the expire time */
-						LogHolder.log(LogLevel.INFO, LogType.MISC,
-									  "DatabaseEntry (" + entry.getClass().getName() + ")" +
-									  entry.getId() + " has reached the expire time and is removed.");
-						m_serviceDatabase.remove(entry.getId());
-						m_timeoutList.removeElementAt(0);
-						/* notify the observers about the removal */
-						setChanged();
-						notifyObservers(new DatabaseMessage(DatabaseMessage.ENTRY_REMOVED, entry));
-					}
-					else
-					{
-						/* the oldest entry in the database
-						 * has not reached expire time now, so there are no more old entries
-						 */
-						moreOldEntrys = false;
-					}
-				}
+				m_dbThread.interrupt();
+				//m_serviceDatabase.notify();
+				Thread.yield();
 			}
-			synchronized (m_serviceDatabase)
-			{
-				/* we need the database in a consistent state */
-				long sleepTime = 0;
-				if (m_timeoutList.size() > 0)
-				{
-					/* get time until next timeout */
-					sleepTime = ( (AbstractDatabaseEntry) (m_serviceDatabase.get(m_timeoutList.firstElement()))).
-						getExpireTime() - System.currentTimeMillis();
-				}
-				if (sleepTime > 0)
-				{
-					/* there is nothing to do now -> wait until next expire time */
-					try
-					{
-						m_serviceDatabase.wait(sleepTime);
-						LogHolder.log(LogLevel.DEBUG, LogType.MISC,
-									  "One entry could be expired. Wake up...");
-					}
-					catch (Exception e)
-					{
-						if (ms_bShutdown)
-						{
-							return;
-						}
+		}
+	}
 
+	private class TimeoutThread implements Runnable
+	{
+		/**
+		 * This is the garbage collector for the database. If an entry becomes
+		 * outdated, it will be automatically removed from the database.
+		 */
+		public void run()
+		{
+			while (!ms_bShutdown)
+			{
+				boolean moreOldEntrys = true;
+				synchronized (m_serviceDatabase)
+				{
+					/* we need exclusive access to the database */
+					while (!ms_bShutdown && (m_timeoutList.size() > 0) && (moreOldEntrys))
+					{
+						AbstractDatabaseEntry entry = (AbstractDatabaseEntry) m_serviceDatabase.get(m_timeoutList.
+							firstElement());
+						if (System.currentTimeMillis() >= entry.getExpireTime())
+						{
+							/* we remove the old entry now, because it has reached the expire time */
+							LogHolder.log(LogLevel.INFO, LogType.MISC,
+										  "DatabaseEntry (" + entry.getClass().getName() + ")" +
+										  entry.getId() + " has reached the expire time and is removed.");
+							m_serviceDatabase.remove(entry.getId());
+							m_timeoutList.removeElementAt(0);
+							/* notify the observers about the removal */
+							setChanged();
+							notifyObservers(new DatabaseMessage(DatabaseMessage.ENTRY_REMOVED, entry));
+						}
+						else
+						{
+							/* the oldest entry in the database
+							 * has not reached expire time now, so there are no more old entries
+							 */
+							moreOldEntrys = false;
+						}
 					}
 				}
-				if (m_timeoutList.size() == 0)
+				synchronized (m_serviceDatabase)
 				{
-					/* there are no entries in the database, wait until there are some */
-					try
+					/* we need the database in a consistent state */
+					long sleepTime = 0;
+					if (m_timeoutList.size() > 0)
 					{
-						m_serviceDatabase.wait();
-						LogHolder.log(LogLevel.DEBUG, LogType.MISC,
-									  "First entry in the database. Look when it expires. Wake up...");
+						/* get time until next timeout */
+						sleepTime = ( (AbstractDatabaseEntry) (m_serviceDatabase.get(m_timeoutList.firstElement()))).
+							getExpireTime() - System.currentTimeMillis();
 					}
-					catch (Exception e)
+					if (sleepTime > 0)
 					{
-						if (ms_bShutdown)
+						/* there is nothing to do now -> wait until next expire time */
+						try
 						{
-							return;
+							m_serviceDatabase.wait(sleepTime);
+							LogHolder.log(LogLevel.DEBUG, LogType.MISC,
+										  "One entry could be expired. Wake up...");
+						}
+						catch (Exception e)
+						{
+							if (ms_bShutdown || Thread.currentThread().isInterrupted())
+							{
+								return;
+							}
+	
+						}
+					}
+					if (m_timeoutList.size() == 0)
+					{
+						/* there are no entries in the database, wait until there are some */
+						try
+						{
+							m_serviceDatabase.wait();
+							LogHolder.log(LogLevel.DEBUG, LogType.MISC,
+										  "First entry in the database. Look when it expires. Wake up...");
+						}
+						catch (Exception e)
+						{
+							if (ms_bShutdown)
+							{
+								return;
+							}
 						}
 					}
 				}
@@ -402,6 +429,10 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 		}
 		boolean addEntry = false;
 		AbstractDatabaseEntry oldEntry = null;
+		boolean bStopThread = false;
+		
+		synchronized (SYNC_THREAD)
+		{
 		synchronized (m_serviceDatabase)
 		{
 			/* we need exclusive access to the database */
@@ -461,8 +492,19 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 				}
 				if (i == 1)
 				{
-					/* entry at the first expire position added -> notify the cleanup thread */
-					m_serviceDatabase.notify();
+					/* entry at the first expire position added */
+					if (newEntry.getExpireTime() == Long.MAX_VALUE)
+					{
+						// this entry will never expire -> cleanup thread is not needed any more
+						bStopThread = true;
+					}
+					else
+					{
+						/* -> notify the cleanup thread */
+						startThread(); // activate if needed	
+						m_serviceDatabase.notify();
+					}
+					
 				}
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 							  "Added / updated entry '" + newEntry.getId() + "' in the " +
@@ -486,8 +528,13 @@ public final class Database extends Observable implements Runnable, IXMLEncodabl
 				}
 			}
 		}
+			if (bStopThread)
+			{
+				stopThread();
+			}
+		}
 		if (addEntry)
-		{
+		{	
 			/* there was an entry added or renewed in the database -> notify the observers */
 			setChanged();
 			if (oldEntry == null)
