@@ -45,7 +45,7 @@ public class JAPMinVersion extends AbstractDistributableDatabaseEntry
 	 * The timeout for minimum JAP version information in the database. This should be an infinite
 	 * timeout (1000 years are infinite enough).
 	 */
-	private static final long DATABASE_TIMEOUT = 1000 * 365 * 24 * 3600 * 1000L;
+	private static final long DATABASE_TIMEOUT = Long.MAX_VALUE;
 
 	/**
 	 * Stores the included ServiceSoftware information.
