@@ -120,7 +120,8 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			{
 				m_bInstallationDialogShown = true;		
 				
-				if (!m_helpModel.isHelpPathDefined() && !showInstallDialog(container))
+				if (!m_helpModel.isHelpPathDefined() && 
+					(!m_helpModel.isHelpPathChangeable() || !showInstallDialog(container)))
 				{			
 					m_bInstallationDialogShown = false;
 					
@@ -160,7 +161,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 	
 	private boolean showInstallDialog(Container a_container)
 	{
-		if (m_helpModel.getHelpPath() == null)
+		if (m_helpModel.getHelpPath() == null || !m_helpModel.isHelpPathChangeable())
 		{
 			return false;
 		}

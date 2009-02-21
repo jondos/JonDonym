@@ -23,6 +23,7 @@
 */
 package gui.help;
 
+import java.io.File;
 import java.util.Observable;
 
 import anon.util.ClassUtil;
@@ -31,13 +32,26 @@ import anon.util.ClassUtil;
 public class LocalHelpFileStorageManager extends AbstractHelpFileStorageManager
 {
 	private final Observable DUMMY = new Observable();
-	private final String LOCAL_HELP_PATH = ClassUtil.getClassDirectory(this.getClass()).getParent(); 
+	private final String LOCAL_HELP_PATH;
 
 	public LocalHelpFileStorageManager(String a_applicationName)
 	{
 		if (a_applicationName == null)
 		{
 			throw new IllegalArgumentException("Application name is null!");
+		}
+		
+		File classDir = ClassUtil.getClassDirectory(this.getClass());
+		
+		if (classDir != null)
+		{
+			LOCAL_HELP_PATH = classDir.getParent();
+		}
+		
+		else
+		{
+			// this may happen in a web (start) environment without sufficient file rights
+			LOCAL_HELP_PATH = null;
 		}
 	}
 	

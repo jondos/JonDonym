@@ -76,11 +76,6 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 	//private JAPHtmlMultiLineLabel m_descLabel;
 
 
-	/**
-	 * This is the internal message system of this module.
-	 */
-	private MessageSystem m_messageSystem;
-
 	private JAPJIntField m_tfListenerPortNumber;
 	private JCheckBox m_cbListenerIsLocal;
 	private JLabel m_labelPortnumber1;
@@ -88,6 +83,7 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 	private TitledBorder m_borderSettingsListener;
 
 	private JCheckBox m_cbProxy;
+	private JCheckBox m_settingsForwardingClientConfigNeedForwarderBox;
 	private JAPJIntField m_tfProxyPortNumber;
 	private JTextField m_tfProxyHost;
 	private JComboBox m_comboProxyType;
@@ -102,6 +98,64 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 	public JAPConfNetwork()
 	{
 		super(new JAPConfNetworkSavePoint());
+	}
+	
+	protected boolean initObservers()
+	{
+		if (super.initObservers())
+		{
+			synchronized(LOCK_OBSERVABLE)
+			{
+				Observer clientSettingsObserver = new Observer()
+				{
+					/**
+					 * This is the observer implementation. If the client settings were changed, we update the
+					 * checkboxes.
+					 *
+					 * @param a_notifier The observed Object. This should always be JAPRoutingSettings or the
+					 *                   module internal message system at the moment.
+					 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
+					 *                  or null at the moment.
+					 */
+					public void update(Observable a_notifier, Object a_message)
+					{
+						try
+						{
+							if (a_notifier == JAPModel.getInstance().getRoutingSettings())
+							{
+								if ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
+									JAPRoutingMessage.CLIENT_SETTINGS_CHANGED)
+								{
+									/* the client settings were changed -> update the state of the checkboxes, maybe
+									 * also make them invisible, if they are not needed
+									 */
+									if (JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder())
+									{
+										m_settingsForwardingClientConfigNeedForwarderBox.setSelected(true);
+									}
+									else
+									{
+										m_settingsForwardingClientConfigNeedForwarderBox.setSelected(false);
+									}
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							/* should not happen */
+							LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
+						}
+					}
+				};
+			
+				JAPModel.getInstance().getRoutingSettings().addObserver(clientSettingsObserver);
+				/* tricky: initialize the checkboxes by calling the observer */
+				clientSettingsObserver.update(JAPModel.getInstance().getRoutingSettings(),
+											  new JAPRoutingMessage(JAPRoutingMessage.CLIENT_SETTINGS_CHANGED));
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -132,23 +186,13 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 	 */
 	public void recreateRootPanel()
 	{
-		synchronized (this)
-		{
-			if (m_messageSystem == null)
-			{
-				/* create a new object for sending internal messages */
-				m_messageSystem = new MessageSystem();
-			}
-		}
-
 		JPanel rootPanel = getRootPanel();
 
 		synchronized (this)
 		{
 			/* clear the whole root panel */
 			rootPanel.removeAll();
-			/* notify the observers of the message system that we recreate the root panel */
-			m_messageSystem.sendMessage();
+
 			/* recreate all parts of the forwarding client configuration dialog */
 			JPanel clientPanel = createForwardingClientConfigPanel();
 
@@ -197,14 +241,14 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 	{
 		final JPanel clientPanel = new JPanel();
 
-		final JCheckBox settingsForwardingClientConfigNeedForwarderBox =
+		m_settingsForwardingClientConfigNeedForwarderBox =
 			new JCheckBox(JAPMessages.getString("settingsForwardingClientConfigNeedForwarderBox"));
 		//settingsForwardingClientConfigNeedForwarderBox.setFont(getFontSetting());
-		settingsForwardingClientConfigNeedForwarderBox.addActionListener(new ActionListener()
+		m_settingsForwardingClientConfigNeedForwarderBox.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
 			{
-				if (settingsForwardingClientConfigNeedForwarderBox.isSelected())
+				if (m_settingsForwardingClientConfigNeedForwarderBox.isSelected())
 				{
 					if (JAPDialog.showYesNoDialog(JAPConfNetwork.this.getRootPanel(),
 												  JAPMessages.getString(MSG_SLOW_ANTI_CENSORSHIP) +
@@ -223,7 +267,7 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 							 */
 							if (!JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder())
 							{
-								settingsForwardingClientConfigNeedForwarderBox.setSelected(false);
+								m_settingsForwardingClientConfigNeedForwarderBox.setSelected(false);
 							}
 						}
 						else
@@ -236,7 +280,7 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 					}
 					else
 					{
-						settingsForwardingClientConfigNeedForwarderBox.setSelected(false);
+						m_settingsForwardingClientConfigNeedForwarderBox.setSelected(false);
 					}
 				}
 				else
@@ -266,68 +310,12 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 		clientPanelConstraints.gridx = 0;
 		clientPanelConstraints.gridy = 0;
 		clientPanelConstraints.insets = new Insets(5, 5, 5, 5);
-		clientPanelLayout.setConstraints(settingsForwardingClientConfigNeedForwarderBox,
+		clientPanelLayout.setConstraints(m_settingsForwardingClientConfigNeedForwarderBox,
 										 clientPanelConstraints);
-		clientPanel.add(settingsForwardingClientConfigNeedForwarderBox);
+		clientPanel.add(m_settingsForwardingClientConfigNeedForwarderBox);
 
 		clientPanelConstraints.insets = new Insets(0, 20, 5, 5);
 
-
-		Observer clientSettingsObserver = new Observer()
-		{
-			/**
-			 * This is the observer implementation. If the client settings were changed, we update the
-			 * checkboxes.
-			 *
-			 * @param a_notifier The observed Object. This should always be JAPRoutingSettings or the
-			 *                   module internal message system at the moment.
-			 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
-			 *                  or null at the moment.
-			 */
-			public void update(Observable a_notifier, Object a_message)
-			{
-				try
-				{
-					if (a_notifier == JAPModel.getInstance().getRoutingSettings())
-					{
-						if ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
-							JAPRoutingMessage.CLIENT_SETTINGS_CHANGED)
-						{
-							/* the client settings were changed -> update the state of the checkboxes, maybe
-							 * also make them invisible, if they are not needed
-							 */
-							if (JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder())
-							{
-								settingsForwardingClientConfigNeedForwarderBox.setSelected(true);
-							}
-							else
-							{
-								settingsForwardingClientConfigNeedForwarderBox.setSelected(false);
-							}
-						}
-					}
-					if (a_notifier == m_messageSystem)
-					{
-						/* the root panel was recreated -> stop observing and remove ourself from the observed
-						 * objects
-						 */
-						JAPModel.getInstance().getRoutingSettings().deleteObserver(this);
-						m_messageSystem.deleteObserver(this);
-					}
-				}
-				catch (Exception e)
-				{
-					/* should not happen */
-					LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
-				}
-			}
-		};
-		/* registrate the observer also at the internal message system */
-		m_messageSystem.addObserver(clientSettingsObserver);
-		JAPModel.getInstance().getRoutingSettings().addObserver(clientSettingsObserver);
-		/* tricky: initialize the checkboxes by calling the observer */
-		clientSettingsObserver.update(JAPModel.getInstance().getRoutingSettings(),
-									  new JAPRoutingMessage(JAPRoutingMessage.CLIENT_SETTINGS_CHANGED));
 
 		/*
 		clientPanelConstraints.gridy++;
@@ -560,7 +548,7 @@ public class JAPConfNetwork extends AbstractJAPConfModule
 
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			//m_descLabel.setFont(new JLabel().getFont());
 	

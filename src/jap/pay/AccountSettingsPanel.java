@@ -399,8 +399,20 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	public AccountSettingsPanel()
 	{
 		super(null);
-		PayAccountsFile.getInstance().addPaymentListener(this);
-		JAPController.getInstance().addObserver(this);
+	}
+	
+	protected boolean initObservers()
+	{
+		if (super.initObservers())
+		{
+			synchronized(LOCK_OBSERVABLE)
+			{
+				PayAccountsFile.getInstance().addPaymentListener(this);
+				JAPController.getInstance().addObserver(this);
+				return true;
+			}
+		}
+		return false;
 	}
 
 
@@ -3539,7 +3551,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			m_comboAnonymousConnection.setSelectedIndex(
 				JAPModel.getInstance().getPaymentAnonymousConnectionSetting());

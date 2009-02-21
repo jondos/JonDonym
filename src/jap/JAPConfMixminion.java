@@ -320,7 +320,7 @@ final class JAPConfMixminion extends AbstractJAPConfModule implements ActionList
 
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			m_sliderPathLen.setValue(JAPModel.getMixminionRouteLen());
 			m_email.setText(JAPModel.getMixminionMyEMail());

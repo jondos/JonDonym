@@ -224,13 +224,13 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		//JAPExtension.addOptOut(m_moduleSystem);
 
 		
-
 		//m_moduleSystem.getConfigurationTree().expandPath(new TreePath(nodeNet.getPath()));
 
-		m_moduleSystem.getConfigurationTree().setSelectionRow(0);
+	//	m_moduleSystem.getConfigurationTree().setSelectionRow(0);
 		/* after finishing building the tree, it is important to update the tree size */
+/*		
 		m_moduleSystem.getConfigurationTree().setMinimumSize(m_moduleSystem.getConfigurationTree().
-			getPreferredSize());
+			getPreferredSize());*/
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -346,11 +346,18 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 			}
 		}
 		m_confUI.afterPack();
+		
+		// do not make this panel smaller than needed by the menu
+		m_moduleSystem.getConfigurationTree().setMinimumSize(m_moduleSystem.getConfigurationTree().
+			getPreferredSize());
+		
 		m_moduleSystem.selectNode(UI_TAB);
 		restoreLocation(JAPModel.getInstance().getConfigWindowLocation());
 		//setDockable(true);
 		this.addWindowListener(this);
 
+		m_moduleSystem.initObservers();
+		
 		JAPModel.getInstance().addObserver(new Observer()
 		{
 			public void update(Observable a_observable, final Object a_message)
@@ -429,7 +436,6 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 				Thread.yield();
 				continue;
 			}
-
 			else if (getSize().width > getScreenBounds().width ||
 					 getSize().height > getScreenBounds().height)
 			{
@@ -921,9 +927,9 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 	}
 
 	/** Updates the shown Values from the Model.*/
-	public synchronized void updateValues()
+	private synchronized void updateValues()
 	{
-		m_moduleSystem.processUpdateValuesEvent();
+		m_moduleSystem.processUpdateValuesEvent(true);
 		/*		if (loadPay)
 		  {
 		   ( (pay.view.PayView) m_pKonto).userPanel.valuesChanged();

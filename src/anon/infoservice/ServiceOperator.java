@@ -36,7 +36,6 @@ import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509SubjectAlternativeName;
-import anon.crypto.X509SubjectKeyIdentifier;
 import anon.util.Util;
 import anon.util.XMLUtil;
 import java.util.Vector;

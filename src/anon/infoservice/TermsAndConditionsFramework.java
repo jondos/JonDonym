@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Vector;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -22,8 +20,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
 
-import anon.crypto.CertPath;
-import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
@@ -31,7 +27,6 @@ import anon.crypto.XMLSignature;
 import anon.infoservice.TermsAndConditions.Translation;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import anon.util.Util;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

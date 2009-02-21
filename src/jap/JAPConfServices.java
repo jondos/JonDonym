@@ -35,7 +35,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import anon.crypto.SignatureVerifier;
+import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixInfo;
+import anon.infoservice.PerformanceInfo;
+import anon.infoservice.StatusInfo;
 import gui.JAPMessages;
 
 /**
@@ -79,6 +84,23 @@ public class JAPConfServices extends AbstractJAPConfModule
 	public JAPConfServices()
 	{
 		super(null);
+	}
+	
+	protected boolean initObservers()
+	{
+		if (super.initObservers())
+		{
+			synchronized (LOCK_OBSERVABLE)
+			{
+				m_anonModule.initObservers();
+				m_torModule.initObservers();
+				m_mixminionModule.initObservers();
+				m_anonGeneralModule.initObservers();
+				m_tcModule.initObservers();
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -233,7 +255,7 @@ public class JAPConfServices extends AbstractJAPConfModule
 	 */
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			/* forward the event to all service modules */
 			m_anonModule.updateValues(false);

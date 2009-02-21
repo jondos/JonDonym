@@ -377,7 +377,7 @@ final class JAPConfTor extends AbstractJAPConfModule implements ActionListener
 
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			updateGuiOutput();
 		}

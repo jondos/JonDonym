@@ -42,7 +42,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import anon.client.TermsAndConditionsRequest.IllegalTCRequestPostConditionException;
 import anon.infoservice.Database;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
@@ -151,7 +150,7 @@ public class TermsAndConditionsResponseHandler extends Observable
 		
 		void addTermsAndConditonsToRead(TermsAndConditions tc)
 		{
-			tcsTosShow.add(tc);
+			tcsTosShow.addElement(tc);
 		}
 		
 		Enumeration getTermsTermsAndConditonsToRead()
