@@ -213,7 +213,7 @@ public final class JAPConstants
 	public final static String PAYMENT_DEFAULT_CERTSPATH = "acceptedPIs/";
 	public final static String MIX_CERTSPATH = "acceptedMixCAs/";
 	public final static String MIX_ROOT_CERTS[] =
-		new String[] {"japmixroot.cer", "Operator_CA.cer", "Test_CA.cer.dev"};
+		new String[] {"japmixroot.cer", "Operator_CA.cer", "Test_CA.cer.dev", "gpf_jondonym_ca.cer"};
 	public final static String INFOSERVICE_ROOT_CERTS[] =
 		new String[] {"japinfoserviceroot.cer", "InfoService_CA.cer"};
 	public final static String CERT_JAPCODESIGNING = "japcodesigning.cer";
