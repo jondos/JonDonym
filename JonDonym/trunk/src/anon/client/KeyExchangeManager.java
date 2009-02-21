@@ -49,7 +49,6 @@ import org.w3c.dom.NodeList;
 
 import anon.ErrorCodes;
 import anon.client.TermsAndConditionsResponseHandler.TermsAndConditionsReadException;
-import anon.client.TermsAndConditionsRequest.IllegalTCRequestPostConditionException;
 import anon.client.crypto.ASymMixCipherPlainRSA;
 import anon.client.crypto.ASymMixCipherRSAOAEP;
 import anon.client.crypto.IASymMixCipher;

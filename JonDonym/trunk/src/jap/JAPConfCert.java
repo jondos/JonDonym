@@ -89,13 +89,23 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 	public JAPConfCert()
 	{
 		super(new JAPConfCertSavePoint());
-		/* observe the store of trusted certificates */
-		SignatureVerifier.getInstance().getVerificationCertificateStore().addObserver(this);
-		/* tricky: initialize the components by calling the observer */
-		update(SignatureVerifier.getInstance().getVerificationCertificateStore(), null);
-		/* set the selected index of the list to the first item to avoid exceptions */
-	    //m_listCert.setSelectedIndex(0);
 		m_deletedCerts = new Vector();
+	}
+	
+	protected boolean initObservers()
+	{
+		if (super.initObservers())
+		{
+			synchronized(LOCK_OBSERVABLE)
+			{
+				/* observe the store of trusted certificates */
+				SignatureVerifier.getInstance().getVerificationCertificateStore().addObserver(this);
+				/* tricky: initialize the components by calling the observer */
+				update(SignatureVerifier.getInstance().getVerificationCertificateStore(), null);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -472,7 +482,7 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 	
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			if (m_cbCertCheckEnabled.isSelected() != SignatureVerifier.getInstance().isCheckSignatures())
 			{

@@ -330,6 +330,19 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 		return m_rootPanel;
 	}
 
+	protected void initObservers()
+	{
+		synchronized (this)
+		{
+			Enumeration enumModules = m_registratedModules.elements();
+			while (enumModules.hasMoreElements())
+			{
+				((AbstractJAPConfModule)enumModules.nextElement()).initObservers();
+			}
+		}
+	}
+	
+	
 	/**
 	 * This method can be used to select a specific module from the outside and bring it to the
 	 * front of the configuration dialog.
@@ -416,7 +429,7 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 	/**
 	 * Processes an update values event on all registered instances of AbstractJAPConfModule.
 	 */
-	public void processUpdateValuesEvent()
+	public void processUpdateValuesEvent(boolean a_bSync)
 	{
 		synchronized (this)
 		{
@@ -424,7 +437,7 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 			Enumeration confModules = m_registratedModules.elements();
 			while (confModules.hasMoreElements())
 			{
-				( (AbstractJAPConfModule) (confModules.nextElement())).updateValues(false);
+				( (AbstractJAPConfModule) (confModules.nextElement())).updateValues(a_bSync);
 			}
 		}
 	}

@@ -304,8 +304,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	private boolean m_bMixInfoShown = false;
 	private boolean m_mapShown = false;
-	private boolean m_observablesRegistered = false;
-	private final Object LOCK_OBSERVABLE = new Object();
 
 	/** the Certificate of the selected Mix-Server */
 	private MultiCertPath m_serverCertPaths;
@@ -1347,7 +1345,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			((MixCascadeTableModel) m_tableMixCascade.getModel()).update();
 		}
@@ -2034,15 +2032,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		return "services_anon";
 	}
 
-
-	protected void onRootPanelShown()
+	protected boolean initObservers()
 	{
-		boolean bUpdateValues = false;
-		synchronized (LOCK_OBSERVABLE)
+		if (super.initObservers())
 		{
-			if (!m_observablesRegistered)
+			synchronized (LOCK_OBSERVABLE)
 			{
-				/* register observables */
 				JAPController.getInstance().addObserver(this);
 				JAPModel.getInstance().getRoutingSettings().addObserver(this);
 				SignatureVerifier.getInstance().getVerificationCertificateStore().addObserver(this);
@@ -2052,10 +2047,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				Database.getInstance(PerformanceInfo.class).addObserver(this);
 				m_cmbCascadeFilter.setSelectedItem(TrustModel.getCurrentTrustModel());
 				TrustModel.addModelObserver(this);
-				m_observablesRegistered = true;
-				bUpdateValues = true;
 			}
+			return true;
 		}
+		return false;
+	}
+	
+
+	protected void onRootPanelShown()
+	{
+		boolean bUpdateValues = false;
 
 		if (!m_infoService.isFilled())
 		{

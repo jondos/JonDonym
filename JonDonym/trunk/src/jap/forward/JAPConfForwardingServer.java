@@ -74,7 +74,6 @@ import jap.AbstractJAPConfModule;
 import jap.JAPConstants;
 import jap.JAPController;
 import jap.JAPModel;
-import jap.MessageSystem;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -89,12 +88,30 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 	private DefaultListModel m_allowedCascadesListModel;
 	private DefaultListModel m_registrationInfoServicesListModel;
 	private JCheckBox m_startServerBox;
-
-	/**
-	 * This is the internal message system of this module.
-	 */
-	private MessageSystem m_messageSystem;
-
+	private JTextField serverPortField;
+	private JTextField uploadBandwidthField;
+	private JComboBox connectionClassesComboBox;
+	private JLabel settingsForwardingServerConfigCurrentBandwidthLabel;
+	private JTextField relativeBandwidthField;
+	private JButton increaseRelativeBandwidthButton;
+	private JButton decreaseRelativeBandwidthButton;
+	private JLabel settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel;
+	private JLabel settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel;
+	private JList knownCascadesList;
+	private JList allowedCascadesList;
+	private JButton settingsForwardingServerConfigAllowedCascadesReloadButton;
+	private JButton settingsForwardingServerConfigAllowedCascadesAddButton;
+	private JButton settingsForwardingServerConfigAllowedCascadesRemoveButton;
+	private JCheckBox settingsForwardingServerConfigAllowedCascadesAllowAllBox;
+	private JLabel settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel;
+	private JLabel settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel;
+	private JList knownInfoServicesList;
+	private JList registrationInfoServicesList;
+	private JButton settingsForwardingServerConfigRegistrationInfoServicesReloadButton;
+	private JButton settingsForwardingServerConfigRegistrationInfoServicesAddButton;
+	private JButton settingsForwardingServerConfigRegistrationInfoServicesRemoveButton;
+	private JCheckBox settingsForwardingServerConfigRegistrationInfoServicesRegisterAtAllBox;
+	
 	/**
 	 * Constructor for JAPConfForwardingServer. We do some initialization here.
 	 */
@@ -102,21 +119,424 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 	{
 		super(new JAPConfForwardingServerSavePoint());
 	}
+	
+	protected boolean initObservers()
+	{
+		if (super.initObservers())
+		{
+			synchronized(LOCK_OBSERVABLE)
+			{
+				Observer serverPortObserver = new Observer()
+				{
+					/**
+					 * This is the observer implementation. If the routing mode is changed in JAPRoutingSettings,
+					 * we update the start routing server checkbox (enabled/disabled, selected/unselected). If the
+					 * panel is recreated (message via the module internal message system), the observer removes
+					 * itself from all observed objects.
+					 *
+					 * @param a_notifier The observed Object. This should always be JAPRoutingSettings or the module
+					 *                   internal message system at the moment.
+					 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
+					 *                  at the moment or null.
+					 */
+					public void update(Observable a_notifier, Object a_message)
+					{
+						try
+						{
+							if (a_notifier == JAPModel.getInstance().getRoutingSettings())
+							{
+								/* message is from JAPRoutingSettings */
+								if ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
+									JAPRoutingMessage.SERVER_PORT_CHANGED)
+								{
+									serverPortField.setText(Integer.toString(JAPModel.getInstance().
+										getRoutingSettings().getServerPort()));
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							/* should not happen */
+							LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
+						}
+					}
+				};
+
+				
+				JAPModel.getInstance().getRoutingSettings().addObserver(serverPortObserver);
+				/* tricky: initialize the components by calling the observer */
+				serverPortObserver.update(JAPModel.getInstance().getRoutingSettings(),
+										  new JAPRoutingMessage(JAPRoutingMessage.SERVER_PORT_CHANGED));
+				
+				
+				Observer connectionClassSelectionObserver = new Observer()
+				{
+					public void update(Observable a_notifier, Object a_message)
+					{
+						try
+						{
+							if (a_notifier == JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector())
+							{
+								/* message is from JAPRoutingConnectionClassSelector */
+								if ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
+									JAPRoutingMessage.CONNECTION_CLASS_CHANGED)
+								{
+									/* change the selected connection class */
+									JAPRoutingConnectionClass currentConnectionClass = JAPModel.getInstance().
+										getRoutingSettings().getConnectionClassSelector().getCurrentConnectionClass();
+									connectionClassesComboBox.setSelectedItem(currentConnectionClass);
+									if (currentConnectionClass.getIdentifier() ==
+										JAPRoutingConnectionClassSelector.CONNECTION_CLASS_USER)
+									{
+										/* user-defined class -> enable possibility for changing the upload bandwidth */
+										uploadBandwidthField.setEnabled(true);
+									}
+									else
+									{
+										/* predefined class -> disable possibility for changing the upload bandwidth */
+										uploadBandwidthField.setEnabled(false);
+									}
+									uploadBandwidthField.setText(Integer.toString( (currentConnectionClass.
+										getMaximumBandwidth() * 8) / 1000));
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							/* should not happen */
+							LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
+						}
+					}
+				};
+
+				JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector().addObserver(
+					connectionClassSelectionObserver);
+				/* tricky: initialize the components by calling the observer */
+				connectionClassSelectionObserver.update(JAPModel.getInstance().getRoutingSettings().
+														getConnectionClassSelector(),
+														new JAPRoutingMessage(JAPRoutingMessage.
+					CONNECTION_CLASS_CHANGED));
+				
+				
+				Observer connectionClassSettingsObserver = new Observer()
+				{
+					/**
+					 * This is the observer implementation. If the connection class or some sttings of the
+					 * current connection class are changed, the components for selecting the relative bandwidth
+					 * are updated. If the panel is recreated (message via the module internal message system),
+					 * the observer removes itself from all observed objects.
+					 *
+					 * @param a_notifier The observed Object. This should always be
+					 *                   JAPRoutingConnectionClassSelector or the module internal message system
+					 *                   at the moment.
+					 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
+					 *                  or null at the moment.
+					 */
+					public void update(Observable a_notifier, Object a_message)
+					{
+						try
+						{
+							if (a_notifier == JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector())
+							{
+								/* message is from JAPRoutingConnectionClassSelector */
+								if ( ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
+									  JAPRoutingMessage.CONNECTION_CLASS_CHANGED) ||
+									( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
+									 JAPRoutingMessage.CONNECTION_PARAMETERS_CHANGED))
+								{
+									/* change the relative bandwidth settings */
+									JAPRoutingConnectionClass currentConnectionClass = JAPModel.getInstance().
+										getRoutingSettings().getConnectionClassSelector().getCurrentConnectionClass();
+									relativeBandwidthField.setText(Integer.toString(currentConnectionClass.
+										getRelativeBandwidth()) + "%");
+									if (currentConnectionClass.getRelativeBandwidth() < 100)
+									{
+										/* increasing the bandwidth is possible */
+										increaseRelativeBandwidthButton.setEnabled(true);
+									}
+									else
+									{
+										/* increasing the bandwidth is not possible */
+										increaseRelativeBandwidthButton.setEnabled(false);
+									}
+									if (currentConnectionClass.getRelativeBandwidth() >
+										( (currentConnectionClass.getMinimumRelativeBandwidth() + 9) / 10) * 10)
+									{
+										/* decreasing the bandwidth is possible (at least by one full step of 10) */
+										decreaseRelativeBandwidthButton.setEnabled(true);
+									}
+									else
+									{
+										/* increasing the bandwidth is not possible (or we cannot decrease it by at least
+										 * one full step of 10)
+										 */
+										decreaseRelativeBandwidthButton.setEnabled(false);
+									}
+								}
+								if ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
+									JAPRoutingMessage.CONNECTION_PARAMETERS_CHANGED)
+								{
+									/* update the label with the bandwidth and connection number information */
+									settingsForwardingServerConfigCurrentBandwidthLabel.setText(
+										JAPMessages.getString(
+											"settingsForwardingServerConfigCurrentBandwidthLabelPart1") + " " +
+										Integer.
+										toString( (JAPModel.getInstance().getRoutingSettings().getBandwidth() * 8) /
+												 1000) + " " +
+										JAPMessages.getString(
+											"settingsForwardingServerConfigCurrentBandwidthLabelPart2") +
+										" " +
+										Integer.toString(JAPModel.getInstance().getRoutingSettings().
+														 getAllowedConnections()) +
+										" " +
+										JAPMessages.getString(
+											"settingsForwardingServerConfigCurrentBandwidthLabelPart3"));
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							/* should not happen */
+							LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
+						}
+					}
+				};
+			
+				JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector().addObserver(
+					connectionClassSettingsObserver);
+				/* tricky: initialize the components by calling the observer */
+				connectionClassSettingsObserver.update(JAPModel.getInstance().getRoutingSettings().
+													   getConnectionClassSelector(),
+													   new JAPRoutingMessage(JAPRoutingMessage.
+					CONNECTION_PARAMETERS_CHANGED));
+				
+				
+				Observer allowedMixCascadesObserver = new Observer()
+				{
+					/**
+					 * This is the observer implementation. If the allowed mixcascades policy or the list of
+					 * allowed mixcascades for the restricted mode is changed, we update the checkbox, the lists
+					 * and the enable-status of the most components on the mixcascades panel, if necessary. If the
+					 * panel is recreated (message via the module internal message system), the observer removes
+					 * itself from all observed objects.
+					 *
+					 * @param a_notifier The observed Object. This should always be
+					 *                   JAPRoutingUseableMixCascades or the module internal message system at
+					 *                   the moment.
+					 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
+					 *                  or null at the moment.
+					 */
+					public void update(Observable a_notifier, Object a_message)
+					{
+						try
+						{
+							if (a_notifier == JAPModel.getInstance().getRoutingSettings().getUseableMixCascadesStore())
+							{
+								/* message is from JAPRoutingUseableMixCascades */
+								int messageCode = ( (JAPRoutingMessage) (a_message)).getMessageCode();
+								if (messageCode == JAPRoutingMessage.ALLOWED_MIXCASCADES_POLICY_CHANGED)
+								{
+									/* enable or disable the components on the panel as needed for currently selected
+									 * mode
+									 */
+									if (JAPModel.getInstance().getRoutingSettings().getUseableMixCascadesStore().
+										getAllowAllAvailableMixCascades())
+									{
+										/* access-to-all available mixcascades -> components for managing the list of
+										 * allowed mixcascades not needed
+										 */
+										settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel.setEnabled(false);
+										settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel.setEnabled(false);
+										knownCascadesList.setEnabled(false);
+										allowedCascadesList.setEnabled(false);
+										/* remove all entries from the both listboxes -> no irritation */
+										knownCascadesList.setModel(new DefaultListModel());
+										allowedCascadesList.setModel(new DefaultListModel());
+										settingsForwardingServerConfigAllowedCascadesReloadButton.setEnabled(false);
+										settingsForwardingServerConfigAllowedCascadesAddButton.setEnabled(false);
+										settingsForwardingServerConfigAllowedCascadesRemoveButton.setEnabled(false);
+										/* select the access-to-all checkbox */
+										settingsForwardingServerConfigAllowedCascadesAllowAllBox.setSelected(true);
+									}
+									else
+									{
+										/* available mixcascades for forwarding are restricted to a list -> components for
+										 * managing that list needed
+										 */
+										settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel.setEnabled(true);
+										settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel.setEnabled(true);
+										/* restore the original listmodels */
+										knownCascadesList.setModel(m_knownCascadesListModel);
+										allowedCascadesList.setModel(m_allowedCascadesListModel);
+										knownCascadesList.setEnabled(true);
+										allowedCascadesList.setEnabled(true);
+										settingsForwardingServerConfigAllowedCascadesReloadButton.setEnabled(true);
+										settingsForwardingServerConfigAllowedCascadesAddButton.setEnabled(true);
+										settingsForwardingServerConfigAllowedCascadesRemoveButton.setEnabled(true);
+										/* deselect the access-to-all checkbox */
+										settingsForwardingServerConfigAllowedCascadesAllowAllBox.setSelected(false);
+									}
+								}
+								if (messageCode == JAPRoutingMessage.ALLOWED_MIXCASCADES_LIST_CHANGED)
+								{
+									synchronized (m_allowedCascadesListModel)
+									{
+										m_allowedCascadesListModel.clear();
+										Enumeration allowedCascades = JAPModel.getInstance().getRoutingSettings().
+											getUseableMixCascadesStore().getAllowedMixCascades().elements();
+										while (allowedCascades.hasMoreElements())
+										{
+											m_allowedCascadesListModel.addElement(allowedCascades.nextElement());
+										}
+									}
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							/* should not happen */
+							LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
+						}
+					}
+				};
+
+				JAPModel.getInstance().getRoutingSettings().getUseableMixCascadesStore().addObserver(
+					allowedMixCascadesObserver);
+				/* tricky: initialize the components by calling the observer (with all possible messages) */
+				allowedMixCascadesObserver.update(JAPModel.getInstance().getRoutingSettings().
+												  getUseableMixCascadesStore(),
+												  new JAPRoutingMessage(JAPRoutingMessage.
+					ALLOWED_MIXCASCADES_LIST_CHANGED));
+				allowedMixCascadesObserver.update(JAPModel.getInstance().getRoutingSettings().
+												  getUseableMixCascadesStore(),
+												  new JAPRoutingMessage(JAPRoutingMessage.
+					ALLOWED_MIXCASCADES_POLICY_CHANGED));
+				
+
+				Observer registrationInfoServicesObserver = new Observer()
+				{
+					/**
+					 * This is the observer implementation. If the registration infoservices policy or the list
+					 * of registration infoservices for the manual registration mode is changed, we update the
+					 * checkbox, the lists and the enable-status of the most components on the infoservices
+					 * panel, if necessary. If the panel is recreated (message via the module internal message
+					 * system), the observer removes itself from all observed objects.
+					 *
+					 * @param a_notifier The observed Object. This should always be
+					 *                   JAPRoutingRegistrationInfoServices or the module internal message
+					 *                   system at the moment.
+					 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
+					 *                  or null at the moment.
+					 */
+					public void update(Observable a_notifier, Object a_message)
+					{
+						try
+						{
+							if (a_notifier ==
+								JAPModel.getInstance().getRoutingSettings().getRegistrationInfoServicesStore())
+							{
+								/* message is from JAPRoutingUseableMixCascades */
+								int messageCode = ( (JAPRoutingMessage) (a_message)).getMessageCode();
+								if (messageCode == JAPRoutingMessage.REGISTRATION_INFOSERVICES_POLICY_CHANGED)
+								{
+									/* enable or disable the components on the panel as needed for currently selected
+									 * mode
+									 */
+									if (JAPModel.getInstance().getRoutingSettings().getRegistrationInfoServicesStore().
+										getRegisterAtAllAvailableInfoServices())
+									{
+										/* register-at-all available primary infoservices -> components for managing the
+										 * list of registration infoservices not needed
+										 */
+										settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel.
+											setEnabled(false);
+										settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel.
+											setEnabled(false);
+										knownInfoServicesList.setEnabled(false);
+										registrationInfoServicesList.setEnabled(false);
+										/* remove all entries from the both listboxes -> no irritation */
+										knownInfoServicesList.setModel(new DefaultListModel());
+										registrationInfoServicesList.setModel(new DefaultListModel());
+										settingsForwardingServerConfigRegistrationInfoServicesReloadButton.setEnabled(false);
+										settingsForwardingServerConfigRegistrationInfoServicesAddButton.setEnabled(false);
+										settingsForwardingServerConfigRegistrationInfoServicesRemoveButton.setEnabled(false);
+										/* select the register-at-all checkbox */
+										settingsForwardingServerConfigRegistrationInfoServicesRegisterAtAllBox.
+											setSelected(true);
+									}
+									else
+									{
+										/* register only at the infoservices from the registration list -> components for
+										 * managing that list needed
+										 */
+										settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel.
+											setEnabled(true);
+										settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel.
+											setEnabled(true);
+										/* restore the original listmodels */
+										knownInfoServicesList.setModel(m_knownInfoServicesListModel);
+										registrationInfoServicesList.setModel(m_registrationInfoServicesListModel);
+										knownInfoServicesList.setEnabled(true);
+										registrationInfoServicesList.setEnabled(true);
+										settingsForwardingServerConfigRegistrationInfoServicesReloadButton.setEnabled(true);
+										settingsForwardingServerConfigRegistrationInfoServicesAddButton.setEnabled(true);
+										settingsForwardingServerConfigRegistrationInfoServicesRemoveButton.setEnabled(true);
+										/* deselect the register-at-all checkbox */
+										settingsForwardingServerConfigRegistrationInfoServicesRegisterAtAllBox.
+											setSelected(false);
+									}
+								}
+								if (messageCode == JAPRoutingMessage.REGISTRATION_INFOSERVICES_LIST_CHANGED)
+								{
+									synchronized (m_registrationInfoServicesListModel)
+									{
+										m_registrationInfoServicesListModel.clear();
+										Enumeration registrationInfoServices = JAPModel.getInstance().
+											getRoutingSettings().getRegistrationInfoServicesStore().
+											getRegistrationInfoServices().elements();
+										while (registrationInfoServices.hasMoreElements())
+										{
+											m_registrationInfoServicesListModel.addElement(registrationInfoServices.
+												nextElement());
+										}
+									}
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							/* should not happen */
+							LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
+						}
+					}
+				};
+
+				JAPModel.getInstance().getRoutingSettings().getRegistrationInfoServicesStore().addObserver(
+					registrationInfoServicesObserver);
+
+				/* tricky: initialize the components by calling the observer (with all possible messages) */
+				registrationInfoServicesObserver.update(JAPModel.getInstance().getRoutingSettings().
+														getRegistrationInfoServicesStore(),
+														new JAPRoutingMessage(JAPRoutingMessage.
+					REGISTRATION_INFOSERVICES_LIST_CHANGED));
+
+				registrationInfoServicesObserver.update(JAPModel.getInstance().getRoutingSettings().
+														getRegistrationInfoServicesStore(),
+														new JAPRoutingMessage(JAPRoutingMessage.
+					REGISTRATION_INFOSERVICES_POLICY_CHANGED));
+				
+				
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Creates the forwarding root panel with all child components.
 	 */
 	public void recreateRootPanel()
 	{
-		synchronized (this)
-		{
-			if (m_messageSystem == null)
-			{
-				/* create a new object for sending internal messages */
-				m_messageSystem = new MessageSystem();
-			}
-		}
-
 		JPanel rootPanel = getRootPanel();
 
 		synchronized (this)
@@ -124,8 +544,6 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			/* clear the whole root panel */
 			rootPanel.removeAll();
 
-			/* notify the observers of the message system that we recreate the root panel */
-			m_messageSystem.sendMessage();
 			/* recreate all parts of the forwarding server configuration dialog */
 			JPanel serverPanel = createForwardingServerConfigPanel();
 
@@ -168,7 +586,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			JAPMessages.getString("settingsForwardingServerConfigPortLabel"));
 		//settingsForwardingServerConfigPortLabel.setFont(getFontSetting());
 
-		final JTextField serverPortField = new JTextField(5)
+		serverPortField = new JTextField(5)
 		{
 			/**
 			 * serial version UID
@@ -232,61 +650,13 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 		//serverPortField.setColumns(6);
 		//serverPortField.setFont(getFontSetting());
 
-		Observer serverPortObserver = new Observer()
-		{
-			/**
-			 * This is the observer implementation. If the routing mode is changed in JAPRoutingSettings,
-			 * we update the start routing server checkbox (enabled/disabled, selected/unselected). If the
-			 * panel is recreated (message via the module internal message system), the observer removes
-			 * itself from all observed objects.
-			 *
-			 * @param a_notifier The observed Object. This should always be JAPRoutingSettings or the module
-			 *                   internal message system at the moment.
-			 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
-			 *                  at the moment or null.
-			 */
-			public void update(Observable a_notifier, Object a_message)
-			{
-				try
-				{
-					if (a_notifier == JAPModel.getInstance().getRoutingSettings())
-					{
-						/* message is from JAPRoutingSettings */
-						if ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
-							JAPRoutingMessage.SERVER_PORT_CHANGED)
-						{
-							serverPortField.setText(Integer.toString(JAPModel.getInstance().
-								getRoutingSettings().getServerPort()));
-						}
-					}
-					if (a_notifier == m_messageSystem)
-					{
-						/* the root panel was recreated -> stop observing and remove ourself from the observed
-						 * objects
-						 */
-						JAPModel.getInstance().getRoutingSettings().deleteObserver(this);
-						m_messageSystem.deleteObserver(this);
-					}
-				}
-				catch (Exception e)
-				{
-					/* should not happen */
-					LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
-				}
-			}
-		};
-		/* registrate the observer also at the internal message system */
-		m_messageSystem.addObserver(serverPortObserver);
-		JAPModel.getInstance().getRoutingSettings().addObserver(serverPortObserver);
-		/* tricky: initialize the components by calling the observer */
-		serverPortObserver.update(JAPModel.getInstance().getRoutingSettings(),
-								  new JAPRoutingMessage(JAPRoutingMessage.SERVER_PORT_CHANGED));
+		
 
 		JLabel settingsForwardingServerConfigMyConnectionLabel = new JLabel(
 			JAPMessages.getString("settingsForwardingServerConfigMyConnectionLabel"));
 		//settingsForwardingServerConfigMyConnectionLabel.setFont(getFontSetting());
 
-		final JComboBox connectionClassesComboBox = new JComboBox(JAPModel.getInstance().getRoutingSettings().
+		connectionClassesComboBox = new JComboBox(JAPModel.getInstance().getRoutingSettings().
 			getConnectionClassSelector().getConnectionClasses());
 		//connectionClassesComboBox.setFont(getFontSetting());
 		connectionClassesComboBox.setEditable(false);
@@ -307,7 +677,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			new JLabel(JAPMessages.getString("settingsForwardingServerConfigMaxUploadBandwidthLabel"));
 		//settingsForwardingServerConfigMaxUploadBandwidthLabel.setFont(getFontSetting());
 
-		final JTextField uploadBandwidthField = new JTextField()
+		uploadBandwidthField = new JTextField()
 		{
 			/**
 			 * serial version UID
@@ -391,88 +761,19 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 		uploadBandwidthField.setColumns(7);
 		//uploadBandwidthField.setFont(getFontSetting());
 
-		Observer connectionClassSelectionObserver = new Observer()
-		{
-			/**
-			 * This is the observer implementation. If the current connection class is changed, the
-			 * connection classes combobox and the maximum bandwidth label are updated. If the panel is
-			 * recreated (message via the module internal message system), the observer removes itself
-			 * from all observed objects.
-			 *
-			 * @param a_notifier The observed Object. This should always be
-			 *                   JAPRoutingConnectionClassSelector or the module internal message system
-			 *                   at the moment.
-			 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
-			 *                  or null at the moment.
-			 */
-			public void update(Observable a_notifier, Object a_message)
-			{
-				try
-				{
-					if (a_notifier == JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector())
-					{
-						/* message is from JAPRoutingConnectionClassSelector */
-						if ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
-							JAPRoutingMessage.CONNECTION_CLASS_CHANGED)
-						{
-							/* change the selected connection class */
-							JAPRoutingConnectionClass currentConnectionClass = JAPModel.getInstance().
-								getRoutingSettings().getConnectionClassSelector().getCurrentConnectionClass();
-							connectionClassesComboBox.setSelectedItem(currentConnectionClass);
-							if (currentConnectionClass.getIdentifier() ==
-								JAPRoutingConnectionClassSelector.CONNECTION_CLASS_USER)
-							{
-								/* user-defined class -> enable possibility for changing the upload bandwidth */
-								uploadBandwidthField.setEnabled(true);
-							}
-							else
-							{
-								/* predefined class -> disable possibility for changing the upload bandwidth */
-								uploadBandwidthField.setEnabled(false);
-							}
-							uploadBandwidthField.setText(Integer.toString( (currentConnectionClass.
-								getMaximumBandwidth() * 8) / 1000));
-						}
-					}
-					if (a_notifier == m_messageSystem)
-					{
-						/* the root panel was recreated -> stop observing and remove ourself from the observed
-						 * objects
-						 */
-						JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector().
-							deleteObserver(this);
-						m_messageSystem.deleteObserver(this);
-					}
-				}
-				catch (Exception e)
-				{
-					/* should not happen */
-					LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
-				}
-			}
-		};
-		/* registrate the observer also at the internal message system */
-		m_messageSystem.addObserver(connectionClassSelectionObserver);
-		JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector().addObserver(
-			connectionClassSelectionObserver);
-		/* tricky: initialize the components by calling the observer */
-		connectionClassSelectionObserver.update(JAPModel.getInstance().getRoutingSettings().
-												getConnectionClassSelector(),
-												new JAPRoutingMessage(JAPRoutingMessage.
-			CONNECTION_CLASS_CHANGED));
 
 		JLabel settingsForwardingServerConfigForwardingPercentageLabel =
 			new JLabel(JAPMessages.getString("settingsForwardingServerConfigForwardingPercentageLabel"));
 		//settingsForwardingServerConfigForwardingPercentageLabel.setFont(getFontSetting());
 
-		final JTextField relativeBandwidthField = new JTextField();
+		relativeBandwidthField = new JTextField();
 		relativeBandwidthField.setColumns(4);
 		relativeBandwidthField.setHorizontalAlignment(JTextField.RIGHT);
 		//relativeBandwidthField.setFont(getFontSetting());
 		relativeBandwidthField.setDisabledTextColor(relativeBandwidthField.getForeground());
 		relativeBandwidthField.setEnabled(false);
 
-		final JButton increaseRelativeBandwidthButton = new JButton(GUIUtils.loadImageIcon("arrowUp.gif", true));
+		increaseRelativeBandwidthButton = new JButton(GUIUtils.loadImageIcon("arrowUp.gif", true));
 		//increaseRelativeBandwidthButton.setMargin(new Insets(1, 1, 1, 1));
 		//increaseRelativeBandwidthButton.setBackground(Color.gray); //this together with the next lines sems to be
 		//increaseRelativeBandwidthButton.setOpaque(false); //stupid but is necessary for JDK 1.5 on Windows XP (and maybe others)
@@ -498,7 +799,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		final JButton decreaseRelativeBandwidthButton = new JButton(GUIUtils.loadImageIcon("arrowDown.gif", true));
+		decreaseRelativeBandwidthButton = new JButton(GUIUtils.loadImageIcon("arrowDown.gif", true));
 		//decreaseRelativeBandwidthButton.setMargin(new Insets(1, 1, 1, 1));
 		decreaseRelativeBandwidthButton.setBorder(new EmptyBorder(0, 1, 0, 1));
 		decreaseRelativeBandwidthButton.setFocusPainted(false);
@@ -522,110 +823,10 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		final JLabel settingsForwardingServerConfigCurrentBandwidthLabel = new JLabel();
+		settingsForwardingServerConfigCurrentBandwidthLabel = new JLabel();
 		//settingsForwardingServerConfigCurrentBandwidthLabel.setFont(getFontSetting());
 
-		Observer connectionClassSettingsObserver = new Observer()
-		{
-			/**
-			 * This is the observer implementation. If the connection class or some sttings of the
-			 * current connection class are changed, the components for selecting the relative bandwidth
-			 * are updated. If the panel is recreated (message via the module internal message system),
-			 * the observer removes itself from all observed objects.
-			 *
-			 * @param a_notifier The observed Object. This should always be
-			 *                   JAPRoutingConnectionClassSelector or the module internal message system
-			 *                   at the moment.
-			 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
-			 *                  or null at the moment.
-			 */
-			public void update(Observable a_notifier, Object a_message)
-			{
-				try
-				{
-					if (a_notifier == JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector())
-					{
-						/* message is from JAPRoutingConnectionClassSelector */
-						if ( ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
-							  JAPRoutingMessage.CONNECTION_CLASS_CHANGED) ||
-							( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
-							 JAPRoutingMessage.CONNECTION_PARAMETERS_CHANGED))
-						{
-							/* change the relative bandwidth settings */
-							JAPRoutingConnectionClass currentConnectionClass = JAPModel.getInstance().
-								getRoutingSettings().getConnectionClassSelector().getCurrentConnectionClass();
-							relativeBandwidthField.setText(Integer.toString(currentConnectionClass.
-								getRelativeBandwidth()) + "%");
-							if (currentConnectionClass.getRelativeBandwidth() < 100)
-							{
-								/* increasing the bandwidth is possible */
-								increaseRelativeBandwidthButton.setEnabled(true);
-							}
-							else
-							{
-								/* increasing the bandwidth is not possible */
-								increaseRelativeBandwidthButton.setEnabled(false);
-							}
-							if (currentConnectionClass.getRelativeBandwidth() >
-								( (currentConnectionClass.getMinimumRelativeBandwidth() + 9) / 10) * 10)
-							{
-								/* decreasing the bandwidth is possible (at least by one full step of 10) */
-								decreaseRelativeBandwidthButton.setEnabled(true);
-							}
-							else
-							{
-								/* increasing the bandwidth is not possible (or we cannot decrease it by at least
-								 * one full step of 10)
-								 */
-								decreaseRelativeBandwidthButton.setEnabled(false);
-							}
-						}
-						if ( ( (JAPRoutingMessage) (a_message)).getMessageCode() ==
-							JAPRoutingMessage.CONNECTION_PARAMETERS_CHANGED)
-						{
-							/* update the label with the bandwidth and connection number information */
-							settingsForwardingServerConfigCurrentBandwidthLabel.setText(
-								JAPMessages.getString(
-									"settingsForwardingServerConfigCurrentBandwidthLabelPart1") + " " +
-								Integer.
-								toString( (JAPModel.getInstance().getRoutingSettings().getBandwidth() * 8) /
-										 1000) + " " +
-								JAPMessages.getString(
-									"settingsForwardingServerConfigCurrentBandwidthLabelPart2") +
-								" " +
-								Integer.toString(JAPModel.getInstance().getRoutingSettings().
-												 getAllowedConnections()) +
-								" " +
-								JAPMessages.getString(
-									"settingsForwardingServerConfigCurrentBandwidthLabelPart3"));
-						}
-					}
-					if (a_notifier == m_messageSystem)
-					{
-						/* the root panel was recreated -> stop observing and remove ourself from the observed
-						 * objects
-						 */
-						JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector().
-							deleteObserver(this);
-						m_messageSystem.deleteObserver(this);
-					}
-				}
-				catch (Exception e)
-				{
-					/* should not happen */
-					LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
-				}
-			}
-		};
-		/* registrate the observer also at the internal message system */
-		m_messageSystem.addObserver(connectionClassSettingsObserver);
-		JAPModel.getInstance().getRoutingSettings().getConnectionClassSelector().addObserver(
-			connectionClassSettingsObserver);
-		/* tricky: initialize the components by calling the observer */
-		connectionClassSettingsObserver.update(JAPModel.getInstance().getRoutingSettings().
-											   getConnectionClassSelector(),
-											   new JAPRoutingMessage(JAPRoutingMessage.
-			CONNECTION_PARAMETERS_CHANGED));
+		
 
 		JTabbedPane advancedConfigurationTabPane = new JTabbedPane();
 		//advancedConfigurationTabPane.setFont(getFontSetting());
@@ -791,18 +992,18 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 	{
 		final JPanel allowedCascadesPanel = new JPanel();
 
-		final JLabel settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel =
+		settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel =
 			new JLabel(JAPMessages.getString(
 				"settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel"));
 		//settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel.setFont(getFontSetting());
-		final JLabel settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel = new JLabel(
+		settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel = new JLabel(
 			JAPMessages.getString("settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel"));
 		//settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel.setFont(getFontSetting());
 
 		m_knownCascadesListModel = new DefaultListModel();
 		m_knownInfoServicesListModel = new DefaultListModel();
 
-		final JList knownCascadesList = new JList(m_knownCascadesListModel);
+		knownCascadesList = new JList(m_knownCascadesListModel);
 		knownCascadesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		final JScrollPane knownCascadesScrollPane = new JScrollPane(knownCascadesList);
 		//knownCascadesScrollPane.setFont(getFontSetting());
@@ -810,14 +1011,14 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 		knownCascadesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
 
 		m_allowedCascadesListModel = new DefaultListModel();
-		final JList allowedCascadesList = new JList(m_allowedCascadesListModel);
+		allowedCascadesList = new JList(m_allowedCascadesListModel);
 		allowedCascadesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		final JScrollPane allowedCascadesScrollPane = new JScrollPane(allowedCascadesList);
 		//allowedCascadesScrollPane.setFont(getFontSetting());
 		/* set the preferred size of the scrollpane to a 4x20 textarea */
 		allowedCascadesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
 
-		final JButton settingsForwardingServerConfigAllowedCascadesReloadButton = new JButton(
+		settingsForwardingServerConfigAllowedCascadesReloadButton = new JButton(
 			JAPMessages.getString("settingsForwardingServerConfigAllowedCascadesReloadButton"));
 		//settingsForwardingServerConfigAllowedCascadesReloadButton.setFont(getFontSetting());
 		settingsForwardingServerConfigAllowedCascadesReloadButton.addActionListener(new ActionListener()
@@ -836,7 +1037,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		final JButton settingsForwardingServerConfigAllowedCascadesAddButton = new JButton(
+		settingsForwardingServerConfigAllowedCascadesAddButton = new JButton(
 			JAPMessages.getString("settingsForwardingServerConfigAllowedCascadesAddButton"));
 		//settingsForwardingServerConfigAllowedCascadesAddButton.setFont(getFontSetting());
 		settingsForwardingServerConfigAllowedCascadesAddButton.addActionListener(new ActionListener()
@@ -856,7 +1057,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		final JButton settingsForwardingServerConfigAllowedCascadesRemoveButton = new JButton(
+		settingsForwardingServerConfigAllowedCascadesRemoveButton = new JButton(
 			JAPMessages.getString("settingsForwardingServerConfigAllowedCascadesRemoveButton"));
 		//settingsForwardingServerConfigAllowedCascadesRemoveButton.setFont(getFontSetting());
 		settingsForwardingServerConfigAllowedCascadesRemoveButton.addActionListener(new ActionListener()
@@ -876,7 +1077,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		final JCheckBox settingsForwardingServerConfigAllowedCascadesAllowAllBox = new JCheckBox(
+		settingsForwardingServerConfigAllowedCascadesAllowAllBox = new JCheckBox(
 			JAPMessages.getString("settingsForwardingServerConfigAllowedCascadesAllowAllBox"),
 			JAPModel.getInstance().getRoutingSettings().getUseableMixCascadesStore().
 			getAllowAllAvailableMixCascades());
@@ -906,116 +1107,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		Observer allowedMixCascadesObserver = new Observer()
-		{
-			/**
-			 * This is the observer implementation. If the allowed mixcascades policy or the list of
-			 * allowed mixcascades for the restricted mode is changed, we update the checkbox, the lists
-			 * and the enable-status of the most components on the mixcascades panel, if necessary. If the
-			 * panel is recreated (message via the module internal message system), the observer removes
-			 * itself from all observed objects.
-			 *
-			 * @param a_notifier The observed Object. This should always be
-			 *                   JAPRoutingUseableMixCascades or the module internal message system at
-			 *                   the moment.
-			 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
-			 *                  or null at the moment.
-			 */
-			public void update(Observable a_notifier, Object a_message)
-			{
-				try
-				{
-					if (a_notifier == JAPModel.getInstance().getRoutingSettings().getUseableMixCascadesStore())
-					{
-						/* message is from JAPRoutingUseableMixCascades */
-						int messageCode = ( (JAPRoutingMessage) (a_message)).getMessageCode();
-						if (messageCode == JAPRoutingMessage.ALLOWED_MIXCASCADES_POLICY_CHANGED)
-						{
-							/* enable or disable the components on the panel as needed for currently selected
-							 * mode
-							 */
-							if (JAPModel.getInstance().getRoutingSettings().getUseableMixCascadesStore().
-								getAllowAllAvailableMixCascades())
-							{
-								/* access-to-all available mixcascades -> components for managing the list of
-								 * allowed mixcascades not needed
-								 */
-								settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel.setEnabled(false);
-								settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel.setEnabled(false);
-								knownCascadesList.setEnabled(false);
-								allowedCascadesList.setEnabled(false);
-								/* remove all entries from the both listboxes -> no irritation */
-								knownCascadesList.setModel(new DefaultListModel());
-								allowedCascadesList.setModel(new DefaultListModel());
-								settingsForwardingServerConfigAllowedCascadesReloadButton.setEnabled(false);
-								settingsForwardingServerConfigAllowedCascadesAddButton.setEnabled(false);
-								settingsForwardingServerConfigAllowedCascadesRemoveButton.setEnabled(false);
-								/* select the access-to-all checkbox */
-								settingsForwardingServerConfigAllowedCascadesAllowAllBox.setSelected(true);
-							}
-							else
-							{
-								/* available mixcascades for forwarding are restricted to a list -> components for
-								 * managing that list needed
-								 */
-								settingsForwardingServerConfigAllowedCascadesKnownCascadesLabel.setEnabled(true);
-								settingsForwardingServerConfigAllowedCascadesAllowedCascadesLabel.setEnabled(true);
-								/* restore the original listmodels */
-								knownCascadesList.setModel(m_knownCascadesListModel);
-								allowedCascadesList.setModel(m_allowedCascadesListModel);
-								knownCascadesList.setEnabled(true);
-								allowedCascadesList.setEnabled(true);
-								settingsForwardingServerConfigAllowedCascadesReloadButton.setEnabled(true);
-								settingsForwardingServerConfigAllowedCascadesAddButton.setEnabled(true);
-								settingsForwardingServerConfigAllowedCascadesRemoveButton.setEnabled(true);
-								/* deselect the access-to-all checkbox */
-								settingsForwardingServerConfigAllowedCascadesAllowAllBox.setSelected(false);
-							}
-						}
-						if (messageCode == JAPRoutingMessage.ALLOWED_MIXCASCADES_LIST_CHANGED)
-						{
-							synchronized (m_allowedCascadesListModel)
-							{
-								m_allowedCascadesListModel.clear();
-								Enumeration allowedCascades = JAPModel.getInstance().getRoutingSettings().
-									getUseableMixCascadesStore().getAllowedMixCascades().elements();
-								while (allowedCascades.hasMoreElements())
-								{
-									m_allowedCascadesListModel.addElement(allowedCascades.nextElement());
-								}
-							}
-						}
-					}
-					if (a_notifier == m_messageSystem)
-					{
-						/* the root panel was recreated -> stop observing and remove ourself from the observed
-						 * objects
-						 */
-						JAPModel.getInstance().getRoutingSettings().getUseableMixCascadesStore().
-							deleteObserver(this);
-						m_messageSystem.deleteObserver(this);
-					}
-				}
-				catch (Exception e)
-				{
-					/* should not happen */
-					LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
-				}
-			}
-		};
-		/* registrate the observer also at the internal message system */
-		m_messageSystem.addObserver(allowedMixCascadesObserver);
-		JAPModel.getInstance().getRoutingSettings().getUseableMixCascadesStore().addObserver(
-			allowedMixCascadesObserver);
-		/* tricky: initialize the components by calling the observer (with all possible messages) */
-		allowedMixCascadesObserver.update(JAPModel.getInstance().getRoutingSettings().
-										  getUseableMixCascadesStore(),
-										  new JAPRoutingMessage(JAPRoutingMessage.
-			ALLOWED_MIXCASCADES_LIST_CHANGED));
-		allowedMixCascadesObserver.update(JAPModel.getInstance().getRoutingSettings().
-										  getUseableMixCascadesStore(),
-										  new JAPRoutingMessage(JAPRoutingMessage.
-			ALLOWED_MIXCASCADES_POLICY_CHANGED));
+		
 
 		TitledBorder settingsForwardingServerConfigAllowedCascadesBorder = new TitledBorder(
 			JAPMessages.getString("settingsForwardingServerConfigAllowedCascadesBorder"));
@@ -1107,17 +1199,17 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 	{
 		JPanel registrationInfoServicesPanel = new JPanel();
 
-		final JLabel settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel = new
+		settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel = new
 			JLabel(JAPMessages.getString(
 				"settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel"));
 		//settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel.setFont(getFontSetting());
-		final JLabel settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel = new
+		settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel = new
 			JLabel(JAPMessages.getString(
 				"settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel"));
 		//settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel.setFont(
 			//getFontSetting());
 
-		final JList knownInfoServicesList = new JList(m_knownInfoServicesListModel);
+		knownInfoServicesList = new JList(m_knownInfoServicesListModel);
 		knownInfoServicesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		final JScrollPane knownInfoServicesScrollPane = new JScrollPane(knownInfoServicesList);
 		//knownInfoServicesScrollPane.setFont(getFontSetting());
@@ -1125,14 +1217,14 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 		knownInfoServicesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
 
 		m_registrationInfoServicesListModel = new DefaultListModel();
-		final JList registrationInfoServicesList = new JList(m_registrationInfoServicesListModel);
+		registrationInfoServicesList = new JList(m_registrationInfoServicesListModel);
 		registrationInfoServicesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		final JScrollPane registrationInfoServicesScrollPane = new JScrollPane(registrationInfoServicesList);
 		//registrationInfoServicesScrollPane.setFont(getFontSetting());
 		/* set the preferred size of the scrollpane to a 4x20 textarea */
 		registrationInfoServicesScrollPane.setPreferredSize( (new JTextArea(4, 20)).getPreferredSize());
 
-		final JButton settingsForwardingServerConfigRegistrationInfoServicesReloadButton = new JButton(
+		settingsForwardingServerConfigRegistrationInfoServicesReloadButton = new JButton(
 			JAPMessages.getString("settingsForwardingServerConfigRegistrationInfoServicesReloadButton"));
 		//settingsForwardingServerConfigRegistrationInfoServicesReloadButton.setFont(getFontSetting());
 		settingsForwardingServerConfigRegistrationInfoServicesReloadButton.addActionListener(new
@@ -1144,7 +1236,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		final JButton settingsForwardingServerConfigRegistrationInfoServicesAddButton = new JButton(
+		settingsForwardingServerConfigRegistrationInfoServicesAddButton = new JButton(
 			JAPMessages.getString("settingsForwardingServerConfigRegistrationInfoServicesAddButton"));
 		//settingsForwardingServerConfigRegistrationInfoServicesAddButton.setFont(getFontSetting());
 
@@ -1166,7 +1258,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		final JButton settingsForwardingServerConfigRegistrationInfoServicesRemoveButton = new JButton(
+		settingsForwardingServerConfigRegistrationInfoServicesRemoveButton = new JButton(
 			JAPMessages.getString("settingsForwardingServerConfigRegistrationInfoServicesRemoveButton"));
 		//settingsForwardingServerConfigRegistrationInfoServicesRemoveButton.setFont(getFontSetting());
 
@@ -1189,7 +1281,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		final JCheckBox settingsForwardingServerConfigRegistrationInfoServicesRegisterAtAllBox = new
+		settingsForwardingServerConfigRegistrationInfoServicesRegisterAtAllBox = new
 			JCheckBox(JAPMessages.getString(
 				"settingsForwardingServerConfigRegistrationInfoServicesRegisterAtAllBox"),
 					  JAPModel.getInstance().getRoutingSettings().getRegistrationInfoServicesStore().
@@ -1220,128 +1312,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 			}
 		});
 
-		Observer registrationInfoServicesObserver = new Observer()
-		{
-			/**
-			 * This is the observer implementation. If the registration infoservices policy or the list
-			 * of registration infoservices for the manual registration mode is changed, we update the
-			 * checkbox, the lists and the enable-status of the most components on the infoservices
-			 * panel, if necessary. If the panel is recreated (message via the module internal message
-			 * system), the observer removes itself from all observed objects.
-			 *
-			 * @param a_notifier The observed Object. This should always be
-			 *                   JAPRoutingRegistrationInfoServices or the module internal message
-			 *                   system at the moment.
-			 * @param a_message The reason of the notification. This should always be a JAPRoutingMessage
-			 *                  or null at the moment.
-			 */
-			public void update(Observable a_notifier, Object a_message)
-			{
-				try
-				{
-					if (a_notifier ==
-						JAPModel.getInstance().getRoutingSettings().getRegistrationInfoServicesStore())
-					{
-						/* message is from JAPRoutingUseableMixCascades */
-						int messageCode = ( (JAPRoutingMessage) (a_message)).getMessageCode();
-						if (messageCode == JAPRoutingMessage.REGISTRATION_INFOSERVICES_POLICY_CHANGED)
-						{
-							/* enable or disable the components on the panel as needed for currently selected
-							 * mode
-							 */
-							if (JAPModel.getInstance().getRoutingSettings().getRegistrationInfoServicesStore().
-								getRegisterAtAllAvailableInfoServices())
-							{
-								/* register-at-all available primary infoservices -> components for managing the
-								 * list of registration infoservices not needed
-								 */
-								settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel.
-									setEnabled(false);
-								settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel.
-									setEnabled(false);
-								knownInfoServicesList.setEnabled(false);
-								registrationInfoServicesList.setEnabled(false);
-								/* remove all entries from the both listboxes -> no irritation */
-								knownInfoServicesList.setModel(new DefaultListModel());
-								registrationInfoServicesList.setModel(new DefaultListModel());
-								settingsForwardingServerConfigRegistrationInfoServicesReloadButton.setEnabled(false);
-								settingsForwardingServerConfigRegistrationInfoServicesAddButton.setEnabled(false);
-								settingsForwardingServerConfigRegistrationInfoServicesRemoveButton.setEnabled(false);
-								/* select the register-at-all checkbox */
-								settingsForwardingServerConfigRegistrationInfoServicesRegisterAtAllBox.
-									setSelected(true);
-							}
-							else
-							{
-								/* register only at the infoservices from the registration list -> components for
-								 * managing that list needed
-								 */
-								settingsForwardingServerConfigRegistrationInfoServicesKnownInfoServicesLabel.
-									setEnabled(true);
-								settingsForwardingServerConfigRegistrationInfoServicesSelectedInfoServicesLabel.
-									setEnabled(true);
-								/* restore the original listmodels */
-								knownInfoServicesList.setModel(m_knownInfoServicesListModel);
-								registrationInfoServicesList.setModel(m_registrationInfoServicesListModel);
-								knownInfoServicesList.setEnabled(true);
-								registrationInfoServicesList.setEnabled(true);
-								settingsForwardingServerConfigRegistrationInfoServicesReloadButton.setEnabled(true);
-								settingsForwardingServerConfigRegistrationInfoServicesAddButton.setEnabled(true);
-								settingsForwardingServerConfigRegistrationInfoServicesRemoveButton.setEnabled(true);
-								/* deselect the register-at-all checkbox */
-								settingsForwardingServerConfigRegistrationInfoServicesRegisterAtAllBox.
-									setSelected(false);
-							}
-						}
-						if (messageCode == JAPRoutingMessage.REGISTRATION_INFOSERVICES_LIST_CHANGED)
-						{
-							synchronized (m_registrationInfoServicesListModel)
-							{
-								m_registrationInfoServicesListModel.clear();
-								Enumeration registrationInfoServices = JAPModel.getInstance().
-									getRoutingSettings().getRegistrationInfoServicesStore().
-									getRegistrationInfoServices().elements();
-								while (registrationInfoServices.hasMoreElements())
-								{
-									m_registrationInfoServicesListModel.addElement(registrationInfoServices.
-										nextElement());
-								}
-							}
-						}
-					}
-					if (a_notifier == m_messageSystem)
-					{
-						/* the root panel was recreated -> stop observing and remove ourself from the observed
-						 * objects
-						 */
-						JAPModel.getInstance().getRoutingSettings().getRegistrationInfoServicesStore().
-							deleteObserver(this);
-						m_messageSystem.deleteObserver(this);
-					}
-				}
-				catch (Exception e)
-				{
-					/* should not happen */
-					LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
-				}
-			}
-		};
-		/* registrate the observer also at the internal message system */
-		m_messageSystem.addObserver(registrationInfoServicesObserver);
-
-		JAPModel.getInstance().getRoutingSettings().getRegistrationInfoServicesStore().addObserver(
-			registrationInfoServicesObserver);
-
-		/* tricky: initialize the components by calling the observer (with all possible messages) */
-		registrationInfoServicesObserver.update(JAPModel.getInstance().getRoutingSettings().
-												getRegistrationInfoServicesStore(),
-												new JAPRoutingMessage(JAPRoutingMessage.
-			REGISTRATION_INFOSERVICES_LIST_CHANGED));
-
-		registrationInfoServicesObserver.update(JAPModel.getInstance().getRoutingSettings().
-												getRegistrationInfoServicesStore(),
-												new JAPRoutingMessage(JAPRoutingMessage.
-			REGISTRATION_INFOSERVICES_POLICY_CHANGED));
+		
 
 		TitledBorder settingsForwardingServerConfigRegistrationInfoServicesBorder = new TitledBorder(
 			JAPMessages.getString("settingsForwardingServerConfigRegistrationInfoServicesBorder"));

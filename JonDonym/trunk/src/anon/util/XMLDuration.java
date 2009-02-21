@@ -27,6 +27,7 @@
  */
 package anon.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Enumeration;
@@ -850,6 +851,16 @@ public class XMLDuration
         return buf.toString();
 	}
 	
+	private String toString(BigDecimal bd) 
+	{
+		String result = toStringJDK5(bd);
+		if (result == null)
+		{
+			result = bd.toString();
+		}
+		return result;
+	}
+	
     /**
      * <p>Turns {@link BigDecimal} to a string representation.</p>
      * 
@@ -860,9 +871,24 @@ public class XMLDuration
      * 
      * @return  <code>String</code> representation of <code>BigDecimal</code> 
      */
-    private String toString(BigDecimal bd) 
+    private String toStringJDK5(BigDecimal bd) 
     {
-        String intString = bd.unscaledValue().toString();
+        String intString;
+        BigInteger unscaledValue;
+       
+        try 
+        {
+			unscaledValue = 
+				(BigInteger)(BigDecimal.class.getMethod("unscaledValue", (Class[])null).invoke(bd, (Object[])null));
+		} 
+        catch (Exception e) 
+        {
+        	// it seems that we are running under JRE 1.4 or lower
+			return null;
+		}
+        
+        intString = unscaledValue.toString();
+        
         int scale = bd.scale();
 
         if (scale == 0) 

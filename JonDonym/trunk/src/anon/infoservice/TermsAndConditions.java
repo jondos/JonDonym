@@ -131,7 +131,7 @@ public class TermsAndConditions implements IXMLEncodable
 		opSki = opSki.toUpperCase();
 		
 		this.operator = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(opSki);
-		if(operator == null)
+		if (operator == null)
 		{
 			throw new XMLParseException("invalid  id "+ opSki +": no operator found with this subject key identifier");
 		}
@@ -147,19 +147,20 @@ public class TermsAndConditions implements IXMLEncodable
 		Element currentTranslation = 
 			(Element) XMLUtil.getFirstChildByName(termsAndConditionRoot, 
 									Translation.XML_ELEMENT_NAME);
-		while(currentTranslation != null)
+		while (currentTranslation != null)
 		{
 			addTranslation(new Translation(currentTranslation));
 			currentTranslation = 
 				(Element) XMLUtil.getNextSiblingByName(currentTranslation, 
 									Translation.XML_ELEMENT_NAME);
 		}
-		if(!hasTranslations())
+		if (!hasTranslations())
 		{
 			throw new XMLParseException("TC of operator "+opSki+" is invalid because it has no translations");
 		}
-		read = termsAndConditionRoot.hasAttribute(XML_ATTR_ACCEPTED);
-		accepted = read ? Boolean.parseBoolean(termsAndConditionRoot.getAttribute(XML_ATTR_ACCEPTED)) : false;
+		
+		read = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, null) != null;
+		accepted = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, false);
 	}
 	
 	public String getDateString()
@@ -530,13 +531,20 @@ public class TermsAndConditions implements IXMLEncodable
 
 		public Element toXmlElement(Document a_doc) 
 		{
-			if(a_doc.equals(translationElement.getOwnerDocument()))
+			if (a_doc.equals(translationElement.getOwnerDocument()))
 			{
 				return translationElement;
 			}
 			else
 			{
-				return (Element) a_doc.importNode(translationElement.cloneNode(true), true);
+				try
+				{
+					return (Element) XMLUtil.importNode(a_doc, translationElement, true);
+				}
+				catch (XMLParseException a_e)
+				{
+					return null;
+				}
 			}
 		}
 		

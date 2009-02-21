@@ -37,11 +37,29 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 	JTable m_tblOperators;
 	private JEditorPane m_termsPane;
 	private JScrollPane m_scrollingTerms;
+	private ITermsAndConditionsContainer m_tcc;
 	
 	protected JAPConfTC(IJAPConfSavePoint savePoint, ITermsAndConditionsContainer tcc)
 	{
 		super(null);
-		tcc.getTermsAndConditionsResponseHandler().addObserver(this);
+		if (tcc == null)
+		{
+			throw new NullPointerException();
+		}
+		m_tcc = tcc;
+	}
+	
+	protected boolean initObservers()
+	{
+		if (super.initObservers())
+		{
+			synchronized(LOCK_OBSERVABLE)
+			{
+				m_tcc.getTermsAndConditionsResponseHandler().addObserver(this);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public String getTabTitle() 
@@ -99,7 +117,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 	
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			((OperatorsTableModel) m_tblOperators.getModel()).update();
 		}

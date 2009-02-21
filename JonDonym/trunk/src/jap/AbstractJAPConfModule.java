@@ -38,6 +38,8 @@ import java.util.Observer;
 import java.util.Observable;
 import javax.swing.SwingUtilities;
 
+import anon.util.ClassUtil;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -55,7 +57,7 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 		public void run()
 		{
 			// synchronize with pack() of config dialog so that update and pack events do not overlap
-			synchronized (JAPConf.getInstance())
+			//synchronized (JAPConf.getInstance())
 			{
 				try
 				{
@@ -80,6 +82,9 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 	 * presses "Cancel" or the default configuration, if the user presses "Reset to defaults".
 	 */
 	protected IJAPConfSavePoint m_savePoint;
+	
+	private boolean m_bObserversInitialised = false;
+	protected final Object LOCK_OBSERVABLE = new Object();
 
 	/**
 	 * Helper class for creating a onRootPanelShown call when the root panel (the whole configuration
@@ -314,6 +319,18 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 	 */
 	protected void onUpdateValues()
 	{
+	}
+	
+	/**
+	 * All observables that are observed by this object MUST be registered here.
+	 * Subsequent calls of this method should not lead to additional registrations.
+	 */
+	protected boolean initObservers()
+	{
+		boolean bObserversInitialised = m_bObserversInitialised;
+		m_bObserversInitialised = true;
+		//System.out.println(ClassUtil.getShortClassName(getClass()));
+		return !bObserversInitialised;
 	}
 
 	/**

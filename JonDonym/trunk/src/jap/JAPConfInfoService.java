@@ -27,7 +27,6 @@
  */
 package jap;
 
-import gui.CertDetailsDialog;
 import gui.GUIUtils;
 import gui.JAPHtmlMultiLineLabel;
 import gui.JAPJIntField;
@@ -107,12 +106,6 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		new Integer[]{new Integer(5), new Integer(10), new Integer(15), new Integer(20), new Integer(25),
 		new Integer(30), new Integer(40), new Integer(50), new Integer(60)};
 
-
-	/**
-	 * This is the internal message system of this module.
-	 */
-	private MessageSystem m_messageSystem;
-
 	/**
 	 * Constructor for JAPConfInfoService. We do some initializing here.
 	 */
@@ -134,6 +127,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 	private JComboBox m_cmbAskedInfoServices;
 	private JAPHtmlMultiLineLabel m_lblExplanation;
 	private JAPHtmlMultiLineLabel m_settingsInfoServiceConfigBasicSettingsDescriptionLabel;
+	private DefaultListModel knownInfoServicesListModel;
 
 	private boolean mb_newInfoService = true;
 
@@ -147,7 +141,362 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 	public JAPConfInfoService()
 	{
 		super(new JAPConfInfoServiceSavePoint());
-		JAPModel.getInstance().addObserver(this);
+	}
+	
+	protected boolean initObservers()
+	{
+		if (super.initObservers())
+		{
+			JAPModel.getInstance().addObserver(this);
+			
+			
+			Observer knownInfoServicesListObserver = new Observer()
+			{
+
+				private boolean m_preferredInfoServiceIsAlsoInDatabase = false;
+
+				private InfoServiceDBEntry m_currentPreferredInfoService = null;
+
+				/**
+				 * This is the observer implementation. If there are changes at the database of known
+				 * InfoServices or the preferred InfoService is changed, this observer will update the list
+				 * of known infoservices. If the panel is recreated (message via the module internal message
+				 * system), the observer removes itself from all observed objects.
+				 *
+				 * @param a_notifier The observed Object. This should always be the Database instance for
+				 *                   the InfoServiceDBEntries, the InfoServiceHolder instance or the module
+				 *                   internal message system at the moment.
+				 * @param a_message The reason of the notification. This should always be a DatabaseMessage,
+				 *                  a InfoServiceHolderMessage or null at the moment (depending on the
+				 *                  notifier).
+				 */
+				public void update(Observable a_notifier, Object a_message)
+				{
+					try
+					{
+						if (a_notifier == Database.getInstance(InfoServiceDBEntry.class))
+						{
+							/* message is from the infoservice database */
+							int messageCode = ( (DatabaseMessage) a_message).getMessageCode();
+							if ( (messageCode == DatabaseMessage.ENTRY_ADDED) ||
+								(messageCode == DatabaseMessage.ENTRY_RENEWED))
+							{
+								final InfoServiceDBEntry updatedEntry = (InfoServiceDBEntry) ( ( (DatabaseMessage)
+									a_message).getMessageData());
+								synchronized (knownInfoServicesListModel)
+								{
+									int entryPositionInList = knownInfoServicesListModel.indexOf(updatedEntry);
+									if (entryPositionInList != -1)
+									{
+										/* we already know an entry with the same ID, but maybe something has changed
+										 * -> replace the entry by the new one
+										 */
+										knownInfoServicesListModel.setElementAt(updatedEntry, entryPositionInList);
+										if (updatedEntry.equals(m_currentPreferredInfoService))
+										{
+											/* the preferred InfoService is also in the database of all known
+											 * InfoServices (because we have received this add or renew message)
+											 */
+											m_preferredInfoServiceIsAlsoInDatabase = true;
+										}
+									}
+									else
+									{
+										/* the entry is really new */
+										if (updatedEntry.isUserDefined())
+										{
+											/* it's an user-defined entry -> add it at the end of the list */
+											knownInfoServicesListModel.addElement(updatedEntry);
+										}
+										else
+										{
+											/* it's an entry downloaded from the Internet -> add it at the end of the
+											 * Internet entries but before the user-defined entries
+											 */
+											int i = findFirstUserDefinedListModelEntry(knownInfoServicesListModel);
+											//knownInfoServicesListModel.insertElementAt(updatedEntry, i);
+											final class Test implements Runnable
+											{
+												int m_Index;
+												protected Test(int i)
+												{
+													m_Index = i;
+												}
+
+												public void run()
+												{
+													knownInfoServicesListModel.add(m_Index, updatedEntry);
+												}
+
+											}
+
+											if (SwingUtilities.isEventDispatchThread())
+											{
+												knownInfoServicesListModel.add(i, updatedEntry);
+											}
+											else
+											{
+												SwingUtilities.invokeAndWait(new Test(i));
+											}
+										}
+									}
+								}
+							}
+							if (messageCode == DatabaseMessage.ENTRY_REMOVED)
+							{
+								InfoServiceDBEntry removedInfoService = (InfoServiceDBEntry) ( ( (DatabaseMessage)
+									a_message).getMessageData());
+								synchronized (knownInfoServicesListModel)
+								{
+									if (removedInfoService.equals(m_currentPreferredInfoService))
+									{
+										/* the preferred InfoService war removed from the database of all known
+										 * InfoServices but don't remove it from this list as long as it is the
+										 * preferred InfoService
+										 */
+										m_preferredInfoServiceIsAlsoInDatabase = false;
+									}
+									else
+									{
+										/* it's not the preferred InfoService -> we can remove it from the list */
+										knownInfoServicesListModel.removeElement(removedInfoService);
+									}
+								}
+							}
+							if (messageCode == DatabaseMessage.ALL_ENTRIES_REMOVED)
+							{
+								synchronized (knownInfoServicesListModel)
+								{
+									/* also the preferred InfoService war removed from the database of all known
+									 * InfoServices (but we have to keep it in the list)
+									 */
+									knownInfoServicesListModel.clear();
+									/*
+									 Enumeration infoServicesInList = knownInfoServicesListModel.elements();
+									   while (infoServicesInList.hasMoreElements())
+									   {
+									 InfoServiceDBEntry currentInfoService = (InfoServiceDBEntry) (
+									  infoServicesInList.nextElement());
+									 if (!currentInfoService.equals(m_currentPreferredInfoService))
+									 {
+									  // it's not the preferred InfoService -> we can remove it //
+									  knownInfoServicesListModel.removeElement(currentInfoService);
+									 }
+									   }*/
+									knownInfoServicesListModel.addElement(m_currentPreferredInfoService);
+									m_listKnownInfoServices.setSelectedIndex(0);
+									m_preferredInfoServiceIsAlsoInDatabase = false;
+								}
+							}
+							if (messageCode == DatabaseMessage.INITIAL_OBSERVER_MESSAGE)
+							{
+								Enumeration databaseEntries = ( (Vector) ( ( (DatabaseMessage) a_message).
+									getMessageData())).elements();
+								synchronized (knownInfoServicesListModel)
+								{
+									int i = 0;
+									while (databaseEntries.hasMoreElements())
+									{
+										knownInfoServicesListModel.add(
+											findFirstUserDefinedListModelEntry(knownInfoServicesListModel),
+											databaseEntries.nextElement());
+										i++;
+									}
+								}
+							}
+						}
+						if (a_notifier == InfoServiceHolder.getInstance())
+						{
+							/* message is from InfoServiceHolder */
+							int messageCode = ( (InfoServiceHolderMessage) a_message).getMessageCode();
+							if (messageCode == InfoServiceHolderMessage.PREFERRED_INFOSERVICE_CHANGED)
+							{
+								/* we have a new preferred InfoService */
+								InfoServiceDBEntry newPreferredInfoService = (InfoServiceDBEntry) ( ( (
+									InfoServiceHolderMessage) a_message).getMessageData());
+								synchronized (knownInfoServicesListModel)
+								{
+									if ( (m_currentPreferredInfoService != null) &&
+										(m_currentPreferredInfoService.equals(newPreferredInfoService)))
+									{
+										/* the new preferred InfoService has the same ID as the old one, but maybe
+										 * something other was changed -> call the set method of the vector
+										 */
+										int positionOfPreferredInfoService = knownInfoServicesListModel.indexOf(
+											m_currentPreferredInfoService);
+										if (positionOfPreferredInfoService != -1)
+										{
+											knownInfoServicesListModel.setElementAt(newPreferredInfoService,
+												positionOfPreferredInfoService);
+										}
+										m_currentPreferredInfoService = newPreferredInfoService;
+									}
+									else
+									{
+										if (m_currentPreferredInfoService != null)
+										{
+											if (m_preferredInfoServiceIsAlsoInDatabase)
+											{
+												/* don't remove the old preferred InfoService from the list, but we have to
+												 * repaint the entry -> call the set method of the vector, but don't change
+												 * anything
+												 */
+												int positionOfOldPreferredInfoService =
+													knownInfoServicesListModel.indexOf(
+													m_currentPreferredInfoService);
+												if (positionOfOldPreferredInfoService != -1)
+												{
+													knownInfoServicesListModel.setElementAt(
+														knownInfoServicesListModel.elementAt(
+														positionOfOldPreferredInfoService),
+														positionOfOldPreferredInfoService);
+												}
+											}
+											else
+											{
+												/* we can remove the old preferred InfoService from the list, because it is
+												 * also not in the database any more
+												 */
+												knownInfoServicesListModel.removeElement(
+													m_currentPreferredInfoService);
+											}
+										}
+										m_currentPreferredInfoService = newPreferredInfoService;
+										if (newPreferredInfoService != null)
+										{
+											int positionOfNewPreferredInfoService = knownInfoServicesListModel.
+												indexOf(newPreferredInfoService);
+											if (positionOfNewPreferredInfoService != -1)
+											{
+												/* the new preferred InfoService was already in the list -> it was already in
+												 * the Database -> only update the value by calling the set method
+												 */
+												m_preferredInfoServiceIsAlsoInDatabase = true;
+												knownInfoServicesListModel.setElementAt(newPreferredInfoService,
+													positionOfNewPreferredInfoService);
+											}
+											else
+											{
+												/* the new preferred InfoService is not already in the list -> it is not in
+												 * the database of known infoservices
+												 */
+												m_preferredInfoServiceIsAlsoInDatabase = false;
+												/* tricky: to add the new preferred InfoService to the list, we simply call
+												 * this observer with an ADD message
+												 */
+												update(Database.getInstance(InfoServiceDBEntry.class),
+													new
+													DatabaseMessage(DatabaseMessage.ENTRY_ADDED,
+													newPreferredInfoService));
+											}
+										}
+										/* also update the remove button (only a user-defined infoservice is removable,
+										 * if it is not currently the perferred infoservice)
+										 */
+										InfoServiceDBEntry selectedInfoService = (InfoServiceDBEntry) (
+											m_listKnownInfoServices.getSelectedValue());
+										if (selectedInfoService != null)
+										{
+											settingsInfoServiceConfigBasicSettingsRemoveButton.setEnabled(
+												selectedInfoService.isUserDefined() &&
+												(!selectedInfoService.equals(newPreferredInfoService)));
+										}
+									}
+								}
+							}
+						}
+					}
+					catch (Exception e)
+					{
+						/* should not happen */
+						LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
+					}
+				}
+			};
+
+			Database.getInstance(InfoServiceDBEntry.class).addObserver(knownInfoServicesListObserver);
+			synchronized (InfoServiceHolder.getInstance())
+			{
+				InfoServiceHolder.getInstance().addObserver(knownInfoServicesListObserver);
+				/* tricky: initialize the preferred InfoService by calling the observer */
+				knownInfoServicesListObserver.update(InfoServiceHolder.getInstance(),
+													 new
+													 InfoServiceHolderMessage(InfoServiceHolderMessage.
+					PREFERRED_INFOSERVICE_CHANGED,
+					InfoServiceHolder.getInstance().getPreferredInfoService()));
+			}			
+			
+
+			Observer infoServicePolicyObserver = new Observer()
+			{
+				/**
+				 * This is the observer implementation. If the InfoService management policy is changed,
+				 * this observer will update the policy checkboxes. If the panel is recreated (message via
+				 * the module internal message system), the observer removes itself from all observed
+				 * objects.
+				 *
+				 * @param a_notifier The observed Object. This should always be the InfoServiceHolder
+				 *                   instance, the JAPController instance or the module internal message
+				 *                   system at the moment.
+				 * @param a_message The reason of the notification. This should always be a
+				 *                  InfoServiceHolderMessage, a JAPControllerMessage or null at the moment
+				 *                  (depending on the notifier).
+				 */
+				public void update(Observable a_notifier, Object a_message)
+				{
+					try
+					{
+						if (a_notifier == InfoServiceHolder.getInstance())
+						{
+							/* message is from InfoServiceHolder */
+							int messageCode = ( (InfoServiceHolderMessage) a_message).getMessageCode();
+							if (messageCode == InfoServiceHolderMessage.INFOSERVICE_MANAGEMENT_CHANGED)
+							{
+								/* the InfoService management policy was changed */
+								boolean newPolicy = ( (Boolean) ( ( (InfoServiceHolderMessage) a_message).
+									getMessageData())).booleanValue();
+								m_cbxUseRedundantISRequests.setSelected(newPolicy);
+							}
+						}
+						if (a_notifier == JAPController.getInstance())
+						{
+							/* message is from JAPController */
+							int messageCode = ( (JAPControllerMessage) a_message).getMessageCode();
+							if (messageCode == JAPControllerMessage.INFOSERVICE_POLICY_CHANGED)
+							{
+								/* the InfoService requests policy was changed */
+								m_allowAutomaticIS.setSelected(!
+									JAPModel.isInfoServiceDisabled());
+							}
+						}
+					}
+					catch (Exception e)
+					{
+						/* should not happen */
+						LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
+					}
+				}
+			};
+
+			synchronized (InfoServiceHolder.getInstance())
+			{
+				InfoServiceHolder.getInstance().addObserver(infoServicePolicyObserver);
+				/* tricky: initialize the policy management box by calling the observer */
+				infoServicePolicyObserver.update(InfoServiceHolder.getInstance(),
+												 new InfoServiceHolderMessage(InfoServiceHolderMessage.
+					INFOSERVICE_MANAGEMENT_CHANGED,
+					new Boolean(InfoServiceHolder.getInstance().isChangeInfoServices())));
+			}
+			JAPController.getInstance().addObserver(infoServicePolicyObserver);
+			/* tricky: initialize the automatic requests policy checkbox by calling the observer */
+			infoServicePolicyObserver.update(JAPController.getInstance(),
+											 new JAPControllerMessage(JAPControllerMessage.
+				INFOSERVICE_POLICY_CHANGED));
+			
+			
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -155,23 +504,10 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 	 */
 	public void recreateRootPanel()
 	{
-		synchronized (this)
-		{
-			if (m_messageSystem == null)
-			{
-				/* create a new object for sending internal messages */
-				m_messageSystem = new MessageSystem();
-			}
-		}
 		JPanel rootPanel = getRootPanel();
 
 		synchronized (this)
 		{
-			/* clear the whole root panel */
-			rootPanel.removeAll();
-			/* notify the observers of the message system that we recreate the root panel */
-			m_messageSystem.sendMessage();
-
 			/* insert all components in the root panel */
 			m_infoServiceTabPane = new JTabbedPane();
 			m_infoServiceTabPane.insertTab(JAPMessages.getString(
@@ -226,7 +562,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		descriptionPanel = new JPanel();
 		addInfoServicePanel = new JPanel();
 
-		final DefaultListModel knownInfoServicesListModel = new DefaultListModel();
+		knownInfoServicesListModel = new DefaultListModel();
 
 		m_listKnownInfoServices = new JList(knownInfoServicesListModel);
 		m_listKnownInfoServices.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -444,291 +780,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 			}
 		});
 
-		Observer knownInfoServicesListObserver = new Observer()
-		{
-
-			private boolean m_preferredInfoServiceIsAlsoInDatabase = false;
-
-			private InfoServiceDBEntry m_currentPreferredInfoService = null;
-
-			/**
-			 * This is the observer implementation. If there are changes at the database of known
-			 * InfoServices or the preferred InfoService is changed, this observer will update the list
-			 * of known infoservices. If the panel is recreated (message via the module internal message
-			 * system), the observer removes itself from all observed objects.
-			 *
-			 * @param a_notifier The observed Object. This should always be the Database instance for
-			 *                   the InfoServiceDBEntries, the InfoServiceHolder instance or the module
-			 *                   internal message system at the moment.
-			 * @param a_message The reason of the notification. This should always be a DatabaseMessage,
-			 *                  a InfoServiceHolderMessage or null at the moment (depending on the
-			 *                  notifier).
-			 */
-			public void update(Observable a_notifier, Object a_message)
-			{
-				try
-				{
-					if (a_notifier == Database.getInstance(InfoServiceDBEntry.class))
-					{
-						/* message is from the infoservice database */
-						int messageCode = ( (DatabaseMessage) a_message).getMessageCode();
-						if ( (messageCode == DatabaseMessage.ENTRY_ADDED) ||
-							(messageCode == DatabaseMessage.ENTRY_RENEWED))
-						{
-							final InfoServiceDBEntry updatedEntry = (InfoServiceDBEntry) ( ( (DatabaseMessage)
-								a_message).getMessageData());
-							synchronized (knownInfoServicesListModel)
-							{
-								int entryPositionInList = knownInfoServicesListModel.indexOf(updatedEntry);
-								if (entryPositionInList != -1)
-								{
-									/* we already know an entry with the same ID, but maybe something has changed
-									 * -> replace the entry by the new one
-									 */
-									knownInfoServicesListModel.setElementAt(updatedEntry, entryPositionInList);
-									if (updatedEntry.equals(m_currentPreferredInfoService))
-									{
-										/* the preferred InfoService is also in the database of all known
-										 * InfoServices (because we have received this add or renew message)
-										 */
-										m_preferredInfoServiceIsAlsoInDatabase = true;
-									}
-								}
-								else
-								{
-									/* the entry is really new */
-									if (updatedEntry.isUserDefined())
-									{
-										/* it's an user-defined entry -> add it at the end of the list */
-										knownInfoServicesListModel.addElement(updatedEntry);
-									}
-									else
-									{
-										/* it's an entry downloaded from the Internet -> add it at the end of the
-										 * Internet entries but before the user-defined entries
-										 */
-										int i = findFirstUserDefinedListModelEntry(knownInfoServicesListModel);
-										//knownInfoServicesListModel.insertElementAt(updatedEntry, i);
-										final class Test implements Runnable
-										{
-											int m_Index;
-											protected Test(int i)
-											{
-												m_Index = i;
-											}
-
-											public void run()
-											{
-												knownInfoServicesListModel.add(m_Index, updatedEntry);
-											}
-
-										}
-
-										if (SwingUtilities.isEventDispatchThread())
-										{
-											knownInfoServicesListModel.add(i, updatedEntry);
-										}
-										else
-										{
-											SwingUtilities.invokeAndWait(new Test(i));
-										}
-									}
-								}
-							}
-						}
-						if (messageCode == DatabaseMessage.ENTRY_REMOVED)
-						{
-							InfoServiceDBEntry removedInfoService = (InfoServiceDBEntry) ( ( (DatabaseMessage)
-								a_message).getMessageData());
-							synchronized (knownInfoServicesListModel)
-							{
-								if (removedInfoService.equals(m_currentPreferredInfoService))
-								{
-									/* the preferred InfoService war removed from the database of all known
-									 * InfoServices but don't remove it from this list as long as it is the
-									 * preferred InfoService
-									 */
-									m_preferredInfoServiceIsAlsoInDatabase = false;
-								}
-								else
-								{
-									/* it's not the preferred InfoService -> we can remove it from the list */
-									knownInfoServicesListModel.removeElement(removedInfoService);
-								}
-							}
-						}
-						if (messageCode == DatabaseMessage.ALL_ENTRIES_REMOVED)
-						{
-							synchronized (knownInfoServicesListModel)
-							{
-								/* also the preferred InfoService war removed from the database of all known
-								 * InfoServices (but we have to keep it in the list)
-								 */
-								knownInfoServicesListModel.clear();
-								/*
-								 Enumeration infoServicesInList = knownInfoServicesListModel.elements();
-								   while (infoServicesInList.hasMoreElements())
-								   {
-								 InfoServiceDBEntry currentInfoService = (InfoServiceDBEntry) (
-								  infoServicesInList.nextElement());
-								 if (!currentInfoService.equals(m_currentPreferredInfoService))
-								 {
-								  // it's not the preferred InfoService -> we can remove it //
-								  knownInfoServicesListModel.removeElement(currentInfoService);
-								 }
-								   }*/
-								knownInfoServicesListModel.addElement(m_currentPreferredInfoService);
-								m_listKnownInfoServices.setSelectedIndex(0);
-								m_preferredInfoServiceIsAlsoInDatabase = false;
-							}
-						}
-						if (messageCode == DatabaseMessage.INITIAL_OBSERVER_MESSAGE)
-						{
-							Enumeration databaseEntries = ( (Vector) ( ( (DatabaseMessage) a_message).
-								getMessageData())).elements();
-							synchronized (knownInfoServicesListModel)
-							{
-								int i = 0;
-								while (databaseEntries.hasMoreElements())
-								{
-									knownInfoServicesListModel.add(
-										findFirstUserDefinedListModelEntry(knownInfoServicesListModel),
-										databaseEntries.nextElement());
-									i++;
-								}
-							}
-						}
-					}
-					if (a_notifier == InfoServiceHolder.getInstance())
-					{
-						/* message is from InfoServiceHolder */
-						int messageCode = ( (InfoServiceHolderMessage) a_message).getMessageCode();
-						if (messageCode == InfoServiceHolderMessage.PREFERRED_INFOSERVICE_CHANGED)
-						{
-							/* we have a new preferred InfoService */
-							InfoServiceDBEntry newPreferredInfoService = (InfoServiceDBEntry) ( ( (
-								InfoServiceHolderMessage) a_message).getMessageData());
-							synchronized (knownInfoServicesListModel)
-							{
-								if ( (m_currentPreferredInfoService != null) &&
-									(m_currentPreferredInfoService.equals(newPreferredInfoService)))
-								{
-									/* the new preferred InfoService has the same ID as the old one, but maybe
-									 * something other was changed -> call the set method of the vector
-									 */
-									int positionOfPreferredInfoService = knownInfoServicesListModel.indexOf(
-										m_currentPreferredInfoService);
-									if (positionOfPreferredInfoService != -1)
-									{
-										knownInfoServicesListModel.setElementAt(newPreferredInfoService,
-											positionOfPreferredInfoService);
-									}
-									m_currentPreferredInfoService = newPreferredInfoService;
-								}
-								else
-								{
-									if (m_currentPreferredInfoService != null)
-									{
-										if (m_preferredInfoServiceIsAlsoInDatabase)
-										{
-											/* don't remove the old preferred InfoService from the list, but we have to
-											 * repaint the entry -> call the set method of the vector, but don't change
-											 * anything
-											 */
-											int positionOfOldPreferredInfoService =
-												knownInfoServicesListModel.indexOf(
-												m_currentPreferredInfoService);
-											if (positionOfOldPreferredInfoService != -1)
-											{
-												knownInfoServicesListModel.setElementAt(
-													knownInfoServicesListModel.elementAt(
-													positionOfOldPreferredInfoService),
-													positionOfOldPreferredInfoService);
-											}
-										}
-										else
-										{
-											/* we can remove the old preferred InfoService from the list, because it is
-											 * also not in the database any more
-											 */
-											knownInfoServicesListModel.removeElement(
-												m_currentPreferredInfoService);
-										}
-									}
-									m_currentPreferredInfoService = newPreferredInfoService;
-									if (newPreferredInfoService != null)
-									{
-										int positionOfNewPreferredInfoService = knownInfoServicesListModel.
-											indexOf(newPreferredInfoService);
-										if (positionOfNewPreferredInfoService != -1)
-										{
-											/* the new preferred InfoService was already in the list -> it was already in
-											 * the Database -> only update the value by calling the set method
-											 */
-											m_preferredInfoServiceIsAlsoInDatabase = true;
-											knownInfoServicesListModel.setElementAt(newPreferredInfoService,
-												positionOfNewPreferredInfoService);
-										}
-										else
-										{
-											/* the new preferred InfoService is not already in the list -> it is not in
-											 * the database of known infoservices
-											 */
-											m_preferredInfoServiceIsAlsoInDatabase = false;
-											/* tricky: to add the new preferred InfoService to the list, we simply call
-											 * this observer with an ADD message
-											 */
-											update(Database.getInstance(InfoServiceDBEntry.class),
-												new
-												DatabaseMessage(DatabaseMessage.ENTRY_ADDED,
-												newPreferredInfoService));
-										}
-									}
-									/* also update the remove button (only a user-defined infoservice is removable,
-									 * if it is not currently the perferred infoservice)
-									 */
-									InfoServiceDBEntry selectedInfoService = (InfoServiceDBEntry) (
-										m_listKnownInfoServices.getSelectedValue());
-									if (selectedInfoService != null)
-									{
-										settingsInfoServiceConfigBasicSettingsRemoveButton.setEnabled(
-											selectedInfoService.isUserDefined() &&
-											(!selectedInfoService.equals(newPreferredInfoService)));
-									}
-								}
-							}
-						}
-					}
-					if (a_notifier == m_messageSystem)
-					{
-						/* the root panel was recreated -> stop observing and remove ourself from the observed
-						 * objects
-						 */
-						Database.getInstance(InfoServiceDBEntry.class).deleteObserver(this);
-						InfoServiceHolder.getInstance().deleteObserver(this);
-						m_messageSystem.deleteObserver(this);
-					}
-				}
-				catch (Exception e)
-				{
-					/* should not happen */
-					LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
-				}
-			}
-		};
-		/* registrate the observer also at the internal message system */
-		m_messageSystem.addObserver(knownInfoServicesListObserver);
-		Database.getInstance(InfoServiceDBEntry.class).addObserver(knownInfoServicesListObserver);
-		synchronized (InfoServiceHolder.getInstance())
-		{
-			InfoServiceHolder.getInstance().addObserver(knownInfoServicesListObserver);
-			/* tricky: initialize the preferred InfoService by calling the observer */
-			knownInfoServicesListObserver.update(InfoServiceHolder.getInstance(),
-												 new
-												 InfoServiceHolderMessage(InfoServiceHolderMessage.
-				PREFERRED_INFOSERVICE_CHANGED,
-				InfoServiceHolder.getInstance().getPreferredInfoService()));
-		}
+		
 
 		JLabel settingsInfoServiceConfigBasicSettingsListLabel = new JLabel(JAPMessages.getString(
 			"settingsInfoServiceConfigBasicSettingsListLabel"));
@@ -1254,81 +1306,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		});
 
 
-		Observer infoServicePolicyObserver = new Observer()
-		{
-			/**
-			 * This is the observer implementation. If the InfoService management policy is changed,
-			 * this observer will update the policy checkboxes. If the panel is recreated (message via
-			 * the module internal message system), the observer removes itself from all observed
-			 * objects.
-			 *
-			 * @param a_notifier The observed Object. This should always be the InfoServiceHolder
-			 *                   instance, the JAPController instance or the module internal message
-			 *                   system at the moment.
-			 * @param a_message The reason of the notification. This should always be a
-			 *                  InfoServiceHolderMessage, a JAPControllerMessage or null at the moment
-			 *                  (depending on the notifier).
-			 */
-			public void update(Observable a_notifier, Object a_message)
-			{
-				try
-				{
-					if (a_notifier == InfoServiceHolder.getInstance())
-					{
-						/* message is from InfoServiceHolder */
-						int messageCode = ( (InfoServiceHolderMessage) a_message).getMessageCode();
-						if (messageCode == InfoServiceHolderMessage.INFOSERVICE_MANAGEMENT_CHANGED)
-						{
-							/* the InfoService management policy was changed */
-							boolean newPolicy = ( (Boolean) ( ( (InfoServiceHolderMessage) a_message).
-								getMessageData())).booleanValue();
-							m_cbxUseRedundantISRequests.setSelected(newPolicy);
-						}
-					}
-					if (a_notifier == JAPController.getInstance())
-					{
-						/* message is from JAPController */
-						int messageCode = ( (JAPControllerMessage) a_message).getMessageCode();
-						if (messageCode == JAPControllerMessage.INFOSERVICE_POLICY_CHANGED)
-						{
-							/* the InfoService requests policy was changed */
-							m_allowAutomaticIS.setSelected(!
-								JAPModel.isInfoServiceDisabled());
-						}
-					}
-					if (a_notifier == m_messageSystem)
-					{
-						/* the root panel was recreated -> stop observing and remove ourself from the observed
-						 * objects
-						 */
-						InfoServiceHolder.getInstance().deleteObserver(this);
-						JAPController.getInstance().deleteObserver(this);
-						m_messageSystem.deleteObserver(this);
-					}
-				}
-				catch (Exception e)
-				{
-					/* should not happen */
-					LogHolder.log(LogLevel.EXCEPTION, LogType.GUI, e);
-				}
-			}
-		};
-		/* registrate the observer also at the internal message system */
-		m_messageSystem.addObserver(infoServicePolicyObserver);
-		synchronized (InfoServiceHolder.getInstance())
-		{
-			InfoServiceHolder.getInstance().addObserver(infoServicePolicyObserver);
-			/* tricky: initialize the policy management box by calling the observer */
-			infoServicePolicyObserver.update(InfoServiceHolder.getInstance(),
-											 new InfoServiceHolderMessage(InfoServiceHolderMessage.
-				INFOSERVICE_MANAGEMENT_CHANGED,
-				new Boolean(InfoServiceHolder.getInstance().isChangeInfoServices())));
-		}
-		JAPController.getInstance().addObserver(infoServicePolicyObserver);
-		/* tricky: initialize the automatic requests policy checkbox by calling the observer */
-		infoServicePolicyObserver.update(JAPController.getInstance(),
-										 new JAPControllerMessage(JAPControllerMessage.
-			INFOSERVICE_POLICY_CHANGED));
+		
 
 		GridBagLayout advancedPanelLayout = new GridBagLayout();
 		advancedPanel.setLayout(advancedPanelLayout);
@@ -1449,7 +1427,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			int index = InfoServiceHolder.getInstance().getNumberOfAskedInfoServices() - 1;
 			if (index < 0)

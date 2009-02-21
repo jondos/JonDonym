@@ -175,7 +175,19 @@ final class JAPConfUI extends AbstractJAPConfModule
 				}
 			}
 		};
-		JAPModel.getInstance().addObserver(m_modelObserver);
+	}
+	
+	protected boolean initObservers()
+	{
+		if (super.initObservers())
+		{
+			synchronized(LOCK_OBSERVABLE)
+			{
+				JAPModel.getInstance().addObserver(m_modelObserver);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void chooseBrowserPath()
@@ -1307,7 +1319,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 	protected void onUpdateValues()
 	{
-		synchronized (JAPConf.getInstance())
+		//synchronized (JAPConf.getInstance())
 		{
 			updateUICombo();
 			

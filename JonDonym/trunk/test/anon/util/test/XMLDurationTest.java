@@ -145,5 +145,8 @@ public class XMLDurationTest extends XtendedPrivateTestCase
 		assertEquals(XMLDuration.GREATER, new XMLDuration("P4Y12M30DT60S").compare(new XMLDuration("P5Y1M1DT80S")));
 	}
 
-
+	public void testToString() throws Exception
+	{
+		assertEquals("P2Y7M22DT7H0M8S", new XMLDuration("P2Y7M22DT7H8S").toString());
+	}
 }
