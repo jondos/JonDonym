@@ -2837,6 +2837,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 				XMLUtil.setValue(tmp, JAPConstants.CONFIG_SIMPLIFIED);
 				elemMainWindow.appendChild(tmp);
 			}
+			else 
+			{
+				Element tmp = doc.createElement(JAPConstants.CONFIG_DEFAULT_VIEW);
+				XMLUtil.setValue(tmp, JAPConstants.CONFIG_NORMAL);
+				elemMainWindow.appendChild(tmp);
+			}
 			// adding Debug-Element
 			Element elemDebug = doc.createElement(JAPConstants.CONFIG_DEBUG);
 			e.appendChild(elemDebug);

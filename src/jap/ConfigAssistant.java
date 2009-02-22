@@ -706,13 +706,11 @@ public class ConfigAssistant extends JAPDialog
 				if (paneRestart.getButtonValue() == DialogContentPane.RETURN_VALUE_OK)
 				{
 					JAPMessages.setLocale(((LanguageMapper)comboLang.getSelectedItem()).getLocale());
-					if (m_radioSimpleView.isSelected() &&
-						JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
+					if (m_radioSimpleView.isSelected())
 					{
 						JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_SIMPLIFIED);
 					}
-					else if (m_radioAdvancedView.isSelected() &&
-							 JAPModel.getDefaultView() == JAPConstants.VIEW_SIMPLIFIED)
+					else if (m_radioAdvancedView.isSelected())
 					{
 						JAPModel.getInstance().setDefaultView(JAPConstants.VIEW_NORMAL);
 					}
