@@ -414,6 +414,58 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		public String getTooltipText();
 	}
 
+	public static class LinkedURLCheckBox extends LinkedCheckBox 
+		implements JAPHelpContext.IURLHelpContext
+	{
+		private URL m_url;
+		private String m_message;
+		
+		public LinkedURLCheckBox(boolean a_bDefault, final URL a_url, final String a_message)
+		{
+			super(a_bDefault, new JAPHelpContext.IURLHelpContext()
+			{
+				public String getURLMessage()
+				{
+					return a_message;
+				}
+				public URL getHelpURL()
+				{
+					return a_url;
+				}
+				public String getHelpContext()
+				{
+					return a_url.toString();
+				}
+				public Container getHelpExtractionDisplayContext()
+				{
+					return null;
+				}
+			});
+			
+			if (a_url == null)
+			{
+				throw new NullPointerException("URL is null!");
+			}
+			
+			if (a_message == null)
+			{
+				throw new NullPointerException("URL message is null!");
+			}
+			
+			m_url = a_url;
+			m_message = a_message;
+		}
+		
+		public String getURLMessage()
+		{
+			return m_message;
+		}
+		public URL getHelpURL()
+		{
+			return m_url;
+		}
+	}
+	
 	/**
 	 * Shows a checkbox with a message on the dialog window.
 	 */

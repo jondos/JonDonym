@@ -153,7 +153,8 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		if (!bBrowserAvailable)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.GUI, 
-			"Error while trying to show context in external help!");
+			"Error while trying to show context '" + context.getHelpContext() + 
+			"' in external help!");
 			m_alternativeHelp.setContext(getHelpContext());
 			m_alternativeHelp.setVisible(a_bVisible);
 		}

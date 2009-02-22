@@ -66,9 +66,9 @@ public class JAPWelcomeWizardPage extends BasicWizardPage implements ActionListe
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private static final String MSG_CHANGELOG_URL = JAPWelcomeWizardPage.class.getName() + "_changelogURL";
-	private static final String MSG_CHANGELOG_URL_BETA = JAPWelcomeWizardPage.class.getName() + "_changelogURLBeta";
-	private static final String MSG_CHANGELOG = JAPWelcomeWizardPage.class.getName() + "_changelog";
+	public static final String MSG_CHANGELOG_URL = JAPWelcomeWizardPage.class.getName() + "_changelogURL";
+	public static final String MSG_CHANGELOG_URL_BETA = JAPWelcomeWizardPage.class.getName() + "_changelogURLBeta";
+	public static final String MSG_CHANGELOG = JAPWelcomeWizardPage.class.getName() + "_changelog";
 	private static final String MSG_CHANGELOG_TT = JAPWelcomeWizardPage.class.getName() + "_changelogTT";
 
 	private JTextField m_tfJapPath = null;

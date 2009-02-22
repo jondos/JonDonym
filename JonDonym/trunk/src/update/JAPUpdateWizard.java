@@ -31,6 +31,7 @@ package update;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.awt.Container;
@@ -58,6 +59,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.util.ClassUtil;
+import anon.util.RecursiveFileTool;
 import anon.util.Util;
 import jap.AbstractJAPMainView;
 import gui.GUIUtils;
@@ -780,6 +782,7 @@ private boolean checkSignature()
 	//Step 5 create the new JAP.jar-File by overwriting the oldFile by the new downloaded file
 	private int overwriteJapJar()
 	{
+		boolean bWriteProtected = false;
 		try
 		{
 			if (m_fileAktJapJar != null && m_fileAktJapJar.equals(CLASSFILE))
@@ -789,12 +792,25 @@ private boolean checkSignature()
 			}
 			downloadPage.m_labelIconStep5.setIcon(downloadPage.arrow);
 	
-			if (m_strTempDirectory == null)
+			
+			try
 			{
 				Util.copyStream(new FileInputStream(m_fileNewJapJar),
-					new FileOutputStream(m_fileAktJapJar));				
+						new FileOutputStream(m_fileAktJapJar));	
 			}
-			else
+			catch (SecurityException a_e)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, a_e);
+				bWriteProtected = true;
+			}
+			catch (IOException a_e)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, a_e);
+				bWriteProtected = true;
+			}
+			//if (m_strTempDirectory != null)
+			
+			if (bWriteProtected || !RecursiveFileTool.equals(m_fileNewJapJar, m_fileAktJapJar, true))
 			{
 				AbstractOS.AbstractRetryCopyProcess retryDialog = new AbstractOS.AbstractRetryCopyProcess(9)
 				{

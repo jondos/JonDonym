@@ -1367,17 +1367,27 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	public synchronized URL getHelpURL(String a_startDoc)
 	{
 		URL helpURL = null;
-		if(isHelpPathDefined() && m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath))
+		if (a_startDoc != null && isHelpPathDefined() && 
+			m_helpFileStorageManager.ensureMostRecentVersion(m_helpPath))
 		{
 			try 
 			{
-				helpURL = new URL("file://" + m_helpPath + "/" +
-							m_helpFileStorageManager.getLocalisedHelpDir() + "/" + a_startDoc);
-			} 
+				if (new File(m_helpPath + File.separator + 
+					m_helpFileStorageManager.getLocalisedHelpDir() + 
+					File.separator + a_startDoc).exists())
+				{
+					helpURL = new URL("file://" + m_helpPath + "/" +
+								m_helpFileStorageManager.getLocalisedHelpDir() 
+								+ "/" + a_startDoc);
+				}
+			}
+			catch (SecurityException a_e)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, a_e);
+			}
 			catch (MalformedURLException e) 
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.MISC, e);
-				return null;
 			}
 		}
 		return helpURL;

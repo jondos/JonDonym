@@ -28,6 +28,7 @@
 package gui;
 
 import java.awt.Container;
+import java.net.URL;
 
 /**
  * This class represents the help context of JAP.
@@ -37,45 +38,7 @@ public final class JAPHelpContext
 	public static final String INDEX = "index";
 	public static final IHelpContext INDEX_CONTEXT =
 						createHelpContext(INDEX);
-//
-//	private String m_currentContext;
-//
-//	public JAPHelpContext()
-//	{
-//		m_currentContext = INDEX;
-//	}
-//
-//	/**
-//	 * Sets the current help context.
-//	 * @param a_helpFile String
-//	 */
-//	public void setContext(String a_helpFile)
-//	{
-//		m_currentContext = a_helpFile;
-//	}
-//
-//	/**
-//	 * Sets the current help context.
-//	 * @param a_helpContext IHelpContext
-//	 */
-//	public void setContext(IHelpContext a_helpContext)
-//	{
-//		setContext(a_helpContext.getHelpContext());
-//	}
-//
-//	/**
-//	 * Returns the current help context
-//	 * @return String
-//	 */
-//	public String getContext()
-//	{
-//		return m_currentContext;
-//	}
-//
-//	/**
-//	 * An interface that is used to get the help context of an object.
-//	 */
-	
+
 	public static IHelpContext createHelpContext(String a_context)
 	{
 		return createHelpContext(a_context, null);
@@ -99,9 +62,20 @@ public final class JAPHelpContext
 			}
 		};
 	}
-	
+
+	/**
+	 * An interface that is used to get the help context of an object.
+	 */	
 	public interface IHelpContext
 	{
+		String getHelpContext();
+		Container getHelpExtractionDisplayContext();
+	}
+	
+	public interface IURLHelpContext extends IHelpContext
+	{
+		String getURLMessage();
+		URL getHelpURL();
 		String getHelpContext();
 		Container getHelpExtractionDisplayContext();
 	}
