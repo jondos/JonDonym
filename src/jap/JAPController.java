@@ -1623,7 +1623,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				
 				tmp = (Element) XMLUtil.getFirstChildByName(elemMainWindow,
 					JAPConstants.CONFIG_DEFAULT_VIEW);
-				String strDefaultView = XMLUtil.parseValue(tmp, JAPConstants.CONFIG_NORMAL);
+				String strDefaultView = XMLUtil.parseValue(tmp, JAPConstants.CONFIG_SIMPLIFIED);
 				if (strDefaultView.equals(JAPConstants.CONFIG_SIMPLIFIED))
 				{
 					setDefaultView(JAPConstants.VIEW_SIMPLIFIED);
