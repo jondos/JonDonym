@@ -547,9 +547,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		if (ii != null)
 		{
 			setIconImage(ii.getImage());
-			// Load Images for "Anonymity Meter"
 		}
-		// preload meter icons
 
 		// "NORTH": Image
 		ImageIcon headerImage = GUIUtils.loadImageIcon("JonDo.png", true, false);
