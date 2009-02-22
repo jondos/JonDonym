@@ -1485,7 +1485,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				}
 			}
 			// calculate distribution points
-			if (m_nrOperatorsCountForDistribution == 2 && m_nrCountries == 2)
+			if (m_nrOperatorsCountForDistribution == 3 && m_nrCountries == 1)
 			{
 				m_distributionPoints = 3;
 			}
