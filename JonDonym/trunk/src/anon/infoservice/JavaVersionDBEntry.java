@@ -141,7 +141,7 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 */
 	public JavaVersionDBEntry(Element a_xmlElement) throws XMLParseException
 	{
-		super(System.currentTimeMillis() + TIMEOUT);
+		super(TIMEOUT);
 		Node currentElement;
 		NodeList nodes;
 		String strTemp;
