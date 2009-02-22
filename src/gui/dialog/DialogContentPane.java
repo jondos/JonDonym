@@ -27,6 +27,7 @@
  */
 package gui.dialog;
 
+import java.net.URL;
 import java.util.Vector;
 
 import java.awt.BorderLayout;
@@ -57,6 +58,8 @@ import javax.swing.JPanel;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
+
+import platform.AbstractOS;
 
 import gui.GUIUtils;
 import gui.JAPHelpContext;
@@ -531,18 +534,46 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 
 		if (a_helpContext != null)
 		{
-			m_helpContext = new JAPHelpContext.IHelpContext()
+			if (a_helpContext instanceof JAPHelpContext.IURLHelpContext)
 			{
-				public Container getHelpExtractionDisplayContext() 
+				m_helpContext = new JAPHelpContext.IURLHelpContext()
 				{
-					return DialogContentPane.this.getContentPane();
-				}
-
-				public String getHelpContext() 
+					public Container getHelpExtractionDisplayContext() 
+					{
+						return DialogContentPane.this.getContentPane();
+					}
+	
+					public String getHelpContext() 
+					{
+						return a_helpContext.getHelpContext();
+					}
+					
+					public String getURLMessage()
+					{
+						return ((JAPHelpContext.IURLHelpContext)a_helpContext).getURLMessage();
+					}
+					
+					public URL getHelpURL()
+					{
+						return ((JAPHelpContext.IURLHelpContext)a_helpContext).getHelpURL();
+					}
+				};
+			}
+			else
+			{
+				m_helpContext = new JAPHelpContext.IHelpContext()
 				{
-					return a_helpContext.getHelpContext();
-				}
-			};
+					public Container getHelpExtractionDisplayContext() 
+					{
+						return DialogContentPane.this.getContentPane();
+					}
+	
+					public String getHelpContext() 
+					{
+						return a_helpContext.getHelpContext();
+					}
+				};
+			}
 		}
 		else
 		{
@@ -2771,27 +2802,45 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 			m_panelOptions.add(m_btnYesOK);
 		}
 
+		addHelpButton();
+	}
+	
+	private JButton addHelpButton()
+	{		
 		if (getHelpContext() != null)
 		{
-			m_btnHelp = JAPHelp.createHelpButton(this);
+			if (m_btnHelp == null)
+			{
+				if (m_helpContext instanceof JAPHelpContext.IURLHelpContext)
+				{
+					m_btnHelp = new JButton(((JAPHelpContext.IURLHelpContext)m_helpContext).getURLMessage());
+					m_btnHelp.addActionListener(new ActionListener()
+					{
+						public void actionPerformed(ActionEvent a_event)
+						{
+							AbstractOS.getInstance().openURL(
+									((JAPHelpContext.IURLHelpContext)m_helpContext).getHelpURL());
+						}
+					});
+				}
+				else
+				{
+					m_btnHelp = JAPHelp.createHelpButton(this);
+				}
+			}
 			m_panelOptions.add(m_btnHelp);
 		}
+		return m_btnHelp;
 	}
 
 	private void createWizardOptions()
 	{
 		m_panelOptions = Box.createHorizontalBox();
 
-		if (getHelpContext() != null)
+		if (addHelpButton() != null)
 		{
-			if ( m_btnHelp == null)
-			{
-				m_btnHelp = JAPHelp.createHelpButton(this);
-			}
-			m_panelOptions.add(m_btnHelp);
 			m_panelOptions.add(Box.createHorizontalStrut(5));
 		}
-
 
 		if (hasPreviousContentPane())
 		{

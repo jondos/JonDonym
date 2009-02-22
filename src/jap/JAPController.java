@@ -54,7 +54,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
+import java.net.URL;
 import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -83,6 +85,7 @@ import platform.AbstractOS;
 import platform.MacOS;
 import proxy.DirectProxy;
 import update.JAPUpdateWizard;
+import update.JAPWelcomeWizardPage;
 import anon.AnonServerDescription;
 import anon.AnonServiceEventAdapter;
 import anon.AnonServiceEventListener;
@@ -3951,7 +3954,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						if (!account.isBackupDone())
 						{
 							JAPDialog.LinkedCheckBox checkbox =
-								new JAPDialog.LinkedCheckBox(false, "payment_account")
+								new JAPDialog.LinkedCheckBox(false, "payment")
 							{
 								public boolean isOnTop()
 								{
@@ -3964,7 +3967,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 							{
 								// skip closing JAP
 								getInstance().setAskSavePayment(!checkbox.getState());
-								final PayAccount tempAcount = account;
 								new Thread(new Runnable()
 								{
 									public void run()
@@ -4464,7 +4466,27 @@ public final class JAPController extends Observable implements IProxyListener, O
 		else
 		{
 			message = JAPMessages.getString(MSG_NEW_OPTIONAL_VERSION, updateVersionNumber + dev);
-			checkbox = new JAPDialog.LinkedCheckBox(false);
+			try
+			{
+				URL tempURL;
+				if (vi.getId().equals(JAPVersionInfo.ID_RELEASE))
+				{
+					tempURL = 
+						new URL(JAPMessages.getString(JAPWelcomeWizardPage.MSG_CHANGELOG_URL));
+				}
+				else
+				{
+					tempURL = 
+						new URL(JAPMessages.getString(JAPWelcomeWizardPage.MSG_CHANGELOG_URL_BETA));
+				}
+				checkbox = new JAPDialog.LinkedURLCheckBox(false, tempURL, 
+						JAPMessages.getString(JAPWelcomeWizardPage.MSG_CHANGELOG));
+			}
+			catch (MalformedURLException a_e)
+			{
+				LogHolder.log(LogLevel.ALERT, LogType.GUI, a_e);
+				checkbox = new JAPDialog.LinkedCheckBox(false);
+			}
 		}
 		JAPDialog.Options options;
 		if (recommendToSwitchToRelease)
