@@ -35,7 +35,6 @@ import java.util.Vector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import anon.client.TermsAndConditionsResponseHandler.IllegalTCRequestPostConditionException;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.TermsAndConditionsFramework;
@@ -239,10 +238,10 @@ public class TermsAndConditionsRequest implements IXMLEncodable
 	/**
 	 * To be called after the mix response was handled.
 	 * checks if the mix really has sent all requested resources.
-	 * This method performs the necessary cleanups when the the terms and conditions containers are
+	 * This method performs the necessary cleanups when the the terms and conditions container are
 	 * not in a consistent state. 
 	 * @throws IllegalRequestPostConditionException if not all resources were sent
-	 * or the T&C containers are in an inconsistent state (e.g because of invalid signatures)
+	 * or the container are in an inconsistent state (e.g because of invalid signatures)
 	 */
 	public void checkRequestPostCondition() throws IllegalTCRequestPostConditionException
 	{

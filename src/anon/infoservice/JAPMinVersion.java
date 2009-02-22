@@ -94,7 +94,7 @@ public class JAPMinVersion extends AbstractDistributableDatabaseEntry
 	 */
 	public JAPMinVersion(Element a_japRootNode) throws Exception
 	{
-		super(System.currentTimeMillis() + DATABASE_TIMEOUT);
+		super(DATABASE_TIMEOUT);
 		Element softwareNode = (Element) (XMLUtil.getFirstChildByName(a_japRootNode,
 			ServiceSoftware.getXmlElementName()));
 		if (softwareNode == null)

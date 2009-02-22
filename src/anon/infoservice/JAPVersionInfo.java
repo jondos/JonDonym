@@ -121,7 +121,7 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
    */
   public JAPVersionInfo(Element a_jnlpRootNode, int a_versionInfoType) throws Exception
   {
-    super(System.currentTimeMillis() + DATABASE_TIMEOUT);
+    super(DATABASE_TIMEOUT);
     m_versionInfoType = a_versionInfoType;
     /* parse the document */
     m_version = XMLUtil.parseAttribute(a_jnlpRootNode, "version", "");

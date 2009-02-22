@@ -73,8 +73,7 @@ public class TermsAndConditionsResponseHandler extends Observable
 	public static final String XML_ELEMENT_INVALID_REQUEST_NAME = "InvalidTermsAndConditionsRequest";
 	public static final String XML_ELEMENT_RESPONSE_NAME = "TermsAndConditionsResponse";
 	
-	public void handleXMLResourceResponse(Document answerDoc, TermsAndConditionsRequest request) 
-			throws XMLParseException, IOException, IllegalTCRequestPostConditionException
+	public void handleXMLResourceResponse(Document answerDoc, TermsAndConditionsRequest request) throws XMLParseException, IOException, IllegalTCRequestPostConditionException
 	{
 		if(answerDoc.getDocumentElement().getTagName().equals(XML_ELEMENT_INVALID_REQUEST_NAME))
 		{
@@ -159,34 +158,4 @@ public class TermsAndConditionsResponseHandler extends Observable
 			return tcsTosShow.elements();
 		}
 	}
-	
-	 public static class IllegalTCRequestPostConditionException extends Exception 	 
-     { 	 
-	 
-         private StringBuffer errorMessages= new StringBuffer(); 	 
-         private int errorMessageNrs = 0; 	 
- 
-         public IllegalTCRequestPostConditionException() 	 
-         { 	 
-        	 super(); 	 
-         } 	 
- 
-         public void addErrorMessage(String errorMessage) 	 
-         { 	 
-        	 errorMessages.append("\n"); 	 
-        	 errorMessages.append(++errorMessageNrs); 	 
-        	 errorMessages.append(". "); 	 
-        	 errorMessages.append(errorMessage); 	 
-         } 	 
- 
-         public boolean hasErrorMessages() 	 
-         { 	 
-        	 return errorMessageNrs > 0; 	 
-         } 	 
- 
-         public String getMessage() 	 
-         { 	 
-         	return hasErrorMessages() ? errorMessages.toString() : null; 	 
-         } 	 
-     }
 }
