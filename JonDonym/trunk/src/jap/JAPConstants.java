@@ -122,7 +122,7 @@ public final class JAPConstants
 
 	public static final int VIEW_NORMAL = 1;
 	public static final int VIEW_SIMPLIFIED = 2;
-	static final int DEFAULT_VIEW = VIEW_NORMAL;
+	public static final int DEFAULT_VIEW = VIEW_SIMPLIFIED;
 
 	static final boolean DEFAULT_SAVE_MAIN_WINDOW_POSITION = true;
 	static final boolean DEFAULT_SAVE_MINI_WINDOW_POSITION = true;
