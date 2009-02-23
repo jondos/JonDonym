@@ -874,7 +874,6 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	{
 		PaymentInstanceDBEntry theBI =
 			(PaymentInstanceDBEntry)Database.getInstance(PaymentInstanceDBEntry.class).getEntryById(a_piID);
-		LogHolder.log(LogLevel.INFO, LogType.PAY, "Payment instance " + a_piID + " is not available.");
 		return theBI;
 	}
 
