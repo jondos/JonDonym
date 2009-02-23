@@ -266,8 +266,6 @@ public final class Database extends Observable implements IXMLEncodable
 		m_DatabaseEntryClass = a_DatabaseEntryClass;
 		m_serviceDatabase = new Hashtable();
 		m_timeoutList = new Vector();
-
-		//startThread();
 	}
 	
 	private void startThread()
@@ -292,8 +290,13 @@ public final class Database extends Observable implements IXMLEncodable
 		{						
 			while (m_dbThread != null && m_dbThread.isAlive())
 			{
+				LogHolder.log(LogLevel.INFO, LogType.DB, 
+						"Shutting down db thread for class: " + m_DatabaseEntryClass.toString());
 				m_dbThread.interrupt();
-				//m_serviceDatabase.notify();
+				synchronized (m_serviceDatabase)
+				{
+					m_serviceDatabase.notify();
+				}
 				Thread.yield();
 			}
 		}
@@ -307,13 +310,16 @@ public final class Database extends Observable implements IXMLEncodable
 		 */
 		public void run()
 		{
-			while (!ms_bShutdown)
+			LogHolder.log(LogLevel.INFO, LogType.DB, 
+					"Starting timeout database thread for class " + m_DatabaseEntryClass.toString() + ".");
+			while (!ms_bShutdown && !Thread.currentThread().isInterrupted())
 			{
 				boolean moreOldEntrys = true;
 				synchronized (m_serviceDatabase)
 				{
 					/* we need exclusive access to the database */
-					while (!ms_bShutdown && (m_timeoutList.size() > 0) && (moreOldEntrys))
+					while (!ms_bShutdown && !Thread.currentThread().isInterrupted() &&
+							(m_timeoutList.size() > 0) && (moreOldEntrys))
 					{
 						AbstractDatabaseEntry entry = (AbstractDatabaseEntry) m_serviceDatabase.get(m_timeoutList.
 							firstElement());
@@ -336,6 +342,10 @@ public final class Database extends Observable implements IXMLEncodable
 							 */
 							moreOldEntrys = false;
 						}
+					}
+					if (ms_bShutdown || Thread.currentThread().isInterrupted())
+					{
+						return;
 					}
 				}
 				synchronized (m_serviceDatabase)
@@ -363,7 +373,6 @@ public final class Database extends Observable implements IXMLEncodable
 							{
 								return;
 							}
-	
 						}
 					}
 					if (m_timeoutList.size() == 0)
@@ -430,107 +439,113 @@ public final class Database extends Observable implements IXMLEncodable
 		boolean addEntry = false;
 		AbstractDatabaseEntry oldEntry = null;
 		boolean bStopThread = false;
+		boolean bStartThread = false;
 		
 		synchronized (SYNC_THREAD)
 		{
-		synchronized (m_serviceDatabase)
-		{
-			/* we need exclusive access to the database */
-			oldEntry = (AbstractDatabaseEntry) (m_serviceDatabase.get(newEntry.getId()));
-			// check if this is an unknown entry, or if the entry is newer than the one we have stored
-			addEntry = newEntry.isNewerThan(oldEntry);
-			//if(addEntry && oldEntry != null) m_timeoutList.removeElement(oldEntry.getId());
-
-			if (addEntry)
+			synchronized (m_serviceDatabase)
 			{
-				// test first if the element has not yet expired
-				if (newEntry.getExpireTime() <= System.currentTimeMillis())
+				/* we need exclusive access to the database */
+				oldEntry = (AbstractDatabaseEntry) (m_serviceDatabase.get(newEntry.getId()));
+				// check if this is an unknown entry, or if the entry is newer than the one we have stored
+				addEntry = newEntry.isNewerThan(oldEntry);
+				//if(addEntry && oldEntry != null) m_timeoutList.removeElement(oldEntry.getId());
+	
+				if (addEntry)
 				{
-					LogHolder.log(LogLevel.INFO, LogType.NET, "Received an expired db entry: '" +
-								  newEntry.getId() + "'. It was dropped immediatly.");
-					AbstractDatabaseEntry removedEntry =
-						(AbstractDatabaseEntry)m_serviceDatabase.remove(newEntry.getId());
-					if (removedEntry != null)
+					// test first if the element has not yet expired
+					if (newEntry.getExpireTime() <= System.currentTimeMillis())
 					{
-						/* There was an entry with a lower version number in the database, which was not
-						 * expired yet??? No matter why, now it was removed -> notify the observers.
-						 */
-						setChanged();
-						notifyObservers(new DatabaseMessage(DatabaseMessage.ENTRY_REMOVED, removedEntry));
-						return true;
-					}
-					return false;
-				}
-				// remove any old entry with the same id from the timeout list
-				while (m_timeoutList.removeElement(newEntry.getId()));
-
-				// add the entry to the database
-				m_serviceDatabase.put(newEntry.getId(), newEntry);
-
-				/* update the timeoutList */
-				boolean timeoutEntryInserted = false;
-				int i = 0;
-				while (!timeoutEntryInserted)
-				{
-					if (i < m_timeoutList.size())
-					{
-						if ( ( (AbstractDatabaseEntry) (m_serviceDatabase.get(
-							m_timeoutList.elementAt(i)))).getExpireTime() >=
-							newEntry.getExpireTime())
+						LogHolder.log(LogLevel.INFO, LogType.NET, "Received an expired db entry: '" +
+									  newEntry.getId() + "' (" +  m_DatabaseEntryClass.toString() + 
+									  "). It was dropped immediatly.");
+						AbstractDatabaseEntry removedEntry =
+							(AbstractDatabaseEntry)m_serviceDatabase.remove(newEntry.getId());
+						if (removedEntry != null)
 						{
-							m_timeoutList.insertElementAt(newEntry.getId(), i);
+							/* There was an entry with a lower version number in the database, which was not
+							 * expired yet??? No matter why, now it was removed -> notify the observers.
+							 */
+							setChanged();
+							notifyObservers(new DatabaseMessage(DatabaseMessage.ENTRY_REMOVED, removedEntry));
+							return true;
+						}
+						return false;
+					}
+					// remove any old entry with the same id from the timeout list
+					while (m_timeoutList.removeElement(newEntry.getId()));
+	
+					// add the entry to the database
+					m_serviceDatabase.put(newEntry.getId(), newEntry);
+	
+					/* update the timeoutList */
+					boolean timeoutEntryInserted = false;
+					int i = 0;
+					while (!timeoutEntryInserted)
+					{
+						if (i < m_timeoutList.size())
+						{
+							if ( ( (AbstractDatabaseEntry) (m_serviceDatabase.get(
+								m_timeoutList.elementAt(i)))).getExpireTime() >=
+								newEntry.getExpireTime())
+							{
+								m_timeoutList.insertElementAt(newEntry.getId(), i);
+								timeoutEntryInserted = true;
+							}
+						}
+						else
+						{
+							/* we are at the last position in the list -> add entry at the end */
+							m_timeoutList.addElement(newEntry.getId());
 							timeoutEntryInserted = true;
 						}
+						i++;
 					}
-					else
+					if (i == 1)
 					{
-						/* we are at the last position in the list -> add entry at the end */
-						m_timeoutList.addElement(newEntry.getId());
-						timeoutEntryInserted = true;
+						/* entry at the first expire position added */
+						if (newEntry.getExpireTime() == Long.MAX_VALUE)
+						{
+							// this entry will never expire -> cleanup thread is not needed any more
+							bStopThread = true;
+						}
+						else
+						{
+							/* -> notify the cleanup thread */
+							bStartThread = true; // activate if needed	
+							m_serviceDatabase.notify();
+						}
+						
 					}
-					i++;
-				}
-				if (i == 1)
-				{
-					/* entry at the first expire position added */
-					if (newEntry.getExpireTime() == Long.MAX_VALUE)
+					LogHolder.log(LogLevel.DEBUG, LogType.MISC,
+								  "Added / updated entry '" + newEntry.getId() + "' in the " +
+								  m_DatabaseEntryClass.getName() + " database. Now there are " +
+								  Integer.toString(m_serviceDatabase.size()) +
+								  " entries stored in this database. The new entry has position " +
+								  Integer.toString(i) + "/" + Integer.toString(m_timeoutList.size()) +
+								  " in the database-timeout list.");
+					if (newEntry instanceof IDistributable && a_bDistribute)
 					{
-						// this entry will never expire -> cleanup thread is not needed any more
-						bStopThread = true;
-					}
-					else
-					{
-						/* -> notify the cleanup thread */
-						startThread(); // activate if needed	
-						m_serviceDatabase.notify();
-					}
-					
-				}
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC,
-							  "Added / updated entry '" + newEntry.getId() + "' in the " +
-							  m_DatabaseEntryClass.getName() + " database. Now there are " +
-							  Integer.toString(m_serviceDatabase.size()) +
-							  " entries stored in this database. The new entry has position " +
-							  Integer.toString(i) + "/" + Integer.toString(m_timeoutList.size()) +
-							  " in the database-timeout list.");
-				if (newEntry instanceof IDistributable && a_bDistribute)
-				{
-					// forward new entries
-					if (ms_distributor != null)
-					{
-						ms_distributor.addJob( (IDistributable) newEntry);
-					}
-					else
-					{
-						LogHolder.log(LogLevel.WARNING, LogType.MISC,
-									  "No distributor specified - cannot distribute database entries!");
+						// forward new entries
+						if (ms_distributor != null)
+						{
+							ms_distributor.addJob( (IDistributable) newEntry);
+						}
+						else
+						{
+							LogHolder.log(LogLevel.WARNING, LogType.MISC,
+										  "No distributor specified - cannot distribute database entries!");
+						}
 					}
 				}
 			}
-		}
 			if (bStopThread)
 			{
 				stopThread();
+			}
+			else if (bStartThread)
+			{
+				startThread();
 			}
 		}
 		if (addEntry)
