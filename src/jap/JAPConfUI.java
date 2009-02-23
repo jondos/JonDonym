@@ -371,6 +371,21 @@ final class JAPConfUI extends AbstractJAPConfModule
 				final JAPDialog dialog = new JAPDialog(getRootPanel(), JAPMessages.getString(MSG_TITLE_IMPORT));
 				LookAndFeel currentLaf = UIManager.getLookAndFeel();
 
+				
+				FileFilter filter = new FileFilter()
+				{
+					public boolean accept(File a_file)
+					{
+						return a_file.isDirectory() || a_file.getName().endsWith(".jar");
+					}
+
+					public String getDescription()
+					{
+						return "*.jar";
+					}
+				};						
+				fileChooser.setFileFilter(filter);
+				
 				final DialogContentPane pane =
 					new SimpleWizardContentPane(dialog,
 												"<font color='red'>" +
@@ -387,19 +402,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 						m_bCanceled = false;
 						CheckError[] errors = super.checkYesOK();
 						fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-						FileFilter filter = new FileFilter()
-						{
-							public boolean accept(File a_file)
-							{
-								return a_file.isDirectory() || a_file.getName().endsWith(".jar");
-							}
-
-							public String getDescription()
-							{
-								return "*.jar";
-							}
-						};
-						fileChooser.setFileFilter(filter);
+						
 						if (fileChooser.showOpenDialog(dialog.getContentPane()) !=
 							JFileChooser.APPROVE_OPTION)
 						{
