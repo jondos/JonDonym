@@ -93,6 +93,8 @@ public final class Database extends Observable implements IXMLEncodable
 	 * Chronological order (in relation to timeouts) of all objects in the database.
 	 */
 	private Vector m_timeoutList;
+	
+	private volatile boolean m_bStopThread = false;
 
 	/**
 	 * Registers a distributor that forwards new database entries.
@@ -266,17 +268,29 @@ public final class Database extends Observable implements IXMLEncodable
 		m_DatabaseEntryClass = a_DatabaseEntryClass;
 		m_serviceDatabase = new Hashtable();
 		m_timeoutList = new Vector();
+		
+		//startThread();
 	}
 	
 	private void startThread()
 	{	
 		synchronized (SYNC_THREAD)
 		{
-			if (ms_bShutdown || (m_dbThread != null && m_dbThread.isAlive()))
+			if (ms_bShutdown || (!m_bStopThread && m_dbThread != null && m_dbThread.isAlive()))
 			{
 				return;
 			}
 			
+			while (m_bStopThread && m_dbThread.isAlive())
+			{
+				LogHolder.log(LogLevel.ERR, LogType.DB, "Shutting down old database thread before starting new one (" + 
+						m_DatabaseEntryClass.toString() + ")");
+				// should not happen
+				m_dbThread.interrupt();
+				Thread.yield();
+			}
+			
+			m_bStopThread = false;
 			m_dbThread = new Thread(new TimeoutThread(), 
 					"Database Thread: " + m_DatabaseEntryClass.toString());
 			m_dbThread.setDaemon(true);
@@ -287,7 +301,8 @@ public final class Database extends Observable implements IXMLEncodable
 	private void stopThread()
 	{	
 		synchronized (SYNC_THREAD)
-		{						
+		{
+			m_bStopThread = true;
 			while (m_dbThread != null && m_dbThread.isAlive())
 			{
 				LogHolder.log(LogLevel.INFO, LogType.DB, 
@@ -312,13 +327,13 @@ public final class Database extends Observable implements IXMLEncodable
 		{
 			LogHolder.log(LogLevel.INFO, LogType.DB, 
 					"Starting timeout database thread for class " + m_DatabaseEntryClass.toString() + ".");
-			while (!ms_bShutdown && !Thread.currentThread().isInterrupted())
+			while (!m_bStopThread && !ms_bShutdown && !Thread.currentThread().isInterrupted())
 			{
 				boolean moreOldEntrys = true;
 				synchronized (m_serviceDatabase)
 				{
 					/* we need exclusive access to the database */
-					while (!ms_bShutdown && !Thread.currentThread().isInterrupted() &&
+					while (!m_bStopThread && !ms_bShutdown && !Thread.currentThread().isInterrupted() &&
 							(m_timeoutList.size() > 0) && (moreOldEntrys))
 					{
 						AbstractDatabaseEntry entry = (AbstractDatabaseEntry) m_serviceDatabase.get(m_timeoutList.
@@ -343,7 +358,7 @@ public final class Database extends Observable implements IXMLEncodable
 							moreOldEntrys = false;
 						}
 					}
-					if (ms_bShutdown || Thread.currentThread().isInterrupted())
+					if (m_bStopThread || ms_bShutdown || Thread.currentThread().isInterrupted())
 					{
 						return;
 					}
@@ -367,9 +382,9 @@ public final class Database extends Observable implements IXMLEncodable
 							LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 										  "One entry could be expired. Wake up...");
 						}
-						catch (Exception e)
+						catch (InterruptedException e)
 						{
-							if (ms_bShutdown || Thread.currentThread().isInterrupted())
+							if (m_bStopThread || ms_bShutdown || Thread.currentThread().isInterrupted())
 							{
 								return;
 							}
@@ -384,9 +399,9 @@ public final class Database extends Observable implements IXMLEncodable
 							LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 										  "First entry in the database. Look when it expires. Wake up...");
 						}
-						catch (Exception e)
+						catch (InterruptedException e)
 						{
-							if (ms_bShutdown)
+							if (m_bStopThread || ms_bShutdown || Thread.currentThread().isInterrupted())
 							{
 								return;
 							}
@@ -587,15 +602,40 @@ public final class Database extends Observable implements IXMLEncodable
 		if (a_entryID != null)
 		{
 			AbstractDatabaseEntry removedEntry;
-			synchronized (m_serviceDatabase)
+			boolean bStopThread = false;
+			boolean bStartThread = false;
+			synchronized (SYNC_THREAD)
 			{
-				/* we need exclusive access to the database */
-				removedEntry = (AbstractDatabaseEntry) m_serviceDatabase.remove(a_entryID);
-				if (removedEntry != null)
+				synchronized (m_serviceDatabase)
 				{
-					m_timeoutList.removeElement(a_entryID);
+					/* we need exclusive access to the database */
+					removedEntry = (AbstractDatabaseEntry) m_serviceDatabase.remove(a_entryID);
+					if (removedEntry != null)
+					{
+						m_timeoutList.removeElement(a_entryID);
+						if (m_timeoutList.size() > 0 && 
+							((AbstractDatabaseEntry)m_serviceDatabase.get(m_timeoutList.elementAt(0))).getExpireTime() ==
+								Long.MAX_VALUE)
+						{
+							bStopThread = true;
+						}
+						else
+						{
+							bStartThread = true;
+						}
+					}
+				}
+				
+				if (bStartThread)
+				{
+					startThread();
+				}
+				else if (bStopThread)
+				{
+					stopThread();
 				}
 			}
+			
 			if (removedEntry != null)
 			{
 				/* an entry was removed -> notify the observers */
@@ -627,11 +667,15 @@ public final class Database extends Observable implements IXMLEncodable
 	 */
 	public void removeAll()
 	{
-		synchronized (m_serviceDatabase)
+		synchronized (SYNC_THREAD)
 		{
-			/* we need exclusive access to the database */
-			m_serviceDatabase.clear();
-			m_timeoutList.removeAllElements();
+			synchronized (m_serviceDatabase)
+			{
+				/* we need exclusive access to the database */
+				m_serviceDatabase.clear();
+				m_timeoutList.removeAllElements();
+			}
+			stopThread();
 		}
 		/* database was cleared -> notify the observers */
 		setChanged();

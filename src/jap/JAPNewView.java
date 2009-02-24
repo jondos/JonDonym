@@ -219,7 +219,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JPanel m_pnlVersion;
 	private JButton m_bttnHelp, m_bttnQuit, m_bttnIconify, m_bttnConf, m_btnAssistant, m_btnAbout;
 
-	JLabel m_buttonDeleteMessage;
+	private JLabel m_buttonDeleteMessage;
 
 	//private Icon[] meterIcons;
 	private JAPConf m_dlgConfig;

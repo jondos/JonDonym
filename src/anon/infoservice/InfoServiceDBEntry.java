@@ -58,6 +58,7 @@ import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.ClassUtil;
+import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
@@ -1221,10 +1222,17 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				}
 				else
 				{
+					String strLoggedInfo;
+					
+					strLoggedInfo = XMLUtil.parseAttribute(entryNode, IXMLEncodable.XML_ATTR_ID, null);
+					if (strLoggedInfo == null)
+					{
+						strLoggedInfo = XMLUtil.toString(entryNode);
+					}
 					LogHolder.log(LogLevel.ERR, LogType.MISC,
 								  "Cannot verify the signature for " +
 								  ClassUtil.getShortClassName(a_getter.m_dbEntryClass) + " entry: " +
-								  XMLUtil.toString(entryNode));
+								  strLoggedInfo);
 				}
 			}
 			catch (Exception e)
@@ -1451,7 +1459,14 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		NodeList mixCascadeStatusNodes = doc.getElementsByTagName("MixCascadeStatus");
 		if (mixCascadeStatusNodes.getLength() == 0)
 		{
-			throw (new Exception("Error in XML structure for cascade with ID" + a_cascade.getId()));
+			if (XMLUtil.getFirstChildByName(doc, "<HTML>") == null)
+			{
+				throw (new Exception("Error in XML structure for cascade with ID " + a_cascade.getId()));
+			}
+			else
+			{
+				throw (new Exception("No status data found for cascade with ID " + a_cascade.getId()));
+			}
 		}
 		Element mixCascadeStatusNode = (Element) (mixCascadeStatusNodes.item(0));
 		StatusInfo info;
