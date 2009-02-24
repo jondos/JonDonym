@@ -793,6 +793,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		c.gridy++;
 		c.gridheight = 5;
 		m_coinstack = new JProgressBar(0, 8);
+		m_coinstack.setBorderPainted(false);
 		p.add(m_coinstack, c);
 
 		c.gridheight = 1;
