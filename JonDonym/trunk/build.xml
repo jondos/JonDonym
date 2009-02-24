@@ -94,8 +94,12 @@
 		<fail unless="lib.skype4J.available" message="Skype4Java not available"/>
 	</target>
   
-	<target name="init" depends="init-global-libs"/>
-
+	<target name="init" depends="init-global-libs">
+	    <copy todir="${build}" verbose="true">
+	      <fileset dir="${src}" includes="**/*.xslt"/>
+	    </copy>
+	</target>
+	
 	<target name="compile" depends="init" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
 		<javac debug="true" debuglevel="lines,source" sourcepath="" 
@@ -127,7 +131,7 @@
 		description="generates the core jarfile for without any libraries">
 		
 		<jar jarfile="${jarfile}" manifest="MANIFEST.MF" duplicate="preserve">
-			<fileset dir="${build}" includes="**/*.class">
+			<fileset dir="${build}" includes="**/*.class,**/*.xslt">
 				<exclude name="jpi/**/*"/>
 				<exclude name="infoservice/**/*"/>
 				<exclude name="misc/**/*"/>
