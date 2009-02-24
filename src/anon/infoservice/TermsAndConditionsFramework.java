@@ -65,6 +65,8 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	private static final String XML_ELEMENT_OPERATOR_FAX = "Fax";
 	private static final String XML_ELEMENT_OPERATOR_EMAIL = "eMail";
 	
+	private static final String XSLT_PATH = "res/tac.xslt";
+	
 	public static int TERMS_AND_CONDITIONS_TTL = 1000*60*60*24;
 	
 	public static int TERMS_AND_CONDITIONS_UPDATE_INTERVAL = 1000*60*60;
@@ -374,19 +376,19 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	{
 		try
 		{		
-			File xsltFile = new File("tac.xslt");
-			File output = new File("output.html");
-			FileOutputStream stream = new FileOutputStream(output);
+			//File xsltFile = new File("tac.xslt");
+			//File output = new File("output.html");
+			//FileOutputStream stream = new FileOutputStream(output);
 			
 			Source xmlSource = new DOMSource(m_docWorkingCopy);
 			
-			Source xsltSource = new StreamSource(xsltFile);
+			Source xsltSource = new StreamSource(this.getClass().getResourceAsStream(XSLT_PATH));
 			
 			TransformerFactory factory = TransformerFactory.newInstance();
 			Transformer transformer = factory.newTransformer(xsltSource);
 			
-			transformer.transform(xmlSource, new StreamResult(stream));
-			stream.close();
+			//transformer.transform(xmlSource, new StreamResult(stream));
+			//stream.close();
 			
 			StringWriter writer = new StringWriter();
 			transformer.transform(xmlSource, new StreamResult(writer));

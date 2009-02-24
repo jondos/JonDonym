@@ -53,6 +53,14 @@ import anon.util.XMLUtil;
  * Extracts the requested resources the mix sends back
  * and stores them.
  * 
+ * Now the mix supports sending two kinds of T&C resources:
+ * 
+ * 1. Customized sections: additional or modified sections that the operator wants
+ *    to be displayed in the given template.
+ * 
+ * 2. Template: the template with predefined terms which is intended
+ *    to be source of multiple Operator terms & conditions.
+ * 
  * A mix tc response looks like this:
  * <TermsAndConditionsResponse>
  * 		<Resources id="(operator subject key identifier)" locale="de">
