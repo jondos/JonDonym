@@ -246,7 +246,42 @@ Statistikdienst &uuml;bermitteln. Selbst mit einer sehr guten
 Browserkonfiguration, dem Abschalten von Cookies und automatischen
 Webbug-Filtern k&ouml;nnen Sie dies niemals zuverl&auml;ssig verhindern.
 Dagegen hilft nur die Verwendung eines Anonymisierungsdienstes wie <a
-href="jondonym.html">JonDonym</a>. </p>
+href="jondonym.html">JonDonym</a>.</p>
+
+<h3><a name="TCPTimestamps" id="TCPTimestamps">TCP-Zeitstempel</a></h3>
+
+<p>Das Transmission Control Protocol (TCP) ist ein Protokoll zur
+Daten&uuml;bertragung zwischen Computern. Es ist notwendig f&uuml;r eine Reihe
+von Internetdiensten wie http (WWW), smtp (E-Mail) und ftp. Wenn beispielsweise
+Ihr Rechenr eine Anfrage nach einer Webseite schickt, werden diese Daten
+innerhalb vieler kleiner sogenannter TCP-Pakete versendet. Neben diesen Daten
+enth&auml;lt ein solches TCP-Paket auch einige optionale Informationsfelder
+(optionale Header). Eine dieser Optionen ist der TCP-Zeitstempel. Der Wert
+dieses Zeitstempels ist proportional zur aktuellen Zeit auf Ihrem Computer, und
+wird gem&auml;&szlig; der internen Uhr Ihres Rechners automatisch
+erh&ouml;ht.</p>
+
+<p>Der Zeitstempel kann vom Clienten- und/oder Server-Ger&auml;t zur
+Performanceoptimierung eingesetzt werden. Jedoch kann ein Internetserver Ihren
+Computer anhand der Zeitstempel wiedererkennen und verfolgen: Indem er den
+Abweichungen in der Uhrzeit misst, kann er ein <a
+href="http://www.cs.washington.edu/homes/yoshi/papers/PDF/">individuelles
+Zeit-Versatz-Profil</a> f&uuml;r Ihren Computer berechnen. Au&szlig;erdem kann
+er die Zeit sch&auml;tzen, zu der Ihr Rechner zuletzt neu gestartet wurde.
+Diese Tricks funktionieren sogar dann, wenn Sie Ihre Internetverbindungen
+ansonsten perfekt anonymisiert haben. </p>
+
+<p>Wenn Sie m&ouml;chten, k&ouml;nnen <a
+href="http://www.saintcorporation.com/cgi-bin/demo_full_tut.pl?tutorial_name=TCP_timestamps.html&amp;fact_color=doc&amp;tag=">Sie
+selbst</a> die <a
+href="http://www.saintcorporation.com/cgi-bin/demo_full_tut.pl?tutorial_name=TCP_timestamps.html&amp;fact_color=doc&amp;tag=">Zeitstempel
+abschalten</a>. Problematisch ist, dass dies <a
+href="https://forums.symantec.com/t5/blogs/blogarticlepage/blog-id/grab_bag/article-id/72#M72">auf
+Windows-Systemen m&ouml;glicherweise nicht funktioniert</a>. Wenn Sie
+stattdessen <a href="jondonym.html">JonDonym</a> verwenden, sind Sie jedoch
+davor gesch&uuml;tzt, auf diese Weise beobachtet zu werden. Denn JonDonym-Mixe
+ersetzen Ihre potenziell unsicheren TCP-Pakete automatisch durch ihre
+eigenen.</p>
 
 <h3><a name="mac" id="mac">MAC-Adresse</a></h3>
 
@@ -254,7 +289,8 @@ href="jondonym.html">JonDonym</a>. </p>
 <em>Ethernet-ID</em>, <em>Airport-ID</em> oder <em>physikalische Adresse</em>
 genannt) ist die Hardware-Adresse jedes einzelnen Netzwerkger&auml;tes. Jeder
 Rechner kann &uuml;ber mehrere solcher physischer oder virtueller
-Netzwerkger&auml;te verf&uuml;gen (dabelgebunden, drahtlos, UMTS, VPN, ...).
+Netzwerkger&auml;te verf&uuml;gen (kabelgebunden <em>(LAN)</em>, drahtlos
+<em>(WLAN)</em>, mobil <em>(GPRS, UMTS)</em>, virtuell <em>(VPN)</em>, ...).
 Die MAC-Adresse dient zur eindeutigen Identifizierung des jeweiligen
 Ger&auml;ts in einem lokalen Rechnernetz. Im Internet wird sie lediglich
 ben&ouml;tigt, damit Ihr Zugangsprovider Ihrem Rechner bzw. Router eine <a

@@ -64,11 +64,14 @@ guesstimate websites requested over VPN simply by analyzing size and timing of
 the encrypted VPN data stream. JonDonym and Tor are quite resilient against
 this attack (a scientific article which demonstrates the attack and lists <a
 href="https://www.jondos.de/de/node/1434">experimental results</a> is in
-preparation; the success rates are over 90% for VPNs). You should also keep in
-mind that VPN hosts can, unlike JonDonym and Tor, track and save every step of
-yours since they control all servers in the VPN. Nevertheless, protection by
-the VPN of a professional and reputable host is typically better than no
-protection at all. </p>
+preparation; the success rates are over 90% for VPNs). Moreover, VPN systems,
+as inherent to their functional principle, normally do not filter or replace
+your computer's TCP packets. They thereby do not protect you from <a
+href="wwwprivacy.html#TCPTimestamps">TCP timestamp attacks</a> like JonDonym
+and Tor. You should also keep in mind that VPN hosts can, unlike JonDonym and
+Tor, track and save every step of yours since they control all servers in the
+VPN. Nevertheless, protection by the VPN of a professional and reputable host
+is typically better than no protection at all. </p>
 
 <h3><a name="networkproxies" id="networkproxies">Network proxies and web
 proxies</a></h3>
