@@ -97,17 +97,22 @@ width="515"></p>
 </ul>
 
 <p>A similar anonymization can only be offered by the non-commercial software
-<a href="http://tor.eff.org/">Tor</a>. Internet beginners should be careful
-with Tor, though: there is no control over who runs the servers in this service
-over which your data travels. In the past, there has been ongoing suspicion
-that criminals and intelligence agencies exploit the Tor network in order to
-secretly attain unencrypted information like passwords, bank accounts and
-credit cards. Certain tricks can enable the Tor server to concentrate much of
-the traffic on itself, making the exploit even more effective. Tor may be set
-as <a href="net.html">proxy in JonDo</a> though, making surfing considerably
-slower but, in some individual cases, even more secure than with JonDonym alone
-because the last servers in this chain will be part of the verified JonDonym
-network.</p>
+<a href="http://tor.eff.org/">Tor</a>. <a
+href="http://www.lightbluetouchpaper.org/2006/09/04/hot-or-not-revealing-hidden-services-by-their-clock-skew/">While
+the Tor hidden services (a special Tor feature) are somewhat affected</a>, the
+Tor users themselves are also protected against <a
+href="wwwprivacy.html#TCPTimestamps">TCP timestamp attacks</a> similar to
+JonDonym. Internet beginners should be careful with Tor, though: there is no
+control over who runs the Tor servers over which your private data travels. In
+the past, there has been ongoing suspicion that criminals and intelligence
+agencies exploit the Tor network in order to secretly attain unencrypted
+information like passwords, bank accounts and credit cards. Certain tricks can
+enable the Tor server to concentrate much of the traffic on itself, making the
+exploit even more effective. Tor may be set as <a href="net.html">proxy in
+JonDo</a> though, making surfing considerably slower but, in some individual
+cases, even more secure than with JonDonym alone because the last servers in
+this chain will then be part of the <a href="certificates.html">verified</a>
+JonDonym network. </p>
 
 <p>Like in Tor, the respective last mix server in a JonDonym cascade could
 record data which is not separately secured by HTTPS/SSL (has to be offered by

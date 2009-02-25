@@ -213,17 +213,49 @@ webbug filters, you are never able to reliably prevent this. The only effective
 protection against this are anonymisation services like <a
 href="jondonym.html">JonDonym</a>. </p>
 
+<h3><a name="TCPTimestamps" id="TCPTimestamps">TCP Timestamps</a></h3>
+
+<p>The Transmission Control Protocol (TCP) is a protocol for transferring data
+between computers. It is necessary for using internet services like http (WWW),
+smtp (E-Mail) and ftp. When your computer sends a request for a web site, for
+example, this data is sent within many small so-called TCP packets. Besides
+that request data, such a TCP packet also contains some optional information
+fields (optional headers). One of those options is the TCP timestamp. The value
+of this timestamp is proportional to the current time of your computer and is
+incremented according to your computer's internal clock.</p>
+
+<p>The timestamp may be used by the client and/or server machine for
+performance optimization. However, an internet server may recognize and track
+your computer by observing those timestamps: By measuring the clock skew of the
+timestamps, it may calculate an <a
+href="http://www.cs.washington.edu/homes/yoshi/papers/PDF/">individual clock
+skew profile</a> for your computer. Moreover, it may estimate the time when
+your machine was last booted. These tricks work even if you have otherwise
+perfectly anonymised your internet connections. </p>
+
+<p>If you like, you may <a
+href="http://www.saintcorporation.com/cgi-bin/demo_full_tut.pl?tutorial_name=TCP_timestamps.html&amp;fact_color=doc&amp;tag=">switch
+off</a> those <a
+href="http://www.securiteam.com/securitynews/5NP0C153PI.html">timestamps
+yourself</a>. The problem is that this <a
+href="https://forums.symantec.com/t5/blogs/blogarticlepage/blog-id/grab_bag/article-id/72#M72">might
+not work on Windows systems</a>. If you use <a
+href="jondonym.html">JonDonym</a> instead, you are however protected against
+being observed this way: The JonDonym mixes automatically replace your
+potentially insecure TCP packets by their own.</p>
+
 <h3><a name="mac" id="mac">MAC Address</a></h3>
 
 <p>The MAC address (MAC=Media-Access-Control, sometimes also called
 <em>Ethernet-ID</em>, <em>Airport-ID</em> or <em>physical address</em>) is the
 hardware address of each individual network device. Each computer may have
-several of such physical or virtual network devices (bound to a cable,
-wireless, UMTS, VPS, ...). The MAC address serves as a unique identifier for
-the respective device in a local area network. On the internet, it is solely
-used by your access provider in order to allocate an <a href="#ip">IP
-address</a> to you. It is only visible for your provider and is neither used
-not transmitted while using the internet.</p>
+several of such physical or virtual network devices (bound to a cable
+<em>(LAN)</em>, wireless <em>(WLAN)</em>, mobile <em>(GPRS, UMTS)</em>, virtual
+<em>(VPS)</em>, ...). The MAC address serves as a unique identifier for the
+respective device in a local area network. On the internet, it is solely used
+by your access provider in order to allocate an <a href="#ip">IP address</a> to
+you. It is only visible for your provider and is neither used not transmitted
+while using the internet.</p>
 
 <p>If you are using a notebook and connect to the internet while travelling,
 the respective provider (if he not already recognizes you by your access data)
@@ -231,8 +263,7 @@ may use the MAC address in order to track and protocol your current position.
 Therefore, you might want to change your MAC address always before connecting
 to an alien computer network. <a
 href="http://translate.google.com/translate?hl=en&amp;sl=de&amp;tl=en&amp;u=http://de.wikipedia.org/wiki/MAC-Adresse">This
-is quite easy on Windows Linux and Mac OS X (look for <em>Query and set a MAC
-address</em>)</a>.</p>
+is quite easy on Windows, Linux and Mac OS X</a>.</p>
 
 <h3><a name="ip" id="ip">IP Address</a></h3>
 
