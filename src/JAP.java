@@ -697,7 +697,7 @@ public class JAP
 					return false;
 				}
 				
-				IJAPMainView view = JAPController.getInstance().getView();
+				final IJAPMainView view = JAPController.getInstance().getView();
 				
 				if (!super.openURL(a_url, a_browerCommand) && view instanceof AbstractJAPMainView)
 				{
@@ -1041,69 +1041,68 @@ public class JAP
 		if (pFFExecutable != null)
 		{
 			pFFExecutable = AbstractOS.createBrowserCommand(pFFExecutable);
+		}
 					
-			if (isArgumentSet("--portable-help-path"))
-			{
-				pFFHelpPath = getArgumentValue("--portable-help-path");
-			}
+		if (isArgumentSet("--portable-help-path"))
+		{
+			pFFHelpPath = getArgumentValue("--portable-help-path");
+		}
+		
+		if (pFFHelpPath == null && isArgumentSet("--jar-path"))
+		{				
+			int index;
+			String jarpath = getArgumentValue("--jar-path");
+			String pFFHelpPathTmp;
 			
-			if (pFFHelpPath == null && isArgumentSet("--jar-path"))
-			{				
-				int index;
-				String jarpath = getArgumentValue("--jar-path");
-				String pFFHelpPathTmp;
-				
-				try
-				{
-					if (m_temp != null && m_temp.length > 0 && jarpath != null)
-					{					
-						pFFHelpPathTmp = m_temp[0];					
-						index = pFFHelpPathTmp.indexOf(jarpath);
-						if (index > 0)
-						{	
-							pFFHelpPathTmp = pFFHelpPathTmp.substring(0, index);
-							String[] dirs = new File(pFFHelpPathTmp).list();						
-							for (int i = 0; i < dirs.length; i++)
+			try
+			{
+				if (m_temp != null && m_temp.length > 0 && jarpath != null)
+				{					
+					pFFHelpPathTmp = m_temp[0];					
+					index = pFFHelpPathTmp.indexOf(jarpath);
+					if (index > 0)
+					{	
+						pFFHelpPathTmp = pFFHelpPathTmp.substring(0, index);
+						String[] dirs = new File(pFFHelpPathTmp).list();						
+						for (int i = 0; i < dirs.length; i++)
+						{
+							if (dirs[i].toUpperCase().equals(AbstractHelpFileStorageManager.HELP_FOLDER.toUpperCase()))
 							{
-								if (dirs[i].toUpperCase().equals(AbstractHelpFileStorageManager.HELP_FOLDER.toUpperCase()))
-								{
-									// found a help folder in the jarpath; assume that it is the right one...
-									pFFHelpPath = pFFHelpPathTmp;
-									break;
-								}
+								// found a help folder in the jarpath; assume that it is the right one...
+								pFFHelpPath = pFFHelpPathTmp;
+								break;
 							}
-						}									
-					}
-				}
-				catch (Exception a_e)
-				{
-					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+						}
+					}									
 				}
 			}
-			
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+			}
+		}
+		
 //			if no path was found, set the help directory to the path where the JAP.jar is located
-			if (pFFHelpPath == null)
+		if (pFFHelpPath == null)
+		{
+			ZipFile jar = ClassUtil.getJarFile();
+			if (jar != null)
 			{
-				ZipFile jar = ClassUtil.getJarFile();
-				if (jar != null)
-				{
-					pFFHelpPath = new File(jar.getName()).getParent();
-				}
-				else if (!JAPModel.getInstance().isHelpPathChangeable())
-				{
-					// maybe this is a test environment with local class files, but no jar file
-					pFFHelpPath = ClassUtil.getClassDirectory(this.getClass()).getParent();
-				}
+				pFFHelpPath = new File(jar.getName()).getParent();
 			}
-			
-	
-			if(pFFHelpPath != null)
+			else if (!JAPModel.getInstance().isHelpPathChangeable())
 			{
-				String messageText = a_splash.getText();
-				a_splash.setText(JAPMessages.getString(JAPController.MSG_UPDATING_HELP));
-				JAPModel.getInstance().setHelpPath(new File(pFFHelpPath), true);
-				a_splash.setText(messageText);				
+				// maybe this is a test environment with local class files, but no jar file
+				pFFHelpPath = ClassUtil.getClassDirectory(this.getClass()).getParent();
 			}
+		}
+
+		if (pFFHelpPath != null)
+		{
+			String messageText = a_splash.getText();
+			a_splash.setText(JAPMessages.getString(JAPController.MSG_UPDATING_HELP));
+			JAPModel.getInstance().setHelpPath(new File(pFFHelpPath), true);
+			a_splash.setText(messageText);				
 		}
 		
 		return pFFExecutable;

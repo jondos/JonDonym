@@ -2656,6 +2656,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_comboAnonServices.closeCascadePopupMenu();
 		if (m_bConfigActive)
 		{
+			System.out.println("active");
 			return;
 		}
 		m_bConfigActive = true;
@@ -2676,14 +2677,21 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				setCursor(c);
 			}
 			m_dlgConfig.selectCard(card, a_value);
-			m_dlgConfig.setVisible(true);
+			new Thread(new Runnable()
+			{
+				public void run()
+				{
+					m_dlgConfig.setVisible(true);
+				}
+			}).start();
+			
 			m_bConfigActive = false;
 		}
 	}
 	
 	public Component getCurrentView()
 	{
-		synchronized (LOCK_CONFIG)
+		//synchronized (LOCK_CONFIG) // produces deadlock in combination with portable JonDo: when no browser is set and help is pressed
 		{
 			if (m_dlgConfig != null && m_dlgConfig.isVisible())
 			{

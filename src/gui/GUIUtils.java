@@ -60,6 +60,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+
+import javax.swing.JFileChooser;
 import javax.swing.ToolTipManager;
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -2055,7 +2057,8 @@ public final class GUIUtils
    * @param aComponents Vector
    * @return Dimension
    */
-  public static Dimension getTotalSize(Vector aComponents) {
+  public static Dimension getTotalSize(Vector aComponents) 
+  {
 	  int totalWidth = 0;
 	  int totalHeight = 0;
 	  //find max width and height
@@ -2066,8 +2069,58 @@ public final class GUIUtils
 		totalHeight += curWidget.getPreferredSize().height;
 	  }
 	  return new Dimension(totalWidth,totalHeight);
-}
+  }
 
+  /**
+   * This method shows a JFileChooser. If the JFileChooser does not show up, the current thread (the thread
+   * that called this method) will be interrupted. This happened on Windows Vista 32 (not often,
+   * but it did) with JRE 6. It might also happen on other systems.
+   * @param parent
+   * @param currentDirectoryPath
+   * @return the return value of the JFileChooser object 
+   */
+  public static int showMonitoredFileChooser(final JFileChooser a_chooser, Component parent)
+  {
+	  if (a_chooser == null)
+	  {
+		  throw new NullPointerException("No file chooser given!");
+	  }
+	  
+	  int result;
+	  final Thread thisThread = Thread.currentThread();
+	  Thread timeoutThread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				try 
+				{
+					Thread.sleep(10000); // 10 seconds should be enough for showing this dialog!
+					if (!a_chooser.isVisible())
+					{
+						LogHolder.log(LogLevel.ALERT, LogType.GUI, "File chooser dialog blocked and was interrupted!");
+						thisThread.interrupt();
+						a_chooser.setVisible(false);
+					}
+				} 
+				catch (InterruptedException e) 
+				{
+					//Ignore, this is OK!
+				}
+			}
+		});
+		timeoutThread.start();
+		try
+		{
+			result = a_chooser.showOpenDialog(parent);
+		}
+		catch (Exception a_e)
+		{
+			LogHolder.log(LogLevel.ALERT, LogType.GUI, a_e);
+			result = JFileChooser.ERROR_OPTION;
+		}
+		timeoutThread.interrupt();
+		return result;
+  }
 
 	/**
 	 * setSizes: takes a Vector of JCoponents and sets them all to the Dimension passed as parameter

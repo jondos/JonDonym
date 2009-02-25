@@ -251,7 +251,7 @@ public class JAPWelcomeWizardPage extends BasicWizardPage implements ActionListe
 			m_fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			//m_fileChooser.setFileFilter(jarFileFilter);
 			m_fileChooser.addChoosableFileFilter(jarFileFilter);
-			int returnVal = m_fileChooser.showOpenDialog(this);
+			int returnVal = GUIUtils.showMonitoredFileChooser(m_fileChooser, this);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{

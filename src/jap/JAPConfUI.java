@@ -52,6 +52,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.TitledBorder;
@@ -147,6 +148,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 	private JTextField m_portableBrowserPathField;
 	private JButton m_portableBrowserPathButton;
 	private Observer m_modelObserver;
+	private boolean m_bClickedBrowserPath = false;
 
 	public JAPConfUI()
 	{
@@ -192,9 +194,106 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 	public void chooseBrowserPath()
 	{
-		if (m_portableBrowserPathButton != null)
+		if (m_bClickedBrowserPath)
 		{
-			m_portableBrowserPathButton.doClick();
+			return;
+		}
+		
+		m_bClickedBrowserPath = true;
+		chooseBrowserPath(null);
+		m_bClickedBrowserPath = false;
+	}
+	
+	private void chooseBrowserPath(String a_defaultFilePath)
+	{
+		File browserFile = null;
+		JFileChooser chooser;
+		
+		if (a_defaultFilePath != null && new File(a_defaultFilePath).exists())
+		{
+			chooser = new JFileChooser(a_defaultFilePath);
+		}
+		else if (JAPModel.getInstance().getPortableBrowserpath() != null)
+		{
+			chooser = new JFileChooser(JAPModel.getInstance().getPortableBrowserpath());
+		}
+		else if (AbstractOS.getInstance().getDefaultBrowserPath() != null)
+		{
+			chooser = new JFileChooser(AbstractOS.getInstance().getDefaultBrowserPath());
+		}
+		else
+		{
+			chooser = new JFileChooser(System.getProperty("user.dir"));
+		}
+		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		
+		if (GUIUtils.showMonitoredFileChooser(chooser, getRootPanel()) == JFileChooser.APPROVE_OPTION)
+		{
+			browserFile = chooser.getSelectedFile();
+		}
+		
+		if (browserFile != null)
+		{
+			final String filePath = AbstractOS.toRelativePath(browserFile.getPath());						
+			JAPDialog browserTestDialog = new JAPDialog(getRootPanel(),
+					JAPMessages.getString(MSG_TEST_BROWSER_PATH));
+			final DialogContentPane pane = new DialogContentPane(browserTestDialog, 
+					JAPMessages.getString(MSG_BROWSER_TEST_EXPLAIN),
+					new DialogContentPaneOptions(JAPDialog.OPTION_TYPE_YES_NO_CANCEL))
+			{
+				private boolean m_bValid = false;
+				
+				public CheckError[] checkNo()
+				{
+					CheckError[] errors = null;
+					
+					if (AbstractOS.getInstance().openBrowser(
+							AbstractOS.createBrowserCommand(filePath)))
+					{
+						printStatusMessage(JAPMessages.getString(MSG_BROWSER_SHOULD_OPEN));
+						m_bValid = true;
+					}
+					else
+					{
+						errors = new CheckError[]{
+								new CheckError(JAPMessages.getString(MSG_BROWSER_DOES_NOT_OPEN), LogType.GUI)};
+					}
+					return errors;
+				}
+				
+				public CheckError[] checkYesOK()
+				{
+					CheckError[] errors = null;
+					
+					if (!m_bValid)
+					{
+						errors = new CheckError[]{new CheckError(JAPMessages.getString(MSG_BROWSER_TEST_PATH), LogType.GUI)};
+					}
+					
+					return errors;
+				}
+			};
+			
+			pane.getButtonNo().setText(JAPMessages.getString(MSG_BROWSER_TEST_BUTTON));
+			pane.getButtonCancel().setText(JAPMessages.getString(MSG_BROWSER_NEW_PATH));
+			pane.getButtonYesOK().setText(JAPMessages.getString(DialogContentPane.MSG_OK));
+		
+			pane.setDefaultButtonOperation(DialogContentPane.ON_YESOK_DISPOSE_DIALOG | 
+					DialogContentPane.ON_CANCEL_DISPOSE_DIALOG);
+			DialogContentPane.updateDialogOptimalSized(pane);
+			browserTestDialog.setVisible(true);
+			browserTestDialog.dispose();
+			
+			if (pane.getButtonValue() == DialogContentPane.RETURN_VALUE_OK)
+			{
+				m_portableBrowserPathField.setText(filePath);
+				m_portableBrowserPathField.repaint();
+			}
+			else if (pane.getButtonValue() == DialogContentPane.RETURN_VALUE_CANCEL)
+			{
+				// choose another file
+				chooseBrowserPath(browserFile.getPath());
+			}
 		}
 	}
 	
@@ -257,6 +356,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 		c1.gridy+=2;
 		c1.fill = GridBagConstraints.BOTH;		
 		c1.gridwidth = 2;
+		c1.gridheight = 1;
 		tempPanel = createHelpPathPanel();
 		if (JAPModel.getInstance().isHelpPathChangeable())
 		{
@@ -403,7 +503,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 						CheckError[] errors = super.checkYesOK();
 						fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 						
-						if (fileChooser.showOpenDialog(dialog.getContentPane()) !=
+						if (GUIUtils.showMonitoredFileChooser(fileChooser, dialog.getContentPane()) !=
 							JFileChooser.APPROVE_OPTION)
 						{
 							m_bCanceled = true;
@@ -877,93 +977,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 			{
 				public void actionPerformed(ActionEvent aev)
 				{
-					File browserFile = null;
-					JFileChooser chooser;
-					
-					if (aev.getActionCommand() != null && new File(aev.getActionCommand()).exists())
-					{
-						chooser = new JFileChooser(aev.getActionCommand());
-					}
-					else if (JAPModel.getInstance().getPortableBrowserpath() != null)
-					{
-						chooser = new JFileChooser(JAPModel.getInstance().getPortableBrowserpath());
-					}
-					else if (AbstractOS.getInstance().getDefaultBrowserPath() != null)
-					{
-						chooser = new JFileChooser(AbstractOS.getInstance().getDefaultBrowserPath());
-					}
-					else
-					{
-						chooser = new JFileChooser(System.getProperty("user.dir"));
-					}
-					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-					
-					if (chooser.showOpenDialog(JAPConfUI.this.getRootPanel()) == JFileChooser.APPROVE_OPTION)
-					{
-						browserFile = chooser.getSelectedFile();
-					}
-					if (browserFile != null)
-					{
-						final String filePath = AbstractOS.toRelativePath(browserFile.getPath());						
-						JAPDialog browserTestDialog = new JAPDialog(JAPConfUI.this.getRootPanel(),
-								JAPMessages.getString(MSG_TEST_BROWSER_PATH));
-						final DialogContentPane pane = new DialogContentPane(browserTestDialog, 
-								JAPMessages.getString(MSG_BROWSER_TEST_EXPLAIN),
-								new DialogContentPaneOptions(JAPDialog.OPTION_TYPE_YES_NO_CANCEL))
-						{
-							private boolean m_bValid = false;
-							
-							public CheckError[] checkNo()
-							{
-								CheckError[] errors = null;
-								
-								if (AbstractOS.getInstance().openBrowser(
-										AbstractOS.createBrowserCommand(filePath)))
-								{
-									printStatusMessage(JAPMessages.getString(MSG_BROWSER_SHOULD_OPEN));
-									m_bValid = true;
-								}
-								else
-								{
-									errors = new CheckError[]{
-											new CheckError(JAPMessages.getString(MSG_BROWSER_DOES_NOT_OPEN), LogType.GUI)};
-								}
-								return errors;
-							}
-							
-							public CheckError[] checkYesOK()
-							{
-								CheckError[] errors = null;
-								
-								if (!m_bValid)
-								{
-									errors = new CheckError[]{new CheckError(JAPMessages.getString(MSG_BROWSER_TEST_PATH), LogType.GUI)};
-								}
-								
-								return errors;
-							}
-						};
-						
-						pane.getButtonNo().setText(JAPMessages.getString(MSG_BROWSER_TEST_BUTTON));
-						pane.getButtonCancel().setText(JAPMessages.getString(MSG_BROWSER_NEW_PATH));
-						pane.getButtonYesOK().setText(JAPMessages.getString(DialogContentPane.MSG_OK));
-					
-						pane.setDefaultButtonOperation(DialogContentPane.ON_YESOK_DISPOSE_DIALOG | 
-								DialogContentPane.ON_CANCEL_DISPOSE_DIALOG);
-						DialogContentPane.updateDialogOptimalSized(pane);
-						browserTestDialog.setVisible(true);
-						
-						if (pane.getButtonValue() == DialogContentPane.RETURN_VALUE_OK)
-						{
-							m_portableBrowserPathField.setText(filePath);
-							m_portableBrowserPathField.repaint();
-						}
-						else if (pane.getButtonValue() == DialogContentPane.RETURN_VALUE_CANCEL)
-						{
-							// choose another file
-							actionPerformed(new ActionEvent(aev.getSource(), aev.getID(), browserFile.getPath()));
-						}
-					}
+					chooseBrowserPath();
 				}
 			};
 			
@@ -1017,7 +1031,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 					
 					JFileChooser chooser = new JFileChooser(model.getHelpPath());
 					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					if(chooser.showOpenDialog(JAPConfUI.this.getRootPanel()) == JFileChooser.APPROVE_OPTION)
+					if(GUIUtils.showMonitoredFileChooser(chooser, JAPConfUI.this.getRootPanel()) == JFileChooser.APPROVE_OPTION)
 					{
 						hpFile = chooser.getSelectedFile();
 					}

@@ -1447,7 +1447,7 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 			return;
 		}
 		
-		if(hpFile == null)
+		if (hpFile == null)
 		{
 			resetHelpPath();
 		}
