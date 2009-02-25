@@ -259,7 +259,7 @@ public class ConfigAssistant extends JAPDialog
 		constraints.anchor = GridBagConstraints.WEST;
 		m_radioSimpleView = new JRadioButton(JAPMessages.getString("ngSettingsViewSimplified"));
 		m_radioAdvancedView = new JRadioButton(JAPMessages.getString("ngSettingsViewNormal"));
-		if (!JAPController.getInstance().isConfigAssistantShown())
+		if (!JAPController.getInstance().isConfigAssistantShown() || JAPModel.getDefaultView() != JAPConstants.DEFAULT_VIEW)
 		{
 			// this is not the first start of JAP
 			if (JAPModel.getDefaultView() == JAPConstants.VIEW_NORMAL)
