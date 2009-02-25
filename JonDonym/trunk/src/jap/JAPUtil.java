@@ -59,6 +59,7 @@ import javax.swing.table.TableModel;
 
 import anon.crypto.JAPCertificate;
 import platform.AbstractOS;
+import gui.GUIUtils;
 import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import gui.SimpleFileFilter;
@@ -476,7 +477,7 @@ public final class JAPUtil
 			fd2.setFileFilter(active);
 		}
 		fd2.setFileHidingEnabled(false);
-		fd2.showOpenDialog(jf);
+		GUIUtils.showMonitoredFileChooser(fd2, jf);
 //										File m_fileCurrentDir = fd2.getCurrentDirectory();
 		return fd2;
 	}

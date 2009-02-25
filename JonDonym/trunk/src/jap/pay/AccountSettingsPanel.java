@@ -3187,7 +3187,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		JFileChooser chooser = new JFileChooser();
 		MyFileFilter filter = new MyFileFilter();
 		chooser.setFileFilter(filter);
-		int returnVal = chooser.showOpenDialog(getRootPanel());
+		int returnVal = GUIUtils.showMonitoredFileChooser(chooser, getRootPanel());
 		if (returnVal == JFileChooser.APPROVE_OPTION)
 		{
 			File f = chooser.getSelectedFile();

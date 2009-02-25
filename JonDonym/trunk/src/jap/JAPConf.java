@@ -63,6 +63,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import anon.infoservice.MixCascade;
+import gui.GUIUtils;
 import gui.JAPMessages;
 import gui.JAPMultilineLabel;
 import gui.dialog.JAPDialog;
@@ -587,7 +588,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 					{
 					}
 				}
-				int ret = fileChooser.showOpenDialog(ms_JapConfInstance.getContentPane());
+				int ret = GUIUtils.showMonitoredFileChooser(fileChooser, ms_JapConfInstance.getContentPane());
 				if (ret == JFileChooser.APPROVE_OPTION)
 				{
 					try

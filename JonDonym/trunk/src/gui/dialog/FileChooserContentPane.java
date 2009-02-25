@@ -27,6 +27,7 @@
  */
 package gui.dialog;
 
+import gui.GUIUtils;
 import gui.JAPMessages;
 
 import java.awt.event.ActionEvent;
@@ -94,7 +95,7 @@ public class FileChooserContentPane extends DialogContentPane implements DialogC
 						chooser.setCurrentDirectory(fileCurrent);
 					}						
 					
-					if(chooser.showOpenDialog(dialog.getContentPane()) == JFileChooser.APPROVE_OPTION)
+					if(GUIUtils.showMonitoredFileChooser(chooser, dialog.getContentPane()) == JFileChooser.APPROVE_OPTION)
 					{
 						File f = chooser.getSelectedFile();
 						if(f != null)
