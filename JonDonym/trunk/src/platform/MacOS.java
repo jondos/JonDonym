@@ -318,13 +318,16 @@ public class MacOS extends AbstractOS
 				exitValue = handleAppleScriptCmds(allStmts, osaInterpreter);
 			}
 			
-			
-			File appletFile = new File(OSA_APPLET_PATH);
-			if(appletFile.exists())
+			if(OSA_APPLET_PATH != null)
 			{
-				RecursiveFileTool.deleteRecursion(appletFile);
+				File appletFile = new File(OSA_APPLET_PATH);
+				if(appletFile.exists() && (OSA_APPLET_PATH.endsWith(OSA_APPLET_NAME)))
+				{
+					RecursiveFileTool.deleteRecursion(appletFile);
+				}
 			}
 			return RecursiveFileTool.equals(src, new File(destDir.getAbsolutePath()+File.separator+src.getName()), true);
+			
 		}
 		catch(IOException ioe)
 		{
