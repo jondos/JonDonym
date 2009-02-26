@@ -4867,7 +4867,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		if (!m_bForwarderNotExplain && a_activate)
 		{
 			/* show a message box with the explanation of the forwarding stuff */
-			JAPDialog.LinkedCheckBox checkbox = new JAPDialog.LinkedCheckBox(false)
+			JAPDialog.LinkedCheckBox checkbox = new JAPDialog.LinkedCheckBox(false, "forwarding_server")
 			{
 				public boolean isOnTop()
 				{
@@ -4905,6 +4905,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 						{
 							try
 							{
+								JAPDialog.LinkedHelpContext context = 
+									new JAPDialog.LinkedHelpContext("forwarding_server");
+								
 								int msgId = getView().addStatusMsg(JAPMessages.getString(
 									"controllerStatusMsgRoutingStartServer"),
 									JAPDialog.MESSAGE_TYPE_INFORMATION, false);
@@ -4919,7 +4922,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 										JAPDialog.showErrorDialog(getViewWindow(),
 											JAPMessages.getString(
 												"settingsRoutingServerRegistrationEmptyListError"),
-											LogType.MISC);
+											LogType.MISC, context);
 										break;
 									}
 									case JAPRoutingSettings.REGISTRATION_UNKNOWN_ERRORS:
@@ -4927,7 +4930,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 										JAPDialog.showErrorDialog(getViewWindow(),
 											JAPMessages.getString(
 											"settingsRoutingServerRegistrationUnknownError"),
-											LogType.MISC);
+											LogType.MISC, context);
 										break;
 									}
 									case JAPRoutingSettings.REGISTRATION_INFOSERVICE_ERRORS:
@@ -4935,7 +4938,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 										JAPDialog.showErrorDialog(getViewWindow(),
 											JAPMessages.getString(
 												"settingsRoutingServerRegistrationInfoservicesError"),
-											LogType.MISC);
+											LogType.MISC, context);
 										break;
 									}
 									case JAPRoutingSettings.REGISTRATION_VERIFY_ERRORS:
@@ -4943,7 +4946,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 										JAPDialog.showErrorDialog(getViewWindow(),
 											JAPMessages.getString(
 												"settingsRoutingServerRegistrationVerificationError"),
-											LogType.MISC);
+											LogType.MISC, context);
 										break;
 									}
 									case JAPRoutingSettings.REGISTRATION_SUCCESS:

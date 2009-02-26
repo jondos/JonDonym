@@ -268,7 +268,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private JCheckBox m_cbAnonymityOn;
 	private JRadioButton m_rbAnonOff, m_rbAnonOn;
 	private JCheckBox m_cbForwarding, m_cbForwardingSmall;
-	private FlippingPanel m_flippingpanelAnon, m_flippingpanelOwnTraffic, m_flippingpanelForward;
+	private FlippingPanel m_flippingpanelAnon, m_flippingpanelOwnTraffic;
+	private JPanel m_flippingpanelForward;
 	private StatusPanel m_StatusPanel;
 	private JPanel m_panelAnonService;
 	private Object SYNC_DISCONNECTED_ERROR = new Object();
@@ -1185,7 +1186,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.gridy++;
 		m_flippingpanelForward = buildForwarderPanel();
-		if (!m_bIsSimpleView)
+		//if (!m_bIsSimpleView)
 		{
 			mainPanel.add(m_flippingpanelForward, c);
 
@@ -1414,7 +1415,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		}
 	}
 
-	private FlippingPanel buildForwarderPanel()
+	private JPanel buildForwarderPanel()
 	{
 		//------------------ Forwarder Panel
 		FlippingPanel flippingPanel = new FlippingPanel(this);
@@ -1608,7 +1609,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 		};
 		JAPModel.getInstance().getRoutingSettings().getServerStatisticsListener().addObserver(observer);
-		return flippingPanel;
+		if (!m_bIsSimpleView)
+		{
+			return flippingPanel;
+		}
+		return p;
 	}
 
 	/**
