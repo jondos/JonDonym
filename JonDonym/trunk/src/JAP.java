@@ -48,11 +48,9 @@ import java.awt.Frame;
 import java.awt.Window;
 
 import anon.client.crypto.KeyPool;
-import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;
-import anon.util.Util;
 import gui.GUIUtils;
 import gui.JAPAWTMsgBox;
 import gui.JAPDll;
