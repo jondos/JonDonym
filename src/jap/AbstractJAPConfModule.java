@@ -38,8 +38,6 @@ import java.util.Observer;
 import java.util.Observable;
 import javax.swing.SwingUtilities;
 
-import anon.util.ClassUtil;
-
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -62,6 +60,7 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 				try
 				{
 					onUpdateValues();
+					m_rootPanel.validate();
 				}
 				catch (Throwable a_e)
 				{
@@ -100,7 +99,7 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 		 */
 		public void ancestorAdded(AncestorEvent event)
 		{
-			if(event.getAncestor() == m_rootPanel)
+			if (event.getAncestor() == getRootPanel())
 			{
 				if (getRootPanel().isVisible())
 				{
