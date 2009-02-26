@@ -44,6 +44,9 @@ ARGS="@ARGS@"
 APPNAME="@APPNAME@"
 JARNAME="@JARNAME@"
 
+#path of the installer
+ROOT_DIR=$(dirname $0)
+
 #don't leave the installpath dir in a mess when errors occur.
 onErrorCleanupAndExit()
 {
@@ -147,7 +150,13 @@ while [ $? -eq 0 ];
 do
 	case ${CMD_OPT} in
 		j)
-			JAVA_HOME_PATH=${OPTARG};;
+			#if a relative path is specified complete it to an absolute path.
+			JAVA_HOME_PATH=${OPTARG}
+			absJPath=$(expr ${JAVA_HOME_PATH} : "\(^/.*\)")
+			if [ -z "$absJPath" ]; then
+				JAVA_HOME_PATH="$(pwd)/${JAVA_HOME_PATH}"
+			fi
+			;;
 		h | ?)
 			printHelpText; 
 			exit 0;;
@@ -164,6 +173,12 @@ if [ "$1" != "" ]; then
 	INSTALL_PATH=$1
 elif [ "${INSTALL_PATH}" = "" ]; then
 	INSTALL_PATH="/usr/local" #if nothing is set: default install path is /usr/local
+fi
+
+#if a relative path is specified complete it to an absolute path.
+absPath=$(expr $INSTALL_PATH : "\(^/.*\)")
+if [ -z "$absPath" ]; then
+	INSTALL_PATH="$(pwd)/${INSTALL_PATH}"
 fi
 
 #complete path of the starter
@@ -194,7 +209,7 @@ case ${answer} in
 esac
 
 #install JAP.jar
-install -Dvm 755 "${JARNAME}.jar" "${INSTALL_PATH}/${APPNAME}/${JARNAME}.jar"
+install -Dvm 755 "${ROOT_DIR}/${JARNAME}.jar" "${INSTALL_PATH}/${APPNAME}/${JARNAME}.jar"
 
 if [ $? -ne 0 ]; then
 	onErrorCleanupAndExit
