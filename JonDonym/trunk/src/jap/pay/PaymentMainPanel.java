@@ -626,7 +626,7 @@ public class PaymentMainPanel extends FlippingPanel
 						{
 							public void run()
 							{
-								if (JAPDialog.showYesNoDialog(JAPController.getInstance().getViewWindow(),
+								if (JAPDialog.showYesNoDialog(JAPController.getInstance().getCurrentView(),
 									JAPMessages.getString(MSG_NEARLYEMPTY_CREATE_ACCOUNT)))
 								{
 									m_view.showConfigDialog(JAPConf.PAYMENT_TAB,
@@ -647,7 +647,7 @@ public class PaymentMainPanel extends FlippingPanel
 						{
 							public void run()
 							{
-								if (JAPDialog.showYesNoDialog(JAPController.getInstance().getViewWindow(),
+								if (JAPDialog.showYesNoDialog(JAPController.getInstance().getCurrentView(),
 									JAPMessages.getString(MSG_NEARLYEXPIRED_CREATE_ACCOUNT)))
 								{
 									m_view.showConfigDialog(JAPConf.PAYMENT_TAB,
@@ -811,7 +811,7 @@ public class PaymentMainPanel extends FlippingPanel
 						}
 
 						int answer = JAPDialog.showConfirmDialog(
-							JAPController.getInstance().getViewWindow(),
+							JAPController.getInstance().getCurrentView(),
 							strMessage + JAPMessages.getString(MSG_WITH_COSTS, formatCascadeName(cascade)) + " " + 
 							JAPMessages.getString(MSG_CREATE_ACCOUNT_QUESTION), 
 							JAPMessages.getString(MSG_CREATE_ACCOUNT_TITLE),
@@ -846,7 +846,7 @@ public class PaymentMainPanel extends FlippingPanel
 					{
 						public void run()
 						{
-							JAPDialog.showErrorDialog(JAPController.getInstance().getViewWindow(),
+							JAPDialog.showErrorDialog(JAPController.getInstance().getCurrentView(),
 								strMessage + JAPMessages.getString(MSG_NO_ACTIVE_ACCOUNT), LogType.PAY, 
 								helpAdapter);
 							m_view.showConfigDialog(JAPConf.PAYMENT_TAB, null);
@@ -895,7 +895,7 @@ public class PaymentMainPanel extends FlippingPanel
 								options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_OK_CANCEL);
 							}
 							int answer = JAPDialog.showConfirmDialog(
-									JAPController.getInstance().getViewWindow(), message, strTitle,
+									JAPController.getInstance().getCurrentView(), message, strTitle,
 									options, JAPDialog.MESSAGE_TYPE_QUESTION, helpAdapter);
 							if (answer == JAPDialog.RETURN_VALUE_YES)
 							{
@@ -1026,7 +1026,7 @@ public class PaymentMainPanel extends FlippingPanel
 
 						if (!GUIUtils.getParentWindow(parent).isVisible())
 						{
-							parent = JAPController.getInstance().getViewWindow();
+							parent = JAPController.getInstance().getCurrentView();
 						}
 
 						if (msg.getErrorCode() == XMLErrorMessage.ERR_ACCOUNT_EMPTY)

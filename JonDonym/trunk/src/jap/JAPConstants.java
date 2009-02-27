@@ -35,7 +35,7 @@ import anon.mixminion.Mixminion;
 
 public final class JAPConstants
 {
-	public static final String aktVersion = "00.10.067"; //Never change the layout of this line!
+	public static final String aktVersion = "00.10.068"; //Never change the layout of this line!
 	public final static boolean m_bUnstableVersion = false; //Set to true if this is an unstable (development) Version
 
 	
@@ -286,6 +286,7 @@ public final class JAPConstants
 	public final static String CONFIG_TYPE = "Type";
 	public final static String CONFIG_OUTPUT = "Output";
 	public final static String CONFIG_CONSOLE = "Console";
+	public final static String CONFIG_WINDOW = "showWindow";
 	public final static String CONFIG_FILE = "File";
 	public final static String CONFIG_TOR = "TOR";
 	public static final String CONFIG_TOR_DIR_SERVER="DirectoryServer";

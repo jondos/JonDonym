@@ -40,7 +40,7 @@ final class JAPFirewallPasswdDlg implements IPasswordReader
 {
 	public String readPassword(ImmutableProxyInterface a_proxyInterface)
 	{
-		JAPDialog dialog = new JAPDialog(JAPController.getInstance().getViewWindow(),
+		JAPDialog dialog = new JAPDialog(JAPController.getInstance().getCurrentView(),
 										 JAPMessages.getString("passwdDlgTitle"), true);
 		dialog.setAlwaysOnTop(true);
 		PasswordContentPane panePasswd =

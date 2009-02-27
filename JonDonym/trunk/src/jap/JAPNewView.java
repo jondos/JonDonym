@@ -55,6 +55,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -308,6 +309,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private boolean m_bIsSimpleView;
 
 	private int m_msgIDInsecure;
+	private int m_msgForwardServer = -1;
+	private int m_msgForwardServerStatus = JAPRoutingSettings.REGISTRATION_SUCCESS;
+	private MouseListener m_mouseForwardError;
+	private final Object SYNC_FORWARD_MSG = new Object();
 
 	public JAPNewView(String s, JAPController a_controller)
 	{
@@ -1438,7 +1443,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			public void actionPerformed(ActionEvent e)
 			{
 				/* start or shutdown the forwarding server */
-				m_Controller.enableForwardingServer( ( (JCheckBox) e.getSource()).isSelected());
+				if (!m_Controller.enableForwardingServer(((JCheckBox) e.getSource()).isSelected()))
+				{
+					((JCheckBox) e.getSource()).setSelected(false);
+				}
 			}
 		};
 		m_cbForwarding.addActionListener(actionListener);
@@ -2229,7 +2237,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 							public void run()
 							{
 								JAPDialog.LinkedCheckBox checkbox = new JAPDialog.LinkedCheckBox(false);
-								if (JAPDialog.showYesNoDialog(JAPController.getInstance().getViewWindow(),
+								if (JAPDialog.showYesNoDialog(JAPController.getInstance().getCurrentView(),
 									JAPMessages.getString(MSG_OLD_JAVA_HINT,
 									new Object[]
 									{entry.getJREVersion()}), JAPMessages.getString(MSG_TITLE_OLD_JAVA),
@@ -2583,7 +2591,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						m_bDisconnectedErrorShown = true;
 					}
 
-					JAPDialog.showErrorDialog(JAPController.getInstance().getViewWindow(),
+					JAPDialog.showErrorDialog(JAPController.getInstance().getCurrentView(),
 											  JAPMessages.getString(MSG_ERROR_DISCONNECTED), LogType.NET,
 											  new JAPDialog.LinkedInformationAdapter()
 					{
@@ -3160,64 +3168,137 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_cbForwardingSmall.setSelected(bForwaringServerOn);
 			Icon icon = null;
 			String strError = null;
-			if (bForwaringServerOn)
+			synchronized (SYNC_FORWARD_MSG)
 			{
-				/* update the server state label and the reason of error, if necessary */
-				int currentRegistrationState = JAPModel.getInstance().getRoutingSettings().
-					getRegistrationStatusObserver().getCurrentState();
-				int currentErrorCode = JAPModel.getInstance().getRoutingSettings().
-					getRegistrationStatusObserver().getCurrentErrorCode();
-				if (currentRegistrationState ==
-					JAPRoutingRegistrationStatusObserver.STATE_NO_REGISTRATION)
+				if (bForwaringServerOn)
 				{
-					if (!GUIUtils.isLoadingImagesStopped())
+					/* update the server state label and the reason of error, if necessary */
+					int currentRegistrationState = JAPModel.getInstance().getRoutingSettings().
+						getRegistrationStatusObserver().getCurrentState();
+					int currentErrorCode = JAPModel.getInstance().getRoutingSettings().
+						getRegistrationStatusObserver().getCurrentErrorCode();
+					
+					if (currentRegistrationState != m_msgForwardServerStatus)
 					{
-						/** @todo check if this helps against update freeze */
-						icon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_WARNING, true);
+						removeStatusMsg(m_msgForwardServer);
+						m_msgForwardServerStatus = JAPRoutingRegistrationStatusObserver.STATE_SUCCESSFUL_REGISTRATION;
+						if (m_mouseForwardError != null)
+						{
+							m_labelForwardingErrorSmall.removeMouseListener(m_mouseForwardError);
+							m_labelForwardingError.removeMouseListener(m_mouseForwardError);
+							m_labelForwardingErrorSmall.setCursor(Cursor.getDefaultCursor());
+							m_labelForwardingError.setCursor(Cursor.getDefaultCursor());
+						}
 					}
-					if (currentErrorCode ==
-						JAPRoutingRegistrationStatusObserver.ERROR_NO_KNOWN_PRIMARY_INFOSERVICES)
+					
+					if (currentRegistrationState ==
+						JAPRoutingRegistrationStatusObserver.STATE_NO_REGISTRATION)
 					{
-						strError = "settingsRoutingServerStatusRegistrationErrorLabelNoKnownInfoServices";
-					}
-					else if (currentErrorCode ==
-							 JAPRoutingRegistrationStatusObserver.ERROR_INFOSERVICE_CONNECT_ERROR)
-					{
-						strError = "settingsRoutingServerStatusRegistrationErrorLabelConnectionFailed";
-					}
-					else if (currentErrorCode ==
-							 JAPRoutingRegistrationStatusObserver.ERROR_VERIFICATION_ERROR)
-					{
-						strError = "settingsRoutingServerStatusRegistrationErrorLabelVerificationFailed";
-					}
-					else if (currentErrorCode == JAPRoutingRegistrationStatusObserver.ERROR_UNKNOWN_ERROR)
-					{
-						strError = "settingsRoutingServerStatusRegistrationErrorLabelUnknownReason";
-
-					}
-					if (strError != null)
-					{
-						strError = JAPMessages.getString(strError);
+						String strErrorHeader = 
+							"<font color='red'>" + JAPMessages.getString(JAPController.MSG_FORWARDER_REGISTRATION_ERROR_HEADER) + 
+							"</font><br><br>";
+						String strErrorFooter = "<br><br>" + JAPMessages.getString(
+								JAPController.MSG_FORWARDER_REGISTRATION_ERROR_FOOTER);
+						
+						if (!GUIUtils.isLoadingImagesStopped())
+						{
+							/** @todo check if this helps against update freeze */
+							icon = GUIUtils.loadImageIcon(JAPConstants.IMAGE_WARNING, true);
+						}
+						if (currentErrorCode ==
+							JAPRoutingRegistrationStatusObserver.ERROR_NO_KNOWN_PRIMARY_INFOSERVICES)
+						{
+							strError = strErrorHeader + 
+							JAPMessages.getString(
+									"settingsRoutingServerRegistrationEmptyListError") + strErrorFooter;
+						}
+						else if (currentErrorCode ==
+								 JAPRoutingRegistrationStatusObserver.ERROR_INFOSERVICE_CONNECT_ERROR)
+						{
+							strError = strErrorHeader +
+							JAPMessages.getString(
+									"settingsRoutingServerRegistrationInfoservicesError") + strErrorFooter;
+						}
+						else if (currentErrorCode ==
+								 JAPRoutingRegistrationStatusObserver.ERROR_VERIFICATION_ERROR)
+						{
+							strError = strErrorHeader +
+							JAPMessages.getString(
+									"settingsRoutingServerRegistrationVerificationError", "<b>" +
+									JAPModel.getInstance().getRoutingSettings().getServerPort() + "</b>") 
+									+ strErrorFooter;
+						}
+						else if (currentErrorCode == JAPRoutingRegistrationStatusObserver.ERROR_UNKNOWN_ERROR)
+						{
+							strError = strErrorHeader +
+							JAPMessages.getString(
+									"settingsRoutingServerRegistrationUnknownError") + strErrorFooter;
+	
+						}
+						if (strError != null)
+						{
+							strError = JAPMessages.getString(strError);
+							
+							if (m_msgForwardServerStatus == JAPRoutingRegistrationStatusObserver.STATE_SUCCESSFUL_REGISTRATION)
+							{
+								final String strErrorFinal = strError;
+								m_msgForwardServer = addStatusMsg(
+										JAPMessages.getString(JAPController.MSG_FORWARDER_REG_ERROR_SHORT),
+										JAPDialog.MESSAGE_TYPE_WARNING, false, new ActionListener()
+										{
+											public void actionPerformed(ActionEvent a_event)
+											{
+												JAPDialog.showErrorDialog(getCurrentView(), strErrorFinal,
+														LogType.MISC, new JAPDialog.LinkedHelpContext("forwarding_server"));
+											}
+										});
+								m_mouseForwardError = new MouseAdapter()
+								{
+									public void mouseClicked(MouseEvent a_event)
+									{
+										JAPDialog.showErrorDialog(getCurrentView(), strErrorFinal,
+												LogType.MISC, new JAPDialog.LinkedHelpContext("forwarding_server"));
+									}
+								};
+								m_labelForwardingErrorSmall.addMouseListener(m_mouseForwardError);
+								m_labelForwardingError.addMouseListener(m_mouseForwardError);
+								m_labelForwardingErrorSmall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+								m_labelForwardingError.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+							}
+						}
 					}
 				}
+				else
+				{
+					removeStatusMsg(m_msgForwardServer);
+					if (m_mouseForwardError != null)
+					{
+						m_labelForwardingErrorSmall.removeMouseListener(m_mouseForwardError);
+						m_labelForwardingError.removeMouseListener(m_mouseForwardError);
+						m_labelForwardingErrorSmall.setCursor(Cursor.getDefaultCursor());
+						m_labelForwardingError.setCursor(Cursor.getDefaultCursor());
+					}
+					m_msgForwardServerStatus = JAPRoutingRegistrationStatusObserver.STATE_SUCCESSFUL_REGISTRATION;
+				}
+					
+				if (!GUIUtils.isLoadingImagesStopped())
+				{
+					/** @todo check if this helps against update freeze */
+					m_labelForwardingError.setIcon(icon);
+					m_labelForwardingErrorSmall.setIcon(icon);
+				}
+				m_labelForwardingError.setToolTipText(strError);
+				m_labelForwardingErrorSmall.setToolTipText(strError);
+	
+				/* if the forwarding client is running, it should not be possible to start the forwarding
+				 * server, also it should not be possible to change the selected mixcascade
+				 */
+				m_cbForwarding.setEnabled(!JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder());
+				m_cbForwardingSmall.setEnabled(!JAPModel.getInstance().getRoutingSettings().
+											   isConnectViaForwarder());
+				m_comboAnonServices.setEnabled(!JAPModel.getInstance().getRoutingSettings().
+											   isConnectViaForwarder());
 			}
-			if (!GUIUtils.isLoadingImagesStopped())
-			{
-				/** @todo check if this helps against update freeze */
-				m_labelForwardingError.setIcon(icon);
-				m_labelForwardingErrorSmall.setIcon(icon);
-			}
-			m_labelForwardingError.setToolTipText(strError);
-			m_labelForwardingErrorSmall.setToolTipText(strError);
-
-			/* if the forwarding client is running, it should not be possible to start the forwarding
-			 * server, also it should not be possible to change the selected mixcascade
-			 */
-			m_cbForwarding.setEnabled(!JAPModel.getInstance().getRoutingSettings().isConnectViaForwarder());
-			m_cbForwardingSmall.setEnabled(!JAPModel.getInstance().getRoutingSettings().
-										   isConnectViaForwarder());
-			m_comboAnonServices.setEnabled(!JAPModel.getInstance().getRoutingSettings().
-										   isConnectViaForwarder());
 			validate();
 		}
 		catch (Throwable t)
@@ -3381,6 +3462,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	{
 		return m_StatusPanel.addStatusMsg(msg, type, bAutoRemove);
 	}
+	
+	public int addStatusMsg(String msg, int type, boolean bAutoRemove, ActionListener a_listener)
+	{
+		return m_StatusPanel.addStatusMsg(msg, type, bAutoRemove, a_listener);
+	}
 
 	public void removeStatusMsg(int id)
 	{
@@ -3397,7 +3483,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		args[3] = a_entry.getVendorLongName();
 		args[4] = a_entry.getVendor();
 		// Uninstall old Java!! http://sunsolve.sun.com/search/document.do?assetkey=1-26-102557-1
-		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
+		JAPDialog.showMessageDialog(JAPController.getInstance().getCurrentView(),
 									JAPMessages.getString(MSG_OLD_JAVA, args) +
 									(a_entry.getJREVersionName() == null ? "" : "<br>" + a_entry.getJREVersionName()),
 									JAPMessages.getString(MSG_TITLE_OLD_JAVA),
@@ -3416,8 +3502,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_Controller.updateInfoServices(!bShowError);
 				m_Controller.updatePaymentInstances(!bShowError);
 				m_Controller.updatePerformanceInfo(!bShowError);
-				m_Controller.fetchMixCascades(bShowError, JAPController.getInstance().getViewWindow(),
-											  !bShowError);
+				m_Controller.fetchMixCascades(bShowError, !bShowError);
 				//setCursor(Cursor.getDefaultCursor());
 				SwingUtilities.invokeLater(new Runnable()
 				{

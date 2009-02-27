@@ -73,7 +73,7 @@ public class JAPMacintosh extends JAP
 		public void handlePreferences(ApplicationEvent event)
 		{
 			event.setHandled(true);
-			JAPController.getInstance().getView().showConfigDialog();
+			JAPController.getInstance().showConfigDialog();
 		}		
 }
 	// Inner class defining the MRJ Interface

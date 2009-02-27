@@ -868,7 +868,7 @@ public class JAPConfForwardingServer extends AbstractJAPConfModule
 
 		serverPortPanelConstraints.gridx = 2;
 		serverPortPanelConstraints.anchor = GridBagConstraints.NORTHEAST;
-		serverPortPanel.add(m_startServerBox, serverPortPanelConstraints);
+		// serverPortPanel.add(m_startServerBox, serverPortPanelConstraints); // do not add this box any more
 		m_startServerBox.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)

@@ -26,7 +26,8 @@ package jap;
  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
- */import java.io.BufferedReader;
+ */import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import javax.swing.JPanel;
@@ -45,6 +46,12 @@ public class ConsoleJAPMainView implements IJAPMainView
 {
 
 	public int addStatusMsg(String msg, int type, boolean bAutoRemove)
+	{
+		LogHolder.log(LogLevel.ALERT, LogType.MISC, msg);
+		return 0;
+	}
+	
+	public int addStatusMsg(String msg, int type, boolean bAutoRemove, ActionListener a_listener)
 	{
 		LogHolder.log(LogLevel.ALERT, LogType.MISC, msg);
 		return 0;

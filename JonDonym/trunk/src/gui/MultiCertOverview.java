@@ -207,6 +207,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		{
 			info = JAPMessages.getString(MSG_NUMBER_OF_CERTS, new Object[] {m_name, new Integer(number)}); 
 		}
+		info += " ";
 		if(verified == 1)
 		{
 			info += JAPMessages.getString(MSG_NUMBER_OF_TRUSTED_CERTS_ONE);
@@ -215,7 +216,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		{
 			info += JAPMessages.getString(MSG_NUMBER_OF_TRUSTED_CERTS, new Integer(verified));
 		}
-		if(verified == 0)
+		if (verified == 0)
 		{
 			mlabel = new JAPMultilineLabel(info, Color.red);
 		}

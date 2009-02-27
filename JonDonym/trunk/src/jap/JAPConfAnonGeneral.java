@@ -33,7 +33,6 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import javax.swing.JCheckBox;
-import javax.swing.border.TitledBorder;
 import javax.swing.JPanel;
 import javax.swing.JComboBox;
 import javax.swing.JSlider;

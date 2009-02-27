@@ -66,7 +66,7 @@ final public class JAPiPAQ
 		// Create the main frame
 		view.create(false);
 		// Switch Debug Console Parent to MainView
-		JAPDebug.setConsoleParent(view);
+		//JAPDebug.setConsoleParent(view);
 		// Add observer
 		m_controller.addJAPObserver(view);
 		// Register the views where they are needed

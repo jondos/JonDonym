@@ -785,6 +785,7 @@ private boolean checkSignature()
 		boolean bWriteProtected = false;
 		try
 		{
+			File fileTemp;
 			if (m_fileAktJapJar != null && m_fileAktJapJar.equals(CLASSFILE))
 			{
 				// If the parent jar is overwritten, no images should be loaded any more!
@@ -812,6 +813,23 @@ private boolean checkSignature()
 			
 			if (bWriteProtected || !RecursiveFileTool.equals(m_fileNewJapJar, m_fileAktJapJar, true))
 			{
+				if (m_strTempDirectory == null)
+				{
+					// We may have write access to the directory where the JAP.jar is in, but not to the file itself!
+					m_strTempDirectory = AbstractOS.getInstance().getTempPath();
+					if (m_strTempDirectory == null)
+					{
+						throw new Exception("Administrator copy failed!");
+					}
+					
+					// copy new JAP.jar to the temp dir and from there to over the JAP.jar; 
+					// this is due to copy interface restictions (the file may not be renamed!) 
+					fileTemp = new File(m_strTempDirectory + m_fileAktJapJar.getName());
+					Util.copyStream(new FileInputStream(m_fileNewJapJar), 
+							new FileOutputStream(fileTemp));
+					m_fileNewJapJar = fileTemp;
+				}
+				
 				AbstractOS.AbstractRetryCopyProcess retryDialog = new AbstractOS.AbstractRetryCopyProcess(9)
 				{
 					public boolean checkRetry()
@@ -846,6 +864,10 @@ private boolean checkSignature()
 				{
 					throw new Exception ("Administrator copy failed!");
 				}
+			}
+			if (!RecursiveFileTool.equals(m_fileNewJapJar, m_fileAktJapJar, true))
+			{
+				throw new Exception ("Administrator copy failed!");
 			}
 			
 			downloadPage.progressBar.setValue(500);

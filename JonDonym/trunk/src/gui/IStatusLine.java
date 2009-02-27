@@ -27,10 +27,14 @@
  */
 package gui;
 
+import java.awt.event.ActionListener;
+
 
 public interface IStatusLine
 {
 	public int addStatusMsg(String msg, int type, boolean bAutoRemove);
+	
+	public int addStatusMsg(String msg, int type, boolean bAutoRemove, ActionListener a_listener);
 
 	public void removeStatusMsg(int id);
 }
