@@ -695,9 +695,7 @@ public class JAP
 					return false;
 				}
 				
-				final IJAPMainView view = JAPController.getInstance().getView();
-				
-				if (!super.openURL(a_url, a_browerCommand) && view instanceof AbstractJAPMainView)
+				if (!super.openURL(a_url, a_browerCommand))
 				{
 					if (a_browerCommand != null && 
 						(getBrowserCommand() == null || !a_browerCommand.equals(getBrowserCommand())))
@@ -718,7 +716,7 @@ public class JAP
 							return true;
 						}
 					};
-					int answer = JAPDialog.showConfirmDialog(((AbstractJAPMainView)view).getCurrentView(),
+					int answer = JAPDialog.showConfirmDialog(JAPController.getInstance().getCurrentView(),
 							JAPMessages.getString(MSG_EXPLAIN_NO_FIREFOX_FOUND), 
 							new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
 					{
@@ -739,7 +737,7 @@ public class JAP
 					}
 					else if (answer == JAPDialog.RETURN_VALUE_NO)
 					{
-						((AbstractJAPMainView)view).showConfigDialog(JAPConf.UI_TAB, this);
+						JAPController.getInstance().showConfigDialog(JAPConf.UI_TAB, this);
 					}
 				}
 				return true;
@@ -826,7 +824,7 @@ public class JAP
 			view.create(true);
 			//view.setWindowIcon();
 			// Switch Debug Console Parent to MainView
-			JAPDebug.setConsoleParent( (JAPNewView) view);
+			//JAPDebug.setConsoleParent( (JAPNewView) view);
 		}
 		else
 		{

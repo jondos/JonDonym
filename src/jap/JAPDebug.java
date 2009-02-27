@@ -33,8 +33,10 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Observable;
 import java.util.Properties;
 
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.GridBagConstraints;
@@ -72,7 +74,7 @@ import gui.dialog.*;
  * <code>JAPDebug.out(int level, int type, String txt)</code>
  * This is a Singleton!
  */
-final public class JAPDebug extends WindowAdapter implements ActionListener, Log
+final public class JAPDebug extends Observable implements ActionListener, Log
 {
 
 	private int m_debugType = LogType.ALL;
@@ -85,6 +87,7 @@ final public class JAPDebug extends WindowAdapter implements ActionListener, Log
 	private static FileLog ms_FileLog = null;
 	private static JAPDebug debug;
 	private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd-hh:mm:ss, ");
+	private WindowAdapter m_winAdapter;
 
 	private JAPDebug()
 	{
@@ -93,6 +96,28 @@ final public class JAPDebug extends WindowAdapter implements ActionListener, Log
 		m_bConsole = false;
 		ms_bFile = false;
 		ms_strFileName = null;
+		m_winAdapter = new WindowAdapter()
+		{
+			public void windowClosing(WindowEvent e)
+			{
+				synchronized (JAPDebug.this)
+				{
+					m_bConsole = false;
+					JAPDebug.this.setChanged();
+					JAPDebug.this.notifyObservers();
+				}
+			}
+			
+			public void windowClosed(WindowEvent e)
+			{
+				synchronized (JAPDebug.this)
+				{
+					m_bConsole = false;
+					JAPDebug.this.setChanged();
+					JAPDebug.this.notifyObservers();
+				}
+			}
+		};
 	}
 
 	public void finalize()
@@ -206,7 +231,7 @@ final public class JAPDebug extends WindowAdapter implements ActionListener, Log
 	 * @param b set true to show the debug console or false to hidde them
 	 * @param parent the parent frame of the debug console
 	 */
-	public static void showConsole(boolean b, Window parent)
+	public static void showConsole(boolean b, Component parent)
 	{
 		debug.internal_showConsole(b, parent);
 	}
@@ -232,6 +257,7 @@ final public class JAPDebug extends WindowAdapter implements ActionListener, Log
 		ms_strFileName = strFilename;
 	}
 
+	/* Leads to deadlock on startup.
 	public static void setConsoleParent(Window parent)
 	{
 		if ( (debug != null) && (JAPDebug.m_bConsole) && (JAPDebug.m_frameConsole != null))
@@ -246,7 +272,7 @@ final public class JAPDebug extends WindowAdapter implements ActionListener, Log
 			JAPDebug.m_frameConsole.dispose();
 			JAPDebug.m_frameConsole = tmpDlg;
 		}
-	}
+	}*/
 
 	public static boolean isShowConsole()
 	{
@@ -264,11 +290,12 @@ final public class JAPDebug extends WindowAdapter implements ActionListener, Log
 		return ms_strFileName;
 	}
 
-	public void internal_showConsole(boolean b, Window parent)
+	public void internal_showConsole(boolean b, Component parent)
 	{
 		if (!b && m_bConsole)
 		{
 			m_frameConsole.dispose();
+			m_frameConsole.removeWindowListener(m_winAdapter);
 			m_textareaConsole = null;
 			m_frameConsole = null;
 			m_bConsole = false;
@@ -331,7 +358,7 @@ final public class JAPDebug extends WindowAdapter implements ActionListener, Log
 			//panel.add("Center",new Canvas());
 			m_frameConsole.getContentPane().add("North", panel);
 			m_frameConsole.getContentPane().add("Center", new JScrollPane(m_textareaConsole));
-			m_frameConsole.addWindowListener(this);
+			m_frameConsole.addWindowListener(m_winAdapter);
 			m_frameConsole.pack();
 			m_frameConsole.moveToUpRightCorner();
 			m_frameConsole.setVisible(true);
@@ -339,10 +366,7 @@ final public class JAPDebug extends WindowAdapter implements ActionListener, Log
 		}
 	}
 
-	public void windowClosing(WindowEvent e)
-	{
-		m_bConsole = false;
-	}
+	
 
 	public void actionPerformed(ActionEvent e)
 	{

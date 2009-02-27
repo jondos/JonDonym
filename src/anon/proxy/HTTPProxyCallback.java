@@ -1064,9 +1064,11 @@ public class HTTPProxyCallback implements ProxyCallback
 				}
 			}
 			allHeaders += CRLF;
-			LogHolder.log(LogLevel.INFO, LogType.NET, Thread.currentThread().getName()+": header dump:\n"+allHeaders);
+			if (LogHolder.isLogged(LogLevel.INFO, LogType.NET))
+			{
+				LogHolder.log(LogLevel.INFO, LogType.NET, Thread.currentThread().getName()+": header dump:\n"+allHeaders);
+			}
 			return allHeaders.getBytes();
 		}
-		
 	}
 }

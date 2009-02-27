@@ -240,6 +240,11 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 											}
 										}
 									}
+									if (m_listKnownInfoServices.getSelectedValue() == null &&
+										updatedEntry.equals(m_currentPreferredInfoService))
+									{
+										m_listKnownInfoServices.setSelectedValue(updatedEntry, true);
+									}
 								}
 							}
 							if (messageCode == DatabaseMessage.ENTRY_REMOVED)
@@ -305,7 +310,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 								}
 							}
 						}
-						if (a_notifier == InfoServiceHolder.getInstance())
+						else if (a_notifier == InfoServiceHolder.getInstance())
 						{
 							/* message is from InfoServiceHolder */
 							int messageCode = ( (InfoServiceHolderMessage) a_message).getMessageCode();
@@ -768,14 +773,16 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 
 	    final JButton viewCertButton =
-			new JButton(JAPMessages.getString(MixDetailsDialog.MSG_CERTIFICATES));
+			new JButton(JAPMessages.getString(MixDetailsDialog.MSG_CERTIFICATES), 
+					GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED));
 		viewCertButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent a_event)
 			{
 				if(m_selectedISCertPaths != null)
 				{
-					MultiCertOverview dialog = new MultiCertOverview(getRootPanel().getParent(), m_selectedISCertPaths, m_selectedISName, true);
+					MultiCertOverview dialog = 
+						new MultiCertOverview(getRootPanel().getParent(), m_selectedISCertPaths, m_selectedISName, true);
 				}
 			}
 		});

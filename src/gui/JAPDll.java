@@ -36,6 +36,7 @@ import java.io.InputStreamReader;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Window;
@@ -348,7 +349,7 @@ final public class JAPDll {
 			}
 
 			// try to update, perhaps it even works right now when the dll is loaded
-			if (update(JAPController.getInstance().getViewWindow()) && 
+			if (update(JAPController.getInstance().getCurrentView()) && 
 				JAPDll.getDllVersion() != null && // == null means that there were problems...
 				JAPDll.getDllVersion().compareTo(JAP_DLL_REQUIRED_VERSION) < 0)
 			{
@@ -387,7 +388,7 @@ final public class JAPDll {
 		}
 	}
 
-	private static boolean update(Window a_window)
+	private static boolean update(Component a_window)
 	{
 		if (renameDLL(JAP_DLL, JAP_DLL_OLD) && extractDLL(new File(getDllFileName())))
 		{
@@ -641,7 +642,7 @@ final public class JAPDll {
 	private static void informUserAboutJapRestart()
 	{
 		//Inform the User about the necessary JAP restart
-		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
+		JAPDialog.showMessageDialog(JAPController.getInstance().getCurrentView(),
 									JAPMessages.getString(MSG_DLL_UPDATE, "'" + JAP_DLL + "'"));
 		//close JAP
 		JAPController.goodBye(false);
@@ -776,12 +777,17 @@ final public class JAPDll {
 		}
 		
 		String dirSwitch = "";
+		String parameters;
 		if (a_file.isDirectory())
 		{
 			dirSwitch = "/E ";
 		}
 		
-		return shellExecute("xcopy", "/Y /R /Q /I " + dirSwitch + "\"" + a_file + "\" \"" + a_directory + "\"", a_asAdmin);
+		parameters = " /Y /R /Q /I /H " + dirSwitch + "\"" + a_file + "\" \"" + a_directory + "\"";
+		//parameters = " /F /L /W /P /V /R /I " + dirSwitch + "\"" + a_file + "\" \"" + a_directory + "\"";
+		LogHolder.log(LogLevel.NOTICE, LogType.MISC, "Doing xcopy: " + parameters);
+		
+		return shellExecute("xcopy", parameters, a_asAdmin);
 	}
 	
 	public static String getDllVersion()
@@ -883,9 +889,10 @@ final public class JAPDll {
 
 	static public long showMainWindow()
 	{
-		JAPController.getInstance().getViewWindow().setVisible(true);
-		JAPController.getInstance().getViewWindow().toFront();
-		JAPController.getInstance().getViewWindow().repaint();
+		Window view = JAPController.getInstance().getViewWindow();
+		view.setVisible(true);
+		view.toFront();
+		view.repaint();
 		return 0;
 	}
 
@@ -955,7 +962,7 @@ final public class JAPDll {
 					{
 						public void run()
 						{
-							JAPController.getInstance().getView().showConfigDialog(card, a_value);
+							JAPController.getInstance().showConfigDialog(card, a_value);
 						}
 					}).start();
 				}

@@ -62,6 +62,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import platform.AbstractOS;
+
 import anon.infoservice.MixCascade;
 import gui.GUIUtils;
 import gui.JAPMessages;
@@ -193,7 +195,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		m_confServices = new JAPConfServices();
 		
 		DefaultMutableTreeNode nodeAnon =
-			m_moduleSystem.addComponent(rootNode, null, "ngAnonymitaet", null, null);
+			m_moduleSystem.addComponent(rootNode, null, "ngTreeAnonService", null, null);
 		if (!m_bIsSimpleView)
 		{
 			m_moduleSystem.addConfigurationModule(nodeAnon, m_confServices, ANON_SERVICES_TAB);
@@ -429,13 +431,14 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		for (int i = 0; i < 2; i++)
 		{
 			pack();
-			if (i != 1 && getSize().width < getSize().height)
+			if (//i != 1 && 
+					getSize().width < getSize().height)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.GUI,
 							  "Could not pack config properly. Width is smaller than height! " +
 							  "Width:" + getSize().width + " Height:" + getSize().height);
-				Thread.yield();
-				continue;
+				//Thread.yield();
+				//continue;
 			}
 			else if (getSize().width > getScreenBounds().width ||
 					 getSize().height > getScreenBounds().height)
@@ -505,7 +508,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		}
 	}
 
-	JPanel buildMiscPanel()
+	private JPanel buildMiscPanel()
 	{
 		JPanel p = new JPanel(new GridBagLayout());
 		p.setBorder(new TitledBorder("Debugging"));
@@ -536,6 +539,13 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		p.add(new JSeparator(), c);
 		m_cbShowDebugConsole = new JCheckBox(JAPMessages.getString("ConfDebugShowConsole"));
 		m_cbShowDebugConsole.setSelected(JAPDebug.isShowConsole());
+		JAPDebug.getInstance().addObserver(new Observer()
+		{
+			public void update(Observable a_observable, final Object a_message)
+			{
+				m_cbShowDebugConsole.setSelected(false);
+			}
+		});
 		m_cbShowDebugConsole.addItemListener(new ItemListener()
 		{
 			public void itemStateChanged(ItemEvent e)
@@ -581,11 +591,19 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 				{
 					try
 					{
-						File f = new File(strCurrentFile);
-						fileChooser.setCurrentDirectory(new File(f.getParent()));
+						fileChooser.setCurrentDirectory(new File(new File(strCurrentFile).getParent()));
 					}
 					catch (Exception e1)
 					{
+						strCurrentFile = "";
+					}
+				}
+				if (JAPController.getInstance().isPortableMode() && strCurrentFile.equals(""))
+				{
+					strCurrentFile = AbstractOS.getInstance().getProperty("user.dir");
+					if (strCurrentFile != null)
+					{
+						fileChooser.setCurrentDirectory(new File(strCurrentFile));
 					}
 				}
 				int ret = GUIUtils.showMonitoredFileChooser(fileChooser, ms_JapConfInstance.getContentPane());
@@ -593,8 +611,16 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 				{
 					try
 					{
-						ms_JapConfInstance.m_tfDebugFileName.setText(fileChooser.getSelectedFile().
-							getCanonicalPath());
+						if (JAPController.getInstance().isPortableMode())
+						{
+							m_tfDebugFileName.setText(AbstractOS.toRelativePath(
+									fileChooser.getSelectedFile().getCanonicalPath()));
+						}
+						else
+						{
+							m_tfDebugFileName.setText(
+									fileChooser.getSelectedFile().getCanonicalPath());
+						}
 					}
 					catch (IOException ex)
 					{

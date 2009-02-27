@@ -1381,7 +1381,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				//getRootPanel().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 				
-				if (JAPController.getInstance().fetchMixCascades(bErr, component, false))
+				if (JAPController.getInstance().fetchMixCascades(bErr, false))
 				{
 					JAPController.getInstance().updatePerformanceInfo(bErr);
 				}/*

@@ -124,12 +124,12 @@ public class MacOSXLib
 				}
 				else if(cmd.equals(MSG_SHOW_DETAILS))
 				{
-					JAPController.getInstance().getView().showConfigDialog(JAPConf.ANON_TAB,
+					JAPController.getInstance().showConfigDialog(JAPConf.ANON_TAB,
 							JAPController.getInstance().getCurrentMixCascade());					
 				}
 				else if(cmd.equals(MSG_SETTINGS))
 				{
-					JAPController.getInstance().getView().showConfigDialog(null, null);
+					JAPController.getInstance().showConfigDialog();
 				}
 				else if(cmd.equals(JAPHelp.MSG_HELP_MENU_ITEM))
 				{
@@ -397,7 +397,7 @@ public class MacOSXLib
 	private static void informUserAboutJapRestart()
 	{
 		// inform the User about the necessary JAP restart
-		JAPDialog.showMessageDialog(JAPController.getInstance().getViewWindow(),
+		JAPDialog.showMessageDialog(JAPController.getInstance().getCurrentView(),
 									JAPMessages.getString(MSG_MACOSX_LIB_UPDATE));
 		// close JAP
 		JAPController.goodBye(false);

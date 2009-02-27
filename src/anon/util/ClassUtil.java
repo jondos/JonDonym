@@ -466,7 +466,16 @@ public final class ClassUtil
 		classUrl = a_class.getResource(classResource);
 
 		// check if the system resource protocol is used
-		file = ResourceLoader.getSystemResource(classUrl.toString());
+		if (classUrl != null)
+		{
+			file = ResourceLoader.getSystemResource(classUrl.toString());
+		}
+		else
+		{
+			// Should never happen!
+			LogHolder.log(LogLevel.ERR, LogType.THREAD, "Get class resource failed!");
+			file = null;
+		}
 		if (file == null)
 		{
 			// the system resource protocol is not used; try to get the directory by another way...

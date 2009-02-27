@@ -256,7 +256,6 @@ public class WindowsOS extends AbstractOS
 			{
 				try
 				{
-					
 					if (currentSize > 0 || !RecursiveFileTool.equals(fileToCopy, md5OldFile, sizeOldFile))
 					{
 						currentSize = RecursiveFileTool.getFileSize(fileToCopy);
@@ -301,6 +300,7 @@ public class WindowsOS extends AbstractOS
 				}
 			
 				Thread.sleep(a_checkRetry.getProgressLoopWaitMilliseconds());
+				Thread.yield();
 			}
 			
 			//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Finished copy loop!");

@@ -234,7 +234,7 @@ public class CascadePopupMenu extends PopupMenu
 		{
 			if(a_event.getSource() == m_editFilter)
 			{
-				JAPController.getInstance().getView().showConfigDialog(JAPConf.ANON_TAB, Boolean.TRUE);
+				JAPController.getInstance().showConfigDialog(JAPConf.ANON_TAB, Boolean.TRUE);
 				setVisible(false);
 			}
 			else

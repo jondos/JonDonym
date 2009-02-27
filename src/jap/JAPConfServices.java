@@ -176,7 +176,7 @@ public class JAPConfServices extends AbstractJAPConfModule
 	 */
 	public String getTabTitle()
 	{
-		return JAPMessages.getString("ngTreeAnonService");
+		return JAPMessages.getString("ngAnonymitaet");
 	}
 
 	/**
