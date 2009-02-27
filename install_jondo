@@ -35,7 +35,7 @@
 JONDOS_HOMEPAGE="https://www.jondos.de"
 
 #default INSTALL_PATH is the users home directory
-INSTALL_PATH=${HOME}
+INSTALL_PATH="/usr/local"
 JAVA_HOME_PATH=${JAVA_HOME}
 JAVA_CMD="java"
 #set placeholders for ant token filtering
@@ -74,7 +74,7 @@ printHelpText()
 	echo " [installpath]/${APPNAME}/${JARNAME}.jar"
 	echo " [installpath]/bin/${APPNAME_LOWERCASE}"
 	echo
-	echo "If not specified installpath defaults to \$HOME or \"/usr/local\", if HOME is not set." 
+	echo "If not specified installpath defaults \"/usr/local\"." 
 	echo
 	echo "Options are:"
 	echo "  -h -?                   shows this help text"
