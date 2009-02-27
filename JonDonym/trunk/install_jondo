@@ -268,11 +268,11 @@ echo 'case "$1" in' 								>> ${STARTER} || errorStarter
 echo '   --remove)'								>> ${STARTER} || errorStarter
 echo "      if [ ! -w \"${INSTALL_PATH}/${APPNAME}\" -o ! -w \"${STARTER}\" ]; then "\
 										>> ${STARTER} || errorStarter
-echo "         echo \"you are not privileged to remove ${APPNAME}, please run this again as privileged user\""\
+echo "         echo \"You are not privileged to remove ${APPNAME}, please run this again as privileged user!\""\
 										>> ${STARTER} || errorStarter
 echo "         exit 1"  							>> ${STARTER} || errorStarter
 echo "      fi" 								>> ${STARTER} || errorStarter
-echo "      echo \"Uninstallling ${APPNAME}... This will delete:\""		>> ${STARTER} || errorStarter
+echo "      echo \"Uninstalling ${APPNAME}... This will delete:\""		>> ${STARTER} || errorStarter
 echo "      echo \"   1. the directory '${INSTALL_PATH}/${APPNAME}',\""		>> ${STARTER} || errorStarter
 echo "      echo \"   2. the file '${STARTER}'\""				>> ${STARTER} || errorStarter
 echo "      echo \"   3. the ${APPNAME} config and help files\""		>> ${STARTER} || errorStarter
@@ -292,7 +292,7 @@ echo '      ;;'  								>> ${STARTER} || errorStarter
 echo '   --help)'								>> ${STARTER} || errorStarter
 echo "      javaCheck && gcjCheck && \$JAVA_CMD -jar ${INSTALL_PATH}/${APPNAME}/${JARNAME}.jar --help"\
 										>> ${STARTER} || errorStarter
-echo "      echo \"--remove                     Deletes all installed ${APPNAME} file\""\
+echo "      echo \"--remove                     Deletes all installed ${APPNAME} files\""\
 										>> ${STARTER} || errorStarter
 echo "      echo \"                             including directory ${INSTALL_PATH}/${APPNAME} and file ${STARTER}\";;"\
 										>> ${STARTER} || errorStarter
