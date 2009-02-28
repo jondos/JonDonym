@@ -388,8 +388,12 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 							SignatureVerifier.getInstance().isCheckSignatures(
 									SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
 					{
-						if (isTemp.getCertPath() != null && 
-							(!isTemp.getCertPath().isVerified() || !isTemp.isValid()))
+						if (isTemp.isUserDefined() && isTemp.getCertPath() == null)
+						{
+							// we nevertheless use this InfoService
+						}
+						else if (isTemp.getCertPath() == null || 
+							!isTemp.getCertPath().isVerified() || !isTemp.isValid())
 						{
 							infoServiceList.removeElement(isTemp);
 						}
