@@ -269,7 +269,7 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 						return a_helpContext;
 					}
 					
-					public Container getHelpExtractionDisplayContext()
+					public Component getHelpExtractionDisplayContext()
 					{
 						return JAPConf.getInstance().getContentPane();
 					}
@@ -309,7 +309,7 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 		return m_currentHelpContext.getHelpContext();
 	}
 
-	public Container getHelpExtractionDisplayContext() 
+	public Component getHelpExtractionDisplayContext() 
 	{
 		return JAPConf.getInstance().getContentPane();
 	}

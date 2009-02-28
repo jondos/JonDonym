@@ -529,7 +529,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			this(a_strMessage, a_bDefault, new JAPHelpContext.IHelpContext()
 			{
 				public String getHelpContext(){ return a_strHelpContext;}
-				public Container getHelpExtractionDisplayContext(){ return null;}
+				public Component getHelpExtractionDisplayContext(){ return null;}
 				
 			});
 		}
@@ -734,7 +734,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 					return a_strHelpContext;
 				}
 				
-				public Container getHelpExtractionDisplayContext()
+				public Component getHelpExtractionDisplayContext()
 				{
 					return null;
 				}
