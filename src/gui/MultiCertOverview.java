@@ -69,6 +69,9 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	private static final String SUMMARY = MultiCertOverview.class.getName() + "_summary";
 	private static final String EXPLANATION = MultiCertOverview.class.getName() + "_explanation";
 	private static final String MSG_NUMBER_OF_CERTS_ONE = MultiCertOverview.class.getName() + "_numberOfCertsOne";
+	private static final String MSG_NUMBER_OF_CERTS_ONE_NOT_TRUSTED = MultiCertOverview.class.getName() + "_numberOfCertsOneNotTrusted";
+	private static final String MSG_NUMBER_OF_CERTS_ONE_EXPIRED = MultiCertOverview.class.getName() + "_numberOfCertsOneExpired";
+	
 	private static final String MSG_NUMBER_OF_CERTS = MultiCertOverview.class.getName() + "_numberOfCerts";
 	private static final String MSG_NUMBER_OF_TRUSTED_CERTS_ONE = MultiCertOverview.class.getName() + "_numberOfTrustedCertsOne";
 	private static final String MSG_NUMBER_OF_TRUSTED_CERTS = MultiCertOverview.class.getName() + "_numberOfTrustedCerts";
@@ -129,10 +132,10 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 	private MultiCertPath m_multiCertPath;
 	private String m_name;
 	private Hashtable m_buttonsAndNodes;
-	//private ButtonGroup m_certButtons;
-	//private JButton m_closeButton;
 	private CertPathInfo[] m_pathInfos;
 	private MultiCertTrustGraph m_graph;
+	
+	private JAPHtmlMultiLineLabel m_lblSummary;
 
 	public MultiCertOverview(Component a_parent, MultiCertPath a_multiCertPath, String a_name, boolean isInfoService)
 	{
@@ -141,7 +144,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		m_multiCertPath = a_multiCertPath;
 		m_pathInfos = m_multiCertPath.getPathInfos();
 		m_graph = new MultiCertTrustGraph(m_pathInfos);
-		if(m_multiCertPath.getSubject().getCommonName().startsWith("<Mix id=") && a_name != null)
+		if (m_multiCertPath.getSubject().getCommonName().startsWith("<Mix id=") && a_name != null)
 		{
 			m_name = a_name;
 		}
@@ -167,74 +170,75 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		
 		
 		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.add(JAPMessages.getString(SUMMARY), drawSummaryPanel(isInfoService));
+		JPanel summary = drawSummaryPanel(isInfoService);
+		tabbedPane.add(JAPMessages.getString(SUMMARY), summary);
 		tabbedPane.add(JAPMessages.getString(EXPLANATION), drawExplanationPanel());
 		c.weighty = 1.0;
 		c.gridy = 2;
 		rootPanel.add(tabbedPane, c);
 		
-		//Close Button
-		/*m_closeButton = new JButton("Schliessen");
-		m_closeButton.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				dispose();
-			}
-		});*/
+
 		
 		this.getContentPane().add(rootPanel);
-		this.setSize(550, 550);
-		//this.setResizable(false);
+		pack();
+		//setResizable(false);
+		
+		finishSummaryPanel(summary);
+		
 		this.setVisible(true);
 	}
 
 	private JPanel drawSummaryPanel(boolean isInfoService)
 	{
 		JPanel summary = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		JAPMultilineLabel mlabel;
+		
+
 				
 		//Info
 		int number = m_multiCertPath.countPaths();
 		int verified = m_multiCertPath.countVerifiedPaths();
+		int verifiedAndValid = m_multiCertPath.countVerifiedAndValidPaths();
 		String info;
-		if(number == 1)
+		String name = "<em>" + m_name + "</em>";
+		
+		if (number <= 1)
 		{
-			info = JAPMessages.getString(MSG_NUMBER_OF_CERTS_ONE, m_name);
+			if (verifiedAndValid == 1)
+			{
+				info = JAPMessages.getString(MSG_NUMBER_OF_CERTS_ONE, name);
+			}
+			else if (verified == 1)
+			{
+				info = JAPMessages.getString(MSG_NUMBER_OF_CERTS_ONE_EXPIRED, name);
+			}
+			else
+			{
+				info = JAPMessages.getString(MSG_NUMBER_OF_CERTS_ONE_NOT_TRUSTED, name);
+			}
 		}
 		else
 		{
-			info = JAPMessages.getString(MSG_NUMBER_OF_CERTS, new Object[] {m_name, new Integer(number)}); 
+			info = JAPMessages.getString(MSG_NUMBER_OF_CERTS, 
+					new Object[] {name, new Integer(number), new Integer(verifiedAndValid)}); 
 		}
 		info += " ";
-		if(verified == 1)
+		if (number > 1)
 		{
-			info += JAPMessages.getString(MSG_NUMBER_OF_TRUSTED_CERTS_ONE);
+			if (verified == 1)
+			{
+				info += JAPMessages.getString(MSG_NUMBER_OF_TRUSTED_CERTS_ONE);
+			}
+			else
+			{
+				info += JAPMessages.getString(MSG_NUMBER_OF_TRUSTED_CERTS, new Integer(verified));
+			}
 		}
-		else
-		{
-			info += JAPMessages.getString(MSG_NUMBER_OF_TRUSTED_CERTS, new Integer(verified));
-		}
-		if (verified == 0)
-		{
-			mlabel = new JAPMultilineLabel(info, Color.red);
-		}
-		else
-		{
-			mlabel = new JAPMultilineLabel(info);
-		}
-		c.gridx = 0;
-		c.gridy = 0;
-		c.insets = new Insets(5, 20, 5, 5);
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1.0;
-		summary.add(mlabel, c);
+		
 		
 		int count = m_graph.countTrustedRootNodes();
 		String organisation;
-		if(!isInfoService && m_multiCertPath.getIssuer().getOrganisation() != null)
+		
+		if( !isInfoService && m_multiCertPath.getIssuer().getOrganisation() != null)
 		{
 			organisation = m_multiCertPath.getIssuer().getOrganisation();
 		}
@@ -246,32 +250,44 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		{
 			organisation = "";
 		}
-		if(count == 1)
-		{
-			info = JAPMessages.getString(MSG_IDENTITY_ONE, organisation);
-		}
-		else
-		{
-			info = JAPMessages.getString(MSG_IDENTITY, new Object[] {organisation, String.valueOf(count)});
-		}
-		if(count == 0)
-		{
-			mlabel = new JAPMultilineLabel(info, Color.red);
-		}
-		else if (count == 1)
-		{
-			mlabel = new JAPMultilineLabel(info);
-		}
-		else
-		{
-			mlabel = new JAPMultilineLabel(info, Color.green.darker().darker());
-		}
+		organisation = "<em>" + organisation + "</em>";
 		
-		c.gridy = 1;
-		c.anchor = GridBagConstraints.SOUTHWEST;
-		summary.add(mlabel, c);
+		if (count > 0)
+		{
+			info += " ";
+			if(count == 1)
+			{
+				info += JAPMessages.getString(MSG_IDENTITY_ONE, organisation);
+			}
+			else
+			{
+				info += JAPMessages.getString(MSG_IDENTITY, 
+						new Object[] {organisation, String.valueOf(count)});
+			}
+		}		
+		
+		if (verified == 0)
+		{
+			m_lblSummary = new JAPHtmlMultiLineLabel("<font color='red'>" + info + "</font>");
+		}
+		else
+		{
+			m_lblSummary = new JAPHtmlMultiLineLabel(info);
+		}
 		
 		return summary;
+	}
+	
+	private void finishSummaryPanel(JPanel a_summary)
+	{
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(5, 20, 5, 5);
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1.0;
+		a_summary.add(m_lblSummary, c);
 	}
 	
 	private JPanel drawExplanationPanel()

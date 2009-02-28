@@ -446,13 +446,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 							continue;
 						}
 						JAPUpdateWizard wz = new JAPUpdateWizard(vi,
-							JAPController.getInstance().getViewWindow());
+							JAPController.getInstance().getCurrentView());
 						/* we got the JAPVersionInfo from the infoservice */
 						if (wz.getStatus() == JAPUpdateWizard.UPDATESTATUS_ERROR)
 						{
 							/* Download failed -> alert, and reset anon mode to false */
 							LogHolder.log(LogLevel.ERR, LogType.MISC, "Some update problem.");
-							JAPDialog.showErrorDialog(JAPController.getInstance().getViewWindow(),
+							JAPDialog.showErrorDialog(JAPController.getInstance().getCurrentView(),
 								JAPMessages.getString("downloadFailed") +
 								JAPMessages.getString("infoURL"), LogType.MISC);
 						}

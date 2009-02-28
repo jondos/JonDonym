@@ -436,7 +436,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				{
 					return a_url.toString();
 				}
-				public Container getHelpExtractionDisplayContext()
+				public Component getHelpExtractionDisplayContext()
 				{
 					return null;
 				}
@@ -750,7 +750,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 			return m_helpContext.getHelpContext();
 		}
 		
-		public Container getHelpExtractionDisplayContext() 
+		public Component getHelpExtractionDisplayContext() 
 		{
 			if (m_helpContext == null)
 			{

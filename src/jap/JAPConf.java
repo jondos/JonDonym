@@ -428,6 +428,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 	protected synchronized void doPack()
 	{
 		// synchronize with updateValues of AbstractJAPConfModul AWT thread so that updates and pack events do not overlap
+		boolean bError = false;
 		for (int i = 0; i < 2; i++)
 		{
 			pack();
@@ -437,19 +438,34 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 				LogHolder.log(LogLevel.ERR, LogType.GUI,
 							  "Could not pack config properly. Width is smaller than height! " +
 							  "Width:" + getSize().width + " Height:" + getSize().height);
-				//Thread.yield();
-				//continue;
+				//bError = true;
+				try 
+				{
+					wait(2000);
+					continue;
+				} 
+				catch (InterruptedException e) 
+				{
+					bError = true;
+				}
 			}
 			else if (getSize().width > getScreenBounds().width ||
 					 getSize().height > getScreenBounds().height)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.GUI, "Packed config view with illegal size! " +
-							  "Width:" + getSize().width + " Height:" + getSize().height +
-							  "\nSetting defaults...");
+							  getSize());
 
+				bError = true;
+			}
+			else
+			{
+				JAPModel.getInstance().setConfigSize(getSize());
+			}
+			if (bError)
+			{				
 				if (JAPModel.getInstance().getConfigSize() != null &&
-					JAPModel.getInstance().getConfigSize().width > 0 &&
-					JAPModel.getInstance().getConfigSize().height > 0)
+						JAPModel.getInstance().getConfigSize().width > 0 &&
+						JAPModel.getInstance().getConfigSize().height > 0)
 				{
 					setSize(JAPModel.getInstance().getConfigSize());
 				}
@@ -458,10 +474,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 					// default size for MacOS
 					setSize(new Dimension(786, 545));
 				}
-			}
-			else
-			{
-				JAPModel.getInstance().setConfigSize(getSize());
+				LogHolder.log(LogLevel.ERR, LogType.GUI, "Setting default config size to " + getSize());
 			}
 			break;
 		}

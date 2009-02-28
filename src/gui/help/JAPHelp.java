@@ -30,6 +30,8 @@ package gui.help;
 
 import java.net.URL;
 
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Frame;
 
 import java.awt.event.ActionEvent;
@@ -167,6 +169,26 @@ public abstract class JAPHelp
 	public abstract void loadCurrentContext();
 	
 	public abstract void setVisible(boolean a_bVisible);
+	
+	public final void setContext(final String a_context, final Component a_parent) 
+	{
+		if (a_context == null)
+		{
+			return;
+		}
+		m_helpContext = new IHelpContext()
+		{
+			public String getHelpContext()
+			{
+				return a_context;
+			}
+			
+			public Component getHelpExtractionDisplayContext()
+			{
+				return a_parent;
+			}
+		};
+	}
 	
 	public final void setContext(IHelpContext context) 
 	{

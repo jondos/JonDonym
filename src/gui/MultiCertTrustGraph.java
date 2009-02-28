@@ -27,7 +27,7 @@ public class MultiCertTrustGraph
 		Node parent, child;
 		boolean verified;
 		
-		for(int i=0; i<infos.length; i++)
+		for (int i=0; i<infos.length; i++)
 		{
 			root = infos[i].getRootCertificate();
 			op = infos[i].getSecondCertificate();
@@ -45,18 +45,17 @@ public class MultiCertTrustGraph
 			m_endNodes.put(end, new Node(end, verified));
 		}
 		
-		for(int i=0; i<infos.length; i++)
+		for (int i=0; i<infos.length; i++)
 		{
 			root = infos[i].getRootCertificate();
 			op = infos[i].getSecondCertificate();
 			end = infos[i].getFirstCertificate();
 			
-			if(op != null)
+			if (op != null)
 			{
 				child = (Node) m_opNodes.get(op);
-				if(root != null)
+				if (root != null)
 				{	//create root-op connection
-					
 					parent = (Node) m_rootNodes.get(root);
 					parent.addChild(child);
 					m_opNodes.remove(op);
@@ -98,7 +97,7 @@ public class MultiCertTrustGraph
 		Enumeration rootNodes = getRootNodes();
 		Node current;
 		
-		while(rootNodes.hasMoreElements())
+		while (rootNodes.hasMoreElements())
 		{
 			current = (Node) rootNodes.nextElement();
 			if(current.isTrusted())

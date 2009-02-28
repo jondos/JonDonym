@@ -33,6 +33,7 @@ import gui.JAPMessages;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.PasswordContentPane;
+import gui.help.JAPHelp;
 import jap.forward.JAPRoutingEstablishForwardedConnectionDialog;
 import jap.forward.JAPRoutingMessage;
 import jap.forward.JAPRoutingSettings;
@@ -211,6 +212,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	public static final String MSG_FORWARDER_REGISTRATION_ERROR_HEADER = JAPController.class.getName() + "_forwardErrorHead";
 	public static final String MSG_FORWARDER_REGISTRATION_ERROR_FOOTER = JAPController.class.getName() + "_forwardErrorFoot";
 	public static final String MSG_FORWARDER_REG_ERROR_SHORT = JAPController.class.getName() + "_forwardErrorShort";
+	public static final String MSG_READ_NEW_HELP = JAPController.class.getName() + "_readNewHelp";
 	
 	
 
@@ -249,6 +251,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private boolean m_bShowConfigAssistant = false;
 	private boolean m_bAssistantClicked = false;
 	private boolean m_bAllowPaidServices = true; 
+	private boolean m_bShowHelpAdvise = false;
 
 	private JobQueue m_anonJobQueue;
 
@@ -796,6 +799,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 				setAnonMode(JAPModel.isAutoConnect());
 			}
 			*/
+		}
+		
+		if (m_bShowHelpAdvise)
+		{
+			JAPDialog.showMessageDialog(getCurrentView(), 
+					JAPMessages.getString(MSG_READ_NEW_HELP, 
+							JAPConstants.aktVersion));
+			JAPHelp.getInstance().setContext("index", getCurrentView());
+			JAPHelp.getInstance().setVisible(true);
 		}
 	}
 
@@ -1607,20 +1619,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					JAPConstants.CONFIG_MOVE_TO_SYSTRAY);
 				b = XMLUtil.parseValue(tmp, false);
 				setMoveToSystrayOnStartup(b);
-				/*if (b)
-				  { ///todo: move to systray
-				 if (m_View != null)
-				 {
-				  b=m_View.hideWindowInTaskbar();
-				 }
-				  }
-				  if(!b)
-				  {
-				 m_View.setVisible(true);
-				   m_View.toFront();
 
-
-				  }*/
 				
 				tmp = (Element) XMLUtil.getFirstChildByName(elemMainWindow, JAPConstants.CONFIG_START_PORTABLE_FIREFOX);
 				JAPModel.getInstance().setStartPortableFirefox(XMLUtil.parseValue(tmp, true));
@@ -1636,8 +1635,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 				}
 				else
 				{
-					// TODO for backwards compatibility with versions prior to 00.10.062; otherwise view gets switched unwanted
+					// TODO for backwards compatibility with versions prior to 00.10.062; otherwise view gets switched unwanted					
 					strDefaultView = XMLUtil.parseValue(tmp, JAPConstants.CONFIG_NORMAL);
+					if (tmp == null)
+					{
+						m_bShowHelpAdvise = true;
+					}
 				}
 				
 				if (strDefaultView.equals(JAPConstants.CONFIG_SIMPLIFIED))
@@ -1742,7 +1745,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 						/** @todo implement password reader for console */
 						IMiscPasswordReader passwordReader;
-						final Hashtable cachedPasswords = new Hashtable();
 						final Hashtable completedAccounts = new Hashtable();
 						JAPDialog tempDialog = null;
 
@@ -4561,7 +4563,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			/* User has selected to download new version of JAP -> Download, Alert, exit program */
 			//store current configuration first
 			saveConfigFile();
-			JAPUpdateWizard wz = new JAPUpdateWizard(vi, getViewWindow());
+			JAPUpdateWizard wz = new JAPUpdateWizard(vi, getCurrentView());
 			/* we got the JAPVersionInfo from the infoservice */
 			/* Assumption: If we are here, the download failed for some resaons, otherwise the
 			 * program would quit
