@@ -1512,18 +1512,24 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 							}							
 						}
 						else
-						{
+						{							
 							resetHelpPath();
+							LogHolder.log(LogLevel.WARNING, LogType.GUI, 
+								"Help path resetted because we could not change it.");
 						}
 					}
 					else
 					{	
 						resetHelpPath();
+						LogHolder.log(LogLevel.WARNING, LogType.GUI, 
+							"Help path resetted because it was invalid.");
 					}
 				}
 				else
 				{
 					resetHelpPath();
+					LogHolder.log(LogLevel.WARNING, LogType.GUI, 
+						"Help path resetted because it was no directory.");
 				}
 			}
 			else
@@ -1626,7 +1632,7 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		{
 			return false;
 		}
-		if (!isHelpPathDefined() || m_bPortableHelp)
+		if (m_bPortableHelp)
 		{
 			return false;
 		}
@@ -1643,15 +1649,19 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	{			
 		boolean helpPathExists = m_helpPath != null;
 		
+		boolean bInstallationExists;
+		String strInstallationValid = null;
+		
 		/* if no storageManager is defined: don't check if installation exists */
 		boolean helpInstallationExists = 
-			(m_helpFileStorageManager.helpInstallationExists(m_helpPath) &&
-			helpPathValidityCheck(m_helpPath).equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS));
+			(bInstallationExists = m_helpFileStorageManager.helpInstallationExists(m_helpPath)) &&
+			((strInstallationValid = helpPathValidityCheck(m_helpPath)).equals(AbstractHelpFileStorageManager.HELP_JONDO_EXISTS));
 		
-		if(helpPathExists && !helpInstallationExists)
+		if (helpPathExists && !helpInstallationExists)
 		{
 			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Help path " + m_helpPath + 
-					" configured but no valid help could be found!");
+					" configured but no valid help could be found! Exists: " + bInstallationExists +
+					" Valid: " + strInstallationValid);
 			m_helpPath = null;
 			setChanged();
 		}

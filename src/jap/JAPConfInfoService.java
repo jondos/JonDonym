@@ -716,8 +716,10 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 			}
 		});
 
-		JButton settingsInfoServiceConfigBasicSettingsSetPreferredButton = new JButton(JAPMessages.getString(
+		final JButton settingsInfoServiceConfigBasicSettingsSetPreferredButton = 
+			new JButton(JAPMessages.getString(
 			"settingsInfoServiceConfigBasicSettingsSetPreferredButton"));
+		settingsInfoServiceConfigBasicSettingsSetPreferredButton.setEnabled(false);
 		settingsInfoServiceConfigBasicSettingsSetPreferredButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent a_event)
@@ -748,6 +750,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 			settingsInfoServiceConfigBasicSettingsRemoveButton = new JButton(JAPMessages.getString(
 				"settingsInfoServiceConfigBasicSettingsRemoveButton"));
+			settingsInfoServiceConfigBasicSettingsRemoveButton.setEnabled(false);
 			settingsInfoServiceConfigBasicSettingsRemoveButton.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent a_event)
@@ -775,6 +778,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 	    final JButton viewCertButton =
 			new JButton(JAPMessages.getString(MixDetailsDialog.MSG_CERTIFICATES), 
 					GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED));
+	    viewCertButton.setEnabled(false);
 		viewCertButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent a_event)
@@ -910,6 +914,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 								getPreferredInfoService();
 							settingsInfoServiceConfigBasicSettingsRemoveButton.setEnabled(selectedInfoService.
 								isUserDefined() && (!selectedInfoService.equals(preferredInfoService)));
+							settingsInfoServiceConfigBasicSettingsSetPreferredButton.setEnabled(
+									!selectedInfoService.equals(preferredInfoService));
 							m_selectedISCertPaths = selectedInfoService.getCertPath();
 							m_selectedISName = selectedInfoService.getName();
 						}

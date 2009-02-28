@@ -152,7 +152,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			super.setChanged();
 		}
 	}
-	private static InnerObservable m_trustModelObservable = new InnerObservable();
+	private static InnerObservable ms_trustModelObservable = new InnerObservable();
 	
 	private static final TrustModel CONTEXT_MODEL_PREMIUM;
 	private static final TrustModel CONTEXT_MODEL_PREMIUM_PRIVATE;
@@ -728,7 +728,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				
 			}
 			
-			m_trustModelObservable.setChanged();
+			ms_trustModelObservable.setChanged();
 			setCurrentTrustModel(temp.getId());
 		}
 	}
@@ -798,21 +798,29 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			m_trustAttributes = (Hashtable) a_trustModel.m_trustAttributes.clone();
 		}
+		synchronized (ms_trustModels)
+		{
+			if (ms_trustModels.contains(this))
+			{
+				ms_trustModelObservable.setChanged();
+				ms_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_CHANGED);
+			}
+		}
 	}
 
 	public static Observable getObservable()
 	{
-		return m_trustModelObservable;
+		return ms_trustModelObservable;
 	}
 
 	public static void addModelObserver(Observer a_observer)
 	{
-		m_trustModelObservable.addObserver(a_observer);
+		ms_trustModelObservable.addObserver(a_observer);
 	}
 
 	public static void deleteModelObserver(Observer a_observer)
 	{
-		m_trustModelObservable.deleteObserver(a_observer);
+		ms_trustModelObservable.deleteObserver(a_observer);
 	}
 
 	/**
@@ -841,8 +849,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			if (a_trustModel != null && !ms_trustModels.contains(a_trustModel))
 			{
 				ms_trustModels.addElement(a_trustModel);
-				m_trustModelObservable.setChanged();
-				m_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_ADDED);
+				ms_trustModelObservable.setChanged();
+				ms_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_ADDED);
 				return true;
 			}
 		}
@@ -860,8 +868,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			if (a_trustModel != null && ms_trustModels.removeElement(a_trustModel))
 			{
-				m_trustModelObservable.setChanged();
-				m_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_REMOVED);
+				ms_trustModelObservable.setChanged();
+				ms_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_REMOVED);
 				return a_trustModel;
 			}
 		}
@@ -1003,11 +1011,11 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				if (((TrustModel)ms_trustModels.elementAt(i)).getId() == a_id)
 				{
 					ms_currentTrustModel = (TrustModel)ms_trustModels.elementAt(i);
-					m_trustModelObservable.setChanged();
+					ms_trustModelObservable.setChanged();
 					break;
 				}
 			}
-			m_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_CHANGED);
+			ms_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_CHANGED);
 		}
 	}
 
@@ -1026,9 +1034,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			if (ms_currentTrustModel != a_trustModel)
 			{
 				ms_currentTrustModel = a_trustModel;
-				m_trustModelObservable.setChanged();
+				ms_trustModelObservable.setChanged();
 			}
-			m_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_CHANGED);
+			ms_trustModelObservable.notifyObservers(NOTIFY_TRUST_MODEL_CHANGED);
 		}
 	}
 

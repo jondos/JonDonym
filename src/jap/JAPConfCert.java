@@ -250,12 +250,12 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 		{
 			public void valueChanged(ListSelectionEvent e)
 			{
-
 				if (m_listmodelCertList.getSize() == 0 || m_listCert.getSelectedValue() == null)
 				{
 					m_shortInfoPanel.update((JAPCertificate)null);
 					m_bttnCertRemove.setEnabled(false);
 					m_bttnCertStatus.setEnabled(false);
+					m_bttnCertDetails.setEnabled(false);
 				}
 				else
 				{
@@ -273,6 +273,7 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 					m_bttnCertStatus.setEnabled(true);
 					/* if the cert is not removable, the Remove Button is not enabled */
 					m_bttnCertRemove.setEnabled(!j.isNotRemovable());
+					m_bttnCertDetails.setEnabled(true);
 				}
 			}
 		});
@@ -337,6 +338,7 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 		});
 
 		m_bttnCertRemove = new JButton(JAPMessages.getString("certBttnRemove"));
+		m_bttnCertRemove.setEnabled(false);
 		m_bttnCertRemove.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -357,6 +359,7 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 				{
 					m_bttnCertRemove.setEnabled(false);
 					m_bttnCertStatus.setEnabled(false);
+					m_bttnCertDetails.setEnabled(false);
 					m_shortInfoPanel.update((JAPCertificate)null);
 				}
 				else
@@ -371,7 +374,8 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 		});
 
 		m_bttnCertStatus = new JButton(JAPMessages.getString("certBttnEnable"));
-		m_bttnCertStatus.addActionListener(new ActionListener()
+		m_bttnCertStatus.setEnabled(false);
+		m_bttnCertStatus.addActionListener(new ActionListener()		
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -392,12 +396,18 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 		});
 
 	    m_bttnCertDetails = new JButton(JAPMessages.getString(MSG_DETAILS));
+	    m_bttnCertDetails.setEnabled(false);
 		m_bttnCertDetails.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				CertificateInfoStructure info = (CertificateInfoStructure)m_listCert.getSelectedValue();
+				if (info == null)
+				{
+					return;
+				}
 				CertDetailsDialog dialog = new CertDetailsDialog(getRootPanel().getParent(),
-					((CertificateInfoStructure)m_listCert.getSelectedValue()).getCertificate().getX509Certificate(),
+						info.getCertificate().getX509Certificate(),
 					true, JAPMessages.getLocale());
 					dialog.pack();
 					dialog.setVisible(true);
