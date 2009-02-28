@@ -77,12 +77,12 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 	/**
 	 * sets the specified path for external installation of the help files
 	 * performs no validityCheck, because it is only called by
-	 * handleHelpPathChanged, which is invkoed by the JAPModel, which itself 
+	 * handleHelpPathChanged, which is invoked by the JAPModel, which itself 
 	 * performs a validity check
 	 */
 	private void setHelpPath(String helpPath)
 	{
-		this.m_helpPath = helpPath;
+		m_helpPath = helpPath;
 	}
 	
 	/**
@@ -204,7 +204,8 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 					else
 					{
 						//help directory already exists in specified folder
-						File jondoHelpFileVersion = new File(helpDir.getPath()+ HELP_VERSION_FILE);
+						File jondoHelpFileVersion = 
+							new File(helpDir.getPath() + File.separator +  HELP_VERSION_FILE);
 						if(a_bIgnoreExistingHelpDir || jondoHelpFileVersion.exists())
 						{
 							try
@@ -238,6 +239,9 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 						}
 						else
 						{
+							LogHolder.log(LogLevel.WARNING, LogType.GUI, 
+									"Found help directory without htis version file: " +
+									jondoHelpFileVersion);
 							return HELP_DIR_EXISTS;
 						}
 					}
@@ -395,7 +399,13 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 		{
 			return false;
 		}
-		return helpFolder.exists();
+		if (helpFolder.exists())
+		{
+			return true;
+		}
+		LogHolder.log(LogLevel.WARNING, LogType.GUI, "Checked for help folder " + helpFolder +
+				" but it did not exist");
+		return false;
 	}
 	
 	/**

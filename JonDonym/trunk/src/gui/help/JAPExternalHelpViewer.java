@@ -120,14 +120,17 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			synchronized (SYNC_INSTALL)
 			{
 				m_bInstallationDialogShown = true;		
-				
+				boolean bDialogShown = false;
 				if (!m_helpModel.isHelpPathDefined() && 
-					(!m_helpModel.isHelpPathChangeable() || !showInstallDialog(container)))
+					(!m_helpModel.isHelpPathChangeable() || 
+						!(bDialogShown = showInstallDialog(container))))
 				{			
 					m_bInstallationDialogShown = false;
 					
 					LogHolder.log(LogLevel.ERR, LogType.GUI, 
-					"Cannot show help externally: Help installation failed");
+						"Cannot show help externally: Help installation failed " +
+						"(changeable: " + m_helpModel.isHelpPathChangeable() + 
+						" showDialog: " + bDialogShown + ")");
 					m_alternativeHelp.setContext(getHelpContext());
 					m_alternativeHelp.setVisible(a_bVisible);
 					return;

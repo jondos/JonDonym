@@ -1105,7 +1105,7 @@ final class JAPConfUI extends AbstractJAPConfModule
 			workerPane.updateDialog();
 			dialog.setResizable(false);
 			dialog.setVisible(true);
-			if(workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
+			if (workerPane.getProgressStatus() != ProgressCapsule.PROGRESS_FINISHED)
 			{			
 				resetHelpPath();
 				JAPDialog.showErrorDialog(JAPConf.getInstance(), 

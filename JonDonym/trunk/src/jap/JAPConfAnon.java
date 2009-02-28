@@ -565,10 +565,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 				else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 2)
 				{
+					m_filterAllMixes.setEnabled(false);
 					m_filterInternationalGroup.setSelected(m_filterAtLeast2Countries.getModel(), true);
 				}
 				else if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 3)
 				{
+					m_filterAtLeast2Mixes.setEnabled(false);
 					m_filterInternationalGroup.setSelected(m_filterAtLeast3Countries.getModel(), true);
 				}
 			}
@@ -1812,18 +1814,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_trustModelCopy.setAttribute(TrustModel.DelayAttribute.class, TrustModel.TRUST_IF_AT_MOST, convertDelayValue(m_filterLatencySlider.getValue(), true));
 			
 			if(m_filterNameField.getText().length() > 0)
+			{
 				m_trustModelCopy.setName(m_filterNameField.getText());
+			}
+			
+			TrustModel.getCurrentTrustModel().copyFrom(m_trustModelCopy);
 			
 			// Display a warning if the new model won't have any trusted cascades
-			if(m_trustModelCopy.hasTrustedCascades())
-			{
-				TrustModel.getCurrentTrustModel().copyFrom(m_trustModelCopy);
-			}
-			else
+			if(!m_trustModelCopy.hasTrustedCascades())
 			{
 				JAPDialog.showWarningDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_NO_CASCADES));
-				m_filterAllMixes.setEnabled(true);
-				m_filterAtLeast2Mixes.setEnabled(true);
 			}
 		}
 		catch(NumberFormatException ex)
