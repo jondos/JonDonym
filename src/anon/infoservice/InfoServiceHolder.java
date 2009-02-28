@@ -372,6 +372,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			int askInfoServices = 1;
 			currentInfoService = getPreferredInfoService();
 			Vector infoServiceList = null;
+			
 			if (m_changeInfoServices)
 			{
 				/* get the whole infoservice list */
@@ -383,12 +384,15 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				for (int i = 0; i <  copyList.size(); i++)
 				{
 					isTemp = (InfoServiceDBEntry)copyList.elementAt(i);
-					if ((isTemp.getCertPath() != null && (!isTemp.getCertPath().isVerified()) ||
-						(SignatureVerifier.getInstance().isCheckSignatures() &&
-								SignatureVerifier.getInstance().isCheckSignatures(
-									SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE) && !isTemp.isValid())))
+					if (SignatureVerifier.getInstance().isCheckSignatures() &&
+							SignatureVerifier.getInstance().isCheckSignatures(
+									SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
 					{
-						infoServiceList.removeElement(isTemp);
+						if (isTemp.getCertPath() != null && 
+							(!isTemp.getCertPath().isVerified() || !isTemp.isValid()))
+						{
+							infoServiceList.removeElement(isTemp);
+						}
 					}
 				}
 			}

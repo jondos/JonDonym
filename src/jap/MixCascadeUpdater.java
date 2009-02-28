@@ -148,20 +148,46 @@ public class MixCascadeUpdater extends AbstractDatabaseUpdater
 
 	protected Hashtable getUpdatedEntries(Hashtable a_entriesToUpdate)
 	{
-		Hashtable updated = Database.getInstance(MixCascade.class).getEntryHash();
-		Enumeration enumCascades = updated.elements();
+		Hashtable updatedCascades;
+		Hashtable cascadesInDB = Database.getInstance(MixCascade.class).getEntryHash();
+		Enumeration enumCascades = cascadesInDB.elements();
 		MixCascade currentCascade;
+		
+		// fetch the current status entries first for a visual speed-up
+		updatedCascades = new Hashtable();
+		while (enumCascades.hasMoreElements())
+		{			
+			currentCascade = (MixCascade)enumCascades.nextElement();
+			if (fetchCurrentStatus(currentCascade))
+			{
+				updatedCascades.put(currentCascade.getId(), currentCascade);
+			}
+		}
+		cascadesInDB = updatedCascades;
+		
+		updatedCascades = getUpdatedEntries_internal(a_entriesToUpdate);
+		enumCascades = updatedCascades.elements();
 		while (enumCascades.hasMoreElements())
 		{
 			currentCascade = (MixCascade)enumCascades.nextElement();
-			if (!currentCascade.isUserDefined())
+			if (!cascadesInDB.contains(currentCascade))
 			{
-				Database.getInstance(StatusInfo.class).update(
-								currentCascade.fetchCurrentStatus(UPDATE_INTERVAL_MS * KEEP_ENTRY_FACTOR));
+				fetchCurrentStatus(currentCascade);
 			}
 		}
-
-		return getUpdatedEntries_internal(a_entriesToUpdate);
+		
+		return updatedCascades;
+	}
+	
+	private boolean fetchCurrentStatus(MixCascade a_cascade)
+	{
+		StatusInfo info = null;
+		if (!a_cascade.isUserDefined())
+		{
+			info = a_cascade.fetchCurrentStatus(UPDATE_INTERVAL_MS * KEEP_ENTRY_FACTOR);
+			return Database.getInstance(StatusInfo.class).update(info);
+		}
+		return info != null;
 	}
 
 	protected Hashtable getUpdatedEntries_internal(Hashtable a_entriesToUpdate)
