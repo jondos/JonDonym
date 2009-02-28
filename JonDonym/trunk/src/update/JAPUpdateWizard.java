@@ -34,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.awt.Component;
 import java.awt.Container;
 
 import platform.AbstractOS;
@@ -132,7 +133,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		this(info, (Object)a_dialog);
 	}
 
-	public JAPUpdateWizard(JAPVersionInfo info, Container a_container)
+	public JAPUpdateWizard(JAPVersionInfo info, Component a_container)
 	{
 		this(info, (Object)a_container);
 	}
@@ -147,7 +148,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		}
 		else
 		{
-			host = new BasicWizardHost((Container)a_parent, this);
+			host = new BasicWizardHost((Component)a_parent, this);
 		}
 		setHost(host);
 		m_Status = UPDATESTATUS_ABORTED;

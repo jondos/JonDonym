@@ -305,11 +305,11 @@ public class MultiCertPath implements IXMLEncodable
 		
 		synchronized (m_certPaths)
 		{
-			for(int i=0; i < m_certPaths.length; i++)
+			for (int i=0; i < m_certPaths.length; i++)
 			{
 				if (!this.needsVerification() || m_certPaths[i].verify())
 				{
-					if (count == 0 || // count at least 1 verified path
+					if (//count == 0 || // count at least 1 verified path
 						m_certPaths[i].checkValidity(new Date()))
 					{
 						count++;

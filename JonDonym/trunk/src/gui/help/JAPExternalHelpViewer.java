@@ -31,6 +31,7 @@ import gui.dialog.JAPDialog;
 import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
 
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Frame;
 import java.net.URL;
@@ -92,7 +93,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 			m_alternativeHelp.setVisible(a_bVisible);
 			return;
 		}
-		Container container = context.getHelpExtractionDisplayContext();
+		Component container = context.getHelpExtractionDisplayContext();
 		
 		/* If no external help path is specified and no help is installed: 
 		 * open dialog to ask the user
@@ -160,7 +161,7 @@ public final class JAPExternalHelpViewer extends JAPHelp
 		}
 	}	
 	
-	private boolean showInstallDialog(Container a_container)
+	private boolean showInstallDialog(Component a_container)
 	{
 		if (m_helpModel.getHelpPath() == null || !m_helpModel.isHelpPathChangeable())
 		{

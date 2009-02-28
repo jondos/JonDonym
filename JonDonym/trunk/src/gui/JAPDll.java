@@ -517,7 +517,7 @@ final public class JAPDll {
 		args[0] = JAP_DLL;
 		args[1] = getUpdatePath();
 		int answer =
-			JAPDialog.showConfirmDialog(JAPController.getInstance().getViewWindow(),
+			JAPDialog.showConfirmDialog(JAPController.getInstance().getCurrentView(),
 										JAPMessages.getString(MSG_DLL_UPDATE_FAILED, args) + "<br>&nbsp;",
 										JAPMessages.getString(JAPDialog.MSG_TITLE_ERROR),
 										JAPDialog.OPTION_TYPE_OK_CANCEL, JAPDialog.MESSAGE_TYPE_WARNING,

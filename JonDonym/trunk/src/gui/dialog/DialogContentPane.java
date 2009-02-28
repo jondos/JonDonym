@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.Vector;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -1407,7 +1408,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		return m_helpContext.getHelpContext();
 	}
 
-	public Container getHelpExtractionDisplayContext() 
+	public Component getHelpExtractionDisplayContext() 
 	{
 		if (m_helpContext == null)
 		{

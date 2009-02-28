@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 package gui.wizard;
 
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Frame;
@@ -71,7 +72,7 @@ public class BasicWizardHost implements WizardHost,ActionListener
 			this((Object)a_dialog, a_wizard);
 		}
 
-		public BasicWizardHost(Container a_dialog, Wizard a_wizard)
+		public BasicWizardHost(Component a_dialog, Wizard a_wizard)
 		{
 			this((Object)a_dialog, a_wizard);
 		}
@@ -89,7 +90,7 @@ public class BasicWizardHost implements WizardHost,ActionListener
 				}
 				else
 				{
-					m_Dialog = new JAPDialog((Container)parent, wizard.getWizardTitle(), true);
+					m_Dialog = new JAPDialog((Component)parent, wizard.getWizardTitle(), true);
 				}
 				GridBagLayout gridBag= new GridBagLayout();
 				GridBagConstraints c = new GridBagConstraints();

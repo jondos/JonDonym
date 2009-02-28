@@ -27,6 +27,7 @@
  */
 package gui;
 
+import java.awt.Component;
 import java.awt.Container;
 import java.net.URL;
 
@@ -44,14 +45,14 @@ public final class JAPHelpContext
 		return createHelpContext(a_context, null);
 	}
 	
-	public static IHelpContext createHelpContext(String a_context, Container a_container)
+	public static IHelpContext createHelpContext(String a_context, Component a_container)
 	{
-		final Container container = a_container;
+		final Component container = a_container;
 		final String context = a_context;
 		
 		return new IHelpContext()
 		{
-			public Container getHelpExtractionDisplayContext() 
+			public Component getHelpExtractionDisplayContext() 
 			{
 				return container;
 			}
@@ -69,7 +70,7 @@ public final class JAPHelpContext
 	public interface IHelpContext
 	{
 		String getHelpContext();
-		Container getHelpExtractionDisplayContext();
+		Component getHelpExtractionDisplayContext();
 	}
 	
 	public interface IURLHelpContext extends IHelpContext
@@ -77,6 +78,6 @@ public final class JAPHelpContext
 		String getURLMessage();
 		URL getHelpURL();
 		String getHelpContext();
-		Container getHelpExtractionDisplayContext();
+		Component getHelpExtractionDisplayContext();
 	}
 }
