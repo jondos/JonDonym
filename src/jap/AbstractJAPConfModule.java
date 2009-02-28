@@ -28,6 +28,7 @@
 
 package jap;
 
+import java.awt.Component;
 import java.awt.Container;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -354,7 +355,7 @@ public abstract class AbstractJAPConfModule implements JAPHelpContext.IHelpConte
 		}
 	}
 
-	public Container getHelpExtractionDisplayContext()
+	public Component getHelpExtractionDisplayContext()
 	{
 		return JAPConf.getInstance().getContentPane();
 	}

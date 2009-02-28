@@ -539,7 +539,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 			{
 				m_helpContext = new JAPHelpContext.IURLHelpContext()
 				{
-					public Container getHelpExtractionDisplayContext() 
+					public Component getHelpExtractionDisplayContext() 
 					{
 						return DialogContentPane.this.getContentPane();
 					}
@@ -564,7 +564,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 			{
 				m_helpContext = new JAPHelpContext.IHelpContext()
 				{
-					public Container getHelpExtractionDisplayContext() 
+					public Component getHelpExtractionDisplayContext() 
 					{
 						return DialogContentPane.this.getContentPane();
 					}
