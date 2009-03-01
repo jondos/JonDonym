@@ -88,6 +88,11 @@ public abstract class AbstractHelpFileStorageManager
 		}
 	}
 	
+	public boolean extractHelpFiles(String a_extractionPath)
+	{
+		return false;
+	}
+	
 	/**
 	 * Performs the specific file storage operation to maintain a consistent file storage state
 	 * when the help path changes

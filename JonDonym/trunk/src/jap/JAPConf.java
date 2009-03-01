@@ -429,51 +429,65 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 	{
 		// synchronize with updateValues of AbstractJAPConfModul AWT thread so that updates and pack events do not overlap
 		boolean bError = false;
-
-		pack();
-		if (getSize().width < getSize().height)
+		boolean bRetry = true;
+		
+		while (!bError)
 		{
-			LogHolder.log(LogLevel.ERR, LogType.GUI,
-						  "Could not pack config properly. Width is smaller than height! " +
-						  "Width:" + getSize().width + " Height:" + getSize().height);
-			bError = true;
-			/*
-			try 
+			pack();
+			if (getSize().width < getSize().height)
 			{
-				wait(2000);
-				continue;
-			} 
-			catch (InterruptedException e) 
-			{
+				LogHolder.log(LogLevel.ERR, LogType.GUI,
+							  "Could not pack config properly. Width is smaller than height! " +
+							  "Width:" + getSize().width + " Height:" + getSize().height);
 				bError = true;
-			}*/
-		}
-		else if (getSize().width > getScreenBounds().width ||
-				 getSize().height > getScreenBounds().height)
-		{
-			LogHolder.log(LogLevel.ERR, LogType.GUI, "Packed config view with illegal size! " +
-						  getSize());
-
-			bError = true;
-		}
-		else
-		{
-			JAPModel.getInstance().setConfigSize(getSize());
-		}
-		if (bError)
-		{				
-			if (JAPModel.getInstance().getConfigSize() != null &&
-					JAPModel.getInstance().getConfigSize().width > 0 &&
-					JAPModel.getInstance().getConfigSize().height > 0)
+				/*
+				try 
+				{
+					wait(2000);
+					continue;
+				} 
+				catch (InterruptedException e) 
+				{
+					bError = true;
+				}*/
+			}
+			else if (getSize().width > getScreenBounds().width ||
+					 getSize().height > getScreenBounds().height)
 			{
-				setSize(JAPModel.getInstance().getConfigSize());
+				LogHolder.log(LogLevel.ERR, LogType.GUI, "Packed config view with illegal size! " +
+							  getSize());
+	
+				bError = true;
 			}
 			else
 			{
-				// default size for MacOS
-				setSize(new Dimension(786, 545));
+				JAPModel.getInstance().setConfigSize(getSize());
 			}
-			LogHolder.log(LogLevel.ERR, LogType.GUI, "Setting default config size to " + getSize());
+			
+			if (bError)
+			{	
+				m_moduleSystem.revalidate();
+				if (bRetry)
+				{
+					bError = false;
+					bRetry = false;
+					continue;
+				}
+				
+				if (JAPModel.getInstance().getConfigSize() != null &&
+						JAPModel.getInstance().getConfigSize().width > 0 &&
+						JAPModel.getInstance().getConfigSize().height > 0)
+				{
+					setSize(JAPModel.getInstance().getConfigSize());
+				}
+				else
+				{
+					// default size for MacOS
+					setSize(new Dimension(786, 545));
+				}
+				LogHolder.log(LogLevel.ERR, LogType.GUI, "Setting default config size to " + getSize());
+			}
+			break;
 		}
 		
 	}

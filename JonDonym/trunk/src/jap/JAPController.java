@@ -44,8 +44,6 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -353,7 +351,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_Model = JAPModel.getInstance();
 	}
 	
-	public void start() {
+	public void start() 
+	{
 		// simulate database distributor and suppress distributor warnings
 		Database.registerDistributor(new IDistributor()
 		{
@@ -4358,8 +4357,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 				}
 				else
 				{
-					JAPDialog.showErrorDialog(getCurrentView(), JAPMessages.getString("errorConnectingInfoService"),
+					if (getCurrentView() != null)
+					{
+						JAPDialog.showErrorDialog(getCurrentView(), JAPMessages.getString("errorConnectingInfoService"),
 											  LogType.NET);
+					}
+					else
+					{
+						LogHolder.log(LogLevel.EXCEPTION, LogType.NET, JAPMessages.getString("errorConnectingInfoService"));
+					}
 				}
 			}
 			return false;
@@ -4630,6 +4636,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		synchronized (SYNC_VIEW)
 		{
+			if (m_finishSplash != null && m_finishSplash instanceof Component &&
+				((Component)m_finishSplash).isVisible())
+			{
+				return (Component)m_finishSplash;
+			}
 			Window view = getViewWindow();
 			if (view instanceof AbstractJAPMainView)
 			{

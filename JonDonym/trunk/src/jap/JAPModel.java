@@ -1588,6 +1588,11 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		}
 	}
 	
+	public boolean extractHelpFiles(String a_extractionPath)
+	{
+		return m_helpFileStorageManager.extractHelpFiles(a_extractionPath);
+	}
+	
 	protected synchronized void resetHelpPath()
 	{
 		String oldHelpPath = m_helpPath;

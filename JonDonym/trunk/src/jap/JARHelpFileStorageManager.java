@@ -51,9 +51,8 @@ import anon.util.ZipArchiver;
  * @author Simon Pecher
  *
  */
-public final class JARHelpFileStorageManager extends AbstractHelpFileStorageManager  {
-	
-
+public final class JARHelpFileStorageManager extends AbstractHelpFileStorageManager  
+{
 	public final static String HELP_VERSION_NODE = "jondohelp";
 	public final static String HELP_VERSION_ATTRIBUTE = "version";
 	
@@ -122,7 +121,6 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 	{
 		String strPath;
 		int index;
-		File fileTmp;
 		
 		if(a_absolutePath != null)
 		{
@@ -130,19 +128,18 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 			
 			if (a_absolutePath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
 			{
-				// this is definitely a JonDo application folder
+				// this definitely is a JonDo application folder
 				a_bIgnoreExistingHelpDir = true;
 			}
 			
-			if(hpFile.exists())
+			if (hpFile.exists())
 			{
 				if(hpFile.isDirectory())
 				{
 					strPath = a_absolutePath;
 					while ((index = strPath.indexOf(HELP_FOLDER)) > 0)
 					{
-						fileTmp = new File(strPath.substring(0, index) + HELP_FOLDER);
-						if (!fileTmp.exists())
+						if (!new File(strPath.substring(0, index) + HELP_FOLDER).exists())
 						{
 							LogHolder.log(LogLevel.EMERG, LogType.MISC, 
 									"Existing help directory was not found!");
@@ -182,7 +179,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 							HELP_FOLDER + File.separator);
 					
 					
-					if(!helpDir.exists())
+					if (!helpDir.exists())
 					{
 						try
 						{							
@@ -240,7 +237,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 						else
 						{
 							LogHolder.log(LogLevel.WARNING, LogType.GUI, 
-									"Found help directory without htis version file: " +
+									"Found help directory without this version file: " +
 									jondoHelpFileVersion);
 							return HELP_DIR_EXISTS;
 						}
@@ -269,6 +266,28 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 	public Observable getStorageObservable()
 	{
 		return m_archiver;
+	}
+	
+	public boolean extractHelpFiles(String a_extractionPath)
+	{
+		if (a_extractionPath == null)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, 
+					"Invalid directory for help extraction: " + a_extractionPath);
+			return false;
+		}
+		boolean installationSuccessful = 
+			m_archiver.extractArchive(HELP_FOLDER + "/", a_extractionPath);
+		if(installationSuccessful)
+		{
+			createHelpVersionDoc(a_extractionPath);
+			return true;
+		}
+		else
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Extracting help files was not succesful.");
+			return false;
+		}
 	}
 	
 	/**
@@ -306,32 +325,21 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 				return true;
 			}
 		}
-			
-		boolean installationSuccessful = m_archiver.extractArchive(HELP_FOLDER + "/", m_helpPath);
-		if(installationSuccessful)
-		{
-			createHelpVersionDoc();
-		}
-		else
-		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC, "Extracting help files was not succesful.");
-			return false;
-		}
 		
-		return installationSuccessful;
+		return extractHelpFiles(m_helpPath);
 	}
 	
 	/**
 	 * creates an XML document containing the version of the JonDo help which has to match the actual JonDo version
 	 */
-	private void createHelpVersionDoc()
+	private static void createHelpVersionDoc(String a_extractionPath)
 	{
 		Document helpVersionDoc = XMLUtil.createDocument();
 		Element helpVersionNode = helpVersionDoc.createElement(HELP_VERSION_NODE);
 		XMLUtil.setAttribute(helpVersionNode, HELP_VERSION_ATTRIBUTE, JAPConstants.aktVersion);
 		helpVersionDoc.appendChild(helpVersionNode);
 		
-		File versionInfoFile = new File(m_helpPath+File.separator+ HELP_FOLDER + File.separator +HELP_VERSION_FILE);
+		File versionInfoFile = new File(a_extractionPath+File.separator+ HELP_FOLDER + File.separator +HELP_VERSION_FILE);
 		try
 		{
 			XMLUtil.write(helpVersionDoc, versionInfoFile);

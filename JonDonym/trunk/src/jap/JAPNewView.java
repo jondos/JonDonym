@@ -211,8 +211,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String IMG_METER_DEACTIVATED = "anonym-o-meter/JAP.deactivated.anim{0}.gif";
 	private static final String IMG_METER_CONNECTING = "anonym-o-meter/JAP.connecting.anim.gif";
 	
-	private final Object FONT_UPDATE = new Object();
-	private boolean m_bFontsUpdated = false;
 	private final JLabel DEFAULT_LABEL = new JLabel();
 
 	//private JLabel meterLabel;
@@ -657,28 +655,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 			});
 		}	
-		m_comboAnonServices.addItemListener(new ItemListener()
-		{
-			public void itemStateChanged(ItemEvent e)
-			{
-				final MixCascade cascade = (MixCascade) m_comboAnonServices.getSelectedItem();
 
-				if (m_bIgnoreAnonComboEvents)
-				{
-					return;
-				}
-				if (e.getStateChange() == ItemEvent.SELECTED)
-				{
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							m_Controller.setCurrentMixCascade(cascade);
-						}
-					});
-				}
-			}
-		});
 
 		c1.insets = new Insets(0, 5, 0, 0);
 		c1.gridwidth = 3;
@@ -1246,14 +1223,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 
 
-		/*
-		* Do not use - for some strange reason this line would prevent Jap from connecting to any pay cascade
-		  //make sure to be noticed of new or deleted accounts
-	      //PayAccountsFile.getInstance().addPaymentListener(this);
-	    */
 
-	    PayAccountsFile.getInstance().addMessageListener(this);
-		PayAccountsFile.fireKnownMessages();
 
 
 
@@ -1359,21 +1329,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 		});
 
-		update(null, new JAPModel.FontResize(0, JAPModel.getInstance().getFontSize()));
-
-		/*Dimension d = super.getPreferredSize();
-		m_iPreferredWidth = Math.max(d.width, Math.max(m_flippingpanelOwnTraffic.getPreferredSize().width,
-			Math.max(
-				Math.max(m_panelAnonService.getPreferredSize().width,
-						 m_flippingpanelForward.getPreferredSize().width),
-				m_flippingpanelAnon.getPreferredSize().width)));*/
-		if (!JAPModel.isInfoServiceDisabled())
-		{
-			fetchMixCascadesAsync(false);
-		}
+	
 
 		updateFonts();		
-		setOptimalSize();
+		setOptimalSize();		
+		
 		updateValues(true);
 		GUIUtils.centerOnScreen(this);
 		GUIUtils.restoreLocation(this, JAPModel.getMainWindowLocation());
@@ -1402,7 +1362,40 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_mainMovedAdapter = new ComponentMovedAdapter();
 		m_helpMovedAdapter = new ComponentMovedAdapter();
 		m_configMovedAdapter = new ComponentMovedAdapter();
-		addComponentListener(m_mainMovedAdapter);		
+		addComponentListener(m_mainMovedAdapter);
+		
+		/*
+		* Do not use - for some strange reason this line would prevent Jap from connecting to any pay cascade
+		  //make sure to be noticed of new or deleted accounts
+	      //PayAccountsFile.getInstance().addPaymentListener(this);
+	    */
+	    PayAccountsFile.getInstance().addMessageListener(this);
+		PayAccountsFile.fireKnownMessages();
+		
+		m_comboAnonServices.addItemListener(new ItemListener()
+		{
+			public void itemStateChanged(ItemEvent e)
+			{
+				final MixCascade cascade = (MixCascade) m_comboAnonServices.getSelectedItem();
+
+				if (m_bIgnoreAnonComboEvents)
+				{
+					return;
+				}
+				if (e.getStateChange() == ItemEvent.SELECTED)
+				{
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							m_Controller.setCurrentMixCascade(cascade);
+						}
+					});
+				}
+			}
+		});
+		
+		
 		
 		if(JAPHelp.getHelpDialog() != null)
 		{
@@ -1417,6 +1410,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_dlgConfig = new JAPConf(JAPNewView.this, m_bWithPayment);
 				m_dlgConfig.addComponentListener(m_configMovedAdapter);
 			}
+		}
+		
+		if (!JAPModel.isInfoServiceDisabled())
+		{
+			fetchMixCascadesAsync(false);
 		}
 	}
 
@@ -1960,34 +1958,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 			}
 		}
-		/*
-		else if (a_message instanceof JAPModel.FontResize && a_message != null)
-		{
-			run = new Runnable()
-			{
-				public void run()
-				{
-					synchronized (FONT_UPDATE)
-					{
-						if (!m_bFontsUpdated)
-						{
-							m_bFontsUpdated = true;
-							// preload meter icons
-							for (int i = 0; i < METERFNARRAY.length; i++)
-							{
-								GUIUtils.loadImageIcon(METERFNARRAY[i], true, true);
-							}
-							SwingUtilities.updateComponentTreeUI(view);
-							SwingUtilities.updateComponentTreeUI(DEFAULT_LABEL);
-							updateFonts();
-							onUpdateValues();
-
-							setOptimalSize();
-						}
-					}
-				}
-			};
-		}*/
 		else if (a_observable instanceof TrustModel.InnerObservable)
 		{
 			m_bTrustChanged = true;
@@ -2624,12 +2594,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	{
 		boolean bShow = true;
 		if (a_bVisible && !isVisible())
-		{
+		{			
 			bShow = !JAPDll.showWindowFromTaskbar();
 		}
 
 		if (bShow)
 		{
+			updateValues(false); // for preventing strange pack operation for combobox on startup
 			super.setVisible(a_bVisible);
 		}
 	}
@@ -3070,8 +3041,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
 					    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
 					{
-						m_labelSpeed.setText("\u2265 " + JAPUtil.formatKbitPerSecValueWithUnit(value, 
-								JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+						if (System.getProperty("java.version").compareTo("1.4") >= 0)
+						{
+							m_labelSpeed.setText("\u2265 " + JAPUtil.formatKbitPerSecValueWithUnit(value, 
+									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+						}
+						else
+						{
+							m_labelSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value, 
+									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+						}						
 					}
 					else if (best == value || best == Integer.MAX_VALUE)
 					{
@@ -3129,7 +3108,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 					if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
 					{
-						m_labelDelay.setText("\u2264 " + value + " ms");
+						if (System.getProperty("java.version").compareTo("1.4") >= 0 )
+						{
+							m_labelDelay.setText("\u2264 " + value + " ms");
+						}
+						else
+						{
+							m_labelDelay.setText("< " + value + " ms");
+						}
+						
 					}
 					else if(best == value || best == 0)
 					{
@@ -3299,6 +3286,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_comboAnonServices.setEnabled(!JAPModel.getInstance().getRoutingSettings().
 											   isConnectViaForwarder());
 			}
+			m_comboAnonServices.validate(); // for JRE 1.3
 			validate();
 		}
 		catch (Throwable t)
