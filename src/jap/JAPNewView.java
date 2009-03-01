@@ -3286,7 +3286,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_comboAnonServices.setEnabled(!JAPModel.getInstance().getRoutingSettings().
 											   isConnectViaForwarder());
 			}
-			m_comboAnonServices.validate(); // for JRE 1.3
+			//m_comboAnonServices.revalidate(); // for JRE 1.3
 			validate();
 		}
 		catch (Throwable t)
