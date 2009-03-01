@@ -208,6 +208,30 @@ public class JAP
 			System.exit(0);
 		}
 
+		
+		if (isArgumentSet("--extractHelp"))
+		{
+			if (getArgumentValue("--extractHelp") == null)
+			{
+				setArgument("--help", null);
+			}
+			else
+			{
+				if (JAPModel.getInstance().extractHelpFiles(getArgumentValue("--extractHelp")))
+				{
+					System.out.println("Help files were extracted to the directory " + 
+							getArgumentValue("--extractHelp") + ".");
+				}
+				else
+				{
+					System.out.println("Error: Help files could not be extracted to the directory " + 
+							getArgumentValue("--extractHelp") + "!");
+				}
+				System.exit(0);
+			}
+		}		
+		
+		
 		if (isArgumentSet("--help") || isArgumentSet("-h"))
 		{
 			System.out.println("Usage:");
@@ -226,11 +250,13 @@ public class JAP
 			System.out.println("--portable [path_to_browser] Tell JonDo that it runs in a portable environment.");
 			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
 			System.out.println("--portable-help-path         Path of external html help files for portable use.");
+			System.out.println("--extractHelp {directory}    Extract the internal help files to a directory.");
 			System.out.println("--config, -c {Filename}:     Force JonDo to use a specific configuration file.");
 			System.out.println("--context {Context}:         Start JonDo with a specific service provider context.");
 			System.exit(0);
 		}
 
+		
 		if (isArgumentSet("-console") || isArgumentSet("--console"))
 		{
 			bConsoleOnly = true;
@@ -1012,6 +1038,11 @@ public class JAP
 		return value;
 	}
 
+	private void setArgument(String a_argument, String a_value)
+	{
+		m_arstrCmdnLnArgs.put(a_argument, a_value);
+	}
+	
 	private boolean isArgumentSet(String a_argument)
 	{
 		return m_arstrCmdnLnArgs.containsKey(a_argument);
@@ -1049,27 +1080,50 @@ public class JAP
 			int index;
 			String jarpath = getArgumentValue("--jar-path");
 			String pFFHelpPathTmp;
+			String strUpwardMove = ".." + File.separator;
 			
 			try
 			{
 				if (m_temp != null && m_temp.length > 0 && jarpath != null)
-				{					
-					pFFHelpPathTmp = m_temp[0];					
-					index = pFFHelpPathTmp.indexOf(jarpath);
-					if (index > 0)
-					{	
-						pFFHelpPathTmp = pFFHelpPathTmp.substring(0, index);
-						String[] dirs = new File(pFFHelpPathTmp).list();						
-						for (int i = 0; i < dirs.length; i++)
+				{
+					// for backwards compatibility to old jondoportable.exe 
+					// try to remove upward directory moves
+					while (jarpath.startsWith(strUpwardMove))
+					{
+						jarpath = jarpath.substring(strUpwardMove.length(), jarpath.length());
+						index = jarpath.indexOf(File.separator);
+						if (index >= 0 && jarpath.length() >= index + 1)
 						{
-							if (dirs[i].toUpperCase().equals(AbstractHelpFileStorageManager.HELP_FOLDER.toUpperCase()))
-							{
-								// found a help folder in the jarpath; assume that it is the right one...
-								pFFHelpPath = pFFHelpPathTmp;
-								break;
-							}
+							jarpath = jarpath.substring(
+									jarpath.indexOf(File.separator) + File.separator.length(), 
+									jarpath.length());
 						}
-					}									
+						else
+						{
+							jarpath = "";
+						}
+					}
+					if (jarpath.trim().length() > 0)
+					{
+						pFFHelpPathTmp = m_temp[0];					
+						index = pFFHelpPathTmp.indexOf(jarpath);
+						if (index > 0)
+						{
+							pFFHelpPathTmp = pFFHelpPathTmp.substring(0, index);
+							String[] dirs = new File(pFFHelpPathTmp).list();						
+							for (int i = 0; i < dirs.length; i++)
+							{
+								if (dirs[i].toUpperCase().equals(
+										AbstractHelpFileStorageManager.HELP_FOLDER.toUpperCase()))
+								{
+									// found a help folder in the jarpath; assume that 
+									// it is the right one...
+									pFFHelpPath = pFFHelpPathTmp;
+									break;
+								}
+							}
+						}		
+					}
 				}
 			}
 			catch (Exception a_e)
@@ -1078,7 +1132,7 @@ public class JAP
 			}
 		}
 		
-//			if no path was found, set the help directory to the path where the JAP.jar is located
+		// if no path was found, set the help directory to the path where the JAP.jar is located
 		if (pFFHelpPath == null)
 		{
 			ZipFile jar = ClassUtil.getJarFile();

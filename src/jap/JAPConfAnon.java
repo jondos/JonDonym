@@ -2193,8 +2193,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
 							    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
 							{
-								m_lblSpeed.setText("\u2265 " + JAPUtil.formatKbitPerSecValueWithUnit(value,
-										JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+								if (System.getProperty("java.version").compareTo("1.4") >= 0)
+								{
+									m_lblSpeed.setText("\u2265 " + JAPUtil.formatKbitPerSecValueWithUnit(value,
+											JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+								}
+								else
+								{
+									m_lblSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value,
+											JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+								}
 							}
 							else if (best == value || best == Integer.MAX_VALUE)
 							{
@@ -2255,7 +2263,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						{
 							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
 							{
-								m_lblDelay.setText("\u2264 " + value + " ms");
+								if (System.getProperty("java.version").compareTo("1.4") >= 0)
+								{
+									m_lblDelay.setText("\u2264 " + value + " ms");
+								}
+								else
+								{
+									m_lblDelay.setText("< " + value + " ms");
+								}
 							}
 							else if(best == value || best == 0)
 							{

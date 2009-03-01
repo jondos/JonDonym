@@ -82,7 +82,7 @@ public final class Database extends Observable implements IXMLEncodable
 	private Class m_DatabaseEntryClass;
 
 	private Thread m_dbThread;
-	private Object SYNC_THREAD = new Object();
+	private final Object SYNC_THREAD = new Object();
 
 	/**
 	 * Stores services we know.
@@ -258,6 +258,11 @@ public final class Database extends Observable implements IXMLEncodable
 	 */
 	private Database(Class a_DatabaseEntryClass) throws IllegalArgumentException
 	{
+		if (a_DatabaseEntryClass == null)
+		{
+			throw new NullPointerException("Invalid database class!");
+		}
+		
 		if (!AbstractDatabaseEntry.class.isAssignableFrom(a_DatabaseEntryClass))
 		{
 			throw new IllegalArgumentException(
@@ -281,7 +286,7 @@ public final class Database extends Observable implements IXMLEncodable
 				return;
 			}
 			
-			while (m_bStopThread && m_dbThread.isAlive())
+			while (m_dbThread != null && m_bStopThread && m_dbThread.isAlive())
 			{
 				LogHolder.log(LogLevel.ERR, LogType.DB, "Shutting down old database thread before starting new one (" + 
 						m_DatabaseEntryClass.toString() + ")");

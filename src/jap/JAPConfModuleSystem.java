@@ -342,6 +342,12 @@ public class JAPConfModuleSystem implements JAPHelpContext.IHelpContext
 		}
 	}
 	
+	protected void revalidate()
+	{
+		m_configurationCardsPanel.revalidate();
+		m_configurationTree.revalidate();
+		m_rootPanel.revalidate();
+	}
 	
 	/**
 	 * This method can be used to select a specific module from the outside and bring it to the

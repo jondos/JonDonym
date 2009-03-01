@@ -89,13 +89,18 @@ public abstract class AbstractJAPMainView extends JFrame implements IJAPMainView
 
 	public void setVisible(boolean a_bVisible)
 	{
-		if (a_bVisible)
+		synchronized (SYNC_PACK)
 		{
-			JAPViewIconified viewiconified=this.getViewIconified();
-			if(viewiconified!=null)
-				viewiconified.setVisible(false);
+			if (a_bVisible)
+			{
+				JAPViewIconified viewiconified=this.getViewIconified();
+				if(viewiconified!=null)
+				{
+					viewiconified.setVisible(false);
+				}
+			}
+			super.setVisible(a_bVisible);
 		}
-		super.setVisible(a_bVisible);
 	}
 
 	public void showConfigDialog(String card, Object a_value)
