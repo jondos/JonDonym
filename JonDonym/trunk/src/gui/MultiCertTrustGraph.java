@@ -1,5 +1,6 @@
 package gui;
 
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -91,18 +92,39 @@ public class MultiCertTrustGraph
 		return m_endNodes.elements();
 	}
 	
+	/**
+	 * Counts how many different root Nodes are in the chain of trust.
+	 * Root Nodes are only counted if they are trusted and valid and at least 
+	 * one of their children is valid. (The childs are always trusted because
+	 * if not they would not be children).
+	 * @return the number of different trusted root nodes in this TrustGraph
+	 */
 	public int countTrustedRootNodes()
 	{
 		int count = 0;
 		Enumeration rootNodes = getRootNodes();
-		Node current;
+		Enumeration childNodes;
+		Node current, child;
+		Date now = new Date();
 		
 		while (rootNodes.hasMoreElements())
 		{
 			current = (Node) rootNodes.nextElement();
-			if(current.isTrusted())
+			if(current.isTrusted() && current.getCertificate().getValidity().isValid(now))
 			{
-				count++;
+				if(current.hasChildNodes())
+				{
+					childNodes = current.getChildNodes();
+					while(childNodes.hasMoreElements())
+					{
+						child = (Node) childNodes.nextElement();
+						if(child.getCertificate().getValidity().isValid(now))
+						{
+							count++;
+							break;
+						}
+					}
+				}
 			}
 		}
 		return count;
@@ -145,9 +167,9 @@ public class MultiCertTrustGraph
 			return m_trusted;
 		}
 		
-		public Vector getChildNodes()
+		public Enumeration getChildNodes()
 		{
-			return m_childNodes;
+			return m_childNodes.elements();
 		}
 		
 		public boolean hasChildNodes()

@@ -509,7 +509,7 @@ public class MultiCertOverview extends JAPDialog implements MouseListener
 		
 		if(node.hasChildNodes())
 		{
-			childs = node.getChildNodes().elements();
+			childs = node.getChildNodes();
 			
 			while(childs.hasMoreElements())
 			{
