@@ -37,7 +37,7 @@ import anon.infoservice.IMutableProxyInterface;
 public interface AnonService
 {
 	///The version of the AnonLib
-	String ANONLIB_VERSION = "00.05.001";
+	String ANONLIB_VERSION = "00.10.070";
 
 	/** Initializes this AnonService. Depending on the AnonService, this may establish a connection to
 	 *  an AnonServer, which is described through the

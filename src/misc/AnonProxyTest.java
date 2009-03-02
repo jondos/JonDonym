@@ -1,6 +1,7 @@
 package misc;
 
 import java.net.ServerSocket;
+
 import anon.proxy.AnonProxy;
 import anon.infoservice.MixCascade;
 import anon.infoservice.SimpleMixCascadeContainer;
@@ -23,7 +24,7 @@ public class AnonProxyTest
 
 
 			//just to ensure that we see some debug messages...
-			SystemErrLog log=new SystemErrLog();
+	/*		SystemErrLog log=new SystemErrLog();
 			log.setLogType(LogType.ALL);
 			log.setLogLevel(LogLevel.DEBUG);
 			LogHolder.setLogInstance(new SystemErrLog());
@@ -62,7 +63,28 @@ public class AnonProxyTest
 			synchronized(theProxy)
 				{
 					theProxy.wait();
-				}
+				}*/
+	           ServerSocket ss = new ServerSocket(4000);
+	          
+		       /* AnonClient theclient= new AnonClient();
+	            theclient.setDummyTraffic(60000);
+	            MixCascade a_mixCascade= new MixCascade("mix.inf.tu-dresden.de",6544);
+	            theclient.setLoginTimeout(60000);
+	            SignatureVerifier.getInstance().setCheckSignatures(false);
+	        	                         theclient.initialize(a_mixCascade, new SimpleMixCascadeContainer(
+	                                             new MixCascade(null, null, "mix.inf.tu-dresden.de", 6544)));
+	       
+	         */
+	            AnonProxy theProxy = new AnonProxy(ss, null,null);
+	            SignatureVerifier.getInstance().setCheckSignatures(false);
+	            theProxy.start(new SimpleMixCascadeContainer(
+	                                     new MixCascade(null, null, "mix.inf.tu-dresden.de", 6544)));
+	            
+	            
+	           synchronized(theProxy)
+	                    {
+	                            theProxy.wait();
+	                    }
 		}
 		catch (Exception e)
 		{
