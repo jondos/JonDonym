@@ -27,11 +27,10 @@
  */
 package anon.pay.xml;
 
-import jap.JAPConstants;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import anon.AnonService;
 import anon.util.Base64;
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
@@ -43,7 +42,7 @@ public class XMLResponse implements IXMLEncodable
 	/** Creates a XMLResponse from the XML representation **/
 	public XMLResponse(String xml) throws Exception
 	{
-        Document doc = XMLUtil.toXMLDocument(xml);
+    Document doc = XMLUtil.toXMLDocument(xml);
 		setValues(doc.getDocumentElement());
 	}
 
@@ -75,7 +74,7 @@ public class XMLResponse implements IXMLEncodable
 	{
 		Element elemRoot = a_doc.createElement("Response");
 		XMLUtil.setValue(elemRoot, Base64.encodeBytes(m_arbResponse));
-		XMLUtil.createChildElementWithValue(elemRoot, "ClientVersion", JAPConstants.aktVersion);
+		XMLUtil.createChildElementWithValue(elemRoot, "ClientVersion", AnonService.ANONLIB_VERSION);
 		return elemRoot;
 	}
 }
