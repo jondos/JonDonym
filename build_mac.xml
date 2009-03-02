@@ -20,6 +20,8 @@
 	<property name="jarfile" location="${dist}/${jarfile.name}.jar"/>
 	<property name="dist.osx" location="${dist}/MacOsX"/>
 	
+	<property name="portableFirefoxPath" value="Portable%20Firefox.app/Contents/MacOS/Portable%20Firefox"/>
+	
 	<path id="classpath.mrj" location="${lib.mrj_classes}"/>
 	<path id="classpath.aje" location="${lib.appleJavaExtensions}"/>
 	
@@ -127,6 +129,14 @@
 			<param name="dist.osx" value="${dist.osx}/manioq"/>
 		</antcall>
 	</target>
+	
+	<target name="portable-mac-dist-archive">
+		<antcall target="mac-dist-archive">
+			<param name="JAP_args" value="--portable ${portableFirefoxPath}"/>
+			<param name="dist.osx" value="${dist.osx}/portable"/>
+		</antcall>
+	</target>
+	
 	
 	<target name="clean">
 		<ant antfile="${buildfile.core}" target="clean"/>
