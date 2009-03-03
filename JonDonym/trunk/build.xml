@@ -13,7 +13,6 @@
 	
 	<property name="dist.linux" location="${dist}/linux"/>
 	
-	
 	<property name="excludesSrcJap" value="${jondoExcludes} JAPMacintosh.java"/>
 	
 	<path id="classpath.httplib" location="${lib.http}"/>
@@ -29,7 +28,6 @@
 	<path id="classpath.jama" location="${lib.jama}"/>
 	<path id="classpath.swing" location="${lib.swing}"/> -->
 	
-		
 	<path id="classpath.all">
 		<path refid="classpath.httplib"/>
 		<path refid="classpath.ftplib"/>
@@ -109,8 +107,6 @@
 		<fail unless="lib.mrj_classes.available" message="MRJ classes not available"/>
 	</target>
   
-	
-	
 	<target name="init" depends="init-global-libs">
 	    <copy todir="${build}" verbose="true">
 	      <fileset dir="${src}" includes="**/res/*"/>
@@ -233,7 +229,7 @@
 	</target>
 	
 	<target name="jar-all-platforms" depends="getcurrentjapdllversion, getcurrentmacosxlibversion"
-	 description="creates a jar containing the specific libraries for all platforms">
+	 description="creates a jar containing all platform-specific libraries">
 			
 			<antcall target="${buildfile.core.target.jar.osindependent}"/>
 			<jar jarfile="${jarfile}" update="true"> 
@@ -262,10 +258,14 @@
 		<antcall target="jar-core"/>
 	</target>
 	
-	<target name="dist" depends="jar-all-platforms" description="generate a distribuation for all paltforms">
-		<ant antfile="${buildfile.signature}" target="${buildfile.signature.target.sign}">
-			<property name="artefact" value="${jarfile}"/>
-		</ant>
+	<!-- this standard target appends a signature to the created jar-file. If you want to create one without signature,
+	  use target "jar-all-platforms" -->
+	<target name="dist" depends="jar-all-platforms" 
+		description="generates a jarfile-distribution for all platforms and also creates a gpg-signature">
+	
+			<ant antfile="${buildfile.signature}" target="${buildfile.signature.target.sign}">
+				<property name="artefact" value="${jarfile}"/>
+			</ant>
 	</target>
 	
 	<!-- still not usable, but please don't delete it yet
@@ -289,9 +289,10 @@
 		
 	</target>
 	
+	<!-- this archiving target also creates a pgp signature -->
 	<target name="linux-dist-archive" depends="linux-dist">
-		<!--<zip destfile="${dist.linux}/${appname}.zip" basedir="${dist.linux}"/>-->
 		
+		<!--<zip destfile="${dist.linux}/${appname}.zip" basedir="${dist.linux}"/>-->
 		<!-- 
 		better than the corresponding ant target,
 		because it preserves file permissions 
@@ -301,12 +302,12 @@
 			<arg value="${appname}.zip"/>
 			<arg value="${appname}"/>
 		</exec>
+		
+		<!-- sign the archive -->
 		<ant antfile="${buildfile.signature}" target="${buildfile.signature.target.sign}">
 			<property name="artefact" value="${dist.linux}/${appname}.zip"/>
 		</ant>
 	</target>
-	
-	
 	
 	<target name="manioq-for-linux-dist-archive">
 		<antcall target="linux-dist-archive">
