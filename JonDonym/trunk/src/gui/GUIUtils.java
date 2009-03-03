@@ -491,7 +491,7 @@ public final class GUIUtils
 				new Integer(fieldTYPE_INT_ARGB.getInt(classBufferedImage))});
 
 			Graphics objectGraphics2D = (Graphics)
-				classBufferedImage.getMethod("createGraphics", null).invoke(objectBufferedImage, null);
+				classBufferedImage.getMethod("createGraphics", (Class[])null).invoke(objectBufferedImage, (Object[])null);
 			objectGraphics2D.drawImage(a_one.getImage(), 0, 0, null);
 			objectGraphics2D.drawImage(a_two.getImage(), a_one.getIconWidth(), 0, null);
 			objectGraphics2D.dispose();
@@ -1230,14 +1230,14 @@ public final class GUIUtils
 		{
 			Object graphicsEnvironment =
 				Class.forName("java.awt.GraphicsEnvironment").getMethod(
-					"getLocalGraphicsEnvironment", null).invoke(null, null);
+					"getLocalGraphicsEnvironment", (Class[])null).invoke((Object)null, (Object[])null);
 			Object[] graphicsDevices = (Object[]) graphicsEnvironment.getClass().getMethod(
-				"getScreenDevices", null).invoke(graphicsEnvironment, null);
+				"getScreenDevices", (Class[])null).invoke(graphicsEnvironment, (Object[])null);
 			screens = new Screen[graphicsDevices.length];
 			for (int i = 0; i < graphicsDevices.length; i++)
 			{
 				graphicsConfiguration = graphicsDevices[i].getClass().getMethod(
-					"getDefaultConfiguration", null).invoke(graphicsDevices[i], null);
+					"getDefaultConfiguration", (Class[])null).invoke(graphicsDevices[i], (Object[])null);
 				screenFrame = (Frame) Frame.class.getConstructor(
 					new Class[]
 					{Class.forName("java.awt.GraphicsConfiguration")}).newInstance(
@@ -1245,7 +1245,7 @@ public final class GUIUtils
 						{graphicsConfiguration});
 				screens[i] = new Screen(screenFrame.getLocation(),
 										(Rectangle) graphicsConfiguration.getClass().getMethod(
-											"getBounds", null).invoke(graphicsConfiguration, null));
+											"getBounds", (Class[])null).invoke(graphicsConfiguration, (Object[])null));
 			}
 			return screens;
 		}
@@ -1280,22 +1280,22 @@ public final class GUIUtils
 			Point screenLocation;
 			Object graphicsEnvironment =
 				Class.forName("java.awt.GraphicsEnvironment").getMethod(
-								"getLocalGraphicsEnvironment", null).invoke(null, null);
+								"getLocalGraphicsEnvironment", (Class[])null).invoke((Object)null, (Object[])null);
 			Object[] graphicsDevices = (Object[])graphicsEnvironment.getClass().getMethod(
-						 "getScreenDevices", null).invoke(graphicsEnvironment, null);
+						 "getScreenDevices", (Class[])null).invoke(graphicsEnvironment, (Object[])null);
 
 			// now look on which srceen the middle of the window is located
 			windowMiddleLocation = getMiddlePoint(a_window);
 			for (int i = 0; i < graphicsDevices.length; i++)
 			{
 				graphicsConfiguration = graphicsDevices[i].getClass().getMethod(
-								"getDefaultConfiguration", null).invoke(graphicsDevices[i], null);
+								"getDefaultConfiguration", (Class[])null).invoke(graphicsDevices[i], (Object[])null);
 				screenFrame = (Frame)Frame.class.getConstructor(
 								new Class[]{Class.forName("java.awt.GraphicsConfiguration")}).newInstance(
 					new Object[]{graphicsConfiguration});
 				screenLocation = screenFrame.getLocation();
 				screenBounds = (Rectangle)graphicsConfiguration.getClass().getMethod(
-								"getBounds", null).invoke(graphicsConfiguration, null);
+								"getBounds", (Class[])null).invoke(graphicsConfiguration, (Object[])null);
 
 				if (windowMiddleLocation.x >= screenLocation.x &&
 					windowMiddleLocation.x <= (screenLocation.x + screenBounds.width) &&
@@ -1654,7 +1654,7 @@ public final class GUIUtils
 										if (classActiveEvent != null && classActiveEvent.isInstance(event))
 										{
 											// ((ActiveEvent) event).dispatch();
-											classActiveEvent.getMethod("dispatch", null).invoke(event, null);
+											classActiveEvent.getMethod("dispatch", (Class[])null).invoke(event, (Object[])null);
 										}
 										else if (event.getSource() instanceof Component)
 										{
@@ -1989,13 +1989,13 @@ public final class GUIUtils
 			// try to center the window on the default screen; useful if there is more than one screen
 			Object graphicsEnvironment =
 				Class.forName("java.awt.GraphicsEnvironment").getMethod(
-						"getLocalGraphicsEnvironment", null).invoke(null, null);
+						"getLocalGraphicsEnvironment", (Class[])null).invoke(null, (Object[])null);
 			Object graphicsDevice = graphicsEnvironment.getClass().getMethod(
-				 "getDefaultScreenDevice", null).invoke(graphicsEnvironment, null);
+				 "getDefaultScreenDevice", (Class[])null).invoke(graphicsEnvironment, (Object[])null);
 			Object graphicsConfiguration = graphicsDevice.getClass().getMethod(
-				"getDefaultConfiguration", null).invoke(graphicsDevice, null);
+				"getDefaultConfiguration", (Class[])null).invoke(graphicsDevice, (Object[])null);
 			screenBounds = (Rectangle)graphicsConfiguration.getClass().getMethod(
-				 "getBounds", null).invoke(graphicsConfiguration, null);
+				 "getBounds", (Class[])null).invoke(graphicsConfiguration, (Object[])null);
 		}
 		catch(Exception a_e)
 		{

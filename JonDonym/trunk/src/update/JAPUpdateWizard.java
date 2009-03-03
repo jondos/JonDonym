@@ -49,7 +49,6 @@ import gui.wizard.BasicWizard;
 import gui.wizard.BasicWizardHost;
 import gui.wizard.WizardPage;
 import gui.dialog.JAPDialog;
-import gui.dialog.PasswordContentPane;
 import jap.JAPConstants;
 import jap.JAPController;
 import jap.JAPModel;
@@ -150,6 +149,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 		{
 			host = new BasicWizardHost((Component)a_parent, this);
 		}
+		host.setHelpEnabled(false);
 		setHost(host);
 		m_Status = UPDATESTATUS_ABORTED;
 		japVersionInfo = info;
@@ -794,7 +794,7 @@ private boolean checkSignature()
 			}
 			downloadPage.m_labelIconStep5.setIcon(downloadPage.arrow);
 	
-			
+			host.setCancelEnabled(false);
 			try
 			{
 				Util.copyStream(new FileInputStream(m_fileNewJapJar),

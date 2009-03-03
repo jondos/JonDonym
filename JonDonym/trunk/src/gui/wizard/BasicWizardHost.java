@@ -42,6 +42,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.WindowConstants;
 
 import anon.util.JAPMessages;
 
@@ -81,7 +82,7 @@ public class BasicWizardHost implements WizardHost,ActionListener
 
 		private BasicWizardHost(Object parent,Wizard wizard)
 		{
-
+				
 				m_Wizard=wizard;
 				//m_currentPage=null;
 
@@ -95,7 +96,7 @@ public class BasicWizardHost implements WizardHost,ActionListener
 				}
 				GridBagLayout gridBag= new GridBagLayout();
 				GridBagConstraints c = new GridBagConstraints();
-
+				m_Dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 				m_Dialog.getContentPane().setLayout(gridBag);
 
 				GridBagLayout gridBagPanel=new GridBagLayout();
