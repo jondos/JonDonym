@@ -8,8 +8,6 @@
 	<property file="build_properties/global.properties"/>
 	<property file="build_properties/jondo-global.properties"/>	
 	<property file="build_properties/global-libs.properties"/>	
-	
-	<property name="mainclass.osx" value="JAPMacintosh"/>
 
 	<property name="bundleid" value="de.jondos.${appname}"/>
 	<property name="JAP_args" value=""/>
@@ -21,39 +19,6 @@
 	<property name="dist.osx" location="${dist}/MacOsX"/>
 	
 	<property name="portableFirefoxPath" value="Portable%20Firefox.app/Contents/MacOS/Portable%20Firefox"/>
-	
-	<path id="classpath.mrj" location="${lib.mrj_classes}"/>
-	<path id="classpath.aje" location="${lib.appleJavaExtensions}"/>
-	
-	<target name="init-mac-libs" depends="getcurrentmacosxlibversion">
-		<ant antfile="${buildfile.core}" target="init-dirs"/>
-		
-		<get src="${lib.mrj_classes.url}" dest="${lib.mrj_classes}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/> 
-		
-		<get src="${lib.appleJavaExtensions.url}" dest="${lib.appleJavaExtensions}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-		
-		<get src="${lib.macOSX.url}" dest="${lib.macOSX}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-	</target>
-	
-	<target name="getcurrentmacosxlibversion" 
-			description="Sets the property 'currentMacOSXLibVersion' to the value provided on the Web">	
-			
-		<get src="http://anon.inf.tu-dresden.de/develop/macosxlibversion.txt" 
-			verbose="true" 
-			usetimestamp="true"
-			ignoreerrors="true"
-			dest="macosxlibversion.txt"/> 
-				
-		<loadfile property="currentMacOSXLibVersion" srcfile="macosxlibversion.txt">
-			<filterchain>
-				<deletecharacters chars="\r\n" />
-			</filterchain>
-		</loadfile>
-		<echo message="Current MacOSXLib Version is: ${currentMacOSXLibVersion}"/>
-	</target>
 	
 	<target name="getcurrentversion" description="Sets the property 'currentVersion', 'releaseDate' to the value provided in JAPConstants.java">
 		<loadfile srcfile="${src}/jap/JAPConstants.java" property="currentVersion">
@@ -78,21 +43,12 @@
 		<echo message="Release Date is: ${releaseDate}"/>
 	</target>
 	
-	<target name="jar-mac" depends="init-mac-libs"
-			description="creates a jar for Mac OS X distributions containing the libMacOSX.jnilib">
-		
-		<ant antfile="${buildfile.core}" target="${buildfile.core.target.jar}">
+	<target name="mac-dist" description="creates a JonDo Mac OS X bundle" depends="getcurrentversion">
+  		
+		<ant antfile="${buildfile.core}" target="${buildfile.core.target.jar.all}">
 			<property name="mainclass" value="${mainclass.osx}"/>
 		</ant>
-		
-		<jar jarfile="${jarfile}" update="true"> 
-			<zipfileset file="${lib.macOSX}" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
-		</jar>
-	</target>
-	
-	<target name="mac-dist" description="creates a JonDo Mac OS X bundle" depends="jar-mac, getcurrentversion">
-  		
-  		<!-- First build a jar file with JAPMacintosh as MainClass -->
+		<!-- First build a jar file with JAPMacintosh as MainClass -->
   		<mkdir dir="${dist.osx}"/>
   		<jarbundler dir="${dist.osx}"
   	            name="${appname}"
