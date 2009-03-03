@@ -69,7 +69,7 @@ public class ServiceLocation
 	/**
 	 * This is the country where the service is located.
 	 */
-	private String country;
+	private String m_country;
 
 	/**
 	 * This is the longitude of the service location. Should be between -180.0 (west of Greenwich)
@@ -105,7 +105,7 @@ public class ServiceLocation
 			state = subject.getStateOrProvince();
 
 			/* get the country */
-			country = subject.getCountryCode();
+			m_country = subject.getCountryCode();
 
 			// get the geolocation
 			AbstractX509Extension extension =
@@ -159,15 +159,15 @@ public class ServiceLocation
 			city = XMLUtil.parseValue(node, "");
 		}
 
-	    if(state == null || state.trim().length() == 0)
+	    if (state == null || state.trim().length() == 0)
 		{
 			node = XMLUtil.getFirstChildByName(locationNode, "State");
 			state = XMLUtil.parseValue(node, "");
 		}
-		if(country == null || country.trim().length() == 0)
+		if (m_country == null || m_country.trim().length() == 0)
 		{
 			node = XMLUtil.getFirstChildByName(locationNode, "Country");
-			country = XMLUtil.parseValue(node, "");
+			m_country = XMLUtil.parseValue(node, "");
 		}
 
 		/* get the longitude / latitude */
@@ -212,7 +212,7 @@ public class ServiceLocation
 	 */
 	public String getCountryCode()
 	{
-		return country;
+		return m_country;
 	}
 
 	/**
@@ -262,11 +262,11 @@ public class ServiceLocation
 					XML_ELEMENT_STATE, 
 					Util.filterXMLChars(state));
 		}
-		if( country != null )
+		if( m_country != null )
 		{
 			XMLUtil.createChildElementWithValue(locationElement, 
 					XML_ELEMENT_COUNTRY, 
-					Util.filterXMLChars(country));
+					Util.filterXMLChars(m_country));
 		}
 		if( longitude != null && 
 			latitude != null )
