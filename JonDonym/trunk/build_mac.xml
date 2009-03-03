@@ -14,7 +14,6 @@
 	
 	<property name="excludesSrcJap" value="${jondoExcludes}"/>
 	
-	<property name="dist" location="dist"/>
 	<property name="jarfile" location="${dist}/${jarfile.name}.jar"/>
 	<property name="dist.osx" location="${dist}/MacOsX"/>
 	
@@ -71,12 +70,16 @@
 	
 	<target name="mac-dist-archive" depends="mac-dist" 
 			description="creates a compressed dmg image of the JonDo Mac OS X bundle (needs Mac OS X)">
-	  <exec executable="hdiutil">
-	    <arg value="create"/>
-	    <arg value="-srcfolder"/>
-	    <arg value="${dist.osx}/${appname}.app"/>
-	  	<arg value="${dist.osx}/${appname}.dmg"/>
-	  </exec>
+		<exec executable="hdiutil">
+			<arg value="create"/>
+			<arg value="-srcfolder"/>
+			<arg value="${dist.osx}/${appname}.app"/>
+			<arg value="${dist.osx}/${appname}.dmg"/>
+		</exec>
+		<!-- sign the archive -->
+		<ant  antfile="${buildfile.signature}" target="${buildfile.signature.target.sign}">
+			<property name="artefact" value="${dist.osx}/${appname}.dmg"/>
+		</ant>
 	</target>
 	
 	<target name="manioq-for-mac-dist-archive">
