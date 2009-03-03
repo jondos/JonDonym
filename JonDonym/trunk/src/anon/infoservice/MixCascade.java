@@ -43,6 +43,7 @@ import anon.crypto.SignatureVerifier;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.XMLSignature;
 import anon.crypto.CertPath;
+import anon.util.CountryMapper;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.ZLibTools;
@@ -1414,7 +1415,24 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					// country bonus
 					operatorCountryCode = currentName.getCountryCode();
 					mixCountryCode = getMixInfo(i).getCertPath().getSubject().getCountryCode();
-					if (operatorCountryCode != null && mixCountryCode != null &&
+					try
+					{
+						if (new CountryMapper(operatorCountryCode).toString() == operatorCountryCode)
+						{
+							operatorCountryCode = null;
+						}
+						else if (new CountryMapper(mixCountryCode).toString() == mixCountryCode)
+						{
+							mixCountryCode = null;
+						}
+					}
+					catch (IllegalArgumentException a_e)
+					{
+						operatorCountryCode = null;
+						mixCountryCode = null;
+					}
+					
+					if (operatorCountryCode != null && mixCountryCode != null && 
 						//!operatorCountries.containsKey(operatorCountryCode) &&
 						//!mixCountries.containsKey(mixCountryCode))
 						!countries.contains(mixCountryCode) &&
