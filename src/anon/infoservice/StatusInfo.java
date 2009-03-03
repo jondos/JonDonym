@@ -346,8 +346,7 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 	 */
 	public int getNrOfActiveUsers()
 	{
-		return 531;
-	//	return m_nrOfActiveUsers;
+		return m_nrOfActiveUsers;
 	}
 
 	/**
