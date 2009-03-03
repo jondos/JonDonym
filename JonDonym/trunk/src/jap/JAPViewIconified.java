@@ -56,11 +56,11 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.StatusInfo;
 import gui.GUIUtils;
 import gui.dialog.JAPDialog;
-import gui.JAPMessages;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.JavaVersionDBEntry;
+import anon.util.JAPMessages;
 
 final public class JAPViewIconified extends JWindow implements ActionListener
 {

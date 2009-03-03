@@ -44,9 +44,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 
-import gui.JAPMessages;
 import logging.LogType;
 import anon.util.IMiscPasswordReader;
+import anon.util.JAPMessages;
 import anon.util.Util;
 import gui.GUIUtils;
 import java.awt.datatransfer.DataFlavor;

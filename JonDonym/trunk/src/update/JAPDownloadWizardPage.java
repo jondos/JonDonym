@@ -31,7 +31,6 @@ package update;
 import gui.JAPMultilineLabel;
 import gui.wizard.BasicWizardPage;
 import jap.JAPConstants;
-import gui.JAPMessages;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -44,6 +43,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
+
+import anon.util.JAPMessages;
 import gui.GUIUtils;
 
 public class JAPDownloadWizardPage extends BasicWizardPage

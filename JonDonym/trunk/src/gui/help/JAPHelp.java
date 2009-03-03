@@ -39,7 +39,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
 
-import gui.JAPMessages;
+import anon.util.JAPMessages;
+
 import gui.JAPHelpContext.IHelpContext;
 import gui.dialog.JAPDialog;
 

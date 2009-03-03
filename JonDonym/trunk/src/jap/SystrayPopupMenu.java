@@ -56,9 +56,9 @@ import platform.AbstractOS;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.StatusInfo;
+import anon.util.JAPMessages;
 import gui.GUIUtils;
 import gui.JAPHelpContext;
-import gui.JAPMessages;
 import gui.PopupMenu;
 import gui.help.JAPHelp;
 

@@ -79,7 +79,9 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.FontUIResource;
 
 import anon.util.ClassUtil;
+import anon.util.CountryMapper;
 import anon.util.IReturnRunnable;
+import anon.util.JAPMessages;
 import anon.util.JobQueue;
 import anon.util.ResourceLoader;
 import anon.infoservice.ServiceLocation;
@@ -2246,6 +2248,16 @@ public final class GUIUtils
 		}
 
 
+	}
+	
+	public static void exitWithNoMessagesError(String a_resourceBundleFilename)
+	{
+		JAPAWTMsgBox.MsgBox(new Frame(),
+				"File not found: " + a_resourceBundleFilename + "_en" +
+				".properties\nYour package of JAP may be corrupted.\n" +
+				"Try again to download or install the package.",
+				"Error");
+		System.exit(1);
 	}
 	
 	public static String getCountryFromServiceLocation(ServiceLocation a_loc)

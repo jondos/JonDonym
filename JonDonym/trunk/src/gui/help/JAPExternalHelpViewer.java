@@ -24,7 +24,6 @@
 package gui.help;
 
 import gui.JAPHelpContext;
-import gui.JAPMessages;
 import gui.JAPHelpContext.IHelpContext;
 import gui.dialog.FileChooserContentPane;
 import gui.dialog.JAPDialog;
@@ -40,6 +39,7 @@ import javax.swing.JFileChooser;
 
 import platform.AbstractOS;
 
+import anon.util.JAPMessages;
 import anon.util.ProgressCapsule;
 
 

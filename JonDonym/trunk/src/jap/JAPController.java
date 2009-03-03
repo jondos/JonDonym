@@ -29,7 +29,6 @@ package jap;
 
 import forward.server.ForwardServerManager;
 import gui.GUIUtils;
-import gui.JAPMessages;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.PasswordContentPane;
@@ -136,6 +135,7 @@ import anon.util.Base64;
 import anon.util.ClassUtil;
 import anon.util.IMiscPasswordReader;
 import anon.util.IPasswordReader;
+import anon.util.JAPMessages;
 import anon.util.JobQueue;
 import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
@@ -1056,7 +1056,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 				//Load Locale-Settings
 				String strLocale =
 					XMLUtil.parseAttribute(root, JAPConstants.CONFIG_LOCALE, JAPMessages.getLocale().getLanguage());
-				JAPMessages.init(new Locale(strLocale, ""), JAPConstants.MESSAGESFN);
+				if (!JAPMessages.init(new Locale(strLocale, ""), JAPConstants.MESSAGESFN))
+				{
+					GUIUtils.exitWithNoMessagesError("MixConfigMessages");
+				}
 
 
 				//Loading debug settings
@@ -3288,9 +3291,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						}
 					}
 					
-					m_proxyAnon.setHTTPHeaderProcessingEnabled(
-							JAPModel.getInstance().isAnonymizedHttpHeaders(),
-							JAPMessages.getInstance());
+					m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 					m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());	
 					
 					if (!JAPModel.isInfoServiceDisabled())
@@ -4877,9 +4878,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						if(m_proxyAnon != null)
 						{
-							m_proxyAnon.setHTTPHeaderProcessingEnabled(
-									JAPModel.getInstance().isAnonymizedHttpHeaders(),
-									JAPMessages.getInstance());
+							m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 							m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 							
 						}
@@ -5438,7 +5437,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 		public AutoSwitchedMixCascadeContainer(boolean a_bSkipInitialCascade)
 		{
-			super(JAPMessages.getInstance());
 			m_bSkipInitialCascade = a_bSkipInitialCascade;
 			m_alreadyTriedCascades = new Hashtable();
 			m_random = new Random(System.currentTimeMillis());

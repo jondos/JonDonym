@@ -45,7 +45,6 @@ import java.util.Hashtable;
 
 import anon.infoservice.ProxyInterface;
 import anon.AnonService;
-import gui.JAPMessages;
 import jap.JAPModel;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -60,6 +59,7 @@ import anon.AnonServiceFactory;
 import anon.infoservice.MixCascade;
 import anon.IServiceContainer;
 import anon.infoservice.IMutableProxyInterface;
+import anon.util.JAPMessages;
 
 final public class DirectProxy implements Runnable, AnonService
 {

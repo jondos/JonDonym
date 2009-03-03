@@ -101,15 +101,15 @@ import anon.pay.IMessageListener;
 import anon.pay.PayAccountsFile;
 import anon.pay.PayMessage;
 import anon.proxy.IProxyListener;
+import anon.util.CountryMapper;
+import anon.util.JAPMessages;
 import anon.util.JobQueue;
 import anon.util.Util;
-import gui.CountryMapper;
 import gui.DataRetentionDialog;
 import gui.FlippingPanel;
 import gui.GUIUtils;
 import gui.JAPDll;
 import gui.JAPHelpContext;
-import gui.JAPMessages;
 import gui.JAPProgressBar;
 import gui.MixDetailsDialog;
 import gui.MultiCertOverview;
@@ -1331,8 +1331,42 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	
 
-		updateFonts();		
+		updateFonts();
 		setOptimalSize();		
+		
+		m_comboAnonServices.addItemListener(new ItemListener()
+		{
+			public void itemStateChanged(ItemEvent e)
+			{
+				final MixCascade cascade = (MixCascade) m_comboAnonServices.getSelectedItem();
+
+				if (m_bIgnoreAnonComboEvents)
+				{
+					return;
+				}
+				if (e.getStateChange() == ItemEvent.SELECTED)
+				{
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							m_Controller.setCurrentMixCascade(cascade);
+						}
+					});
+				}
+			}
+		});
+		//;
+		//m_comboAnonServices.revalidate();
+		
+		/*
+		* Do not use - for some strange reason this line would prevent Jap from connecting to any pay cascade
+		  //make sure to be noticed of new or deleted accounts
+	      //PayAccountsFile.getInstance().addPaymentListener(this);
+	    */
+	    PayAccountsFile.getInstance().addMessageListener(this);
+		PayAccountsFile.fireKnownMessages();
+		
 		
 		updateValues(true);
 		GUIUtils.centerOnScreen(this);
@@ -1363,39 +1397,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_helpMovedAdapter = new ComponentMovedAdapter();
 		m_configMovedAdapter = new ComponentMovedAdapter();
 		addComponentListener(m_mainMovedAdapter);
-		
-		/*
-		* Do not use - for some strange reason this line would prevent Jap from connecting to any pay cascade
-		  //make sure to be noticed of new or deleted accounts
-	      //PayAccountsFile.getInstance().addPaymentListener(this);
-	    */
-	    PayAccountsFile.getInstance().addMessageListener(this);
-		PayAccountsFile.fireKnownMessages();
-		
-		m_comboAnonServices.addItemListener(new ItemListener()
-		{
-			public void itemStateChanged(ItemEvent e)
-			{
-				final MixCascade cascade = (MixCascade) m_comboAnonServices.getSelectedItem();
-
-				if (m_bIgnoreAnonComboEvents)
-				{
-					return;
-				}
-				if (e.getStateChange() == ItemEvent.SELECTED)
-				{
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							m_Controller.setCurrentMixCascade(cascade);
-						}
-					});
-				}
-			}
-		});
-		
-		
 		
 		if(JAPHelp.getHelpDialog() != null)
 		{
@@ -2640,7 +2641,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_comboAnonServices.closeCascadePopupMenu();
 		if (m_bConfigActive)
 		{
-			System.out.println("active");
 			return;
 		}
 		m_bConfigActive = true;
@@ -2809,8 +2809,6 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			m_bTrustChanged = false;
 			boolean bShowPopup = m_comboAnonServices.isPopupVisible();
-			m_comboAnonServices.removeAllItems();
-			m_comboAnonServices.setMixCascade(null);
 			m_comboAnonServices.setMixCascade(currentMixCascade);
 			if (bShowPopup)
 			{
@@ -2824,6 +2822,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		{
 			m_comboAnonServices.setSelectedItem(currentMixCascade);
 		}
+		m_comboAnonServices.validate();
 		m_bIgnoreAnonComboEvents = false;
 
 		// Config panel

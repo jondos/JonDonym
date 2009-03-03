@@ -28,7 +28,6 @@
 package gui.dialog;
 
 import gui.GUIUtils;
-import gui.JAPMessages;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,6 +36,8 @@ import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
+
+import anon.util.JAPMessages;
 
 import logging.LogType;
 

@@ -58,9 +58,9 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import anon.crypto.JAPCertificate;
+import anon.util.JAPMessages;
 import platform.AbstractOS;
 import gui.GUIUtils;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import gui.SimpleFileFilter;
 import logging.LogHolder;

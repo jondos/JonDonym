@@ -38,7 +38,6 @@ import javax.swing.JComboBox;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
-import gui.JAPMessages;
 import javax.swing.JLabel;
 import java.util.Dictionary;
 import java.util.Observable;
@@ -46,6 +45,7 @@ import java.util.Hashtable;
 
 import anon.client.AnonClient;
 import anon.infoservice.BlacklistedCascadeIDEntry;
+import anon.util.JAPMessages;
 import anon.client.DummyTrafficControlChannel;
 import java.util.Observer;
 

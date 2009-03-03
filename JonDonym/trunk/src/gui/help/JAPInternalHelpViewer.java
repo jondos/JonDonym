@@ -25,9 +25,7 @@ package gui.help;
 
 import gui.GUIUtils;
 import gui.JAPHelpContext;
-import gui.JAPMessages;
 import gui.JTextComponentToClipboardCopier;
-import gui.LanguageMapper;
 import gui.JAPHelpContext.IHelpContext;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp.IExternalEMailCaller;
@@ -66,6 +64,8 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
+import anon.util.JAPMessages;
+import anon.util.LanguageMapper;
 import anon.util.ResourceLoader;
 
 /**
@@ -78,8 +78,8 @@ import anon.util.ResourceLoader;
  * helpPath[i]. It is enough to specify the property 'helpPath', specific directories for each language
  * are optional.
  * (classes modified from Swing Example "Metalworks")
- * @see gui.LanguageMapper
- * @see gui.JAPMessages
+ * @see anon.util.LanguageMapper
+ * @see anon.util.JAPMessages
  */
 public class JAPInternalHelpViewer extends JAPDialog 
 {

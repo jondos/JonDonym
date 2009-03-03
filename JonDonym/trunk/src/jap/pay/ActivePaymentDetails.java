@@ -25,10 +25,10 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import anon.util.JAPMessages;
 import anon.util.Util;
 import gui.GUIUtils;
 import gui.JAPHtmlMultiLineLabel;
-import gui.JAPMessages;
 import gui.LinkMouseListener;
 import gui.dialog.JAPDialog;
 import jap.JAPController;

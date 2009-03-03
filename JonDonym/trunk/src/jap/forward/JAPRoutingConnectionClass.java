@@ -29,6 +29,8 @@ package jap.forward;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import anon.util.JAPMessages;
 import anon.util.XMLUtil;
 import logging.LogHolder;
 import logging.LogLevel;

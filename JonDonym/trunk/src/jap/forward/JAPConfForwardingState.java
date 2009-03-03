@@ -45,6 +45,7 @@ import javax.swing.border.TitledBorder;
 
 import anon.transport.address.AddressParameter;
 import anon.transport.address.IAddress;
+import anon.util.JAPMessages;
 import gui.JAPHtmlMultiLineLabel;
 import logging.LogHolder;
 import logging.LogLevel;

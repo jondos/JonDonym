@@ -55,7 +55,6 @@ import javax.swing.table.DefaultTableModel;
 import anon.tor.ordescription.InfoServiceORListFetcher;
 import anon.tor.ordescription.ORList;
 import gui.GUIUtils;
-import gui.JAPMessages;
 import gui.JAPJIntField;
 import gui.dialog.JAPDialog;
 import logging.LogType;
@@ -63,6 +62,7 @@ import java.util.Dictionary;
 import anon.tor.ordescription.ORDescriptor;
 import javax.swing.JTextField;
 import anon.tor.ordescription.PlainORListFetcher;
+import anon.util.JAPMessages;
 
 final class JAPConfTor extends AbstractJAPConfModule implements ActionListener
 {

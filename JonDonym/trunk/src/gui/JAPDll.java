@@ -46,6 +46,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.SwingUtilities;
 
 import anon.util.ClassUtil;
+import anon.util.JAPMessages;
 import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.Util;

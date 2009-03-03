@@ -40,7 +40,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import gui.JAPMessages;
+import anon.util.JAPMessages;
+
 
 /**
  * This is the configuration GUI for the cert.

@@ -55,13 +55,17 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 
-import gui.CountryMapper;
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import gui.GUIUtils;
-import gui.JAPMessages;
 import gui.JAPMultilineLabel;
 
 import anon.infoservice.ServiceLocation;
 import anon.infoservice.ServiceOperator;
+import anon.util.CountryMapper;
+import anon.util.JAPMessages;
 
 /**
  * Class for painting a mix cascade in the configuration dialog
@@ -321,15 +325,24 @@ final public class ServerListPanel extends JPanel implements ActionListener
 	{
 		if(a_location != null)
 		{
-			CountryMapper county = 
-				new CountryMapper(a_location.getCountryCode(), JAPMessages.getLocale());
-			
-			m_mixFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + county.getISOCode() + ".png"));
-			m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_COUNTRY, county.toString()));
+			try
+			{
+				CountryMapper county = 
+					new CountryMapper(a_location.getCountryCode(), JAPMessages.getLocale());
+				m_mixFlags[a_mix].setIcon(GUIUtils.loadImageIcon("flags/" + county.getISOCode() + ".png"));
+				m_mixFlags[a_mix].setToolTipText(JAPMessages.getString(MSG_MIX_COUNTRY, county.toString()));
+			}
+			catch (IllegalArgumentException a_e)
+			{
+				// this does not seem to be a valid country code
+				m_mixFlags[a_mix].setIcon(null);
+				m_mixFlags[a_mix].setToolTipText(null);
+			}
 		}
 		else
 		{
 			m_mixFlags[a_mix].setIcon(null);
+			m_mixFlags[a_mix].setToolTipText(null);
 		}
 	}
 	

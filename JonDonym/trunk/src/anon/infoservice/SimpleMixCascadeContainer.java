@@ -13,7 +13,6 @@ public class SimpleMixCascadeContainer extends AbstractMixCascadeContainer
 	private boolean m_bAutoReConnect=false;
 	public SimpleMixCascadeContainer(MixCascade a_mixCascade)
 	{
-		super(null);
 		m_mixCascade = a_mixCascade;
 	}
 	public MixCascade getNextMixCascade()

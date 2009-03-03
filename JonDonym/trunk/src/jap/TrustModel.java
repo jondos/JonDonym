@@ -40,7 +40,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import gui.JAPMessages;
 import anon.client.BasicTrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.IServiceContextContainer;
@@ -50,6 +49,7 @@ import anon.infoservice.StatusInfo;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.PerformanceInfo;
 import anon.util.IXMLEncodable;
+import anon.util.JAPMessages;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import logging.LogHolder;
@@ -740,7 +740,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(String a_strName, long a_id)
 	{
-		super(JAPMessages.getInstance());
 		//m_id = ms_trustModels.size();
 		m_id = a_id;
 		m_strName = a_strName == null ? "Default trust model" : a_strName;
@@ -753,7 +752,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(TrustModel a_trustModel)
 	{
-		super(JAPMessages.getInstance());
 		copyFrom(a_trustModel);
 	}
 
@@ -766,7 +764,6 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(Element a_trustModelElement) throws XMLParseException
 	{
-		super(JAPMessages.getInstance());
 		XMLUtil.assertNodeName(a_trustModelElement, XML_ELEMENT_NAME);
 
 		XMLUtil.assertNotNull(a_trustModelElement, XML_ATTR_ID);

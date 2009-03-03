@@ -28,7 +28,6 @@
 package anon.proxy;
 
 
-import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -56,7 +55,6 @@ import logging.LogType;
 import anon.AnonServerDescription;
 import anon.pay.IAIEventListener;
 import anon.infoservice.IMutableProxyInterface;
-import anon.util.IMessages;
 import anon.util.ObjectQueue;
 import java.security.SignatureException;
 
@@ -239,7 +237,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_Anon.addEventListener(this);
 	}
 	
-	public void setHTTPHeaderProcessingEnabled(boolean enable, IMessages a_messages)
+	public void setHTTPHeaderProcessingEnabled(boolean enable)
 	{
 		if(enable)
 		{
@@ -250,7 +248,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			}
 			if(m_httpProxyCallback == null)
 			{
-				m_httpProxyCallback = new HTTPProxyCallback(a_messages);
+				m_httpProxyCallback = new HTTPProxyCallback();
 			}
 			m_callbackHandler.registerProxyCallback(m_httpProxyCallback);
 		}
@@ -1116,7 +1114,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	{
 		public DummyMixCascadeContainer()
 		{
-			super(null);
 		}
 		
 		public MixCascade getNextMixCascade()
@@ -1155,7 +1152,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 		public EncapsulatedMixCascadeContainer(AbstractMixCascadeContainer a_mixCascadeContainer)
 		{
-			super(a_mixCascadeContainer.getMessages());
 			m_mixCascadeContainer = a_mixCascadeContainer;
 		}
 

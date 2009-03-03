@@ -66,7 +66,6 @@ import platform.AbstractOS;
 
 import anon.infoservice.MixCascade;
 import gui.GUIUtils;
-import gui.JAPMessages;
 import gui.JAPMultilineLabel;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp;
@@ -79,6 +78,7 @@ import logging.LogLevel;
 import logging.LogType;
 import java.awt.Dimension;
 import anon.pay.PayAccount;
+import anon.util.JAPMessages;
 
 final public class JAPConf extends JAPDialog implements ActionListener, WindowListener
 {
@@ -431,6 +431,7 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		boolean bError = false;
 		boolean bRetry = true;
 		
+		m_moduleSystem.revalidate();
 		while (!bError)
 		{
 			pack();

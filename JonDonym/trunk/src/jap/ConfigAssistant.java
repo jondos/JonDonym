@@ -53,11 +53,12 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextPane;
 import javax.swing.border.Border;
 
+import anon.util.JAPMessages;
+import anon.util.LanguageMapper;
+
 import gui.GUIUtils;
 import gui.JAPHelpContext;
-import gui.JAPMessages;
 import gui.JTextComponentToClipboardCopier;
-import gui.LanguageMapper;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;

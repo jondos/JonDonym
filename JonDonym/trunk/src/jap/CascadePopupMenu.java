@@ -47,9 +47,9 @@ import javax.swing.JSeparator;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.NewCascadeIDEntry;
+import anon.util.JAPMessages;
 import gui.GUIUtils;
 import gui.PopupMenu;
-import gui.JAPMessages;
 
 /**
  *

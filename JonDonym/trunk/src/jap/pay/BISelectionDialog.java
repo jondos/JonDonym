@@ -43,7 +43,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import anon.pay.PaymentInstanceDBEntry;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import java.util.Vector;
 import java.util.Enumeration;
@@ -51,6 +50,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.pay.PayAccountsFile;
+import anon.util.JAPMessages;
 
 /** This dialog fetches all known Payment Instances from the InfoService and lets
  *  the user select one.

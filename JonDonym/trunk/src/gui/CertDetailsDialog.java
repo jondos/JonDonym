@@ -73,6 +73,8 @@ import anon.crypto.Validity;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509Extensions;
 import anon.crypto.X509UnknownExtension;
+import anon.util.CountryMapper;
+import anon.util.JAPMessages;
 
 /**
  * <p>CertDetails Dialog </p>

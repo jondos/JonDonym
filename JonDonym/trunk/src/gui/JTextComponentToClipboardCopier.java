@@ -40,6 +40,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
+import anon.util.JAPMessages;
+
 /**
  * Adds a context menu to JTextComponents that is activated by a click on the right mouse
  * button that enabled the user to copy the text to clipboard.

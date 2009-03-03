@@ -41,7 +41,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.StatusInfo;
-import gui.JAPMessages;
+import anon.util.JAPMessages;
 
 /**
  * This is only a wrapper class for the configuration classes under the services node. It is only

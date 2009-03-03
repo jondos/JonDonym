@@ -51,8 +51,8 @@ import anon.mixminion.mmrdescription.MMRDescription;
 import anon.mixminion.mmrdescription.MMRList;
 import anon.mixminion.mmrdescription.InfoServiceMMRListFetcher;
 import anon.mixminion.mmrdescription.PlainMMRListFetcher;
+import anon.util.JAPMessages;
 
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import logging.LogType;
 import gui.GUIUtils;

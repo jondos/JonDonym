@@ -37,7 +37,6 @@ import platform.signal.SignalHandler;
 
 import infoservice.PassiveInfoServiceInitializer;
 import infoservice.performance.PerformanceMeter;
-import gui.JAPMessages;
 import jap.pay.AccountUpdater;
 import jap.JAPModel;
 import jap.JAPController;
@@ -48,6 +47,7 @@ import anon.infoservice.IDistributable;
 import anon.infoservice.IDistributor;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.TermsAndConditionsFramework;
+import anon.util.JAPMessages;
 import anon.util.ThreadPool;
 import anon.util.TimedOutputStream;
 import logging.LogHolder;

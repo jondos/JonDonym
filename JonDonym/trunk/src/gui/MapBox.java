@@ -50,6 +50,8 @@ import javax.swing.text.html.HTML.Attribute;
 import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 
+import anon.util.JAPMessages;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

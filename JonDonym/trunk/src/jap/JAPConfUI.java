@@ -60,11 +60,11 @@ import javax.swing.filechooser.FileFilter;
 
 import anon.util.ClassUtil;
 import anon.util.IReturnRunnable;
+import anon.util.JAPMessages;
+import anon.util.LanguageMapper;
 import anon.util.ProgressCapsule;
 import gui.GUIUtils;
 import gui.JAPDll;
-import gui.JAPMessages;
-import gui.LanguageMapper;
 import gui.TitledGridBagPanel;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;

@@ -34,8 +34,9 @@ import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
 
+import anon.util.JAPMessages;
+
 import forward.server.ServerSocketPropagandist;
-import gui.JAPMessages;
 
 /**
  * This is the implementation of the infoservice registration table data, showed in the server
