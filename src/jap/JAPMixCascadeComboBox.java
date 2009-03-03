@@ -52,8 +52,8 @@ import javax.swing.border.EmptyBorder;
 
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
+import anon.util.JAPMessages;
 import gui.GUIUtils;
-import gui.JAPMessages;
 import javax.swing.ImageIcon;
 
 import platform.AbstractOS;
@@ -74,7 +74,7 @@ public class JAPMixCascadeComboBox extends JComboBox
 		m_renderer = new JAPMixCascadeComboBoxListCellRender();
 		setRenderer(m_renderer);
 		setEditable(false);
-		removeAllItems();
+		//removeAllItems();
 	}
 
 	public void addItem(Object o)
@@ -128,14 +128,8 @@ public class JAPMixCascadeComboBox extends JComboBox
 			return;
 		}
 
-		if (m_currentCascade == null)
-		{
-			removeAllItems();
-		}
-		else
-		{
-			super.removeItem(m_currentCascade);
-		}
+		removeAllItems();
+		//super.removeItem(m_currentCascade);
 
 		m_currentCascade = cascade;
 		if (m_currentCascade != null)
@@ -154,7 +148,7 @@ public class JAPMixCascadeComboBox extends JComboBox
 		//super.addItem(ITEM_AVAILABLE_SERVERS); // this is not needed any more
 		for (int i = 0; i < trustModels.size(); i++)
 		{
-			model = (TrustModel)trustModels.elementAt(i);
+			model = (TrustModel)trustModels.elementAt(i);			
 			if (model.isAdded())
 			{
 				super.addItem(model);

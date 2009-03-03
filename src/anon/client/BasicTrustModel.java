@@ -36,7 +36,7 @@ import java.util.Observable;
 
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
-import anon.util.IMessages;
+import anon.util.JAPMessages;
 
 
 /**
@@ -46,29 +46,8 @@ import anon.util.IMessages;
  */
 public class BasicTrustModel extends Observable implements ITrustModel
 {
-	private IMessages m_messages;
-	
-	public BasicTrustModel(IMessages a_messages)
+	public BasicTrustModel()
 	{
-		if (a_messages != null)
-		{
-			m_messages = a_messages;
-		}
-		else
-		{
-			m_messages = new IMessages()
-			{
-				public String getMessage(String a_key)
-				{
-					return "Invalid Signature";
-				}
-				
-				public String getMessage(String a_key, Object a_argument)
-				{
-					return getMessage(a_key);
-				}
-			};
-		}
 	}
 
 	public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
@@ -86,7 +65,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 				countUnverified++;
 				if (exception == null)
 				{
-					exception = new SignatureException(m_messages.getMessage("invalidSignature") + " (Mix " + (i+1) + ")");
+					exception = new SignatureException(JAPMessages.getString("invalidSignature") + " (Mix " + (i+1) + ")");
 				}
 			}
 		}
@@ -94,7 +73,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		{
 			if (countUnverified > 1 || a_cascade.getNumberOfOperatorsShown() == 1 || a_cascade.getNumberOfMixes() <= 1)
 			{
-				throw new SignatureException(m_messages.getMessage("invalidSignature"));
+				throw new SignatureException(JAPMessages.getString("invalidSignature"));
 			}
 			else
 			{
@@ -106,7 +85,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		
 		if (a_cascade == null || !a_cascade.isVerified())
 		{
-			throw (new SignatureException(m_messages.getMessage("invalidSignature")));
+			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
 		}
 		else if (SignatureVerifier.getInstance().isCheckSignatures())
 		{
@@ -121,7 +100,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 				}
 			}
 			
-			throw (new SignatureException(m_messages.getMessage("invalidSignature")));
+			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
 		}
 	}
 

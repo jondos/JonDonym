@@ -49,8 +49,8 @@ import javax.swing.JTextField;
 
 import anon.infoservice.JAPVersionInfo;
 import anon.util.ClassUtil;
+import anon.util.JAPMessages;
 import gui.GUIUtils;
-import gui.JAPMessages;
 import gui.JAPMultilineLabel;
 import gui.wizard.BasicWizardPage;
 import jap.JAPConstants;

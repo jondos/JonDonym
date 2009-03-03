@@ -30,11 +30,12 @@
 package jap.pay.wizardnew;
 
 import gui.dialog.DialogContentPane;
-import gui.JAPMessages;
 import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.WorkerContentPane;
 import gui.dialog.JAPDialog;
 import anon.pay.PaymentInstanceDBEntry;
+import anon.util.JAPMessages;
+
 import javax.swing.ButtonGroup;
 import java.awt.GridBagConstraints;
 import java.awt.Container;

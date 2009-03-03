@@ -38,6 +38,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import anon.util.JAPMessages;
 import anon.util.captcha.IImageEncodedCaptcha;
 import logging.LogHolder;
 import logging.LogLevel;

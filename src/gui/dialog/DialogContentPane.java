@@ -60,12 +60,13 @@ import javax.swing.RootPaneContainer;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import anon.util.JAPMessages;
+
 import platform.AbstractOS;
 
 import gui.GUIUtils;
 import gui.JAPHelpContext;
 import gui.JAPHtmlMultiLineLabel;
-import gui.JAPMessages;
 import gui.help.JAPHelp;
 import logging.LogHolder;
 import logging.LogLevel;

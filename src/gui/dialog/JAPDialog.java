@@ -76,11 +76,12 @@ import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import anon.util.JAPMessages;
+
 import platform.AbstractOS;
 import gui.GUIUtils;
 import gui.JAPHelpContext;
 import gui.JAPHtmlMultiLineLabel;
-import gui.JAPMessages;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

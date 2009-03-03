@@ -36,10 +36,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.ImageIcon;
 
+import anon.util.JAPMessages;
 import anon.util.ResourceLoader;
 import gui.GUIUtils;
 import gui.JAPAboutAutoScroller;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 
 final class JAPAbout extends JAPDialog

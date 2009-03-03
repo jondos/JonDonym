@@ -28,11 +28,9 @@
 package jap;
 
 import gui.CertDetailsDialog;
-import gui.CountryMapper;
 import gui.DataRetentionDialog;
 import gui.GUIUtils;
 import gui.JAPJIntField;
-import gui.JAPMessages;
 import gui.MapBox;
 import gui.MixDetailsDialog;
 import gui.MultiCertOverview;
@@ -128,6 +126,8 @@ import anon.infoservice.ServiceOperator;
 import anon.infoservice.ServiceSoftware;
 import anon.infoservice.StatusInfo;
 import anon.pay.PayAccountsFile;
+import anon.util.CountryMapper;
+import anon.util.JAPMessages;
 import anon.util.Util;
 import anon.util.Util.Comparable;
 

@@ -27,10 +27,13 @@
  */
 package jap;
 
+import gui.GUIUtils;
+
 import java.io.FileNotFoundException;
 import java.util.Locale;
 
-import gui.JAPMessages;
+import anon.util.JAPMessages;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -48,7 +51,10 @@ final public class JAPiPAQ
 	public void startJAP(String strJapConfFile)
 	{
 		// Init Messages....
-		JAPMessages.init(JAPConstants.MESSAGESFN);
+		if (!JAPMessages.init(JAPConstants.MESSAGESFN))
+		{
+			GUIUtils.exitWithNoMessagesError("MixConfigMessages");
+		}
 		JAPModel.getInstance().setSmallDisplay(true);
 		// Test (part 2) for right JVM....
 		// Create the controller object

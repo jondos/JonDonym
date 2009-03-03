@@ -52,6 +52,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import anon.util.JAPMessages;
+
 import logging.FileLog;
 import logging.Log;
 import logging.LogLevel;

@@ -29,7 +29,6 @@ package jap;
 
 import gui.GUIUtils;
 import gui.JAPDll;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import gui.help.AbstractHelpFileStorageManager;
 import gui.help.IHelpModel;
@@ -63,6 +62,7 @@ import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.ProxyInterface;
 import anon.mixminion.mmrdescription.MMRList;
 import anon.util.ClassUtil;
+import anon.util.JAPMessages;
 import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.Util;

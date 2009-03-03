@@ -29,7 +29,6 @@ package jap;
 
 import gui.CAListCellRenderer;
 import gui.CertDetailsDialog;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 
 import java.awt.GridBagConstraints;
@@ -64,6 +63,7 @@ import anon.crypto.CertPath;
 import anon.crypto.CertificateInfoStructure;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
+import anon.util.JAPMessages;
 
 /**
  * This is the configuration GUI for the cert.

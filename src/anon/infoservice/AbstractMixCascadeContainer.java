@@ -34,7 +34,6 @@ package anon.infoservice;
 import anon.AnonServerDescription;
 import anon.IServiceContainer;
 import anon.client.BasicTrustModel;
-import anon.util.IMessages;
 
 /**
  * This class keeps and returns one or more objects of the class MixCascade.
@@ -42,17 +41,8 @@ import anon.util.IMessages;
  */
 public abstract class AbstractMixCascadeContainer extends BasicTrustModel implements IServiceContainer
 {
-	private IMessages m_messages;
-	
-	public AbstractMixCascadeContainer(IMessages a_messages)
+	public AbstractMixCascadeContainer()
 	{
-		super(a_messages);
-		m_messages = a_messages;
-	}
-	
-	public IMessages getMessages()
-	{
-		return m_messages;
 	}
 	
 	/**

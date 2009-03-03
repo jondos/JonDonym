@@ -43,8 +43,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 
+import anon.util.JAPMessages;
+
 import gui.dialog.JAPDialog;
-import gui.JAPMessages;
 
 // this shall become the browser/wizardhost providing class ...
 public class BasicWizardHost implements WizardHost,ActionListener

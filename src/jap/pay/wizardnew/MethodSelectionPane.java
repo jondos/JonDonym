@@ -44,7 +44,7 @@ import javax.swing.JRadioButton;
 import anon.pay.xml.XMLPaymentOption;
 import anon.pay.xml.XMLPaymentOptions;
 import anon.pay.xml.XMLVolumePlan;
-import gui.JAPMessages;
+import anon.util.JAPMessages;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPane.IWizardSuitable;
 import gui.dialog.DialogContentPaneOptions;

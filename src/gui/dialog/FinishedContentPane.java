@@ -27,7 +27,7 @@
  */
 package gui.dialog;
 
-import gui.JAPMessages;
+import anon.util.JAPMessages;
 
 /**
  * This content pane could be used as the last content pane in a wizard. It may have a title and a

@@ -29,7 +29,6 @@ package jap.pay;
 
 import gui.dialog.JAPDialog;
 import java.awt.Component;
-import gui.JAPMessages;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,6 +47,8 @@ import anon.pay.BIConnection;
 import jap.JAPModel;
 import logging.LogType;
 import anon.pay.xml.XMLErrorMessage;
+import anon.util.JAPMessages;
+
 import javax.swing.Box;
 import java.awt.Insets;
 import jap.AbstractJAPConfModule;

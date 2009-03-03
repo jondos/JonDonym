@@ -30,7 +30,6 @@ package jap;
 import gui.GUIUtils;
 import gui.JAPHtmlMultiLineLabel;
 import gui.JAPJIntField;
-import gui.JAPMessages;
 import gui.JAPMultilineLabel;
 import gui.MixDetailsDialog;
 import gui.MultiCertOverview;
@@ -84,6 +83,7 @@ import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.InfoServiceHolderMessage;
 import anon.infoservice.ListenerInterface;
+import anon.util.JAPMessages;
 
 /**
  * This is the configuration GUI for the infoservice.

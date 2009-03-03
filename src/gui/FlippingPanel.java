@@ -39,6 +39,9 @@ import java.awt.event.MouseListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import anon.util.JAPMessages;
+
 import java.awt.Cursor;
 
 /**

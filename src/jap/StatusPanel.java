@@ -41,9 +41,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import anon.util.JAPMessages;
+
 import gui.GUIUtils;
 import gui.IStatusLine;
-import gui.JAPMessages;
 import logging.LogType;
 import logging.LogLevel;
 import logging.LogHolder;

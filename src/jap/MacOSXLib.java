@@ -41,12 +41,12 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JSeparator;
 
 import gui.JAPHelpContext;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;
+import anon.util.JAPMessages;
 import anon.util.ResourceLoader;
 import anon.util.Util;
 import logging.LogHolder;

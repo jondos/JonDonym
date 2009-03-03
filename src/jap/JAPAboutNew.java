@@ -34,9 +34,9 @@ import java.awt.GridBagLayout;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 
+import anon.util.JAPMessages;
 import anon.util.ResourceLoader;
 import gui.JAPDll;
-import gui.JAPMessages;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;

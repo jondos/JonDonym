@@ -34,7 +34,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import anon.infoservice.HttpResponseStructure;
-import anon.util.IMessages;
+import anon.util.JAPMessages;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -112,8 +112,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	private Hashtable m_upstreamBytes = null;
 	
 	private Vector m_httpConnectionListeners = null;
-	
-	private IMessages m_messages;
+
 	
 	private static final IHTTPHelper UPSTREAM_HELPER = new IHTTPHelper()
 	{
@@ -133,26 +132,8 @@ public class HTTPProxyCallback implements ProxyCallback
 		}
 	};
 	
-	public HTTPProxyCallback(IMessages a_messages)
+	public HTTPProxyCallback()
 	{
-		m_messages = a_messages;
-		
-		if (m_messages == null)
-		{
-			m_messages = new IMessages()
-			{
-				public String getMessage(String a_key)
-				{
-					return "A proxy message error occured!";
-				}
-				
-				public String getMessage(String a_key, Object a_argument)
-				{
-					return getMessage(a_key);
-				}
-			};
-		}
-		
 		m_connectionHTTPHeaders = new Hashtable();
 		m_unfinishedRequests = new Hashtable();
 		m_unfinishedResponses = new Hashtable();
@@ -423,7 +404,7 @@ public class HTTPProxyCallback implements ProxyCallback
 				throw new HTTPHeaderParseException(
 						HttpResponseStructure.HTTP_RETURN_BAD_REQUEST,
 						messageType, 
-						m_messages.getMessage(errorMsgKey));
+						JAPMessages.getString(errorMsgKey));
 			}
 			
 			

@@ -23,12 +23,13 @@
 */
 package gui.help;
 
-import gui.JAPMessages;
-import gui.LanguageMapper;
 
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Observable;
+
+import anon.util.JAPMessages;
+import anon.util.LanguageMapper;
 
 /**
  * A generic interface that allows the JAPModel to maintain a consistent file storage layer 

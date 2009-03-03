@@ -34,6 +34,7 @@ import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
 import anon.util.ClassUtil;
+import anon.util.JAPMessages;
 
 /**
  * This text field only accepts positive integers as input.

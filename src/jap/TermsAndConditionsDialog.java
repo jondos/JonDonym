@@ -8,12 +8,12 @@ import javax.swing.JEditorPane;
 
 import jap.pay.wizardnew.TermsAndConditionsPane;
 import gui.dialog.JAPDialog;
-import gui.JAPMessages;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.infoservice.TermsAndConditions;
+import anon.util.JAPMessages;
 
 public class TermsAndConditionsDialog extends JAPDialog
 {

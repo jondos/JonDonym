@@ -44,9 +44,9 @@ import anon.ErrorCodes;
 import anon.pay.IPaymentListener;
 import anon.pay.PayAccount;
 import anon.pay.xml.XMLErrorMessage;
+import anon.util.JAPMessages;
 import anon.util.captcha.IImageEncodedCaptcha;
 import anon.util.captcha.ICaptchaSender;
-import gui.JAPMessages;
 import logging.LogType;
 import anon.infoservice.MixCascade;
 

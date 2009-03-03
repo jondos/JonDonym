@@ -31,12 +31,13 @@ package update;
 import gui.JAPMultilineLabel;
 import gui.wizard.BasicWizardPage;
 import jap.JAPConstants;
-import gui.JAPMessages;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import javax.swing.JLabel;
+
+import anon.util.JAPMessages;
 import gui.GUIUtils;
 
 public class JAPFinishWizardPage extends BasicWizardPage

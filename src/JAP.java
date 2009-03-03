@@ -51,10 +51,10 @@ import anon.client.crypto.KeyPool;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;
+import anon.util.JAPMessages;
 import gui.GUIUtils;
 import gui.JAPAWTMsgBox;
 import gui.JAPDll;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import gui.help.AbstractHelpFileStorageManager;
 import jap.AbstractJAPMainView;
@@ -213,22 +213,21 @@ public class JAP
 		{
 			if (getArgumentValue("--extractHelp") == null)
 			{
-				setArgument("--help", null);
+				setArgument("--extractHelp", ".");
+			}
+			
+			if (JAPModel.getInstance().extractHelpFiles(getArgumentValue("--extractHelp")))
+			{
+				System.out.println("Help files were extracted to the directory '" + 
+						getArgumentValue("--extractHelp") + "'.");
 			}
 			else
 			{
-				if (JAPModel.getInstance().extractHelpFiles(getArgumentValue("--extractHelp")))
-				{
-					System.out.println("Help files were extracted to the directory " + 
-							getArgumentValue("--extractHelp") + ".");
-				}
-				else
-				{
-					System.out.println("Error: Help files could not be extracted to the directory " + 
-							getArgumentValue("--extractHelp") + "!");
-				}
-				System.exit(0);
+				System.out.println("Error: Help files could not be extracted to the directory '" + 
+						getArgumentValue("--extractHelp") + "'!");
 			}
+			System.exit(0);
+			
 		}		
 		
 		
@@ -250,7 +249,7 @@ public class JAP
 			System.out.println("--portable [path_to_browser] Tell JonDo that it runs in a portable environment.");
 			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
 			System.out.println("--portable-help-path         Path of external html help files for portable use.");
-			System.out.println("--extractHelp {directory}    Extract the internal help files to a directory.");
+			System.out.println("--extractHelp [directory]    Extract the internal help files to a directory.");
 			System.out.println("--config, -c {Filename}:     Force JonDo to use a specific configuration file.");
 			System.out.println("--context {Context}:         Start JonDo with a specific service provider context.");
 			System.exit(0);
@@ -274,7 +273,10 @@ public class JAP
 			//if (javaVersion.compareTo("1.0.5") <= 0)
 			if (javaVersion.compareTo("1.3") <= 0)
 			{
-				JAPMessages.init(JAPConstants.MESSAGESFN);
+				if (!JAPMessages.init(JAPConstants.MESSAGESFN))
+				{
+					GUIUtils.exitWithNoMessagesError("MixConfigMessages");
+				}
 				if (bConsoleOnly)
 				{
 					System.out.println(JAPMessages.getString(MSG_ERROR_NEED_NEWER_JAVA));

@@ -52,9 +52,9 @@ import javax.swing.JPanel;
 
 import anon.pay.xml.XMLPaymentOption;
 import anon.pay.xml.XMLTransCert;
+import anon.util.JAPMessages;
 import anon.util.Util;
 import gui.GUIUtils;
-import gui.JAPMessages;
 import gui.LinkMouseListener;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPane.IWizardSuitable;

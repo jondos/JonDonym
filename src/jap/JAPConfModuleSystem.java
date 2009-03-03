@@ -53,8 +53,9 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import anon.util.JAPMessages;
+
 import gui.GUIUtils;
-import gui.JAPMessages;
 import gui.JAPHelpContext;
 
 /**

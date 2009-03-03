@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import anon.infoservice.DataRetentionInformation;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;
+import anon.util.JAPMessages;
 import anon.util.XMLDuration;
 
 import gui.dialog.JAPDialog;

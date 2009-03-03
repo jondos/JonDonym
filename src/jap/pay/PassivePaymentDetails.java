@@ -13,8 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import anon.pay.xml.XMLPassivePayment;
+import anon.util.JAPMessages;
 import gui.JAPHtmlMultiLineLabel;
-import gui.JAPMessages;
 import gui.dialog.JAPDialog;
 import jap.JAPUtil;
 import logging.LogHolder;

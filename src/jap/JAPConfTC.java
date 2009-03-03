@@ -1,6 +1,5 @@
 package jap;
 
-import gui.JAPMessages;
 import gui.OperatorsCellRenderer;
 
 import java.awt.Dimension;
@@ -29,6 +28,7 @@ import anon.client.ITermsAndConditionsContainer;
 import anon.infoservice.Database;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
+import anon.util.JAPMessages;
 
 public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionListener, Observer
 {

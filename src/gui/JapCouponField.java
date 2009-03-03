@@ -37,6 +37,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import javax.swing.JPopupMenu;
+
+import anon.util.JAPMessages;
+
 import java.awt.event.ActionListener;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Clipboard;
