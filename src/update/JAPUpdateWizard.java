@@ -861,14 +861,10 @@ private boolean checkSignature()
 				boolean copySuccess = AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, 
 						new File(m_fileAktJapJar.getParent()), retryDialog);
 				host.unlockDialog();
-				if (!copySuccess)
+				if (!copySuccess || !RecursiveFileTool.equals(m_fileNewJapJar, m_fileAktJapJar, true))
 				{
 					throw new Exception ("Administrator copy failed!");
 				}
-			}
-			if (!RecursiveFileTool.equals(m_fileNewJapJar, m_fileAktJapJar, true))
-			{
-				throw new Exception ("Administrator copy failed!");
 			}
 			
 			downloadPage.progressBar.setValue(500);

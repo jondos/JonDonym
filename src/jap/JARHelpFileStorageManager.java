@@ -137,19 +137,19 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 				if(hpFile.isDirectory())
 				{
 					strPath = a_absolutePath;
-					while ((index = strPath.indexOf(HELP_FOLDER)) > 0)
+					while ((index = strPath.toLowerCase().lastIndexOf(HELP_FOLDER.toLowerCase())) >= 0)
 					{
-						if (!new File(strPath.substring(0, index) + HELP_FOLDER).exists())
+						if (!new File(strPath.substring(0, index + HELP_FOLDER.length())).exists())
 						{
 							LogHolder.log(LogLevel.EMERG, LogType.MISC, 
 									"Existing help directory was not found!");
 						}
-						if (getHelpVersion(m_helpPath + 
-								File.separator + HELP_FOLDER) != null)
+						//if (getHelpVersion(m_helpPath + File.separator + HELP_FOLDER) != null)
+						if (getHelpVersion(strPath.substring(0, index + HELP_FOLDER.length())) != null)
 						{
 							return HELP_NESTED;
 						}
-						strPath = strPath.substring(index, strPath.length());
+						strPath = strPath.substring(0, index);
 					}
 					
 					// check for virtual directories					
@@ -270,12 +270,18 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 	
 	public boolean extractHelpFiles(String a_extractionPath)
 	{
+		return extractHelpFiles(a_extractionPath, true);
+	}
+	
+	private boolean extractHelpFiles(String a_extractionPath, boolean bAcceptHelpFolderInPath)
+	{
 		if (a_extractionPath == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC, 
 					"Invalid directory for help extraction: " + a_extractionPath);
 			return false;
 		}
+		
 		boolean installationSuccessful = 
 			m_archiver.extractArchive(HELP_FOLDER + "/", a_extractionPath);
 		if(installationSuccessful)
@@ -326,7 +332,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 			}
 		}
 		
-		return extractHelpFiles(m_helpPath);
+		return extractHelpFiles(m_helpPath, false);
 	}
 	
 	/**

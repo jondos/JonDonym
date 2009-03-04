@@ -244,6 +244,8 @@ public class RecursiveFileTool {
 	 */
 	public static boolean equals(File a_oneFile, File a_otherFile, boolean a_doHashComparison)
 	{
+		boolean bComparedQuick = false;
+		
 		if (a_oneFile == null || a_otherFile == null)
 		{
 			return false;
@@ -251,31 +253,52 @@ public class RecursiveFileTool {
 		
 		try
 		{
-			if (!a_oneFile.exists() || !a_otherFile.exists() || 
-				a_oneFile.length() != a_otherFile.length())
+			if (!a_oneFile.exists() || !a_otherFile.exists())
 			{
 				return false;
 			}
-			
-			if (!a_doHashComparison)
+			bComparedQuick = true;
+		}
+		catch (SecurityException a_e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+		}
+		
+		try
+		{
+			if (a_oneFile.length() != a_otherFile.length())
 			{
-				// this was a quick comparison only, do not read the files
-				return true;
+				return false;
 			}
+			bComparedQuick = true;
+		}
+		catch (SecurityException a_e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+		}
 			
+		if (!a_doHashComparison && bComparedQuick)
+		{
+			// this was a quick comparison only, we have finished now; do not read the files
+			return true;
+		}
+			
+		try
+		{	
 			if (!Util.arraysEqual(createMD5Digest(a_oneFile), createMD5Digest(a_otherFile)))
 			{
 				return false;
 			}
 		}
-		catch (Exception a_e)
+		catch (IOException a_e)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
-			if (a_oneFile.length() == a_otherFile.length())
-			{
-				// maybe we succeeded, but we cannot be sure...
-				return true;
-			}
+			return false;
+		}
+		catch (SecurityException a_e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+			// maybe we succeeded, but we cannot be sure...
 		}
 		
 		return true;

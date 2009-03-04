@@ -52,7 +52,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.TitledBorder;
@@ -132,6 +131,9 @@ final class JAPConfUI extends AbstractJAPConfModule
 
 	private static final String MSG_MINI_ON_TOP = JAPConfUI.class.getName() + "_miniOnTop";
 	private static final String MSG_MINI_ON_TOP_TT = JAPConfUI.class.getName() + "_miniOnTopTT";
+	
+	private static final String MSG_CHOOSE_OTHER_DIR = JAPConfUI.class.getName() + "_chooseOtherDir";
+	
 
 	private TitledBorder m_borderLookAndFeel, m_borderView;
 	private JComboBox m_comboLanguage, m_comboUI, m_comboDialogFormat;
@@ -1047,7 +1049,8 @@ final class JAPConfUI extends AbstractJAPConfModule
 						else
 						{
 							JAPDialog.showErrorDialog(JAPConf.getInstance(), 
-									JAPMessages.getString(hpFileValidation), LogType.MISC);
+									JAPMessages.getString(hpFileValidation) + " " + 
+									JAPMessages.getString(MSG_CHOOSE_OTHER_DIR), LogType.MISC);
 						}
 					}
 				}
