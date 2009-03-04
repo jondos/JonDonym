@@ -811,11 +811,18 @@ final public class Configuration
 					m_aPerfMeterConf[4] = Integer.valueOf(value);
 				}
 				
-				value = a_properties.getProperty("perf.maxWaitForSingleTest", "60000");
+				value = a_properties.getProperty("perf.maxWaitForSingleTest", "50000");
 				if(value != null)
 				{
 					m_aPerfMeterConf[5] = new Integer(Math.max(5*1000, Integer.parseInt(value)));
 				}
+				
+				value = a_properties.getProperty("perf.maxConnectionErrorsPerRequest", "4");
+				if (value != null)
+				{
+					m_aPerfMeterConf[6] = Integer.valueOf(value);
+				}
+				
 				
 				m_strPerfAccountDirectory = 
 					new File(a_properties.getProperty(IS_PROP_NAME_PERFACCOUNT_DIRECTORY, 

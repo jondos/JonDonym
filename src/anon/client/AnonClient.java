@@ -787,7 +787,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 						}
 						catch (Exception a_e)
 						{
-							a_e.printStackTrace();
 							exceptionCache.addElement(a_e);
 						}
 					}
@@ -816,7 +815,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 			}
 			catch (SignatureException a_e)
 			{
-				LogHolder.log(LogLevel.ERR, LogType.CRYPTO, a_e);
+				LogHolder.log(LogLevel.EXCEPTION, LogType.CRYPTO, a_e);
 				closeSocketHandler();
 				/** @todo Make this more transparent... */
 				return ErrorCodes.E_SIGNATURE_CHECK_OTHERMIX_FAILED;
