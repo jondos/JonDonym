@@ -100,6 +100,69 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	private Node m_node;
 
 	/**
+	 * Creates a ServiceOperator just by his Certificate
+	 * @param operatorCertificate the opeartors certificate
+	 */
+	public ServiceOperator(JAPCertificate operatorCertificate)
+	{
+		
+		super(Long.MAX_VALUE);
+		X509DistinguishedName subject = operatorCertificate.getSubject();
+		m_node = null;
+		m_certPath = null;
+		/* get the organization name */
+		m_strOrganization = subject.getOrganisation();
+		if(m_strOrganization == null || m_strOrganization.trim().length() == 0)
+		{
+			// if no organization is given, use the common name
+			m_strOrganization = subject.getCommonName();
+		}
+		m_countryCode = subject.getCountryCode();
+		m_strOrgUnit = subject.getOrganisationalUnit();
+			
+		/* get the e-mail address */
+		m_strEmail = subject.getE_EmailAddress();
+		if (m_strEmail == null || m_strEmail.trim().length() == 0)
+		{
+		   m_strEmail = subject.getEmailAddress();
+		}
+			
+		// get the URL
+		AbstractX509Extension extension =
+			operatorCertificate.getExtensions().getExtension(X509SubjectAlternativeName.IDENTIFIER);
+		if (extension != null && extension instanceof X509SubjectAlternativeName)
+		{
+			X509SubjectAlternativeName alternativeName = (X509SubjectAlternativeName) extension;
+			Vector tags = alternativeName.getTags();
+			Vector values = alternativeName.getValues();
+			if (tags.size() == values.size())
+			{
+				for (int i = 0; i < tags.size(); i++)
+				{
+					if (tags.elementAt(i).equals(X509SubjectAlternativeName.TAG_URL))
+					{
+						try
+						{
+							m_strUrl = new URL(values.elementAt(i).toString()).toString();
+						}
+						catch (Exception a_e)
+						{
+							// ignore
+						}
+						break;
+					}
+				}
+			}
+		}
+		m_strID = operatorCertificate.getSubjectKeyIdentifierConcatenated();			
+	    if (m_strID == null)
+		{
+			LogHolder.log(LogLevel.ALERT, LogType.DB, "Could not create ID for ServiceOperator entry!");
+			m_strID = "";
+		}
+	}
+	
+	/**
 	 * Creates a new ServiceOperator an operator certificate or
 	 * from an XML description (Operator node).
 	 *

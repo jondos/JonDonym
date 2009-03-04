@@ -149,29 +149,27 @@ public class TermsAndConditions implements IXMLEncodable
 	 * @throws SignatureException if the signature of a Terms and Conditions translation
 	 * has no valid signature.
 	 */
-	public TermsAndConditions(Element termsAndConditionRoot, ServiceOperator op) throws XMLParseException, ParseException, SignatureException
+	public TermsAndConditions(Element termsAndConditionRoot, ServiceOperator operator) throws XMLParseException, ParseException, SignatureException
 	{
-		String opSki = null;
-		if(op != null)
+		if(operator != null)
 		{
-			opSki = op.getId();
+			this.operator = operator;
 		}
 		else
 		{
-			opSki = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ID, null);
-		}
-		
-		if(opSki == null)
-		{
-			throw new XMLParseException("attribute 'id' of TermsAndConditions must not be null!");
-		}
-		
-		opSki = opSki.toUpperCase();
-		
-		this.operator = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(opSki);
-		if (operator == null)
-		{
-			throw new XMLParseException("invalid  id "+ opSki +": no operator found with this subject key identifier");
+			String opSki = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ID, null);
+			if(opSki == null)
+			{
+				throw new XMLParseException("attribute 'id' of TermsAndConditions must not be null!");
+			}
+			
+			opSki = opSki.toUpperCase();
+			
+			this.operator = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(opSki);
+			if (this.operator == null)
+			{
+				throw new XMLParseException("invalid  id "+ opSki +": no operator found with this subject key identifier");
+			}
 		}
 		
 		String dateStr = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_DATE, null);
@@ -194,7 +192,7 @@ public class TermsAndConditions implements IXMLEncodable
 		}
 		if (!hasTranslations())
 		{
-			throw new XMLParseException("TC of operator "+opSki+" is invalid because it has no translations");
+			throw new XMLParseException("TC of operator "+this.operator.getId()+" is invalid because it has no translations");
 		}
 		
 		read = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, null) != null;
@@ -226,8 +224,7 @@ public class TermsAndConditions implements IXMLEncodable
 	
 	private synchronized void addTranslation(Translation t) throws SignatureException
 	{
-		//if(t.isDefaultLocale()) throw new SignatureException("Just a silly test");
-		/*if(!t.isVerified())
+		if(!t.isVerified())
 		{
 			throw new SignatureException("Translation ["+t.getLocale()+"] of "+operator.getOrganization()+" is not verified");
 		}
@@ -235,7 +232,7 @@ public class TermsAndConditions implements IXMLEncodable
 		{
 			throw new SignatureException("Translation ["+t.getLocale()+"] is not signed by its operator '"+
 					operator.getOrganization()+"'");
-		}*/
+		}
 		
 		synchronized (this)
 		{
