@@ -1179,7 +1179,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 					a_splash.setText(messageText);
 				}
-						
 
 	            m_Model.setHttpListenerPortNumber(XMLUtil.parseAttribute(root,
 					JAPConstants.CONFIG_PORT_NUMBER,

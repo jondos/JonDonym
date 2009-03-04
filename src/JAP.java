@@ -248,7 +248,7 @@ public class JAP
 			System.out.println("--cascade {[host][:port][:id]}    Connects to the specified Mix-Cascade.");
 			System.out.println("--portable [path_to_browser] Tell JonDo that it runs in a portable environment.");
 			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
-			System.out.println("--portable-help-path         Path of external html help files for portable use.");
+			System.out.println("--help-path                  Path where external html help files should be installed.");
 			System.out.println("--extractHelp [directory]    Extract the internal help files to a directory.");
 			System.out.println("--config, -c {Filename}:     Force JonDo to use a specific configuration file.");
 			System.out.println("--context {Context}:         Start JonDo with a specific service provider context.");
@@ -1053,99 +1053,112 @@ public class JAP
 	private String buildPortableFFCommand(ISplashResponse a_splash)
 	{
 		String pFFExecutable;
-		String pFFHelpPath = null;
+		String pFFHelpPath;
 
-		if (!isArgumentSet("--portable") )
+		if (isArgumentSet("--portable"))
 		{
-			return null;
+			//check if portable is set
+			pFFExecutable = JAPModel.getInstance().getPortableBrowserpath();
+			if (pFFExecutable == null)
+			{
+				pFFExecutable = getArgumentValue("--portable");
+				JAPModel.getInstance().setPortableBrowserpath(pFFExecutable);
+			}
+			if (pFFExecutable != null)
+			{
+				pFFExecutable = AbstractOS.createBrowserCommand(pFFExecutable);
+			}
 		}
-		
-		//check if portable is set
-		pFFExecutable = JAPModel.getInstance().getPortableBrowserpath();
-		if (pFFExecutable == null)
+		else
 		{
-			pFFExecutable = getArgumentValue("--portable");
-			JAPModel.getInstance().setPortableBrowserpath(pFFExecutable);
-		}
-		if (pFFExecutable != null)
-		{
-			pFFExecutable = AbstractOS.createBrowserCommand(pFFExecutable);
+			pFFExecutable = null;
 		}
 					
-		if (isArgumentSet("--portable-help-path"))
+		if (isArgumentSet("--help-path"))
+		{
+			pFFHelpPath = getArgumentValue("--help-path");
+		}
+		else if (isArgumentSet("--portable-help-path"))
 		{
 			pFFHelpPath = getArgumentValue("--portable-help-path");
 		}
-		
-		if (pFFHelpPath == null && isArgumentSet("--jar-path"))
-		{				
-			int index;
-			String jarpath = getArgumentValue("--jar-path");
-			String pFFHelpPathTmp;
-			String strUpwardMove = ".." + File.separator;
-			
-			try
-			{
-				if (m_temp != null && m_temp.length > 0 && jarpath != null)
-				{
-					// for backwards compatibility to old jondoportable.exe 
-					// try to remove upward directory moves
-					while (jarpath.startsWith(strUpwardMove))
-					{
-						jarpath = jarpath.substring(strUpwardMove.length(), jarpath.length());
-						index = jarpath.indexOf(File.separator);
-						if (index >= 0 && jarpath.length() >= index + 1)
-						{
-							jarpath = jarpath.substring(
-									jarpath.indexOf(File.separator) + File.separator.length(), 
-									jarpath.length());
-						}
-						else
-						{
-							jarpath = "";
-						}
-					}
-					if (jarpath.trim().length() > 0)
-					{
-						pFFHelpPathTmp = m_temp[0];					
-						index = pFFHelpPathTmp.indexOf(jarpath);
-						if (index > 0)
-						{
-							pFFHelpPathTmp = pFFHelpPathTmp.substring(0, index);
-							String[] dirs = new File(pFFHelpPathTmp).list();						
-							for (int i = 0; i < dirs.length; i++)
-							{
-								if (dirs[i].toUpperCase().equals(
-										AbstractHelpFileStorageManager.HELP_FOLDER.toUpperCase()))
-								{
-									// found a help folder in the jarpath; assume that 
-									// it is the right one...
-									pFFHelpPath = pFFHelpPathTmp;
-									break;
-								}
-							}
-						}		
-					}
-				}
-			}
-			catch (Exception a_e)
-			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
-			}
+		else
+		{
+			pFFHelpPath = null;
 		}
 		
-		// if no path was found, set the help directory to the path where the JAP.jar is located
-		if (pFFHelpPath == null)
+		if (isArgumentSet("--portable"))
 		{
-			ZipFile jar = ClassUtil.getJarFile();
-			if (jar != null)
-			{
-				pFFHelpPath = new File(jar.getName()).getParent();
+			if (pFFHelpPath == null && isArgumentSet("--jar-path"))
+			{				
+				int index;
+				String jarpath = getArgumentValue("--jar-path");
+				String pFFHelpPathTmp;
+				String strUpwardMove = ".." + File.separator;
+				
+				try
+				{
+					if (m_temp != null && m_temp.length > 0 && jarpath != null)
+					{
+						// for backwards compatibility to old jondoportable.exe 
+						// try to remove upward directory moves
+						while (jarpath.startsWith(strUpwardMove))
+						{
+							jarpath = jarpath.substring(strUpwardMove.length(), jarpath.length());
+							index = jarpath.indexOf(File.separator);
+							if (index >= 0 && jarpath.length() >= index + 1)
+							{
+								jarpath = jarpath.substring(
+										jarpath.indexOf(File.separator) + File.separator.length(), 
+										jarpath.length());
+							}
+							else
+							{
+								jarpath = "";
+							}
+						}
+						if (jarpath.trim().length() > 0)
+						{
+							pFFHelpPathTmp = m_temp[0];					
+							index = pFFHelpPathTmp.indexOf(jarpath);
+							if (index > 0)
+							{
+								pFFHelpPathTmp = pFFHelpPathTmp.substring(0, index);
+								String[] dirs = new File(pFFHelpPathTmp).list();						
+								for (int i = 0; i < dirs.length; i++)
+								{
+									if (dirs[i].toUpperCase().equals(
+											AbstractHelpFileStorageManager.HELP_FOLDER.toUpperCase()))
+									{
+										// found a help folder in the jarpath; assume that 
+										// it is the right one...
+										pFFHelpPath = pFFHelpPathTmp;
+										break;
+									}
+								}
+							}		
+						}
+					}
+				}
+				catch (Exception a_e)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+				}
 			}
-			else if (!JAPModel.getInstance().isHelpPathChangeable())
+			
+			// if no path was found, set the help directory to the path where the JAP.jar is located
+			if (pFFHelpPath == null)
 			{
-				// maybe this is a test environment with local class files, but no jar file
-				pFFHelpPath = ClassUtil.getClassDirectory(this.getClass()).getParent();
+				ZipFile jar = ClassUtil.getJarFile();
+				if (jar != null)
+				{
+					pFFHelpPath = new File(jar.getName()).getParent();
+				}
+				else if (!JAPModel.getInstance().isHelpPathChangeable())
+				{
+					// maybe this is a test environment with local class files, but no jar file
+					pFFHelpPath = ClassUtil.getClassDirectory(this.getClass()).getParent();
+				}
 			}
 		}
 
