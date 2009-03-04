@@ -29,6 +29,7 @@ package jap;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Locale;
 
 import java.awt.Color;
@@ -144,7 +145,7 @@ public class ConfigAssistant extends JAPDialog
 
 	private static final String IMG_ARROW = "arrow46.gif";
 	private static final String IMG_HELP_BUTTON = ConfigAssistant.class.getName() + "_en_help.gif";
-	private static final String IMG_SERVICES = ConfigAssistant.class.getName() + "_services.gif";
+	private static final String IMG_SERVICES = ConfigAssistant.class.getName() + "_services{0}.gif";
 
 	private JTextPane[] m_lblHostnames = new JTextPane[PROXIES.length];
 	private JTextPane[] m_lblPorts = new JTextPane[PROXIES.length];
@@ -629,7 +630,8 @@ public class ConfigAssistant extends JAPDialog
 			  DialogContentPane.ON_YESOK_SHOW_PREVIOUS_CONTENT |
 			  DialogContentPane.ON_CANCEL_DISPOSE_DIALOG |
 			  DialogContentPane.ON_NO_SHOW_PREVIOUS_CONTENT);
-		lblImage = new JLabel(GUIUtils.loadImageIcon(IMG_SERVICES));
+			
+		lblImage = new JLabel(loadServicesIcon());
 		lblImage.setBorder(border);
 		paneExplainNoConnection.getContentPane().add(lblImage);
 
@@ -658,7 +660,7 @@ public class ConfigAssistant extends JAPDialog
 			DialogContentPane.ON_YESOK_SHOW_PREVIOUS_CONTENT |
 			DialogContentPane.ON_CANCEL_DISPOSE_DIALOG |
 			DialogContentPane.ON_NO_SHOW_PREVIOUS_CONTENT);
-		lblImage = new JLabel(GUIUtils.loadImageIcon(IMG_SERVICES));
+		lblImage = new JLabel(loadServicesIcon());
 		lblImage.setBorder(border);
 		paneExplainBadConnection.getContentPane().add(lblImage);
 
@@ -731,6 +733,17 @@ public class ConfigAssistant extends JAPDialog
 		m_radioNoServiceAvailable.setVisible(false);
 	}
 
+	private ImageIcon loadServicesIcon()
+	{
+		ImageIcon icon = GUIUtils.loadImageIcon(MessageFormat.format(
+				IMG_SERVICES, new Object[]{"_" + JAPMessages.getLocale().getLanguage()}));
+		if (icon == null)
+		{
+			icon = GUIUtils.loadImageIcon(MessageFormat.format(IMG_SERVICES, new Object[]{""}));
+		}
+		return icon;
+	}
+	
 	private void addProxyInfo(JComponent a_component, GridBagConstraints a_constraints, String a_protocol)
 	{
 		JLabel tempLabel;

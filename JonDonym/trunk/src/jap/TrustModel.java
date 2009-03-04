@@ -28,7 +28,6 @@
 package jap;
 
 import java.security.SignatureException;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Hashtable;
@@ -1091,9 +1090,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			setCurrentTrustModel(XMLUtil.parseAttribute(a_container, XML_ATTR_CURRENT_TRUST_MODEL, 0l));
 		}
 		
-		if(trustModelsAdded == 0)
+		if (trustModelsAdded == 0)
 		{
-			TrustModel model = new TrustModel(MSG_CASCADES_FILTER, 5);
+			TrustModel model = new TrustModel("", 5);
 			model.setEditable(true);
 			TRUST_MODEL_CUSTOM_FILTER = model;
 			addTrustModel(model);
@@ -1104,7 +1103,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	{
 		removeTrustModel(TRUST_MODEL_CUSTOM_FILTER);
 	
-		TrustModel model = new TrustModel(MSG_CASCADES_FILTER, 5);
+		TrustModel model = new TrustModel("", 5);
 		model.setEditable(true);
 		TRUST_MODEL_CUSTOM_FILTER = model;
 		addTrustModel(model);
@@ -1141,7 +1140,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		{
 			throw new IllegalArgumentException("Invalid name for trust model!");
 		}
-		m_strName = a_strName;
+		if (a_strName.trim().equals(JAPMessages.getString(MSG_CASCADES_FILTER)))
+		{
+			m_strName = "";
+		}
+		else
+		{
+			m_strName = a_strName;
+		}
 	}
 
 	/**
@@ -1151,6 +1157,10 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public String getName()
 	{
+		if (m_strName == null || m_strName.trim().length() == 0)
+		{
+			return JAPMessages.getString(MSG_CASCADES_FILTER);
+		}
 		return JAPMessages.getString(m_strName);
 	}
 
@@ -1176,7 +1186,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 		//XMLUtil.setAttribute(elemTrustModel, XML_ATTR_SHOW_WARNING, m_bSh owWarning);
 		XMLUtil.setAttribute(elemTrustModel, XML_ATTR_ID, m_id);
-		XMLUtil.setAttribute(elemTrustModel, XML_ATTR_NAME, getName());
+		XMLUtil.setAttribute(elemTrustModel, XML_ATTR_NAME, m_strName);
 
 		synchronized(m_trustAttributes)
 		{
