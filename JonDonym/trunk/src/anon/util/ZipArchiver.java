@@ -67,7 +67,7 @@ public class ZipArchiver extends Observable
 		}
 	}
 	
-	public boolean extractArchive(String pathName, String destination)
+	public boolean extractArchive(String a_archivePathName, String destination)
 	{	
 		String dest = destination;
 		Enumeration allZipEntries = null;
@@ -105,7 +105,7 @@ public class ZipArchiver extends Observable
 				
 				entryName = entry.getName();
 
-				if( (pathName == null) || (entryName.startsWith(pathName)) )
+				if( (a_archivePathName == null) || (entryName.startsWith(a_archivePathName)) )
 				{
 					totalSize += entry.getSize();
 					if( entry.isDirectory() )
@@ -127,7 +127,7 @@ public class ZipArchiver extends Observable
 			}
 			if( (matchedFileEntries.size() == 0) && (matchedDirEntries.size() == 0) )
 			{
-				LogHolder.log(LogLevel.ERR, LogType.MISC, "No matching files for "+pathName+" found in archive "+m_archive.getName());
+				LogHolder.log(LogLevel.ERR, LogType.MISC, "No matching files for "+a_archivePathName+" found in archive "+m_archive.getName());
 				notifyAboutChanges(0, 0, ProgressCapsule.PROGRESS_FAILED);
 				return false;
 			}
@@ -141,10 +141,10 @@ public class ZipArchiver extends Observable
 				File dir = new File(dest+File.separator+dirName);
 				if(dir != null)
 				{
-					if(!dir.mkdir() )
+					if (!dir.exists() && !dir.mkdir())
 					{
 						LogHolder.log(LogLevel.ERR, LogType.MISC, "Error while extracting archive "+
-								m_archive.getName()+": could not create directory "+dir.getName());
+								m_archive.getName()+": could not create directory "+dir.getAbsolutePath());
 						extractErrorRollback(matchedDirEntries, destination);
 						return false;
 					}
@@ -218,14 +218,17 @@ public class ZipArchiver extends Observable
 	
 	private static void extractErrorRollback(Vector entries, String destination) 
 	{	
-		for(int i = entries.size(); i > 0; i--)
+		for (int i = entries.size(); i > 0; i--)
 		{
 			File f = new File(destination+File.separator+ entries.elementAt(i-1));
-
+			if (!f.exists())
+			{
+				continue;
+			}
 			String was = f.delete() ? " " : " not ";
 
 			LogHolder.log((was.trim().length() == 0 ? LogLevel.DEBUG : LogLevel.ERR), 
-					LogType.MISC, "Rollback: file "+f+was+"successfully deleted");
+					LogType.MISC, "Rollback: file "+f.getAbsolutePath()+was+"successfully deleted");
 		}
 	}
 

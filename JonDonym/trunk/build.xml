@@ -120,6 +120,7 @@
 	
 	<target name="compile" depends="init-compile-version, init" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
+		<echo message="compiler version: ${build.compile.version}"/>
 		<javac debug="true" debuglevel="lines,source" sourcepath="" 
 			classpathref="classpath.all" srcdir="${src}" excludes="${excludesSrcJap}" 
     		destdir="${build}" fork="yes"
@@ -309,10 +310,10 @@
 		</ant>
 	</target>
 	
-	<target name="manioq-for-linux-dist-archive">
+	<target name="serviceprovidercontext-for-linux-dist-archive">
 		<antcall target="linux-dist-archive">
-			<param name="JAP_args" value="--manioq"/>
-			<param name="dist.linux" value="${dist.linux}/manioq"/>
+			<param name="JAP_args" value="--context a_serviceprovider_name"/>
+			<param name="dist.linux" value="${dist.linux}/a_serviceprovider_name"/>
 		</antcall>
 	</target>
 	
