@@ -144,6 +144,12 @@ public class PerformanceMeter implements Runnable, Observer
 	private int m_requestsPerInterval;
 	
 	/**
+	 * The number of connection errors after that the current performance request is stopped
+	 * (= no hope to get it done is left).
+	 */
+	private int m_maxConnectionErrorsPerRequest;
+	
+	/**
 	 * The test timeout.
 	 */
 	private int m_maxWaitForTest;
@@ -275,6 +281,7 @@ public class PerformanceMeter implements Runnable, Observer
 		m_majorInterval = ((Integer) a_config[3]).intValue();
 		m_requestsPerInterval = ((Integer) a_config[4]).intValue();
 		m_maxWaitForTest = ((Integer) a_config[5]).intValue();
+		m_maxConnectionErrorsPerRequest = ((Integer) a_config[6]).intValue();
 		
 		// set anon client timeout
 		AnonClient.setLoginTimeout(m_maxWaitForTest);
@@ -833,6 +840,8 @@ public class PerformanceMeter implements Runnable, Observer
 		int iUpdates = 0;
 		int dataSize = m_dataSize;
 		int requestsPerInterval = m_requestsPerInterval;
+		int maxErrors = m_maxConnectionErrorsPerRequest;
+		int errors = 0;
 		int errorCode = ErrorCodes.E_UNKNOWN; 		
 		Hashtable hashBadInfoServices = new Hashtable();
 		Hashtable vDelay = new Hashtable();
@@ -854,21 +863,26 @@ public class PerformanceMeter implements Runnable, Observer
 		PerformanceEntry entry = (PerformanceEntry) Database.getInstance(PerformanceEntry.class).getEntryById(a_cascade.getId());
 		
 		// create one if necessary
-		if(entry == null)
+		if (entry == null)
 		{
 			entry = new PerformanceEntry(a_cascade.getId());
 		}		
 		
-		while(!Thread.currentThread().isInterrupted())
+		while (!Thread.currentThread().isInterrupted())
 		{			
 			// connect to the mix cascade
 		    errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
 		    if (errorCode == ErrorCodes.E_CONNECT || errorCode == ErrorCodes.E_UNKNOWN)
 		    {
+		    	errors++;
+		    	if (errors > maxErrors)
+		    	{
+		    		break;
+		    	}
 		    	//	try to recover from this error; maybe a temporary problem
 				try
 				{
-					Thread.sleep(500);
+					Thread.sleep(200);
 				}
 				catch (InterruptedException e)
 				{

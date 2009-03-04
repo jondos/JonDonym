@@ -81,8 +81,6 @@ public class BasicTrustModel extends Observable implements ITrustModel
 			}
 		}
 		
-		
-		
 		if (a_cascade == null || !a_cascade.isVerified())
 		{
 			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
