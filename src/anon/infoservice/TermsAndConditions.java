@@ -94,8 +94,8 @@ public class TermsAndConditions implements IXMLEncodable
 	private final static Hashtable tcHashtable = new Hashtable();
 	
 	/**
-	 * creates an empty Terms And Condition object for the specified id and validation date
-	 * which serves as a contianer for the different translations.
+	 * Creates an empty Terms And Condition object for the specified id and validation date
+	 * which serves as a container for the different translations.
 	 * @throws ParseException 
 	 */
 	public TermsAndConditions(ServiceOperator operator, String date) throws ParseException
@@ -121,13 +121,51 @@ public class TermsAndConditions implements IXMLEncodable
 		read = false;
 	}
 
+	/**
+	 * Creates a TermsAndConditions container from the given XML DOM element
+	 * with all translation that are stored within this element.
+	 * The ServiceOperator ID will be extracted from termsAndConditionsRoot
+	 * @param termsAndConditionRoot the DOM Element from which the Container will be created
+	 * @throws XMLParseException if termsAndConditionsRoot does not provide a valid operator SKI
+	 * or the date attribute is missing
+	 * @throws ParseException if the date is in a wrong format (must be .
+	 * @throws SignatureException if the signature of a Terms and Conditions translation
+	 * has no valid signature.
+	 */
 	public TermsAndConditions(Element termsAndConditionRoot) throws XMLParseException, ParseException, SignatureException
 	{
-		String opSki = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ID, null);
+		this(termsAndConditionRoot, null);
+	}
+	
+	/**
+	 * Creates a TermsAndConditions container from the given XML DOM element
+	 * with all translation that are stored within this element.
+	 * The ServiceOperator ID from op is used if it is not null. Otherwise the ID will be extracted from termsAndConditionsRoot
+	 * @param termsAndConditionRoot the DOM Element from which the Container will be created
+	 * @param op the Operator to whom these Terms And Conditions belong
+	 * @throws XMLParseException if op is null and termsAndConditionsRoot does not provide a valid operator SKI
+	 * or the date attribute is missing
+	 * @throws ParseException if the date is in a wrong format.
+	 * @throws SignatureException if the signature of a Terms and Conditions translation
+	 * has no valid signature.
+	 */
+	public TermsAndConditions(Element termsAndConditionRoot, ServiceOperator op) throws XMLParseException, ParseException, SignatureException
+	{
+		String opSki = null;
+		if(op != null)
+		{
+			opSki = op.getId();
+		}
+		else
+		{
+			opSki = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ID, null);
+		}
+		
 		if(opSki == null)
 		{
 			throw new XMLParseException("attribute 'id' of TermsAndConditions must not be null!");
 		}
+		
 		opSki = opSki.toUpperCase();
 		
 		this.operator = (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(opSki);
@@ -163,21 +201,33 @@ public class TermsAndConditions implements IXMLEncodable
 		accepted = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, false);
 	}
 	
+	/**
+	 * returns the date as String in the format 'yyyyMMdd' from when these T&Cs became valid
+	 * @return the date in the format 'yyyyMMdd' from when these T&Cs became valid
+	 */
 	public String getDateString()
 	{
 		return new SimpleDateFormat(DATE_FORMAT).format(m_date);
 	}
 	
+	/**
+	 * adds a T&C translation which specified by the DOMElement translationRoot
+	 * @param translationRoot the DOMELement form which the translation should be appended to the 
+	 * T&Cs container
+	 * @throws XMLParseException if the translation does not refer to a valid T&C template or the
+	 * 'locale' attribute which specifies the language is not set.
+	 * @throws SignatureException if translationRoot does not conatin a valid signature
+	 */
 	public synchronized void addTranslation(Element translationRoot) throws XMLParseException, SignatureException
 	{
 		addTranslation(new Translation(translationRoot));
 	}
 	
 	
-	public synchronized void addTranslation(Translation t) throws SignatureException
+	private synchronized void addTranslation(Translation t) throws SignatureException
 	{
 		//if(t.isDefaultLocale()) throw new SignatureException("Just a silly test");
-		if(!t.isVerified())
+		/*if(!t.isVerified())
 		{
 			throw new SignatureException("Translation ["+t.getLocale()+"] of "+operator.getOrganization()+" is not verified");
 		}
@@ -185,11 +235,11 @@ public class TermsAndConditions implements IXMLEncodable
 		{
 			throw new SignatureException("Translation ["+t.getLocale()+"] is not signed by its operator '"+
 					operator.getOrganization()+"'");
-		}
+		}*/
 		
 		synchronized (this)
 		{
-			if(t.isDefaultLocale())
+			if(t.isDefaultTranslation())
 			{
 				defaultTranslation = t;
 			}
@@ -197,77 +247,158 @@ public class TermsAndConditions implements IXMLEncodable
 		translations.put(t.getLocale(), t);
 	}
 	
-	public synchronized Translation getDefaultTranslation()
+	/**
+	 * returns the default translation of the T&C which is displayed if there
+	 * is no translation available for current display language 
+	 * @return the default T&C translation
+	 */
+	public synchronized TermsAndConditionsTranslation getDefaultTranslation()
 	{
 		return defaultTranslation;
 	}
 	
-	public Translation getTranslation(Locale locale)
+	/**
+	 * returns the translation of the T&C specified by the corresponding locale object
+	 * @param locale the locale refering to the desired translation language 
+	 * @return the desired T&C translation or null if the translation does not exist.
+	 */
+	public TermsAndConditionsTranslation getTranslation(Locale locale)
 	{
 		return getTranslation(locale.getLanguage());
 	}
 	
-	public Translation getTranslation(String locale)
+	/**
+	 * returns the translation of the T&C specified by the two letter language code
+	 * @param the two letter code specifying the desired translation langugae 
+	 * @return the desired T&C translation or null if the translation does not exist.
+	 */
+	public TermsAndConditionsTranslation getTranslation(String locale)
 	{
 		return (Translation) translations.get(locale.trim().toLowerCase());
 	}
 	
+	/**
+	 * returns all translations of this T&C container 
+	 * @return all translations as (implementing interface TermsAndConditionsTranslation) 
+	 * of this T&C container as an enumeration.
+	 */
+	public Enumeration getAllTranslations()
+	{
+		return translations.elements();
+	}
+	
+	/**
+	 * return the id of the template which is needed to render the translation specified
+	 * by the two-letter language code
+	 * @param locale
+	 * @return
+	 */
 	public String getTemplateReferenceId(String locale)
 	{
 		Translation t = (Translation) translations.get(locale.trim().toLowerCase());
-		return (t != null) ? t.getReferenceId() : null;
+		return (t != null) ? t.getTemplateReferenceId() : null;
 	}
 	
+	/**
+	 * returns if this T&C container provides a translation specified by the two-letter language code
+	 * @param locale the two letter-code of the language
+	 * @return true if the specified translation exists, false otherwise
+	 */
 	public boolean hasTranslation(String locale)
 	{
 		return translations.containsKey(locale.trim().toLowerCase());
 	}
 	
+	/**
+	 * for checking if this T&C container provides a translation specified by the given locale object
+	 * @param locale locale object referring to the corresponding language
+	 * @return true if the specified translation exists, false otherwise
+	 */
 	public boolean hasTranslation(Locale locale)
 	{
 		return hasTranslation(locale.getLanguage());
 	}
 	
+	/**
+	 * for checking whether this T&C container has stored translations at all
+	 * @return true if this T&C container provides at least one translation, false otherwise.
+	 */
 	public boolean hasTranslations()
 	{
 		return !translations.isEmpty();
 	}
 	
+	/**
+	 * for checking if a default translation is specified which must be true if this
+	 * T&C container is not empty.
+	 * @return true if this T&C container has a default translation false otherwise
+	 */
 	public synchronized boolean hasDefaultTranslation()
 	{
 		return defaultTranslation != null;
 	}
 
+	/**
+	 * returns the ServiceOperator-DBEntry referring to the operator to whom these T&C belong.
+	 * @return
+	 */
 	public ServiceOperator getOperator()
 	{
 		return operator;
 	}
 	
+	/**
+	 * return a date object which holds the date from when these T&Cs became valid
+	 * @return  a date object which holds the date from when these T&Cs became valid.
+	 */
 	public Date getDate()
 	{
-		return m_date;
+		return (Date) m_date.clone();
 	}
 	
+	/**
+	 * marks the T&Cs as accepted if 'accepted' is true or
+	 * rejected otherwise
+	 * @param accepted true stands for accept, false for reject
+	 */
 	public synchronized void setAccepted(boolean accepted)
 	{
 		this.accepted = accepted;
 	}
 	
+	/**
+	 * returns whether these T&C are accepted by the user
+	 * this is true if and only if they were read and accepted.
+	 * @return true if and only if the T&Cs were read and accepted, false otherwise
+	 */
 	public boolean isAccepted() 
 	{
 		return accepted;
 	}
 	
+	/**
+	 * for checking if these T&Cs were already read.
+	 * @return true if T&Cs were read, false otherwise
+	 */
 	public boolean isRead() 
 	{
 		return read;
 	}
 
+	/**
+	 * marks these T&Cs as read/unread
+	 * @param read true means read, false unread
+	 */
 	public synchronized void setRead(boolean read) 
 	{
 		this.read = read;
 	}
 	
+	/**
+	 * returns whether these T&Cs wer rejected.
+	 * this is true if and only if the T&Cs were read and and not accepted.
+	 * @return true if and only if the T&Cs were read and and not accepted, false otherwise.
+	 */
 	public synchronized boolean isRejected() 
 	{
 		return read && !accepted;
@@ -353,21 +484,21 @@ public class TermsAndConditions implements IXMLEncodable
 			throw new IllegalStateException("T&C document "+operator.getId()+
 					" cannot be created when no translations are loaded.");
 		}
-		Translation translation = getTranslation(language);
+		TermsAndConditionsTranslation translation = getTranslation(language);
 		if(translation == null)
 		{
 			translation = getDefaultTranslation();
 		}
 		//default translation must never be null
 		TermsAndConditionsFramework fr = 
-			TermsAndConditionsFramework.getById(translation.getReferenceId(), false);
+			TermsAndConditionsFramework.getById(translation.getTemplateReferenceId(), false);
 		if(fr == null)
 		{ 
-			throw new NullPointerException("Associated template '"+translation.getReferenceId()+"' for" +
+			throw new NullPointerException("Associated template '"+translation.getTemplateReferenceId()+"' for" +
 					" translation ["+translation.getLocale()+"] of terms and conditions for operator '"
 					+operator.getOrganization()+"' not found.");
 		}
-		fr.importData(translation);
+		fr.importData(operator.getOrganization(), operator.getEMail(), operator.getCountryCode(), translation);
 		return fr.transform();
 	}
 	
@@ -432,7 +563,7 @@ public class TermsAndConditions implements IXMLEncodable
 	/**
 	 * Class that represents a translation of the enclosing terms and conditions.
 	 */
-	class Translation implements IXMLEncodable
+	private class Translation implements IXMLEncodable, TermsAndConditionsTranslation
 	{
 		public static final String XML_ELEMENT_NAME = "TCTranslation";
 		public static final String XML_ELEMENT_CONTAINER_NAME = TermsAndConditions.XML_ELEMENT_NAME;
@@ -472,7 +603,7 @@ public class TermsAndConditions implements IXMLEncodable
 			}
 		}
 		
-		public String getReferenceId()
+		public String getTemplateReferenceId()
 		{
 			return referenceId;
 		}
@@ -482,14 +613,14 @@ public class TermsAndConditions implements IXMLEncodable
 			return locale;
 		}
 		
-		public boolean isDefaultLocale()
+		public boolean isDefaultTranslation()
 		{
 			return defaultLocale;
 		}
 		
 		public Element getTranslationElement()
 		{
-			return translationElement;
+			return (Element) translationElement.cloneNode(true);
 		}
 
 		public XMLSignature getSignature()
@@ -548,9 +679,14 @@ public class TermsAndConditions implements IXMLEncodable
 			}
 		}
 		
-		public ServiceOperator getOperator() 
+		/*public ServiceOperator getOperator() 
 		{
 			return TermsAndConditions.this.operator;
+		}*/
+		
+		public String toString()
+		{
+			return locale;
 		}
 		
 		public Date getDate() 

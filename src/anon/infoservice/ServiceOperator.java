@@ -300,37 +300,6 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	{
 		return m_node;
 	}
-	
-	
-	public void setOrganization(String organization) 
-	{
-		m_strOrganization = organization;
-	}
-
-	public void setOrganizationUnit(String orgUnit) 
-	{
-		m_strOrgUnit = orgUnit;
-	}
-
-	public void setUrl(String url) 
-	{
-		m_strUrl = url;
-	}
-
-	public void setEMail(String email) 
-	{
-		m_strEmail = email;
-	}
-
-	public void setCountryCode(String code) 
-	{
-		m_countryCode = code;
-	}
-
-	public void setLastUpdate(long update) 
-	{
-		m_lastUpdate = update;
-	}
 
 	public Element toXMLElement(Document ownerDocument)
 	{
