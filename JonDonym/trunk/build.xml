@@ -28,6 +28,15 @@
 	<path id="classpath.jama" location="${lib.jama}"/>
 	<path id="classpath.swing" location="${lib.swing}"/> -->
 	
+	<path id="classpath.japlib">
+		<path refid="classpath.httplib"/>
+		<path refid="classpath.bouncycastle_jap"/>
+		<path refid="classpath.skype"/>
+		<path refid="classpath.ftplib"/>
+		<path refid="classpath.xml-rpc"/>
+		<path refid="classpath.log4j"/>
+	</path>
+	
 	<path id="classpath.all">
 		<path refid="classpath.httplib"/>
 		<path refid="classpath.ftplib"/>
@@ -162,6 +171,28 @@
 				<deletecharacters chars="\r\n" />
 			</filterchain>
 		</loadfile>
+	</target>
+	
+	<target name="jap-lib" depends="clean, init-compile-version, init">
+		<javac srcdir="${src}" 
+				destdir="${build}" fork="yes"
+				source="${build.compile.version}"
+				target="${build.compile.version}"
+				classpathref="classpath.japlib"
+				includes="gui/**, logging/**, anon/crypto/**, anon/infoservice/**">
+		</javac>
+		<mkdir dir="${dist}"/>
+		
+		<manifest file="MANIFEST.MF"/>
+		<jar jarfile="${dist}/jap-gui-lib.jar" manifest="MANIFEST.MF">
+			<fileset dir="${build}"/>
+			<zipfileset src="${lib.http}"/>
+			<zipfileset src="${lib.ftp}"/>
+			<zipfileset src="${lib.log4j}"/>
+			<zipfileset src="${lib.bouncyCastle}"/>
+			<zipfileset src="${lib.xmlrpc}"/>
+			<zipfileset src="${lib.skype4J}"/>
+		</jar>
 	</target>
 	
 	<target name="jar-core"

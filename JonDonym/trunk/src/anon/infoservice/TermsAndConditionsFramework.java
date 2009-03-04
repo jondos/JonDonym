@@ -23,7 +23,6 @@ import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
-import anon.infoservice.TermsAndConditions.Translation;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import logging.LogHolder;
@@ -160,30 +159,39 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}
 	
-	public void importData(Translation tcTranslation)
+	public void importData(	String operatorOrganization,
+							String operatorEmail,
+							String operatorCountryCode,  
+							TermsAndConditionsTranslation tcTranslation )
 	{
 		
 		//Document doc = a_data.getDocument();
 		try
 		{
 			// find the ServiceOperator object to our T&C
-			ServiceOperator op = tcTranslation.getOperator();
+			/*ServiceOperator op = tcTranslation.getOperator();
 			
 			if(op == null)
 			{
 				//Must never happen!
 				throw new NullPointerException("The operator of a tc translation cannot be null. This must never happen. Please report!");
-			}
+			}*/
 			
 			// create the operator node
-			Element operator = (Element) XMLUtil.getFirstChildByName(tcTranslation.getTranslationElement(), XML_ELEMENT_OPERATOR);
+			Element tcTranslationElement = tcTranslation.getTranslationElement();
+			if(tcTranslationElement == null)
+			{
+				throw new XMLParseException("Translation node must not be null. Mix violates T&C protocol.");
+			}
+			
+			Element operator = (Element) XMLUtil.getFirstChildByName(tcTranslationElement, XML_ELEMENT_OPERATOR);
 			if(operator == null)
 			{
 				throw new XMLParseException("Operator must not be null. Mix violates T&C protocol.");
 			}
 			
 			// get country from country code
-			Locale loc = new Locale(op.getCountryCode(), op.getCountryCode());
+			Locale loc = new Locale(operatorCountryCode, operatorCountryCode);
 			Locale tcLoc = new Locale(tcTranslation.getLocale(), "", "");
 			
 			Element country = m_docWorkingCopy.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
@@ -200,28 +208,28 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			replaceNode(operator, XML_ELEMENT_OPERATOR);
 			Element replacedOpNode = (Element)
 				XMLUtil.getFirstChildByNameUsingDeepSearch(m_docWorkingCopy.getDocumentElement(), XML_ELEMENT_OPERATOR);
-			XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_NAME, op.getOrganization());
-			XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_EMAIL, op.getEMail());
+			XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_NAME, operatorOrganization);
+			XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_EMAIL, operatorEmail);
 			
 			replaceNode(country, XML_ELEMENT_OPERATOR_COUNTRY);
 			
 			// replace PrivacyPolicyUrl
-			replaceNodeFromTC(tcTranslation, XML_ELEMENT_PRIVACY_POLICY_URL);
+			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_PRIVACY_POLICY_URL);
 			
 			// replace LegalOpinionsUrl
-			replaceNodeFromTC(tcTranslation, XML_ELEMENT_LEGAL_OPINIONS_URL);
+			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_LEGAL_OPINIONS_URL);
 			
 			// replace OperationalAgreementUrl
-			replaceNodeFromTC(tcTranslation, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
+			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
 			
 			// replace Location
-			replaceNodeFromTC(tcTranslation, XML_ELEMENT_OPERATOR_CITY);
+			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_OPERATOR_CITY);
 			
 			// replace Venue
-			replaceNodeFromTC(tcTranslation, XML_ELEMENT_VENUE);
+			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_VENUE);
 			
 			// ExtendedOperatorCountry
-			replaceNodeFromTC(tcTranslation, "ExtendedOperatorCountry");
+			replaceNodeFromTC(tcTranslationElement, "ExtendedOperatorCountry");
 			
 			Element date = m_docWorkingCopy.createElement("Date");
 			DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, tcLoc);
@@ -283,19 +291,19 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}*/
 	
-	private void replaceNodeFromTC(Translation tcTranslation, String a_nodeName) throws XMLParseException
+	private void replaceNodeFromTC(Element tcTranslationElement, String a_nodeName) throws XMLParseException
 	{
-		Node node = importNodeFromTC(tcTranslation, a_nodeName);
+		Node node = importNodeFromTC(tcTranslationElement, a_nodeName);
 		if(node != null)
 		{
 			replaceNode(node, a_nodeName);
 		}
 	}
 	
-	private Node importNodeFromTC(Translation tcTranslation, String a_nodeName)
+	private Node importNodeFromTC(Element tcTranslationElement, String a_nodeName)
 	{
 		// look for node
-		Node node = XMLUtil.getFirstChildByNameUsingDeepSearch(tcTranslation.getTranslationElement(), a_nodeName);
+		Node node = XMLUtil.getFirstChildByNameUsingDeepSearch(tcTranslationElement, a_nodeName);
 		if(node != null)
 		{
 			return node;
