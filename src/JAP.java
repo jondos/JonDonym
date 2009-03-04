@@ -162,9 +162,7 @@ public class JAP
 	/** Initializes and starts the JAP.
 	 */
 	public void startJAP()
-	{
-		final String msg =
-			"JAP/JonDo must run with a 1.1.3 or higher version Java!\nYou will find more information at the JAP webpage!\nYour Java Version: ";
+	{		
 		String javaVersion = System.getProperty("java.version");
 		String vendor = System.getProperty("java.vendor");
 		String os = System.getProperty("os.name");
@@ -179,9 +177,16 @@ public class JAP
 		System.getProperties().remove("socksProxyHost");
 		System.getProperties().remove("socksProxyPort");
 		
+		JAPModel.getInstance().setProgramName(getArgumentValue("--programName"));
+		String strname = JAPModel.getInstance().getProgramName();
+		
+		final String msg = strname +
+			" must run with a 1.1.3 or higher version Java!\nYou will find more information at the " + strname +
+			" webpage!\nYour Java Version: ";
+		
 		if (isArgumentSet("--version") || isArgumentSet("-v"))
 		{
-			System.out.println("JAP/JonDo version: " + JAPConstants.aktVersion + "\n" +
+			System.out.println(strname + " version: " + JAPConstants.aktVersion + "\n" +
 							   "Java Vendor: " + vendor + "\n" +
 							   "Java Version: " + javaVersion + "\n");
 			System.exit(0);
@@ -189,7 +194,8 @@ public class JAP
 
 		if (!JAPConstants.m_bReleasedVersion)
 		{
-			System.out.println("Starting up JAP/JonDo version " + JAPConstants.aktVersion + ". (" + javaVersion +
+			System.out.println("Starting up " + strname + " version " + 
+					JAPConstants.aktVersion + ". (" + javaVersion +
 							   "/" + vendor + "/" + os +
 							   (mrjVersion != null ? "/" + mrjVersion : "") + ")");
 		}
@@ -235,26 +241,26 @@ public class JAP
 		{
 			System.out.println("Usage:");
 			System.out.println("--help, -h:                  Show this text.");
-			System.out.println("--console:                   Start JAP/JonDo in console-only mode.");
-			System.out.println("--allow-multiple, -a         Allow JAP to start multiple instances.");
-			System.out.println("--minimized, -m:             Minimize JAP/JonDo on startup.");
+			System.out.println("--console:                   Start " + strname + " in console-only mode.");
+			System.out.println("--allow-multiple, -a         Allow " + strname + " to start multiple instances.");
+			System.out.println("--minimized, -m:             Minimize " + strname + " on startup.");
 			System.out.println("--version, -v:               Print version information.");
 			System.out.println("--showDialogFormat           Show and set dialog format options.");
 			System.out.println("--noSplash, -s               Suppress splash screen on startup.");
+			System.out.println("--programName {JAP|JonDo}    Show this program in different distributor modes.");
 			System.out.println("--presenation, -p            Presentation mode (slight GUI changes).");
 			System.out.println("--forwarder, -f {port}       Act as a forwarder on a specified port.");
 			System.out.println("--listen, -l {[host][:port]} Listen on the specified interface.");
 			System.out.println("--uninstall, -u              Delete all configuration and help files.");
-			System.out.println("--cascade {[host][:port][:id]}    Connects to the specified Mix-Cascade.");
-			System.out.println("--portable [path_to_browser] Tell JonDo that it runs in a portable environment.");
-			System.out.println("--portable-jre               Tell JonDo that it runs with a portable JRE.");
+			System.out.println("--cascade {[host][:port][:id]} Connects to the specified Mix-Cascade.");
+			System.out.println("--portable [path_to_browser] Tell " + strname + " that it runs in a portable environment.");
+			System.out.println("--portable-jre               Tell " + strname + " that it runs with a portable JRE.");
 			System.out.println("--help-path                  Path where external html help files should be installed.");
 			System.out.println("--extractHelp [directory]    Extract the internal help files to a directory.");
-			System.out.println("--config, -c {Filename}:     Force JonDo to use a specific configuration file.");
-			System.out.println("--context {Context}:         Start JonDo with a specific service provider context.");
+			System.out.println("--config, -c {Filename}:     Force " + strname + " to use a specific configuration file.");
+			System.out.println("--context {Context}:         Start " + strname + " with a specific service provider context.");
 			System.exit(0);
 		}
-
 		
 		if (isArgumentSet("-console") || isArgumentSet("--console"))
 		{
@@ -846,7 +852,7 @@ public class JAP
 		IJAPMainView view;
 		if (!bConsoleOnly)
 		{
-			view = new JAPNewView(JAPConstants.TITLE, m_controller);
+			view = new JAPNewView(JAPModel.getInstance().getProgramName(), m_controller);
 
 			// Create the main frame
 			view.create(true);

@@ -183,6 +183,8 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 
 	private String m_context = CONTEXT_JONDONYM;
 	
+	private String m_strDistributorMode = JAPConstants.PROGRAM_NAME_JAP_JONDO;
+	
 	private String m_strRelativeBrowserPath;
 	
 	private int m_fontSize = 0;
@@ -1974,6 +1976,21 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	public String getContext() 
 	{
 		return m_context;
+	}
+	
+	public String getProgramName()
+	{
+		return m_strDistributorMode;
+	}
+	
+	public void setProgramName(String a_programName)
+	{
+		if (a_programName != null && 
+			(a_programName.equals(JAPConstants.PROGRAM_NAME_JAP) || 
+				a_programName.equals(JAPConstants.PROGRAM_NAME_JONDO)))
+		{
+			m_strDistributorMode = a_programName;
+		}
 	}
 	
 	public synchronized void setContext(String context) 
