@@ -460,7 +460,16 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 					}
 					synchronized(m_lblJAPIcon)
 					{
-						m_lblJAPIcon.setIcon(GUIUtils.loadImageIcon(JAPConstants.IICON16FN, true, false));
+						String iconPath;
+						if (JAPModel.getInstance().getProgramName().equals(JAPConstants.PROGRAM_NAME_JONDO))
+						{
+							iconPath = JAPConstants.ICON_JONDO;
+						}
+						else
+						{
+							iconPath = JAPConstants.IICON16FN;
+						}
+						m_lblJAPIcon.setIcon(GUIUtils.loadImageIcon(iconPath, true, false));
 					}
 				}
 				else
@@ -639,7 +648,16 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 						}
 						if (m_Controller.isAnonConnected())
 						{
-							m_lblJAPIcon.setIcon(GUIUtils.loadImageIcon(JAPConstants.IICON16FN, true, false));
+							String iconPath;
+							if (JAPModel.getInstance().getProgramName().equals(JAPConstants.PROGRAM_NAME_JONDO))
+							{
+								iconPath = JAPConstants.ICON_JONDO;
+							}
+							else
+							{
+								iconPath = JAPConstants.IICON16FN;
+							}
+							m_lblJAPIcon.setIcon(GUIUtils.loadImageIcon(iconPath, true, false));
 						}
 						else
 						{

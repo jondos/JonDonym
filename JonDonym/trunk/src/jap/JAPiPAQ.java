@@ -68,7 +68,7 @@ final public class JAPiPAQ
 
 		// Output some information about the system
 		// Create the view object
-		view = new JAPNewView(JAPConstants.TITLE, m_controller);
+		view = new JAPNewView(JAPModel.getInstance().getProgramName(), m_controller);
 		// Create the main frame
 		view.create(false);
 		// Switch Debug Console Parent to MainView

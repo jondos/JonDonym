@@ -54,6 +54,10 @@ public final class JAPConstants
 	public static final String CURRENT_CONFIG_VERSION = aktVersion;
 
 	public static final String strReleaseDate; //The Release date of this version
+	
+	public static final String PROGRAM_NAME_JAP = "JAP";
+	public static final String PROGRAM_NAME_JAP_JONDO = "JAP/JonDo";
+	public static final String PROGRAM_NAME_JONDO = "JonDo";
 
 	//display in some information dialog and in
 	//the update dialog
@@ -138,14 +142,13 @@ public final class JAPConstants
 	static final boolean DEFAULT_WARN_ON_CLOSE = true;
 
 	static final String JAPLocalFilename = "JAP.jar";
-	public static final String TITLE = "JAP / JonDo";
 	public static final String XMLCONFFN = "jap.conf";
 	public static final String MESSAGESFN = "JAPMessages";
 	public static final String BUSYFN = "busy.gif";
 	static final String ABOUTFN = "info.gif";
 	public static final String DOWNLOADFN = "install.gif";
 	static final String IICON16FN = "icon16.gif";
-	static final String ICONFN = "icon.gif";
+	static final String ICON_JONDO = "JonDo.ico.gif";
 
 
 	//static final String   CONFIGICONFN                 = "icoc.gif";

@@ -547,7 +547,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_flippingpanelForward = new FlippingPanel(this);
 
 		// Load Icon in upper left corner of the frame window
-		ImageIcon ii = GUIUtils.loadImageIcon(JAPConstants.IICON16FN, true, false);
+		String iconPath;
+		if (JAPModel.getInstance().getProgramName().equals(JAPConstants.PROGRAM_NAME_JONDO))
+		{
+			iconPath = JAPConstants.ICON_JONDO;
+		}
+		else
+		{
+			iconPath = JAPConstants.IICON16FN;
+		}
+		ImageIcon ii = GUIUtils.loadImageIcon(iconPath, true, false);
 		if (ii != null)
 		{
 			setIconImage(ii.getImage());
@@ -2904,7 +2913,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					{
 						if (m_bIsIconified)
 						{
-							setTitle("JAP/JonDo (" + //JAPMessages.getString(SystrayPopupMenu.MSG_ANONYMITY) + ": " +
+							setTitle(JAPModel.getInstance().getProgramName() + 
+									" (" + //JAPMessages.getString(SystrayPopupMenu.MSG_ANONYMITY) + ": " +
 									currentMixCascade.getDistribution() + "," + currentStatus.getAnonLevel() + " / 6,6" + ")");
 						}
 						else
