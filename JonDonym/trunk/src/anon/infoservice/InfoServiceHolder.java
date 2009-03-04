@@ -377,7 +377,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			{
 				/* get the whole infoservice list */
 				infoServiceList = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
-				
+								
 				Vector copyList = (Vector)infoServiceList.clone();
 				InfoServiceDBEntry isTemp;
 				
@@ -388,7 +388,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 							SignatureVerifier.getInstance().isCheckSignatures(
 									SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
 					{
-						if (isTemp.isUserDefined() && isTemp.getCertPath() == null)
+						if ((isTemp.isBootstrap() || isTemp.isUserDefined()) && isTemp.getCertPath() == null)
 						{
 							// we nevertheless use this InfoService
 						}
@@ -1126,7 +1126,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			}
 		}
 
-		/* remove bootstrap entries is possible; at least three InfoServices have to be loaded, excluding default */
+		/* remove bootstrap entries if possible; at least three InfoServices have to be loaded, excluding default */
 		Vector currentEntries = Database.getInstance(InfoServiceDBEntry.class).getEntryList();
 		Vector bootstrapIDs = new Vector();
 		int nrLoadedIS = 0;
