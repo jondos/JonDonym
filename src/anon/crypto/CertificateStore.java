@@ -139,7 +139,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 			{
 				CertificateContainer currentCertificateContainer = (CertificateContainer) (allCertificates.
 					nextElement());
-				if(currentCertificateContainer.getCertificate().equals(a_certificate))
+				if (currentCertificateContainer.getCertificate().equals(a_certificate))
 				{
 					return currentCertificateContainer.getInfoStructure();
 				}

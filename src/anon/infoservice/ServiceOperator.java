@@ -242,6 +242,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 					vecCertificates.addElement(certTemp);
 				}
 			}
+
 			m_strID = JAPCertificate.calculateXORofSKIs(vecCertificates);			
 		}
 	    

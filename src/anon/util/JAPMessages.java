@@ -189,6 +189,10 @@ public final class JAPMessages
 	 */
 	public static Locale getLocale()
 	{
+		if (ms_locale == null)
+		{
+			return Locale.getDefault();
+		}
 		return ms_locale;
 	}
 

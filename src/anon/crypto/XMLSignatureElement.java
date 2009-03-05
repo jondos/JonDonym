@@ -258,14 +258,14 @@ public class XMLSignatureElement implements IXMLEncodable
 	{
 		Enumeration certificates;
 		
-		if(m_appendedCerts.size() > 0)
+		if (m_appendedCerts.size() > 0)
 		{
 			certificates = m_appendedCerts.elements();
 			//try to verify the signature with its appended certificates
-			while(certificates.hasMoreElements())
+			while (certificates.hasMoreElements())
 			{
 				JAPCertificate currentCertificate = (JAPCertificate) certificates.nextElement();
-				if(verify(a_node, currentCertificate.getPublicKey()))
+				if (verify(a_node, currentCertificate.getPublicKey()))
 				{
 					Vector appendedCertificates = (Vector)this.getCertificates().clone();
 					appendedCertificates.removeElement(currentCertificate);
@@ -301,8 +301,7 @@ public class XMLSignatureElement implements IXMLEncodable
 	 *                              has an invalid structure
 	 * @return true if the node could be verified with this signature; false otherwise
 	 */
-	private boolean verify(Node a_node, IMyPublicKey a_publicKey) throws
-		XMLParseException
+	private boolean verify(Node a_node, IMyPublicKey a_publicKey) throws XMLParseException
 	{
 
 		if (a_publicKey == null || a_node == null)
