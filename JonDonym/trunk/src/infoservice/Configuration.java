@@ -1098,7 +1098,7 @@ final public class Configuration
 				if (currentCertificate != null)
 				{
 					SignatureVerifier.getInstance().getVerificationCertificateStore().
-						addCertificateWithoutVerification(currentCertificate, a_certificateType, true, false);
+						addCertificateWithoutVerification(currentCertificate, a_certificateType, true, true);
 					LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 								  "Added the following file to the store of trusted " + 
 								  a_strName + " certificates: " +

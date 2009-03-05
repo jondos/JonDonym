@@ -5085,20 +5085,23 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		JAPCertificate defaultRootCert = null;
 
-		for (int i = 0; i < a_singleCerts.length; i++)
+		if (a_singleCerts != null)
 		{
-			if (a_singleCerts[i] != null &&
-				(!JAPConstants.m_bReleasedVersion ||
-				 !a_singleCerts[i].endsWith(".dev")))
+			for (int i = 0; i < a_singleCerts.length; i++)
 			{
-				defaultRootCert = JAPCertificate.getInstance(ResourceLoader.loadResource(
-					JAPConstants.CERTSPATH + a_certspath + a_singleCerts[i]));
-				if (defaultRootCert == null)
+				if (a_singleCerts[i] != null &&
+					(!JAPConstants.m_bReleasedVersion ||
+					 !a_singleCerts[i].endsWith(".dev")))
 				{
-					continue;
+					defaultRootCert = JAPCertificate.getInstance(ResourceLoader.loadResource(
+						JAPConstants.CERTSPATH + a_certspath + a_singleCerts[i]));
+					if (defaultRootCert == null)
+					{
+						continue;
+					}
+					SignatureVerifier.getInstance().getVerificationCertificateStore().
+						addCertificateWithoutVerification(defaultRootCert, a_type, true, true);
 				}
-				SignatureVerifier.getInstance().getVerificationCertificateStore().
-					addCertificateWithoutVerification(defaultRootCert, a_type, true, true);
 			}
 		}
 		String strBlockCert = null;
@@ -5128,6 +5131,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		addDefaultCertificates(JAPConstants.MIX_CERTSPATH, JAPConstants.MIX_ROOT_CERTS,
 							   JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX);
+		
+		addDefaultCertificates(JAPConstants.OPERATOR_CERTSPATH, null,
+				   JAPCertificate.CERTIFICATE_TYPE_MIX);
 
 		addDefaultCertificates(JAPConstants.INFOSERVICE_CERTSPATH, JAPConstants.INFOSERVICE_ROOT_CERTS,
 							   JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE);
@@ -5141,11 +5147,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			  JAPConstants.CERTSPATH + JAPConstants.CERT_JAPINFOSERVICEMESSAGES));
 		if (updateMessagesCert != null)
 		{
-			//changed this back to add updateCert as CERTIFICATE_TYPE_ROOT_UPDATE for new CertPath implementation. rh
-			//SignatureVerifier.getInstance().getVerificationCertificateStore().
-				//addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_UPDATE, true, true);
 			SignatureVerifier.getInstance().getVerificationCertificateStore().
-				addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_ROOT_UPDATE, true, true);
+				addCertificateWithoutVerification(updateMessagesCert, JAPCertificate.CERTIFICATE_TYPE_UPDATE, true, true);
 		}
 		else
 		{

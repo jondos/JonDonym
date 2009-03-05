@@ -417,11 +417,11 @@ public final class XMLSignature
 		XMLSignatureElement currentSignature;
 		
 		//verify all signatures
-		while(signatures.hasMoreElements())
+		while (signatures.hasMoreElements())
 		{
 			currentSignature = (XMLSignatureElement)signatures.nextElement();
 			
-			if(!currentSignature.verify(a_node, a_documentType, a_directCertificatePaths))
+			if (!currentSignature.verify(a_node, a_documentType, a_directCertificatePaths))
 			{
 				throw new SignatureException("No verifier for a Signature found!");
 			}

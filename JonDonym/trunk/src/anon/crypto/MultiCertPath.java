@@ -54,7 +54,7 @@ public class MultiCertPath implements IXMLEncodable
 	
 	protected MultiCertPath(CertPath[] a_certPaths, int a_documentType)
 	{
-		if(a_certPaths.length != 0 && a_certPaths[0] != null)
+		if (a_certPaths.length != 0 && a_certPaths[0] != null)
 		{
 			m_subject = a_certPaths[0].getFirstCertificate().getSubject();
 			m_issuer = a_certPaths[0].getFirstCertificate().getIssuer();

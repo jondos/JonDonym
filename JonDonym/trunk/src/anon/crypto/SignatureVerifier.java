@@ -43,6 +43,8 @@ import anon.util.XMLUtil;
  */
 public class SignatureVerifier implements IXMLEncodable
 {
+		public static final int DOCUMENT_CLASS_NONE = 0;
+	
         /**
          * This is the class for all documents coming from mixes (mixinfo, cascadeinfo, status).
          */
