@@ -350,7 +350,9 @@ public class TermsAndConditions implements IXMLEncodable
 	 */
 	public Date getDate()
 	{
-		return (Date) m_date.clone();
+		Date clonedDate = new Date();
+		clonedDate.setTime(m_date.getTime()); // Date does not support clone() in JRE 1.1
+		return clonedDate;
 	}
 	
 	/**

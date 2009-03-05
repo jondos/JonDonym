@@ -241,14 +241,14 @@ public class CertificateStore extends Observable implements IXMLEncodable
 		return lockId;
 	}
 
-	public int addCertificateWithoutVerification(JAPCertificate a_certificate, int a_certificateType,
+	public synchronized int addCertificateWithoutVerification(JAPCertificate a_certificate, int a_certificateType,
 												 boolean a_onlyHardRemovable, boolean a_bNotRemovable)
 	{
 		return addCertificateWithoutVerification(CertPath.getRootInstance(a_certificate), a_certificateType,
 												 a_onlyHardRemovable, a_bNotRemovable);
 	}
 
-	public int addCertificateWithoutVerification(CertPath a_certPath, int a_certificateType,
+	public synchronized int addCertificateWithoutVerification(CertPath a_certPath, int a_certificateType,
 												 boolean a_onlyHardRemovable, boolean a_bNotRemovable)
 	{
 		int lockId = -1;
@@ -420,7 +420,7 @@ public class CertificateStore extends Observable implements IXMLEncodable
 		notifyObservers();
 	}
 
-	public void setEnabled(CertificateInfoStructure a_certificateStructure, boolean a_enabled)
+	public synchronized void setEnabled(CertificateInfoStructure a_certificateStructure, boolean a_enabled)
 	{
 		synchronized (m_trustedCertificates)
 		{
