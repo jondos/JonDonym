@@ -50,14 +50,20 @@
 		<mkdir dir="${dist}" />
 	</target>
 	
-	<target name="compile" depends="init"
+	<!-- if not already define, set the version number for the compile option to the default VM version -->
+	<target name="init-compile-version" unless="build.compile.version">
+		<property name="build.compile.version" value="${java.specification.version}"/>
+	</target>
+	
+	<target name="compile" depends="init,init-compile-version"
 			description="compiles infoservices sources">
-		
 		<javac debug="true" debuglevel="lines,source"
 				srcdir="${src}" 
 				destdir="${build}" 
 				excludes="${infoservice-excludes}" 
-				classpathref="classpath.all">
+				classpathref="classpath.all"
+				source="${build.compile.version}"
+				target="${build.compile.version}">
 			
 			<include name="**/*.java"/>
 		</javac>
