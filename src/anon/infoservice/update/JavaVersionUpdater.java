@@ -25,38 +25,54 @@
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-package jap;
+package anon.infoservice.update;
 
-import anon.infoservice.AbstractDatabaseEntry;
-import anon.infoservice.MixCascade;
-import anon.infoservice.update.AbstractMixCascadeUpdater;
+import java.util.Hashtable;
+
+import anon.infoservice.JavaVersionDBEntry;
+import anon.infoservice.InfoServiceHolder;
 
 /**
- * Updates the list of available MixCascades.
+ * Updates the latest java version.
  * @author Rolf Wendolsky
  */
-public class MixCascadeUpdater extends AbstractMixCascadeUpdater
+public class JavaVersionUpdater extends AbstractDatabaseUpdater
 {
-	public MixCascadeUpdater(ObservableInfo a_observableInfo)
+	private static final long UPDATE_INTERVAL_MS = 1000 * 60 * 60 * 12l ; // half a day (update twice per day)
+	private static final long UPDATE_INTERVAL_MS_SHORT = 1000 * 60 * 10l; // 10 minutes
+
+	public JavaVersionUpdater(ObservableInfo a_observableInfo)
 	{
-		super(a_observableInfo);
+		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS_SHORT), a_observableInfo);
 	}
 
-	public MixCascadeUpdater(long interval, boolean a_bDoMixInfoCleanup, ObservableInfo a_observableInfo)
+	public Class getUpdatedClass()
 	{
-		super(interval, a_bDoMixInfoCleanup, a_observableInfo);
+		return JavaVersionDBEntry.class;
 	}
 
-	protected AbstractDatabaseEntry getPreferredEntry()
+	protected Hashtable getUpdatedEntries(Hashtable a_dummy)
 	{
-		return JAPController.getInstance().getCurrentMixCascade();
-	}
-
-	protected void setPreferredEntry(AbstractDatabaseEntry a_preferredEntry)
-	{
-		if (a_preferredEntry instanceof MixCascade)
+		Hashtable hashtable = InfoServiceHolder.getInstance().getLatestJavaVersions();
+		if (hashtable == null)
 		{
-			JAPController.getInstance().setCurrentMixCascade((MixCascade)a_preferredEntry);
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS_SHORT);
+			return new Hashtable();
 		}
+		((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+		return hashtable;
+	}
+
+	protected Hashtable getEntrySerials()
+	{
+		//return new Hashtable();
+		Hashtable hashtable = InfoServiceHolder.getInstance().getLatestJavaVersionSerials();
+		if (hashtable == null)
+		{
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS_SHORT);
+			return new Hashtable();
+		}
+		((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+		return hashtable;
 	}
 }

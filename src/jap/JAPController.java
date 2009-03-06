@@ -90,10 +90,12 @@ import anon.AnonServerDescription;
 import anon.AnonServiceEventAdapter;
 import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
+import anon.client.AbstractAutoSwitchedMixCascadeContainer;
 import anon.client.AnonClient;
 import anon.client.ITermsAndConditionsContainer;
 import anon.client.TermsAndConditionsResponseHandler;
 import anon.client.TrustException;
+import anon.client.TrustModel;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.AbstractMixCascadeContainer;
@@ -120,6 +122,12 @@ import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.update.InfoServiceUpdater;
+import anon.infoservice.update.JavaVersionUpdater;
+import anon.infoservice.update.MessageUpdater;
+import anon.infoservice.update.MinVersionUpdater;
+import anon.infoservice.update.PaymentInstanceUpdater;
+import anon.infoservice.update.PerformanceInfoUpdater;
 import anon.mixminion.MixminionServiceDescription;
 import anon.mixminion.mmrdescription.MMRList;
 import anon.pay.BIConnection;
@@ -140,6 +148,7 @@ import anon.util.JobQueue;
 import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
 import anon.util.XMLUtil;
+import anon.util.Updater.ObservableInfo;
 
 /* This is the Controller of All. It's a Singleton!*/
 public final class JAPController extends Observable implements IProxyListener, Observer,
@@ -276,6 +285,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private DirectProxy m_proxyDirect = null; // service object for direct access (bypass anon service)
 	private AnonProxy m_proxyAnon = null; // service object for anon access
 
+	private ObservableInfo m_observableInfo;
 	private AccountUpdater m_AccountUpdater;
 	private InfoServiceUpdater m_InfoServiceUpdater;
 	private PaymentInstanceUpdater m_paymentInstanceUpdater;
@@ -371,16 +381,45 @@ public final class JAPController extends Observable implements IProxyListener, O
 		},
 			JAPConstants.TIME_RESTART_AFTER_SOCKET_ERROR);
 
+		m_observableInfo = new ObservableInfo(JAPModel.getInstance())
+		{
+			public Integer getUpdateChanged()
+			{
+				return JAPModel.CHANGED_INFOSERVICE_AUTO_UPDATE;
+			}
+			public boolean isUpdateDisabled()
+			{
+				return JAPModel.isInfoServiceDisabled();
+			}
+			
+			public void notifyAdditionalObserversOnUpdate(Class a_updatedClass)
+			{
+				if (a_updatedClass == null)
+				{
+					throw new NullPointerException("No class given!");
+				}
+				if (a_updatedClass == MixCascade.class)
+				{
+					JAPController.getInstance().notifyJAPObservers();
+				}
+				else if (a_updatedClass == PerformanceInfo.class)
+				{
+					JAPController.getInstance().notifyJAPObservers();
+				}
+			}
+		};
+		
+		
 		// initialise IS update threads
 		m_feedback = new JAPFeedback();
 		m_AccountUpdater = new AccountUpdater();
-		m_InfoServiceUpdater = new InfoServiceUpdater();
-		m_perfInfoUpdater = new PerformanceInfoUpdater();
-		m_paymentInstanceUpdater = new PaymentInstanceUpdater();
-		m_MixCascadeUpdater = new MixCascadeUpdater();
-		m_minVersionUpdater = new MinVersionUpdater();
-		m_javaVersionUpdater = new JavaVersionUpdater();
-		m_messageUpdater = new MessageUpdater();
+		m_InfoServiceUpdater = new InfoServiceUpdater(m_observableInfo);
+		m_perfInfoUpdater = new PerformanceInfoUpdater(m_observableInfo);
+		m_paymentInstanceUpdater = new PaymentInstanceUpdater(m_observableInfo);
+		m_MixCascadeUpdater = new MixCascadeUpdater(m_observableInfo);
+		m_minVersionUpdater = new MinVersionUpdater(m_observableInfo);
+		m_javaVersionUpdater = new JavaVersionUpdater(m_observableInfo);
+		m_messageUpdater = new MessageUpdater(m_observableInfo);
 		//m_termsUpdater = new TermsAndConditionsUpdater();
 		m_tcResponseHandler = new TermsAndConditionsResponseHandler();
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
@@ -484,7 +523,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 			}
 			m_currentMixCascade = new MixCascade(JAPMessages.getString(JAPConstants.DEFAULT_ANON_NAME),
 												 JAPConstants.DEFAULT_ANON_MIX_IDs[0], mixIDs, listeners,
-												 //System.currentTimeMillis() + Constants.TIMEOUT_MIXCASCADE);
 												 System.currentTimeMillis());
 			m_currentMixCascade.setUserDefined(false, null);
 			m_currentMixCascade.showAsTrusted(true);
@@ -3708,6 +3746,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 			m_anonJobQueue.addJob(new SetAnonModeAsync(a_anonModeSelected));
 		}
 	}
+	
+	public ObservableInfo getObservableInfo()
+	{
+		return m_observableInfo;
+	}
 
 	/**
 	 * This will do all necessary things in order to enable the anonymous mode. The method decides
@@ -5423,221 +5466,32 @@ public final class JAPController extends Observable implements IProxyListener, O
 		return dlg.getReturnValues();
 	}
 
-	/**
-	 * This class returns a new random cascade from all currently available cascades every time
-	 * getNextCascade() is called. If all available cascades have been returned once, this class starts
-	 * again by choosing the random cascades from all available ones.
-	 * @author Rolf Wendolsky
-	 */
-	private class AutoSwitchedMixCascadeContainer extends AbstractMixCascadeContainer
-	{
-		private Hashtable m_alreadyTriedCascades;
-		private Random m_random;
-		private MixCascade m_initialCascade;
-		private MixCascade m_currentCascade;
-		private boolean m_bKeepCurrentCascade;
-		private boolean m_bSkipInitialCascade;
 
+	private class AutoSwitchedMixCascadeContainer extends AbstractAutoSwitchedMixCascadeContainer
+	{
 		public AutoSwitchedMixCascadeContainer(boolean a_bSkipInitialCascade)
 		{
-			m_bSkipInitialCascade = a_bSkipInitialCascade;
-			m_alreadyTriedCascades = new Hashtable();
-			m_random = new Random(System.currentTimeMillis());
-			m_random.nextInt();
-			m_initialCascade = JAPController.getInstance().getCurrentMixCascade();
-			m_bKeepCurrentCascade = false;
+			super(a_bSkipInitialCascade, JAPController.getInstance().getCurrentMixCascade());
 		}
 
 		public AutoSwitchedMixCascadeContainer()
 		{
 			this(false);
 		}
-		public MixCascade getInitialCascade()
+
+		public boolean isPaidServiceAllowed()
 		{
-			return m_initialCascade;
-		}
-
-		public MixCascade getNextMixCascade()
-		{
-			synchronized (m_alreadyTriedCascades)
-			{
-				if (!JAPModel.getInstance().isCascadeAutoSwitched())
-				{
-					m_alreadyTriedCascades.clear();
-					m_bKeepCurrentCascade = false;
-					if (m_currentCascade == null)
-					{
-						m_currentCascade = m_initialCascade;
-					}
-				}
-				else if (m_bKeepCurrentCascade)
-				{
-					// do not check if this cascade has been used before
-					m_bKeepCurrentCascade = false;
-					if (m_currentCascade == null)
-					{
-						m_currentCascade = m_initialCascade;
-					}
-					if (m_currentCascade != null)
-					{
-						m_alreadyTriedCascades.put(m_currentCascade.getId(), m_currentCascade);
-					}
-				}
-				else if (m_bSkipInitialCascade || m_initialCascade == null ||
-						 m_alreadyTriedCascades.containsKey(m_initialCascade.getId()))
-				{
-					MixCascade currentCascade = null;
-					Vector availableCascades;
-					boolean forward = true;
-
-					availableCascades = Database.getInstance(MixCascade.class).getEntryList();
-					if (availableCascades.size() > 0)
-					{
-						int chosenCascadeIndex = m_random.nextInt();
-						if (chosenCascadeIndex < 0)
-						{
-							// only positive numbers are allowed
-							chosenCascadeIndex *= -1;
-							// move backward
-							forward = false;
-						}
-
-						// chose an index from the vector
-						chosenCascadeIndex %= availableCascades.size();
-						/* Go through all indices until a suitable MixCascade is found or the original index
-						 * is reached.
-						 */
-						int i;
-						for (i = 0; i < availableCascades.size(); i++)
-						{
-							currentCascade = (MixCascade) availableCascades.elementAt(chosenCascadeIndex);
-							// this is the logic that decides whether to use a cascade or not
-							if (!m_alreadyTriedCascades.containsKey(currentCascade.getId()))
-							{
-								m_alreadyTriedCascades.put(currentCascade.getId(), currentCascade);
-								if (isSuitableCascade(currentCascade))
-								{
-									// found a suitable cascade
-									break;
-								}
-							}
-							if (forward)
-							{
-								chosenCascadeIndex = (chosenCascadeIndex + 1) % availableCascades.size();
-							}
-							else
-							{
-								chosenCascadeIndex -= 1;
-								if (chosenCascadeIndex < 0)
-								{
-									chosenCascadeIndex = availableCascades.size() - 1;
-								}
-							}
-						}
-						if (i == availableCascades.size())
-						{
-							// no suitable cascade was found
-							if (m_alreadyTriedCascades.size() == 0)
-							{
-								/** @todo Perhaps we should insert a timeout here? */
-							}
-							currentCascade = null;
-						}
-					}
-					else if (m_initialCascade == null)
-					{
-						// no cascade is available
-						return null;
-					}
-					if (currentCascade == null)
-					{
-						m_bSkipInitialCascade = false; // this is not the first call
-						m_alreadyTriedCascades.clear();
-						currentCascade = getNextMixCascade();
-						if (currentCascade == null && m_initialCascade != null)
-						{
-							// fallback if there are really no cascades; take the initial cascade
-							currentCascade = m_initialCascade;
-							m_alreadyTriedCascades.put(m_initialCascade.getId(), m_initialCascade);
-						}
-					}
-					m_currentCascade = currentCascade;
-				}
-				else
-				{
-					m_alreadyTriedCascades.put(m_initialCascade.getId(), m_initialCascade);
-					m_currentCascade = m_initialCascade;
-				}
-
-				if (m_bSkipInitialCascade)
-				{
-					m_initialCascade = m_currentCascade;
-				}
-				// this only happens for the first call
-				m_bSkipInitialCascade = false;
-			}
-
-			return m_currentCascade;
+			return !isConfigAssistantShown() && m_bAllowPaidServices;
 		}
 
 		public boolean isServiceAutoSwitched()
 		{
 			return JAPModel.getInstance().isCascadeAutoSwitched();
 		}
+		
 		public boolean isReconnectedAutomatically()
 		{
 			return JAPModel.isAutomaticallyReconnected();
-		}
-
-		private boolean isSuitableCascade(MixCascade a_cascade)
-		{
-			if (a_cascade == null)
-			{
-				return false;
-			}
-
-			if (a_cascade.isPayment() && !TrustModel.getCurrentTrustModel().isPaymentForced() &&
-				((isConfigAssistantShown()) || !m_bAllowPaidServices))
-			{
-				// do not connect to payment for new users
-				return false;
-			}
-
-			if (m_initialCascade != null && m_bSkipInitialCascade && a_cascade.equals(m_initialCascade))
-			{
-				return false;
-			}
-
-			/*
-			 * Cascade is not suitable if payment and the warning dialog is shown or no account is available
-			 * Otherwise the user would have to answer a dialog which is not good for automatic connections.
-			 */
-			/*
-			return isTrusted(a_cascade) && !(a_cascade.isPayment() &&
-					 ( !JAPController.getInstance().getDontAskPayment() ||
-					  PayAccountsFile.getInstance().getNumAccounts() == 0 ||
-					  PayAccountsFile.getInstance().getActiveAccount() == null ||
-					  PayAccountsFile.getInstance().getActiveAccount().getBalance().getCredit() == 0));*/
-			return isTrusted(a_cascade);
-
-
-		}
-		public MixCascade getCurrentMixCascade()
-		{
-			return m_currentCascade;
-		}
-
-		public void keepCurrentService(boolean a_bKeepCurrentCascade)
-		{
-			synchronized (m_alreadyTriedCascades)
-			{
-				m_bKeepCurrentCascade = a_bKeepCurrentCascade;
-			}
-		}
-
-		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
-		{
-			TrustModel.getCurrentTrustModel().checkTrust(a_cascade);
 		}
 		
 		public ITermsAndConditionsContainer getTCContainer()

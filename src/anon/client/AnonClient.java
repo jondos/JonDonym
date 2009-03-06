@@ -573,7 +573,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 								( (AnonServiceEventListener) (eventListenersList.nextElement())).packetMixed(
 									packetCounter.getProcessedPackets() * (long) (MixPacket.getPacketSize()));
 							}
-
 						}
 					}
 				}

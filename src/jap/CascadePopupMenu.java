@@ -44,6 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
+import anon.client.TrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.NewCascadeIDEntry;

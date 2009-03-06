@@ -63,6 +63,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
+import anon.client.TrustModel;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.transport.address.Endpoint;
@@ -81,7 +82,6 @@ import jap.JAPModel;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-import jap.TrustModel;
 
 /**
  * This is implementation of the dialog shown when starting a forwarded

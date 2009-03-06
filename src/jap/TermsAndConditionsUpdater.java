@@ -5,11 +5,7 @@ import java.util.Hashtable;
 
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.InfoServiceHolder;
-import anon.infoservice.TermsAndConditionsFramework;
-
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
+import anon.infoservice.update.AbstractDatabaseUpdater;
 
 public class TermsAndConditionsUpdater extends AbstractDatabaseUpdater 
 {
@@ -18,7 +14,7 @@ public class TermsAndConditionsUpdater extends AbstractDatabaseUpdater
 	
 	public TermsAndConditionsUpdater()
 	{
-		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS_SHORT));
+		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS_SHORT), JAPController.getInstance().getObservableInfo());
 	}
 	
 	public Class getUpdatedClass()

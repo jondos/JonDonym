@@ -3,6 +3,7 @@ package infoservice;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Observable;
 
 import org.w3c.dom.Document;
 
@@ -14,12 +15,11 @@ import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.StatusInfo;
+import anon.infoservice.update.InfoServiceUpdater;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import jap.InfoServiceUpdater;
-import jap.PassiveInfoServiceMainUpdater;
-import jap.PassiveInfoServiceStatusUpdater;
+import anon.util.Updater.ObservableInfo;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -88,9 +88,21 @@ public class PassiveInfoServiceInitializer
 		/* activate querying of all InfoServices */
 		InfoServiceHolder.getInstance().setNumberOfAskedInfoServices(InfoServiceHolder.MAXIMUM_OF_ASKED_INFO_SERVICES);
 		
-		infoServiceUpdater = new InfoServiceUpdater(); /** Handler of infoservice entries */
-		statusUpdater = new PassiveInfoServiceStatusUpdater(); /** Handler of status entries */
-		globalUpdater = new PassiveInfoServiceGlobalUpdater();
+		ObservableInfo observableInfo = new ObservableInfo(new Observable())
+		{
+			public Integer getUpdateChanged()
+			{
+				return new Integer(0);
+			}
+			public boolean isUpdateDisabled()
+			{
+				return false;
+			}
+		};
+		
+		infoServiceUpdater = new InfoServiceUpdater(observableInfo); /** Handler of infoservice entries */
+		statusUpdater = new PassiveInfoServiceStatusUpdater(observableInfo); /** Handler of status entries */
+		globalUpdater = new PassiveInfoServiceGlobalUpdater(observableInfo);
 		
 		infoServiceUpdater.start(false);
 		statusUpdater.start(false);
@@ -128,15 +140,15 @@ public class PassiveInfoServiceInitializer
 	 * invokes the Main updater and after that caches the Database
 	 * this makes sure that the most recent data is cached.
 	 */
-	static class PassiveInfoServiceGlobalUpdater extends Thread
+	private static class PassiveInfoServiceGlobalUpdater extends Thread
 	{
 		
 		private static PassiveInfoServiceMainUpdater mainUpdater = null;
 		
-		PassiveInfoServiceGlobalUpdater() throws IOException
+		PassiveInfoServiceGlobalUpdater(ObservableInfo a_observableInfo) throws IOException
 		{
 			mainUpdater = new PassiveInfoServiceMainUpdater(
-					!Configuration.getInstance().isPerfEnabled());
+					!Configuration.getInstance().isPerfEnabled(), a_observableInfo);
 		}
 		
 		public void run()

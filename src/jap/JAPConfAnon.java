@@ -104,6 +104,7 @@ import platform.AbstractOS;
 import anon.AnonServerDescription;
 import anon.AnonServiceEventListener;
 import anon.client.TrustException;
+import anon.client.TrustModel;
 import anon.crypto.AbstractX509AlternativeName;
 import anon.crypto.CertPath;
 import anon.crypto.JAPCertificate;

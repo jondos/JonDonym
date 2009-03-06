@@ -39,7 +39,6 @@ final public class FileLog extends AbstractLog4jLog
 	public FileLog(String fileName, int maxFileSize, int maxBackups)
 	{
 		super();
-		m_Log = Logger.getRootLogger();
 		PatternLayout layout = new PatternLayout("[%d{ISO8601} - %p] %m%n");
 		try
 		{
@@ -48,11 +47,16 @@ final public class FileLog extends AbstractLog4jLog
 			appender.setMaxBackupIndex(maxBackups);
 			appender.setBufferedIO(false);
 			appender.activateOptions();
-			m_Log.removeAllAppenders();
-			m_Log.addAppender(appender);
+			getLogger().removeAllAppenders();
+			getLogger().addAppender(appender);
 		}
 		catch (IOException ex)
 		{
 		}
+	}
+	
+	protected Logger getLogger()
+	{
+		return Logger.getRootLogger();
 	}
 }

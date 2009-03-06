@@ -25,38 +25,65 @@
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-package jap;
+package anon.infoservice.update;
+
+import java.util.Hashtable;
 
 import anon.infoservice.AbstractDatabaseEntry;
-import anon.infoservice.MixCascade;
-import anon.infoservice.update.AbstractMixCascadeUpdater;
+import anon.infoservice.InfoServiceDBEntry;
+import anon.infoservice.InfoServiceHolder;
+
 
 /**
- * Updates the list of available MixCascades.
+ * Updates the known InfoServices. This may be done automatically (by a background thread) and manually
+ * by method call. The automatic update is only done if this is allowed by the model.
  * @author Rolf Wendolsky
  */
-public class MixCascadeUpdater extends AbstractMixCascadeUpdater
+public class InfoServiceUpdater extends AbstractDatabaseUpdater
 {
-	public MixCascadeUpdater(ObservableInfo a_observableInfo)
+	private static final long UPDATE_INTERVAL_MS = 5 * 60000l; // every five minutes
+
+	public InfoServiceUpdater(ObservableInfo a_observableInfo)
 	{
-		super(a_observableInfo);
+		super(new ConstantUpdateInterval(UPDATE_INTERVAL_MS), a_observableInfo);
 	}
 
-	public MixCascadeUpdater(long interval, boolean a_bDoMixInfoCleanup, ObservableInfo a_observableInfo)
+
+	public Class getUpdatedClass()
 	{
-		super(interval, a_bDoMixInfoCleanup, a_observableInfo);
+		return InfoServiceDBEntry.class;
 	}
 
 	protected AbstractDatabaseEntry getPreferredEntry()
 	{
-		return JAPController.getInstance().getCurrentMixCascade();
+		return InfoServiceHolder.getInstance().getPreferredInfoService();
 	}
 
 	protected void setPreferredEntry(AbstractDatabaseEntry a_preferredEntry)
 	{
-		if (a_preferredEntry instanceof MixCascade)
+		if (a_preferredEntry instanceof InfoServiceDBEntry)
 		{
-			JAPController.getInstance().setCurrentMixCascade((MixCascade)a_preferredEntry);
+			InfoServiceHolder.getInstance().setPreferredInfoService((InfoServiceDBEntry)a_preferredEntry);
 		}
+	}
+
+	protected void updateInternal()
+	{
+		//synchronized (InfoServiceHolder.getInstance())
+		{
+			super.updateInternal();
+		}
+	}
+
+	protected Hashtable getEntrySerials()
+	{
+		//return InfoServiceHolder.getInstance().getInfoServiceSerials();
+		return new Hashtable();
+	}
+
+
+	protected Hashtable getUpdatedEntries(Hashtable a_entriesToUpdate)
+	{
+		return InfoServiceHolder.getInstance().getInfoServices();
 	}
 }

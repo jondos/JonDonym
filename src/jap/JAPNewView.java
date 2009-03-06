@@ -81,6 +81,7 @@ import javax.swing.border.LineBorder;
 
 import anon.AnonServerDescription;
 import anon.client.TrustException;
+import anon.client.TrustModel;
 import anon.crypto.MultiCertPath;
 import anon.infoservice.BlacklistedCascadeIDEntry;
 import anon.infoservice.CascadeIDEntry;

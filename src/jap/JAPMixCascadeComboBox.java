@@ -50,6 +50,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import anon.client.TrustModel;
 import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.util.JAPMessages;
