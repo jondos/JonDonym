@@ -183,9 +183,10 @@ public class TermsAndConditions implements IXMLEncodable
 		Element currentTranslation = 
 			(Element) XMLUtil.getFirstChildByName(termsAndConditionRoot, 
 									Translation.XML_ELEMENT_NAME);
+		//TODO: enable signature check if working
 		while (currentTranslation != null)
 		{
-			addTranslation(new Translation(currentTranslation));
+			addTranslation(new Translation(currentTranslation), false);
 			currentTranslation = 
 				(Element) XMLUtil.getNextSiblingByName(currentTranslation, 
 									Translation.XML_ELEMENT_NAME);
@@ -212,26 +213,44 @@ public class TermsAndConditions implements IXMLEncodable
 	 * adds a T&C translation which specified by the DOMElement translationRoot
 	 * @param translationRoot the DOMELement form which the translation should be appended to the 
 	 * T&Cs container
+	 * @param withSignatureCheck specifies whether this translation should only appended if it contains a valid signature.
+	 * @throws XMLParseException if the translation does not refer to a valid T&C template or the
+	 * 'locale' attribute which specifies the language is not set.
+	 * @throws SignatureException if translationRoot does not contain a valid signature
+	 */
+	public void addTranslation(Element translationRoot, boolean withSignatureCheck) throws XMLParseException, SignatureException
+	{
+		addTranslation(new Translation(translationRoot), withSignatureCheck);
+	}
+	
+	/**
+	 * adds a T&C translation which specified by the DOMElement translationRoot
+	 * @param translationRoot the DOMELement form which the translation should be appended to the 
+	 * T&Cs container
 	 * @throws XMLParseException if the translation does not refer to a valid T&C template or the
 	 * 'locale' attribute which specifies the language is not set.
 	 * @throws SignatureException if translationRoot does not conatin a valid signature
 	 */
-	public synchronized void addTranslation(Element translationRoot) throws XMLParseException, SignatureException
+	public void addTranslation(Element translationRoot) throws XMLParseException, SignatureException
 	{
-		addTranslation(new Translation(translationRoot));
+		//TODO: enable signature check if working
+		addTranslation(new Translation(translationRoot), false);
 	}
 	
 	
-	private synchronized void addTranslation(Translation t) throws SignatureException
+	private synchronized void addTranslation(Translation t, boolean withSignatureCheck) throws SignatureException
 	{
-		if(!t.isVerified())
+		if(withSignatureCheck)
 		{
-			throw new SignatureException("Translation ["+t.getLocale()+"] of "+operator.getOrganization()+" is not verified");
-		}
-		if(!t.checkId())
-		{
-			throw new SignatureException("Translation ["+t.getLocale()+"] is not signed by its operator '"+
-					operator.getOrganization()+"'");
+			if(!t.isVerified())
+			{
+				throw new SignatureException("Translation ["+t.getLocale()+"] of "+operator.getOrganization()+" is not verified");
+			}
+			if(!t.checkId())
+			{
+				throw new SignatureException("Translation ["+t.getLocale()+"] is not signed by its operator '"+
+						operator.getOrganization()+"'");
+			}
 		}
 		
 		synchronized (this)
@@ -489,16 +508,17 @@ public class TermsAndConditions implements IXMLEncodable
 			translation = getDefaultTranslation();
 		}
 		//default translation must never be null
-		TermsAndConditionsFramework fr = 
+		
+		TermsAndConditionsFramework displayTemplate = 
 			TermsAndConditionsFramework.getById(translation.getTemplateReferenceId(), false);
-		if(fr == null)
+		if(displayTemplate == null)
 		{ 
 			throw new NullPointerException("Associated template '"+translation.getTemplateReferenceId()+"' for" +
 					" translation ["+translation.getLocale()+"] of terms and conditions for operator '"
 					+operator.getOrganization()+"' not found.");
 		}
-		fr.importData(operator.getOrganization(), operator.getEMail(), operator.getCountryCode(), translation);
-		return fr.transform();
+		displayTemplate.importData(translation);
+		return displayTemplate.transform();
 	}
 	
 	public boolean equals(Object anotherTC)
@@ -685,12 +705,17 @@ public class TermsAndConditions implements IXMLEncodable
 		
 		public String toString()
 		{
-			return locale;
+			return new Locale(locale).getDisplayLanguage(Locale.ENGLISH) + (defaultLocale ? " (default)" : "");
 		}
 		
 		public Date getDate() 
 		{
 			return TermsAndConditions.this.getDate();
+		}
+
+		public ServiceOperator getOperator()
+		{
+			return TermsAndConditions.this.operator;
 		}
 	}
 }

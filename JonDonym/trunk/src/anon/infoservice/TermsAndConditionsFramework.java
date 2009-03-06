@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Locale;
 
 import javax.xml.transform.Source;
@@ -159,23 +160,20 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		}
 	}
 	
-	public void importData(	String operatorOrganization,
-							String operatorEmail,
-							String operatorCountryCode,  
-							TermsAndConditionsTranslation tcTranslation )
+	public void importData(	TermsAndConditionsTranslation tcTranslation )
 	{
 		
 		//Document doc = a_data.getDocument();
 		try
 		{
 			// find the ServiceOperator object to our T&C
-			/*ServiceOperator op = tcTranslation.getOperator();
+			ServiceOperator op = tcTranslation.getOperator();
 			
 			if(op == null)
 			{
 				//Must never happen!
 				throw new NullPointerException("The operator of a tc translation cannot be null. This must never happen. Please report!");
-			}*/
+			}
 			
 			// create the operator node
 			Element tcTranslationElement = tcTranslation.getTranslationElement();
@@ -187,11 +185,13 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			Element operator = (Element) XMLUtil.getFirstChildByName(tcTranslationElement, XML_ELEMENT_OPERATOR);
 			if(operator == null)
 			{
-				throw new XMLParseException("Operator must not be null. Mix violates T&C protocol.");
+				operator = op.toXMLElement(XMLUtil.createDocument(), false);
+				System.out.println("opnode: "+XMLUtil.toString(operator));
+				//throw new XMLParseException("Operator must not be null.");
 			}
 			
 			// get country from country code
-			Locale loc = new Locale(operatorCountryCode, operatorCountryCode);
+			Locale loc = new Locale(op.getCountryCode(), op.getCountryCode());
 			Locale tcLoc = new Locale(tcTranslation.getLocale(), "", "");
 			
 			Element country = m_docWorkingCopy.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
@@ -208,8 +208,8 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			replaceNode(operator, XML_ELEMENT_OPERATOR);
 			Element replacedOpNode = (Element)
 				XMLUtil.getFirstChildByNameUsingDeepSearch(m_docWorkingCopy.getDocumentElement(), XML_ELEMENT_OPERATOR);
-			XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_NAME, operatorOrganization);
-			XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_EMAIL, operatorEmail);
+			//XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_NAME, op.getOrganization());
+			//XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_EMAIL, op.getEMail());
 			
 			replaceNode(country, XML_ELEMENT_OPERATOR_COUNTRY);
 			
@@ -223,10 +223,10 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
 			
 			// replace Location
-			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_OPERATOR_CITY);
+			replaceNodeFromTC(operator, XML_ELEMENT_OPERATOR_CITY);
 			
 			// replace Venue
-			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_VENUE);
+			replaceNodeFromTC(operator, XML_ELEMENT_VENUE);
 			
 			// ExtendedOperatorCountry
 			replaceNodeFromTC(tcTranslationElement, "ExtendedOperatorCountry");
@@ -460,6 +460,43 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			return m_certPath.isValid(new Date());
 		}
 		return false;
+	}
+	
+	public static synchronized void store(Element root)
+	{
+		Element current = (Element) XMLUtil.getFirstChildByName(root, XML_ELEMENT_NAME);
+		while(current != null)
+		{
+			try
+			{
+				Database.getInstance(TermsAndConditionsFramework.class).update(
+						new TermsAndConditionsFramework(current));
+				current = (Element) XMLUtil.getNextSiblingByName(current, XML_ELEMENT_NAME);
+			}
+			catch(XMLParseException xpe)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.MISC, 
+					"one tc templates could not be stored in the DB");
+			}
+		}
+	}
+	
+	public static synchronized Enumeration getAllStoredRefIDs()
+	{
+		final Enumeration e = Database.getInstance(TermsAndConditionsFramework.class).getEntryList().elements();
+		return new Enumeration()
+		{
+			public boolean hasMoreElements() 
+			{
+				return e.hasMoreElements();
+			}
+
+			public Object nextElement() 
+			{
+				return ((TermsAndConditionsFramework)e.nextElement()).getId();
+			}
+			
+		};
 	}
 	
 	public static void loadFromDirectory(File a_dir)

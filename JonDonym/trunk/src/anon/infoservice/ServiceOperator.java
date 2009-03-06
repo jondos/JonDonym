@@ -38,6 +38,8 @@ import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509SubjectAlternativeName;
 import anon.util.Util;
 import anon.util.XMLUtil;
+
+import java.util.Enumeration;
 import java.util.Vector;
 import anon.crypto.AbstractX509Extension;
 import java.net.URL;
@@ -99,6 +101,9 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 */
 	private Node m_node;
 
+	/** operator address information as a certificate independent extension */ 
+	private OperatorAddress address;
+	
 	/**
 	 * Creates a ServiceOperator just by his Certificate
 	 * @param operatorCertificate the opeartors certificate
@@ -160,6 +165,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 			LogHolder.log(LogLevel.ALERT, LogType.DB, "Could not create ID for ServiceOperator entry!");
 			m_strID = "";
 		}
+	    address = null;
 	}
 	
 	/**
@@ -375,6 +381,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		return TermsAndConditions.getTermsAndConditions(this) != null;
 	}
 	
+	
 	/* creates a DOM-Tree with the data which will be owned by
 	 * ownerDocument but not appended to it.
 	 * if spamSafe is true than the Email-Tag as well as the content are 
@@ -420,6 +427,15 @@ public class ServiceOperator extends AbstractDatabaseEntry
 					spamSafe ? Util.filterXMLChars(getEMailSpamSafe()) : Util.filterXMLChars(getEMail()));
 		}
 		
+		if (address != null)
+		{
+			Enumeration e = address.getAddressAsNodeList(ownerDocument);
+			while (e.hasMoreElements()) 
+			{
+				mixOperatorElement.appendChild((Element) e.nextElement());
+			}
+		}
+		
 		return mixOperatorElement;
 	}
 	
@@ -434,5 +450,15 @@ public class ServiceOperator extends AbstractDatabaseEntry
 
 		ServiceOperator op = (ServiceOperator) a_obj;
 		return getId().equals(op.getId());
+	}
+
+	public OperatorAddress getAddress() 
+	{
+		return address;
+	}
+
+	public void setAddress(OperatorAddress address) 
+	{
+		this.address = address;
 	}
 }
