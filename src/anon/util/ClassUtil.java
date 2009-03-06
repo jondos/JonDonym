@@ -63,6 +63,8 @@ public final class ClassUtil
 	 * Stores all loaded directories.
 	 */
 	private static Vector ms_loadedDirectories = new Vector();
+	
+	private static boolean ms_bEnableFindSubclasses = true;
 
 	/**
 	 * This class works without being initialised and is completely static.
@@ -275,6 +277,11 @@ public final class ClassUtil
 		return getClassPath(false);
 	}
 
+	public static void enableFindSubclasses(boolean a_benable)
+	{
+		ms_bEnableFindSubclasses = a_benable;
+	}
+	
 	/**
 	 * Gets all classes that extend the given class or implement the given
 	 * interface, including the class itself. It is recommended to store this
@@ -294,10 +301,15 @@ public final class ClassUtil
 		Vector subclasses;
 		Class possibleSubclass;
 
+		if (!ms_bEnableFindSubclasses)
+		{
+			return new Vector();
+		}
+		
 		loadClasses(a_class);
 		classes = loadClasses(getCallingClassStatic());
 		subclasses = new Vector();
-
+		
 		while (classes.hasMoreElements())
 		{
 			possibleSubclass = (Class) classes.nextElement();

@@ -1141,7 +1141,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					JAPConstants.REMIND_OPTIONAL_UPDATE));
 				JAPModel.getInstance().setReminderForJavaUpdate(
 								XMLUtil.parseAttribute(root, JAPModel.XML_REMIND_JAVA_UPDATE,
-					JAPConstants.REMIND_JAVA_UPDATE));
+										isPortableMode() ? false : JAPConstants.REMIND_JAVA_UPDATE));
 				if (!m_bShowConfigAssistant)
 				{
 					// show the config assistant only if JAP forced this at the last start

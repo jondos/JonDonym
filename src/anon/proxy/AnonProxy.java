@@ -643,7 +643,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Could not set accept time out!", e1);
 		}
 		requester = new OpenSocketRequester(this, THREAD_SYNC);
-		socketThread = new Thread(requester);
+		socketThread = new Thread(requester, requester.getClass().getName());
 		socketThread.start();
 
 		try
