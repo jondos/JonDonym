@@ -52,6 +52,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import anon.ErrorCodes;
+import anon.client.TrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.pay.AIControlChannel;
@@ -74,7 +75,6 @@ import jap.JAPController;
 import jap.JAPModel;
 import jap.JAPNewView;
 import jap.JAPUtil;
-import jap.TrustModel;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

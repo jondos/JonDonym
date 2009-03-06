@@ -30,6 +30,7 @@ package jap;
 import java.util.Hashtable;
 
 import anon.infoservice.StatusInfo;
+import anon.infoservice.update.AbstractDatabaseUpdater;
 
 final class JAPFeedback extends AbstractDatabaseUpdater
 {
@@ -40,7 +41,7 @@ final class JAPFeedback extends AbstractDatabaseUpdater
 
 	public JAPFeedback()
 	{
-		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS));
+		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS), JAPController.getInstance().getObservableInfo());
 		m_updateInterval = (DynamicUpdateInterval)getUpdateInterval();
 	}
 

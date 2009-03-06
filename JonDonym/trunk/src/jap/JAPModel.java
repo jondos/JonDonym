@@ -54,6 +54,7 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import platform.AbstractOS;
+import anon.client.TrustModel;
 import anon.crypto.JAPCertificate;
 import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.IProxyInterfaceGetter;
@@ -1995,22 +1996,8 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	
 	public synchronized void setContext(String context) 
 	{
-		boolean bChanged = false;
-		if (m_context != context && context != null && (m_context == null || !m_context.equals(context)))
-		{
-			// changed!
-			if ((m_context == null && !context.equals(CONTEXT_JONDONYM)) || m_context != null)
-			{
-				//changed from default to other context or the other way round
-				bChanged = true;
-			}
-			m_context = context;
-		}
-
-		if (bChanged)
-		{
-			// did not work with an observer, I do not know why...
-			TrustModel.updateContext();
-		}
+		// did not work with an observer, I do not know why...
+		TrustModel.updateContext(context);
+		
 	}
 }

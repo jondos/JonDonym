@@ -76,7 +76,7 @@ public abstract class Updater implements Observer
 		init();
 	}
 
-	protected static abstract class ObservableInfo
+	public static abstract class ObservableInfo
 	{
 		private Observable m_observable;
 
@@ -89,6 +89,11 @@ public abstract class Updater implements Observer
 			m_observable = a_observable;
 		}
 
+		public void notifyAdditionalObserversOnUpdate(Class a_updatedClass)
+		{
+			
+		}
+		
 		public final Observable getObservable()
 		{
 			return m_observable;
@@ -192,6 +197,11 @@ public abstract class Updater implements Observer
 		m_updateThread.setPriority(Thread.MIN_PRIORITY);
 		m_updateThread.setDaemon(true);
 		m_updateThread.start();
+	}
+	
+	protected  ObservableInfo getObservableInfo() 
+	{
+		return m_observable;
 	}
 
 	public void update(Observable a_observable, Object a_argument)

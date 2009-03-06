@@ -53,6 +53,7 @@ import javax.swing.event.MenuListener;
 
 import platform.AbstractOS;
 
+import anon.client.TrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.infoservice.StatusInfo;

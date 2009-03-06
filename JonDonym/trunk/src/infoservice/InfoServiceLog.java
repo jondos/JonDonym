@@ -44,6 +44,10 @@ final public class InfoServiceLog extends AbstractLog4jLog
 	public InfoServiceLog(Properties a_properties)
 	{
 		PropertyConfigurator.configure(a_properties);
-		m_Log = Logger.getRootLogger();
+	}
+	
+	protected Logger getLogger()
+	{
+		return Logger.getRootLogger();
 	}
 }

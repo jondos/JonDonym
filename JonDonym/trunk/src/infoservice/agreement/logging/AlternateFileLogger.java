@@ -11,6 +11,7 @@ import org.apache.log4j.RollingFileAppender;
 
 public class AlternateFileLogger extends AbstractLog4jLog
 {
+	private Logger m_Log;
     public AlternateFileLogger(String fileName, int maxFileSize, int maxBackups)
     {
         super();
@@ -32,5 +33,9 @@ public class AlternateFileLogger extends AbstractLog4jLog
             //
         }
     }
+    protected Logger getLogger()
+	{
+		return m_Log;
+	}
 
 }

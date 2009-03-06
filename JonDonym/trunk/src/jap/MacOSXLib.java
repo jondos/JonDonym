@@ -43,6 +43,7 @@ import javax.swing.JSeparator;
 import gui.JAPHelpContext;
 import gui.dialog.JAPDialog;
 import gui.help.JAPHelp;
+import anon.client.TrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.util.ClassUtil;

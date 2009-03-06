@@ -38,7 +38,7 @@ import org.apache.log4j.Logger;
 public abstract class AbstractLog4jLog implements Log
 {
 
-	protected Logger m_Log;
+	protected abstract Logger getLogger();
 
 	/**
 	 * Logs a message to the infoservice logging output.
@@ -79,7 +79,7 @@ public abstract class AbstractLog4jLog implements Log
 			log4jPriority = Level.FATAL;
 		}
 		/* log the message */
-		m_Log.log(null, log4jPriority, a_message, null);
+		getLogger().log(null, log4jPriority, a_message, null);
 	}
 
 	/**
@@ -139,7 +139,7 @@ public abstract class AbstractLog4jLog implements Log
 				break;
 
 		}
-		m_Log.setLevel(l);
+		getLogger().setLevel(l);
 	}
 
 	/**
@@ -151,23 +151,23 @@ public abstract class AbstractLog4jLog implements Log
 	{
 		int level = LogLevel.EMERG;
 
-		if (m_Log.isEnabledFor(Level.DEBUG))
+		if (getLogger().isEnabledFor(Level.DEBUG))
 		{
 			level = LogLevel.DEBUG;
 		}
-		else if (m_Log.isEnabledFor(Level.INFO))
+		else if (getLogger().isEnabledFor(Level.INFO))
 		{
 			level = LogLevel.INFO;
 		}
-		else if (m_Log.isEnabledFor(Level.WARN))
+		else if (getLogger().isEnabledFor(Level.WARN))
 		{
 			level = LogLevel.WARNING;
 		}
-		else if (m_Log.isEnabledFor(Level.ERROR))
+		else if (getLogger().isEnabledFor(Level.ERROR))
 		{
 			level = LogLevel.ERR;
 		}
-		else if (m_Log.isEnabledFor(Level.FATAL))
+		else if (getLogger().isEnabledFor(Level.FATAL))
 		{
 			level = LogLevel.ALERT;
 		}

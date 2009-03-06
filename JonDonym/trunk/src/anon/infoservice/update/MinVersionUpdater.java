@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2000 - 2005, The JAP-Team
+ Copyright (c) 2006, The JAP-Team
  All rights reserved.
  Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
@@ -7,7 +7,7 @@
   - Redistributions of source code must retain the above copyright notice,
  this list of conditions and the following disclaimer.
 
-  - Redistributions in binary form must reproduce the above copyright notice,
+  - Redistributions in bisnary form must reproduce the above copyright notice,
  this list of conditions and the following disclaimer in the documentation and/or
  other materials provided with the distribution.
 
@@ -25,33 +25,48 @@
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-package infoservice.mailsystem.central;
+package anon.infoservice.update;
 
-import java.util.Properties;
+import java.util.Hashtable;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-
-import logging.AbstractLog4jLog;
+import anon.infoservice.InfoServiceHolder;
+import anon.infoservice.JAPMinVersion;
 
 /**
- * This class is used for logging messages of the mailsystem via Log4J.
+ *
+ * @author Rolf Wendolsky
  */
-public class MailSystemLog extends AbstractLog4jLog {
+public class MinVersionUpdater extends AbstractDatabaseUpdater
+{
+	private static final long UPDATE_INTERVAL_MS = 1000 * 60 * 60 * 12l ; // half a day (update twice per day)
+	private static final long UPDATE_INTERVAL_MS_SHORT = 1000 * 60 * 8l; // 8 minutes
 
-  /**
-   * Creates a new instance of MailSystemLog. This prepares Log4J for logging the messages of the
-   * mailsystem.
-   *
-   * @a_properties The properties to configure Log4J.
-   */
-  public MailSystemLog(Properties a_properties) {
-    PropertyConfigurator.configure(a_properties);
-
-  }
-  
-  protected Logger getLogger()
+	public MinVersionUpdater(ObservableInfo a_observableInfo)
 	{
-		return Logger.getRootLogger();
+		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS_SHORT), a_observableInfo);
 	}
+
+	public Class getUpdatedClass()
+	{
+		return JAPMinVersion.class;
+	}
+
+	protected Hashtable getUpdatedEntries(Hashtable a_dummy)
+	{
+		Hashtable hashtable = new Hashtable();
+		JAPMinVersion version = InfoServiceHolder.getInstance().getNewVersionNumber();
+		if (version != null)
+		{
+			((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS_SHORT);
+			hashtable.put(version.getId(), version);
+		}
+		((DynamicUpdateInterval)getUpdateInterval()).setUpdateInterval(UPDATE_INTERVAL_MS);
+		return  hashtable;
+	}
+
+	protected Hashtable getEntrySerials()
+	{
+		return new Hashtable();
+	}
+
 }
