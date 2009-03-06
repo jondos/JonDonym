@@ -444,20 +444,20 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 
 	public void update(Observable a_notifier, Object a_message)
 	{
-		/**
-		 * list init, add certificates by issuer name
-		 * It is important to place this here as otherwise a deadlock with
-		 * CertificateStore.removeCertificate is possible (this class is an observer...).
-		 * Therefore the lock on CertificateStore and on this class should not be mixed!
-		 */
-		Enumeration enumCerts = SignatureVerifier.getInstance().getVerificationCertificateStore().
-			getAllCertificates().elements();
-
-		synchronized (this)
+		if (a_notifier == SignatureVerifier.getInstance().getVerificationCertificateStore() &&
+			(a_message == null || (a_message instanceof Integer &&
+								   ((Integer)a_message).intValue() == JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX)))
 		{
-			if (a_notifier == SignatureVerifier.getInstance().getVerificationCertificateStore() &&
-				(a_message == null || (a_message instanceof Integer &&
-									   ((Integer)a_message).intValue() == JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX)))
+			/**
+			 * list init, add certificates by issuer name
+			 * It is important to place this here as otherwise a deadlock with
+			 * CertificateStore.removeCertificate is possible (this class is an observer...).
+			 * Therefore the lock on CertificateStore and on this class should not be mixed!
+			 */
+			Enumeration enumCerts = SignatureVerifier.getInstance().getVerificationCertificateStore().
+				getAllCertificates().elements();
+			
+			synchronized (this)
 			{
 				/* the message is from the SignatureVerifier trusted certificates store */
 				int lastIndex = m_listCert.getSelectedIndex();
@@ -480,14 +480,6 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 				}
 			}
 		}
-	}
-
-	public void fontSizeChanged(final JAPModel.FontResize a_resize, final JLabel a_dummyLabel)
-	{
-		/*
-		m_lblCertTitle.setFont(new Font(a_dummyLabel.getFont().getName(), Font.BOLD,
-										(int)(a_dummyLabel.getFont().getSize() * 1.2)));
-								 */
 	}
 	
 	protected void onUpdateValues()

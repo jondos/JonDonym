@@ -256,6 +256,7 @@ public class SignatureVerifier implements IXMLEncodable
 			}
         }
 
+        /*
 		private class SignatureHolder
 		{
 			XMLSignature m_signature;
@@ -267,10 +268,11 @@ public class SignatureVerifier implements IXMLEncodable
 			{
 				return m_signature;
 			}
-		}
+		}*/
 
 		public XMLSignature getVerifiedXml(final Element a_rootNode, final int a_documentClass)
 		{
+			/*
 			final SignatureHolder sigholder = new SignatureHolder();
 			Runnable run = new Runnable()
 			{
@@ -290,7 +292,8 @@ public class SignatureVerifier implements IXMLEncodable
 			{
 			}
 
-			return sigholder.getSignature();
+			return sigholder.getSignature(); */			
+			return getVerifiedXml_internal(a_rootNode, a_documentClass);
 		}
 
 		/**
