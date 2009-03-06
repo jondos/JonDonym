@@ -14,5 +14,7 @@ public interface TermsAndConditionsTranslation
 	
 	public Element getTranslationElement();
 	
+	public ServiceOperator getOperator();
+	
 	public Date getDate();
 }
