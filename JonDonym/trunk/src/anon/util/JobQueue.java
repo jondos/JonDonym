@@ -138,6 +138,7 @@ public class JobQueue
 				}
 			}
 		}, a_name);
+		m_threadQueue.setDaemon(true);
 		m_threadQueue.start();
 	}
 

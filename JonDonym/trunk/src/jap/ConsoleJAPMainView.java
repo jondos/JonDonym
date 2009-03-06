@@ -121,7 +121,7 @@ public class ConsoleJAPMainView implements IJAPMainView
 					}
 				}
 				System.out.println("Type 'exit' to quit or 'save' to save the configuration.");
-			}	
+			}
 		JAPController.goodBye(true);
 	}
 

@@ -215,6 +215,8 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 		}
 		catch (Exception e)
 		{
+			LogHolder.log(LogLevel.ERR, LogType.CRYPTO,
+					  "Error while verifying status info certificates!", e);
 		}
 
 		//The following is a workaround because if signature check is disabled, then also
