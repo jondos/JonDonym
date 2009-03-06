@@ -277,13 +277,13 @@ public class CertPath implements IXMLEncodable
 		
 		if(a_pathCertificates != null)
 		{
-			pathCertificate = doNameAndKeyChaining(getLastCertificate(), a_pathCertificates);
+			pathCertificate = doNameAndKeyChaining(getLastCertificate(), a_pathCertificates, false);
 		}
 		
 		while(pathCertificate != null)
 		{
 			appendCertificate(pathCertificate);
-			pathCertificate = doNameAndKeyChaining(pathCertificate, a_pathCertificates);
+			pathCertificate = doNameAndKeyChaining(pathCertificate, a_pathCertificates, false);
 		}
 		
 		findVerifier();
@@ -295,12 +295,12 @@ public class CertPath implements IXMLEncodable
 		Vector rootCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
 										getAvailableCertificatesByType(getRootCertType(m_documentType));
 		
-		trustAnchor = doNameAndKeyChaining(this.getLastCertificate(), rootCertificates);
+		trustAnchor = doNameAndKeyChaining(this.getLastCertificate(), rootCertificates, false);
 		if(trustAnchor == null)
 		{
 			rootCertificates = SignatureVerifier.getInstance().getVerificationCertificateStore().
 									getUnavailableCertificatesByType(getRootCertType(m_documentType));
-			trustAnchor = doNameAndKeyChaining(this.getLastCertificate(), rootCertificates);
+			trustAnchor = doNameAndKeyChaining(this.getLastCertificate(), rootCertificates, false);
 		}
 		if (trustAnchor != null)
 		{
@@ -316,9 +316,12 @@ public class CertPath implements IXMLEncodable
 	 * compared with the SubjectKeyIdentifier of the possible verifiers
 	 * @param a_cert the cert to find the issuer for
 	 * @param a_possibleIssuers a vector of certs to search fot the issuer
+	 * @param a_AllowSelfSigned true if a verification with a self-signed certificate is allowed; false otherwise
+	 *                         Warning: may lead to an endless loop if not explicitly used in a self signed context!
 	 * @return the possible issuer or <code>null</code> if there was none
 	 */
-	private static JAPCertificate doNameAndKeyChaining(JAPCertificate a_cert, Vector a_possibleIssuers)
+	private static JAPCertificate doNameAndKeyChaining(JAPCertificate a_cert, Vector a_possibleIssuers,
+			boolean a_bAllowSelfSigned)
 	{
 		JAPCertificate issuer;
 		JAPCertificate sameIssuer = null;
@@ -338,7 +341,8 @@ public class CertPath implements IXMLEncodable
 			}
 			
 			//Name Chaining
-			if (a_cert.getIssuer() != null && issuer.getSubject() != null)
+			if (a_cert.getIssuer() != null && issuer.getSubject() != null && 
+				(a_bAllowSelfSigned || !a_cert.equals(issuer)))
 			{
 				if (a_cert.getIssuer().equals(issuer.getSubject()))
 				{
@@ -768,13 +772,13 @@ public class CertPath implements IXMLEncodable
 			// this will only work for self signed certificates, so make a pre-check for faster validation
 			trustedCerts = new Vector();
 			trustedCerts.addElement(getLastCertificate());
-			if (doNameAndKeyChaining(getLastCertificate(), trustedCerts) != null)
+			if (doNameAndKeyChaining(getLastCertificate(), trustedCerts, true) != null)
 			{
 				trustedCerts = 
 					SignatureVerifier.getInstance().getVerificationCertificateStore().getAvailableCertificatesByType(
 						getCertType(m_documentType));
 
-				if (m_valid && doNameAndKeyChaining(getLastCertificate(), trustedCerts) != null)
+				if (m_valid && doNameAndKeyChaining(getLastCertificate(), trustedCerts, true) != null)
 				{
 					m_verified = true;
 					return true;
