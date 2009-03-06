@@ -1171,7 +1171,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 					a_splash.setText(JAPMessages.getString(MSG_UPDATING_HELP));
 					JAPModel.getInstance().getHelpURL();
 					if (!JAPModel.getInstance().isHelpPathDefined() &&
-						AbstractOS.getInstance().isHelpAutoInstalled())
+						AbstractOS.getInstance().isHelpAutoInstalled() &&
+						!JAPDialog.isConsoleOnly())
 					{
 						JAPModel.getInstance().setHelpPath(new File(
 								AbstractOS.getInstance().getDefaultHelpPath(
