@@ -85,6 +85,7 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 	private JCheckBox m_cbCertCheckEnabled;
 	private JPanel  m_panelCAList;
 	private Vector m_deletedCerts;
+	private boolean m_bDoNotUpdate = false;
 
 	public JAPConfCert()
 	{
@@ -444,6 +445,12 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 
 	public void update(Observable a_notifier, Object a_message)
 	{
+		if (m_bDoNotUpdate)
+		{
+			// do not update on every change, as this would cause only the first change to be done
+			return;
+		}
+		
 		if (a_notifier == SignatureVerifier.getInstance().getVerificationCertificateStore() &&
 			(a_message == null || (a_message instanceof Integer &&
 								   ((Integer)a_message).intValue() == JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX)))
@@ -495,45 +502,58 @@ final class JAPConfCert extends AbstractJAPConfModule implements Observer
 
 	protected boolean onOkPressed()
 	{
-		CertificateInfoStructure currentCertificate, storedCertificate;
-		Enumeration certificates;
-		//Cert seetings
-		SignatureVerifier.getInstance().setCheckSignatures(m_cbCertCheckEnabled.isSelected());
-		
-		//remove deleted certs from store
-		certificates = m_deletedCerts.elements();
-		while(certificates.hasMoreElements())
+		if (m_bDoNotUpdate)
 		{
-			currentCertificate = (CertificateInfoStructure) certificates.nextElement();
-			SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificate(currentCertificate);
+			return true;
 		}
-		m_deletedCerts.removeAllElements();
-		
-		//change cert status and add new ones
-		certificates = m_listmodelCertList.elements();
-		while(certificates.hasMoreElements())
-		{
-			currentCertificate = (CertificateInfoStructure) certificates.nextElement();
-			storedCertificate = SignatureVerifier.getInstance().getVerificationCertificateStore().
-				getCertificateInfoStructure(currentCertificate.getCertificate(), JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX);
+		synchronized (this)
+		{	
+			m_bDoNotUpdate = true;
 			
-			if(storedCertificate != null)
+			CertificateInfoStructure currentCertificate, storedCertificate;
+			Enumeration certificates;
+			//Cert seetings
+			SignatureVerifier.getInstance().setCheckSignatures(m_cbCertCheckEnabled.isSelected());
+			
+			//remove deleted certs from store
+			certificates = m_deletedCerts.elements();
+			while(certificates.hasMoreElements())
 			{
-				if(storedCertificate.isEnabled() != currentCertificate.isEnabled())
+				currentCertificate = (CertificateInfoStructure) certificates.nextElement();
+				SignatureVerifier.getInstance().getVerificationCertificateStore().removeCertificate(currentCertificate);
+			}
+			m_deletedCerts.removeAllElements();
+			
+			//change cert status and add new ones
+			certificates = m_listmodelCertList.elements();
+			while(certificates.hasMoreElements())
+			{
+				currentCertificate = (CertificateInfoStructure) certificates.nextElement();
+				storedCertificate = SignatureVerifier.getInstance().getVerificationCertificateStore().
+					getCertificateInfoStructure(currentCertificate.getCertificate(), JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX);
+				
+				if(storedCertificate != null)
 				{
+					if(storedCertificate.isEnabled() != currentCertificate.isEnabled())
+					{
+						SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(currentCertificate, currentCertificate.isEnabled());
+					}
+				}
+				else
+				{
+					SignatureVerifier.getInstance().getVerificationCertificateStore().
+						addCertificateWithoutVerification(currentCertificate.getCertificate(), JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX, true, false);
 					SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(currentCertificate, currentCertificate.isEnabled());
 				}
 			}
-			else
-			{
-				SignatureVerifier.getInstance().getVerificationCertificateStore().
-					addCertificateWithoutVerification(currentCertificate.getCertificate(), JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX, true, false);
-				SignatureVerifier.getInstance().getVerificationCertificateStore().setEnabled(currentCertificate, currentCertificate.isEnabled());
-			}
-		}
+			
+			//store current settings if cancel is pressed later
+			super.m_savePoint.createSavePoint();
 		
-		//store current stettings if cancel is pressed later
-		super.m_savePoint.createSavePoint();
+			m_bDoNotUpdate = false;
+		}
+		update(SignatureVerifier.getInstance().getVerificationCertificateStore(), null);
+		
 		return true;
 	}
 	
