@@ -22,7 +22,11 @@ public class TermsAndConditionsDialog extends JAPDialog
 	
 	/*public TermsAndConditionsDialog(Component a_parent, ServiceOperator a_op, 
 			boolean a_bUpdateFromInfoService)*/
-	public TermsAndConditionsDialog(Component a_parent, TermsAndConditions tc) 
+	public TermsAndConditionsDialog(Component a_parent, TermsAndConditions tc)
+	{
+		this(a_parent, tc, JAPMessages.getLocale().getLanguage());
+	}
+	public TermsAndConditionsDialog(Component a_parent, TermsAndConditions tc, String langCode) 
 	{
 		super(a_parent, "T&C");
 		
