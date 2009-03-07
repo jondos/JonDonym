@@ -188,6 +188,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_AT_LEAST = JAPConfAnon.class.getName() + "_atLeast";
 	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
+	private static final String MSG_FILTER_SOCKS = JAPConfAnon.class.getName() + "_filterSOCKS";
+	private static final String MSG_FILTER_SOCKS_ONLY = JAPConfAnon.class.getName() + "_filterSOCKSOnly";
+	
 	
 	private static final String MSG_CONNECTED =  JAPConfAnon.class.getName() + "_connected";
 	private static final String MSG_LBL_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityLbl";
@@ -293,7 +296,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JRadioButton m_filterAtLeast2Mixes;
 	private JRadioButton m_filterAtLeast3Mixes;
 	private JTextField m_filterNameField;
-	private ButtonGroup m_filterPaymentGroup;
+	private ButtonGroup m_filterSOCKSGroup;
+	//private ButtonGroup m_filterPaymentGroup;
 	private ButtonGroup m_filterCascadeGroup;
 	private ButtonGroup m_filterInternationalGroup;
 
@@ -527,16 +531,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_filterNameField.setText(m_trustModelCopy.getName());
 						
-			m_filterPanel.selectRadioButton(m_filterPaymentGroup, 
-					String.valueOf(m_trustModelCopy.getAttribute(TrustModel.PaymentAttribute.class).getTrustCondition()));
-		
+			//m_filterPanel.selectRadioButton(m_filterPaymentGroup, 
+					//String.valueOf(m_trustModelCopy.getAttribute(TrustModel.PaymentAttribute.class).getTrustCondition()));
+			m_filterPanel.selectRadioButton(m_filterSOCKSGroup, 
+					String.valueOf(m_trustModelCopy.getAttribute(TrustModel.SocksAttribute.class).getTrustCondition()));
+			
 			int trustCondition = m_trustModelCopy.getAttribute(TrustModel.NumberOfMixesAttribute.class).getTrustCondition();
 			Integer conditionValue = ((Integer) m_trustModelCopy.getAttribute(TrustModel.NumberOfMixesAttribute.class).getConditionValue());
 			
 			m_filterPanel.selectRadioButton(m_filterCascadeGroup, 
 					String.valueOf(trustCondition));
 			
-			if(conditionValue != null)
+			if (conditionValue != null)
 			{
 				if(trustCondition == TrustModel.TRUST_IF_AT_LEAST && conditionValue.intValue() == 0)
 				{
@@ -1794,9 +1800,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		
 		try
 		{
+			/*
 			String cmd = m_filterPaymentGroup.getSelection().getActionCommand();
 			int value = 0;
 			m_trustModelCopy.setAttribute(TrustModel.PaymentAttribute.class, Integer.parseInt(cmd));
+			*/
+			String cmd = m_filterSOCKSGroup.getSelection().getActionCommand();
+			int value = 0;
+			m_trustModelCopy.setAttribute(TrustModel.SocksAttribute.class, Integer.parseInt(cmd));
 			
 			cmd = m_filterCascadeGroup.getSelection().getActionCommand();
 			if(m_filterAtLeast2Mixes.isSelected()) value = 2;
@@ -3822,6 +3833,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			c.weighty = 0.7;
 			add(p, c);
 			
+			/*
 			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_PAYMENT));
 			p = new JPanel(new GridLayout(0, 1));
 			p.setBorder(title);
@@ -3856,7 +3868,27 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterPaymentGroup = new ButtonGroup();
 			m_filterPaymentGroup.add(r);
 			m_filterPaymentGroup.add(s);
-			m_filterPaymentGroup.add(t);
+			m_filterPaymentGroup.add(t);*/
+			
+			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_SOCKS));
+			p = new JPanel(new GridLayout(0, 1));
+			p.setBorder(title);
+			
+			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
+			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
+			r.setSelected(true);
+			p.add(r);
+	
+			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_SOCKS_ONLY));
+			
+			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
+			p.add(s);
+				
+			
+			m_filterSOCKSGroup = new ButtonGroup();
+			m_filterSOCKSGroup.add(r);
+			m_filterSOCKSGroup.add(s);
+			
 			
 			c.gridx += 2;
 			c.gridwidth = 1;

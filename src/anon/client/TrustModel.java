@@ -48,7 +48,6 @@ import anon.infoservice.StatusInfo;
 import anon.infoservice.PerformanceEntry;
 import anon.infoservice.PerformanceInfo;
 import anon.pay.PayAccountsFile;
-import anon.util.ClassUtil;
 import anon.util.IXMLEncodable;
 import anon.util.JAPMessages;
 import anon.util.XMLParseException;
@@ -126,6 +125,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String MSG_SERVICES_PREMIUM_PRIVATE = TrustModel.class.getName() + "_servicesPremiumPrivate";
 	
 	
+	private static final String MSG_EXCEPTION_NO_SOCKS = TrustModel.class.getName() + "_exceptionNoSocks";
 	private static final String MSG_EXCEPTION_PAY_CASCADE = TrustModel.class.getName() + "_exceptionPayCascade";
 	private static final String MSG_EXCEPTION_FREE_CASCADE = TrustModel.class.getName() + "_exceptionFreeCascade";
 	private static final String MSG_EXCEPTION_WRONG_SERVICE_CONTEXT = TrustModel.class.getName() + "_wrongServiceContext";
@@ -316,7 +316,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 				}
 			}
 			catch(Exception ex)
-			{ex.printStackTrace();
+			{
+				LogHolder.log(LogLevel.NOTICE, LogType.DB, ex);
 				throw new XMLParseException(XML_ELEMENT_NAME, ex.getMessage());
 			}
 			
@@ -369,9 +370,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	};
 	
 	
-	public static class PaymentAttribute extends TrustAttribute
+	public static class QualityAttribute extends TrustAttribute
 	{
-		public PaymentAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
+		public QualityAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
 		{
 			super(a_trustCondition, a_conditionValue, a_bIgnoreNoDataAvailable);
 		}
@@ -388,6 +389,23 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			else if (getTrustCondition() == TRUST_IF_TRUE)
 			{
 				throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_FREE_CASCADE));
+			}
+		}
+	};
+	
+	
+	public static class SocksAttribute extends TrustAttribute
+	{
+		public SocksAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
+		{
+			super(a_trustCondition, a_conditionValue, a_bIgnoreNoDataAvailable);
+		}
+
+		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
+		{
+			if (!a_cascade.isSocks5Supported() && getTrustCondition() == TRUST_IF_TRUE)
+			{
+				throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_NO_SOCKS));
 			}
 		}
 	};
@@ -648,14 +666,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		ms_trustModels.addElement(model);
 		
 		model = new TrustModel(MSG_SERVICES_BUSINESS, 0);
-		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE); // this might be altered when we have hybrid services...
+		model.setAttribute(QualityAttribute.class, TRUST_IF_NOT_TRUE); // this might be altered when we have hybrid services...
 		model.setAttribute(ContextAttribute.class, TRUST_IF_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50), true);
 		CONTEXT_MODEL_BUSINESS = model;
 
 		model = new TrustModel(MSG_SERVICES_PREMIUM_PRIVATE, 2);
-		model.setAttribute(PaymentAttribute.class, TRUST_IF_TRUE);
+		model.setAttribute(QualityAttribute.class, TRUST_IF_TRUE);
 		model.setAttribute(ContextAttribute.class, TRUST_IF_NOT_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100), true);
@@ -663,7 +681,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		CONTEXT_MODEL_PREMIUM_PRIVATE = model;
 
 		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2);
-		model.setAttribute(PaymentAttribute.class, TRUST_IF_TRUE);
+		model.setAttribute(QualityAttribute.class, TRUST_IF_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100), true);
 		model.setAttribute(NumberOfMixesAttribute.class, TRUST_IF_AT_LEAST, 3);
@@ -672,7 +690,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);
-		model.setAttribute(PaymentAttribute.class, TRUST_IF_NOT_TRUE);
+		model.setAttribute(QualityAttribute.class, TRUST_IF_NOT_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
 		CONTEXT_MODEL_FREE = model;
@@ -805,7 +823,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		for (int i = 0; i < a_trustModelElement.getChildNodes().getLength(); i++)
 		{
 			Element el = (Element) a_trustModelElement.getChildNodes().item(i);
-			setAttribute(TrustAttribute.fromXmlElement(el));
+			try
+			{
+				setAttribute(TrustAttribute.fromXmlElement(el));
+			}
+			catch (XMLParseException a_e)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
+			}
 		}
 	}
 	
@@ -1235,7 +1260,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	public boolean isPaymentForced()
 	{
-		TrustAttribute attr = getAttribute(PaymentAttribute.class);
+		TrustAttribute attr = getAttribute(QualityAttribute.class);
 
 		return (attr == null) ? false : (attr.getTrustCondition() == TRUST_IF_TRUE);
 	}

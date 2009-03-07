@@ -27,8 +27,6 @@
  */
 package anon.infoservice.update;
 
-import jap.JAPController;
-
 import java.util.Hashtable;
 import java.util.Vector;
 

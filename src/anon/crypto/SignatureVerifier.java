@@ -141,9 +141,13 @@ public class SignatureVerifier implements IXMLEncodable
          * @param a_checkSignaturesEnabled True, if signature checking shall be enabled, false if it
          *                                 shall be disabled.
          */
-        public void setCheckSignatures(boolean a_checkSignaturesEnabled)
+        public synchronized void setCheckSignatures(boolean a_checkSignaturesEnabled)
         {
-			m_checkSignatures = a_checkSignaturesEnabled;
+        	if (m_checkSignatures != a_checkSignaturesEnabled)
+        	{
+        		m_checkSignatures = a_checkSignaturesEnabled;
+        		m_trustedCertificates.reset();
+        	}
         }
 
 		public void setCheckSignatures(int a_documentClass, boolean a_bCheckignatures)
@@ -256,46 +260,6 @@ public class SignatureVerifier implements IXMLEncodable
 			}
         }
 
-        /*
-		private class SignatureHolder
-		{
-			XMLSignature m_signature;
-			public void setSignature(XMLSignature a_signature)
-			{
-				m_signature = a_signature;
-			}
-			public XMLSignature getSignature()
-			{
-				return m_signature;
-			}
-		}*/
-
-		public XMLSignature getVerifiedXml(final Element a_rootNode, final int a_documentClass)
-		{
-			/*
-			final SignatureHolder sigholder = new SignatureHolder();
-			Runnable run = new Runnable()
-			{
-				public void run()
-				{
-					sigholder.setSignature(getVerifiedXml_internal(a_rootNode, a_documentClass));
-				}
-			};
-			Thread doit = new Thread(run);
-			doit.setPriority(Thread.MIN_PRIORITY + 1);
-			doit.start();
-			try
-			{
-				doit.join();
-			}
-			catch (InterruptedException ex)
-			{
-			}
-
-			return sigholder.getSignature(); */			
-			return getVerifiedXml_internal(a_rootNode, a_documentClass);
-		}
-
 		/**
 		* Verifies the signature of an XML document against the store of trusted certificates.
 		*
@@ -304,13 +268,12 @@ public class SignatureVerifier implements IXMLEncodable
 		* @param a_documentClass The class of the document. See the constants in this class.
 		*
 		* @return the XMLSignature that should be verified. It is also returned if the verification
-		*         was NOT successfull. Call isVerified() on the returned XMLSignature Object to get
+		*         was NOT successful. Call isVerified() on the returned XMLSignature Object to get
 		*         the result of the verification.
 		*
 		* @todo The ID within the document should be compared to the ID stored in the certificate.
-		* @todo the return value should be the certificate that successfully verified the signature
 		*/
-	    public XMLSignature getVerifiedXml_internal(Element a_rootNode, int a_documentClass)
+        public XMLSignature getVerifiedXml(final Element a_rootNode, final int a_documentClass)
 		{
 			XMLSignature signature = null;
 			synchronized (m_trustedCertificates)

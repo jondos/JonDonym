@@ -100,6 +100,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 	private static final String MSG_EXPLANATION = JAPConfInfoService.class.getName() + "_explanation";
 	private static final String MSG_ALL_INFO_SERVICES =
 		JAPConfInfoService.class.getName() + "_allInfoServices";
+	private static final String MSG_INACTIVE = JAPConfInfoService.class.getName() + "_inactive";
 
 
 	private static final Integer[] CONNECT_TIMEOUTS =
@@ -112,6 +113,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 
 	private JAPMultilineLabel m_hostLabel;
 	private JLabel m_portLabel;
+	private JLabel m_lblInactive;
 
 	private JList m_listKnownInfoServices;
 
@@ -868,6 +870,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 								viewCertButton.setEnabled(false);
 								viewCertButton.setIcon(null);
 								viewCertButton.setForeground(settingsInfoServiceConfigBasicSettingsRemoveButton.getForeground());
+								m_lblInactive.setVisible(false);
 							}
 							else
 							{
@@ -876,24 +879,29 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 								{
 									viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_NOT_TRUSTED));
 									viewCertButton.setForeground(Color.red);
+									m_lblInactive.setVisible(true);
 								}
 								else
 								{
 									viewCertButton.setForeground(settingsInfoServiceConfigBasicSettingsRemoveButton.getForeground());
 									if (!certPath.isValid(new Date()))
 									{
+										m_lblInactive.setVisible(true);
 										viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID));
 									}
 									else if (certPath.countVerifiedAndValidPaths() > 2)
 									{
+										m_lblInactive.setVisible(false);
 										viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_THREE_CERTS));
 									}
 									else if (certPath.countVerifiedAndValidPaths() > 1)
 									{
+										m_lblInactive.setVisible(false);
 										viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED_DOUBLE));
 									}
 									else
 									{
+										m_lblInactive.setVisible(false);
 										viewCertButton.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_TRUSTED));
 									}
 								}
@@ -1026,7 +1034,18 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		configPanelConstraints.insets = new Insets(10, 0, 0, 5);
 		m_portLabel = new JLabel("                                                      ");
 		configPanel.add(m_portLabel, configPanelConstraints);
-
+		
+		m_lblInactive = new JLabel(JAPMessages.getString(MSG_INACTIVE));
+		m_lblInactive.setIcon(GUIUtils.loadImageIcon(MultiCertOverview.IMG_INVALID));
+		m_lblInactive.setVisible(false);
+		configPanelConstraints.gridy++;
+		configPanelConstraints.gridx = 1;
+		configPanelConstraints.fill = GridBagConstraints.NONE;
+		configPanelConstraints.gridwidth = 2;
+		configPanelConstraints.insets = new Insets(10, 10, 0, 5);
+		configPanel.add(m_lblInactive, configPanelConstraints);
+		
+		configPanelConstraints.gridwidth = 1;
 	    configPanelConstraints.gridx = 0;
 		configPanelConstraints.gridy = 1;
 		configPanelConstraints.weightx = 1.0;
