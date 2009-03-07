@@ -419,6 +419,20 @@ public class CertificateStore extends Observable implements IXMLEncodable
 		/* notify the observers, only meaningful, if setChanged() was called */
 		notifyObservers();
 	}
+	
+	public synchronized void reset()
+	{
+		synchronized (m_trustedCertificates)
+		{
+			CertificateContainer container;
+			Enumeration certs = m_trustedCertificates.elements();
+			while (certs.hasMoreElements())
+			{
+				container = (CertificateContainer)certs.nextElement();
+				container.setEnabled(container.isEnabled());
+			}
+		}
+	}
 
 	public synchronized void setEnabled(CertificateInfoStructure a_certificateStructure, boolean a_enabled)
 	{

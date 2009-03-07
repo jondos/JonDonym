@@ -60,7 +60,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
 		{
 			info = a_cascade.getMixInfo(i);
-			if (info == null || !info.isVerified())
+			if ((info == null && SignatureVerifier.getInstance().isCheckSignatures()) || !info.isVerified())
 			{
 				countUnverified++;
 				if (exception == null)
@@ -81,7 +81,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 			}
 		}
 		
-		if (a_cascade == null || !a_cascade.isVerified())
+		if (a_cascade == null || (!a_cascade.isUserDefined() && !a_cascade.isVerified()))
 		{
 			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
 		}

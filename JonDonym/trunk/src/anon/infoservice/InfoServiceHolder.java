@@ -27,6 +27,7 @@
  */
 package anon.infoservice;
 
+import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -143,6 +144,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	 * Function number for fetchInformation() - getMixInfo().
 	 */
 	private static final int GET_MIXINFOS = 25;
+	
+	private static final String[] GETS;
 
 	/**
 	 * This defines, whether there is an automatic change of infoservice after failure as default.
@@ -173,6 +176,29 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	private boolean m_changeInfoServices;
 
 	private int m_nrAskedInfoServices = DEFAULT_OF_ASKED_INFO_SERVICES;
+
+	
+	static 
+	{
+		Field[] allFields = InfoServiceHolder.class.getDeclaredFields();
+		GETS = new String[allFields.length];
+		
+		for (int i = 0; i < allFields.length; i++)
+		{
+			if (allFields[i].getName().startsWith("GET") && allFields[i].getType() == int.class)
+			{
+				try 
+				{
+					GETS[allFields[i].getInt(null)] = allFields[i].getName();
+				} 
+				catch (Exception a_e) 
+				{
+					LogHolder.log(LogLevel.ERR, LogType.DB, a_e);
+					break;
+				} 
+			}
+		}
+	}
 
 	/**
 	 * This creates a new instance of InfoServiceHolder. This is only used for setting some
@@ -670,7 +696,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 													  " with id " +
 													  currentSerialEntry.getId() + "!");
 										/**
-										 * This may only be used for filtering if allInfoServices think this entry
+										 * This may only be used for filtering if all InfoServices think this entry
 										 * is unverified.
 										 * If at least one IS reports it as verified, it must not be filtered.
 										 */
@@ -738,9 +764,21 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				m_result = result;
 				return;
 			}
-
+			
+			String fieldName = null;
+			if (GETS.length > functionNumber)
+			{
+				fieldName = GETS[functionNumber];
+			}
+			if (fieldName == null)
+			{
+				fieldName = "the needed information (" + functionNumber + ")";
+			}
+			
 			LogHolder.log(LogLevel.ERR, LogType.NET,
-						  "No InfoService with the needed information (" + functionNumber + ") available.",
+						  "No InfoService with " + fieldName + " available" +
+						  (arguments == null || arguments.elementAt(0) == null ? "." : " for argument: " +
+								  arguments.elementAt(0)),
 						  true);
 			m_result = null;
 		}
