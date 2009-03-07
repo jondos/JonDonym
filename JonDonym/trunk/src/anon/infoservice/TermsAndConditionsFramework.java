@@ -55,6 +55,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	private static final String XML_ELEMENT_PRIVACY_POLICY_URL = "PrivacyPolicyUrl";
 	
 	private static final String XML_ELEMENT_OPERATOR = "Operator";
+	// do not delete: dynamic reference!
 	private static final String XML_ELEMENT_OPERATOR_NAME = "Name";
 	private static final String XML_ELEMENT_OPERATOR_STREET = "Street";
 	private static final String XML_ELEMENT_OPERATOR_POSTAL_CODE = "PostalCode";
