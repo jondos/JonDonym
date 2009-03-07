@@ -705,7 +705,7 @@ public class TermsAndConditions implements IXMLEncodable
 		
 		public String toString()
 		{
-			return new Locale(locale).getDisplayLanguage(Locale.ENGLISH) + (defaultLocale ? " (default)" : "");
+			return new Locale(locale, "").getDisplayLanguage(Locale.ENGLISH) + (defaultLocale ? " (default)" : "");
 		}
 		
 		public Date getDate() 

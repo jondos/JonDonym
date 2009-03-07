@@ -9,7 +9,12 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import anon.util.XMLUtil;
 
+/**
+ * TODO Maybe this should be turned into an IXMLEncodable...
+ *
+ */
 public class OperatorAddress 
 {
 	
@@ -101,7 +106,7 @@ public class OperatorAddress
 				{
 					f = this.getClass().getDeclaredField(allFields[i].getName().toUpperCase()+"_NODE");
 					Element element = owner.createElement(f.get(this).toString());
-					element.setTextContent(allFields[i].get(this).toString());
+					XMLUtil.setValue(element, allFields[i].get(this).toString());
 					v.addElement(element);
 				} 
 				catch (SecurityException e) {
@@ -125,7 +130,7 @@ public class OperatorAddress
 	Element getPostElement(Document owner)
 	{
 		Element e = owner.createElement(POST_NODE);
-		e.setTextContent(post);
-		return owner.createElement(POST_NODE);
+		XMLUtil.setValue(e, post);
+		return e;
 	}
 }
