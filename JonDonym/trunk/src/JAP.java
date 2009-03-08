@@ -360,11 +360,11 @@ public class JAP
 							{
 								return true;
 							}
-							
+							/*
 							public boolean isApplicationModalityForced() 
 							{
 								return true;
-							}
+							}*/
 						};
 						JAPDialog.showErrorDialog(null, errorString, LogType.MISC, test);
 					System.exit(0);
