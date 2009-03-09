@@ -323,6 +323,8 @@ public final class AnonProxyRequest implements Runnable
 						 * and needs another handling.
 						 */
 						sendRemainingBytesRecursion(dsChunk, e.getBytesSent(), m_OutChannel);
+						//Postcondition: aktPos is always 0, because we sent the whole chunk away; 
+						aktPos = 0;
 					}
 					else
 					{
