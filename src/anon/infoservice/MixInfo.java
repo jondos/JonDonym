@@ -33,13 +33,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import anon.crypto.CertPath;
-import anon.crypto.CertificateInfoStructure;
 import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.IXMLEncodable;
-import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import logging.LogHolder;
@@ -47,11 +45,8 @@ import logging.LogLevel;
 import logging.LogType;
 import anon.crypto.IVerifyable;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -315,6 +310,11 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix ID: " + m_mixId);
 	  }
 	  
+	  if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+	  {
+		  m_mixSignature = null;
+	  }
+	  
 	  m_bSocks = XMLUtil.parseAttribute(
 		   XMLUtil.getFirstChildByName(a_mixNode, "Proxies"), "socks5Support", false);
 
@@ -534,6 +534,10 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	   */
 	  m_freeMix = false;
 	  m_xmlStructure = a_mixNode;
+	  if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE && !a_bFromCascade)
+	  {
+		  m_xmlStructure = null;
+	  }
 
 	  /* a name type specifies whether the name should be extracted from the
 	   * operator- or the mix certificate.
@@ -848,7 +852,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    *
    * @return The XML node for this mix entry (Mix node).
    */
-  public Element getXmlStructure() {
+  public Element getXmlStructure() 
+  {
     return m_xmlStructure;
   }
 

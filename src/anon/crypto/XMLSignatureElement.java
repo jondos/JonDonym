@@ -242,7 +242,13 @@ public class XMLSignatureElement implements IXMLEncodable
 	
 	public boolean verifyFast(Node a_node, IMyPublicKey a_publicKey) throws XMLParseException
 	{
-		return verify(a_node, a_publicKey);
+		boolean bResult = verify(a_node, a_publicKey);
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_elemSignature = null;
+			m_signedInfoCanonical = null;
+		}
+		return bResult;
 	}
 	
 	/**
@@ -270,6 +276,11 @@ public class XMLSignatureElement implements IXMLEncodable
 					Vector appendedCertificates = (Vector)this.getCertificates().clone();
 					appendedCertificates.removeElement(currentCertificate);
 					m_certPath = CertPath.getInstance(currentCertificate, a_documentType, appendedCertificates);
+					if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+					{
+						m_elemSignature = null;
+						m_signedInfoCanonical = null;
+					}
 					return true;
 				}
 			}
@@ -278,16 +289,26 @@ public class XMLSignatureElement implements IXMLEncodable
 		{
 			//if there are no appended certs try verification with the stored certificates
 			certificates = a_directCertPaths.elements();
-			while(certificates.hasMoreElements())
+			while (certificates.hasMoreElements())
 			{
 				CertPath currentPath = (CertPath) certificates.nextElement();
 				
-				if(verify(a_node, currentPath.getFirstCertificate().getPublicKey()))
+				if (verify(a_node, currentPath.getFirstCertificate().getPublicKey()))
 				{
 					m_certPath = currentPath;
+					if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+					{
+						m_elemSignature = null;
+						m_signedInfoCanonical = null;
+					}
 					return true;
 				}
 			}
+		}
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_elemSignature = null;
+			m_signedInfoCanonical = null;
 		}
 		return false;
 	}

@@ -303,8 +303,17 @@ public class AsymmetricCryptoKeyPair
 
 			if (ms_publicKeyClasses.size() < 2)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.CRYPTO,
-							  "Public key classes have not been loaded automatically!");
+				int level;
+				if (ClassUtil.isFindSubclassesEnabled())
+				{
+					level = LogLevel.EXCEPTION;
+				}
+				else
+				{
+					level = LogLevel.NOTICE;
+				}
+				LogHolder.log(level, LogType.CRYPTO,
+				"Public key classes have not been loaded automatically!");
 				// load them manually and prevent double references
 				ms_publicKeyClasses.removeElement(MyDSAPublicKey.class);
 				ms_publicKeyClasses.removeElement(MyRSAPublicKey.class);
