@@ -95,11 +95,6 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	 * The operators certificate
 	 */
 	private MultiCertPath m_certPath;
-	
-	/**
-	 * The XML data.
-	 */
-	private Node m_node;
 
 	/** operator address information as a certificate independent extension */ 
 	private OperatorAddress address;
@@ -113,7 +108,6 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		
 		super(Long.MAX_VALUE);
 		X509DistinguishedName subject = operatorCertificate.getSubject();
-		m_node = null;
 		m_certPath = null;
 		/* get the organization name */
 		m_strOrganization = subject.getOrganisation();
@@ -183,7 +177,6 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		X509DistinguishedName subject;
 		CertPath path;
 
-		m_node = a_node;
 		m_certPath = a_certPath;
 		m_lastUpdate = a_lastUpdate;
 
@@ -361,14 +354,6 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	public String getCountryCode() 
 	{
 		return m_countryCode;
-	}
-	
-	/**
-	 * Returns the XML data.
-	 */
-	public Node getXML()
-	{
-		return m_node;
 	}
 
 	public Element toXMLElement(Document ownerDocument)

@@ -319,6 +319,10 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix-Cascade ID: " + m_mixCascadeId);
 		}
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_signature = null;
+		}
 
 		m_mixProtocolVersion =
 			XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "MixProtocolVersion"), null);
@@ -413,7 +417,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			m_mixNodes.addElement(mixNode);
 		}
 		m_mixInfos = new MixInfo[mixNodes.getLength()];
-		boolean bNullMixInfo = false;
+
 		int countDataRetentionMixes = 0;
 		for (int i = 0; i < mixNodes.getLength(); i++)
 		{
@@ -447,7 +451,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			}
 			catch (XMLParseException a_e)
 			{
-				bNullMixInfo = true;
 				m_mixInfos[i] = null;
 			}
 		}
@@ -499,16 +502,24 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			m_serial = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_SERIAL, Long.MIN_VALUE);
 		}
 
-		/* store the xml structure */
-		if (a_compressedMixCascadeNode != null)
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
 		{
-			m_compressedXmlStructure = a_compressedMixCascadeNode;
+			m_compressedXmlStructure = null;
+			m_xmlStructure = null;
 		}
 		else
 		{
-			m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(a_mixCascadeNode));
+			/* store the xml structure */
+			if (a_compressedMixCascadeNode != null)
+			{
+				m_compressedXmlStructure = a_compressedMixCascadeNode;
+			}
+			else
+			{
+				m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(a_mixCascadeNode));
+			}
+			m_xmlStructure = a_mixCascadeNode;
 		}
-		m_xmlStructure = a_mixCascadeNode;
 
 		// restore the id if needed
 		if (m_bFromCascade && a_mixIDFromCascade.trim().length() > 0)
@@ -641,8 +652,16 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		/* some more values */
 		m_userDefined = true;
 		m_bDefaultVerified = true;
-		m_xmlStructure = generateXmlRepresentation();
-		m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(m_xmlStructure));
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_xmlStructure = null;
+			m_compressedXmlStructure = null;
+		}
+		else
+		{
+			m_xmlStructure = generateXmlRepresentation();
+			m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(m_xmlStructure));
+		}
 		createMixIDString();
 		calculateOperatorsAndCountries();
 	}
@@ -1151,8 +1170,16 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			/* set the lastUpdate time */
 			m_lastUpdate = System.currentTimeMillis();
 		}
-		m_xmlStructure = generateXmlRepresentation();
-		m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(m_xmlStructure));
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_xmlStructure = null;
+			m_compressedXmlStructure = null;
+		}
+		else
+		{
+			m_xmlStructure = generateXmlRepresentation();
+			m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(m_xmlStructure));
+		}
 		calculateOperatorsAndCountries();
 	}
 
@@ -1282,9 +1309,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 
 	public boolean isVerified()
 	{
-		if (m_signature != null)
+		if (m_certPath != null)
 		{
-			return m_signature.isVerified();
+			return m_certPath.isVerified();
 		}
 		return m_bDefaultVerified;
 	}

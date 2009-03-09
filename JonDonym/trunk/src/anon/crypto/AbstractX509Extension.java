@@ -150,7 +150,16 @@ public abstract class AbstractX509Extension
 
 			if (ms_classExtensions.size() < AVAILABLE_EXTENSIONS.length)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.CRYPTO,
+				int level;
+				if (ClassUtil.isFindSubclassesEnabled())
+				{
+					level = LogLevel.EXCEPTION;
+				}
+				else
+				{
+					level = LogLevel.NOTICE;
+				}
+				LogHolder.log(level, LogType.CRYPTO,
 							  "X509 extension classes have not been loaded automatically!");
 				for (int i = 0; i < AVAILABLE_EXTENSIONS.length; i++)
 				{

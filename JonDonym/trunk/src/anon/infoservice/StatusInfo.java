@@ -274,8 +274,16 @@ public final class StatusInfo extends AbstractDatabaseEntry implements IDistribu
 				m_anonLevel = 6;
 			}
 		}
-		m_statusXmlData = XMLUtil.toString(a_statusNode);
-		m_statusXmlDataBytes=m_statusXmlData.getBytes();
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_statusXmlData = null;
+			m_statusXmlDataBytes = null;
+		}
+		else
+		{
+			m_statusXmlData = XMLUtil.toString(a_statusNode);
+			m_statusXmlDataBytes = m_statusXmlData.getBytes();
+		}
 	}
 
 	/**

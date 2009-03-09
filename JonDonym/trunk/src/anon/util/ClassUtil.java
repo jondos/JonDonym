@@ -282,6 +282,11 @@ public final class ClassUtil
 		ms_bEnableFindSubclasses = a_benable;
 	}
 	
+	public static boolean isFindSubclassesEnabled()
+	{
+		return ms_bEnableFindSubclasses;
+	}
+	
 	/**
 	 * Gets all classes that extend the given class or implement the given
 	 * interface, including the class itself. It is recommended to store this

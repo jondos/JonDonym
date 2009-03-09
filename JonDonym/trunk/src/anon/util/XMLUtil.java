@@ -72,6 +72,10 @@ import java.io.StringReader;
  */
 public class XMLUtil
 {
+	public static final int STORAGE_MODE_NORMAL = 0;
+	public static final int STORAGE_MODE_OPTIMIZED = 1;
+	public static final int STORAGE_MODE_AGRESSIVE = 2;
+	
 	private final static String DEFAULT_FORMAT_SPACE = "    ";
 	private final static String XML_STR_BOOLEAN_TRUE = "true";
 	private final static String XML_STR_BOOLEAN_FALSE = "false";
@@ -81,6 +85,8 @@ public class XMLUtil
 
 	private static boolean m_bCheckedHumanReadableFormatting = false;
 	private static boolean m_bNeedsHumanReadableFormatting = true;
+	
+	private static int ms_storageMode = STORAGE_MODE_NORMAL;
 
 	static
 	{
@@ -97,6 +103,30 @@ public class XMLUtil
 		}
 	}
 
+	public static int getStorageMode()
+	{
+		return ms_storageMode;
+	}
+	
+	/**
+	 * Sets the storage mode for XML documents. STORAGE_MODE_AGRESSIVE means that XML classes will
+	 * try to set their internal XML variables to null as soon as possible, regardless of the state
+	 * of the object. Calls to some methods may lead to a null pointer if methods calling the
+	 * XML variables are used. 
+	 * STORAGE_MODE_OPTIMIZED means that XML classes will set their internal XML variables to null
+	 * if they are optional and the object state is still consistent. However, it may not be possible
+	 * to store or send these objects any more. 
+	 * @param a_storageMode
+	 */
+	public static void setStorageMode(int a_storageMode)
+	{
+		if (a_storageMode == STORAGE_MODE_NORMAL || a_storageMode == STORAGE_MODE_OPTIMIZED || 
+			a_storageMode == STORAGE_MODE_AGRESSIVE)
+		{
+			ms_storageMode = a_storageMode;
+		}
+	}
+	
 	/**
 	 * Throws an XMLParseException if the given XML node is null.
 	 * @param a_node an XML node

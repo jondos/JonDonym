@@ -211,7 +211,14 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		}
 
 		/* store the XML representation */
-		m_xmlDescription = a_infoServiceNode;
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_xmlDescription = null;
+		}
+		else
+		{
+			m_xmlDescription = a_infoServiceNode;
+		}
 
 		// verify the signature
 		m_signature = SignatureVerifier.getInstance().getVerifiedXml(a_infoServiceNode,
@@ -410,7 +417,14 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		m_bPerfServerEnabled = a_bPerfServerEnabled;
 		
 		/* generate the XML representation for this InfoServiceDBEntry */
-		m_xmlDescription = generateXmlRepresentation();
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_xmlDescription = null;
+		}
+		else
+		{
+			m_xmlDescription = generateXmlRepresentation();
+		}
 	}
 
 	public static void setConnectionTimeout(int a_timeoutMS)
@@ -653,7 +667,14 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		{
 			m_infoserviceSoftware = new ServiceSoftware(Constants.INFOSERVICE_VERSION);
 		}
-		m_xmlDescription = generateXmlRepresentation();
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_xmlDescription = null;
+		}
+		else
+		{
+			m_xmlDescription = generateXmlRepresentation();
+		}
 	}
 	
 	public void markAsBootstrap()
@@ -1229,7 +1250,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 					{
 						strLoggedInfo = XMLUtil.toString(entryNode);
 					}
-					LogHolder.log(LogLevel.ERR, LogType.MISC,
+					LogHolder.log(LogLevel.WARNING, LogType.MISC,
 								  "Cannot verify the signature for " +
 								  ClassUtil.getShortClassName(a_getter.m_dbEntryClass) + " entry: " +
 								  strLoggedInfo);

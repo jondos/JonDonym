@@ -76,7 +76,7 @@ public class RevokedCertifcateStore
 		// no crls found
 		if(crl == null)
 		{
-			LogHolder.log(LogLevel.ERR, LogType.CRYPTO, "Could not load default CRLs!");
+			LogHolder.log(LogLevel.WARNING, LogType.CRYPTO, "Could not load default CRLs!");
 		}
 	}
 	
