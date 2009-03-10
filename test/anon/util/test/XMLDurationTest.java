@@ -54,7 +54,7 @@ public class XMLDurationTest extends XtendedPrivateTestCase
 		assertEquals(0, duration.getDays());
 		assertEquals(0, duration.getHours());
 		assertEquals(0, duration.getMinutes());
-		assertEquals(0.0, duration.getSeconds());
+		assertEquals(0.0, duration.getSeconds(), 0.01);
 	}
 	
 	public void testSimpleFormats() throws Exception
@@ -84,64 +84,64 @@ public class XMLDurationTest extends XtendedPrivateTestCase
 		assertEquals(8, duration.getMonths());
 		assertEquals(1, duration.getYears());
 		assertEquals(XMLDuration.DURATION_YEARMONTH, duration.getXMLSchemaType());
-		
+
 		try
 		{
-			duration = new XMLDuration("P1Y2MT");			
+			duration = new XMLDuration("P1Y2MT");
 			fail("Format not allowed!");
 		}
 		catch (XMLParseException a_e)
 		{
 			// ignore
 		}
-		
+
 		try
 		{
-			duration = new XMLDuration("PT2Y");			
+			duration = new XMLDuration("PT2Y");
 			fail("Format not allowed!");
 		}
 		catch (XMLParseException a_e)
 		{
 			// ignore
 		}
-		
+
 	}
-	
+
 	public void testAdvancedFormats() throws Exception
 	{
 		XMLDuration duration;
-		
+
 		duration = new XMLDuration("P10Y20M200D");
 		assertEquals(10, duration.getYears());
 		assertEquals(20, duration.getMonths());
 		assertEquals(200, duration.getDays());
-		
-		
+
+
 		duration = new XMLDuration("PT12H10M60.556S");
 		assertEquals(0, duration.getYears());
 		assertEquals(12, duration.getHours());
 		assertEquals(10, duration.getMinutes());
-		assertEquals(60.556, duration.getSeconds());
+		assertEquals(60.556, duration.getSeconds(), 0.01);
 
 		duration = new XMLDuration("P6DT26H0M303.111S");
 		assertEquals(6, duration.getDays());
 		assertEquals(26, duration.getHours());
 		assertEquals(0, duration.getMinutes());
-		assertEquals(303.111, duration.getSeconds());
+		assertEquals(303.111, duration.getSeconds(), 0.01);
 		assertEquals(XMLDuration.DURATION_DAYTIME, duration.getXMLSchemaType());
 	}
-	
+
 	public void testComparison() throws Exception
 	{
 		XMLDuration duration;
-		
+
 		duration = new XMLDuration("P1Y12M123D");
 		assertEquals(duration.getXMLSchema(), XMLDuration.EQUAL, duration.compare(new XMLDuration(duration)));
-		
-		
+
+
 		assertEquals(XMLDuration.EQUAL, new XMLDuration("P10Y20M200D").compare(new XMLDuration("P12Y2M22D")));
 		assertEquals(XMLDuration.EQUAL, new XMLDuration("P2DT5S").compare(new XMLDuration("PT23H1498M125S")));
-		
+
 		assertEquals(XMLDuration.GREATER, new XMLDuration("P4Y12M30DT60S").compare(new XMLDuration("P5Y1M1DT80S")));
 	}
 
