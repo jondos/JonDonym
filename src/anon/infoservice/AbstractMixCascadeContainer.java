@@ -50,18 +50,18 @@ public abstract class AbstractMixCascadeContainer extends BasicTrustModel implem
 	 * with every call of this method.
 	 * @return a MixCascade and never null
 	 */
-	public abstract MixCascade getNextMixCascade();
+	public abstract MixCascade getNextCascade();
 
 	/**
 	 * Returns the last return value of getNextCascade().
 	 * @return the last return value of getNextCascade() (may be null if no call has been
 	 * done yet)
 	 */
-	public abstract MixCascade getCurrentMixCascade();
+	public abstract MixCascade getCurrentCascade();
 
 	public final AnonServerDescription getCurrentService()
 	{
-		return getCurrentMixCascade();
+		return getCurrentCascade();
 	}
 
 	/**

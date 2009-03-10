@@ -58,7 +58,9 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import anon.crypto.JAPCertificate;
+import anon.crypto.SignatureVerifier;
 import anon.util.JAPMessages;
+import anon.util.ResourceLoader;
 import platform.AbstractOS;
 import gui.GUIUtils;
 import gui.dialog.JAPDialog;
@@ -654,4 +656,48 @@ public final class JAPUtil
 		return duration + " " + JAPMessages.getString(MSG_DATE_UNIT + message);
 	}
 
+	public static void addDefaultCertificates(String a_certspath, String[] a_singleCerts, int a_type)
+	{
+		addDefaultCertificates(a_certspath, a_singleCerts, a_type, null);
+	}
+	
+	public static void addDefaultCertificates(String a_certspath, String[] a_singleCerts, int a_type, String a_ignoreCertMark)
+	{
+		JAPCertificate defaultRootCert = null;
+
+		if (a_singleCerts != null)
+		{
+			for (int i = 0; i < a_singleCerts.length; i++)
+			{
+				if (a_singleCerts[i] != null && (a_ignoreCertMark == null || !a_singleCerts[i].endsWith(a_ignoreCertMark)))
+					//	 &&(!JAPConstants.m_bReleasedVersion ||
+					 //!a_singleCerts[i].endsWith(".dev")))
+				{
+					defaultRootCert = JAPCertificate.getInstance(ResourceLoader.loadResource(
+							"certificates/" + a_certspath + a_singleCerts[i]));
+					if (defaultRootCert == null)
+					{
+						continue;
+					}
+					SignatureVerifier.getInstance().getVerificationCertificateStore().
+						addCertificateWithoutVerification(defaultRootCert, a_type, true, true);
+				}
+			}
+		}
+
+		Enumeration certificates =
+			JAPCertificate.getInstance("certificates/" + a_certspath, true, a_ignoreCertMark).elements();
+		while (certificates.hasMoreElements())
+		{
+			defaultRootCert = (JAPCertificate) certificates.nextElement();
+			SignatureVerifier.getInstance().getVerificationCertificateStore().
+				addCertificateWithoutVerification(defaultRootCert, a_type, true, true);
+		}
+		/* no elements were found */
+		if (defaultRootCert == null)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC,
+						  "Error loading certificates of type '" + a_type + "'.");
+		}	
+	}
 }

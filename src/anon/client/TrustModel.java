@@ -1314,9 +1314,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			}
 		}
 
-		
 		super.checkTrust(a_cascade);
-				
 
 		synchronized(m_trustAttributes)
 		{

@@ -638,11 +638,18 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 			  }
 		  }
 	  }
-
+	  
 	  int errorAccount = PayAccountsFile.getInstance().signalAccountRequest(m_connectedCascade);
 	  if (errorAccount != ErrorCodes.E_SUCCESS)
 	  {
 		  return errorAccount;
+	  }
+	  
+	  activeAccount = PayAccountsFile.getInstance().getActiveAccount();
+	  if (activeAccount == null)
+	  {
+		  //return ErrorCodes.E_ACCOUNT_EMPTY; do not send, as this would close the connection
+		  return ErrorCodes.E_UNKNOWN;
 	  }
 
 	  if (priceCerts.size() != mixIDs.size())
@@ -684,8 +691,8 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 		  return ErrorCodes.E_UNKNOWN;
 	  }
 
-	  PayAccountsFile.getInstance().getActiveAccount().resetCurrentBytes();
-	  sendXmlMessage(XMLUtil.toXMLDocument(PayAccountsFile.getInstance().getActiveAccount().getAccountCertificate()));
+	  activeAccount.resetCurrentBytes();
+	  sendXmlMessage(XMLUtil.toXMLDocument(activeAccount.getAccountCertificate()));
 	  /*
 	   * new ai login procedure: wait until all messages are
 	   * exchanged or until login is timed out
