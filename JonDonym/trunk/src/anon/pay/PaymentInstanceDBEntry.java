@@ -37,19 +37,16 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import anon.crypto.JAPCertificate;
-import anon.infoservice.AbstractDistributableDatabaseEntry;
 import anon.infoservice.Constants;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.ServiceSoftware;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.crypto.MultiCertPath;
-import anon.crypto.X509SubjectKeyIdentifier;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.infoservice.AbstractDistributableCertifiedDatabaseEntry;
 import java.util.Date;
-import anon.crypto.CertPath;
 import anon.crypto.IVerifyable;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -107,8 +104,15 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		XMLUtil.assertNotNull(elemRoot);
 		String name;
 
-		/* store the XML representation */
-		m_xmlDescription = elemRoot;
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_xmlDescription = null;
+		}
+		else
+		{
+			/* store the XML representation */
+			m_xmlDescription = elemRoot;
+		}
 
 		name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, XML_ELEM_NAME), null);
 		if (name == null) // || !name.equals(m_name))
@@ -129,8 +133,14 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 
 		/* get the ID */
 		m_strPaymentInstanceId = elemRoot.getAttribute(XML_ATTR_ID);
-		if(!checkId() ) {
+		if(!checkId() ) 
+		{
 			throw new XMLParseException(elemRoot.getNodeName(),"Invalid Payment-Instance ID: " + m_strPaymentInstanceId );
+		}
+		
+		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		{
+			m_signature = null;
 		}
 		
 		m_name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, XML_ELEM_NAME), "");
@@ -225,9 +235,9 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 
 	public boolean isVerified()
 	{
-		if (m_signature != null)
+		if (m_certPath != null)
 		{
-			return m_signature.isVerified();
+			return m_certPath.isVerified();
 		}
 		return false;
 	}

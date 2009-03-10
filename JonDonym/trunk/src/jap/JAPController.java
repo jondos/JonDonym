@@ -2053,7 +2053,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					// choose a random initial cascade
 					AutoSwitchedMixCascadeContainer cascadeSwitcher =
 						new AutoSwitchedMixCascadeContainer(true);
-					setCurrentMixCascade(cascadeSwitcher.getNextMixCascade());
+					setCurrentMixCascade(cascadeSwitcher.getNextCascade());
 				}
 				else
 				{
@@ -2066,7 +2066,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 					catch (Exception e)
 					{
-						m_currentMixCascade = new AutoSwitchedMixCascadeContainer().getNextMixCascade();
+						m_currentMixCascade = new AutoSwitchedMixCascadeContainer().getNextCascade();
 					}
 				}
 				/** make the default cascade known (so that it is not marked as new on first JAP start) */
@@ -3057,7 +3057,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	
 	public MixCascade switchToNextMixCascade()
 	{
-		MixCascade cascade = new AutoSwitchedMixCascadeContainer(true).getNextMixCascade();
+		MixCascade cascade = new AutoSwitchedMixCascadeContainer(true).getNextCascade();
 		setCurrentMixCascade(cascade);
 		return cascade;
 	}
@@ -5127,46 +5127,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	private static void addDefaultCertificates(String a_certspath, String[] a_singleCerts, int a_type)
 	{
-		JAPCertificate defaultRootCert = null;
-
-		if (a_singleCerts != null)
-		{
-			for (int i = 0; i < a_singleCerts.length; i++)
-			{
-				if (a_singleCerts[i] != null &&
-					(!JAPConstants.m_bReleasedVersion ||
-					 !a_singleCerts[i].endsWith(".dev")))
-				{
-					defaultRootCert = JAPCertificate.getInstance(ResourceLoader.loadResource(
-						JAPConstants.CERTSPATH + a_certspath + a_singleCerts[i]));
-					if (defaultRootCert == null)
-					{
-						continue;
-					}
-					SignatureVerifier.getInstance().getVerificationCertificateStore().
-						addCertificateWithoutVerification(defaultRootCert, a_type, true, true);
-				}
-			}
-		}
-		String strBlockCert = null;
-		if (JAPConstants.m_bReleasedVersion)
-		{
-			strBlockCert = ".dev";
-		}
-		Enumeration certificates =
-			JAPCertificate.getInstance(JAPConstants.CERTSPATH + a_certspath, true, strBlockCert).elements();
-		while (certificates.hasMoreElements())
-		{
-			defaultRootCert = (JAPCertificate) certificates.nextElement();
-			SignatureVerifier.getInstance().getVerificationCertificateStore().
-				addCertificateWithoutVerification(defaultRootCert, a_type, true, true);
-		}
-		/* no elements were found */
-		if (defaultRootCert == null)
-		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC,
-						  "Error loading certificates of type '" + a_type + "'.");
-		}
+		JAPUtil.addDefaultCertificates(a_certspath, a_singleCerts, a_type, 
+				(JAPConstants.m_bReleasedVersion ? ".dev" : null));
 	}
 
 

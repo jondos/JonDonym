@@ -52,7 +52,6 @@ public class BasicTrustModel extends Observable implements ITrustModel
 
 	public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 	{
-		
 		// test if all mixes have verified certificates.
 		MixInfo info;
 		int countUnverified = 0;
@@ -110,6 +109,10 @@ public class BasicTrustModel extends Observable implements ITrustModel
 	 */
 	public final boolean isTrusted(MixCascade a_cascade)
 	{
+		if (a_cascade == null)
+		{
+			return false;
+		}
 		if (a_cascade != null && a_cascade.isShownAsTrusted())
 		{
 			return true;

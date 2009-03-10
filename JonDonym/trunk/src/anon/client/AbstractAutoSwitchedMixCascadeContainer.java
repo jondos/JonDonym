@@ -39,7 +39,7 @@ public abstract class AbstractAutoSwitchedMixCascadeContainer extends AbstractMi
 		return m_initialCascade;
 	}
 
-	public final MixCascade getNextMixCascade()
+	public final MixCascade getNextCascade()
 	{
 		synchronized (m_alreadyTriedCascades)
 		{
@@ -135,7 +135,7 @@ public abstract class AbstractAutoSwitchedMixCascadeContainer extends AbstractMi
 				{
 					m_bSkipInitialCascade = false; // this is not the first call
 					m_alreadyTriedCascades.clear();
-					currentCascade = getNextMixCascade();
+					currentCascade = getNextCascade();
 					if (currentCascade == null && m_initialCascade != null)
 					{
 						// fallback if there are really no cascades; take the initial cascade
@@ -199,9 +199,23 @@ public abstract class AbstractAutoSwitchedMixCascadeContainer extends AbstractMi
 
 
 	}
-	public final MixCascade getCurrentMixCascade()
+	public final MixCascade getCurrentCascade()
 	{
 		return m_currentCascade;
+	}
+	
+	public final boolean setCurrentCascade(MixCascade a_cascade)
+	{
+		if (!isTrusted(a_cascade))
+		{
+			return false;
+		}
+		synchronized (m_alreadyTriedCascades)
+		{
+			m_bKeepCurrentCascade = true;
+			m_currentCascade = a_cascade;
+		}
+		return true;
 	}
 
 	public final void keepCurrentService(boolean a_bKeepCurrentCascade)

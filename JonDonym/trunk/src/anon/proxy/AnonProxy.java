@@ -361,7 +361,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	{
 		try
 		{
-			return m_currentMixCascade.getCurrentMixCascade();
+			return m_currentMixCascade.getCurrentCascade();
 		}
 		catch (NullPointerException a_e)
 		{
@@ -759,7 +759,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 				   !m_Anon.isConnected() && !Thread.currentThread().isInterrupted())
 			{
 				LogHolder.log(LogLevel.ERR, LogType.NET, "Try reconnect to AN.ON service");
-				int ret = m_Anon.initialize(m_currentMixCascade.getNextMixCascade(), m_currentMixCascade);
+				int ret = m_Anon.initialize(m_currentMixCascade.getNextCascade(), m_currentMixCascade);
 				if (ret == ErrorCodes.E_SUCCESS)
 				{
 					m_currentMixCascade.keepCurrentService(true);
@@ -809,7 +809,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 				newMixCascade = new EncapsulatedMixCascadeContainer(a_newMixCascade);
 			}
 
-			if (getMixCascade() != newMixCascade.getCurrentMixCascade() && threadRun != null)
+			if (getMixCascade() != newMixCascade.getCurrentCascade() && threadRun != null)
 			{
 				bSwitch = true;
 				THREAD_SYNC.notifyAll();
@@ -856,7 +856,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 
 			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to initialize AN.ON");
 			m_numChannels = 0;
-			int ret = m_Anon.initialize(m_currentMixCascade.getNextMixCascade(), m_currentMixCascade);
+			int ret = m_Anon.initialize(m_currentMixCascade.getNextCascade(), m_currentMixCascade);
 
 			if (ret != ErrorCodes.E_SUCCESS)
 			{
@@ -1116,12 +1116,12 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		{
 		}
 		
-		public MixCascade getNextMixCascade()
+		public MixCascade getNextCascade()
 		{
 			return null;
 		}
 
-		public MixCascade getCurrentMixCascade()
+		public MixCascade getCurrentCascade()
 		{
 			return null;
 		}
@@ -1160,14 +1160,14 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			m_mixCascadeContainer.checkTrust(a_cascade);
 		}
 
-		public MixCascade getNextMixCascade()
+		public MixCascade getNextCascade()
 		{
-			return m_mixCascadeContainer.getNextMixCascade();
+			return m_mixCascadeContainer.getNextCascade();
 		}
 
-		public MixCascade getCurrentMixCascade()
+		public MixCascade getCurrentCascade()
 		{
-			return m_mixCascadeContainer.getCurrentMixCascade();
+			return m_mixCascadeContainer.getCurrentCascade();
 		}
 
 		public void keepCurrentService(boolean a_bKeepCurrentCascade)

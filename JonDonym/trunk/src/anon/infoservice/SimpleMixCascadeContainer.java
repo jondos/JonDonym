@@ -15,11 +15,11 @@ public class SimpleMixCascadeContainer extends AbstractMixCascadeContainer
 	{
 		m_mixCascade = a_mixCascade;
 	}
-	public MixCascade getNextMixCascade()
+	public MixCascade getNextCascade()
 	{
 		return m_mixCascade;
 	}
-	public MixCascade getCurrentMixCascade()
+	public MixCascade getCurrentCascade()
 	{
 		return m_mixCascade;
 	}
