@@ -92,6 +92,8 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 	private NumberFormat m_NumberFormat;
 	private boolean m_anonModeDisabled = false;
 	private Object SYNC_CURSOR = new Object();
+	
+	//private Thread m_threadCheckVisibility;
 
 	private GUIUtils.WindowDocker m_docker;
 
@@ -127,6 +129,27 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 			}
 		};
 		init();
+		/*
+		m_threadCheckVisibility = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				while(true)
+				{
+					try 
+					{
+						Thread.sleep(1000);
+						System.out.println("OnTop: " + GUIUtils.isAlwaysOnTop(JAPViewIconified.this) + " Showing: " + JAPViewIconified.this.isShowing() + " Focusable: " + JAPViewIconified.this.isFocusable() + " Valid: " + JAPViewIconified.this.isValid());
+					}
+					catch (InterruptedException e) 
+					{
+						break;
+					}
+				}
+				//
+			}
+		});
+		m_threadCheckVisibility.start();*/
 	}
 
 	private void init()

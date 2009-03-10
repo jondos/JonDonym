@@ -1355,7 +1355,8 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		JPanel pnlAnonymous = new JPanel();
 		advancedPanelConstraints.gridwidth = 3;
 		pnlAnonymous.add(new JLabel(JAPMessages.getString(MSG_ALLOW_DIRECT_CONNECTION) + ":"));
-		String[] choiceAnonConnection = JAPModel.getMsgConnectionAnonymous();
+		String[] choiceAnonConnection = new String[JAPModel.getMsgConnectionAnonymous().length];
+		System.arraycopy(JAPModel.getMsgConnectionAnonymous(), 0, choiceAnonConnection, 0, choiceAnonConnection.length);
 		for (int i = 0; i < choiceAnonConnection.length; i++)
 		{
 			choiceAnonConnection[i] = JAPMessages.getString(choiceAnonConnection[i]);

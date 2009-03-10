@@ -2611,7 +2611,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 		if (bShow)
 		{
-			updateValues(false); // for preventing strange pack operation for combobox on startup
+			//updateValues(false); // for preventing strange pack operation for combobox on startup; LEADS TO PROBLEMS WITH MINI-VIEW!
 			super.setVisible(a_bVisible);
 		}
 	}
