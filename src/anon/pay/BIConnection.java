@@ -61,6 +61,7 @@ import anon.pay.xml.XMLPaymentOptions;
 import anon.pay.xml.XMLResponse;
 import anon.pay.xml.XMLTransCert;
 import anon.pay.xml.XMLTransactionOverview;
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.captcha.ICaptchaSender;
 import anon.util.captcha.IImageEncodedCaptcha;
@@ -310,7 +311,7 @@ public class BIConnection implements ICaptchaSender
 	 *
 	 * @throws IOException
 	 */
-	public void disconnect() throws Exception
+	public void disconnect() throws IOException, XMLParseException
 	{
 		m_httpClient.close();
 	}
@@ -660,7 +661,7 @@ public class BIConnection implements ICaptchaSender
 			}
 			else
 			{
-				LogHolder.log(LogLevel.DEBUG, LogType.PAY, "User entered an invalid coupon, reply from jpi was: "+ err.getMessage() );
+				LogHolder.log(LogLevel.ERR, LogType.PAY, "User entered an invalid coupon, reply from jpi was: "+ err.getMessage() );
 				return false;
 			}
 		}

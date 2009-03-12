@@ -44,6 +44,7 @@ import logging.LogLevel;
 import logging.LogHolder;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.pay.BIConnection;
+import anon.util.Util;
 import jap.JAPModel;
 import logging.LogType;
 import anon.pay.xml.XMLErrorMessage;
@@ -274,7 +275,7 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 
 		if (paymentSettings.getSettingValue("VolumeLimited").equals("true") )
 		{
-			m_lVolume = new JLabel(JAPUtil.formatBytesValueWithUnit(Long.parseLong(paymentSettings.getSettingValue("VolumeAmount"))*1000));
+			m_lVolume = new JLabel(Util.formatBytesValueWithUnit(Long.parseLong(paymentSettings.getSettingValue("VolumeAmount"))*1000));
 		}
 		else {
 			m_lVolume = new JLabel(getString(MSG_UNLIMITED));

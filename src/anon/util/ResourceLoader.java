@@ -418,7 +418,7 @@ public final class ResourceLoader
 		// check if this is just a file path seems to be a file path
 		try
 		{
-			Object resource = a_instantiator.getInstance(loadResourceAsStream(a_strResourceSearchPath));
+			Object resource = a_instantiator.getInstance(loadResourceAsStream(a_strResourceSearchPath), a_strResourceSearchPath);
 			if (resource != null)
 			{
 				resources.put(a_strResourceSearchPath, resource);
@@ -1287,7 +1287,7 @@ public final class ResourceLoader
 			return getStreamAsBytes(a_file.getInputStream(a_entry));
 		}
 		
-		public Object getInstance(InputStream a_inputStream) throws IOException
+		public Object getInstance(InputStream a_inputStream, String a_resourceName) throws IOException
 		{
 			return getStreamAsBytes(a_inputStream);
 		}
@@ -1309,7 +1309,7 @@ public final class ResourceLoader
 			return SYSTEM_RESOURCE_TYPE_ZIP;
 		}
 		
-		public Object getInstance(InputStream a_inputStream)
+		public Object getInstance(InputStream a_inputStream, String a_resourceName)
 		{
 			return null;
 		}

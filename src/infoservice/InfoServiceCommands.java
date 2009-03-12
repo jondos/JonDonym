@@ -27,8 +27,6 @@
  */
 package infoservice;
 
-import jap.JAPUtil;
-
 import java.net.InetAddress;
 import java.io.File;
 import java.util.Date;
@@ -67,6 +65,7 @@ import anon.infoservice.PerformanceEntry;
 import anon.pay.PayAccount;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.IXMLEncodable;
+import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.ZLibTools;
@@ -1034,7 +1033,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				htmlData += "    <table style=\"align: left\" border=\"0\" width=\"30%\"><tr><th colspan=\"2\">Performance Monitoring Enabled</th></tr>\n" + 
 				"<tr><td class=\"name\">Proxy host</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[0] + "</td></tr>" +
 				"<tr><td class=\"name\">Proxy port</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[1] + "<td></tr>" +
-				"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(((Integer)Configuration.getInstance().getPerformanceMeterConfig()[2]).intValue()) + "<td></tr>" +
+				"<tr><td class=\"name\">Datasize</td><td class=\"status\">" + Util.formatBytesValueWithUnit(((Integer)Configuration.getInstance().getPerformanceMeterConfig()[2]).intValue()) + "<td></tr>" +
 				"<tr><td class=\"name\">Major interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[3] + " ms<td></tr>" +
 				"<tr><td class=\"name\">Requests per interval</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[4] + "<td></tr>" +
 				"<tr><td class=\"name\">Stop requests after</td><td class=\"status\">" + Configuration.getInstance().getPerformanceMeterConfig()[5] + " ms<td></tr>" +
@@ -1048,7 +1047,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 				"<tr><td class=\"name\">Last Cascade updated</td><td class=\"status\">" + InfoService.getPerfMeter().getLastCascadeUpdated() + "</td></tr>" +
 				"</table><br />" +
 				"<table style=\"align: left\" border=\"0\" width=\"30%\">" +
-				"<tr><td class=\"name\">Accumulated Total Traffic</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getBytesRecvd()) + "</td></tr>" +
+				"<tr><td class=\"name\">Accumulated Total Traffic</td><td class=\"status\">" + Util.formatBytesValueWithUnit(InfoService.getPerfMeter().getBytesRecvd()) + "</td></tr>" +
 				"</table><br />";
 				
 				Vector vPIs = Database.getInstance(PaymentInstanceDBEntry.class).getEntryList();
@@ -1058,8 +1057,8 @@ final public class InfoServiceCommands implements JWSInternalCommands
 					PaymentInstanceDBEntry pi = (PaymentInstanceDBEntry) vPIs.elementAt(i);
 					
 					htmlData += "<h2>" + pi.getName() + "</h2><table style=\"align: left\" border=\"0\" width=\"30%\">" +
-					"<tr><td class=\"name\">Estimated PayTraffic per Day</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().calculatePayTrafficPerDay(pi.getId())) + "</td></tr>" +
-					"<tr><td class=\"name\">Remaining PayCredit</td><td class=\"status\">" + JAPUtil.formatBytesValueWithUnit(InfoService.getPerfMeter().getRemainingCredit(pi.getId())) + "</td></tr>" +				
+					"<tr><td class=\"name\">Estimated PayTraffic per Day</td><td class=\"status\">" + Util.formatBytesValueWithUnit(InfoService.getPerfMeter().calculatePayTrafficPerDay(pi.getId())) + "</td></tr>" +
+					"<tr><td class=\"name\">Remaining PayCredit</td><td class=\"status\">" + Util.formatBytesValueWithUnit(InfoService.getPerfMeter().getRemainingCredit(pi.getId())) + "</td></tr>" +				
 					"<tr><td class=\"name\">Estimated Pay End Time</td><td class=\"status\">" + (InfoService.getPerfMeter().calculateRemainingPayTime(pi.getId()) == 0 ? "(unknown)" : new Date(InfoService.getPerfMeter().calculateRemainingPayTime(pi.getId())).toString()) + "</td></tr>" +
 					"</table><br />";
 				}
@@ -1083,7 +1082,7 @@ final public class InfoServiceCommands implements JWSInternalCommands
 						PayAccount account = (PayAccount)usedFiles.get(file);
 						htmlData += "<tr>" + "<td class=\"name\">" + account.getAccountNumber() + "</td>" 
 						//+ "<td class=\"status\">"  + JAPUtil.formatBytesValueWithUnit(account.getBalance().getVolumeKBytesLeft() * 1000) + "</td>"
-						+ "<td class=\"status\">"  + JAPUtil.formatBytesValueWithUnit(account.getCurrentCredit() * 1000) + "</td>"
+						+ "<td class=\"status\">"  + Util.formatBytesValueWithUnit(account.getCurrentCredit() * 1000) + "</td>"
 						+ "<td class=\"name\">" + file.getName() + "</td><td class=\"status\">" + new Date(account.getBackupTime()) + "</td></tr>";
 					}
 				}

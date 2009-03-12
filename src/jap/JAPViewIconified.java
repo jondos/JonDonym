@@ -61,6 +61,7 @@ import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.JavaVersionDBEntry;
 import anon.util.JAPMessages;
+import anon.util.Util;
 
 final public class JAPViewIconified extends JWindow implements ActionListener
 {
@@ -388,8 +389,8 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 		GUIUtils.moveToUpRightCorner(this);
 		GUIUtils.restoreLocation(this, JAPModel.getInstance().getIconifiedWindowLocation());
 		//m_labelBytes.setText(JAPMessages.getString("iconifiedViewZero"));
-		m_labelBytes.setText(JAPUtil.formatBytesValueWithoutUnit(0));
-		m_lblBytes.setText(JAPUtil.formatBytesValueOnlyUnit(0) + ": ");
+		m_labelBytes.setText(Util.formatBytesValueWithoutUnit(0));
+		m_lblBytes.setText(Util.formatBytesValueOnlyUnit(0) + ": ");
 		m_labelUsers.setText(JAPMessages.getString("iconifiedViewNA"));
 		m_labelTraffic.setText(JAPMessages.getString("iconifiedViewNA"));
 		m_labelAnon.setText(JAPMessages.getString("iconifiedViewNA"));
@@ -566,8 +567,8 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 			{
 				//if (JAPController.getInstance().isAnonConnected())
 				{
-					m_lblBytes.setText(JAPUtil.formatBytesValueOnlyUnit(a_totalBytes) + ":");
-					m_labelBytes.setText(JAPUtil.formatBytesValueWithoutUnit(a_totalBytes));
+					m_lblBytes.setText(Util.formatBytesValueOnlyUnit(a_totalBytes) + ":");
+					m_labelBytes.setText(Util.formatBytesValueWithoutUnit(a_totalBytes));
 				}
 				/*else
 				{

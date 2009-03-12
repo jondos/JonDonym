@@ -419,7 +419,7 @@ public class CertificateRevocationList implements IXMLEncodable
 			}
 			catch (Throwable t)
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, t);
+				LogHolder.log(LogLevel.EXCEPTION, LogType.CRYPTO, t);
 				return null;
 			}
 		}
@@ -436,7 +436,7 @@ public class CertificateRevocationList implements IXMLEncodable
 
 		public Object getInstance(File a_file, File directory) throws Exception
 		{
-			if (a_file == null || (m_ignoreCRLMark != null && a_file.getName().endsWith(m_ignoreCRLMark)))
+			if (a_file == null || isBlocked(a_file.getName()))
 			{
 				return null;
 			}
@@ -446,7 +446,7 @@ public class CertificateRevocationList implements IXMLEncodable
 		public Object getInstance(ZipEntry a_entry, ZipFile a_file)
 				throws Exception
 		{
-			if (a_file == null || (m_ignoreCRLMark != null && a_file.getName().endsWith(m_ignoreCRLMark)))
+			if (a_file == null || isBlocked(a_entry.getName()))
 			{
 				return null;
 			}
@@ -454,9 +454,36 @@ public class CertificateRevocationList implements IXMLEncodable
 			return CertificateRevocationList.getInstance(a_file.getInputStream(a_entry));
 		}
 		
-		public Object getInstance(InputStream a_inputStream)
+		public Object getInstance(InputStream a_inputStream, String a_resourceName)
 		{
+			if (a_resourceName == null || isBlocked(a_resourceName))
+			{
+				return null;
+			}
 			return CertificateRevocationList.getInstance(a_inputStream);
 		}
+		
+		private boolean isBlocked(String a_resourceName)
+		{
+			int index;
+			if (m_ignoreCRLMark == null || a_resourceName == null || m_ignoreCRLMark.trim().length() == 0)
+			{
+				return false;
+			}
+			
+			if (a_resourceName.endsWith(m_ignoreCRLMark))
+			{
+				return true;
+			}
+			if ((index = a_resourceName.indexOf(m_ignoreCRLMark)) >= 0)
+			{
+				a_resourceName = a_resourceName.substring(index, a_resourceName.length());
+				if (a_resourceName.indexOf("/") < 0 && a_resourceName.indexOf(File.separator) < 0)
+				{
+					return true;
+				}
+			}
+			return false;
+		}		
 	}
 }

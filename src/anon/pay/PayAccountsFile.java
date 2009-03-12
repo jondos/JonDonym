@@ -27,6 +27,7 @@
  */
 package anon.pay;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Enumeration;
 import java.util.Observable;
@@ -37,6 +38,7 @@ import org.w3c.dom.Element;
 
 import anon.ErrorCodes;
 import anon.crypto.AsymmetricCryptoKeyPair;
+import anon.crypto.DSAKeyPool;
 import anon.infoservice.Database;
 import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.MixCascade;
@@ -47,6 +49,7 @@ import anon.pay.xml.XMLGenericText;
 import anon.pay.xml.XMLJapPublicKey;
 import anon.util.IMiscPasswordReader;
 import anon.util.IXMLEncodable;
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.captcha.ICaptchaSender;
 import anon.util.captcha.IImageEncodedCaptcha;
@@ -119,6 +122,8 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	private Vector m_messageListeners = new Vector();
 
 	private MyAccountListener m_MyAccountListener = new MyAccountListener();
+	
+	private DSAKeyPool m_keyPool;
 
 	/**
 	 * At this time, the implementation supports only one single BI. In the future
@@ -136,7 +141,8 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	// singleton!
 	private PayAccountsFile()
 	{
-
+		m_keyPool = new DSAKeyPool();
+		m_keyPool.start();
 	}
 
 	/**
@@ -151,6 +157,11 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 			ms_AccountsFile = new PayAccountsFile();
 		}
 		return ms_AccountsFile;
+	}
+	
+	public AsymmetricCryptoKeyPair createAccountKeyPair()
+	{
+		return m_keyPool.popKeyPair();
 	}
 
 	/**
@@ -225,7 +236,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 			long activeAccountNumber = Long.parseLong(XMLUtil.parseValue(elemActiveAccount, "0"));
 
 			Element elemAccounts = (Element) XMLUtil.getFirstChildByName(elemAccountsFile, "Accounts");
-			Element elemAccount = (Element) elemAccounts.getFirstChild();
+			Element elemAccount = (Element) XMLUtil.getFirstChildByName(elemAccounts, PayAccount.XML_ELEMENT_NAME);
 			while (elemAccount != null)
 			{
 				try
@@ -281,7 +292,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	/**
 	 * Thrown if an account with same account number was already existing when trying to add it.
 	 */
-	public static class AccountAlreadyExisting extends Exception
+	public static class AccountAlreadyExistingException extends Exception
 	{
 	}
 
@@ -616,7 +627,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	 * @param account new account
 	 * @throws Exception If the same account was already added
 	 */
-	public synchronized void addAccount(PayAccount newAccount) throws Exception
+	public synchronized void addAccount(PayAccount newAccount) throws AccountAlreadyExistingException
 	{
 		PayAccount tmp;
 		boolean activeChanged = false;
@@ -627,7 +638,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 			tmp = (PayAccount) enumer.nextElement();
 			if (tmp.getAccountNumber() == newAccount.getAccountNumber())
 			{
-				throw new AccountAlreadyExisting();
+				throw new AccountAlreadyExistingException();
 			}
 		}
 		newAccount.addAccountListener(m_MyAccountListener);
@@ -791,6 +802,17 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 		}
 	}
 
+	public PayAccount createAccount(PaymentInstanceDBEntry a_bi, IMutableProxyInterface a_proxys,
+			XMLGenericText a_terms) throws Exception
+	{
+		AsymmetricCryptoKeyPair keyPair = createAccountKeyPair();
+		if (keyPair == null)
+		{
+			return null;
+		}
+		return createAccount(a_bi, a_proxys, keyPair, a_terms);
+	}
+	
 	/**
 	 * Creates a new Account.
 	 * Generates an RSA or DSA key pair and then registers a new account with the BI.
@@ -802,8 +824,8 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	 *
 	 */
 	public PayAccount createAccount(PaymentInstanceDBEntry a_bi, IMutableProxyInterface a_proxys,
-									AsymmetricCryptoKeyPair a_keyPair, XMLGenericText a_terms) throws
-		Exception
+									AsymmetricCryptoKeyPair a_keyPair, XMLGenericText a_terms) 
+		throws Exception
 	{
 		XMLJapPublicKey xmlKey = new XMLJapPublicKey(a_keyPair.getPublic());
 

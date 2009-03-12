@@ -31,6 +31,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
@@ -184,7 +185,7 @@ public class PayAccount implements IXMLEncodable
 	 * @param privateKey
 	 *          the private key
 	 */
-	public PayAccount(XMLAccountCertificate certificate, IMyPrivateKey privateKey, PaymentInstanceDBEntry theBI, XMLGenericText terms) throws Exception
+	public PayAccount(XMLAccountCertificate certificate, IMyPrivateKey privateKey, PaymentInstanceDBEntry theBI, XMLGenericText terms)
 	{
 		m_accountCertificate = certificate;
 		m_privateKey = privateKey;
@@ -748,7 +749,11 @@ public class PayAccount implements IXMLEncodable
 
 		}
 
-		String termsHtml = xmlTerms.getText();
+		String termsHtml = null;
+		if (xmlTerms != null)
+		{
+			termsHtml = xmlTerms.getText();
+		}
 		if (termsHtml == null || termsHtml.trim().equals(""))
 		{
 			// no valid terms and conditions available; maybe an old account?
@@ -1116,6 +1121,44 @@ public class PayAccount implements IXMLEncodable
 		return m_theBI;
 	}
 
+	public static String checkCouponCode(String a_code)
+	{
+		if (a_code == null)
+		{
+			return null;
+		}
+		
+		// maybe this code was entered with spaces...
+		StringTokenizer tokenizer = new StringTokenizer(a_code);
+		a_code = "";
+		while (tokenizer.hasMoreTokens())
+		{
+			a_code += tokenizer.nextToken();
+		}
+		
+		if (a_code.length() != 16)
+		{
+			return null;
+		}
+		a_code = a_code.toUpperCase();
+		
+		// test for hexadecimal code
+		for (int i = 0; i < a_code.length(); i++)
+		{
+			if ((a_code.charAt(i) >= '0' &&  a_code.charAt(i) <= '9') ||
+				(a_code.charAt(i) >= 'A' &&  a_code.charAt(i) <= 'F'))
+			{
+				continue;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		
+		return a_code;
+	}
+	
 	public void decryptPrivateKey(IMiscPasswordReader a_passwordReader) throws Exception
 	{
 		if (m_encryptedPrivateKey != null)

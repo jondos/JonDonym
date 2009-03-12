@@ -85,6 +85,7 @@ import org.w3c.dom.Element;
 import HTTPClient.ForbiddenIOException;
 import anon.ErrorCodes;
 import anon.client.TrustModel;
+import anon.crypto.AsymmetricCryptoKeyPair;
 import anon.crypto.DSAKeyPair;
 import anon.crypto.XMLEncryption;
 import anon.infoservice.IMutableProxyInterface;
@@ -109,6 +110,7 @@ import anon.pay.xml.XMLVolumePlans;
 import anon.util.IReturnRunnable;
 import anon.util.JAPMessages;
 import anon.util.SingleStringPasswordReader;
+import anon.util.Util;
 import anon.util.XMLUtil;
 import anon.util.captcha.ICaptchaSender;
 import anon.util.captcha.IImageEncodedCaptcha;
@@ -123,7 +125,6 @@ import gui.dialog.SimpleWizardContentPane;
 import gui.dialog.WorkerContentPane;
 import gui.dialog.DialogContentPane.Layout;
 import jap.AbstractJAPConfModule;
-import jap.JAPConf;
 import jap.JAPConfInfoService;
 import jap.JAPConstants;
 import jap.JAPController;
@@ -1292,7 +1293,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					JAPMessages.getLocale().getLanguage()));
 				
 				//m_labelSpent.setText(JAPUtil.formatBytesValueWithUnit(balance.getSpent()));
-				m_labelSpent.setText(JAPUtil.formatBytesValueWithUnit(selectedAccount.getCurrentSpent()));
+				m_labelSpent.setText(Util.formatBytesValueWithUnit(selectedAccount.getCurrentSpent()));
 				
 				//m_labelBalance.setText(JAPUtil.formatEuroCentValue(balance.getBalance()));
 
@@ -1325,7 +1326,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				{
 					m_labelVolume.setText(((expired ? "(" : "") +
 										  // JAPUtil.formatBytesValueWithUnit(balance.getVolumeKBytesLeft() * 1000) +
-							 				JAPUtil.formatBytesValueWithUnit(selectedAccount.getCurrentCredit() * 1000) +
+							 				Util.formatBytesValueWithUnit(selectedAccount.getCurrentCredit() * 1000) +
 											(expired ? ")" : "")));
 					m_labelVolume.setForeground(m_labelValid.getForeground());
 					m_labelVolume.setToolTipText(null);
@@ -2576,17 +2577,17 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	    /*************** create keypair ****************/
 		final IReturnRunnable keyCreationThread = new IReturnRunnable()
 		{
-			private DSAKeyPair m_keyPair;
+			private AsymmetricCryptoKeyPair m_keyPair;
 
 			public void run()
 			{
 				m_bDoNotCloseDialog = true;
-				m_keyPair =
-					DSAKeyPair.getInstance(new SecureRandom(), DSAKeyPair.KEY_LENGTH_1024, 20);
+				m_keyPair = PayAccountsFile.getInstance().createAccountKeyPair();
 				if (m_keyPair == null)
 				{
 					JAPDialog.showErrorDialog(
 						a_parentDialog, JAPMessages.getString(MSG_KEY_PAIR_CREATE_ERROR), LogType.PAY);
+					Thread.currentThread().interrupt();
 				}
 				m_bDoNotCloseDialog = false;
 			}
@@ -3264,7 +3265,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			{
 				String message = "";
 
-				if (ex instanceof PayAccountsFile.AccountAlreadyExisting)
+				if (ex instanceof PayAccountsFile.AccountAlreadyExistingException)
 				{
 					message = JAPMessages.getString(MSG_ACCOUNT_ALREADY_EXISTING);
 				}

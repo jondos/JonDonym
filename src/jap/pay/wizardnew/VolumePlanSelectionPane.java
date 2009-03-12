@@ -51,6 +51,7 @@ import anon.pay.PaymentInstanceDBEntry;
 import anon.pay.xml.XMLVolumePlan;
 import anon.pay.xml.XMLVolumePlans;
 import anon.util.JAPMessages;
+import anon.util.Util;
 import gui.GUIUtils;
 import gui.JapCouponField;
 import gui.dialog.DialogContentPane;
@@ -164,14 +165,7 @@ import javax.swing.BorderFactory;
 
 	public boolean isCouponComplete()
 	{
-	   String enteredCoupon = getCouponString();
-	   if (enteredCoupon.length() != 16 )
-	   {
-		   return false;
-	   } else
-	   {
-		   return true;
-	   }
+	   return PayAccount.checkCouponCode(getCouponString()) != null;
 	}
 
 	/**
@@ -291,7 +285,7 @@ import javax.swing.BorderFactory;
 		JLabel planVolumeLbl;
 		if (aPlan.isVolumeLimited() )
 		{
-			planVolumeLbl = new JLabel(JAPUtil.formatBytesValueWithUnit(aPlan.getVolumeKbytes()*1000));
+			planVolumeLbl = new JLabel(Util.formatBytesValueWithUnit(aPlan.getVolumeKbytes()*1000));
 		}
 		else
 		{

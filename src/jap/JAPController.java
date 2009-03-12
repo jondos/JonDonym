@@ -147,6 +147,7 @@ import anon.util.JAPMessages;
 import anon.util.JobQueue;
 import anon.util.RecursiveFileTool;
 import anon.util.ResourceLoader;
+import anon.util.Util;
 import anon.util.XMLUtil;
 import anon.util.Updater.ObservableInfo;
 
@@ -5105,29 +5106,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	public static InfoServiceDBEntry[] createDefaultInfoServices() throws Exception
 	{
-		Vector listeners;
-		InfoServiceDBEntry[] entries = new InfoServiceDBEntry[JAPConstants.DEFAULT_INFOSERVICE_NAMES.length];
-		for (int i = 0; i < entries.length; i++)
-		{
-			listeners = new Vector(JAPConstants.DEFAULT_INFOSERVICE_PORT_NUMBERS[i].length);
-			for (int j = 0; j < JAPConstants.DEFAULT_INFOSERVICE_PORT_NUMBERS[i].length; j++)
-			{
-				listeners.addElement(new ListenerInterface(JAPConstants.DEFAULT_INFOSERVICE_HOSTNAMES[i],
-					JAPConstants.DEFAULT_INFOSERVICE_PORT_NUMBERS[i][j]));
-			}
-			entries[i] = new InfoServiceDBEntry(
-						 JAPConstants.DEFAULT_INFOSERVICE_NAMES[i],
-						 JAPConstants.DEFAULT_INFOSERVICE_NAMES[i], listeners, false, true, 0, 0, false);
-			entries[i].markAsBootstrap();
-		}
-
-		return entries;
+		return anon.util.Util.createDefaultInfoServices(JAPConstants.DEFAULT_INFOSERVICE_NAMES, 
+				JAPConstants.DEFAULT_INFOSERVICE_HOSTNAMES, JAPConstants.DEFAULT_INFOSERVICE_PORT_NUMBERS);
 	}
 
 
 	private static void addDefaultCertificates(String a_certspath, String[] a_singleCerts, int a_type)
 	{
-		JAPUtil.addDefaultCertificates(a_certspath, a_singleCerts, a_type, 
+		anon.crypto.Util.addDefaultCertificates(a_certspath, a_singleCerts, a_type, 
 				(JAPConstants.m_bReleasedVersion ? ".dev" : null));
 	}
 
@@ -5298,7 +5284,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		boolean choice = JAPDialog.showYesNoDialog(
 			getCurrentView(),
 			JAPMessages.getString("unrealBytesDesc") + "<p>" +
-			JAPMessages.getString("unrealBytesDifference") + " " + JAPUtil.formatBytesValueWithUnit(a_bytes),
+			JAPMessages.getString("unrealBytesDifference") + " " + Util.formatBytesValueWithUnit(a_bytes),
 			JAPMessages.getString("unrealBytesTitle"),adapter
 			);
 

@@ -69,7 +69,7 @@ public class XMLJapPublicKey implements IXMLEncodable //extends XMLDocument
 
 	//~ Constructors ***********************************************************
 
-	public XMLJapPublicKey(IMyPublicKey key) throws Exception
+	public XMLJapPublicKey(IMyPublicKey key)
 	{
 		m_publicKey = key;
 	}

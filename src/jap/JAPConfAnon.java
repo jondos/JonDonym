@@ -2195,9 +2195,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						}
 						else if(value == 0)
 						{
-							m_lblSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
+							m_lblSpeed.setText("< " + Util.formatKbitPerSecValueWithUnit(
 									PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1],
-									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+									Util.MAX_FORMAT_KBIT_PER_SEC));
 							//bTrusted = false;
 						}
 						else
@@ -2207,26 +2207,26 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							{
 								if (System.getProperty("java.version").compareTo("1.4") >= 0)
 								{
-									m_lblSpeed.setText("\u2265 " + JAPUtil.formatKbitPerSecValueWithUnit(value,
-											JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+									m_lblSpeed.setText("\u2265 " + Util.formatKbitPerSecValueWithUnit(value,
+											Util.MAX_FORMAT_KBIT_PER_SEC));
 								}
 								else
 								{
-									m_lblSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value,
-											JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+									m_lblSpeed.setText("> " + Util.formatKbitPerSecValueWithUnit(value,
+											Util.MAX_FORMAT_KBIT_PER_SEC));
 								}
 							}
 							else if (best == value || best == Integer.MAX_VALUE)
 							{
-								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value,
-										JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+								m_lblSpeed.setText(Util.formatKbitPerSecValueWithUnit(value,
+										Util.MAX_FORMAT_KBIT_PER_SEC));
 							}
 							else
 							{
-								m_lblSpeed.setText(JAPUtil.formatKbitPerSecValueWithoutUnit(value,
-										JAPUtil.MAX_FORMAT_KBIT_PER_SEC) + 
-										"-" + JAPUtil.formatKbitPerSecValueWithUnit(best,
-												JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+								m_lblSpeed.setText(Util.formatKbitPerSecValueWithoutUnit(value,
+										Util.MAX_FORMAT_KBIT_PER_SEC) + 
+										"-" + Util.formatKbitPerSecValueWithUnit(best,
+												Util.MAX_FORMAT_KBIT_PER_SEC));
 							}
 						}
 						if (bTrusted)

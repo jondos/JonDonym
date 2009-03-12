@@ -36,6 +36,8 @@ import org.w3c.dom.Document;
 
 import anon.pay.xml.XMLDescription;
 import java.io.BufferedOutputStream;
+
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
 final public class HttpClient
@@ -62,7 +64,7 @@ final public class HttpClient
 	 *
 	 * @throws IOException
 	 */
-	public void close() throws Exception
+	public void close() throws IOException, XMLParseException
 	{
 		writeRequest("GET", "close", null);
 		readAnswer();
@@ -106,7 +108,7 @@ final public class HttpClient
 	 * @return Die im Body der Antwort enthaltenen Daten als XMLDocument
 	 * @throws IOException
 	 */
-	public Document readAnswer() throws Exception
+	public Document readAnswer() throws IOException, XMLParseException
 	{
 		int contentLength = -1;
 		char[] data = null;

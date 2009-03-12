@@ -767,7 +767,7 @@ public final class ClassUtil
 			}
 		}
 		
-		public Object getInstance(InputStream a_inputStream)
+		public Object getInstance(InputStream a_inputStream, String a_resourceName)
 		{
 			return null;
 		}

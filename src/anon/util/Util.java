@@ -27,8 +27,6 @@
  */
 package anon.util;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,9 +36,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.DecimalFormat;
 import java.util.Vector;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
+
+import anon.infoservice.InfoServiceDBEntry;
+import anon.infoservice.ListenerInterface;
+
 
 public final class Util
 {
@@ -49,6 +52,17 @@ public final class Util
 	
 	private final static String WHITESPACE_ENCODED = "%20";
 	private final static String WHITESPACE = " ";
+	
+	public static final int MAX_FORMAT_BYTES = 0;
+	public static final int MAX_FORMAT_KBYTES = 1;
+	public static final int MAX_FORMAT_MBYTES = 2;
+	public static final int MAX_FORMAT_GBYTES = 3;
+	
+	public static final int MAX_FORMAT_KBIT_PER_SEC = 0;
+	public static final int MAX_FORMAT_MBIT_PER_SEC = 1;
+	public static final int MAX_FORMAT_GBIT_PER_SEC = 2;
+	
+	public static final int MAX_FORMAT_ALL = 4;
 	
 	/**
 	 * This class works without being initialised and is completely static.
@@ -697,8 +711,6 @@ public final class Util
 		Class objectClass = anObject.getClass();
 		Method[] allMethods = objectClass.getMethods();
 		
-		Class[] currentMethodParameterTypes = null;
-		
 		Method currentStringSetter = null;
 		Method currentStringGetter = null;
 		
@@ -725,12 +737,12 @@ public final class Util
 					if( temp != null && !temp.equals("") )
 					{
 						try {
-							currentStringGetter = objectClass.getMethod("get"+temp, null);
+							currentStringGetter = objectClass.getMethod("get"+temp, (Class[])null);
 							if(currentStringGetter != null)
 							{
 								if(currentStringGetter.getReturnType().equals(String.class))
 								{
-									toFilter = (String) currentStringGetter.invoke(anObject, null);
+									toFilter = (String) currentStringGetter.invoke(anObject, (Object[])null);
 									if( toFilter != null )
 									{
 										toFilter = filterXMLChars(toFilter);
@@ -798,4 +810,147 @@ public final class Util
 		
 		return buff.toString();
 	}
+	
+	public static InfoServiceDBEntry[] createDefaultInfoServices(
+			String [] a_defaultNames, String[] a_defaultHostNames, int[][] a_defaultPortNumbers) throws Exception
+	{
+		Vector listeners;
+		InfoServiceDBEntry[] entries = new InfoServiceDBEntry[a_defaultNames.length];
+		for (int i = 0; i < entries.length; i++)
+		{
+			listeners = new Vector(a_defaultPortNumbers[i].length);
+			for (int j = 0; j < a_defaultPortNumbers[i].length; j++)
+			{
+				listeners.addElement(new ListenerInterface(a_defaultHostNames[i],
+						a_defaultPortNumbers[i][j]));
+			}
+			entries[i] = new InfoServiceDBEntry(
+					a_defaultNames[i], a_defaultNames[i], listeners, false, true, 0, 0, false);
+			entries[i].markAsBootstrap();
+		}
+
+		return entries;
+	}
+	
+	
+	
+	public static String formatKbitPerSecValueWithUnit(long c)
+	{
+		return formatKbitPerSecValueWithUnit(c, MAX_FORMAT_ALL);
+	}
+
+	public static String formatKbitPerSecValueWithUnit(long c, int a_maxFormat)
+	{
+		return formatKbitPerSecValueWithoutUnit(c, a_maxFormat) + " " + formatKbitPerSecValueOnlyUnit(c, a_maxFormat);
+	}
+	
+	public static String formatKbitPerSecValueOnlyUnit(long c)
+	{
+		return formatKbitPerSecValueOnlyUnit(c, MAX_FORMAT_ALL);
+	}
+	
+	public static String formatKbitPerSecValueOnlyUnit(long c, int a_maxFormat)
+	{
+		if (c < 1000 || a_maxFormat < MAX_FORMAT_MBIT_PER_SEC)
+		{
+			return JAPMessages.getString("kbit/s");
+		}
+		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_GBIT_PER_SEC)
+		{
+			return JAPMessages.getString("Mbit/s");
+		}
+		return JAPMessages.getString("Gbit/s");		
+	}
+	
+	public static String formatKbitPerSecValueWithoutUnit(long c)
+	{
+		return formatKbitPerSecValueWithoutUnit(c, MAX_FORMAT_ALL);
+	}
+	
+	public static String formatKbitPerSecValueWithoutUnit(long c, int a_maxFormat)
+	{
+		DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
+		double d = c;
+		if (c < 1000 || a_maxFormat < MAX_FORMAT_MBIT_PER_SEC)
+		{
+			df.applyPattern("#,####");
+		}
+		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_GBIT_PER_SEC)
+		{
+			d /= 1000.0;
+			df.applyPattern("#,##0.0");
+		}
+		else
+		{
+			d /= 1000000.0;
+			df.applyPattern("#,##0.0");
+		}
+		return df.format(d);
+	}
+
+	/** Returns the desired unit for this amount of Bytes (Bytes, kBytes, MBytes,GBytes)*/
+	public static String formatBytesValueWithUnit(long c)
+	{
+		return formatBytesValueWithUnit(c, MAX_FORMAT_ALL);
+	}
+
+	public static String formatBytesValueWithUnit(long c, int a_maxFormat)
+	{
+		return formatBytesValueWithoutUnit(c, a_maxFormat) + " " + formatBytesValueOnlyUnit(c, a_maxFormat);
+	}
+
+
+	public static String formatBytesValueOnlyUnit(long c)
+	{
+		return formatBytesValueOnlyUnit(c, MAX_FORMAT_ALL);
+	}
+
+	public static String formatBytesValueOnlyUnit(long c, int a_maxFormat)
+	{
+		if (c < 1000 || a_maxFormat < MAX_FORMAT_KBYTES)
+		{
+			return JAPMessages.getString("Byte");
+		}
+		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_MBYTES)
+		{
+			return JAPMessages.getString("kByte");
+		}
+		else if (c < 1000000000 || a_maxFormat < MAX_FORMAT_GBYTES)
+		{
+			return JAPMessages.getString("MByte");
+		}
+		return JAPMessages.getString("GByte");
+	}
+
+	public static String formatBytesValueWithoutUnit(long c)
+	{
+		return formatBytesValueWithoutUnit(c, MAX_FORMAT_ALL);
+}
+
+	/** Returns a formated number which respects different units (Bytes, kBytes, MBytes, GBytes)*/
+	public static String formatBytesValueWithoutUnit(long c, int a_maxFormat)
+	{
+		DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
+		double d = c;
+		if (c < 1000 || a_maxFormat < MAX_FORMAT_KBYTES)
+		{
+			df.applyPattern("#,####");
+		}
+		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_MBYTES)
+		{
+			d /= 1000.0;
+			df.applyPattern("#,##0.0");
+		}
+		else if (c < 1000000000 || a_maxFormat < MAX_FORMAT_GBYTES)
+		{
+			d /= 1000000.0;
+			df.applyPattern("#,##0.0");
+		}
+		else
+		{
+			d /= 1000000000.0;
+			df.applyPattern("#,##0.0");
+		}
+		return df.format(d);
+	}	
 }
