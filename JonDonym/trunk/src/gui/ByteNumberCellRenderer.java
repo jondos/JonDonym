@@ -27,7 +27,7 @@
  */
 package gui;
 
-import jap.JAPUtil;
+import anon.util.Util;
 
 import java.awt.Component;
 
@@ -71,7 +71,7 @@ public class ByteNumberCellRenderer extends DefaultTableCellRenderer
 			return this;
 		}
 
-		setText(JAPUtil.formatBytesValueWithUnit( ( ( (Long) value).longValue())));
+		setText(Util.formatBytesValueWithUnit( ( ( (Long) value).longValue())));
 		return this;
 	}
 }

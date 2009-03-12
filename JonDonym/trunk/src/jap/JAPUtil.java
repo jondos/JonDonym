@@ -58,9 +58,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import anon.crypto.JAPCertificate;
-import anon.crypto.SignatureVerifier;
 import anon.util.JAPMessages;
-import anon.util.ResourceLoader;
 import platform.AbstractOS;
 import gui.GUIUtils;
 import gui.dialog.JAPDialog;
@@ -77,17 +75,6 @@ import java.util.Locale;
 public final class JAPUtil
 {
 	private static final String MSG_DATE_UNIT = JAPUtil.class.getName() + "_";
-
-	public static final int MAX_FORMAT_BYTES = 0;
-	public static final int MAX_FORMAT_KBYTES = 1;
-	public static final int MAX_FORMAT_MBYTES = 2;
-	public static final int MAX_FORMAT_GBYTES = 3;
-	
-	public static final int MAX_FORMAT_KBIT_PER_SEC = 0;
-	public static final int MAX_FORMAT_MBIT_PER_SEC = 1;
-	public static final int MAX_FORMAT_GBIT_PER_SEC = 2;
-	
-	public static final int MAX_FORMAT_ALL = 4;
 
 	public static JAPDialog.ILinkedInformation createDialogBrowserLink(String a_strUrl)
 	{
@@ -119,126 +106,6 @@ public final class JAPUtil
 				AbstractOS.getInstance().openURL(myUrl);
 			}
 		};
-	}
-	
-	public static String formatKbitPerSecValueWithUnit(long c)
-	{
-		return formatKbitPerSecValueWithUnit(c, MAX_FORMAT_ALL);
-	}
-
-	public static String formatKbitPerSecValueWithUnit(long c, int a_maxFormat)
-	{
-		return formatKbitPerSecValueWithoutUnit(c, a_maxFormat) + " " + formatKbitPerSecValueOnlyUnit(c, a_maxFormat);
-	}
-	
-	public static String formatKbitPerSecValueOnlyUnit(long c)
-	{
-		return formatKbitPerSecValueOnlyUnit(c, MAX_FORMAT_ALL);
-	}
-	
-	public static String formatKbitPerSecValueOnlyUnit(long c, int a_maxFormat)
-	{
-		if (c < 1000 || a_maxFormat < MAX_FORMAT_MBIT_PER_SEC)
-		{
-			return JAPMessages.getString("kbit/s");
-		}
-		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_GBIT_PER_SEC)
-		{
-			return JAPMessages.getString("Mbit/s");
-		}
-		return JAPMessages.getString("Gbit/s");		
-	}
-	
-	public static String formatKbitPerSecValueWithoutUnit(long c)
-	{
-		return formatKbitPerSecValueWithoutUnit(c, MAX_FORMAT_ALL);
-	}
-	
-	public static String formatKbitPerSecValueWithoutUnit(long c, int a_maxFormat)
-	{
-		DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
-		double d = c;
-		if (c < 1000 || a_maxFormat < MAX_FORMAT_MBIT_PER_SEC)
-		{
-			df.applyPattern("#,####");
-		}
-		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_GBIT_PER_SEC)
-		{
-			d /= 1000.0;
-			df.applyPattern("#,##0.0");
-		}
-		else
-		{
-			d /= 1000000.0;
-			df.applyPattern("#,##0.0");
-		}
-		return df.format(d);
-	}
-
-	/** Returns the desired unit for this amount of Bytes (Bytes, kBytes, MBytes,GBytes)*/
-	public static String formatBytesValueWithUnit(long c)
-	{
-		return formatBytesValueWithUnit(c, MAX_FORMAT_ALL);
-	}
-
-	public static String formatBytesValueWithUnit(long c, int a_maxFormat)
-	{
-		return formatBytesValueWithoutUnit(c, a_maxFormat) + " " + formatBytesValueOnlyUnit(c, a_maxFormat);
-	}
-
-
-	public static String formatBytesValueOnlyUnit(long c)
-	{
-		return formatBytesValueOnlyUnit(c, MAX_FORMAT_ALL);
-	}
-
-	public static String formatBytesValueOnlyUnit(long c, int a_maxFormat)
-	{
-		if (c < 1000 || a_maxFormat < MAX_FORMAT_KBYTES)
-		{
-			return JAPMessages.getString("Byte");
-		}
-		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_MBYTES)
-		{
-			return JAPMessages.getString("kByte");
-		}
-		else if (c < 1000000000 || a_maxFormat < MAX_FORMAT_GBYTES)
-		{
-			return JAPMessages.getString("MByte");
-		}
-		return JAPMessages.getString("GByte");
-	}
-
-	public static String formatBytesValueWithoutUnit(long c)
-	{
-		return formatBytesValueWithoutUnit(c, MAX_FORMAT_ALL);
-}
-
-	/** Returns a formated number which respects different units (Bytes, kBytes, MBytes, GBytes)*/
-	public static String formatBytesValueWithoutUnit(long c, int a_maxFormat)
-	{
-		DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
-		double d = c;
-		if (c < 1000 || a_maxFormat < MAX_FORMAT_KBYTES)
-		{
-			df.applyPattern("#,####");
-		}
-		else if (c < 1000000 || a_maxFormat < MAX_FORMAT_MBYTES)
-		{
-			d /= 1000.0;
-			df.applyPattern("#,##0.0");
-		}
-		else if (c < 1000000000 || a_maxFormat < MAX_FORMAT_GBYTES)
-		{
-			d /= 1000000.0;
-			df.applyPattern("#,##0.0");
-		}
-		else
-		{
-			d /= 1000000000.0;
-			df.applyPattern("#,##0.0");
-		}
-		return df.format(d);
 	}
 
 
@@ -654,50 +521,5 @@ public final class JAPUtil
 		}
 
 		return duration + " " + JAPMessages.getString(MSG_DATE_UNIT + message);
-	}
-
-	public static void addDefaultCertificates(String a_certspath, String[] a_singleCerts, int a_type)
-	{
-		addDefaultCertificates(a_certspath, a_singleCerts, a_type, null);
-	}
-	
-	public static void addDefaultCertificates(String a_certspath, String[] a_singleCerts, int a_type, String a_ignoreCertMark)
-	{
-		JAPCertificate defaultRootCert = null;
-
-		if (a_singleCerts != null)
-		{
-			for (int i = 0; i < a_singleCerts.length; i++)
-			{
-				if (a_singleCerts[i] != null && (a_ignoreCertMark == null || !a_singleCerts[i].endsWith(a_ignoreCertMark)))
-					//	 &&(!JAPConstants.m_bReleasedVersion ||
-					 //!a_singleCerts[i].endsWith(".dev")))
-				{
-					defaultRootCert = JAPCertificate.getInstance(ResourceLoader.loadResource(
-							"certificates/" + a_certspath + a_singleCerts[i]));
-					if (defaultRootCert == null)
-					{
-						continue;
-					}
-					SignatureVerifier.getInstance().getVerificationCertificateStore().
-						addCertificateWithoutVerification(defaultRootCert, a_type, true, true);
-				}
-			}
-		}
-
-		Enumeration certificates =
-			JAPCertificate.getInstance("certificates/" + a_certspath, true, a_ignoreCertMark).elements();
-		while (certificates.hasMoreElements())
-		{
-			defaultRootCert = (JAPCertificate) certificates.nextElement();
-			SignatureVerifier.getInstance().getVerificationCertificateStore().
-				addCertificateWithoutVerification(defaultRootCert, a_type, true, true);
-		}
-		/* no elements were found */
-		if (defaultRootCert == null)
-		{
-			LogHolder.log(LogLevel.ERR, LogType.MISC,
-						  "Error loading certificates of type '" + a_type + "'.");
-		}	
 	}
 }

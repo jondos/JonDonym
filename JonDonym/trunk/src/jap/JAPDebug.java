@@ -38,7 +38,6 @@ import java.util.Properties;
 
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Window;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -53,6 +52,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import anon.util.JAPMessages;
+import anon.util.Util;
 
 import logging.FileLog;
 import logging.Log;
@@ -408,14 +408,14 @@ final public class JAPDebug extends Observable implements ActionListener, Log
 			catch (Exception e1)
 			{}
 			m_textareaConsole.append("TotalMemory: " +
-									 JAPUtil.formatBytesValueWithUnit(Runtime.getRuntime().totalMemory()) + "\n");
+									 Util.formatBytesValueWithUnit(Runtime.getRuntime().totalMemory()) + "\n");
 			try
 			{
 				Long result = (Long)
 					Runtime.class.getMethod("maxMemory", new Class[0]).invoke(
 									   Runtime.getRuntime(), new Object[0]);
 				m_textareaConsole.append("MaxMemory: " +
-										 JAPUtil.formatBytesValueWithUnit(result.longValue()) + "\n");
+										 Util.formatBytesValueWithUnit(result.longValue()) + "\n");
 			}
 			catch (Exception a_e)
 			{
@@ -423,7 +423,7 @@ final public class JAPDebug extends Observable implements ActionListener, Log
 			}
 
 			m_textareaConsole.append("FreeMemory: " +
-									 JAPUtil.formatBytesValueWithUnit(Runtime.getRuntime().freeMemory()) + "\n");
+									 Util.formatBytesValueWithUnit(Runtime.getRuntime().freeMemory()) + "\n");
 			m_textareaConsole.append("\n");
 			m_textareaConsole.append(JAPModel.getInstance().toString());
 		}

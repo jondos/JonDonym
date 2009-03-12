@@ -1274,16 +1274,17 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 
 		public Object getInstance(File a_file, File a_topDirectory) throws IOException
 		{
-			if (a_file == null || (m_strIgnoreCertMark != null && a_file.getName().endsWith(m_strIgnoreCertMark)))
+			if (a_file == null || isBlocked(a_file.getName()))
 			{
 				return null;
 			}
+
 			return JAPCertificate.getInstance(new FileInputStream(a_file));
 		}
 
 		public Object getInstance(ZipEntry a_entry, ZipFile a_file) throws IOException
 		{
-			if (a_file == null || (m_strIgnoreCertMark != null && a_file.getName().endsWith(m_strIgnoreCertMark)))
+			if (a_file == null || isBlocked(a_entry.getName()))
 			{
 				return null;
 			}
@@ -1291,9 +1292,37 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 			return JAPCertificate.getInstance(a_file.getInputStream(a_entry));
 		}
 		
-		public Object getInstance(InputStream a_inputStream)
+		public Object getInstance(InputStream a_inputStream, String a_resourceName)
 		{
+			if (a_resourceName == null || isBlocked(a_resourceName))
+			{
+				return null;
+			}
+
 			return JAPCertificate.getInstance(a_inputStream);
+		}
+		
+		private boolean isBlocked(String a_resourceName)
+		{
+			int index;
+			if (m_strIgnoreCertMark == null || a_resourceName == null || m_strIgnoreCertMark.trim().length() == 0)
+			{
+				return false;
+			}
+			
+			if (a_resourceName.endsWith(m_strIgnoreCertMark))
+			{
+				return true;
+			}
+			if ((index = a_resourceName.indexOf(m_strIgnoreCertMark)) >= 0)
+			{
+				a_resourceName = a_resourceName.substring(index, a_resourceName.length());
+				if (a_resourceName.indexOf("/") < 0 && a_resourceName.indexOf(File.separator) < 0)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 	

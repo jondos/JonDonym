@@ -63,6 +63,7 @@ import anon.pay.xml.XMLBalance;
 import anon.pay.xml.XMLErrorMessage;
 import anon.util.JAPMessages;
 import anon.util.JobQueue;
+import anon.util.Util;
 import anon.util.captcha.ICaptchaSender;
 import anon.util.captcha.IImageEncodedCaptcha;
 import gui.FlippingPanel;
@@ -497,7 +498,7 @@ public class PaymentMainPanel extends FlippingPanel
 					{
 						m_BalanceProgressBar.setEnabled(false);
 						//m_BalanceText.setText(JAPUtil.formatBytesValueWithUnit(balance.getVolumeKBytesLeft() * 1000));
-						m_BalanceText.setText(JAPUtil.formatBytesValueWithUnit(activeAccount.getCurrentCredit() * 1000));
+						m_BalanceText.setText(Util.formatBytesValueWithUnit(activeAccount.getCurrentCredit() * 1000));
 //							JAPUtil.MAX_FORMAT_KBYTES));
 						m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 						m_labelValidUntil.setText(JAPUtil.formatTimestamp(balance.getFlatEnddate(), false,
@@ -543,7 +544,7 @@ public class PaymentMainPanel extends FlippingPanel
 						if (balance == null)
 						{
 							m_labelValidUntil.setText("");
-							m_BalanceText.setText(JAPUtil.formatBytesValueWithUnit(0));
+							m_BalanceText.setText(Util.formatBytesValueWithUnit(0));
 							m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 						}
 						else
@@ -608,10 +609,10 @@ public class PaymentMainPanel extends FlippingPanel
 					//set rest of the panel
 					m_spentThisSession = AIControlChannel.getBytes();
 
-					m_labelSessionSpent.setText(JAPUtil.formatBytesValueWithUnit(m_spentThisSession));
+					m_labelSessionSpent.setText(Util.formatBytesValueWithUnit(m_spentThisSession));
 
 					//m_labelTotalSpent.setText(JAPUtil.formatBytesValueWithUnit(activeAccount.getSpent()));
-					m_labelTotalSpent.setText(JAPUtil.formatBytesValueWithUnit(activeAccount.getCurrentSpent()));
+					m_labelTotalSpent.setText(Util.formatBytesValueWithUnit(activeAccount.getCurrentSpent()));
 					// account is nearly empty
 
 					if (a_bWarnIfNearlyEmpty && //a_bWarnIfNearlyEmpty means warnings are not to be suppressed

@@ -1,402 +1,418 @@
+/*
+ Copyright (c) 2009, The JAP-Team, JonDos GmbH
+ All rights reserved.
+ Redistribution and use in source and binary forms, with or without modification,
+ are permitted provided that the following conditions are met:
+
+  - Redistributions of source code must retain the above copyright notice,
+ this list of conditions and the following disclaimer.
+
+  - Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation and/or
+ other materials provided with the distribution.
+
+  - Neither the name of the University of Technology Dresden, Germany, nor the name of
+ the JonDos GmbH, nor the names of their contributors may be used to endorse or
+ promote products derived from this software without specific prior written permission.
+
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+ OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+ BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ */
 package jondonym.console;
 
-import jap.JAPController;
-import jap.JAPUtil;
-
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
 
-import java.util.Observable;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
-
-import anon.proxy.AnonProxy;
-import anon.infoservice.AbstractDatabaseEntry;
+import anon.pay.PayAccount;
+import anon.pay.PayAccountsFile;
+import anon.pay.PaymentInstanceDBEntry;
+import anon.client.TrustModel;
 import anon.infoservice.Database;
-import anon.infoservice.IDistributable;
-import anon.infoservice.IDistributor;
-import anon.infoservice.InfoServiceDBEntry;
-import anon.infoservice.InfoServiceHolder;
+import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.MixCascade;
-import anon.infoservice.update.AbstractMixCascadeUpdater;
-import anon.infoservice.update.InfoServiceUpdater;
-import anon.infoservice.update.PaymentInstanceUpdater;
-import logging.AbstractLog4jLog;
-import logging.Log;
+import anon.util.Configuration;
+import anon.util.Util;
+import anon.util.XMLUtil;
 import logging.LogHolder;
 import logging.LogType;
 import logging.LogLevel;
-import logging.SystemErrLog;
-import anon.client.AbstractAutoSwitchedMixCascadeContainer;
-import anon.client.DummyTrafficControlChannel;
-import anon.client.ITermsAndConditionsContainer;
-import anon.crypto.JAPCertificate;
-import anon.crypto.SignatureVerifier;
-import anon.util.ClassUtil;
-import anon.util.Configuration;
-import anon.util.XMLUtil;
-import anon.util.Updater.ObservableInfo;
 
+/**
+ * This is a small console test application for the Controller interface. it may be used for
+ * testing new interface functions and for debugging.
+ * @author Rolf Wendolsky
+ */
 public class JonDoConsole
 {
-	private static InfoServiceUpdater ms_isUpdater;
-	private static MixCascadeUpdater ms_cascadeUpdater;
-	private static PaymentInstanceUpdater ms_paymentUpdater;
-	private static ServerSocket ms_socketListener;
-	private static AnonProxy ms_jondonymProxy;
-	private static AutoSwitchedMixCascadeContainer ms_serviceContainer;
-	
-	
-	public static synchronized void init(final Logger a_logger, Configuration a_configuration) throws Exception
-	{		
-		if (ms_isUpdater != null)
-		{
-			return;
-		}
-		
-		Log templog;
-		if (a_logger == null)
-		{
-			templog = new SystemErrLog();
-		}
-		else
-		{
-			templog = new AbstractLog4jLog()
-			{
-				  protected Logger getLogger()
-					{
-						return a_logger;
-					}
-			};
-		}
-		
-   		LogHolder.setLogInstance(templog);
-   		templog.setLogType(LogType.ALL);
-   		templog.setLogLevel(LogLevel.WARNING);
-   		
-   		LogHolder.log(LogLevel.ALERT, LogType.MISC, "Initialising " + ClassUtil.getClassNameStatic() + " version 0.3");
-   		
-		ClassUtil.enableFindSubclasses(false); // This would otherwise start non-daemon AWT threads, blow up memory and prevent closing the app.
-		XMLUtil.setStorageMode(XMLUtil.STORAGE_MODE_AGRESSIVE); // Store as few XML data as possible for memory optimization.
-		SignatureVerifier.getInstance().setCheckSignatures(true);
-		
-		 
-		JAPUtil.addDefaultCertificates("acceptedInfoServiceCAs/", new String[] {"japinfoserviceroot.cer", "InfoService_CA.cer"}, JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE);
-		JAPUtil.addDefaultCertificates("acceptedMixCAs/", new String[] {"japmixroot.cer", "Operator_CA.cer", //"Test_CA.cer.dev", 
-				"gpf_jondonym_ca.cer"}, JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX);
-		JAPUtil.addDefaultCertificates("acceptedPIs/", new String[]{//"bi.cer.dev", 
-				"Payment_Instance.cer"}, JAPCertificate.CERTIFICATE_TYPE_PAYMENT);
-     
-		 // simulate database distributor and suppress distributor warnings
-		Database.registerDistributor(new IDistributor()
-		{
-			public void addJob(IDistributable a_distributable)
-			{
-			}
-		});
-    
-		InfoServiceDBEntry[] defaultInfoService = JAPController.createDefaultInfoServices();
-		for (int i = 0; i < defaultInfoService.length; i++)
-		{
-			Database.getInstance(InfoServiceDBEntry.class).update(defaultInfoService[i]);
-		}
-		InfoServiceHolder.getInstance().setPreferredInfoService(defaultInfoService[0]);
-		
-		ObservableInfo a_observableInfo = new ObservableInfo(new Observable())
-		{
-			public Integer getUpdateChanged()
-			{
-				return new Integer(0);
-			}
-			public boolean isUpdateDisabled()
-			{
-				return false;
-			}
-		};
-		
-		ms_isUpdater = new InfoServiceUpdater(a_observableInfo);
-		ms_cascadeUpdater = new MixCascadeUpdater(a_observableInfo);
-		ms_paymentUpdater = new PaymentInstanceUpdater(a_observableInfo);
-	}
-	
 	public static void main(String[] args)
 	{
 		try
 		{
-			init(null, null);
-			start();
-			
-			if (!isRunning())
-			{
-				return;
-			}
-			
-			String entered = "";
-			boolean bChoose = false;
-			Vector cascades = null;
-			int index;
-			
-			while (true)
-			{
-				if (entered != null && !bChoose)
-				{
-					System.out.println("Type 'choose' to choose another service, 'force' to prevent auto-switching or 'exit' to quit.");
-				}
-				entered = null;
-				try
-				{
-					entered = new BufferedReader(new InputStreamReader(System.in)).readLine();
-				}
-				catch(Throwable t)
-				{
-				}
-				if (entered == null)
-				{
-					//Hm something is strange... do not simply continue but wait some time
-					//BTW: That are situations when this could happen?
-					// One is if JAP is run on VNC based X11 server
-					try
-					{
-						Thread.sleep(1000);
-					}
-					catch (InterruptedException e)
-					{
-					}
-					continue;
-				}
-	
-				if (bChoose)
-				{
-					bChoose = false;
-					try
-					{
-						index = Integer.parseInt(entered) - 1;
-						if (index >= 0 && index < cascades.size())
-						{
-							switchCascade((MixCascade)cascades.elementAt(index));
-						}
-						continue;
-					}
-					catch (NumberFormatException a_e)
-					{
-					}
-					System.out.println("Sorry, this service is not available.");
-				}
-				else if (entered.equals("exit"))
-				{
-					stop();
-					break;
-				}
-				else if (entered.equals("choose"))
-				{
-					cascades = getAvailableCascades();
-					for (int i = 0; i < cascades.size(); i++)
-					{
-						System.out.println((i+1) + ". " + cascades.elementAt(i));
-					}
-					bChoose = true;
-					
-					continue;
-				}
-				else if (entered.equals("force"))
-				{
-					setCascadeAutoSwitched(!isCascadeAutoSwitched());
-					System.out.println("Auto-switch is " + (isCascadeAutoSwitched() ? "ON" : "OFF") + ".");
-				}
-				else
-				{
-					System.out.println(ms_jondonymProxy.getMixCascade().getName() + " (" + (isConnected() ? "connected, " +
-							"auto-switch:" + ((isCascadeAutoSwitched() ? "ON" : "OFF")) : "disconnected") + ")");
-					  
-		            System.out.println("Memory usage: " + 
-		            		JAPUtil.formatBytesValueWithUnit(Runtime.getRuntime().totalMemory()) + ", Max VM memory: " +
-	
-							 JAPUtil.formatBytesValueWithUnit(Runtime.getRuntime().maxMemory()) + ", Free memory: " +
-							 JAPUtil.formatBytesValueWithUnit(Runtime.getRuntime().freeMemory()));
-				}
-			}			
-			
+			Controller.init(null, new LocalFileConfiguration());
 		}
 		catch (Exception a_e)
 		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+			a_e.printStackTrace();
+			//LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
+			return;
 		}
-	}
-	
-	public static synchronized void stop()
-	{
-		if (ms_jondonymProxy != null)
+		
+		MixCascade defaultCascade = null;
+		// TODO put a command line parser here...
+		if (args != null && args.length > 0)
 		{
-			ms_jondonymProxy.stop();
-		}
-		if (ms_socketListener != null)
-		{
+			// interpret the first two arguments as hostname and port
 			try 
 			{
-				ms_socketListener.close();
+				defaultCascade = new MixCascade(args[0], Integer.parseInt(args[1]));
+				TrustModel.setCurrentTrustModel(TrustModel.TRUST_MODEL_USER_DEFINED);
 			} 
-			catch (IOException a_e) 
+			catch (Exception e) 
 			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.NET, a_e);
+				e.printStackTrace();
+				System.out.println("Could not parse input as [hostname] and [port] of a cascade!");
+				return;
 			}
-			ms_socketListener = null;
-		}
-	}
-	
-	public static synchronized void switchCascade(MixCascade a_cascade)
-	{
-		if (a_cascade == null)
+		}	
+		
+		Controller.start(defaultCascade); // the cascade argument is here only for debugging; use Controller.start() otherwise
+		
+		if (!Controller.isRunning())
 		{
-			return;
-		}
-		if (ms_jondonymProxy != null && ms_serviceContainer != null)
-		{
-			ms_serviceContainer.setCurrentCascade(a_cascade);
-			ms_jondonymProxy.stop();
-			ms_jondonymProxy.start(ms_serviceContainer);
-		}
-	}
-	
-	public static synchronized void setCascadeAutoSwitched(boolean a_bAutoSwitch)
-	{
-		if (ms_serviceContainer != null)
-		{
-			ms_serviceContainer.setServiceAutoSwitched(a_bAutoSwitch);
-		}
-	}
-	
-	public static synchronized boolean isCascadeAutoSwitched()
-	{
-		if (ms_serviceContainer != null)
-		{
-			return ms_serviceContainer.isServiceAutoSwitched();
-		}
-		return true;
-	}
-	
-	public static synchronized Vector getAvailableCascades()
-	{
-		return Database.getInstance(MixCascade.class).getEntryList();
-	}
-	
-	public static synchronized MixCascade getCurrentCascade()
-	{
-		if (ms_jondonymProxy == null)
-		{
-			return null;
-		}
-		return ms_jondonymProxy.getMixCascade();
-	}
-	
-	public static synchronized boolean isRunning()
-	{
-		return ms_socketListener != null;
-	}
-	
-	public static synchronized boolean isConnected()
-	{
-		return isRunning() && ms_jondonymProxy != null && ms_jondonymProxy.isConnected();
-	}
-	
-	public static synchronized void start()
-	{
-		if (ms_socketListener != null)
-		{
+			System.out.println("Could not start controller! Exiting...");
 			return;
 		}
 		
+		
+		String entered = "";
+		boolean bChoose = false;
+		boolean bCreate = false;
+		Vector cascades = null;
+		Vector vecPIs = null;
+		boolean bPI = false;
+		PayAccount account = null;
+		boolean bSwitchTrust = false;
+		Vector vecTrustModels = null;
+		int index;
+		
+		while (true)
+		{
+			if (entered != null)
+			{
+				if (bChoose)
+				{
+					System.out.println("Please enter a cascade number to choose or 'break'.");
+				}
+				else if (bCreate)
+				{
+					System.out.println("Please enter a coupon code or 'break'.");
+				}
+				else if (bPI)
+				{
+					System.out.println("Please enter a payment instance number to switch or 'break'.");
+				}
+				else if (bSwitchTrust)
+				{
+					System.out.println("Please enter the number of the trust filter you wish to activate or 'break'.");
+				}
+				else
+				{
+					System.out.println();
+					System.out.println("Type 'choose' to choose another service, 'force' to prevent auto-switching, 'charge' to create an account,\n" +
+						"'pi' to switch to another payment instance, 'trust' to activate another trust model, <ENTER> for more information or 'exit' to quit.");
+				}
+			}
+			
+			entered = null;
+			try
+			{
+				entered = new BufferedReader(new InputStreamReader(System.in)).readLine();
+			}
+			catch(Throwable t)
+			{
+			}
+			if (entered == null)
+			{
+				//Hm something is strange... do not simply continue but wait some time
+				//BTW: That are situations when this could happen?
+				// One is if JAP is run on VNC based X11 server
+				try
+				{
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e)
+				{
+				}
+				continue;
+			}
+
+			if (entered.equals("break") || entered.equals("exit"))
+			{
+				boolean bSaved = false;
+				PayAccountsFile.getInstance().deleteAccount(account);
+				if (account != null)
+				{
+					PayAccountsFile.getInstance().deleteAccount(account);
+					bSaved = true;
+					saveConfiguration();
+				}
+				account = null;
+				bChoose = false;
+				bCreate = false;
+				if (entered.equals("exit"))
+				{
+					Controller.stop();
+					if (!bSaved)
+					{
+						saveConfiguration();
+					}
+					break;
+				}
+			}
+			else if (bChoose)
+			{
+				bChoose = false;
+				try
+				{
+					index = Integer.parseInt(entered) - 1;
+					if (index >= 0 && index < cascades.size())
+					{
+						Controller.switchCascade((MixCascade)cascades.elementAt(index));
+					}
+					continue;
+				}
+				catch (NumberFormatException a_e)
+				{
+				}
+				System.out.println("Sorry, this service is not available.");
+			}
+			else if (bSwitchTrust)
+			{
+				bSwitchTrust = false;
+				try
+				{
+					index = Integer.parseInt(entered) - 1;
+					if (index >= 0 && index < vecTrustModels.size())
+					{
+						TrustModel.setCurrentTrustModel((TrustModel)vecTrustModels.elementAt(index));
+						System.out.println("Trust model is now: '" + ((TrustModel)vecTrustModels.elementAt(index)).getName() + "'");
+						if (!TrustModel.getCurrentTrustModel().isTrusted(Controller.getCurrentCascade()) && Controller.isCascadeAutoSwitched())
+						{
+							Controller.switchCascade();
+						}
+					}
+					continue;
+				}
+				catch (NumberFormatException a_e)
+				{
+				}
+				System.out.println("Sorry, there is no such trust model.");
+			}
+			else if (bPI)
+			{
+				bPI = false;
+				try
+				{
+					index = Integer.parseInt(entered) - 1;
+					if (index >= 0 && index < vecPIs.size())
+					{
+						Controller.setIDActivePI(((PaymentInstanceDBEntry)vecPIs.elementAt(index)).getId());
+					}
+					System.out.println("The active payment instance is now " + Controller.getIDActivePI() + ".");
+					continue;
+				}
+				catch (NumberFormatException a_e)
+				{
+				}
+				System.out.println("Sorry, this payment instance is not available.");
+			}			
+			else if (bCreate)
+			{
+				try
+				{
+					if (!Controller.activateCouponCode(entered, account, true))
+					{
+						System.out.println("This does not seem to be a valid coupon code: '" + entered + "'");
+					}
+					else
+					{
+						System.out.println("Coupon code accepted, charging account...");
+						
+						final String tEntered = entered;
+						final PayAccount tAccount = account;
+						account = null;
+						bCreate = false;
+						
+						Thread useCode = new Thread(new Runnable()
+						{
+							public void run()
+							{
+								try
+								{
+									if (Controller.activateCouponCode(tEntered, tAccount, false))
+									{
+										try
+										{
+											tAccount.fetchAccountInfo(new IMutableProxyInterface.DummyMutableProxyInterface(), true);
+										}
+										catch (Exception a_e)
+										{
+											LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+											System.out.println("A problem occured while updating your charged account!");
+										}
+										if (tAccount.getBalance() != null)
+										{
+											System.out.println("Your have created an account with " + tAccount.getBalance().getVolumeKBytesLeft() + " kbytes!");
+										}
+										else
+										{
+											System.out.println("Your have created an account!");
+										}
+									}
+								}
+								catch (Exception a_e)
+								{
+									LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+									System.out.println("A problem occured when validating your code!");
+								}
+							}
+						});
+						useCode.setDaemon(false);
+						useCode.start();
+					}
+				}
+				catch (Exception a_e)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+					System.out.println("A problem occured when validating your code!");
+				}	
+			}
+			else if (entered.equals("choose"))
+			{
+				cascades = Controller.getAvailableCascades();
+				for (int i = 0; i < cascades.size(); i++)
+				{
+					System.out.println((i+1) + ". " + cascades.elementAt(i));
+				}
+				bChoose = true;
+				
+				continue;
+			}
+			else if (entered.equals("pi"))
+			{
+				vecPIs = Database.getInstance(PaymentInstanceDBEntry.class).getEntryList();
+				for (int i = 0; i < vecPIs.size(); i++)
+				{
+					System.out.println((i+1) + ". " + ((PaymentInstanceDBEntry)vecPIs.elementAt(i)).getName() + " (" +
+							((PaymentInstanceDBEntry)vecPIs.elementAt(i)).getId() + ")");
+				}
+				bPI = true;
+				
+				continue;
+			}
+			else  if (entered.equals("trust"))
+			{
+				vecTrustModels = TrustModel.getTrustModels();
+				for (int i = 0; i < vecTrustModels.size(); i++)
+				{
+					System.out.println((i+1) + ". " + ((TrustModel)vecTrustModels.elementAt(i)).getName());
+				}
+				bSwitchTrust = true;
+				
+				continue;
+			}
+			else if (entered.equals("force"))
+			{
+				Controller.setCascadeAutoSwitched(!Controller.isCascadeAutoSwitched());
+				System.out.println("Auto-switch is " + (Controller.isCascadeAutoSwitched() ? "ON" : "OFF") + ".");
+			}
+			else if (entered.equals("charge"))
+			{
+				bCreate = true;
+				try
+				{
+					account = Controller.createAccount();
+					saveConfiguration();
+				}
+				catch (Exception a_e)
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+				}
+				if (account == null)
+				{
+					bCreate = false;
+					System.out.println("Could not create account for PI " + Controller.getIDActivePI() + "!");
+				}
+			}
+			else
+			{
+				String balance = ")";
+				if (PayAccountsFile.getInstance().getActiveAccount() != null &&
+					PayAccountsFile.getInstance().getActiveAccount().getBalance() != null)
+				{
+					balance = ", balance: " + 
+						Util.formatBytesValueWithUnit(
+								PayAccountsFile.getInstance().getActiveAccount().getCurrentCredit() * 1000) + ")";
+				}
+				
+				System.out.println(Controller.getCurrentCascade().getName() + " (" + (Controller.isConnected() ? "connected, " +
+						"auto-switch:" + ((Controller.isCascadeAutoSwitched() ? "ON" : "OFF")) : "disconnected") + 
+						", TrustModel:'" + TrustModel.getCurrentTrustModel().getName() + "'" + balance);
+				  
+	            System.out.println("Memory usage: " + 
+	            		Util.formatBytesValueWithUnit(Runtime.getRuntime().totalMemory()) + ", Max VM memory: " +
+
+						 Util.formatBytesValueWithUnit(Runtime.getRuntime().maxMemory()) + ", Free memory: " +
+						 Util.formatBytesValueWithUnit(Runtime.getRuntime().freeMemory()));
+			}
+		}			
+	}
+	
+	private static void saveConfiguration()
+	{
 		try
 		{
-			ms_socketListener = new ServerSocket(4001);
-			
-	        ms_isUpdater.start(true);
-	        ms_isUpdater.update();
-	        ms_paymentUpdater.start(true);
-	        ms_paymentUpdater.update();
-	        ms_cascadeUpdater.start(true);
-	        ms_cascadeUpdater.update();
-	         
-	        MixCascade cascade;
-	        if (ms_jondonymProxy == null || ms_jondonymProxy.getMixCascade() == null)
-	        {
-		        cascade = (MixCascade)Database.getInstance(MixCascade.class).getRandomEntry();
-	        }
-	        else
-	        {
-	        	cascade = ms_jondonymProxy.getMixCascade();
-	        }
-	       
-	        if (cascade == null)
-	        {
-	        	// cascade = new MixCascade("mix.inf.tu-dresden.de", 6544);
-	        	cascade = new MixCascade("none", 6544);
-	        }
-	        
-	        ms_jondonymProxy = new AnonProxy(ms_socketListener, null,null);
-	        ms_jondonymProxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
-	        ms_serviceContainer = new AutoSwitchedMixCascadeContainer(cascade);
-	        ms_jondonymProxy.start(ms_serviceContainer);
+			Controller.saveConfiguration();
 		}
-		catch (Exception e)
+		catch (Exception a_e)
 		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
-			stop();
+			LogHolder.log(LogLevel.EXCEPTION, LogType.FILE, a_e);
+			System.out.println("Configuration was not saved!");
 		}
 	}
 	
-	
-	private static class AutoSwitchedMixCascadeContainer extends AbstractAutoSwitchedMixCascadeContainer
+	/**
+	 * We know it is an XML configuration, so we may use XML methods. This is not very nice and other people
+	 * should not do this, as the configuration format might change (compression etc.). 
+	 * Therefore this class is private and not for public use.
+	 */
+	private static class LocalFileConfiguration implements Configuration 
 	{
-		private boolean m_bAutoSwitched = true;
-		public AutoSwitchedMixCascadeContainer(MixCascade a_cascade)
-		{
-			super(false, a_cascade);
-		}
-
-		public boolean isPaidServiceAllowed()
-		{
-			return false;
-		}
+		private final File CONFIGURATION = new File("jondoConsole.conf");
 		
-		public void setServiceAutoSwitched(boolean a_bAutoSwitched)
+		public String read() throws Exception
 		{
-			m_bAutoSwitched = a_bAutoSwitched;
-		}
-		
-		public boolean isServiceAutoSwitched()
-		{
-			return m_bAutoSwitched;
-		}
-		
-		public boolean isReconnectedAutomatically()
-		{
-			return true;
-		}
-		
-		public ITermsAndConditionsContainer getTCContainer()
-		{
+			if (CONFIGURATION.exists())
+			{
+				System.out.println("Loading configuration from " + CONFIGURATION.getAbsolutePath());
+				return XMLUtil.toString(XMLUtil.readXMLDocument(CONFIGURATION));
+			}
 			return null;
 		}
-	}	
-	
-	private static class MixCascadeUpdater extends AbstractMixCascadeUpdater
-	{
-		public MixCascadeUpdater(ObservableInfo a_observableInfo)
+		public void write(String a_configurationContent) throws Exception
 		{
-			super(a_observableInfo);
-		}
-
-		protected AbstractDatabaseEntry getPreferredEntry()
-		{
-			return null; // set current cascade here!
-		}
-
-		protected void setPreferredEntry(AbstractDatabaseEntry a_preferredEntry)
-		{
-			// do nothing
+			System.out.println("Writing configuration to " + CONFIGURATION.getAbsolutePath());
+			XMLUtil.write(XMLUtil.toXMLDocument(a_configurationContent), CONFIGURATION);
 		}
 	}
 }

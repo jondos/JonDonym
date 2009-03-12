@@ -68,7 +68,7 @@ public interface IResourceInstantiator
 	 * @return
 	 * @throws Exception
 	 */
-	public Object getInstance(InputStream a_inputStream) throws Exception;
+	public Object getInstance(InputStream a_inputStream, String a_resourceName) throws Exception;
 
 	/**
 	 * An Exception that is thrown by a ResourceInstantiator if too much instantiations have failed.

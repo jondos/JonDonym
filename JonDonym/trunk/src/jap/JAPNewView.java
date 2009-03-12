@@ -1609,8 +1609,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						JAPRoutingServerStatisticsListener stats = (JAPRoutingServerStatisticsListener)
 							a_notifier;
 						long c = stats.getTransferedBytes();
-						m_labelForwardedTrafficBytes.setText(JAPUtil.formatBytesValueWithoutUnit(c));
-						m_labelForwardedTrafficBytesUnit.setText(JAPUtil.formatBytesValueOnlyUnit(c));
+						m_labelForwardedTrafficBytes.setText(Util.formatBytesValueWithoutUnit(c));
+						m_labelForwardedTrafficBytesUnit.setText(Util.formatBytesValueOnlyUnit(c));
 						m_labelForwarderAcceptedConnections.setText(Integer.toString(stats.
 							getAcceptedConnections()));
 						m_labelForwarderRejectedConnections.setText(Integer.toString(stats.
@@ -3041,9 +3041,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 				else if (value == 0)
 				{
-					m_labelSpeed.setText("< " + JAPUtil.formatKbitPerSecValueWithUnit(
+					m_labelSpeed.setText("< " + Util.formatKbitPerSecValueWithUnit(
 							PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1], 
-							JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							Util.MAX_FORMAT_KBIT_PER_SEC));
 					//bTrusted = false;
 				}
 				else
@@ -3053,25 +3053,25 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					{
 						if (System.getProperty("java.version").compareTo("1.4") >= 0)
 						{
-							m_labelSpeed.setText("\u2265 " + JAPUtil.formatKbitPerSecValueWithUnit(value, 
-									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							m_labelSpeed.setText("\u2265 " + Util.formatKbitPerSecValueWithUnit(value, 
+									Util.MAX_FORMAT_KBIT_PER_SEC));
 						}
 						else
 						{
-							m_labelSpeed.setText("> " + JAPUtil.formatKbitPerSecValueWithUnit(value, 
-									JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+							m_labelSpeed.setText("> " + Util.formatKbitPerSecValueWithUnit(value, 
+									Util.MAX_FORMAT_KBIT_PER_SEC));
 						}						
 					}
 					else if (best == value || best == Integer.MAX_VALUE)
 					{
-						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithUnit(value, 
-								JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+						m_labelSpeed.setText(Util.formatKbitPerSecValueWithUnit(value, 
+								Util.MAX_FORMAT_KBIT_PER_SEC));
 					}
 					else
 					{
-						m_labelSpeed.setText(JAPUtil.formatKbitPerSecValueWithoutUnit(
-								value, JAPUtil.MAX_FORMAT_KBIT_PER_SEC) + "-" + 
-								JAPUtil.formatKbitPerSecValueWithUnit(best, JAPUtil.MAX_FORMAT_KBIT_PER_SEC));
+						m_labelSpeed.setText(Util.formatKbitPerSecValueWithoutUnit(
+								value, Util.MAX_FORMAT_KBIT_PER_SEC) + "-" + 
+								Util.formatKbitPerSecValueWithUnit(best, Util.MAX_FORMAT_KBIT_PER_SEC));
 					}
 				}
 				
@@ -3361,13 +3361,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						String s;
 
 						//unit = JAPUtil.formatBytesValueOnlyUnit(a_totalBytes, JAPUtil.MAX_FORMAT_KBYTES);
-						unit = JAPUtil.formatBytesValueOnlyUnit(a_totalBytes);
+						unit = Util.formatBytesValueOnlyUnit(a_totalBytes);
 						m_labelOwnTrafficUnit.setText(unit);
 						m_labelOwnTrafficUnit.revalidate();
 						m_labelOwnTrafficUnitSmall.setText(unit);
 						m_labelOwnTrafficUnitSmall.revalidate();
 						//s = JAPUtil.formatBytesValueWithoutUnit(a_totalBytes, JAPUtil.MAX_FORMAT_KBYTES);
-						s = JAPUtil.formatBytesValueWithoutUnit(a_totalBytes);
+						s = Util.formatBytesValueWithoutUnit(a_totalBytes);
 						m_labelOwnTrafficBytes.setText(s);
 						m_labelOwnTrafficBytes.revalidate();
 						m_labelOwnTrafficBytesSmall.setText(s);
@@ -3417,16 +3417,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 					public void run()
 					{
-						String unit = JAPUtil.formatBytesValueOnlyUnit(m_lTrafficWWW);
+						String unit = Util.formatBytesValueOnlyUnit(m_lTrafficWWW);
 						m_labelOwnTrafficUnitWWW.setText(unit);
 						m_labelOwnTrafficUnitWWW.revalidate();
-						String s = JAPUtil.formatBytesValueWithoutUnit(m_lTrafficWWW);
+						String s = Util.formatBytesValueWithoutUnit(m_lTrafficWWW);
 						m_labelOwnTrafficBytesWWW.setText(s);
 						m_labelOwnTrafficBytesWWW.revalidate();
-						unit = JAPUtil.formatBytesValueOnlyUnit(m_lTrafficOther);
+						unit = Util.formatBytesValueOnlyUnit(m_lTrafficOther);
 						m_labelOwnTrafficUnitOther.setText(unit);
 						m_labelOwnTrafficUnitOther.revalidate();
-						s = JAPUtil.formatBytesValueWithoutUnit(m_lTrafficOther);
+						s = Util.formatBytesValueWithoutUnit(m_lTrafficOther);
 						m_labelOwnTrafficBytesOther.setText(s);
 						m_labelOwnTrafficBytesOther.revalidate();
 						JAPDll.onTraffic();
