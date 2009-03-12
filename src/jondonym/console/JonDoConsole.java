@@ -136,7 +136,7 @@ public class JonDoConsole
 					System.out.println("Type <ENTER> for more information,\n'choose' to choose another service," +
 							"\n'force' to prevent auto-switching,\n'charge' to create an account," + 
 							"\n'pi' to switch to another payment instance," +
-									"\n'trust' to activate another trust model,\n'exit' to quit.");
+									"\n'trust' to activate another trust model, or\n'exit' to quit.");
 				}
 			}
 			
@@ -278,13 +278,13 @@ public class JonDoConsole
 											LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
 											System.out.println("A problem occured while updating your charged account!");
 										}
-										if (tAccount.getBalance() != null)
+										
+										System.out.println("Your have created an account with " + tAccount.getCurrentCredit() + " kbytes!");
+										if (PayAccountsFile.getInstance().getActiveAccount() == null || 
+											PayAccountsFile.getInstance().getActiveAccount().getCurrentCredit() == 0  ||
+											!PayAccountsFile.getInstance().getActiveAccount().getPIID().equals(Controller.getActivePaymentInstanceID()))
 										{
-											System.out.println("Your have created an account with " + tAccount.getBalance().getVolumeKBytesLeft() + " kbytes!");
-										}
-										else
-										{
-											System.out.println("Your have created an account!");
+											PayAccountsFile.getInstance().setActiveAccount(tAccount);
 										}
 									}
 								}
@@ -388,6 +388,8 @@ public class JonDoConsole
 	
 	private static void saveConfiguration()
 	{
+		// this is not so good for a productive environment; maybe empty accounts should be archived somehow
+		
 		try
 		{
 			Controller.saveConfiguration();

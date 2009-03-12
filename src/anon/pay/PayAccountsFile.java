@@ -468,10 +468,13 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 				}
 				//if deleted account had a message, remove it
 				//because a deleted account will not be update any more -> JapNewView would not realize the message is gone
-				PayMessage oldMessage = accountToDelete.getBalance().getMessage();
-				if (oldMessage != null && !oldMessage.getShortMessage().equals("") )
+				if (accountToDelete.getBalance() != null)
 				{
-					fireMessageRemoved(oldMessage);
+					PayMessage oldMessage = accountToDelete.getBalance().getMessage();
+					if (oldMessage != null && !oldMessage.getShortMessage().equals("") )
+					{
+						fireMessageRemoved(oldMessage);
+					}
 				}
 
 	            //get a new active account, if possible

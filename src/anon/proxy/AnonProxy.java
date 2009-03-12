@@ -758,7 +758,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			while (threadRun != null && m_currentMixCascade.isReconnectedAutomatically() &&
 				   !m_Anon.isConnected() && !Thread.currentThread().isInterrupted())
 			{
-				LogHolder.log(LogLevel.ERR, LogType.NET, "Try reconnect to AN.ON service");
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "Try reconnect to AN.ON service");
 				int ret = m_Anon.initialize(m_currentMixCascade.getNextCascade(), m_currentMixCascade);
 				if (ret == ErrorCodes.E_SUCCESS)
 				{
