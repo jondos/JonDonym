@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 import anon.pay.PayAccount;
@@ -388,7 +389,19 @@ public class JonDoConsole
 	
 	private static void saveConfiguration()
 	{
-		// this is not so good for a productive environment; maybe empty accounts should be archived somehow
+		// delete all empty accounts (save the coupon codes if you would like to save them...
+		Enumeration enumAccounts = PayAccountsFile.getInstance().getAccounts();
+		PayAccount currentAccount;
+		while (enumAccounts.hasMoreElements())
+		{
+			currentAccount = (PayAccount)enumAccounts.nextElement();
+			if (currentAccount.getBalance() != null && currentAccount.getBalance().getSpent() > 0 && 
+					currentAccount.getCurrentCredit() == 0)
+			{
+				// delete accounts that are clearly unusable or already completely used
+				PayAccountsFile.getInstance().deleteAccount(currentAccount);
+			}
+		}
 		
 		try
 		{
