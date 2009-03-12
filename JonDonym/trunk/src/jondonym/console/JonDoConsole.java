@@ -56,6 +56,8 @@ public class JonDoConsole
 {
 	public static void main(String[] args)
 	{
+		MixCascade defaultCascade = null;
+		
 		try
 		{
 			Controller.init(null, new LocalFileConfiguration());
@@ -67,7 +69,6 @@ public class JonDoConsole
 			return;
 		}
 		
-		MixCascade defaultCascade = null;
 		// TODO put a command line parser here...
 		if (args != null && args.length > 0)
 		{
@@ -93,7 +94,11 @@ public class JonDoConsole
 			return;
 		}
 		
-		
+		run();
+	}
+	
+	private static void run()
+	{
 		String entered = "";
 		boolean bChoose = false;
 		boolean bCreate = false;
@@ -162,6 +167,7 @@ public class JonDoConsole
 				PayAccountsFile.getInstance().deleteAccount(account);
 				if (account != null)
 				{
+					// this account is deleted as it is of no further use and only consumes memory
 					PayAccountsFile.getInstance().deleteAccount(account);
 					bSaved = true;
 					saveConfiguration();
@@ -226,9 +232,9 @@ public class JonDoConsole
 					index = Integer.parseInt(entered) - 1;
 					if (index >= 0 && index < vecPIs.size())
 					{
-						Controller.setIDActivePI(((PaymentInstanceDBEntry)vecPIs.elementAt(index)).getId());
+						Controller.setActivePaymentInstanceID(((PaymentInstanceDBEntry)vecPIs.elementAt(index)).getId());
 					}
-					System.out.println("The active payment instance is now " + Controller.getIDActivePI() + ".");
+					System.out.println("The active payment instance is now " + Controller.getActivePaymentInstanceID() + ".");
 					continue;
 				}
 				catch (NumberFormatException a_e)
@@ -351,7 +357,7 @@ public class JonDoConsole
 				if (account == null)
 				{
 					bCreate = false;
-					System.out.println("Could not create account for PI " + Controller.getIDActivePI() + "!");
+					System.out.println("Could not create account for PI " + Controller.getActivePaymentInstanceID() + "!");
 				}
 			}
 			else
@@ -375,7 +381,7 @@ public class JonDoConsole
 						 Util.formatBytesValueWithUnit(Runtime.getRuntime().maxMemory()) + ", Free memory: " +
 						 Util.formatBytesValueWithUnit(Runtime.getRuntime().freeMemory()));
 			}
-		}			
+		}
 	}
 	
 	private static void saveConfiguration()
