@@ -58,10 +58,34 @@ public class JonDoConsole
 	public static void main(String[] args)
 	{
 		MixCascade defaultCascade = null;
+		Configuration configuration = new LocalFileConfiguration();
+		
+		// TODO put a command line parser here...
+		if (args != null && args.length > 0)
+		{
+			if (args[0].equals("--noConfiguration"))
+			{
+				configuration = null;
+			}
+			else
+			{
+				// interpret the first two arguments as hostname and port
+				try 
+				{
+					defaultCascade = new MixCascade(args[0], Integer.parseInt(args[1]));
+				} 
+				catch (Exception e) 
+				{
+					e.printStackTrace();
+					System.out.println("Could not parse input as [hostname] and [port] of a cascade!");
+					return;
+				}
+			}
+		}
 		
 		try
 		{
-			Controller.init(null, new LocalFileConfiguration());
+			Controller.init(null, configuration);
 		}
 		catch (Exception a_e)
 		{
@@ -71,21 +95,10 @@ public class JonDoConsole
 		}
 		
 		// TODO put a command line parser here...
-		if (args != null && args.length > 0)
+		if (defaultCascade != null)
 		{
-			// interpret the first two arguments as hostname and port
-			try 
-			{
-				defaultCascade = new MixCascade(args[0], Integer.parseInt(args[1]));
-				TrustModel.setCurrentTrustModel(TrustModel.TRUST_MODEL_USER_DEFINED);
-			} 
-			catch (Exception e) 
-			{
-				e.printStackTrace();
-				System.out.println("Could not parse input as [hostname] and [port] of a cascade!");
-				return;
-			}
-		}	
+			TrustModel.setCurrentTrustModel(TrustModel.TRUST_MODEL_USER_DEFINED);
+		}
 		
 		Controller.start(defaultCascade); // the cascade argument is here only for debugging; use Controller.start() otherwise
 		
