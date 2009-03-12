@@ -133,8 +133,10 @@ public class JonDoConsole
 				else
 				{
 					System.out.println();
-					System.out.println("Type 'choose' to choose another service, 'force' to prevent auto-switching, 'charge' to create an account,\n" +
-						"'pi' to switch to another payment instance, 'trust' to activate another trust model, <ENTER> for more information or 'exit' to quit.");
+					System.out.println("Type <ENTER> for more information,\n'choose' to choose another service," +
+							"\n'force' to prevent auto-switching,\n'charge' to create an account," + 
+							"\n'pi' to switch to another payment instance," +
+									"\n'trust' to activate another trust model,\n'exit' to quit.");
 				}
 			}
 			
