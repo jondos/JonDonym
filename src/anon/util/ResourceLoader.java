@@ -345,18 +345,20 @@ public final class ResourceLoader
 	public static byte[] loadResource(String a_strRelativeResourcePath)
 	{
 		InputStream in = loadResourceAsStream(a_strRelativeResourcePath);
+		byte[] retBytes = null;
 		if (in == null)
 		{
 			return null;
 		}
 		try
 		{
-			return getStreamAsBytes(in);
+			retBytes = getStreamAsBytes(in);
 		}
 		catch (IOException a_e)
 		{
-			return null;
 		}
+		Util.closeStream(in);
+		return retBytes;
 	}
 
 	/**
@@ -414,24 +416,25 @@ public final class ResourceLoader
 										  boolean a_bRecursive)
 	{
 		Hashtable resources = new Hashtable();
+		Object resource = null;
+		InputStream inStream = null;
 		
 		// check if this is just a file path seems to be a file path
 		try
 		{
-			Object resource = a_instantiator.getInstance(loadResourceAsStream(a_strResourceSearchPath), a_strResourceSearchPath);
-			if (resource != null)
-			{
-				resources.put(a_strResourceSearchPath, resource);
-				return resources;
-			}
-			else
-			{
-			}
+			inStream = loadResourceAsStream(a_strResourceSearchPath);
+			resource = a_instantiator.getInstance(inStream, a_strResourceSearchPath);
 		}
 		catch (Exception a_e)
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, a_e);
 			// ignore, maybe this is no file
+		}
+		Util.closeStream(inStream);
+		if (resource != null)
+		{
+			resources.put(a_strResourceSearchPath, resource);
+			return resources;
 		}
 		
 		Enumeration classPathFiles = readFilesFromClasspath(false).elements();

@@ -31,6 +31,8 @@ package jap;
 import java.awt.Window;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -377,14 +379,18 @@ public class MacOSXLib
 	
 	private static boolean extractDLL(File a_file)
 	{
+		boolean bSuccess = false;
+		InputStream streamOne = null;
+		OutputStream streamTwo = null;
+		
 		LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Extracting " + JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME + 
 				" from jar-file to: " + a_file);
 
 		try
 		{
-			Util.copyStream(
-					ResourceLoader.loadResourceAsStream(JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME),
-					new FileOutputStream(a_file));
+			streamOne = ResourceLoader.loadResourceAsStream(JAP_MACOSX_LIB_REQUIRED_VERSION_FILENAME);
+			streamTwo = new FileOutputStream(a_file);
+			Util.copyStream(streamOne, streamTwo);
 			
 			return true;
 		}
@@ -392,7 +398,11 @@ public class MacOSXLib
 		{
 			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
 		}
-		return false;
+		
+		Util.closeStream(streamOne);
+		Util.closeStream(streamTwo);
+		
+		return bSuccess;
 	}
 	
 	private static void informUserAboutJapRestart()

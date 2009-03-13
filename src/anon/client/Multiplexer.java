@@ -279,9 +279,12 @@ public class Multiplexer extends Observable implements Runnable
 				else
 				{
 					/* we don't know a channel with the specified ID - maybe it's already closed */
-					LogHolder.log(LogLevel.INFO, LogType.NET,
-								  "Received a packet for unknown channel '" +
-								  Integer.toString(receivedPacket.getChannelId()) + "'.");
+					if (LogHolder.isLogged(LogLevel.INFO, LogType.NET))
+					{
+						LogHolder.log(LogLevel.INFO, LogType.NET,
+								"Received a packet for unknown channel '" +
+								Integer.toString(receivedPacket.getChannelId()) + "'.");
+					}
 					synchronized (m_internalEventSynchronization)
 					{
 						setChanged();
@@ -325,7 +328,10 @@ public class Multiplexer extends Observable implements Runnable
 			/* end of input stream handling */
 			if (m_bClosed)
 			{
-				LogHolder.log(LogLevel.NOTICE, LogType.NET, Thread.currentThread().getName()+": terminated!", e);
+				if (LogHolder.isLogged(LogLevel.NOTICE, LogType.NET))
+				{
+					LogHolder.log(LogLevel.NOTICE, LogType.NET, Thread.currentThread().getName()+": terminated!", e);
+				}
 			}
 			else
 			{

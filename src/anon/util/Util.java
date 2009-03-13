@@ -41,6 +41,10 @@ import java.util.Vector;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.ListenerInterface;
 
@@ -660,6 +664,36 @@ public final class Util
 		}
 		encodeBuffer.append(stringWithWhitespaces.substring(lastIx));
 		return encodeBuffer.toString();
+	}
+	
+	public static void closeStream(InputStream a_input)
+	{
+		if (a_input != null)
+		{
+			try
+			{
+				a_input.close();
+			}
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.FILE, a_e);
+			}
+		}
+	}
+	
+	public static void closeStream(OutputStream a_input)
+	{
+		if (a_input != null)
+		{
+			try
+			{
+				a_input.close();
+			}
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.ERR, LogType.FILE, a_e);
+			}
+		}
 	}
 	
 	public static void copyStream(InputStream a_input, OutputStream a_output)
