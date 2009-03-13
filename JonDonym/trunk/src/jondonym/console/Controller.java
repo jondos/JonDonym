@@ -154,7 +154,7 @@ public class Controller
 		Util.addDefaultCertificates("acceptedMixCAs/", JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX);
 		Util.addDefaultCertificates("acceptedPIs/", JAPCertificate.CERTIFICATE_TYPE_PAYMENT);
      
-		 // simulate database distributor and suppress distributor warnings
+		// simulate database distributor and suppress distributor warnings
 		Database.registerDistributor(new IDistributor()
 		{
 			public void addJob(IDistributable a_distributable)

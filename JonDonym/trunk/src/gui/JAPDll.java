@@ -32,7 +32,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
@@ -474,16 +476,20 @@ final public class JAPDll {
 	*/
    private static boolean extractDLL(File a_file)
    {
-		LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Extracting " + JAP_DLL_NEW_32bit + 
+	   boolean bSuccess = false;
+	   InputStream streamOne = null;
+	   OutputStream streamTwo = null;
+	   
+	   LogHolder.log(LogLevel.DEBUG, LogType.GUI, "Extracting " + JAP_DLL_NEW_32bit + 
 				" from jar-file to: " + a_file);
 
 		try
 		{
-			Util.copyStream(
-					ResourceLoader.loadResourceAsStream(JAP_DLL_NEW_32bit),
-					new FileOutputStream(a_file));
+			streamOne = ResourceLoader.loadResourceAsStream(JAP_DLL_NEW_32bit);
+			streamTwo = new FileOutputStream(a_file);
+			Util.copyStream(streamOne, streamTwo);
 		
-			return true;
+			bSuccess = true;
 		}
 		catch (Exception e)
 		{
@@ -492,7 +498,11 @@ final public class JAPDll {
 			//JAPDialog.showMessageDialog( JAPController.getView(),
 			//JAPMessages.getString(MSG_PERMISSION_PROBLEM, "'" + a_file + "'") );
 		}
-		return false;
+		
+		Util.closeStream(streamOne);
+		Util.closeStream(streamTwo);
+		
+		return bSuccess;
 	}
 
 	/**

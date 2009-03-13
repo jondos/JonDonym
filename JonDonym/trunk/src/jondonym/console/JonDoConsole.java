@@ -49,7 +49,7 @@ import logging.LogType;
 import logging.LogLevel;
 
 /**
- * This is a small console test application for the Controller interface. it may be used for
+ * This is a small console test application for the Controller interface. It may be used for
  * testing new interface functions and for debugging.
  * @author Rolf Wendolsky
  */

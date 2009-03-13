@@ -33,6 +33,7 @@ import java.util.Hashtable;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.MissingResourceException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 
 import logging.LogHolder;
@@ -118,6 +119,8 @@ public final class JAPMessages
 	 */
 	public static synchronized boolean init(Locale locale, String a_resourceBundleFilename)
 	{
+		InputStream stream = null;
+		
 		if (ms_locale != null)
 		{
 			// the first bundle has been loaded; set English as safe default
@@ -142,9 +145,9 @@ public final class JAPMessages
 		try
 		{
 			//ms_resourceBundle = PropertyResourceBundle.getBundle(a_resourceBundleFilename, locale);
-			ms_resourceBundle = new PropertyResourceBundle(
-				 ResourceLoader.loadResourceAsStream(
-						 getBundleLocalisedFilename(a_resourceBundleFilename, locale), true));
+			stream = ResourceLoader.loadResourceAsStream(
+					 getBundleLocalisedFilename(a_resourceBundleFilename, locale), true);
+			ms_resourceBundle = new PropertyResourceBundle(stream);
 		}
 		catch (Exception a_e)
 		{
@@ -168,9 +171,12 @@ public final class JAPMessages
 				}
 				catch (Exception e)
 				{
+					LogHolder.log(LogLevel.ERR, LogType.FILE, e);
 				}
 			}
 		}
+		
+		Util.closeStream(stream);
 
 		ms_cachedMessages = new Hashtable();
 		ms_locale = locale;
