@@ -71,7 +71,6 @@ import jap.JAPNewView;
 import jap.JAPSplash;
 import jap.JAPViewIconified;
 import jap.MacOSXLib;
-import jondonym.console.JonDoConsole;
 import logging.FileLog;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -174,54 +173,6 @@ public class JAP
 		int listenPort = 0;
 		MixCascade commandlineCascade = null;
 		
-		// parse any given Mix-Cascade
-		if (isArgumentSet("--cascade"))
-		{
-			String tmpStr = getArgumentValue("--cascade");
-			try
-			{
-				//cascade is given as host[:port][:id]
-				StringTokenizer st=new StringTokenizer(tmpStr,":");
-				String host=null;
-				String id=null;
-				int port=6544;
-				if(st.hasMoreTokens())
-				{
-						host=st.nextToken();
-				}
-				if(st.hasMoreTokens())
-					{
-							port=Integer.parseInt(st.nextToken());
-					}
-				if(st.hasMoreTokens())
-					{
-							id=st.nextToken();
-					}
-				commandlineCascade=new MixCascade("Commandline Cascade",id,host,port);
-			}
-			catch (Throwable t)
-			{
-			}
-		}
-		
-		if (isArgumentSet("-console") || isArgumentSet("--console"))
-		{
-			//bConsoleOnly = true;
-			if (commandlineCascade != null)
-			{
-				String[] args = new String[2];
-				args[0] = commandlineCascade.getListenerInterface(0).getHost();
-				args[1] = "" + commandlineCascade.getListenerInterface(0).getPort();
-				JonDoConsole.main(args);
-			}
-			else
-			{
-				JonDoConsole.main(null);
-			}
-			return;
-		}
-		
-		
 		/* system wide socks settings should not not apply to JAP */
 		System.getProperties().remove("socksProxyHost");
 		System.getProperties().remove("socksProxyPort");
@@ -309,6 +260,11 @@ public class JAP
 			System.out.println("--config, -c {Filename}:     Force " + strname + " to use a specific configuration file.");
 			System.out.println("--context {Context}:         Start " + strname + " with a specific service provider context.");
 			System.exit(0);
+		}
+		
+		if (isArgumentSet("-console") || isArgumentSet("--console"))
+		{
+			bConsoleOnly = true;
 		}
 	
 		if (isArgumentSet("--uninstall") || isArgumentSet("-u"))
@@ -674,6 +630,35 @@ public class JAP
 			}
 		}
 
+		// parse any given Mix-Cascade
+		if (isArgumentSet("--cascade"))
+		{
+			String tmpStr = getArgumentValue("--cascade");
+			try
+			{
+				//cascade is given as host[:port][:id]
+				StringTokenizer st=new StringTokenizer(tmpStr,":");
+				String host=null;
+				String id=null;
+				int port=6544;
+				if(st.hasMoreTokens())
+				{
+						host=st.nextToken();
+				}
+				if(st.hasMoreTokens())
+					{
+							port=Integer.parseInt(st.nextToken());
+					}
+				if(st.hasMoreTokens())
+					{
+							id=st.nextToken();
+					}
+				commandlineCascade=new MixCascade("Commandline Cascade",id,host,port);
+			}
+			catch (Throwable t)
+			{
+			}
+		}
 
 		// Create the controller object
 		splash.setText(JAPMessages.getString(MSG_STARTING_CONTROLLER));
