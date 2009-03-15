@@ -20,27 +20,29 @@ alt="-&gt;"></a></span> </p>
 <h2>JonDonym, AN.ON and Tor</h2>
 
 <p><strong>The JonDonym/AN.ON technology is based on the principle of multiple
-encryption, distribution and processing. This procedure does not only protect
-your internet activities from being observed by third parties (<em>against your
-access provider, WLAN hackers, advertising services and websites</em>), but
-also against observation by the individual JonDonym providers themselves
-(<em>against JonDonym service operators and their billing
+(layered) encryption, distribution and processing. This procedure does not only
+protect your internet activities from being observed by third parties
+(<em>against your access provider, WLAN hackers, advertising services and
+websites</em>), but also against observation by the individual JonDonym
+providers themselves (<em>against JonDonym service operators and their billing
 providers</em>).</strong></p>
 
 <p>The anonymization service JonDonym is a development branch of the <a
 href="http://anon.inf.tu-dresden.de">AN.ON Project</a>. It consists of multiple
-user selectable mix cascades. A cascade consists of two or three mix servers
-operated by independent and non interrelated organizations or private
-individuals who all <a href="certificates.html">publish their identity</a>. The
-operators have to abide by strict provisions which prohibit saving connection
-data or exchanging such data with other operators in a cascade. Every
-connection from a user is differently encrypted for every mix server within a
-cascade and transferred through the cascade to the target, e.g. a website.
-Thereby no mix operator alone can by himself expose the user. Eavesdroppers on
-the connections to JonDonym mixes get garbage data only. Also, since a lot of
-users surf the anonymization service simultaneously, and thus share the same <a
-href="wwwprivacy.html#ip">IP address</a>, all connections of every user are
-concealed amidst each other: a correlation is not possible any more. </p>
+user selectable mix cascades. A cascade consists of two or three separately
+encrypted mix servers. These mix servers are operated by independent and non
+interrelated organizations or private individuals who all <a
+href="certificates.html">publish their identity</a>. The operators have to
+abide by strict provisions which prohibit saving connection data or exchanging
+such data with other operators. Every connection from a user is differently
+encrypted for every mix server within a cascade and transferred through the
+cascade to the target, e.g. a website. Thereby no mix operator alone can by
+himself expose the user. Eavesdroppers on the connections to JonDonym cascades
+get garbage data only, as the connection to every mix is separately encrypted.
+Also, since a lot of users surf the anonymization service simultaneously, and
+thus share the same <a href="wwwprivacy.html#ip">IP address</a>, all
+connections of every user are concealed amidst each other: a correlation is not
+possible any more. </p>
 
 <p style="text-align:center;"><img alt="JonDonym" src="img/jondonym.jpg"
 width="515"></p>
@@ -49,9 +51,9 @@ width="515"></p>
 <ul>
   <li><b>Protection against your own internet access provider:</b> Strong
     encryption and authentication protect you from being observed. Nobody can
-    read the traffic between your PC and the JonDonym service. (Encrypted with
-    RSA 1024 and AES 128; signed with DSA, RSA or ECDSA; realized with the
-    BouncyCastle and OpenSSL libraries)</li>
+    read the traffic between your PC and the JonDonym mixes. (per mix encrypted
+    with RSA 1024 and AES 128 for each mix; signatures built with DSA, RSA or
+    ECDSA; realized with the BouncyCastle and OpenSSL libraries)</li>
   <li><b>Protection against the anonymity service operators:</b> Unless all mix
     operators in a JonDonym cascade are separately forced by a court order,
     blackmail or a hacker attack to monitor you, your JonDonym connections are
@@ -106,13 +108,13 @@ JonDonym. Internet beginners should be careful with Tor, though: there is no
 control over who runs the Tor servers over which your private data travels. In
 the past, there has been ongoing suspicion that criminals and intelligence
 agencies exploit the Tor network in order to secretly attain unencrypted
-information like passwords, bank accounts and credit cards. Certain tricks can
-enable the Tor server to concentrate much of the traffic on itself, making the
-exploit even more effective. Tor may be set as <a href="net.html">proxy in
-JonDo</a> though, making surfing considerably slower but, in some individual
-cases, even more secure than with JonDonym alone because the last servers in
-this chain will then be part of the <a href="certificates.html">verified</a>
-JonDonym network. </p>
+information like passwords, bank accounts and credit cards. Moreover, certain
+tricks can enable the Tor server to concentrate much of the traffic on itself,
+making the exploit even more effective. Tor may be set as <a
+href="net.html">proxy in JonDo</a> though, making surfing considerably slower
+but, in some individual cases, even more secure than with JonDonym alone:
+thereby the last servers in this chain will then be part of the <a
+href="certificates.html">verified</a> JonDonym network. </p>
 
 <p>Like in Tor, the respective last mix server in a JonDonym cascade could
 record data which is not separately secured by HTTPS/SSL (has to be offered by

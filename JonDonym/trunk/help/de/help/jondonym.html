@@ -20,29 +20,30 @@ alt="-&gt;"></a></span> </p>
 <h2>JonDonym, AN.ON und Tor</h2>
 
 <p><strong>Die JonDonym/AN.ON-Technik basiert auf dem Prinzip der mehrfachen
-Verschl&uuml;sselung, Verteilung und Weiterleitung. Dieses Verfahren
-sch&uuml;tzt Ihre Internet-Aktivit&auml;ten nicht nur gegen Beobachter von
-Dritter Seite (<em>gegen Ihren Zugangs-Provider, WLAN-Hacker, Werbedienste und
-Webseiten</em>), sondern auch gegen eine Beobachtung durch die einzelnen
+(schichtweisen) Verschl&uuml;sselung, Verteilung und Weiterleitung. Dieses
+Verfahren sch&uuml;tzt Ihre Internet-Aktivit&auml;ten nicht nur vor Beobachtung
+von Dritter Seite (<em>gegen Ihren Zugangs-Provider, WLAN-Hacker, Werbedienste
+und Webseiten</em>), sondern auch vor einer Beobachtung durch die einzelnen
 Anbieter von JonDonym selbst (<em>gegen die Betreiber von JonDonym-Diensten und
 deren Abrechnungsdienstleister</em>).</strong></p>
 
 <p>Der Anonymisierungsdienst JonDonym ist ein Entwicklungszweig des <a
 href="http://anon.inf.tu-dresden.de">AN.ON-Projekts</a>. Er besteht aus
-mehreren einzeln w&auml;hlbaren Mixkaskaden. Diese setzen sich aus zwei bis
-drei Mix-Servern zusammen, die von jeweils unabh&auml;ngigen Organisationen
-oder Privatpersonen betrieben werden, <a href="certificates.html">deren
-Identit&auml;t ver&ouml;ffentlicht wird</a>. Die Betreiber m&uuml;ssen sich an
-strikte Betriebsrichtlinien halten, die ihnen verbieten, Verbindungsdaten zu
-speichern oder mit den anderen Mix-Betreibern in der Kaskade oder mit einer
-dritten Organisation Surfdaten von Nutzern auszutauschen. Jede
-Internetverbindung eines Nutzers wird f&uuml;r jeden Mix einer Kaskade
-unterschiedlich verschl&uuml;sselt und &uuml;ber die Mixkaskade bis zum Ziel,
-z.B. zu einer Webseite, gesendet. Dadurch kann kein Mixbetreiber alleine den
-Nutzer enttarnen . Lauscher auf den Verbindungen zu JonDonym-Mixen k&ouml;nnen
-keine brauchbaren Inhaltsdaten abgreifen. Da au&szlig;erdem viele Benutzer
-gleichzeitig den Anonymisierungsdienst nutzen und sich dabei alle dieselbe <a
-href="wwwprivacy.html#ip">IP-Adresse</a> teilen, werden die
+mehreren einzeln w&auml;hlbaren Mix-Kaskaden. Diese setzen sich aus zwei bis
+drei Mix-Servern mit jeweils separater Verschl&uuml;sselung zusammen. Diese
+Server werden jeweils unabh&auml;ngigen Organisationen oder Privatpersonen
+betrieben, <a href="certificates.html">deren Identit&auml;t ver&ouml;ffentlicht
+wird</a>. Die Betreiber m&uuml;ssen sich an strikte Betriebsrichtlinien halten,
+die ihnen verbieten, Verbindungsdaten zu speichern oder mit den anderen
+Mix-Betreibern oder mit einer dritten Organisation Surfdaten von Nutzern
+auszutauschen. Jede Internetverbindung eines Nutzers wird f&uuml;r jeden Mix
+einer Kaskade unterschiedlich verschl&uuml;sselt und &uuml;ber die Mixkaskade
+bis zum Ziel, z.B. zu einer Webseite, gesendet. Dadurch kann kein Mixbetreiber
+alleine den Nutzer enttarnen. Lauscher auf den Verbindungen zu
+JonDonym-Kaskaden k&ouml;nnen keine brauchbaren Inhaltsdaten abgreifen, da die
+Verbindung zu jedem Mix einzeln verschl&uuml;sselt wird. Da au&szlig;erdem
+viele Benutzer gleichzeitig den Anonymisierungsdienst nutzen und sich dabei
+alle dieselbe <a href="wwwprivacy.html#ip">IP-Adresse</a> teilen, werden die
 Internetverbindungen jedes Benutzers unter denen aller anderen Benutzer auf
 derselben Kaskade versteckt: eine Zuordnung ist somit nicht mehr m&ouml;glich.
 </p>
@@ -56,14 +57,14 @@ Vorteile:</p>
   <li><b>Schutz vor dem eigenen Internet-Zugangs-Provider:</b> Starke
     Verschl&uuml;sselung und Authentisierung sch&uuml;tzen Sie davor,
     beobachtet zu werden. Niemand kann den Datenverkehr zwischen Ihrem Rechner
-    und dem JonDonym-Dienst mitlesen. (Verschl&uuml;sselt mit RSA 1024 und AES
-    128; signiert mit DSA, RSA oder ECDSA; realisiert mit den Bibliotheken
-    BouncyCastle und OpenSSL)</li>
+    und den JonDonym-Mixen mitlesen. (je Mix verschl&uuml;sselt mit RSA 1024
+    und AES 128; Signaturen erzeugt mit DSA, RSA oder ECDSA; realisiert mit den
+    Bibliotheken BouncyCastle und OpenSSL)</li>
   <li><b>Schutz vor den Betreibern des Anonymisierungsdienstes:</b> Solange
-    nicht alle Dienstbetreiber einer JonDonym-Kaskade einzeln per
+    nicht alle Mix-Betreiber einer JonDonym-Kaskade einzeln per
     Gerichtsbeschluss, Erpressung oder einem Hacker-Angriff gezwungen werden
     Sie zu &uuml;berwachen, sind Ihre JonDonym-Verbindungen sicher. Die
-    Mixbetreiber werden regelm&auml;&szlig;ig auf ihre Seriosit&auml;t und
+    Mix-Betreiber werden regelm&auml;&szlig;ig auf ihre Seriosit&auml;t und
     Professionalit&auml;t gepr&uuml;ft. Au&szlig;erdem wird ihre Identit&auml;t
     ver&ouml;ffentlicht.</li>
   <li><b>Keine Logdaten:</b> Den Mixbetreibern ist es vertraglich untersagt,
@@ -116,13 +117,13 @@ die Ihre privaten Kommunikationsdaten laufen. In der Vergangenheit gab es immer
 wieder den Verdacht, dass Kriminelle und Geheimdienste das Tor-Netzwerk
 missbrauchen, um unbemerkt unverschl&uuml;sselt &uuml;bertragene Informationen
 wie Passw&ouml;rter, Kontoverbindungen und Kreditkartendaten abzufangen und zu
-missbrauchen. Mit bestimmten Tricks k&ouml;nnen einzelne Tor-Server besonders
-viel Datenverkehr auf sich leiten um diese Angriffe effektiver zu machen. Tor
-kann aber gefahrlos als <a href="net.html">Proxy in JonDo eingetragen</a>
-werden, wodurch das Surfen zwar deutlich langsamer, aber in Einzelf&auml;llen
-noch sicherer wird als mit JonDo allein. Denn die letzten Server in der Kette
-sind dann Teil des <a href="certificates.html">verifizierten</a>
-JonDonym-Netzwerkes.</p>
+missbrauchen. Mit bestimmten Tricks k&ouml;nnen einzelne Tor-Server
+au&szlig;erdem besonders viel Datenverkehr auf sich leiten um diese Angriffe
+effektiver zu machen. Tor kann aber gefahrlos als <a href="net.html">Proxy in
+JonDo eingetragen</a> werden, wodurch das Surfen zwar deutlich langsamer, aber
+in Einzelf&auml;llen noch sicherer wird als mit JonDo allein. Denn die letzten
+Server in der Kette sind dann Teil des <a
+href="certificates.html">verifizierten</a> JonDonym-Netzwerkes.</p>
 
 <p>Wie bei Tor k&ouml;nnte auch der jeweils letzte Mix-Server einer
 JonDonym-Kaskade Datenverkehr, der nicht zus&auml;tzlich &uuml;ber eine
