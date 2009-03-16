@@ -221,6 +221,7 @@ public abstract class AbstractDatabaseUpdater extends Updater
 	protected boolean doCleanup(Hashtable a_newEntries)
 	{
 		boolean bUpdated = false;
+		AbstractDatabaseEntry currentEntry;
 
 		/* now remove all non user-defined infoservices, which were not updated, from the
 		 * database of known infoservices
@@ -228,7 +229,7 @@ public abstract class AbstractDatabaseUpdater extends Updater
 		Enumeration knownDBEntries = Database.getInstance(getUpdatedClass()).getEntryList().elements();
 		while (knownDBEntries.hasMoreElements())
 		{
-			AbstractDatabaseEntry currentEntry = (AbstractDatabaseEntry) (knownDBEntries.nextElement());
+			currentEntry = (AbstractDatabaseEntry) (knownDBEntries.nextElement());
 			if (!protectFromCleanup(currentEntry) && !currentEntry.isUserDefined() && 
 				!a_newEntries.contains(currentEntry) /*&&  immediate cleanup
 				(currentEntry.getCreationTime() +  KEEP_ENTRY_FACTOR * getUpdateInterval().getUpdateInterval()) <
