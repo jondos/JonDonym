@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<DummyElement id="encodableAK33#3">
+    <!--This xml structure has been created by anon.crypto.test.XMLSignatureTest.-->
+
+    <!--The calling test class was anon.crypto.test.XMLSignatureTest.-->
+
+    <TextNode BooleanAttribute="false">dummy</TextNode>
+    <ContainerNode IntAttribute="682">
+        <NumberNode>142</NumberNode>
+        <NumberNode>5721672</NumberNode>
+    </ContainerNode>
+    <BooleanNode>true</BooleanNode>
+    <Signature>
+        <SignedInfo>
+            <CanonicalizationMethod></CanonicalizationMethod>
+            <SignatureMethod Algorithm="Dummy"></SignatureMethod>
+            <Reference>
+                <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></DigestMethod>
+                <DigestValue>6F/wvk51FFnVSXUqbyEFuWalbYs=</DigestValue>
+            </Reference>
+        </SignedInfo>
+        <SignatureValue>5vc3YEVG6aPnYmLByWEG6Q==</SignatureValue>
+        <KeyInfo>
+            <X509Data><X509Certificate xml:space="preserve">MIGXMHigAwIBAgIBATAIBgYAAAAAAAAwEjEQMA4GA1UEAwwHcHJpdmF0ZTAeFw0wODA4MTExMjIz
+MTRaFw0wODA4MTExMjIzMTRaMBMxETAPBgNVBAMMCHByaXZhdGUyMBcwCAYGAAAAAAACAwsAAghy
+ytyarkmpjaMCMAAwCAYGAAAAAAAAAxEAefJSZ6wb+m9VBzKGsc1MkA==</X509Certificate><X509Certificate xml:space="preserve">MIGYMHmgAwIBAgIBATAIBgYAAAAAAAAwEzERMA8GA1UEAwwIcHJpdmF0ZTMwHhcNMDgwODExMTIy
+MzE0WhcNMDgwODExMTIyMzE0WjATMREwDwYDVQQDDAhwcml2YXRlMjAXMAgGBgAAAAAAAgMLAAII
+csrcmq5JqY2jAjAAMAgGBgAAAAAAAAMRACfJhHnNotrPK5ReMll0oqs=</X509Certificate></X509Data>
+        </KeyInfo>
+    </Signature>
+</DummyElement>
