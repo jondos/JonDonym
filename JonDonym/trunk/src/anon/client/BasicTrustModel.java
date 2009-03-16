@@ -59,7 +59,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
 		{
 			info = a_cascade.getMixInfo(i);
-			if ((info == null && SignatureVerifier.getInstance().isCheckSignatures()) || !info.isVerified())
+			if ((info == null && SignatureVerifier.getInstance().isCheckSignatures()) || (info != null && !info.isVerified()))
 			{
 				countUnverified++;
 				if (exception == null)
