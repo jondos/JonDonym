@@ -157,9 +157,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_NOT_TRUSTWORTHY = JAPConfAnon.class.getName() + "_notTrustworthy";
 	private static final String MSG_EXPLAIN_NOT_TRUSTWORTHY =
 		JAPConfAnon.class.getName() + "_explainNotTrustworthy";
-	private static final String MSG_BLACKLISTED = JAPConfAnon.class.getName() + "_blacklisted";
 	private static final String MSG_EXPLAIN_BLACKLISTED = JAPConfAnon.class.getName() + "_explainBlacklisted";
-	private static final String MSG_PI_UNAVAILABLE = JAPConfAnon.class.getName() + "_piUnavailable";
 	private static final String MSG_EXPLAIN_PI_UNAVAILABLE = JAPConfAnon.class.getName() + "_explainPiUnavailable";
 	private static final String MSG_EXPLAIN_NO_CASCADES = JAPConfAnon.class.getName() + "_explainNoCascades";
 	private static final String MSG_WHAT_IS_THIS = JAPConfAnon.class.getName() + "_whatIsThis";
@@ -1006,18 +1004,17 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_lblAvailability.setForeground(Color.red);
 			m_lblAvailability.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			if (Database.getInstance(BlacklistedCascadeIDEntry.class).getEntryById(
-				cascade.getMixIDsAsString()) != null)
+			if (TrustModel.isBlacklisted(cascade))
 			{
-				m_lblAvailability.setText(JAPMessages.getString(MSG_BLACKLISTED));
+				m_lblAvailability.setText(JAPMessages.getString(TrustModel.MSG_BLACKLISTED));
 				m_lblAvailability.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_BLACKLISTED,
 					TrustModel.getCurrentTrustModel().getName()));
 				m_blacklist = true;
 				m_unknownPI = false;
 			}
-			else if (cascade.isPayment() && PayAccountsFile.getInstance().getBI(cascade.getPIID()) == null)
+			else if (TrustModel.isNoPaymentInstanceFound(cascade))
 			{
-				m_lblAvailability.setText(JAPMessages.getString(MSG_PI_UNAVAILABLE));
+				m_lblAvailability.setText(JAPMessages.getString(TrustModel.MSG_PI_UNAVAILABLE));
 				m_lblAvailability.setToolTipText(JAPMessages.getString(MSG_EXPLAIN_PI_UNAVAILABLE,
 					TrustModel.getCurrentTrustModel().getName()));
 				m_blacklist = false;

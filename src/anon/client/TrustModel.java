@@ -123,7 +123,8 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String MSG_ALL_SERVICES = TrustModel.class.getName() + "_allServices";
 	private static final String MSG_SERVICES_BUSINESS = TrustModel.class.getName() + "_servicesBusiness";
 	private static final String MSG_SERVICES_PREMIUM_PRIVATE = TrustModel.class.getName() + "_servicesPremiumPrivate";
-	
+	public static final String MSG_PI_UNAVAILABLE = TrustModel.class.getName() + "_piUnavailable";
+	public static final String MSG_BLACKLISTED = TrustModel.class.getName() + "_blacklisted";
 	
 	private static final String MSG_EXCEPTION_NO_SOCKS = TrustModel.class.getName() + "_exceptionNoSocks";
 	private static final String MSG_EXCEPTION_PAY_CASCADE = TrustModel.class.getName() + "_exceptionPayCascade";
@@ -1286,22 +1287,41 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		return false;
 	}
 
+	public static boolean isBlacklisted(MixCascade a_cascade)
+	{
+		if (a_cascade == null)
+		{
+			return false;
+		}
+		return Database.getInstance(BlacklistedCascadeIDEntry.class).getEntryById(
+				  a_cascade.getMixIDsAsString()) != null;
+	}
+	
+	public static boolean isNoPaymentInstanceFound(MixCascade a_cascade)
+	{
+		if (a_cascade == null)
+		{
+			return false;
+		}
+		return a_cascade.isPayment() && PayAccountsFile.getInstance().getBI(a_cascade.getPIID()) == null &&
+			PayAccountsFile.getInstance().getChargedAccount(a_cascade.getPIID()) != null;
+	}
+	
 	public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
 	{
 		if (a_cascade == null)
 		{
-			throw (new TrustException("Cascade is null!"));
+			throw (new TrustException("Null cascade!"));
 		}
 
-		if (Database.getInstance(BlacklistedCascadeIDEntry.class).getEntryById(
-			  a_cascade.getMixIDsAsString()) != null)
+		if (isBlacklisted(a_cascade))
 		{
-			throw (new TrustException("Cascade is in blacklist!"));
+			throw (new TrustException(JAPMessages.getString(MSG_BLACKLISTED)));
 		}
 
-		if (a_cascade.isPayment() && PayAccountsFile.getInstance().getBI(a_cascade.getPIID()) == null)
+		if (isNoPaymentInstanceFound(a_cascade))
 		{
-			throw (new TrustException("Payment instance for this cascade is unknown!"));
+			throw (new TrustException(JAPMessages.getString(MSG_PI_UNAVAILABLE)));
 		}
 
 		// allow to connect to unverified cascades in user defined filter
