@@ -89,8 +89,8 @@
 			verbose="true" usetimestamp="true" ignoreerrors="true"/> 		
 		<get src="${lib.appleJavaExtensions.url}" dest="${lib.appleJavaExtensions}"
 			verbose="true" usetimestamp="true" ignoreerrors="true"/>
-		<get src="${lib.macOSX.url}" dest="${lib.macOSX}"
-			verbose="true" usetimestamp="true" ignoreerrors="true"/>
+		<!--<get src="${lib.macOSX.url}" dest="${lib.macOSX}"
+			verbose="true" usetimestamp="true" ignoreerrors="true"/> -->
 		
 		<!--<available file="${lib.jama}" property="lib.jama.available"/>-->
 		<available file="${lib.http}" property="lib.http.available"/>
@@ -260,15 +260,16 @@
 			</jar>
 	</target>
 	
-	<target name="jar-all-platforms" depends="getcurrentjapdllversion, getcurrentmacosxlibversion"
+	<!-- removed from depend:  "getcurrentmacosxlibversion" -->
+	<target name="jar-all-platforms" depends="getcurrentjapdllversion"
 	 description="creates a jar containing all platform-specific libraries">
 			
 			<antcall target="${buildfile.core.target.jar.osindependent}"/>
 			<jar jarfile="${jarfile}" update="true"> 
 				<zipfileset file="${lib.japdll}" fullpath="japdll.dll.${currentJAPDllVersion}"/>
-				<zipfileset file="${lib.macOSX}" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>
-				<zipfileset file="${lib.appleJavaExtensions}"/>
-				<zipfileset file="${lib.mrj_classes}"/>
+				<!--<zipfileset file="${lib.macOSX}" fullpath="libMacOSX.jnilib.${currentMacOSXLibVersion}"/>-->
+				<zipfileset src="${lib.appleJavaExtensions}"/>
+				<zipfileset src="${lib.mrj_classes}"/>
 			</jar>
 	</target>
 	
