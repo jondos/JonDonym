@@ -56,6 +56,27 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		MixInfo info;
 		int countUnverified = 0;
 		SignatureException exception = null;
+		
+		if (a_cascade == null || (!a_cascade.isUserDefined() && !a_cascade.isVerified()))
+		{
+			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
+		}
+		else if (SignatureVerifier.getInstance().isCheckSignatures())
+		{
+			// check whether at least one of the certificates and at least the certificate of the first or last Mix are still valid
+			for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
+			{
+				if (a_cascade.getMixInfo(i) != null && a_cascade.getMixInfo(i).getCertPath() != null &&
+					a_cascade.getMixInfo(i).getCertPath().isValid(new Date()) && (i == 0 || i == a_cascade.getNumberOfMixes() - 1))
+				{
+					return;
+				}
+			}
+			
+			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
+		}
+		
+		// check whether one of the mixes in the cascade has an invalid signature
 		for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
 		{
 			info = a_cascade.getMixInfo(i);
@@ -78,27 +99,7 @@ public class BasicTrustModel extends Observable implements ITrustModel
 			{
 				throw exception;
 			}
-		}
-		
-		if (a_cascade == null || (!a_cascade.isUserDefined() && !a_cascade.isVerified()))
-		{
-			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
-		}
-		else if (SignatureVerifier.getInstance().isCheckSignatures())
-		{
-			
-			// check whether at least one of the certificates and at least the certificate of the first or last Mix are valid
-			for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
-			{
-				if (a_cascade.getMixInfo(i) != null && a_cascade.getMixInfo(i).getCertPath() != null &&
-					a_cascade.getMixInfo(i).getCertPath().isValid(new Date()) && (i == 0 || i == a_cascade.getNumberOfMixes() - 1))
-				{
-					return;
-				}
-			}
-			
-			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
-		}
+		}		
 	}
 
 	/**

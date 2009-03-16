@@ -563,6 +563,11 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 		return getChargedAccount(a_piid, getActiveAccount());
 	}
 	
+	public synchronized PayAccount getChargedAccount(String a_piid)
+	{
+		return getChargedAccount(a_piid, null);
+	}
+	
 	public synchronized PayAccount getChargedAccount(String a_piid, PayAccount a_excludeAccount)
 	{
 		Vector accounts = PayAccountsFile.getInstance().getAccounts(a_piid);
