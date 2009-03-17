@@ -38,14 +38,14 @@
 	</xsl:template>
 		
 	<xsl:template match="PreAmble/Operator">
-		<xsl:value-of select="Name" /><br />
+		<xsl:value-of select="Organisation" /><br />
 		<xsl:value-of select="Street" /><br />
 		<xsl:value-of select="PostalCode" /> - <xsl:value-of select="City" /><br />
 		<xsl:value-of select="OperatorCountry" /><br />
 		<br />
 		VAT: <xsl:value-of select="VAT" /><br />
 		Fax: <xsl:value-of select="Fax" /><br />
-		E-Mail: <xsl:value-of select="eMail" /><br />
+		E-Mail: <xsl:value-of select="EMail" /><br />
 	</xsl:template>
 		
 	<xsl:template match="Section">

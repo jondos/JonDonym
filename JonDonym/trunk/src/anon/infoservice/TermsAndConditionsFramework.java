@@ -183,13 +183,12 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 				throw new XMLParseException("Translation node must not be null. Mix violates T&C protocol.");
 			}
 			
-			Element operator = (Element) XMLUtil.getFirstChildByName(tcTranslationElement, XML_ELEMENT_OPERATOR);
+			Element operator = operator = op.toXMLElement(XMLUtil.createDocument(), tcTranslation.getOperatorAddress(), false);
 			if(operator == null)
 			{
-				operator = op.toXMLElement(XMLUtil.createDocument(), false);
-				System.out.println("opnode: "+XMLUtil.toString(operator));
-				//throw new XMLParseException("Operator must not be null.");
+				throw new XMLParseException("Operator must not be null.");
 			}
+			
 			
 			// get country from country code
 			Locale loc = new Locale(op.getCountryCode(), op.getCountryCode());
@@ -215,22 +214,47 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			replaceNode(country, XML_ELEMENT_OPERATOR_COUNTRY);
 			
 			// replace PrivacyPolicyUrl
-			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_PRIVACY_POLICY_URL);
+			//replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_PRIVACY_POLICY_URL);
+			
+			String[] urlElements = new String[]
+			{
+					XML_ELEMENT_PRIVACY_POLICY_URL, 
+					XML_ELEMENT_LEGAL_OPINIONS_URL, 
+					XML_ELEMENT_OPERATIONAL_AGREEMENT_URL
+			};
+			
+			String[] urlValues = new String[]
+            {
+					tcTranslation.getPrivacyPolicyUrl(),
+					tcTranslation.getLegalOpinionsUrl(),
+					tcTranslation.getOperationalAgreementUrl()
+            };
+			
+			Element currentUrlElement = null;
+			for (int i = 0; i < urlValues.length; i++) 
+			{
+				currentUrlElement =
+					(Element) XMLUtil.getFirstChildByNameUsingDeepSearch(m_docWorkingCopy.getDocumentElement(), urlElements[i]);
+				if(currentUrlElement != null)
+				{
+					currentUrlElement.setTextContent(urlValues[i]);
+				}
+			}
 			
 			// replace LegalOpinionsUrl
-			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_LEGAL_OPINIONS_URL);
+			//replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_LEGAL_OPINIONS_URL);
 			
 			// replace OperationalAgreementUrl
-			replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
+			//replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
 			
 			// replace Location
-			replaceNodeFromTC(operator, XML_ELEMENT_OPERATOR_CITY);
+			//replaceNodeFromTC(operator, XML_ELEMENT_OPERATOR_CITY);
 			
 			// replace Venue
 			replaceNodeFromTC(operator, XML_ELEMENT_VENUE);
 			
 			// ExtendedOperatorCountry
-			replaceNodeFromTC(tcTranslationElement, "ExtendedOperatorCountry");
+			//replaceNodeFromTC(tcTranslationElement, "ExtendedOperatorCountry");
 			
 			Element date = m_docWorkingCopy.createElement("Date");
 			DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, tcLoc);

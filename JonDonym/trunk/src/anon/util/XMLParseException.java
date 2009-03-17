@@ -58,6 +58,11 @@ public class XMLParseException extends Exception
 		super(parseTagName(a_strTagName) + getMessage(a_strMessage));
 	}
 
+	public XMLParseException(Throwable cause) 
+	{
+		super(cause);
+	}
+	
 	/**
 	 * Creates a new exception.
 	 * @param a_strTagName the name of the tag where the exception occured
