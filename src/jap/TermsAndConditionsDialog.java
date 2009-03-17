@@ -1,18 +1,24 @@
 package jap;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
 import java.text.DateFormat;
 import java.util.Locale;
 
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 
 import jap.pay.wizardnew.TermsAndConditionsPane;
+import gui.JapHtmlPane;
 import gui.dialog.JAPDialog;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.infoservice.TermsAndConditions;
+import anon.infoservice.TermsAndConditionsTranslation;
 import anon.util.JAPMessages;
 
 public class TermsAndConditionsDialog extends JAPDialog
@@ -44,7 +50,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 			return;
 		}
 	
-		String htmlText = tc.getHTMLText(JAPMessages.getLocale());
+		String htmlText = tc.getHTMLText(langCode);
 		if(htmlText == null)
 		{
 			return;
@@ -68,6 +74,32 @@ public class TermsAndConditionsDialog extends JAPDialog
 		pack();
 		
 		m_ret.setError(false);
+	}
+	
+	public static void previewTranslation(Frame owner,
+										TermsAndConditionsTranslation tcTranslation)
+	{
+		String htmlText = null;
+		try 
+		{
+			TermsAndConditionsFramework displayTemplate = 
+				TermsAndConditionsFramework.getById(tcTranslation.getTemplateReferenceId(), false);
+			displayTemplate.importData(tcTranslation);
+			htmlText = displayTemplate.transform();
+		}
+		catch(Exception e)
+		{
+			htmlText = "<html><head><title><Preview error></title></head><body><head><h1>Error creating tc preview</h1>"+
+				"<h2>Reason:</h2><p>"+e+"</p>";
+			e.printStackTrace();
+		}
+		JapHtmlPane htmlPane = new JapHtmlPane(htmlText);
+		htmlPane.setPreferredSize(new Dimension(800,600));
+		JDialog displayDialog = new JDialog(owner, "Translation preview ["+tcTranslation+"]");
+		displayDialog.add(htmlPane);
+		displayDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		displayDialog.pack();
+		displayDialog.setVisible(true);
 	}
 	
 	public boolean hasError()

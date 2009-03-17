@@ -28,6 +28,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package anon.infoservice;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.SignatureException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -73,10 +78,6 @@ public class TermsAndConditions implements IXMLEncodable
 	public final static String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsList";
 	public final static String XML_ELEMENT_NAME = "TermsAndConditions";
 	public final static String XML_ELEMENT_TRANSLATION_NAME = Translation.XML_ELEMENT_NAME;
-	
-	private static final String XML_ATTR_LOCALE = "locale";
-	private static final String XML_ATTR_DEFAULT_LOCALE = "default";
-	private static final String XML_ATTR_REFERENCE_ID = "referenceId";
 
 	private static final String DATE_FORMAT = "yyyyMMdd"; 
 	
@@ -86,7 +87,7 @@ public class TermsAndConditions implements IXMLEncodable
 	private Date m_date;
 	
 	private Hashtable translations;
-	private Translation defaultTranslation = null;
+	private Translation defaultTl = null;
 	
 	private boolean accepted;
 	private boolean read;
@@ -257,7 +258,7 @@ public class TermsAndConditions implements IXMLEncodable
 		{
 			if(t.isDefaultTranslation())
 			{
-				defaultTranslation = t;
+				defaultTl = t;
 			}
 		}
 		translations.put(t.getLocale(), t);
@@ -270,7 +271,7 @@ public class TermsAndConditions implements IXMLEncodable
 	 */
 	public synchronized TermsAndConditionsTranslation getDefaultTranslation()
 	{
-		return defaultTranslation;
+		return defaultTl;
 	}
 	
 	/**
@@ -351,7 +352,7 @@ public class TermsAndConditions implements IXMLEncodable
 	 */
 	public synchronized boolean hasDefaultTranslation()
 	{
-		return defaultTranslation != null;
+		return defaultTl != null;
 	}
 
 	/**
@@ -363,15 +364,18 @@ public class TermsAndConditions implements IXMLEncodable
 		return operator;
 	}
 	
+	public void setDate(Date date)
+	{
+		m_date = date;
+	}
+	
 	/**
 	 * return a date object which holds the date from when these T&Cs became valid
 	 * @return  a date object which holds the date from when these T&Cs became valid.
 	 */
 	public Date getDate()
 	{
-		Date clonedDate = new Date();
-		clonedDate.setTime(m_date.getTime()); // Date does not support clone() in JRE 1.1
-		return clonedDate;
+		return m_date;
 	}
 	
 	/**
@@ -553,7 +557,7 @@ public class TermsAndConditions implements IXMLEncodable
 		return (m_date.equals(toWhichDate) || m_date.after(toWhichDate));
 	}
 	
-	public Element toXmlElement(Document a_doc) 
+	private Element xmlOut(Document a_doc, boolean signedTranslations) 
 	{
 		if(!hasTranslations() || !hasDefaultTranslation())
 		{
@@ -574,9 +578,21 @@ public class TermsAndConditions implements IXMLEncodable
 		
 		while (allTranslations.hasMoreElements()) 
 		{
-			 tcRoot.appendChild(((Translation)allTranslations.nextElement()).toXmlElement(a_doc));	
+			 tcRoot.appendChild(signedTranslations ?
+					 ((Translation)allTranslations.nextElement()).toXmlElement(a_doc) : 
+					 ((Translation)allTranslations.nextElement()).createXMLOutput(a_doc) );	
 		}
 		return tcRoot;
+	}
+	
+	public Element toXmlElement(Document doc) 
+	{
+		return xmlOut(doc, true);
+	}
+	
+	public Element createXMLOutput(Document doc) 
+	{
+		return xmlOut(doc, false);
 	}
 	
 	/**
@@ -584,33 +600,57 @@ public class TermsAndConditions implements IXMLEncodable
 	 */
 	private class Translation implements IXMLEncodable, TermsAndConditionsTranslation
 	{
-		public static final String XML_ELEMENT_NAME = "TCTranslation";
-		public static final String XML_ELEMENT_CONTAINER_NAME = TermsAndConditions.XML_ELEMENT_NAME;
-		
-		private String referenceId;
+		private String templateReferenceId;
 		private String locale;
-		private boolean defaultLocale;
+		private boolean defaultTranslation;
 		private Element translationElement;
+		
+		private String privacyPolicyUrl;
+		private String legalOpinionsUrl;
+		private String operationalAgreementUrl;
+		
+		private OperatorAddress operatorAddress;
 		
 		private XMLSignature signature = null;
 		private MultiCertPath certPath = null;
 		
-		public Translation(Element translationElement) throws XMLParseException
+		Translation(Element translationElement) throws XMLParseException
 		{
-			this.referenceId = XMLUtil.parseAttribute(translationElement, XML_ATTR_REFERENCE_ID, "");
-			if(this.referenceId.equals(""))
+			this(translationElement, true);
+		}
+		
+		private Translation(Element translationElement, boolean withAttributeCheck) throws XMLParseException
+		{
+			this.templateReferenceId = XMLUtil.parseAttribute(translationElement, XML_ATTR_REFERENCE_ID, "");
+			
+			if(withAttributeCheck && this.templateReferenceId.equals(""))
 			{
 				throw new XMLParseException("TC translation must refer to a valid TC template");
 			}
 			
 			this.locale = XMLUtil.parseAttribute(translationElement, XML_ATTR_LOCALE, "");
-			if(this.locale.equals(""))
+			if(withAttributeCheck && this.locale.equals(""))
 			{
 				throw new XMLParseException("TC translation must set attribute 'locale'");
 			}
 			
 			this.locale = this.locale.trim().toLowerCase();
-			this.defaultLocale = XMLUtil.parseAttribute(translationElement, XML_ATTR_DEFAULT_LOCALE, false);
+			this.defaultTranslation = XMLUtil.parseAttribute(translationElement, XML_ATTR_DEFAULT_LOCALE, false);
+	
+			privacyPolicyUrl = XMLUtil.parseValue(XMLUtil.getFirstChildByName(translationElement, XML_ELEMENT_PRIVACY_POLICY), "");
+			legalOpinionsUrl = XMLUtil.parseValue(XMLUtil.getFirstChildByName(translationElement, XML_ELEMENT_LEGAL_OPINIONS), "");
+			operationalAgreementUrl= XMLUtil.parseValue(XMLUtil.getFirstChildByName(translationElement, XML_ELEMENT_OPERATIONAL_AGREEMENT), "");
+			
+			Element operatorElement = (Element) XMLUtil.getFirstChildByName(translationElement, ServiceOperator.XML_ELEMENT_NAME);
+			if(operatorElement != null)
+			{
+				operatorAddress = new OperatorAddress(operatorElement);
+			}
+			else
+			{
+				operatorAddress = null;
+			}
+			//useful if this object is created from a signed XML structure.
 			this.translationElement = translationElement;
 			
 			// verify the signature
@@ -622,9 +662,19 @@ public class TermsAndConditions implements IXMLEncodable
 			}
 		}
 		
+		public void setTemplateReferenceId(String templateReferenceId) 
+		{
+			this.templateReferenceId = templateReferenceId;
+		}
+		
 		public String getTemplateReferenceId()
 		{
-			return referenceId;
+			return templateReferenceId;
+		}
+
+		public void setLocale(String locale)
+		{
+			this.locale = locale;
 		}
 		
 		public String getLocale()
@@ -634,7 +684,12 @@ public class TermsAndConditions implements IXMLEncodable
 		
 		public boolean isDefaultTranslation()
 		{
-			return defaultLocale;
+			return defaultTranslation;
+		}
+		
+		public void setDefaultTranslation(boolean defaultTranslation)
+		{
+			this.defaultTranslation = defaultTranslation;
 		}
 		
 		public Element getTranslationElement()
@@ -678,7 +733,13 @@ public class TermsAndConditions implements IXMLEncodable
 		{
 			return this.locale.equals(((Translation) obj).locale);
 		}
-
+		
+		/**
+		 *  merely outputs the doc from which this translation was initialized.
+		 *  If you want to output the current use the method createXMLOutput.
+		 *  This method is to implement the IXMLEncodable interface and it should be used.
+		 *  if this translation was created from a signed XML node.
+		 */
 		public Element toXmlElement(Document a_doc) 
 		{
 			if (a_doc.equals(translationElement.getOwnerDocument()))
@@ -698,14 +759,64 @@ public class TermsAndConditions implements IXMLEncodable
 			}
 		}
 		
-		/*public ServiceOperator getOperator() 
+		/**
+		 * This method creates an xml Element according to the 
+		 * current object state whereas
+		 * toXMLElement outputs the xml represenation from which the object was ininitialized.
+		 * this method does not append teh element to the specified document.
+		 * @param doc the document which should own the newly created translation element
+		 */
+		public Element createXMLOutput(Document doc) 
 		{
-			return TermsAndConditions.this.operator;
-		}*/
+			Element root = doc.createElement(XML_ELEMENT_NAME);
+			root.setAttribute(XML_ATTR_REFERENCE_ID, templateReferenceId);
+			root.setAttribute(XML_ATTR_LOCALE, locale);
+			if(defaultTranslation)
+			{
+				root.setAttribute(XML_ATTR_DEFAULT_LOCALE, "true");
+			}
+			if(!privacyPolicyUrl.equals(""))
+			{
+				XMLUtil.createChildElementWithValue(root, XML_ELEMENT_PRIVACY_POLICY, privacyPolicyUrl);
+			}
+			if(!legalOpinionsUrl.equals(""))
+			{
+				XMLUtil.createChildElementWithValue(root, XML_ELEMENT_LEGAL_OPINIONS, legalOpinionsUrl);
+			}
+			if(!operationalAgreementUrl.equals(""))
+			{
+				XMLUtil.createChildElementWithValue(root, XML_ELEMENT_OPERATIONAL_AGREEMENT, operationalAgreementUrl);
+			}
+			if(operatorAddress != null)
+			{
+				Enumeration e = operatorAddress.getAddressAsNodeList(doc);
+				Element operatorAddressRoot = null; 
+				if(e.hasMoreElements())
+				{
+					operatorAddressRoot = doc.createElement(ServiceOperator.XML_ELEMENT_NAME);
+					root.appendChild(operatorAddressRoot);
+				}
+				while (e.hasMoreElements()) 
+				{
+					operatorAddressRoot.appendChild((Element) e.nextElement());
+				}
+			}
+			return root;
+		}
+		
+		public void setOperatorAddress(OperatorAddress operatorAddress) 
+		{
+			this.operatorAddress = operatorAddress;
+		}
+		
+		public OperatorAddress getOperatorAddress() 
+		{
+			return operatorAddress;
+		}
 		
 		public String toString()
 		{
-			return new Locale(locale, "").getDisplayLanguage(Locale.ENGLISH) + (defaultLocale ? " (default)" : "");
+			return new Locale(locale, "").getDisplayLanguage(Locale.ENGLISH) + (defaultTranslation ? " (default)" : "");
 		}
 		
 		public Date getDate() 
@@ -716,6 +827,114 @@ public class TermsAndConditions implements IXMLEncodable
 		public ServiceOperator getOperator()
 		{
 			return TermsAndConditions.this.operator;
+		}
+
+		public String getPrivacyPolicyUrl() 
+		{
+			return privacyPolicyUrl;
+		}
+
+		public void setPrivacyPolicyUrl(String privacyPolicyUrl) 
+		{
+			this.privacyPolicyUrl = privacyPolicyUrl;
+		}
+
+		public String getLegalOpinionsUrl() 
+		{
+			return legalOpinionsUrl;
+		}
+
+		public void setLegalOpinionsUrl(String legalOpinionsUrl) 
+		{
+			this.legalOpinionsUrl = legalOpinionsUrl;
+		}
+
+		public String getOperationalAgreementUrl() 
+		{
+			return operationalAgreementUrl;
+		}
+
+		public void setOperationalAgreementUrl(String operationalAgreementUrl) 
+		{
+			this.operationalAgreementUrl = operationalAgreementUrl;
+		}
+
+		public TermsAndConditionsTranslation duplicateWithImports(
+				Element xmlImports)
+		{
+			try 
+			{
+				Translation newTrans = new Translation(xmlImports, false);
+				Object currentValue = null;
+				Method currentGetter = null;
+				Method currentSetter = null;
+				
+				PropertyDescriptor translationPDs[] =
+					Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors();
+				for (int i = 0; i < translationPDs.length; i++) 
+				{
+					if( !translationPDs[i].getName().equals("operatorAddress") &&
+						//!translationPDs[i].getName().equals("operator") &&
+						translationPDs[i].getWriteMethod() != null)
+					{
+						currentGetter = translationPDs[i].getReadMethod();
+						currentSetter = translationPDs[i].getWriteMethod();
+						currentValue = currentGetter.invoke(this, null);
+					
+						if( (currentValue != null) && !currentValue.toString().equals(""))
+						{
+							currentSetter.invoke(
+									newTrans, 
+									new Object[]{currentValue});
+						}
+					}
+				}
+				
+				if(newTrans.getOperator() == null)
+				{
+					newTrans.setOperatorAddress(operatorAddress);
+				}
+				else if(operatorAddress != null)
+				{
+					//now we update every address field on the newTrans address object
+					//which is defined in the address object of the current translation
+					PropertyDescriptor addressPDs[] =
+						Introspector.getBeanInfo(OperatorAddress.class).getPropertyDescriptors();
+					for (int i = 0; i < addressPDs.length; i++) 
+					{
+						if( addressPDs[i].getWriteMethod() != null )
+						{
+							currentGetter = addressPDs[i].getReadMethod();
+							currentSetter = addressPDs[i].getWriteMethod();
+							currentValue = currentGetter.invoke(this.operatorAddress, null);
+							//update the field in the copied object.
+							if( (currentValue != null) && !currentValue.toString().equals(""))
+							{
+								currentSetter.invoke(
+										newTrans.operatorAddress, 
+										new Object[]{currentValue});
+							}
+						}
+					}
+				}
+				return newTrans;
+			}
+			catch (XMLParseException e) 
+			{
+			} 
+			catch (IntrospectionException e) 
+			{
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
 		}
 	}
 }

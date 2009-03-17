@@ -1,14 +1,22 @@
 package anon.infoservice;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
 /**
@@ -18,12 +26,19 @@ import anon.util.XMLUtil;
 public class OperatorAddress 
 {
 	
-	public final static String STREET_NODE = "Street";
-	public final static String POST_NODE = "PostalCode";
-	public final static String CITY_NODE = "City";
-	public final static String VAT_NODE = "VAT";
-	public final static String FAX_NODE = "Fax";
-	public final static String VENUE_NODE = "Venue";
+	public final static String NODE_NAME_STREET = "Street";
+	public final static String NODE_NAME_POST = "PostalCode";
+	public final static String NODE_NAME_CITY = "City";
+	public final static String NODE_NAME_VAT = "VAT";
+	public final static String NODE_NAME_FAX = "Fax";
+	public final static String NODE_NAME_VENUE = "Venue";
+	
+	public final static String PROPERTY_NAME_STREET = "street";
+	public final static String PROPERTY_NAME_POST = "post";
+	public final static String PROPERTY_NAME_CITY = "city";
+	public final static String PROPERTY_NAME_VAT = "vat";
+	public final static String PROPERTY_NAME_FAX = "fax";
+	public final static String PROPERTY_NAME_VENUE = "venue";
 	
 	private String street;
 	private String post;
@@ -31,6 +46,55 @@ public class OperatorAddress
 	private String vat;
 	private String fax;
 	private String venue;
+	
+	private static Hashtable propertyDescriptors = new Hashtable();
+	
+	static 
+	{
+		try 
+		{
+			BeanInfo info = Introspector.getBeanInfo(OperatorAddress.class);
+			PropertyDescriptor[] pds = info.getPropertyDescriptors();
+			for (int i = 0; i < pds.length; i++)
+			{
+				propertyDescriptors.put(pds[i].getName(), pds[i]);
+			}
+		} 
+		catch (IntrospectionException e) 
+		{
+		} 
+	}
+	
+	public OperatorAddress()
+	{
+		
+	}
+	
+	public OperatorAddress(Element xmlRoot) throws XMLParseException
+	{
+		//the name of the root element does not matter.
+		NodeList nl = xmlRoot.getChildNodes();
+		Element currElement = null;
+		Field currField = null;
+		for (int i = 0; i < nl.getLength(); i++) 
+		{
+			if(nl.item(i).getNodeType() == Node.ELEMENT_NODE)
+			{
+				currElement = (Element) nl.item(i);
+				try 
+				{
+					currField = this.getClass().getDeclaredField(currElement.getTagName().toLowerCase());
+					currField.set(this, currElement.getTextContent());
+				} catch (SecurityException e) {
+				} catch (NoSuchFieldException e) {
+				} catch (IllegalArgumentException e) {
+				} catch (DOMException e) {
+					throw new XMLParseException(e);
+				} catch (IllegalAccessException e) {
+				}
+			}
+		}
+	}
 	
 	public String getStreet() 
 	{
@@ -99,15 +163,22 @@ public class OperatorAddress
 		Field[] allFields = this.getClass().getDeclaredFields();
 		for (int i = 0; i < allFields.length; i++) 
 		{
-			if(!Modifier.isFinal(allFields[i].getModifiers()))
+			if(!Modifier.isFinal(allFields[i].getModifiers()) && 
+				!Modifier.isStatic(allFields[i].getModifiers()))
 			{
 				Field f;
+				Object value;
 				try 
 				{
-					f = this.getClass().getDeclaredField(allFields[i].getName().toUpperCase()+"_NODE");
-					Element element = owner.createElement(f.get(this).toString());
-					XMLUtil.setValue(element, allFields[i].get(this).toString());
-					v.addElement(element);
+					value = allFields[i].get(this);
+					
+					if( (value != null) && !value.toString().equals("") )
+					{
+						f = this.getClass().getDeclaredField("NODE_NAME_"+allFields[i].getName().toUpperCase());
+						Element element = owner.createElement(f.get(this).toString());
+						XMLUtil.setValue(element, value.toString());
+						v.addElement(element);
+					}
 				} 
 				catch (SecurityException e) {
 					e.printStackTrace();
@@ -120,17 +191,67 @@ public class OperatorAddress
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 				}
-				
 			}
 		}
 		return v.elements();
 	}
 	
-	
-	Element getPostElement(Document owner)
+	public static PropertyDescriptor getDescriptor(String propertyName)
 	{
-		Element e = owner.createElement(POST_NODE);
+		return (PropertyDescriptor) propertyDescriptors.get(propertyName);
+	}
+	
+	/*Element getPostElement(Document owner)
+	{
+		Element e = owner.createElement(NODE_NAME_POST);
 		XMLUtil.setValue(e, post);
 		return e;
+	}*/
+	
+	
+	
+	public static void main(String[] args)
+	{
+		try 
+		{
+			BeanInfo info = Introspector.getBeanInfo(TermsAndConditionsTranslation.class);
+			PropertyDescriptor[] pds = info.getPropertyDescriptors();
+		
+			for (int i = 0; i < pds.length; i++)
+			{
+				System.out.println("Property "+pds[i].getName()+" has writeMethod: "+pds[i].getWriteMethod());
+			}
+		} 
+		catch (IntrospectionException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/*try 
+		{
+			BeanInfo info = Introspector.getBeanInfo(OperatorAddress.class);
+			PropertyDescriptor[] pds = info.getPropertyDescriptors();
+			EventSetDescriptor[] esds = info.getEventSetDescriptors();
+			for (int i = 0; i < pds.length; i++)
+			{
+				System.out.println("Property "+pds[i].getName()+" has writeMethod: "+pds[i].getWriteMethod());
+				if(pds[i].createPropertyEditor(null) == null)
+				{
+					System.out.println("no property editor.");
+				}
+			}
+			if(esds != null)
+			{
+				for (int i = 0; i < esds.length; i++) {
+					System.out.println("EventSetDescriptor: "+esds[i].getName());
+				}
+			}
+			//PropertyEditorSupport pes = new PropertyEditorSupport();
+		} 
+		catch (IntrospectionException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 	}
 }

@@ -303,7 +303,6 @@ public class MacOS extends AbstractOS
 					File oldImage = new File(OSA_APPLET_PATH+File.separator+
 												BUNDLE_RESOURCES+"applet.icns");
 					oldImage.delete();
-					//TODO: better use a proper update icon.
 					archiver.extractSingleEntry("images/JUpdate.icns", 
 													OSA_APPLET_PATH+File.separator+
 													BUNDLE_RESOURCES+"applet.icns");	
