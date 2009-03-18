@@ -58,7 +58,6 @@ import anon.util.XMLUtil;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-import anon.infoservice.IMutableProxyInterface;
 import anon.pay.xml.XMLGenericStrings;
 import anon.pay.xml.XMLGenericText;
 import anon.util.ZLibTools;
@@ -359,7 +358,8 @@ public class PayAccount implements IXMLEncodable
 			return null;
 		}
 	}
-
+	
+	
 	public void addTransCert(XMLTransCert cert) throws Exception
 	{
 		m_transCerts.addElement(cert);
@@ -994,13 +994,13 @@ public class PayAccount implements IXMLEncodable
 	 * @todo switch SSL on
 	 * @throws java.lang.SecurityException if the account is encrypted an not usable
 	 */
-	public XMLAccountInfo fetchAccountInfo(IMutableProxyInterface a_proxys, boolean a_bForce)
+	public XMLAccountInfo fetchAccountInfo(boolean a_bForce)
 		throws SecurityException, Exception
 	{
-		return fetchAccountInfo(a_proxys, a_bForce, 0);
+		return fetchAccountInfo(a_bForce, 0);
 	}
 	
-	public XMLAccountInfo fetchAccountInfo(IMutableProxyInterface a_proxys, boolean a_bForce,
+	public XMLAccountInfo fetchAccountInfo(boolean a_bForce,
 			int a_connectionTimeout)
 		throws SecurityException, Exception
 	{
@@ -1027,11 +1027,11 @@ public class PayAccount implements IXMLEncodable
 			biConn = new BIConnection(m_theBI);
 			if (a_connectionTimeout > 0)
 			{
-				biConn.connect(a_proxys, a_connectionTimeout);
+				biConn.connect(a_connectionTimeout);
 			}
 			else
 			{
-				biConn.connect(a_proxys);
+				biConn.connect();
 			}
 			biConn.authenticate(m_accountCertificate, m_privateKey);
 			info = biConn.getAccountInfo();
@@ -1065,7 +1065,7 @@ public class PayAccount implements IXMLEncodable
 	 * @throws Exception
 	 * @throws java.lang.SecurityException if the account is encrypted an not usable
 	 */
-	public XMLTransCert charge(IMutableProxyInterface a_proxys, XMLGenericStrings a_parameters) throws SecurityException, Exception
+	public XMLTransCert charge(XMLGenericStrings a_parameters) throws SecurityException, Exception
 	{
 		if (getPrivateKey() == null)
 		{
@@ -1077,7 +1077,7 @@ public class PayAccount implements IXMLEncodable
 		try
 		{
 			biConn = new BIConnection(m_theBI);
-			biConn.connect(a_proxys);
+			biConn.connect();
 			biConn.authenticate(m_accountCertificate, m_privateKey);
 			transcert = biConn.charge(a_parameters);
 			biConn.disconnect();

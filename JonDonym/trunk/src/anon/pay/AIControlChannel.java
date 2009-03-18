@@ -95,8 +95,6 @@ public class AIControlChannel extends XmlControlChannel
 
   private Vector m_aiListeners = new Vector();
 
-  private IMutableProxyInterface m_proxys;
-
   private PacketCounter m_packetCounter;
 
   private MixCascade m_connectedCascade;
@@ -115,11 +113,10 @@ public class AIControlChannel extends XmlControlChannel
    */
   private boolean m_prepaidAmountInPayRequest = false;
   
-public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_proxy,
+public AIControlChannel(Multiplexer a_multiplexer,
 						  PacketCounter a_packetCounter, IServiceContainer a_serviceContainer,
 						  MixCascade a_connectedCascade) {
     super(ChannelTable.CONTROL_CHANNEL_ID_PAY, a_multiplexer, a_serviceContainer);
-    m_proxys = a_proxy;
     m_packetCounter = a_packetCounter;
 	m_connectedCascade = a_connectedCascade;
 	m_aiLoginSyncObject = new Vector(1);
@@ -384,11 +381,11 @@ public AIControlChannel(Multiplexer a_multiplexer, IMutableProxyInterface a_prox
 				  if (a_bSynchronous)
 				  {
 					  /* set a short connection timeout as this update blocks connection to a Cascade */
-					  currentAccount.fetchAccountInfo(m_proxys, false, 2000); 
+					  currentAccount.fetchAccountInfo(false, 2000); 
 				  }
 				  else
 				  {
-					  currentAccount.fetchAccountInfo(m_proxys, false);
+					  currentAccount.fetchAccountInfo(false);
 				  }
 			  }
 			  catch (Exception ex)

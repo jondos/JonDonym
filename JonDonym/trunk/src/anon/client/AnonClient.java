@@ -115,9 +115,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 	private Pay m_paymentInstance;
 
-	private IMutableProxyInterface m_paymentProxyInterface =
-		new IMutableProxyInterface.DummyMutableProxyInterface();
-
 	private boolean m_connected;
 	
 	static 
@@ -229,7 +226,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 							status = ErrorCodes.E_ALREADY_CONNECTED;
 							synchronized (m_threadInitialise)
 							{
-								m_threadInitialise.notify();
+								m_threadInitialise.notifyAll();
 							}
 							return;
 						//}
@@ -253,7 +250,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 							status = ErrorCodes.E_INTERRUPTED;
 							synchronized (m_threadInitialise)
 							{
-								m_threadInitialise.notify();
+								m_threadInitialise.notifyAll();
 							}
 							return;
 						}
@@ -263,14 +260,14 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 						status = ErrorCodes.E_CONNECT;
 						synchronized (m_threadInitialise)
 						{
-							m_threadInitialise.notify();
+							m_threadInitialise.notifyAll();
 						}
 						return;
 					}
 					status = initializeProtocol(connectionToMixCascade, a_mixCascade, a_serviceContainer);
 					synchronized (m_threadInitialise)
 					{
-						m_threadInitialise.notify();
+						m_threadInitialise.notifyAll();
 					}
 					return;
 				}
@@ -346,19 +343,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		return m_loginTimeout;
 	}
 
-	public void setPaymentProxy(IMutableProxyInterface a_paymentProxyInterface)
-	{
-		if (a_paymentProxyInterface == null)
-		{
-			m_paymentProxyInterface = new IMutableProxyInterface.DummyMutableProxyInterface();
-		}
-		else
-		{
-			m_paymentProxyInterface = a_paymentProxyInterface;
-		}
-
-	}
-
 	public int setProxy(IMutableProxyInterface a_proxyInterface)
 	{
 		synchronized (m_internalSynchronization)
@@ -405,7 +389,21 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		{
 			if (m_threadInitialise != null)
 			{
-				m_threadInitialise.interrupt();
+				synchronized (m_threadInitialise)
+				{
+					while (m_threadInitialise.isAlive())
+					{
+						m_threadInitialise.interrupt();
+						try 
+						{
+							m_threadInitialise.wait(100);
+						} 
+						catch (InterruptedException e) 
+						{
+							break;
+						}
+					}
+				}
 			}
 		}
 		synchronized (m_internalSynchronization)
@@ -877,7 +875,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				m_dummyTrafficControlChannel.setDummyTrafficInterval(m_dummyTrafficInterval);
 			}
 			/* maybe we have to start some more services */
-			int errorCode = finishInitialization(m_multiplexer, m_keyExchangeManager, m_paymentProxyInterface,
+			int errorCode = finishInitialization(m_multiplexer, m_keyExchangeManager, 
 												 m_packetCounter, a_connectionToMixCascade, a_serviceContainer,
 												 m_keyExchangeManager.getConnectedCascade() );
 			if (errorCode != ErrorCodes.E_SUCCESS)
@@ -934,7 +932,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	}
 
 	private int finishInitialization(Multiplexer a_multiplexer, KeyExchangeManager a_keyExchangeManager,
-									 IMutableProxyInterface a_proxyInterface, PacketCounter a_packetCounter,
+									PacketCounter a_packetCounter,
 									 IStreamConnection a_connection, IServiceContainer a_serviceContainer,
 									 MixCascade a_cascade)
 	{
@@ -968,7 +966,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		 * disabled
 		 */
 		AIControlChannel aiControlChannel =
-			new AIControlChannel(a_multiplexer, a_proxyInterface, a_packetCounter, a_serviceContainer, a_cascade);
+			new AIControlChannel(a_multiplexer, a_packetCounter, a_serviceContainer, a_cascade);
 		m_paymentInstance = new Pay(aiControlChannel);
 		if (a_keyExchangeManager.isPaymentRequired())
 		{	

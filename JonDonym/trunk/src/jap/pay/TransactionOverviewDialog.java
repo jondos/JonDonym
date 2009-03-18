@@ -240,7 +240,7 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 				{
 					curAccount = (PayAccount) m_accounts.elementAt(0); //just get the first account to find a BI to connect to
 					BIConnection biConn = new BIConnection(curAccount.getBI());
-					biConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+					biConn.connect();
 					biConn.authenticate(curAccount.getAccountCertificate(), curAccount.getPrivateKey());
 					overview = biConn.fetchTransactionOverview(overview);
 					biConn.disconnect();
@@ -340,11 +340,10 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 					try
 					{
 						BIConnection biConn = new BIConnection(m_account.getBI());
-						biConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+						biConn.connect();
 						biConn.authenticate(m_account.getAccountCertificate(), m_account.getPrivateKey());
 
-						biConn.connect(JAPModel.getInstance().
-									   getPaymentProxyInterface());
+						biConn.connect();
 						biConn.authenticate(m_account.getAccountCertificate(),
 											m_account.getPrivateKey());
 
@@ -450,7 +449,7 @@ public class TransactionOverviewDialog extends JAPDialog implements ActionListen
 		{
 			PaymentInstanceDBEntry theJPI = a_account.getBI();
 			BIConnection biConn = new BIConnection(theJPI);
-			biConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+			biConn.connect();
 			biConn.authenticate(a_account.getAccountCertificate(), a_account.getPrivateKey());
 			XMLPaymentOptions allOptions = biConn.fetchPaymentOptions();
 			//optionsToShow: Vector of Hashtables, one per active option, containing strings in current language

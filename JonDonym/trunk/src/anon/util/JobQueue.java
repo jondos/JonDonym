@@ -56,14 +56,6 @@ public class JobQueue
 
 	/**
 	 * Creates and starts the job queue.
-	 */
-	public JobQueue()
-	{
-		this("Job queue");
-	}
-
-	/**
-	 * Creates and starts the job queue.
 	 * @param a_name name of the queue
 	 */
 	public JobQueue(String a_name)
@@ -96,8 +88,28 @@ public class JobQueue
 							m_currentJob == m_jobs.firstElement() &&
 							m_currentJobThread.isAlive())
 						{
-							// a job is currently running; stop it;
-							m_currentJobThread.interrupt();
+							// a job is currently running; 
+							if (((Job) m_jobs.lastElement()).isInterrupting())
+							{
+								// interrupt the running job 
+								while (m_currentJobThread.isAlive())
+								{
+									m_currentJobThread.interrupt();
+									try 
+									{
+										Thread.currentThread().wait(100);
+									} 
+									catch (InterruptedException e) 
+									{
+										break;
+									}
+								}
+							}
+							else 
+							{
+								// wait for the end/notify of the running job
+								continue;
+							}
 						}
 						else if (m_jobs.size() > 0)
 						{
@@ -179,7 +191,7 @@ public class JobQueue
 			runJob();
 			if (m_queue != null)
 			{
-				m_queue.removeJob(this);
+				m_queue.removeJob(this, true);
 			}
 		}
 
@@ -193,12 +205,17 @@ public class JobQueue
 			return null;
 		}
 
+		public boolean isInterrupting()
+		{
+			return false;
+		}
+		
 		/**
 		 * If a new thread is added to the queue and mayBeSkippedIfDuplicate() returns true, it is skipped if
 	     * another thread with the same value already is in the queue.
 		 * @return if this thread is skipped if another thread with the same value already is in the queue
 		 */
-		public final boolean mayBeSkippedIfDuplicate()
+		public final boolean isSkippedIfDuplicate()
 		{
 			return m_bMayBeSkippedIfDuplicate;
 		}
@@ -213,13 +230,14 @@ public class JobQueue
 	public void addJob(final Job a_anonJob)
 	{
 		Thread jobThread;
+		Job job;
 
 		if (a_anonJob == null)
 		{
 			return;
 		}
 
-		if (!a_anonJob.mayBeSkippedIfDuplicate() && m_bInterrupted)
+		if (!a_anonJob.isSkippedIfDuplicate() && m_bInterrupted)
 		{
 			// only jobs that may be skipped are allowed when thread is interrupted
 			return;
@@ -233,7 +251,7 @@ public class JobQueue
 
 		synchronized (m_threadQueue)
 		{
-			if (m_jobs.contains(a_anonJob))
+			if (a_anonJob.isSkippedIfDuplicate() && m_jobs.contains(a_anonJob))
 			{
 				// do not accept duplicate jobs
 				return;
@@ -243,12 +261,27 @@ public class JobQueue
 			{
 				/* check whether this is job is different to the last one */
 				Job lastJob = (Job) (m_jobs.lastElement());
-				if (lastJob.mayBeSkippedIfDuplicate() && a_anonJob.mayBeSkippedIfDuplicate())
+				if (lastJob.isSkippedIfDuplicate() && a_anonJob.isSkippedIfDuplicate())
 				{
 					/* It's the same as the last job and may be skipped; skip it! */
 					return;
 				}
+				else 
+				{
+					// remove all jobs that are not currently running
+					while (m_jobs.size() > 0)
+					{
+						job = (Job)m_jobs.lastElement();
+						if (job == m_currentJob && m_currentJobThread.isAlive())
+						{
+							// do not delete a running job; finish it and then start this new job
+							break;
+						}
+						removeJob(job, false);
+					}
+				}
 			}
+			
 			jobThread = new Thread(a_anonJob);
 			jobThread.setDaemon(true);
 			a_anonJob.m_queue = this;
@@ -265,7 +298,7 @@ public class JobQueue
 	}
 
 	/**
-	 * Stops the queue once and for all and interupts all running threads. After calling
+	 * Stops the queue once and for all and interrupts all running threads. After calling
 	 * this method, it will not accept any new threads.
 	 */
 	public void stop()
@@ -295,7 +328,7 @@ public class JobQueue
 	 * queue that the job was removed, so that a new job may be started.
 	 * @param a_anonJob a Job to be removed
 	 */
-	private void removeJob(final Job a_anonJob)
+	private void removeJob(final Job a_anonJob, boolean a_bNotifyQueue)
 	{
 		if (a_anonJob == null)
 		{
@@ -310,7 +343,10 @@ public class JobQueue
 				((Thread)m_jobThreads.elementAt(index)).interrupt();
 				m_jobs.removeElementAt(index);
 				m_jobThreads.removeElementAt(index);
-				m_threadQueue.notify();
+				if (a_bNotifyQueue)
+				{
+					m_threadQueue.notify();
+				}
 			}
 		}
 	}

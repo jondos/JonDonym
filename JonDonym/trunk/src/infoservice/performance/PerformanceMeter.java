@@ -43,7 +43,6 @@ import java.util.Vector;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
@@ -58,7 +57,6 @@ import org.w3c.dom.Element;
 import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
 
-import jap.pay.AccountUpdater;
 import anon.ErrorCodes;
 import anon.client.AnonClient;
 import anon.client.DummyTrafficControlChannel;
@@ -72,9 +70,9 @@ import anon.infoservice.SimpleMixCascadeContainer;
 import anon.infoservice.Database;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.StatusInfo;
+import anon.infoservice.update.AccountUpdater;
 import anon.pay.PayAccount;
 import anon.pay.PayAccountsFile;
-import anon.pay.PaymentInstanceDBEntry;
 import anon.proxy.AnonProxy;
 import anon.util.IMiscPasswordReader;
 import anon.util.XMLParseException;
@@ -322,7 +320,7 @@ public class PerformanceMeter implements Runnable, Observer
 	
 		try
 		{
-			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null, null);
+			m_proxy = new AnonProxy(new ServerSocket(m_proxyPort, -1, InetAddress.getByName(m_proxyHost)), null);
 		}
 		catch (IOException a_e)
 		{
@@ -570,6 +568,12 @@ public class PerformanceMeter implements Runnable, Observer
 	 */
 	private void startTest(final MixCascade a_cascade) 
 	{
+/*
+		if (!a_cascade.getId().equals("B13473DF6235B7F20EF0A5F74F69A32CC68745DE"))
+		{
+			return;
+		}
+		*/
 		Thread performTestThread;
 		
 		// update the account files again
@@ -868,8 +872,10 @@ public class PerformanceMeter implements Runnable, Observer
 			entry = new PerformanceEntry(a_cascade.getId());
 		}		
 		
+		//LogHolder.log(LogLevel.WARNING, LogType.NET, "Testing cascade " + a_cascade.getName() + "...");
+		
 		while (!Thread.currentThread().isInterrupted())
-		{			
+		{
 			// connect to the mix cascade
 		    errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
 		    if (errorCode == ErrorCodes.E_CONNECT || errorCode == ErrorCodes.E_UNKNOWN)
@@ -904,7 +910,8 @@ public class PerformanceMeter implements Runnable, Observer
 		if (errorCode != ErrorCodes.E_SUCCESS || !m_proxy.isConnected())
 		{
 			// interrupted or any other not recoverable error 
-			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not start performance test. Connection to cascade " + a_cascade.getMixNames() + " failed.");
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "Could not start performance test. " +
+					"Connection to cascade " + a_cascade.getMixNames() + " failed with error " + errorCode + ".");
 			//return iUpdates;
 		}
 		else
@@ -1194,7 +1201,7 @@ public class PerformanceMeter implements Runnable, Observer
 	        			m_proxy.stop();
 	        		}
 	  
-	    		    if ( m_proxy.start(new SimpleMixCascadeContainer(a_cascade)) == 
+	    		    if (m_proxy.start(new SimpleMixCascadeContainer(a_cascade)) == 
 	    		    	ErrorCodes.E_SUCCESS && m_proxy.isConnected())
 	    		    {
 	    		    	bRetry = true;
@@ -1205,7 +1212,7 @@ public class PerformanceMeter implements Runnable, Observer
 	        LogHolder.log(LogLevel.DEBUG, LogType.NET, "Performance meter parsed server header.");
 	        
 	        // check if the content length is supposed to be the same as the requested data size
-	        if(resp.m_contentLength != a_recvBuff.length)
+	        if (resp.m_contentLength != a_recvBuff.length)
 	        {
     			LogHolder.log(LogLevel.ERR, LogType.NET, "Performance Meter could not verify incoming package. Specified invalid Content-Length " + resp.m_contentLength + " of " + a_recvBuff.length + " bytes.");
     			closeMeterSocket();

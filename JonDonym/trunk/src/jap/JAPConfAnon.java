@@ -2685,7 +2685,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			Vector countPorts;
 			Integer port;
 
-			// Get hostnames and ports
+			// Get host names and ports
 			String interfaces = "";
 			String ports = "";
 			int[] portsArray = new int[a_cascade.getNumberOfListenerInterfaces()];
@@ -2862,7 +2862,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 
 		/**
-		 * Get the hostnames of a cascade.
+		 * Get the host names of a cascade.
 		 * @param a_cascadeId String
 		 * @return String
 		 */

@@ -202,8 +202,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_OPEN_FIREFOX = JAPNewView.class.getName() + "_openFirefox";
 
 
-
+	private JobQueue m_blinkJobs;
 	private JobQueue m_transferedBytesJobs;
+	private JobQueue m_channelsChangedJobs;
 	private JobQueue m_packetMixedJobs;
 
 	private static final String HLP_ANONYMETER = JAPNewView.class.getName() + "_anonymometer";
@@ -320,8 +321,10 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_Controller = JAPController.getInstance();
 		m_dlgConfig = null; //new JAPConf(this);
 		m_bIsIconified = false;
+		m_blinkJobs = new JobQueue("Blink job queue");
 		m_transferedBytesJobs = new JobQueue("Transfered bytes update job queue");
 		m_packetMixedJobs = new JobQueue("packet mixed update job queue");
+		m_channelsChangedJobs = new JobQueue("channels changed job queue");
 		m_lTrafficWWW = 0;
 		m_lTrafficOther = 0;
 	}
@@ -331,7 +334,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		m_bWithPayment = loadPay;
 		LogHolder.log(LogLevel.INFO, LogType.GUI, "Initializing view...");
 		init();
-		setTitle(Double.toString(Math.random())); //ensure that we have an uinque title
+		setTitle(Double.toString(Math.random())); //ensure that we have an unique title
 		JAPDll.setWindowIcon(getTitle());
 		setTitle(m_Title);
 		LogHolder.log(LogLevel.INFO, LogType.GUI, "View initialized!");
@@ -1689,7 +1692,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	{
 		boolean bAnonMode = m_Controller.getAnonMode();
 		boolean bConnected = m_Controller.isAnonConnected();
-		boolean bConnectionErrorShown = m_bShowConnecting;
+		boolean bConnectionErrorShown = m_Controller.isConnecting() || m_bShowConnecting;
 		String lang = "";
 		
 		if (JAPMessages.getLocale().getLanguage() == "de")
@@ -1729,46 +1732,103 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	/**
 	 * Shows a blinking JAP icon.
 	 */
-	public void blink()
+	private void blink(final long c)
 	{
-		if (isVisible())
+		m_blinkJobs.addJob(new JobQueue.Job(true)
 		{
-			Thread blinkThread = new Thread(new Runnable()
+			public void runJob()
 			{
-				public void run()
+				if (c > 0 && m_ViewIconified != null)
 				{
-					synchronized (m_progressOwnTrafficActivity)
-					{
-						if (m_currentChannels == 0)
-						{
-							return;
-						}
-
-						if (m_Controller.isAnonConnected())
-						{
-							m_progressOwnTrafficActivity.setValue(m_currentChannels - 1);
-							m_progressOwnTrafficActivitySmall.setValue(m_currentChannels - 1);
-							try
-							{
-								m_progressOwnTrafficActivity.wait(500);
-							}
-							catch (InterruptedException a_e)
-							{
-								// ignore
-							}
-						}
-						if (!m_Controller.isAnonConnected())
-						{
-							m_currentChannels = 0;
-						}
-						m_progressOwnTrafficActivity.setValue(m_currentChannels);
-						m_progressOwnTrafficActivitySmall.setValue(m_currentChannels);
-					}
+					m_ViewIconified.blink();
 				}
-			});
-			blinkThread.setDaemon(true);
-			blinkThread.start();
-		}
+				
+				if (isVisible())
+				{
+					Runnable transferedBytesThread = new Runnable()
+					{
+						public void run()
+						{
+							synchronized (m_progressOwnTrafficActivity)
+							{
+								if (m_currentChannels == 0)
+								{
+									return;
+								}
+
+								if (m_Controller.isAnonConnected())
+								{
+									m_progressOwnTrafficActivity.setValue(
+											Math.min(m_currentChannels, 
+													m_progressOwnTrafficActivity.getMaximum())- 1);
+									m_progressOwnTrafficActivitySmall.setValue(Math.min(m_currentChannels, 
+											m_progressOwnTrafficActivity.getMaximum())- 1);
+									try
+									{
+										m_progressOwnTrafficActivity.wait(250);
+									}
+									catch (InterruptedException a_e)
+									{
+										// ignore
+									}
+								}
+							}
+						}
+					};
+
+					try
+					{
+						SwingUtilities.invokeAndWait(transferedBytesThread);
+					}
+					catch (InvocationTargetException ex)
+					{
+					}
+					catch (InterruptedException ex)
+					{
+					}
+					transferedBytesThread = null;
+					
+					if (m_Controller.isAnonConnected())
+					{
+						try 
+						{
+							Thread.sleep(250);
+						} 
+						catch (InterruptedException e) 
+						{
+						}
+					}
+					
+					transferedBytesThread = new Runnable()
+					{
+						public void run()
+						{
+							synchronized (m_progressOwnTrafficActivity)
+							{	
+								if (!m_Controller.isAnonConnected())
+								{
+									m_currentChannels = 0;
+								}
+								m_progressOwnTrafficActivity.setValue(m_currentChannels);
+								m_progressOwnTrafficActivitySmall.setValue(m_currentChannels);
+							}
+						}
+					};
+
+					try
+					{
+						SwingUtilities.invokeAndWait(transferedBytesThread);
+					}
+					catch (InvocationTargetException ex)
+					{
+					}
+					catch (InterruptedException ex)
+					{
+					}
+					transferedBytesThread = null;
+				}
+			}
+		});
 	}
 
 
@@ -2363,7 +2423,9 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	public void dispose()
 	{
+		m_blinkJobs.stop();
 		m_transferedBytesJobs.stop();
+		m_channelsChangedJobs.stop();
 		m_packetMixedJobs.stop();
 		m_flippingPanelPayment.stopUpdateQueue();
 		super.dispose();
@@ -3329,18 +3391,26 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 
 	private int m_currentChannels = 0;
 
-	public void channelsChanged(int c)
+	public void channelsChanged(final int c)
 	{
 		// Nr of Channels
 		//int c=controller.getNrOfChannels();
-		synchronized (m_progressOwnTrafficActivity)
+		m_channelsChangedJobs.addJob(new JobQueue.Job()
 		{
-			m_currentChannels = c;
-			c = Math.min(c, m_progressOwnTrafficActivity.getMaximum());
-			m_progressOwnTrafficActivity.setValue(c);
-			m_progressOwnTrafficActivitySmall.setValue(c);
-		}
-//			ownTrafficChannelsProgressBar.setString(String.valueOf(c));
+			public void runJob()
+			{
+				synchronized (m_progressOwnTrafficActivity)
+				{
+					m_currentChannels = c;
+					int c2 = Math.min(c, m_progressOwnTrafficActivity.getMaximum());
+					m_progressOwnTrafficActivity.setValue(c2);
+					m_progressOwnTrafficActivitySmall.setValue(c2);
+					m_progressOwnTrafficActivity.notify();
+				}
+//					ownTrafficChannelsProgressBar.setString(String.valueOf(c));	
+			}
+		});
+
 	}
 
 	public void packetMixed(final long a_totalBytes)
@@ -3389,6 +3459,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 				}
 				transferedBytesThread = null;
+				
+				try 
+				{
+					Thread.sleep(500);
+				} 
+				catch (InterruptedException e) 
+				{
+					//ignore
+				}
 			}
 		});
 	}
@@ -3406,16 +3485,14 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			m_lTrafficOther = c;
 		}
 
+		
+		blink(c);
+	
+		
 		m_transferedBytesJobs.addJob(new JobQueue.Job()
 		{
 			public void runJob()
 			{
-				if (c > 0 && m_ViewIconified != null)
-				{
-					m_ViewIconified.blink();
-				}
-				blink();
-
 				Runnable transferedBytesThread = new Runnable()
 				{
 					public void run()
@@ -3447,6 +3524,15 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				{
 				}
 				transferedBytesThread = null;
+				
+				try 
+				{
+					Thread.sleep(500);
+				} 
+				catch (InterruptedException e) 
+				{
+					//ignore
+				}
 			}
 		});
 	}

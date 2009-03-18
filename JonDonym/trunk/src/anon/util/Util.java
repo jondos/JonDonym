@@ -736,6 +736,15 @@ public final class Util
 		return returnString;
 	}
 	
+	public static String restoreXMLChars(String a_source)
+	{
+		String returnString = replaceAll(a_source, "&#38;", "&");
+		returnString = replaceAll(returnString, "&#60;", "<");
+		returnString = replaceAll(returnString, "&#62;", ">");
+		returnString = replaceAll(returnString, "&#34;", "\"");
+		return returnString;
+	}
+	
 	public static void filterXMLCharsForAnObject(Object anObject)
 	{
 		if(anObject == null)

@@ -10,7 +10,7 @@ import anon.client.ITermsAndConditionsContainer;
 public class SimpleMixCascadeContainer extends AbstractMixCascadeContainer
 {
 	private MixCascade m_mixCascade;
-	private boolean m_bAutoReConnect=false;
+	private boolean m_bAutoReConnect = false;
 	public SimpleMixCascadeContainer(MixCascade a_mixCascade)
 	{
 		m_mixCascade = a_mixCascade;

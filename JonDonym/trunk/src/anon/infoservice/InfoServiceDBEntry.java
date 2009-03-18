@@ -84,7 +84,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	/**
 	 * A proxy interface that is used for all connections and may change over time.
 	 */
-	private static IMutableProxyInterface m_proxyInterface =
+	private static IMutableProxyInterface ms_proxyInterface =
 		new IMutableProxyInterface.DummyMutableProxyInterface();
 
 	/**
@@ -442,7 +442,10 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 
 	public static void setMutableProxyInterface(IMutableProxyInterface a_proxyInterface)
 	{
-		m_proxyInterface = a_proxyInterface;
+		if (a_proxyInterface != null)
+		{
+			ms_proxyInterface = a_proxyInterface;
+		}
 	}
 
 	/**
@@ -822,20 +825,12 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		int connectionCounter = 0;
 		HTTPConnectionDescriptor currentConnectionDescriptor = null;
 		IProxyInterfaceGetter proxyInterfaceGetter = null;
-		IMutableProxyInterface proxyInterface;
 		boolean bAnonProxy;
 
 		while ( (connectionCounter < m_listenerInterfaces.size()) && !Thread.currentThread().isInterrupted())
 		{
 			// update the connectionCounter
 			connectionCounter++;
-
-			proxyInterface = m_proxyInterface;
-			if (proxyInterface == null)
-			{
-				// No connection is possible as there are no proxies available!
-				break;
-			}
 
 			bAnonProxy = false;
 
@@ -846,7 +841,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 					bAnonProxy = true;
 				}
 
-				proxyInterfaceGetter = proxyInterface.getProxyInterface(bAnonProxy);
+				proxyInterfaceGetter = ms_proxyInterface.getProxyInterface(bAnonProxy);
 				if (proxyInterfaceGetter == null)
 				{
 					continue;

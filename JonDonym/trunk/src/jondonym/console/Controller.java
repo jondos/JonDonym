@@ -337,8 +337,7 @@ public class Controller
 		{
 			return null;
 		}
-		return PayAccountsFile.getInstance().createAccount(entry, 
-				new IMutableProxyInterface.DummyMutableProxyInterface(), null);
+		return PayAccountsFile.getInstance().createAccount(entry, null);
 	}
 	
 	public static boolean activateCouponCode(String a_code, PayAccount a_account, boolean a_bPreCheck) throws Exception
@@ -362,7 +361,7 @@ public class Controller
 			try
 			{
 				piConn = new BIConnection(a_account.getBI());
-				piConn.connect(new IMutableProxyInterface.DummyMutableProxyInterface());
+				piConn.connect();
 				piConn.authenticate(a_account.getAccountCertificate(),a_account.getPrivateKey());
 				bValid = piConn.checkCouponCode(a_code);
 				piConn.disconnect();
@@ -394,7 +393,7 @@ public class Controller
 		
 		String lang = JAPMessages.getLocale().getLanguage();
 		requestData.addEntry("language",lang);
-		XMLTransCert transCert = a_account.charge(new IMutableProxyInterface.DummyMutableProxyInterface(), requestData);
+		XMLTransCert transCert = a_account.charge(requestData);
 		if (transCert == null)
 		{
 			return false;
@@ -413,7 +412,7 @@ public class Controller
 		 try
 		 {
 			 piConn = new BIConnection(a_account.getBI());
-			 piConn.connect(new IMutableProxyInterface.DummyMutableProxyInterface());
+			 piConn.connect();
 			 piConn.authenticate(a_account.getAccountCertificate(), a_account.getPrivateKey());
 			 if (!piConn.sendPassivePayment(paymentToSend))
 			 {
@@ -503,7 +502,7 @@ public class Controller
 	        	cascade = new MixCascade("none", 6544);
 	        }
 	        
-	        ms_jondonymProxy = new AnonProxy(ms_socketListener, null,null);
+	        ms_jondonymProxy = new AnonProxy(ms_socketListener, null);
 	        ms_jondonymProxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
 	        ms_serviceContainer = new AutoSwitchedMixCascadeContainer(cascade);
 	        ms_jondonymProxy.start(ms_serviceContainer);

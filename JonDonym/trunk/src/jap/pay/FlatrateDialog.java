@@ -313,7 +313,7 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 		{
 			PaymentInstanceDBEntry pi = m_account.getBI();
 			BIConnection piConn = new BIConnection(pi);
-			piConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+			piConn.connect();
 			piConn.authenticate(m_account.getAccountCertificate(),m_account.getPrivateKey());
 			reply = piConn.buyFlatrate(m_account.getAccountNumber());
 			piConn.disconnect();
@@ -361,7 +361,7 @@ public class FlatrateDialog extends JAPDialog implements ActionListener
 		{
 			PaymentInstanceDBEntry pi = m_account.getBI();
 			BIConnection piConn = new BIConnection(pi);
-			piConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+			piConn.connect();
 			piConn.authenticate(m_account.getAccountCertificate(),m_account.getPrivateKey());
 			theSettings = piConn.getPaymentSettings();
 			piConn.disconnect();

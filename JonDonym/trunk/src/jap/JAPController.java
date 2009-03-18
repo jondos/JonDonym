@@ -36,7 +36,6 @@ import gui.help.JAPHelp;
 import jap.forward.JAPRoutingEstablishForwardedConnectionDialog;
 import jap.forward.JAPRoutingMessage;
 import jap.forward.JAPRoutingSettings;
-import jap.pay.AccountUpdater;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -122,6 +121,7 @@ import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.update.AccountUpdater;
 import anon.infoservice.update.InfoServiceUpdater;
 import anon.infoservice.update.JavaVersionUpdater;
 import anon.infoservice.update.MessageUpdater;
@@ -262,6 +262,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private boolean m_bShowHelpAdvise = false;
 
 	private JobQueue m_anonJobQueue;
+	private boolean m_bConnecting = false;
 
 	private JobQueue queueFetchAccountInfo;
 	private long m_lastBalanceUpdateMS = 0;
@@ -413,7 +414,19 @@ public final class JAPController extends Observable implements IProxyListener, O
 		
 		// initialise IS update threads
 		m_feedback = new JAPFeedback();
-		m_AccountUpdater = new AccountUpdater();
+		m_AccountUpdater = new AccountUpdater(new ObservableInfo(JAPModel.getInstance())
+		{
+			public Integer getUpdateChanged()
+			{
+				return PayAccountsFile.CHANGED_AUTO_UPDATE;
+			}
+
+			public boolean isUpdateDisabled()
+			{
+				return !PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled();
+			}
+		}
+		);
 		m_InfoServiceUpdater = new InfoServiceUpdater(m_observableInfo);
 		m_perfInfoUpdater = new PerformanceInfoUpdater(m_observableInfo);
 		m_paymentInstanceUpdater = new PaymentInstanceUpdater(m_observableInfo);
@@ -426,6 +439,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
 		InfoServiceDBEntry.setMutableProxyInterface(m_Model.getInfoServiceProxyInterface());
+		BIConnection.setMutableProxyInterface(m_Model.getPaymentProxyInterface());
 
 		queueFetchAccountInfo = new JobQueue("FetchAccountInfoJobQueue");
 
@@ -3214,20 +3228,55 @@ public final class JAPController extends Observable implements IProxyListener, O
 	   m_Model.setSocksListenerPortNumber(p);
 	 }*/
 
+	public boolean isConnecting()
+	{
+		return m_bConnecting;
+	}
+	
 	//---------------------------------------------------------------------
 	//---------------------------------------------------------------------
 	//---------------------------------------------------------------------
 	private final class SetAnonModeAsync extends JobQueue.Job
 	{
-
 		private boolean m_startServer;
 
 		public SetAnonModeAsync(boolean a_startServer)
 		{
-			super(!a_startServer);
+			//super(!a_startServer);
+			super();
 			m_startServer = a_startServer;
 		}
 
+		public boolean isInterrupting()
+		{
+			return !m_startServer;
+		}
+		
+		public boolean equals(Object a_job)
+		{
+			if (!(a_job instanceof SetAnonModeAsync) || a_job == null)
+			{
+				return false;
+			}
+			if (((SetAnonModeAsync)a_job).isStartServerJob() == this.isStartServerJob())
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public int hashCode()
+		{
+			if (isStartServerJob())
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		
 		public String getAddedJobLogMessage()
 		{
 			return "Added a job for changing the anonymity mode to '" +
@@ -3246,6 +3295,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 				/* job was not canceled -> we have to do it */
 				try
 				{
+					if (m_startServer)
+					{
+						m_bConnecting = true;
+					}
 					setServerMode(m_startServer);
 				}
 				catch (Throwable a_e)
@@ -3253,6 +3306,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					LogHolder.log(LogLevel.EXCEPTION, LogType.NET,
 								  "Error while setting server mode to " + m_startServer + "!", a_e);
 				}
+				m_bConnecting = false;
 
 				LogHolder.log(LogLevel.DEBUG, LogType.MISC,
 							  "Job for changing the anonymity mode to '" +
@@ -3325,8 +3379,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						if (!bSwitchCascade)
 						{
 							m_proxyAnon = new AnonProxy(
-								m_socketHTTPListener, JAPModel.getInstance().getMutableProxyInterface(),
-								JAPModel.getInstance().getPaymentProxyInterface());
+								m_socketHTTPListener, JAPModel.getInstance().getMutableProxyInterface());
 						}
 					}
 					
@@ -5340,7 +5393,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					// fetch new balance
 					try
 					{
-						currentAccount.fetchAccountInfo(JAPModel.getInstance().getPaymentProxyInterface(), false);
+						currentAccount.fetchAccountInfo(false);
 					}
 					catch (Exception ex)
 					{

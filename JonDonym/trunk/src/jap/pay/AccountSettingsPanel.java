@@ -30,7 +30,6 @@ package jap.pay;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -1587,7 +1586,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				{
 					PaymentInstanceDBEntry pi = a_accountCreationThread.getAccount().getBI();
 					piConn = new BIConnection(pi);
-					piConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+					piConn.connect();
 
 					piConn.authenticate(a_accountCreationThread.getAccount().getAccountCertificate(),
 										a_accountCreationThread.getAccount().getPrivateKey());
@@ -1652,7 +1651,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				   PaymentInstanceDBEntry pi = a_accountCreationThread.getAccount().getBI();
 				   piConn = new BIConnection(pi);
 
-				   piConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+				   piConn.connect();
 				   piConn.authenticate(a_accountCreationThread.getAccount().getAccountCertificate(),
 									   //  PayAccountsFile.getInstance().getActiveAccount().getAccountCertificate(),
 									   a_accountCreationThread.getAccount().getPrivateKey());
@@ -1765,7 +1764,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 						String lang = JAPMessages.getLocale().getLanguage();
 						requestData.addEntry("language",lang);
 						PayAccount curAccount = a_accountCreationThread.getAccount();
-						m_transCert = curAccount.charge(JAPModel.getInstance().getPaymentProxyInterface(), requestData);
+						m_transCert = curAccount.charge(requestData);
 						if (m_transCert != null)
 						{
 							a_tan.addElement(m_transCert);
@@ -1894,7 +1893,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				 }
 				 try
 				 {
-					 biConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+					 biConn.connect();
 					 biConn.authenticate(a_accountCreationThread.getAccount().getAccountCertificate(),
 										 a_accountCreationThread.getAccount().getPrivateKey());
 					 if (!biConn.sendPassivePayment(paymentToSend))
@@ -2140,7 +2139,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					pi = m_jpi;
 				}
 				piConn = new BIConnection(pi);
-				piConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+				piConn.connect();
 				//authentication is neither necessary nor possible (creating first account -> user does not yet have an account to authenticate with)
 				LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching terms and conditions");
 
@@ -2204,8 +2203,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 						{
 							XMLTransactionOverview overview;
 
-							biConn.connect(JAPModel.getInstance().
-										   getPaymentProxyInterface());
+							biConn.connect();
 							biConn.authenticate(selectedAccount.getAccountCertificate(),
 												selectedAccount.getPrivateKey());
 							overview =
@@ -2453,7 +2451,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				{
 					//Check if payment instance is reachable
 					biconn = new BIConnection( jpiPane.getSelectedPaymentInstance() );
-					biconn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+					biconn.connect();
 					biconn.disconnect();
 				}
 				catch (Exception e)
@@ -2518,7 +2516,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			   {
 				   PaymentInstanceDBEntry pi = jpiPane.getSelectedPaymentInstance();
 				   piConn = new BIConnection(pi);
-				   piConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+				   piConn.connect();
 
 				   //authentication is neither necessary nor possible (creating first account -> user does not yet have an account to authenticate with)
 				   LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching cancellation policy");
@@ -2616,14 +2614,13 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				{
 					try
 					{
-						IMutableProxyInterface payProxy = JAPModel.getInstance().getPaymentProxyInterface();
 						DSAKeyPair accountKeys = (DSAKeyPair) keyWorkerPane.getValue();
 						PaymentInstanceDBEntry jpi = jpiPane.getSelectedPaymentInstance();
 						XMLGenericText agreedTerms = (XMLGenericText) fetchTermsPane.getValue();
 
-						m_payAccount = PayAccountsFile.getInstance().createAccount(jpi,payProxy,accountKeys,agreedTerms);
+						m_payAccount = PayAccountsFile.getInstance().createAccount(jpi,accountKeys,agreedTerms);
 
-						m_payAccount.fetchAccountInfo(JAPModel.getInstance().getPaymentProxyInterface(), true);
+						m_payAccount.fetchAccountInfo(true);
 						break;
 					}
 					catch (IOException a_e)
@@ -2944,8 +2941,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			{
 				try
 				{
-					a_accountCreationThread.getAccount().fetchAccountInfo(
-						JAPModel.getInstance().getPaymentProxyInterface(), true);
+					a_accountCreationThread.getAccount().fetchAccountInfo(true);
 					updateAccountList();
 				}
 				catch (Exception e)
