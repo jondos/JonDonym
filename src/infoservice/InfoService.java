@@ -37,9 +37,6 @@ import platform.signal.SignalHandler;
 
 import infoservice.PassiveInfoServiceInitializer;
 import infoservice.performance.PerformanceMeter;
-import jap.pay.AccountUpdater;
-import jap.JAPModel;
-import jap.JAPController;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.Database;
@@ -47,9 +44,11 @@ import anon.infoservice.IDistributable;
 import anon.infoservice.IDistributor;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.update.AccountUpdater;
 import anon.util.JAPMessages;
 import anon.util.ThreadPool;
 import anon.util.TimedOutputStream;
+import anon.util.Updater.ObservableInfo;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -121,11 +120,21 @@ public class InfoService implements Observer
 			s1.startServer();
 			
 //			 configure the performance meter
-			if(Configuration.getInstance().isPerfEnabled())
+			if (Configuration.getInstance().isPerfEnabled())
 			{				
 				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting Performance Meter...");
 				
-				ms_accountUpdater = new AccountUpdater();		
+				ms_accountUpdater = new AccountUpdater(new ObservableInfo(new Observable())
+				{
+					public Integer getUpdateChanged()
+					{
+						return new Integer(0);
+					}
+					public boolean isUpdateDisabled()
+					{
+						return false;
+					}
+				});		
 				ms_accountUpdater.start(false);				
 				ms_perfMeter = new PerformanceMeter(ms_accountUpdater);
 				Thread perfMeterThread = new Thread(InfoService.ms_perfMeter);			
@@ -144,14 +153,6 @@ public class InfoService implements Observer
 			JAPMessages.setLocale(Locale.ENGLISH);			
 
 			System.out.println("InfoService is running!");
-			
-			JAPModel model = JAPModel.getInstance();
-			model.setPaymentAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
-			model.setInfoServiceAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
-			model.setUpdateAnonymousConnectionSetting(JAPModel.CONNECTION_BLOCK_ANONYMOUS);
-			model.setAnonConnectionChecker(JAPController.getInstance().new AnonConnectionChecker());
-			model.setAutoReConnect(true);
-			model.setCascadeAutoSwitch(false);
 			
 			Thread tacLoader = new Thread()
 			{

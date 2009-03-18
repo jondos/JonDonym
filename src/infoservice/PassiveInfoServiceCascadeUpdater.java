@@ -1,19 +1,27 @@
 package infoservice;
 
-import jap.MixCascadeUpdater;
 
 import java.util.Hashtable;
 
-public class PassiveInfoServiceCascadeUpdater extends MixCascadeUpdater {
+import anon.infoservice.AbstractDatabaseEntry;
+import anon.infoservice.update.AbstractMixCascadeUpdater;
 
-	public PassiveInfoServiceCascadeUpdater(long interval, ObservableInfo a_observableInfo) 
-	{
-		super(interval, false, a_observableInfo);
-	}
-
+public class PassiveInfoServiceCascadeUpdater extends AbstractMixCascadeUpdater 
+{
+	private AbstractDatabaseEntry m_preferred;
 	public PassiveInfoServiceCascadeUpdater(ObservableInfo a_observableInfo) 
 	{
-		super(a_observableInfo);
+		super(Long.MAX_VALUE, false, a_observableInfo);
+	}
+	
+	protected AbstractDatabaseEntry getPreferredEntry()
+	{
+		return m_preferred;
+	}
+	
+	protected void setPreferredEntry(AbstractDatabaseEntry a_entry)
+	{
+		m_preferred = a_entry;
 	}
 	
 	protected Hashtable getUpdatedEntries(Hashtable a_entriesToUpdate)

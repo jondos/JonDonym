@@ -1217,7 +1217,21 @@ public class XMLUtil
 	public static Document readXMLDocument(File a_file) throws IOException, XMLParseException
 	{
 		FileInputStream inputStream = new FileInputStream(a_file);
-		Document doc = readXMLDocument(inputStream);
+		IOException exIO = null;
+		XMLParseException exXML = null;
+		Document doc = null;
+		try
+		{
+			doc = readXMLDocument(inputStream);
+		}
+		catch (IOException a_e)
+		{
+			exIO = a_e;
+		}
+		catch (XMLParseException a_e)
+		{
+			exXML = a_e;
+		}
 		try
 		{
 			inputStream.close();
@@ -1225,6 +1239,14 @@ public class XMLUtil
 		catch (IOException a_e)
 		{
 			// never mind
+		}
+		if (exIO != null)
+		{
+			throw exIO;
+		}
+		else if (exXML != null)
+		{
+			throw exXML;
 		}
 		return doc;
 	}

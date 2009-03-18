@@ -285,7 +285,7 @@ public class JonDoConsole
 									{
 										try
 										{
-											tAccount.fetchAccountInfo(new IMutableProxyInterface.DummyMutableProxyInterface(), true);
+											tAccount.fetchAccountInfo(true);
 										}
 										catch (Exception a_e)
 										{

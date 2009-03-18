@@ -274,6 +274,14 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 				m_firstMessage = null;
 				m_aktY = ICON_HEIGHT;
 				m_Thread.interrupt(); //display next message
+				try 
+				{
+					Thread.sleep(100);
+				}
+				catch (InterruptedException e) 
+				{
+				}
+				m_Thread.interrupt();
 			}
 			else
 			{
@@ -299,6 +307,14 @@ public class StatusPanel extends JPanel implements Runnable, IStatusLine
 					m_firstMessage = curEntry.m_Next;
 					m_aktY = ICON_HEIGHT;
 					m_Thread.interrupt(); //display changes
+					try 
+					{
+						Thread.sleep(100);
+					}
+					catch (InterruptedException e) 
+					{
+					}
+					m_Thread.interrupt();
 				}
 				prevEntry.m_Next = curEntry.m_Next; //remove entry from list
 			}

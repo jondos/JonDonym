@@ -810,15 +810,14 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 		}
 	}
 
-	public PayAccount createAccount(PaymentInstanceDBEntry a_bi, IMutableProxyInterface a_proxys,
-			XMLGenericText a_terms) throws Exception
+	public PayAccount createAccount(PaymentInstanceDBEntry a_bi, XMLGenericText a_terms) throws Exception
 	{
 		AsymmetricCryptoKeyPair keyPair = createAccountKeyPair();
 		if (keyPair == null)
 		{
 			return null;
 		}
-		return createAccount(a_bi, a_proxys, keyPair, a_terms);
+		return createAccount(a_bi, keyPair, a_terms);
 	}
 	
 	/**
@@ -831,7 +830,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	 * @param a_keyPair RSA should not be used at the moment
 	 *
 	 */
-	public PayAccount createAccount(PaymentInstanceDBEntry a_bi, IMutableProxyInterface a_proxys,
+	public PayAccount createAccount(PaymentInstanceDBEntry a_bi,
 									AsymmetricCryptoKeyPair a_keyPair, XMLGenericText a_terms) 
 		throws Exception
 	{
@@ -842,7 +841,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 		//System.out.println(a_bi.getId());
 		BIConnection biConn = new BIConnection(a_bi);
 		biConn.addConnectionListener(this);
-		biConn.connect(a_proxys);
+		biConn.connect();
 		XMLAccountCertificate cert = biConn.registerNewAccount(xmlKey, a_keyPair.getPrivate());
 		biConn.disconnect();
 

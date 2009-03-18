@@ -96,8 +96,12 @@ public class BIConnection implements ICaptchaSender
 
 	private boolean m_bSendNewCaptcha;
 	private boolean m_bFirstCaptcha = true;
-
-	IMutableProxyInterface m_proxyInterface = null;
+	
+	/**
+	 * A proxy interface that is used for all connections and may change over time.
+	 */
+	private static IMutableProxyInterface ms_proxyInterface =
+		new IMutableProxyInterface.DummyMutableProxyInterface();
 
 	/**
 	 * Constructor
@@ -137,10 +141,18 @@ public class BIConnection implements ICaptchaSender
 	{
 		return ms_connectionTimeout;
 	}
-
-	public void connect(IMutableProxyInterface a_proxyInterface) throws IOException
+	
+	public static void setMutableProxyInterface(IMutableProxyInterface a_proxyInterface)
 	{
-		connect(a_proxyInterface, ms_connectionTimeout);
+		if (a_proxyInterface != null)
+		{
+			ms_proxyInterface = a_proxyInterface;
+		}
+	}
+
+	public void connect() throws IOException
+	{
+		connect(ms_connectionTimeout);
 	}
 	
 	/**
@@ -149,16 +161,11 @@ public class BIConnection implements ICaptchaSender
 	 * @throws IOException if an error occured while connection
 	 * @throws ForbiddenIOException if it is assumed that the local provider forbids the connection
 	 */
-	public void connect(IMutableProxyInterface a_proxyInterface, int a_connectionTimeout) throws IOException
+	public void connect(int a_connectionTimeout) throws IOException
 	{
 		IOException exception = new IOException("No valid proxy available");
 
-		if (a_proxyInterface == null)
-		{
-			throw exception;
-		}
-
-		m_proxyInterface = a_proxyInterface;
+	
 		IProxyInterfaceGetter proxyInterfaceGetter;
 		boolean bAnonProxy = false;
 
@@ -169,7 +176,7 @@ public class BIConnection implements ICaptchaSender
 				bAnonProxy = true;
 			}
 
-			proxyInterfaceGetter = a_proxyInterface.getProxyInterface(bAnonProxy);
+			proxyInterfaceGetter = ms_proxyInterface.getProxyInterface(bAnonProxy);
 			if (proxyInterfaceGetter == null)
 			{
 				continue;
@@ -491,7 +498,7 @@ public class BIConnection implements ICaptchaSender
 					LogHolder.log(LogLevel.INFO, LogType.PAY,
 								  "Not connected to payment instance while trying to disconnect");
 				}
-				this.connect(m_proxyInterface);
+				this.connect();
 			}
 			// send our public key
 			m_httpClient.writeRequest(

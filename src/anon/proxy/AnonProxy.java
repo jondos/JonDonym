@@ -158,7 +158,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	 */
 	public AnonProxy(ServerSocket a_listener)
 	{
-		this (a_listener, null, null);
+		this (a_listener, null);
 	}
 
 	/**
@@ -177,8 +177,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	 *          connections to the anon servers (e.g. if you are behind some
 	 *          firewall etc.)
 	 */
-	public AnonProxy(ServerSocket a_listener, IMutableProxyInterface a_proxyInterface,
-					 IMutableProxyInterface a_paymentProxyInterface)
+	public AnonProxy(ServerSocket a_listener, IMutableProxyInterface a_proxyInterface)
 	{
 		if (a_listener == null)
 		{
@@ -193,7 +192,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		// HTTP
 		m_Anon = AnonServiceFactory.getAnonServiceInstance(AnonServiceFactory.SERVICE_ANON);
 		m_Anon.setProxy(m_proxyInterface);
-		( (AnonClient) m_Anon).setPaymentProxy(a_paymentProxyInterface);
 		setDummyTraffic(DummyTrafficControlChannel.DT_DISABLE);
 		m_forwardedConnection = false;
 		m_anonServiceListener = new Vector();
@@ -494,11 +492,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 				try
 				{
 					threadRun.interrupt();
-					threadRun.join(1000);
-					if (i > 3)
-					{
-						threadRun.stop();
-					}
+					threadRun.join(500);
 					i++;
 				}
 				catch (InterruptedException e)
@@ -633,6 +627,10 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		}
 		catch (Exception e)
 		{
+			if (bShuttingDown)
+			{
+				return;
+			}
 		}
 		try
 		{
@@ -642,13 +640,26 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		{
 			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Could not set accept time out!", e1);
 		}
+		
+		if (bShuttingDown)
+		{
+			try
+			{
+				m_socketListener.setSoTimeout(oldTimeOut);
+			}
+			catch (Exception e4)
+			{
+			}
+			return;
+		}
+		
 		requester = new OpenSocketRequester(this, THREAD_SYNC);
 		socketThread = new Thread(requester, requester.getClass().getName());
 		socketThread.start();
 
 		try
 		{
-			while (!Thread.currentThread().isInterrupted())
+			while (!Thread.currentThread().isInterrupted() && !bShuttingDown)
 			{
 				Socket socket = null;
 				try
@@ -671,8 +682,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 								  "Could not set non-Blocking mode for Channel-Socket!", soex);
 					continue;
 				}
-
-
 			}
 		}
 		catch (Exception e)
@@ -756,7 +765,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			m_bReconnecting = true;
 
 			while (threadRun != null && m_currentMixCascade.isReconnectedAutomatically() &&
-				   !m_Anon.isConnected() && !Thread.currentThread().isInterrupted())
+				   !m_Anon.isConnected() && !bShuttingDown && !Thread.currentThread().isInterrupted())
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.NET, "Try reconnect to AN.ON service");
 				int ret = m_Anon.initialize(m_currentMixCascade.getNextCascade(), m_currentMixCascade);
@@ -776,8 +785,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			}
 			m_bReconnecting = false;
 
-			if ( (threadRun == null || !isConnected()) &&
-				!m_currentMixCascade.isReconnectedAutomatically())
+			if ((threadRun == null || !isConnected()) && !m_currentMixCascade.isReconnectedAutomatically())
 			{
 				stop();
 				THREAD_SYNC.notifyAll(); // maybe setting has changed meanwhile
@@ -919,7 +927,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			if (bConnectionError)
 			{
 				connectionError();
-				return ErrorCodes.E_CONNECT;
+				return ret;
 			}
 			return ErrorCodes.E_SUCCESS;
 		}

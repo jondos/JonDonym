@@ -85,7 +85,7 @@ public class PassiveInfoServiceMainUpdater extends AbstractDatabaseUpdater
 	{
 		super(interval, a_observableInfo);
 		
-		m_cascadeUpdater = new PassiveInfoServiceCascadeUpdater(Long.MAX_VALUE, a_observableInfo);
+		m_cascadeUpdater = new PassiveInfoServiceCascadeUpdater(a_observableInfo);
 		m_mixUpdater = new MixInfoUpdater(a_observableInfo);
 		piUpdater = new PaymentInstanceUpdater(Long.MAX_VALUE, a_observableInfo);
 		

@@ -389,7 +389,7 @@ import javax.swing.BorderFactory;
 			try
 			{
 				BIConnection piConn = new BIConnection(jpi);
-				piConn.connect(JAPModel.getInstance().getPaymentProxyInterface());
+				piConn.connect();
 				piConn.authenticate(account.getAccountCertificate(),account.getPrivateKey());
 				LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Checking coupon code validity in VolumePlanSelectionPane");
 				isValid = piConn.checkCouponCode(getEnteredCouponCode() );

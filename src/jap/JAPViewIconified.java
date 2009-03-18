@@ -651,10 +651,10 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 	{
 		if (isVisible())
 		{
-			Thread blinkThread = new Thread(new Runnable()
+			/*Thread blinkThread = new Thread(new Runnable()
 			{
 				public void run()
-				{
+				{*/
 					synchronized (m_lblJAPIcon)
 					{
 						if (m_Controller.isAnonConnected())
@@ -663,7 +663,7 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 								"_icon16red.gif", true, false));
 							try
 							{
-								m_lblJAPIcon.wait(1000);
+								m_lblJAPIcon.wait(250);
 							}
 							catch (InterruptedException a_e)
 							{
@@ -689,10 +689,10 @@ final public class JAPViewIconified extends JWindow implements ActionListener
 								"_icon16discon.gif", true, false));
 						}
 					}
-				}
+		/*		}
 			});
 			blinkThread.setDaemon(true);
-			blinkThread.start();
+			blinkThread.start();*/
 		}
 	}
 }
