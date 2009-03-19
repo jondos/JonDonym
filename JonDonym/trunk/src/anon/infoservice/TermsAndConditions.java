@@ -731,6 +731,7 @@ public class TermsAndConditions implements IXMLEncodable
 		
 		public boolean equals(Object obj) 
 		{
+			if(obj == null) return false;
 			return this.locale.equals(((Translation) obj).locale);
 		}
 		
