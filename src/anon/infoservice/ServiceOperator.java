@@ -387,31 +387,31 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		{
 			XMLUtil.createChildElementWithValue(mixOperatorElement, 
 					XML_ELEMENT_ORGANISATION, 
-					Util.filterXMLChars(m_strOrganization));
+					XMLUtil.filterXMLChars(m_strOrganization));
 		}
 		if( m_strUrl != null )
 		{
 			XMLUtil.createChildElementWithValue(mixOperatorElement, 
 					XML_ELEMENT_URL, 
-					Util.filterXMLChars(m_strUrl));
+					XMLUtil.filterXMLChars(m_strUrl));
 		}
 		if( m_countryCode != null )
 		{
 			XMLUtil.createChildElementWithValue(mixOperatorElement, 
 					XML_ELEMENT_COUNTRYCODE, 
-					Util.filterXMLChars(m_countryCode));
+					XMLUtil.filterXMLChars(m_countryCode));
 		}
 		if( m_strOrgUnit != null )
 		{
 			XMLUtil.createChildElementWithValue(mixOperatorElement, 
 					XML_ELEMENT_ORG_UNIT, 
-					Util.filterXMLChars(m_strOrgUnit));
+					XMLUtil.filterXMLChars(m_strOrgUnit));
 		}
 		if( m_strEmail != null )
 		{
 			XMLUtil.createChildElementWithValue(mixOperatorElement, 
 					spamSafe ? XML_ELEMENT_EMAIL_SPAMSAFE : XML_ELEMENT_EMAIL, 
-					spamSafe ? Util.filterXMLChars(getEMailSpamSafe()) : Util.filterXMLChars(getEMail()));
+					spamSafe ? XMLUtil.filterXMLChars(getEMailSpamSafe()) : XMLUtil.filterXMLChars(getEMail()));
 		}
 		
 		if (address != null)

@@ -253,20 +253,20 @@ public class ServiceLocation
 		{
 			XMLUtil.createChildElementWithValue(locationElement, 
 					XML_ELEMENT_CITY, 
-					Util.filterXMLChars(city));
+					XMLUtil.filterXMLChars(city));
 		}
 		
 		if( state != null )
 		{
 			XMLUtil.createChildElementWithValue(locationElement, 
 					XML_ELEMENT_STATE, 
-					Util.filterXMLChars(state));
+					XMLUtil.filterXMLChars(state));
 		}
 		if( m_country != null )
 		{
 			XMLUtil.createChildElementWithValue(locationElement, 
 					XML_ELEMENT_COUNTRY, 
-					Util.filterXMLChars(m_country));
+					XMLUtil.filterXMLChars(m_country));
 		}
 		if( longitude != null && 
 			latitude != null )
@@ -276,11 +276,11 @@ public class ServiceLocation
 			
 			XMLUtil.createChildElementWithValue(geoElement, 
 					XML_ELEMENT_LONGITUDE, 
-					Util.filterXMLChars(longitude));
+					XMLUtil.filterXMLChars(longitude));
 			
 			XMLUtil.createChildElementWithValue(geoElement, 
 					XML_ELEMENT_LATITUDE, 
-					Util.filterXMLChars(latitude));
+					XMLUtil.filterXMLChars(latitude));
 		}
 		return locationElement;
 	}

@@ -1212,8 +1212,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				JAPModel.getInstance().setAskForAnyNonAnonymousRequest(
 								XMLUtil.parseAttribute(root, JAPModel.XML_ASK_FOR_NON_ANONYMOUS_SURFING, true));
 				
-				JAPModel.getInstance().initHelpPath(
-								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
+				JAPModel.getInstance().initHelpPath(XMLUtil.restoreFilteredXMLChars(
+								XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null)));
 				if (!JAPDialog.isConsoleOnly())
 				{
 					String messageText = a_splash.getText();
@@ -2106,7 +2106,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			catch (Exception e)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.MISC,
-							  "JAPModel:Error loading configuration! " + e.toString());
+							  "Error loading configuration! " , e);
 			}
 		} //end if f!=null
 		// fire event
@@ -2148,8 +2148,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 										
 					Element root = doc.getDocumentElement();					
-					JAPModel.getInstance().initHelpPath(
-							XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null));
+					JAPModel.getInstance().initHelpPath(XMLUtil.restoreFilteredXMLChars(
+							XMLUtil.parseAttribute(root, XML_ATTR_HELP_PATH, null)));
 					JAPModel.getInstance().resetHelpPath();					
 					
 					try
@@ -2695,7 +2695,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			if(JAPModel.getInstance().isHelpPathDefined() && 
 					JAPModel.getInstance().isHelpPathChangeable())
 			{
-				XMLUtil.setAttribute(e, XML_ATTR_HELP_PATH, JAPModel.getInstance().getHelpPath());
+				XMLUtil.setAttribute(e, XML_ATTR_HELP_PATH, XMLUtil.filterXMLChars(JAPModel.getInstance().getHelpPath()));
 			}
 			
 			try

@@ -33,9 +33,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.text.DecimalFormat;
 import java.util.Vector;
 import java.util.StringTokenizer;
@@ -717,102 +714,6 @@ public final class Util
 		a_input.close();
 		a_output.flush();
 		a_output.close();
-	}
-	
-	/**
-	 * filters out the chars &, <, >and "
-	 * with the unicode entities.
-	 * WARNING: this destroys valid Entities
-	 * so only use this this for dirty, not XML compliant Strings 
-	 * @param a_source
-	 * @return
-	 */
-	public static String filterXMLChars(String a_source)
-	{
-		String returnString = replaceAll(a_source, "&", "&#38;");
-		returnString = replaceAll(returnString, "<", "&#60;");
-		returnString = replaceAll(returnString, ">", "&#62;");
-		returnString = replaceAll(returnString, "\"", "&#34;");
-		return returnString;
-	}
-	
-	public static String restoreXMLChars(String a_source)
-	{
-		String returnString = replaceAll(a_source, "&#38;", "&");
-		returnString = replaceAll(returnString, "&#60;", "<");
-		returnString = replaceAll(returnString, "&#62;", ">");
-		returnString = replaceAll(returnString, "&#34;", "\"");
-		return returnString;
-	}
-	
-	public static void filterXMLCharsForAnObject(Object anObject)
-	{
-		if(anObject == null)
-		{
-			return;
-		}
-		Class objectClass = anObject.getClass();
-		Method[] allMethods = objectClass.getMethods();
-		
-		Method currentStringSetter = null;
-		Method currentStringGetter = null;
-		
-		int currentModifiers = 0;
-		String temp = null;
-		String toFilter = null;
-		
-		for (int i = 0; i < allMethods.length; i++) 
-		{
-			if( allMethods[i].getParameterTypes().length == 1 )
-			{
-				currentModifiers = allMethods[i].getModifiers();
-				if(allMethods[i].getParameterTypes()[0].equals(String.class) &&
-						allMethods[i].getName().startsWith("set")	&&
-						Modifier.isPublic(currentModifiers) &&
-						!Modifier.isStatic(currentModifiers) )
-				{
-					currentStringGetter = null;
-					toFilter = null;
-					
-					currentStringSetter = allMethods[i];
-					temp = currentStringSetter.getName().substring(3);
-					
-					if( temp != null && !temp.equals("") )
-					{
-						try {
-							currentStringGetter = objectClass.getMethod("get"+temp, (Class[])null);
-							if(currentStringGetter != null)
-							{
-								if(currentStringGetter.getReturnType().equals(String.class))
-								{
-									toFilter = (String) currentStringGetter.invoke(anObject, (Object[])null);
-									if( toFilter != null )
-									{
-										toFilter = filterXMLChars(toFilter);
-										currentStringSetter.invoke(anObject, new Object[]{toFilter});
-									}
-								}
-							}
-						} 
-						catch (SecurityException e) 
-						{
-						} 
-						catch (NoSuchMethodException e) 
-						{
-						}
-						catch (IllegalArgumentException e)
-						{
-						} 
-						catch (IllegalAccessException e) 
-						{
-						} 
-						catch (InvocationTargetException e) 
-						{
-						}
-					}
-				}
-			}
-		}
 	}
 	
 	/**

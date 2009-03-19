@@ -43,7 +43,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.StringTokenizer;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -1805,6 +1807,110 @@ public class XMLUtil
 			d.appendChild(node);
 		
 			return d;
+		}
+
+		/**
+		 * filters out the chars &, <, >and "
+		 * with the unicode entities.
+		 * WARNING: this destroys valid Entities
+		 * so only use this this for dirty, not XML compliant Strings 
+		 * @param a_source
+		 * @return
+		 */
+		public static String filterXMLChars(String a_source)
+		{
+			if (a_source == null)
+			{
+				return null;
+			}
+			String returnString = Util.replaceAll(a_source, "&", "&#38;");
+			returnString = Util.replaceAll(returnString, "<", "&#60;");
+			returnString = Util.replaceAll(returnString, ">", "&#62;");
+			returnString = Util.replaceAll(returnString, "\"", "&#34;");
+			return returnString;
+		}
+
+		public static void filterXMLCharsForAnObject(Object anObject)
+		{
+			if(anObject == null)
+			{
+				return;
+			}
+			Class objectClass = anObject.getClass();
+			Method[] allMethods = objectClass.getMethods();
+			
+			Method currentStringSetter = null;
+			Method currentStringGetter = null;
+			
+			int currentModifiers = 0;
+			String temp = null;
+			String toFilter = null;
+			
+			for (int i = 0; i < allMethods.length; i++) 
+			{
+				if( allMethods[i].getParameterTypes().length == 1 )
+				{
+					currentModifiers = allMethods[i].getModifiers();
+					if(allMethods[i].getParameterTypes()[0].equals(String.class) &&
+							allMethods[i].getName().startsWith("set")	&&
+							Modifier.isPublic(currentModifiers) &&
+							!Modifier.isStatic(currentModifiers) )
+					{
+						currentStringGetter = null;
+						toFilter = null;
+						
+						currentStringSetter = allMethods[i];
+						temp = currentStringSetter.getName().substring(3);
+						
+						if( temp != null && !temp.equals("") )
+						{
+							try {
+								currentStringGetter = objectClass.getMethod("get"+temp, (Class[])null);
+								if(currentStringGetter != null)
+								{
+									if(currentStringGetter.getReturnType().equals(String.class))
+									{
+										toFilter = (String) currentStringGetter.invoke(anObject, (Object[])null);
+										if( toFilter != null )
+										{
+											toFilter = filterXMLChars(toFilter);
+											currentStringSetter.invoke(anObject, new Object[]{toFilter});
+										}
+									}
+								}
+							} 
+							catch (SecurityException e) 
+							{
+							} 
+							catch (NoSuchMethodException e) 
+							{
+							}
+							catch (IllegalArgumentException e)
+							{
+							} 
+							catch (IllegalAccessException e) 
+							{
+							} 
+							catch (InvocationTargetException e) 
+							{
+							}
+						}
+					}
+				}
+			}
+		}
+
+		public static String restoreFilteredXMLChars(String a_source)
+		{
+			if (a_source == null)
+			{
+				return null;
+			}
+			String returnString = Util.replaceAll(a_source, "&#38;", "&");
+			returnString = Util.replaceAll(returnString, "&#60;", "<");
+			returnString = Util.replaceAll(returnString, "&#62;", ">");
+			returnString = Util.replaceAll(returnString, "&#34;", "\"");
+			return returnString;
 		}
 	}
 
