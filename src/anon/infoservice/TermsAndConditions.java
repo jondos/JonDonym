@@ -768,7 +768,7 @@ public class TermsAndConditions implements IXMLEncodable
 		 */
 		public Element createXMLOutput(Document doc) 
 		{
-			Element root = doc.createElement(XML_ELEMENT_NAME);
+			Element root = doc.createElement(TermsAndConditionsTranslation.XML_ELEMENT_NAME);
 			root.setAttribute(XML_ATTR_REFERENCE_ID, templateReferenceId);
 			root.setAttribute(XML_ATTR_LOCALE, locale);
 			if(defaultTranslation)

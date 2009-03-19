@@ -84,12 +84,12 @@ public class OperatorAddress
 				try 
 				{
 					currField = this.getClass().getDeclaredField(currElement.getTagName().toLowerCase());
-					currField.set(this, currElement.getTextContent());
+					currField.set(this, XMLUtil.parseValue(currElement, (String)null));
 				} catch (SecurityException e) {
 				} catch (NoSuchFieldException e) {
 				} catch (IllegalArgumentException e) {
 				} catch (DOMException e) {
-					throw new XMLParseException(e);
+					throw new XMLParseException(e.getMessage());
 				} catch (IllegalAccessException e) {
 				}
 			}

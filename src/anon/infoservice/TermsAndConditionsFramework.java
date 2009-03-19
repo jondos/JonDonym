@@ -237,7 +237,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 					(Element) XMLUtil.getFirstChildByNameUsingDeepSearch(m_docWorkingCopy.getDocumentElement(), urlElements[i]);
 				if(currentUrlElement != null)
 				{
-					currentUrlElement.setTextContent(urlValues[i]);
+					XMLUtil.setValue(currentUrlElement, urlValues[i]);
 				}
 			}
 			

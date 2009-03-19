@@ -58,10 +58,11 @@ public class XMLParseException extends Exception
 		super(parseTagName(a_strTagName) + getMessage(a_strMessage));
 	}
 
+	/* Not allowed for jre 1.1
 	public XMLParseException(Throwable cause) 
 	{
 		super(cause);
-	}
+	}*/
 	
 	/**
 	 * Creates a new exception.
