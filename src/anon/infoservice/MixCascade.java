@@ -174,6 +174,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 * Is greater zero if user number is restricted.
 	 */
 	private int m_maxUsers = 0;
+	
+	private String m_strPorts;
+	private String m_strHosts;
 
 	/**
 	 * True, if this MixCascade is a payment cascade.
@@ -1028,6 +1031,18 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return returnedListener;
 	}
 	
+	public String getHostsAsString()
+	{
+		cacheHostAndPortsAsString();
+		return m_strHosts;
+	}
+	
+	public String getPortsAsString()
+	{
+		cacheHostAndPortsAsString();
+		return m_strPorts;
+	}
+	
 	public Vector getHosts()
 	{
 		Vector hosts = new Vector();
@@ -1378,6 +1393,73 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	{
 		calculateOperatorsAndCountries();
 		return m_distributionPoints;
+	}
+	
+	private synchronized void cacheHostAndPortsAsString()
+	{
+		if (m_strPorts != null || m_strHosts != null)
+		{
+			// cached
+			return;
+		}
+		
+		//Get cascade id
+		Vector countPorts;
+		Integer port;
+
+		// Get host names and ports
+		String interfaces = "";
+		String ports = "";
+		int[] portsArray = new int[getNumberOfListenerInterfaces()];
+
+		for (int i = 0; i < getNumberOfListenerInterfaces(); i++)
+		{
+			if (interfaces.indexOf(getListenerInterface(i).getHost()) == -1)
+			{
+				if (interfaces.length() > 0)
+				{
+					interfaces += "\n";
+				}
+				interfaces += getListenerInterface(i).getHost(); // GUIUtils.trim(getListenerInterface(i).getHost(), MAX_HOST_LENGTH);
+			}
+			portsArray[i] = getListenerInterface(i).getPort();
+		}
+
+		// Sort the array containing the port numbers and put the numbers into a string
+		for (int i = 0; i < portsArray.length; i++)
+		{
+			for (int k = i + 1; k < portsArray.length; k++)
+			{
+				if (portsArray[i] > portsArray[k])
+				{
+					int tmp = portsArray[k];
+					portsArray[k] = portsArray[i];
+					portsArray[i] = tmp;
+				}
+			}
+		}
+
+		countPorts = new Vector(portsArray.length);
+		for (int i = 0; i < portsArray.length; i++)
+		{
+			// do not double-count any ports
+			port = new Integer(portsArray[i]);
+			if (countPorts.contains(port))
+			{
+				continue;
+			}
+			countPorts.addElement(new Integer(portsArray[i]));
+		}
+		for (int i = 0; i < countPorts.size(); i++)
+		{
+			ports += countPorts.elementAt(i).toString();
+			if (i != countPorts.size() - 1)
+			{
+				ports += ", ";
+			}
+		}
+		m_strHosts = interfaces;
+		m_strPorts = ports;
 	}
 	
 	private void calculateOperatorsAndCountries()

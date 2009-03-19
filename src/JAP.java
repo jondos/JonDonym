@@ -192,7 +192,7 @@ public class JAP
 			System.exit(0);
 		}
 
-		if (!JAPConstants.m_bReleasedVersion)
+		//if (!JAPConstants.m_bReleasedVersion)
 		{
 			System.out.println("Starting up " + strname + " version " + 
 					JAPConstants.aktVersion + ". (" + javaVersion +
@@ -1182,7 +1182,16 @@ public class JAP
 	public static void main(String[] argv)
 	{
 		// do NOT change anything in main!
-		JAP jap = new JAP(argv);
-		jap.startJAP();
+		try
+		{
+			JAP jap = new JAP(argv);
+			jap.startJAP();
+		}
+		catch (Throwable a_e)
+		{
+			System.out.println("A severe problem was encountered on startup!");
+			a_e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 }

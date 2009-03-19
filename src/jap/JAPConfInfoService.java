@@ -1129,7 +1129,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 					addInfoServiceNameField.setText("");
 					descriptionPanel.setVisible(true);
 					settingsInfoServiceConfigBasicSettingsAddButton.setEnabled(true);
-					m_listKnownInfoServices.setSelectedIndex(m_listKnownInfoServices.getModel().getSize() - 1);
+					m_listKnownInfoServices.setSelectedValue(newInfoService, true);
 				}
 				catch (Exception e)
 				{
@@ -1457,6 +1457,16 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 		m_allowAutomaticIS.setSelected(true);
 		setConnectionTimeout(InfoServiceDBEntry.DEFAULT_GET_XML_CONNECTION_TIMEOUT);
 	}
+	
+	protected void onRootPanelShown()
+	{
+		if (m_listKnownInfoServices.getSelectedIndex() < 0)
+		{
+			//Select the preferred InfoService
+			m_listKnownInfoServices.setSelectedValue(InfoServiceHolder.getInstance().
+													 getPreferredInfoService(), true);
+		}
+	}
 
 	protected void onUpdateValues()
 	{
@@ -1475,9 +1485,7 @@ public class JAPConfInfoService extends AbstractJAPConfModule implements Observe
 			m_allowAutomaticIS.setSelected(!JAPModel.isInfoServiceDisabled());
 			m_comboAnonymousConnection.setSelectedIndex(
 				  JAPModel.getInstance().getInfoServiceAnonymousConnectionSetting());
-			//Select the preferred InfoService
-			m_listKnownInfoServices.setSelectedValue(InfoServiceHolder.getInstance().
-													 getPreferredInfoService(), true);
+			
 			m_cmbAskedInfoServices.setEnabled(InfoServiceHolder.getInstance().isChangeInfoServices());
 	
 	

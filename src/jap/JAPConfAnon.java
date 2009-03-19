@@ -95,7 +95,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -126,7 +125,6 @@ import anon.infoservice.ServiceLocation;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.ServiceSoftware;
 import anon.infoservice.StatusInfo;
-import anon.pay.PayAccountsFile;
 import anon.util.CountryMapper;
 import anon.util.JAPMessages;
 import anon.util.Util;
@@ -210,8 +208,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final int MAX_HOST_LENGTH = 30;
 
 	private boolean m_bUpdateServerPanel = true;
-
-	private InfoServiceTempLayer m_infoService;
 
 	JComboBox m_cmbCascadeFilter;
 
@@ -324,21 +320,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	protected JAPConfAnon(IJAPConfSavePoint savePoint)
 	{
 		super(null);
-		if (m_infoService == null)
-		{
-			m_infoService = new InfoServiceTempLayer(false);
-		}
-		else if (!m_infoService.isFilled())
-		{
-			new Thread(new Runnable()
-			{
-				public void run()
-				{
-					m_infoService.fill(true);
-					updateValues(false);
-				}
-			}).start();
-		}
 		JAPController.getInstance().addEventListener(new LocalAnonServiceEventListener());
 	}
 
@@ -1038,7 +1019,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_lblAvailability.setText(JAPMessages.getString(MSG_UNREACHABLE));
 			m_lblAvailability.setToolTipText(null);
 		}
-		else if (m_infoService.isUserLimitReached(cascade.getId()))
+		else if (InfoServiceTempLayer.isUserLimitReached(cascade))
 		{
 			m_lblAvailability.setCursor(Cursor.getDefaultCursor());
 			m_lblAvailability.setForeground(Color.red);
@@ -1096,7 +1077,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		}
 		if (selectedMixId != null)
 		{
-			String version = GUIUtils.trim(m_infoService.getMixVersion(cascade, selectedMixId));
+			String version = GUIUtils.trim(InfoServiceTempLayer.getMixVersion(cascade, selectedMixId));
 			if (version != null)
 			{
 				version = ", " + JAPMessages.getString(MSG_MIX_VERSION) + "=" + version;
@@ -1108,7 +1089,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 			m_nrLabel.setToolTipText(JAPMessages.getString(MSG_MIX_ID) + "=" + selectedMixId + version);
 			//m_lblMix.setText(JAPMessages.getString("infoAboutMix") +
-			String name = GUIUtils.trim(m_infoService.getName(cascade, selectedMixId), 80);
+			String name = GUIUtils.trim(InfoServiceTempLayer.getName(cascade, selectedMixId), 80);
 			if (name == null)
 			{
 				m_nrLabel.setText("N/A");
@@ -1152,19 +1133,21 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_moveMixRight.setVisible(false);
 		}
 
-
-		for(int i = 0; i < m_serverList.getNumberOfMixes() && i < cascade.getMixIds().size(); i++)
-		{			
-			String mixId = (String) cascade.getMixIds().elementAt(i);
-			
-			ServiceLocation location = m_infoService.getServiceLocation(cascade, mixId);
-			ServiceOperator operator = m_infoService.getServiceOperator(cascade, mixId);
-			m_serverList.update(i, operator, location);
+		if (cascade != null)
+		{
+			for(int i = 0; i < m_serverList.getNumberOfMixes() && i < cascade.getMixIds().size(); i++)
+			{			
+				String mixId = (String) cascade.getMixIds().elementAt(i);
+				
+				ServiceLocation location = InfoServiceTempLayer.getServiceLocation(cascade, mixId);
+				ServiceOperator operator = InfoServiceTempLayer.getServiceOperator(cascade, mixId);
+				m_serverList.update(i, operator, location);
+			}
 		}
 		
-		m_operatorLabel.setText(GUIUtils.trim(m_infoService.getOperator(cascade, selectedMixId)));
+		m_operatorLabel.setText(GUIUtils.trim(InfoServiceTempLayer.getOperator(cascade, selectedMixId)));
 		m_operatorLabel.setToolTipText(m_operatorLabel.getText());
-		ServiceOperator operator = m_infoService.getServiceOperator(cascade, selectedMixId);
+		ServiceOperator operator = InfoServiceTempLayer.getServiceOperator(cascade, selectedMixId);
 		if (operator != null && operator.getCountryCode() != null)
 		{
 			m_operatorLabel.setIcon(GUIUtils.loadImageIcon("flags/" + operator.getCountryCode() + ".png"));
@@ -1174,7 +1157,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_operatorLabel.setIcon(null);
 		}
 		
-		m_btnHomepage.setToolTipText(m_infoService.getUrl(cascade, selectedMixId));
+		m_btnHomepage.setToolTipText(InfoServiceTempLayer.getUrl(cascade, selectedMixId));
 
 		if (getUrlFromLabel(m_btnHomepage) != null)
 		{
@@ -1185,7 +1168,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_btnHomepage.setEnabled(false);
 		}
 
-		m_btnEmail.setToolTipText(GUIUtils.trim(m_infoService.getEMail(cascade, selectedMixId)));
+		m_btnEmail.setToolTipText(GUIUtils.trim(InfoServiceTempLayer.getEMail(cascade, selectedMixId)));
 		if (getEMailFromLabel(m_btnEmail) != null)
 		{
 			m_btnEmail.setEnabled(true);
@@ -1195,9 +1178,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_btnEmail.setEnabled(false);
 		}
 
-		m_locationCoordinates = m_infoService.getCoordinates(cascade, selectedMixId);
-		m_locationLabel.setText(GUIUtils.trim(m_infoService.getLocation(cascade, selectedMixId)));
-		m_btnMap.setToolTipText(GUIUtils.trim(m_infoService.getLocation(cascade, selectedMixId)));
+		m_locationCoordinates = InfoServiceTempLayer.getCoordinates(cascade, selectedMixId);
+		m_locationLabel.setText(GUIUtils.trim(InfoServiceTempLayer.getLocation(cascade, selectedMixId)));
+		m_btnMap.setToolTipText(GUIUtils.trim(InfoServiceTempLayer.getLocation(cascade, selectedMixId)));
 		if (m_locationCoordinates != null)
 		{
 			m_btnMap.setEnabled(true);
@@ -1206,7 +1189,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_btnMap.setEnabled(false);
 		}
-		ServiceLocation location = m_infoService.getServiceLocation(cascade, selectedMixId);
+		ServiceLocation location = InfoServiceTempLayer.getServiceLocation(cascade, selectedMixId);
 		if (location != null)
 		{
 			m_locationLabel.setIcon(GUIUtils.loadImageIcon("flags/" + location.getCountryCode() + ".png"));
@@ -1215,10 +1198,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		{
 			m_locationLabel.setIcon(null);
 		}
-		m_locationLabel.setToolTipText(m_infoService.getLocation(cascade, selectedMixId));
+		m_locationLabel.setToolTipText(InfoServiceTempLayer.getLocation(cascade, selectedMixId));
 
-		m_serverInfo = m_infoService.getMixInfo(cascade, selectedMixId);
-		m_serverCertPaths = m_infoService.getMixCertPath(cascade, selectedMixId);
+		m_serverInfo = InfoServiceTempLayer.getMixInfo(cascade, selectedMixId);
+		m_serverCertPaths = InfoServiceTempLayer.getMixCertPath(cascade, selectedMixId);
 
 		if (m_serverCertPaths != null && m_serverInfo != null)
 		{
@@ -1421,7 +1404,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}*/
 				
 				//Update the temporary infoservice database
-				m_infoService.fill(a_bCheckInfoServiceUpdateStatus);
 				updateValues(false);
 
 				//getRootPanel().setCursor(c);
@@ -2065,25 +2047,15 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 	protected void onRootPanelShown()
 	{
-		boolean bUpdateValues = false;
-
-		if (!m_infoService.isFilled())
+		//updateValues(false); // deadlock in MacOS
+		new Thread(new Runnable()
 		{
-			bUpdateValues = true;			
-		}
-		if (bUpdateValues)
-		{
-			//updateValues(false); // deadlock in MacOS
-			new Thread(new Runnable()
+			public void run()
 			{
-				public void run()
-				{
-					m_infoService.fill(true);
-					updateValues(false);
-				}
-			}).start();
-			//fetchCascades(false, false, true);
-		}
+				updateValues(false);
+			}
+		}).start();
+		//fetchCascades(false, false, true);
 
 		if (m_tableMixCascade.getRowCount() > 0 && m_tableMixCascade.getSelectedRow() < 0)
 		{
@@ -2131,196 +2103,191 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				}
 				cascadeId = cascade.getId();
 
-				if (m_infoService != null)
+
+				if(m_filterPanel == null || !m_filterPanel.isVisible())
 				{
-					if(m_filterPanel == null || !m_filterPanel.isVisible())
+					if (cascade.getNumberOfMixes() <= 1)
 					{
-						if (cascade.getNumberOfMixes() <= 1)
+						drawServerPanel(3, "", false, 0);
+					}
+					else
+					{
+						if (!cascade.isUserDefined() && cascade.getNumberOfOperatorsShown() <= 1)
 						{
-							drawServerPanel(3, "", false, 0);
+							// this cascade is run by only one operator!
+							drawServerPanel(1, cascade.getName(), true, selectedMix);
 						}
 						else
 						{
-							if (!cascade.isUserDefined() && cascade.getNumberOfOperatorsShown() <= 1)
-							{
-								// this cascade is run by only one operator!
-								drawServerPanel(1, cascade.getName(), true, selectedMix);
-							}
-							else
-							{
-								drawServerPanel(cascade.getNumberOfMixes(), cascade.getName(), true, selectedMix);
-							}
+							drawServerPanel(cascade.getNumberOfMixes(), cascade.getName(), true, selectedMix);
 						}
 					}
+				}
 
-					PerformanceEntry entry = m_infoService.getPerformanceEntry(cascadeId);
-					int value;
-					int best;
+				PerformanceEntry entry = InfoServiceTempLayer.getPerformanceEntry(cascadeId);
+				int value;
+				int best;
+				
+				DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
+				df.applyPattern("#,####0.00");
+				
+				if(entry != null)
+				{
+					boolean bTrusted;
 					
-					DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(JAPMessages.getLocale());
-					df.applyPattern("#,####0.00");
-					
-					if(entry != null)
+					try
 					{
-						boolean bTrusted;
-						
-						try
+						TrustModel.getCurrentTrustModel().getAttribute(
+								TrustModel.SpeedAttribute.class).checkTrust(cascade);
+						bTrusted = true;
+					}
+					catch (TrustException a_e)
+					{
+						bTrusted = false;
+					}
+					catch (SignatureException a_e)
+					{
+						bTrusted = false;
+					}
+					
+					value = entry.getBound(PerformanceEntry.SPEED).getBound();
+					best = entry.getBestBound(PerformanceEntry.SPEED);
+					if (best < value)
+					{
+						// this might happen if not all InfoServices send best bounds
+						best = value;
+					}
+					if (value < 0 || value == Integer.MAX_VALUE)
+					{
+						m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+					}
+					else if(value == 0)
+					{
+						m_lblSpeed.setText("< " + Util.formatKbitPerSecValueWithUnit(
+								PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1],
+								Util.MAX_FORMAT_KBIT_PER_SEC));
+						//bTrusted = false;
+					}
+					else
+					{
+						if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
+						    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
 						{
-							TrustModel.getCurrentTrustModel().getAttribute(
-									TrustModel.SpeedAttribute.class).checkTrust(cascade);
-							bTrusted = true;
-						}
-						catch (TrustException a_e)
-						{
-							bTrusted = false;
-						}
-						catch (SignatureException a_e)
-						{
-							bTrusted = false;
-						}
-						
-						value = entry.getBound(PerformanceEntry.SPEED).getBound();
-						best = entry.getBestBound(PerformanceEntry.SPEED);
-						if (best < value)
-						{
-							// this might happen if not all InfoServices send best bounds
-							best = value;
-						}
-						if (value < 0 || value == Integer.MAX_VALUE)
-						{
-							m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
-						}
-						else if(value == 0)
-						{
-							m_lblSpeed.setText("< " + Util.formatKbitPerSecValueWithUnit(
-									PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED][1],
-									Util.MAX_FORMAT_KBIT_PER_SEC));
-							//bTrusted = false;
-						}
-						else
-						{
-							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED]
-							    [PerformanceEntry.BOUNDARIES[PerformanceEntry.SPEED].length - 1] == best)
+							if (System.getProperty("java.version").compareTo("1.4") >= 0)
 							{
-								if (System.getProperty("java.version").compareTo("1.4") >= 0)
-								{
-									m_lblSpeed.setText("\u2265 " + Util.formatKbitPerSecValueWithUnit(value,
-											Util.MAX_FORMAT_KBIT_PER_SEC));
-								}
-								else
-								{
-									m_lblSpeed.setText("> " + Util.formatKbitPerSecValueWithUnit(value,
-											Util.MAX_FORMAT_KBIT_PER_SEC));
-								}
-							}
-							else if (best == value || best == Integer.MAX_VALUE)
-							{
-								m_lblSpeed.setText(Util.formatKbitPerSecValueWithUnit(value,
+								m_lblSpeed.setText("\u2265 " + Util.formatKbitPerSecValueWithUnit(value,
 										Util.MAX_FORMAT_KBIT_PER_SEC));
 							}
 							else
 							{
-								m_lblSpeed.setText(Util.formatKbitPerSecValueWithoutUnit(value,
-										Util.MAX_FORMAT_KBIT_PER_SEC) + 
-										"-" + Util.formatKbitPerSecValueWithUnit(best,
-												Util.MAX_FORMAT_KBIT_PER_SEC));
+								m_lblSpeed.setText("> " + Util.formatKbitPerSecValueWithUnit(value,
+										Util.MAX_FORMAT_KBIT_PER_SEC));
 							}
 						}
-						if (bTrusted)
+						else if (best == value || best == Integer.MAX_VALUE)
 						{
-							m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
+							m_lblSpeed.setText(Util.formatKbitPerSecValueWithUnit(value,
+									Util.MAX_FORMAT_KBIT_PER_SEC));
 						}
 						else
 						{
-							m_lblSpeed.setForeground(Color.red);
+							m_lblSpeed.setText(Util.formatKbitPerSecValueWithoutUnit(value,
+									Util.MAX_FORMAT_KBIT_PER_SEC) + 
+									"-" + Util.formatKbitPerSecValueWithUnit(best,
+											Util.MAX_FORMAT_KBIT_PER_SEC));
 						}
-						
-						try
-						{
-							TrustModel.getCurrentTrustModel().getAttribute(
-									TrustModel.DelayAttribute.class).checkTrust(cascade);
-							bTrusted = true;
-						}
-						catch (TrustException a_e)
-						{
-							bTrusted = false;
-						}
-						catch (SignatureException a_e)
-						{
-							bTrusted = false;
-						}
-						
-						value = entry.getBound(PerformanceEntry.DELAY).getBound();
-						best = entry.getBestBound(PerformanceEntry.DELAY);
-						if (best > value)
-						{
-							// this might happen if not all InfoServices send best bounds
-							best = value;
-						}
-						if (value <= 0)
-						{
-							m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
-						}
-						else if (value == Integer.MAX_VALUE)
-						{
-							m_lblDelay.setText("> " + 
-									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
-									PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
-							//bTrusted = false;
-						}
-						else
-						{
-							if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
-							{
-								if (System.getProperty("java.version").compareTo("1.4") >= 0)
-								{
-									m_lblDelay.setText("\u2264 " + value + " ms");
-								}
-								else
-								{
-									m_lblDelay.setText("< " + value + " ms");
-								}
-							}
-							else if(best == value || best == 0)
-							{
-								m_lblDelay.setText(value + " ms");
-							}
-							else
-							{
-								m_lblDelay.setText(value + "-" + best + " ms");
-							}
-						}
-						if (bTrusted)
-						{
-							m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
-						}
-						else
-						{
-							m_lblDelay.setForeground(Color.red);
-						}
+					}
+					if (bTrusted)
+					{
+						m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
 					}
 					else
 					{
-						m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
-						m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
-						m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
-						m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
+						m_lblSpeed.setForeground(Color.red);
 					}
 					
-					m_anonLevelLabel.setText(cascade.getDistribution()  + "," +  
-							m_infoService.getAnonLevel(cascadeId) + " / " + 
-							MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX);
-					m_numOfUsersLabel.setText(m_infoService.getNumOfUsers(cascadeId));
-					m_lblVDS.setVisible(cascade.getDataRetentionInformation() != null);
+					try
+					{
+						TrustModel.getCurrentTrustModel().getAttribute(
+								TrustModel.DelayAttribute.class).checkTrust(cascade);
+						bTrusted = true;
+					}
+					catch (TrustException a_e)
+					{
+						bTrusted = false;
+					}
+					catch (SignatureException a_e)
+					{
+						bTrusted = false;
+					}
 					
-					
-					setAvailabilityLabel(cascade, entry);
-					m_lblSocks.setVisible(cascade.isSocks5Supported());
+					value = entry.getBound(PerformanceEntry.DELAY).getBound();
+					best = entry.getBestBound(PerformanceEntry.DELAY);
+					if (best > value)
+					{
+						// this might happen if not all InfoServices send best bounds
+						best = value;
+					}
+					if (value <= 0)
+					{
+						m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+					}
+					else if (value == Integer.MAX_VALUE)
+					{
+						m_lblDelay.setText("> " + 
+								PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][
+								PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY].length - 2] + " ms");
+						//bTrusted = false;
+					}
+					else
+					{
+						if (PerformanceEntry.BOUNDARIES[PerformanceEntry.DELAY][0] == best)
+						{
+							if (System.getProperty("java.version").compareTo("1.4") >= 0)
+							{
+								m_lblDelay.setText("\u2264 " + value + " ms");
+							}
+							else
+							{
+								m_lblDelay.setText("< " + value + " ms");
+							}
+						}
+						else if(best == value || best == 0)
+						{
+							m_lblDelay.setText(value + " ms");
+						}
+						else
+						{
+							m_lblDelay.setText(value + "-" + best + " ms");
+						}
+					}
+					if (bTrusted)
+					{
+						m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
+					}
+					else
+					{
+						m_lblDelay.setForeground(Color.red);
+					}
 				}
-				if(m_filterPanel == null || !m_filterPanel.isVisible())
-				//if(!bUpdateServerPanel)
-					drawServerInfoPanel();
-
+				else
+				{
+					m_lblSpeed.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+					m_lblDelay.setText(JAPMessages.getString(JAPNewView.MSG_UNKNOWN_PERFORMANCE));
+					m_lblSpeed.setForeground(m_anonLevelLabel.getForeground());
+					m_lblDelay.setForeground(m_anonLevelLabel.getForeground());
+				}
+				
+				m_anonLevelLabel.setText(cascade.getDistribution()  + "," +  
+						InfoServiceTempLayer.getAnonLevel(cascadeId) + " / " + 
+						MixCascade.DISTRIBUTION_MAX + "," + StatusInfo.ANON_LEVEL_MAX);
+				m_numOfUsersLabel.setText(InfoServiceTempLayer.getNumOfUsers(cascade));
+				m_lblVDS.setVisible(cascade.getDataRetentionInformation() != null);
+				
+				
+				setAvailabilityLabel(cascade, entry);
+				m_lblSocks.setVisible(cascade.isSocks5Supported());
+				
 				if (cascade.isUserDefined())
 				{
 				   m_deleteCascadeButton.setEnabled(
@@ -2333,7 +2300,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 					m_deleteCascadeButton.setEnabled(false);
 					m_showEditPanelButton.setEnabled(false);
 				}
-
+				
 				MixCascade current = JAPController.getInstance().getCurrentMixCascade();
 				if (current != null && current.equals(cascade))
 				{
@@ -2343,8 +2310,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				{
 					m_selectCascadeButton.setEnabled(true);
 				}
-				itemStateChanged(null);
 			}
+			
+			if(m_filterPanel == null || !m_filterPanel.isVisible())
+			{
+			//if(!bUpdateServerPanel)
+				drawServerInfoPanel();
+			}
+
+
+
+			
+			itemStateChanged(null);
 		}
 	}
 
@@ -2476,7 +2453,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						{
 							MixCascade cascade =
 								(MixCascade) ( (DatabaseMessage) a_message).getMessageData();
-							m_infoService.removeCascade(cascade);
 							// remove the corresponding mixes if the cascade is not the current cascade
 							if (!JAPController.getInstance().getCurrentMixCascade().equals(cascade))
 							{
@@ -2501,7 +2477,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 							MixCascade cascade = (MixCascade) ( (DatabaseMessage) a_message).getMessageData();
 							MixInfo mixinfo;
 							String mixId;
-							m_infoService.updateCascade(cascade);
 
 							Vector mixIDs = (cascade).getMixIds();
 							for (int i = 0; i < mixIDs.size(); i++)
@@ -2629,181 +2604,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	 * Temporary image of relevant infoservice entries. For better response time
 	 * of the GUI.
 	 */
-	private final class InfoServiceTempLayer
+	private static final class InfoServiceTempLayer
 	{
-		private Hashtable m_Cascades;
-		private boolean m_isFilled = false;
-		private Object LOCK_FILL = new Object();
-
-		public InfoServiceTempLayer(boolean a_autoFill)
-		{
-			m_Cascades = new Hashtable();
-			if (a_autoFill)
-			{
-				this.fill(true);
-			}
-		}
-
-		public boolean isFilled()
-		{
-			synchronized (LOCK_FILL)
-			{
-				return m_isFilled;
-			}
-		}
-
-		public void removeCascade(MixCascade a_cascade)
-		{
-			if (a_cascade == null)
-			{
-				return;
-			}
-			synchronized (LOCK_FILL)
-			{
-				m_Cascades.remove(a_cascade.getId());
-			}
-		}
-
-		/**
-		 * Adds or updates cached cascade information concerning ports and hosts.
-		 * @param a_cascade the cascade that should be updated
-		 */
-		public void updateCascade(MixCascade a_cascade)
-		{
-			updateCascade(a_cascade, m_Cascades);
-		}
-		
-		private void updateCascade(MixCascade a_cascade, Hashtable a_hashtable)
-		{
-			if (a_cascade == null || a_hashtable == null)
-			{
-				return;
-			}
-
-			//Get cascade id
-			String id = a_cascade.getId();
-			Vector countPorts;
-			Integer port;
-
-			// Get host names and ports
-			String interfaces = "";
-			String ports = "";
-			int[] portsArray = new int[a_cascade.getNumberOfListenerInterfaces()];
-
-			for (int i = 0; i < a_cascade.getNumberOfListenerInterfaces(); i++)
-			{
-				if (interfaces.indexOf(a_cascade.getListenerInterface(i).getHost()) == -1)
-				{
-					if (interfaces.length() > 0)
-					{
-						interfaces += "\n";
-					}
-					interfaces += GUIUtils.trim(a_cascade.getListenerInterface(i).getHost(), MAX_HOST_LENGTH);
-				}
-				portsArray[i] = a_cascade.getListenerInterface(i).getPort();
-			}
-
-			// Sort the array containing the port numbers and put the numbers into a string
-			for (int i = 0; i < portsArray.length; i++)
-			{
-				for (int k = i + 1; k < portsArray.length; k++)
-				{
-					if (portsArray[i] > portsArray[k])
-					{
-						int tmp = portsArray[k];
-						portsArray[k] = portsArray[i];
-						portsArray[i] = tmp;
-					}
-				}
-			}
-
-			countPorts = new Vector(portsArray.length);
-			for (int i = 0; i < portsArray.length; i++)
-			{
-				// do not double-count any ports
-				port = new Integer(portsArray[i]);
-				if (countPorts.contains(port))
-				{
-					continue;
-				}
-				countPorts.addElement(new Integer(portsArray[i]));
-			}
-			for (int i = 0; i < countPorts.size(); i++)
-			{
-				ports += countPorts.elementAt(i).toString();
-				if (i != countPorts.size() - 1)
-				{
-					ports += ", ";
-				}
-			}
-			
-			synchronized (LOCK_FILL)
-			{
-				a_hashtable.put(id, new TempCascade(id, interfaces, ports, a_cascade.getMaxUsers()));
-			}
-		}
-
-		private void fill(boolean a_bCheckInfoServiceUpdateStatus)
-		{
-			//synchronized (LOCK_FILL)
-			{
-				if (!fill(Database.getInstance(MixCascade.class).getEntryList(),
-						  a_bCheckInfoServiceUpdateStatus))
-				{
-					fill(Util.toVector(JAPController.getInstance().getCurrentMixCascade()),
-						 a_bCheckInfoServiceUpdateStatus);
-				}
-			}
-		}
-
-		/**
-		 * Fills the temporary database by requesting info from the infoservice.
-		 * @todo check if synchronized with update is needed!!!
-		 */
-		private boolean fill(Vector c, boolean a_bCheckInfoServiceUpdateStatus)
-		{
-			if (c == null || c.size() == 0)
-			{
-				return false;
-			}
-			synchronized (LOCK_FILL)
-			{
-				Hashtable cascades = new Hashtable();
-
-				for (int j = 0; j < c.size(); j++)
-				{
-					MixCascade cascade = (MixCascade) c.elementAt(j);
-					// update hosts and ports
-					updateCascade(cascade);
-				}
-
-				for (int j = 0; j < c.size(); j++)
-				{
-					MixCascade cascade = (MixCascade) c.elementAt(j);
-
-					// update hosts and ports
-					updateCascade(cascade, cascades);
-				}
-				m_Cascades = cascades;
-				m_isFilled = true;								
-			}
-			
-			for (int j = 0; j < c.size(); j++)
-			{
-				MixCascade cascade = (MixCascade) c.elementAt(j);
-				/* fetch the current cascade state */
-				if (!cascade.isUserDefined() &&
-					(!a_bCheckInfoServiceUpdateStatus || !JAPModel.isInfoServiceDisabled()))
-				{
-					Database.getInstance(StatusInfo.class).update(cascade.fetchCurrentStatus());
-				}
-			}
-			
-			return true;
-		}
-
-
-		public String getAnonLevel(String a_cascadeId)
+		public static String getAnonLevel(String a_cascadeId)
 		{
 			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
 			if (statusInfo != null && statusInfo.getAnonLevel() >= 0)
@@ -2822,39 +2625,38 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		 * @param a_cascadeId String
 		 * @return String
 		 */
-		public String getNumOfUsers(String a_cascadeId)
+		public static String getNumOfUsers(MixCascade a_cascade)
 		{
-			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
-			TempCascade cascade = (TempCascade) m_Cascades.get(a_cascadeId);
-			if (statusInfo != null)
+			if (a_cascade != null)
 			{
-				int maxUsers = 0;
-				if (cascade != null)
+				StatusInfo statusInfo = getStatusInfo(a_cascade.getId());
+				if (statusInfo != null)
 				{
-					maxUsers = cascade.getMaxUsers();
+					int maxUsers = 0;
+					maxUsers = a_cascade.getMaxUsers();
+					
+					return "" + statusInfo.getNrOfActiveUsers() + (maxUsers != 0 ? " / " + maxUsers : "");
 				}
-				
-				return "" + statusInfo.getNrOfActiveUsers() + (maxUsers != 0 ? " / " + maxUsers : "");
 			}
 			return "N/A";
 		}
 		
-		public boolean isUserLimitReached(String a_cascadeId)
+		public static boolean isUserLimitReached(MixCascade a_cascade)
 		{
-			StatusInfo statusInfo = getStatusInfo(a_cascadeId);
-			TempCascade cascade = (TempCascade) m_Cascades.get(a_cascadeId);
-			if (statusInfo != null)
+			if (a_cascade != null)
 			{
-				int maxUsers = 0;
-				if (cascade != null)
+				StatusInfo statusInfo = getStatusInfo(a_cascade.getId());
+	
+				if (statusInfo != null)
 				{
-					maxUsers = cascade.getMaxUsers();
-				}
-				if (maxUsers > 0)
-				{
-					if (maxUsers - statusInfo.getNrOfActiveUsers() <= 3)
+					int maxUsers = a_cascade.getMaxUsers();
+					
+					if (maxUsers > 0)
 					{
-						return true;
+						if (maxUsers - statusInfo.getNrOfActiveUsers() <= 3)
+						{
+							return true;
+						}
 					}
 				}
 			}
@@ -2866,15 +2668,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		 * @param a_cascadeId String
 		 * @return String
 		 */
-		public String getHosts(String a_cascadeId)
+		public static String getHosts(MixCascade a_cascade)
 		{
-			TempCascade cascade = (TempCascade) m_Cascades.get(a_cascadeId);
-			if (cascade == null)
+			if (a_cascade == null || a_cascade.getHostsAsString() == null)
 			{
 				return "N/A";
 			}
 
-			return cascade.getHosts();
+			return a_cascade.getHostsAsString();
 		}
 
 		/**
@@ -2882,17 +2683,16 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		 * @param a_cascadeId String
 		 * @return String
 		 */
-		public String getPorts(String a_cascadeId)
+		public static String getPorts(MixCascade a_cascade)
 		{
-			TempCascade cascade = (TempCascade) m_Cascades.get(a_cascadeId);
-			if (cascade == null)
+			if (a_cascade == null || a_cascade.getPortsAsString() == null)
 			{
 				return "N/A";
 			}
-			return cascade.getPorts();
+			return a_cascade.getPortsAsString();
 		}
 
-		public String getMixVersion(MixCascade a_cascade, String a_mixID)
+		public static String getMixVersion(MixCascade a_cascade, String a_mixID)
 		{
 			MixInfo mixinfo = getMixInfo(a_cascade, a_mixID);
 			if (mixinfo != null)
@@ -2906,7 +2706,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return null;
 		}
 
-		public MultiCertPath getMixCertPath(MixCascade a_cascade, String a_mixID)
+		public static MultiCertPath getMixCertPath(MixCascade a_cascade, String a_mixID)
 		{
 			MixInfo mixinfo = getMixInfo(a_cascade, a_mixID);
 			MultiCertPath certificate = null;
@@ -2922,7 +2722,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		 * @param a_mixId String
 		 * @return String
 		 */
-		public String getEMail(MixCascade a_cascade, String a_mixId)
+		public static String getEMail(MixCascade a_cascade, String a_mixId)
 		{
 			ServiceOperator operator;
 			MixInfo info;
@@ -2949,7 +2749,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		 * @param a_mixId String
 		 * @return String
 		 */
-		public String getOperator(MixCascade a_cascade, String a_mixId)
+		public static String getOperator(MixCascade a_cascade, String a_mixId)
 		{
 			ServiceOperator operator = getServiceOperator(a_cascade, a_mixId);
 			String strOperator = null;
@@ -2990,7 +2790,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		 * @param a_mixId String
 		 * @return String
 		 */
-		public String getUrl(MixCascade a_cascade, String a_mixId)
+		public static String getUrl(MixCascade a_cascade, String a_mixId)
 		{
 			ServiceOperator operator = getServiceOperator(a_cascade, a_mixId);
 			String strUrl = null;
@@ -3022,7 +2822,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return strUrl;
 		}
 
-		public String getName(MixCascade a_cascade, String a_mixId)
+		public static String getName(MixCascade a_cascade, String a_mixId)
 		{
 			String name;
 			MixInfo info = getMixInfo(a_cascade, a_mixId);
@@ -3044,7 +2844,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		 * @param a_mixId String
 		 * @return String
 		 */
-		public String getLocation(MixCascade a_cascade, String a_mixId)
+		public static String getLocation(MixCascade a_cascade, String a_mixId)
 		{
 			ServiceLocation location = getServiceLocation(a_cascade, a_mixId);
 			if(location != null)
@@ -3062,7 +2862,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 		 * @param a_cascadeId String
 		 * @return boolean
 		 */
-		public boolean isPay(String a_cascadeId)
+		public static boolean isPay(String a_cascadeId)
 		{
 			MixCascade cascade = getMixCascade(a_cascadeId);
 			if (cascade != null)
@@ -3072,7 +2872,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return false;
 		}
 
-		public Vector getCoordinates(MixCascade a_cascade, String a_mixId)
+		public static Vector getCoordinates(MixCascade a_cascade, String a_mixId)
 		{
 			ServiceLocation location = getServiceLocation(a_cascade, a_mixId);
 			Vector coordinates;
@@ -3097,17 +2897,17 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return coordinates;
 		}
 
-		private StatusInfo getStatusInfo(String a_cascadeId)
+		private static StatusInfo getStatusInfo(String a_cascadeId)
 		{
 			return (StatusInfo) Database.getInstance(StatusInfo.class).getEntryById(a_cascadeId);
 		}
 
-		private MixCascade getMixCascade(String a_cascadeId)
+		private static MixCascade getMixCascade(String a_cascadeId)
 		{
 			return (MixCascade) Database.getInstance(MixCascade.class).getEntryById(a_cascadeId);
 		}
 
-		private ServiceLocation getServiceLocation(MixCascade a_cascade, String a_mixId)
+		private static ServiceLocation getServiceLocation(MixCascade a_cascade, String a_mixId)
 		{
 			MixInfo info = getMixInfo(a_cascade, a_mixId);
 
@@ -3136,7 +2936,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return null;
 		}
 
-		private ServiceOperator getServiceOperator(MixCascade a_cascade, String a_mixId)
+		private static ServiceOperator getServiceOperator(MixCascade a_cascade, String a_mixId)
 		{
 			MixInfo info = getMixInfo(a_cascade, a_mixId);
 
@@ -3167,7 +2967,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return null;
 		}
 
-		private MixInfo getMixInfo(MixCascade a_cascade, String a_mixId)
+		private static MixInfo getMixInfo(MixCascade a_cascade, String a_mixId)
 		{
 			MixInfo info = null;
 			MixInfo tempInfo;
@@ -3200,7 +3000,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			return info;
 		}
 		
-		private PerformanceEntry getPerformanceEntry(String a_cascadeId)
+		private static PerformanceEntry getPerformanceEntry(String a_cascadeId)
 		{
 			return PerformanceInfo.getLowestCommonBoundEntry(a_cascadeId);
 		}
@@ -3934,9 +3734,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 
 				this.setToolTipText(
 						JAPMessages.getString("cascadeReachableBy") + ": " + 
-						m_infoService.getHosts(cascade.getId()) + " - " +
+						InfoServiceTempLayer.getHosts(cascade) + " - " +
 						JAPMessages.getString("cascadePorts") + ": " +
-						m_infoService.getPorts(cascade.getId()));
+						InfoServiceTempLayer.getPorts(cascade));
 				
 				if (cascade.isUserDefined())
 				{
