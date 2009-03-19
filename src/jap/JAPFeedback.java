@@ -41,7 +41,28 @@ final class JAPFeedback extends AbstractDatabaseUpdater
 
 	public JAPFeedback()
 	{
-		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS), JAPController.getInstance().getObservableInfo());
+		super(new DynamicUpdateInterval(UPDATE_INTERVAL_MS), new ObservableInfo(
+				JAPController.getInstance().getObservableInfo().getObservable())
+		{
+			public Integer getUpdateChanged()
+			{
+				return JAPController.getInstance().getObservableInfo().getUpdateChanged();
+			}
+			public boolean isUpdateDisabled()
+			{
+				return JAPController.getInstance().getObservableInfo().isUpdateDisabled();
+			}
+			
+			public void notifyAdditionalObserversOnUpdate(Class a_updatedClass)
+			{
+				JAPController.getInstance().getObservableInfo().notifyAdditionalObserversOnUpdate(a_updatedClass);
+			}
+			
+			public boolean updateImmediately()
+			{
+				return true;
+			}
+		});
 		m_updateInterval = (DynamicUpdateInterval)getUpdateInterval();
 	}
 

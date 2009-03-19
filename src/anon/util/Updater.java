@@ -94,6 +94,11 @@ public abstract class Updater implements Observer
 			
 		}
 		
+		public boolean updateImmediately()
+		{
+			return false;
+		}
+		
 		public final Observable getObservable()
 		{
 			return m_observable;
@@ -211,14 +216,25 @@ public abstract class Updater implements Observer
 		{
 			return;
 		}
+		
 		final Updater updater = this;
-		new Thread(new Runnable()
+		if (!m_observable.isUpdateDisabled())
 		{
-			public void run()
+			new Thread(new Runnable()
 			{
-				updater.start(false);
-			}
-		}).start();
+				public void run()
+				{
+					if (m_observable.updateImmediately())
+					{
+						updater.update(false);
+					}
+					else
+					{
+						updater.start(false);
+					}
+				}
+			}).start();
+		}
 	}
 
 	/**
