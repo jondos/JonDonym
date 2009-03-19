@@ -32,8 +32,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -190,7 +188,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 	public XMLPriceCertificate(String xml) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes());
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		setValues(doc.getDocumentElement());
 		m_docThePriceCert = doc;
 		m_hashValue = XMLSignature.getHashValueOfElement(m_docThePriceCert);
@@ -204,7 +202,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 	public XMLPriceCertificate(byte[] xmldata) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xmldata);
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		setValues(doc.getDocumentElement());
 		m_docThePriceCert = doc;
 		m_hashValue = XMLSignature.getHashValueOfElement(m_docThePriceCert);

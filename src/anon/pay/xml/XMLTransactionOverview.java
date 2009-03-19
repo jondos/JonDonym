@@ -27,11 +27,10 @@
  */
 package anon.pay.xml;
 
-import java.io.ByteArrayInputStream;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.sql.Timestamp;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

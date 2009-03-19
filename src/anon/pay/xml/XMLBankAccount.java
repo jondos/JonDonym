@@ -29,8 +29,6 @@ package anon.pay.xml;
 
 import java.io.ByteArrayInputStream;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -117,7 +115,7 @@ public class XMLBankAccount implements IXMLEncodable
 	public XMLBankAccount(String xml) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes());
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		setValues(doc.getDocumentElement());
 		m_docTheBankAccount = doc;
 	}
@@ -130,7 +128,7 @@ public class XMLBankAccount implements IXMLEncodable
 	public XMLBankAccount(byte[] xmldata) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xmldata);
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		setValues(doc.getDocumentElement());
 		m_docTheBankAccount = doc;
 	}

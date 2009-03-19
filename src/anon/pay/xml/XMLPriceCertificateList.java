@@ -32,8 +32,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -115,7 +113,7 @@ public class XMLPriceCertificateList implements IXMLEncodable
 	public XMLPriceCertificateList(String xml) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes());
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		m_thePriceCerts = new Vector();
 		setValues(doc.getDocumentElement());
 		m_docThePriceCerts = doc;
@@ -124,7 +122,7 @@ public class XMLPriceCertificateList implements IXMLEncodable
 	public XMLPriceCertificateList(byte[] xmldata) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xmldata);
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		m_thePriceCerts = new Vector();
 		setValues(doc.getDocumentElement());
 		m_docThePriceCerts = doc;

@@ -29,8 +29,6 @@ package anon.pay.xml;
 
 import java.io.ByteArrayInputStream;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -91,7 +89,7 @@ public class XMLMixAccountBalance implements IXMLEncodable
 	public XMLMixAccountBalance(String xml) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes());
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		setValues(doc.getDocumentElement());
 		m_docTheMixAccountBalance = doc;
 	}
@@ -99,7 +97,7 @@ public class XMLMixAccountBalance implements IXMLEncodable
 	public XMLMixAccountBalance(byte[] xmldata) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xmldata);
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		setValues(doc.getDocumentElement());
 		m_docTheMixAccountBalance = doc;
 	}
