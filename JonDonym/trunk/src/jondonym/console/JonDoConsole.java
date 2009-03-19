@@ -39,7 +39,6 @@ import anon.pay.PayAccountsFile;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.client.TrustModel;
 import anon.infoservice.Database;
-import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.MixCascade;
 import anon.util.Configuration;
 import anon.util.Util;

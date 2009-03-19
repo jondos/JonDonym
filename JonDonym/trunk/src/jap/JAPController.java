@@ -410,19 +410,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		
 		// initialise IS update threads
 		m_feedback = new JAPFeedback();
-		m_AccountUpdater = new AccountUpdater(new ObservableInfo(JAPModel.getInstance())
-		{
-			public Integer getUpdateChanged()
-			{
-				return PayAccountsFile.CHANGED_AUTO_UPDATE;
-			}
-
-			public boolean isUpdateDisabled()
-			{
-				return !PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled();
-			}
-		}
-		);
+		m_AccountUpdater = new AccountUpdater();
 		m_InfoServiceUpdater = new InfoServiceUpdater(m_observableInfo);
 		m_perfInfoUpdater = new PerformanceInfoUpdater(m_observableInfo);
 		m_paymentInstanceUpdater = new PaymentInstanceUpdater(m_observableInfo);

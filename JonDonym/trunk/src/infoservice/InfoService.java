@@ -124,17 +124,7 @@ public class InfoService implements Observer
 			{				
 				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting Performance Meter...");
 				
-				ms_accountUpdater = new AccountUpdater(new ObservableInfo(new Observable())
-				{
-					public Integer getUpdateChanged()
-					{
-						return new Integer(0);
-					}
-					public boolean isUpdateDisabled()
-					{
-						return false;
-					}
-				});		
+				ms_accountUpdater = new AccountUpdater();		
 				ms_accountUpdater.start(false);				
 				ms_perfMeter = new PerformanceMeter(ms_accountUpdater);
 				Thread perfMeterThread = new Thread(InfoService.ms_perfMeter);			

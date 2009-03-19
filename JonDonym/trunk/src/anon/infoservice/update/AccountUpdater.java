@@ -41,7 +41,7 @@ public class AccountUpdater extends Updater
 	private static final long UPDATE_INTERVAL_MS = 1000 * 60 * 5l; // 5 minutes
 	private boolean m_successfulUpdate = false;
 
-	public AccountUpdater(ObservableInfo a_observableInfo)
+	public AccountUpdater()
 	{
 		super(new IUpdateInterval()
 		{
@@ -50,7 +50,24 @@ public class AccountUpdater extends Updater
 				return UPDATE_INTERVAL_MS;
 			}
 		}
-		,a_observableInfo);
+		,new ObservableInfo(PayAccountsFile.getInstance())
+		{
+			public Integer getUpdateChanged()
+			{
+				return PayAccountsFile.CHANGED_AUTO_UPDATE;
+			}
+
+			public boolean isUpdateDisabled()
+			{
+				return !PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled();
+			}
+			
+			public boolean updateImmediately()
+			{
+				return true;
+			}
+		}
+		);
 	}
 
 	/**
