@@ -56,14 +56,16 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 	
 	private static final String XML_ELEMENT_OPERATOR = "Operator";
 	// do not delete: dynamic reference!
-	private static final String XML_ELEMENT_OPERATOR_NAME = "Name";
+	private static final String XML_ELEMENT_OPERATOR_COUNTRY = "OperatorCountry";
+	private static final String XML_ELEMENT_OPERATOR_CITY = "City";
+	
+	/*private static final String XML_ELEMENT_OPERATOR_NAME = "Name";
 	private static final String XML_ELEMENT_OPERATOR_STREET = "Street";
 	private static final String XML_ELEMENT_OPERATOR_POSTAL_CODE = "PostalCode";
-	private static final String XML_ELEMENT_OPERATOR_CITY = "City";
-	private static final String XML_ELEMENT_OPERATOR_COUNTRY = "OperatorCountry";
+	
 	private static final String XML_ELEMENT_OPERATOR_VAT = "VAT";
 	private static final String XML_ELEMENT_OPERATOR_FAX = "Fax";
-	private static final String XML_ELEMENT_OPERATOR_EMAIL = "eMail";
+	private static final String XML_ELEMENT_OPERATOR_EMAIL = "eMail";*/
 	
 	private static final String XSLT_PATH = "res/tac.xslt";
 	
@@ -216,31 +218,42 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			// replace PrivacyPolicyUrl
 			//replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_PRIVACY_POLICY_URL);
 			
-			String[] urlElements = new String[]
+			String[] replaceElements = new String[]
 			{
 					XML_ELEMENT_PRIVACY_POLICY_URL, 
 					XML_ELEMENT_LEGAL_OPINIONS_URL, 
-					XML_ELEMENT_OPERATIONAL_AGREEMENT_URL
+					XML_ELEMENT_OPERATIONAL_AGREEMENT_URL,
+					XML_ELEMENT_OPERATOR_CITY,
+					XML_ELEMENT_VENUE,
+					"Date"
 			};
 			
-			String[] urlValues = new String[]
+			String[] replaceValues = new String[]
             {
 					tcTranslation.getPrivacyPolicyUrl(),
 					tcTranslation.getLegalOpinionsUrl(),
-					tcTranslation.getOperationalAgreementUrl()
+					tcTranslation.getOperationalAgreementUrl(),
+					tcTranslation.getOperatorAddress().getCity(),
+					tcTranslation.getOperatorAddress().getVenue(),
+					DateFormat.getDateInstance(DateFormat.MEDIUM, tcLoc).format(tcTranslation.getDate())
             };
 			
 			Element currentUrlElement = null;
-			for (int i = 0; i < urlValues.length; i++) 
+			NodeList currentNl = null; 
+			for (int i = 0; i < replaceValues.length; i++) 
 			{
-				currentUrlElement =
-					(Element) XMLUtil.getFirstChildByNameUsingDeepSearch(m_docWorkingCopy.getDocumentElement(), urlElements[i]);
-				if(currentUrlElement != null)
+				currentNl = m_docWorkingCopy.getElementsByTagName(replaceElements[i]);
+				for(int j = 0; j < currentNl.getLength(); j++)
 				{
-					XMLUtil.setValue(currentUrlElement, urlValues[i]);
+					currentUrlElement =
+						(Element) currentNl.item(j);
+					if( (currentUrlElement != null) && 
+						(replaceValues[i] != null) )
+					{
+						XMLUtil.setValue(currentUrlElement, replaceValues[i]);
+					}
 				}
 			}
-			
 			// replace LegalOpinionsUrl
 			//replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_LEGAL_OPINIONS_URL);
 			
@@ -251,17 +264,10 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			//replaceNodeFromTC(operator, XML_ELEMENT_OPERATOR_CITY);
 			
 			// replace Venue
-			replaceNodeFromTC(operator, XML_ELEMENT_VENUE);
+			//replaceNodeFromTC(operator, XML_ELEMENT_VENUE);
 			
 			// ExtendedOperatorCountry
 			//replaceNodeFromTC(tcTranslationElement, "ExtendedOperatorCountry");
-			
-			Element date = m_docWorkingCopy.createElement("Date");
-			DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, tcLoc);
-			XMLUtil.setValue(date, df.format(tcTranslation.getDate()));
-			
-			// replace Date
-			replaceNode(date, "Date");
 			
 			// loop through all Paragraph nodes in our import document
 			NodeList paragraphs = tcTranslation.getTranslationElement().getElementsByTagName(XML_ELEMENT_PARAGRAPH);
