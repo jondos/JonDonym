@@ -120,6 +120,7 @@ public final class JAPMessages
 	public static synchronized boolean init(Locale locale, String a_resourceBundleFilename)
 	{
 		InputStream stream = null;
+		Exception ex = null;
 		
 		if (ms_locale != null)
 		{
@@ -147,9 +148,18 @@ public final class JAPMessages
 			//ms_resourceBundle = PropertyResourceBundle.getBundle(a_resourceBundleFilename, locale);
 			stream = ResourceLoader.loadResourceAsStream(
 					 getBundleLocalisedFilename(a_resourceBundleFilename, locale), true);
-			ms_resourceBundle = new PropertyResourceBundle(stream);
+			if (stream != null)
+			{
+				ms_resourceBundle = new PropertyResourceBundle(stream);
+			}
 		}
 		catch (Exception a_e)
+		{
+			ex = a_e;
+		}
+		Util.closeStream(stream);
+		
+		if (stream == null)
 		{
 			try
 			{
@@ -164,9 +174,13 @@ public final class JAPMessages
 						locale = Locale.getDefault();
 						ms_resourceBundle = PropertyResourceBundle.getBundle(a_resourceBundleFilename, locale);
 					}
+					else if (ex != null)
+					{
+						throw ex;
+					}
 					else
 					{
-						throw a_e;
+						throw a_e2;
 					}
 				}
 				catch (Exception e)
@@ -175,8 +189,6 @@ public final class JAPMessages
 				}
 			}
 		}
-		
-		Util.closeStream(stream);
 
 		ms_cachedMessages = new Hashtable();
 		ms_locale = locale;
