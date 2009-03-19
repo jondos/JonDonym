@@ -31,7 +31,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,7 +55,7 @@ public class XMLPaymentSettings implements IXMLEncodable
 	public XMLPaymentSettings(String xml) throws Exception
 	{
 		ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes());
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+		Document doc = XMLUtil.readXMLDocument(in);
 		setValues(doc.getDocumentElement());
 	}
 

@@ -27,7 +27,6 @@
  */
 package anon.pay.xml;
 
-import java.sql.Timestamp;
 import java.util.Date;
 
 import org.w3c.dom.Document;
