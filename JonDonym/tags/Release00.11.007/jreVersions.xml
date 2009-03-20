@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JavaVersionInfos>
+    <JavaVersion vendor="Sun">
+        <VendorLongName>Sun Microsystems Inc.</VendorLongName>  
+        <LatestVersion>1.6.0</LatestVersion> 
+        <DownloadURL>http://java.sun.com/javase/downloads/index.jsp</DownloadURL>
+        <LatestVersion os="Windows 95">1.3.1_19</LatestVersion>
+        <DownloadURL os="Windows 95">http://java.sun.com/j2se/1.3/download.html</DownloadURL>
+        <LatestVersion os="Windows 98">1.4.2_13</LatestVersion>
+        <DownloadURL os="Windows 98">http://java.sun.com/j2se/1.4.2/download.html</DownloadURL>        
+        <!--<DownloadURL>http://java.sun.com</DownloadURL>-->
+    </JavaVersion>
+    <JavaVersion vendor="Blackdown">
+        <VendorLongName>Blackdown Java-Linux Team</VendorLongName> <!-- Optional additional identifier -->
+        <LatestVersion>1.4.2-03</LatestVersion> <!-- Most recent JRE version number of this vendor -->        
+        <DownloadURL>http://www.blackdown.org/java-linux/java-linux-d2.html</DownloadURL> <!-- URL to download the JRE -->       
+    </JavaVersion>    
+</JavaVersionInfos>
