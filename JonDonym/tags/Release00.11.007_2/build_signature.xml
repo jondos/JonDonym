@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="JonDonym" default="sign-artefact" basedir=".">
+	<description>Ant Build file for signing the various components of the JonDonym project</description>
+	
+	<taskdef name="signer" classname="org.apache.commons.openpgp.ant.OpenPgpSignerTask"/>
+	<property file="build_properties/sign.properties"/>
+
+		<target name="sign-artefact">
+			<fail unless="gpg.settings.available" message="No signature settings defined!"/>
+			<fail unless="artefact" message="No artefact specified!"/>
+			<signer 
+				secring="${gpg.secring}"
+				pubring="${gpg.pubring}"
+				password="${gpg.seckey.password}" keyid="${gpg.seckey.id}"
+				artefact="${artefact}"/>
+		</target>
+</project>
