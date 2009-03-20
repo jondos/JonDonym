@@ -53,7 +53,9 @@ import anon.util.XMLDuration;
                                                 If FALSE, only the time of connection to service is logged.-->
 >>>       <OutputTime>TRUE|FALSE</OutputTime> <!--If TRUE, the time of packet sending / connection establishment is logged.
                                                   If false, only the time of disconnection from service is logged.-->
->>>       <InputChannelID>TRUE|FALSE</InputChannelID>  <!--If TRUE, the channel id of incoming packet is logged-->
+>>>       <InputChannelID>TRUE|FALSE</InputChannelID>  <!--If TRUE, the channel id of incoming packet is logged;
+                                                        MUST also be true if the logging is request/mix-packet-based;
+                                                        FALSE if the logging is login/logout/connection based only.-->
 >>>       <OutputChannelID>TRUE|FALSE</OutputChannelID> <!--If TRUE, the channel id of outgoing packet is logged-->
 >>>       <InputSourceIPAddress>TRUE|FALSE</InputSourceIPAddress><!--If TRUE, the source IP address of incoming connection is logged-->
 >>>       <InputSourceIPPort>TRUE|FALSE</InputSourceIPPort> <!--If TRUE, the source IP port of incoming connection is logged-->
@@ -216,11 +218,27 @@ public class DataRetentionInformation
 			else
 			{
 				drInfo = a_cascade.getMixInfo(i).getDataRetentionInformation();
+				
+				if (i == 0)
+				{
+					// first mix...
+					if (drInfo != null)
+					{
+						// test whether this data retention will provide usable request-based results; 
+						// they are not usable, if only login and logout time (= perfect anonymity) or no IP address is logged 
+						if (!drInfo.isLogged(INPUT_CHANNEL_ID) || !drInfo.isLogged(INPUT_SOURCE_IP_ADDRESS))
+						{
+							return null;
+						}
+					}
+				}
 			}
 			vecDrInfo.addElement(drInfo);
 		}
 
-		return getCascadeDataRetentionInformation(vecDrInfo);
+		drInfo = getCascadeDataRetentionInformation(vecDrInfo);
+		
+		return drInfo;
 	}
 	
 	

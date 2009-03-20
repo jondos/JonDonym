@@ -3056,7 +3056,22 @@ public final class JAPController extends Observable implements IProxyListener, O
 	
 	public MixCascade switchToNextMixCascade()
 	{
-		MixCascade cascade = new AutoSwitchedMixCascadeContainer(true).getNextCascade();
+		return switchToNextMixCascade(false);
+	}
+	
+	public MixCascade switchToNextMixCascade(boolean a_bForceNextRandom)
+	{
+		AutoSwitchedMixCascadeContainer container = new AutoSwitchedMixCascadeContainer(true);
+		MixCascade cascade;
+		
+		if (a_bForceNextRandom)
+		{
+			cascade = container.getNextRandomCascade();
+		}
+		else
+		{
+			cascade = container.getNextCascade();
+		}
 		setCurrentMixCascade(cascade);
 		return cascade;
 	}

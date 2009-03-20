@@ -3349,8 +3349,8 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					m_labelForwardingError.setIcon(icon);
 					m_labelForwardingErrorSmall.setIcon(icon);
 				}
-				m_labelForwardingError.setToolTipText(strError);
-				m_labelForwardingErrorSmall.setToolTipText(strError);
+				m_labelForwardingError.setToolTipText("<html>" + strError + "</html>");
+				m_labelForwardingErrorSmall.setToolTipText("<html>" + strError + "</html>");
 	
 				/* if the forwarding client is running, it should not be possible to start the forwarding
 				 * server, also it should not be possible to change the selected mixcascade

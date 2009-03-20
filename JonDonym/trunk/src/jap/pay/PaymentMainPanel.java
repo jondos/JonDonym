@@ -827,8 +827,11 @@ public class PaymentMainPanel extends FlippingPanel
 						{
 							if (answer == JAPDialog.RETURN_VALUE_NO)
 							{
-								// this user wants free services only... Choose the free trust model.
-								TrustModel.forceFreeTrustModel();
+								if (!TrustModel.getCurrentTrustModel().isEditable())
+								{
+									// this user wants free services only... Choose the free trust model.
+									TrustModel.forceFreeTrustModel();
+								}
 							}
 							JAPController.getInstance().setAllowPaidServices(false);
 							JAPController.getInstance().switchToNextMixCascade();
@@ -915,8 +918,11 @@ public class PaymentMainPanel extends FlippingPanel
 							{
 								if (answer == JAPDialog.RETURN_VALUE_NO)
 								{
-									// this user wants free services only... Choose the free trust model.
-									TrustModel.forceFreeTrustModel();
+									if (!TrustModel.getCurrentTrustModel().isEditable())
+									{
+										// this user wants free services only... Choose the free trust model.
+										TrustModel.forceFreeTrustModel();
+									}
 								}
 								JAPController.getInstance().setAllowPaidServices(false);
 								JAPController.getInstance().switchToNextMixCascade();
@@ -1078,8 +1084,11 @@ public class PaymentMainPanel extends FlippingPanel
 							{
 								if (answer == JAPDialog.RETURN_VALUE_NO)
 								{
-									// this user wants free services only... Choose the free trust model.
-									TrustModel.forceFreeTrustModel();
+									if (!TrustModel.getCurrentTrustModel().isEditable())
+									{
+										// this user wants free services only... Choose the free trust model.
+										TrustModel.forceFreeTrustModel();
+									}
 								}
 								JAPController.getInstance().setAllowPaidServices(false);
 								JAPController.getInstance().switchToNextMixCascade();
