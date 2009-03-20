@@ -127,6 +127,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	public static final String MSG_BLACKLISTED = TrustModel.class.getName() + "_blacklisted";
 	
 	private static final String MSG_EXCEPTION_NO_SOCKS = TrustModel.class.getName() + "_exceptionNoSocks";
+	private static final String MSG_EXCEPTION_DATA_RETENTION = TrustModel.class.getName() + "_exceptionDataRetention";
 	private static final String MSG_EXCEPTION_PAY_CASCADE = TrustModel.class.getName() + "_exceptionPayCascade";
 	private static final String MSG_EXCEPTION_FREE_CASCADE = TrustModel.class.getName() + "_exceptionFreeCascade";
 	private static final String MSG_EXCEPTION_WRONG_SERVICE_CONTEXT = TrustModel.class.getName() + "_wrongServiceContext";
@@ -390,6 +391,22 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			else if (getTrustCondition() == TRUST_IF_TRUE)
 			{
 				throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_FREE_CASCADE));
+			}
+		}
+	};
+	
+	public static class DataRetentionAttribute extends TrustAttribute
+	{
+		public DataRetentionAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
+		{
+			super(a_trustCondition, a_conditionValue, a_bIgnoreNoDataAvailable);
+		}
+
+		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
+		{
+			if (a_cascade.getDataRetentionInformation() != null && getTrustCondition() == TRUST_IF_NOT_TRUE)
+			{
+				throw new TrustException(JAPMessages.getString(MSG_EXCEPTION_DATA_RETENTION));
 			}
 		}
 	};

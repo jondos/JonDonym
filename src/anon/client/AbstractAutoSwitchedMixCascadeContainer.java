@@ -8,6 +8,7 @@ import java.util.Vector;
 import anon.infoservice.AbstractMixCascadeContainer;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
+import anon.pay.PayAccountsFile;
 
 /**
  * This class returns a new random cascade from all currently available cascades every time
@@ -39,11 +40,26 @@ public abstract class AbstractAutoSwitchedMixCascadeContainer extends AbstractMi
 		return m_initialCascade;
 	}
 
+	/**
+	 * Explicitly chooses the next cascade at random. If auto-reconnect is active,
+	 * this method is equal to getNextCascade().
+	 * @return the next cascade at random
+	 */
+	public final MixCascade getNextRandomCascade()
+	{
+		return getNextCascade(true);
+	}
+	
 	public final MixCascade getNextCascade()
+	{
+		return getNextCascade(false);
+	}
+	
+	private final MixCascade getNextCascade(boolean a_bForceNextRandom)
 	{
 		synchronized (m_alreadyTriedCascades)
 		{
-			if (!isServiceAutoSwitched())
+			if (!isServiceAutoSwitched() && !a_bForceNextRandom)
 			{
 				m_alreadyTriedCascades.clear();
 				m_bKeepCurrentCascade = false;
@@ -174,7 +190,10 @@ public abstract class AbstractAutoSwitchedMixCascadeContainer extends AbstractMi
 		}
 
 		if (a_cascade.isPayment() && !TrustModel.getCurrentTrustModel().isPaymentForced() && // Force is stonger! 
-			!isPaidServiceAllowed())
+				// if no valid account exists, do not allow automatic connections to
+				// paid services if an editable account is active or if the user does not want to connect to them
+			(PayAccountsFile.getInstance().getChargedAccount(a_cascade.getPIID()) == null &&
+					(TrustModel.getCurrentTrustModel().isEditable() || !isPaidServiceAllowed())))
 		{
 			// do not connect to payment for new users
 			return false;

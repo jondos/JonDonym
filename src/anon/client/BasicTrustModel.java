@@ -63,17 +63,22 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		}
 		else if (SignatureVerifier.getInstance().isCheckSignatures())
 		{
+			exception = new SignatureException(JAPMessages.getString("invalidSignature"));
 			// check whether at least one of the certificates and at least the certificate of the first or last Mix are still valid
 			for (int i = 0; i < a_cascade.getNumberOfMixes(); i++)
 			{
 				if (a_cascade.getMixInfo(i) != null && a_cascade.getMixInfo(i).getCertPath() != null &&
 					a_cascade.getMixInfo(i).getCertPath().isValid(new Date()) && (i == 0 || i == a_cascade.getNumberOfMixes() - 1))
 				{
-					return;
+					exception = null;
+					break;
 				}
 			}
 			
-			throw (new SignatureException(JAPMessages.getString("invalidSignature")));
+			if (exception != null)
+			{
+				throw exception;
+			}
 		}
 		
 		// check whether one of the mixes in the cascade has an invalid signature
@@ -93,18 +98,16 @@ public class BasicTrustModel extends Observable implements ITrustModel
 		{
 			if (countUnverified > 1 || a_cascade.getNumberOfOperatorsShown() == 1 || a_cascade.getNumberOfMixes() <= 1)
 			{
-				throw new SignatureException(JAPMessages.getString("invalidSignature"));
+				exception = new SignatureException(JAPMessages.getString("invalidSignature"));
 			}
-			else
-			{
-				throw exception;
-			}
+			
+			throw exception;
 		}		
 	}
 
 	/**
 	 * Does a call on checkTrust() after checking the isShownAsTrusted() attribute of the given cascade.
-	 * Should be called by GUI methods only, not for checking the trust to make a connection!
+	 * Should be called by GUI/user controller methods only, not for checking the trust to make a connection!
 	 * @param a_cascade MixCascade
 	 * @return boolean
 	 */

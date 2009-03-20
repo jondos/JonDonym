@@ -73,6 +73,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -158,6 +159,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_EXPLAIN_BLACKLISTED = JAPConfAnon.class.getName() + "_explainBlacklisted";
 	private static final String MSG_EXPLAIN_PI_UNAVAILABLE = JAPConfAnon.class.getName() + "_explainPiUnavailable";
 	private static final String MSG_EXPLAIN_NO_CASCADES = JAPConfAnon.class.getName() + "_explainNoCascades";
+	private static final String MSG_EXPLAIN_CURRENT_CASCADE_NOT_TRUSTED = JAPConfAnon.class.getName() + "_explainCurrentCascadeNotTrusted";
 	private static final String MSG_WHAT_IS_THIS = JAPConfAnon.class.getName() + "_whatIsThis";
 	private static final String MSG_FILTER = JAPConfAnon.class.getName() + "_filter";
 	private static final String MSG_FILTER_CANCEL = "cancelButton";
@@ -184,9 +186,9 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final String MSG_FILTER_AT_LEAST = JAPConfAnon.class.getName() + "_atLeast";
 	private static final String MSG_FILTER_AT_MOST = JAPConfAnon.class.getName() + "_atMost";
 	private static final String MSG_FILTER_SELECT_ALL_OPERATORS = JAPConfAnon.class.getName() + "_selectAllOperators";
-	private static final String MSG_FILTER_SOCKS = JAPConfAnon.class.getName() + "_filterSOCKS";
+	private static final String MSG_FILTER_OTHER = JAPConfAnon.class.getName() + "_filterOther";
 	private static final String MSG_FILTER_SOCKS_ONLY = JAPConfAnon.class.getName() + "_filterSOCKSOnly";
-	
+	private static final String MSG_FILTER_NO_DATA_RETENTION = JAPConfAnon.class.getName() + "_filterNoDataRetention";
 	
 	private static final String MSG_CONNECTED =  JAPConfAnon.class.getName() + "_connected";
 	private static final String MSG_LBL_AVAILABILITY = JAPConfAnon.class.getName() + "_availabilityLbl";
@@ -204,8 +206,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private static final int FILTER_LATENCY_STEPS = 5;
 	private static final int FILTER_LATENCY_MAJOR_TICK = 1000;
 	private static final int FILTER_LATENCY_MAX = FILTER_LATENCY_STEPS * FILTER_LATENCY_MAJOR_TICK;
-
-	private static final int MAX_HOST_LENGTH = 30;
 
 	private boolean m_bUpdateServerPanel = true;
 
@@ -290,7 +290,10 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private JRadioButton m_filterAtLeast2Mixes;
 	private JRadioButton m_filterAtLeast3Mixes;
 	private JTextField m_filterNameField;
-	private ButtonGroup m_filterSOCKSGroup;
+	
+	private JCheckBox m_cbxSocks5;
+	private JCheckBox m_cbxDataRetention;
+	
 	//private ButtonGroup m_filterPaymentGroup;
 	private ButtonGroup m_filterCascadeGroup;
 	private ButtonGroup m_filterInternationalGroup;
@@ -512,8 +515,19 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						
 			//m_filterPanel.selectRadioButton(m_filterPaymentGroup, 
 					//String.valueOf(m_trustModelCopy.getAttribute(TrustModel.PaymentAttribute.class).getTrustCondition()));
-			m_filterPanel.selectRadioButton(m_filterSOCKSGroup, 
-					String.valueOf(m_trustModelCopy.getAttribute(TrustModel.SocksAttribute.class).getTrustCondition()));
+			boolean bSelect;
+			
+			bSelect = m_trustModelCopy.getAttribute(TrustModel.SocksAttribute.class).getTrustCondition() == TrustModel.TRUST_IF_TRUE;
+			if (bSelect != m_cbxSocks5.isSelected())
+			{
+				m_cbxSocks5.setSelected(bSelect);
+			}
+			
+			bSelect = m_trustModelCopy.getAttribute(TrustModel.DataRetentionAttribute.class).getTrustCondition() == TrustModel.TRUST_IF_NOT_TRUE;
+			if (bSelect != m_cbxDataRetention.isSelected())
+			{
+				m_cbxDataRetention.setSelected(bSelect);
+			}
 			
 			int trustCondition = m_trustModelCopy.getAttribute(TrustModel.NumberOfMixesAttribute.class).getTrustCondition();
 			Integer conditionValue = ((Integer) m_trustModelCopy.getAttribute(TrustModel.NumberOfMixesAttribute.class).getConditionValue());
@@ -1784,9 +1798,29 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			int value = 0;
 			m_trustModelCopy.setAttribute(TrustModel.PaymentAttribute.class, Integer.parseInt(cmd));
 			*/
-			String cmd = m_filterSOCKSGroup.getSelection().getActionCommand();
+			int trust;
 			int value = 0;
-			m_trustModelCopy.setAttribute(TrustModel.SocksAttribute.class, Integer.parseInt(cmd));
+			String cmd;
+			
+			if (m_cbxSocks5.isSelected())
+			{
+				trust = TrustModel.TRUST_IF_TRUE;
+			}
+			else
+			{
+				trust = TrustModel.TRUST_ALWAYS;
+			}
+			m_trustModelCopy.setAttribute(TrustModel.SocksAttribute.class, trust);
+			
+			if (m_cbxDataRetention.isSelected())
+			{
+				trust = TrustModel.TRUST_IF_NOT_TRUE;
+			}
+			else
+			{
+				trust = TrustModel.TRUST_ALWAYS;
+			}
+			m_trustModelCopy.setAttribute(TrustModel.DataRetentionAttribute.class, trust);
 			
 			cmd = m_filterCascadeGroup.getSelection().getActionCommand();
 			if(m_filterAtLeast2Mixes.isSelected()) value = 2;
@@ -1812,9 +1846,18 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			TrustModel.getCurrentTrustModel().copyFrom(m_trustModelCopy);
 			
 			// Display a warning if the new model won't have any trusted cascades
-			if(!m_trustModelCopy.hasTrustedCascades())
+			if (!TrustModel.getCurrentTrustModel().hasTrustedCascades())
 			{
 				JAPDialog.showWarningDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_NO_CASCADES));
+			}
+			else if (JAPController.getInstance().isAnonConnected() &&
+					!TrustModel.getCurrentTrustModel().isTrusted(JAPController.getInstance().getCurrentMixCascade()))
+			{
+				if (JAPModel.getInstance().isCascadeAutoSwitched() ||
+					JAPDialog.showYesNoDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_CURRENT_CASCADE_NOT_TRUSTED)))
+				{
+					JAPController.getInstance().switchToNextMixCascade(true);
+				}
 			}
 		}
 		catch(NumberFormatException ex)
@@ -3667,25 +3710,14 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			m_filterPaymentGroup.add(s);
 			m_filterPaymentGroup.add(t);*/
 			
-			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_SOCKS));
+			title = new TitledBorder(JAPMessages.getString(MSG_FILTER_OTHER));
 			p = new JPanel(new GridLayout(0, 1));
 			p.setBorder(title);
 			
-			r = new JRadioButton(JAPMessages.getString(MSG_FILTER_ALL));
-			r.setActionCommand(String.valueOf(TrustModel.TRUST_ALWAYS));
-			r.setSelected(true);
-			p.add(r);
-	
-			s = new JRadioButton(JAPMessages.getString(MSG_FILTER_SOCKS_ONLY));
-			
-			s.setActionCommand(String.valueOf(TrustModel.TRUST_IF_TRUE));
-			p.add(s);
-				
-			
-			m_filterSOCKSGroup = new ButtonGroup();
-			m_filterSOCKSGroup.add(r);
-			m_filterSOCKSGroup.add(s);
-			
+			m_cbxSocks5 = new JCheckBox(JAPMessages.getString(MSG_FILTER_SOCKS_ONLY), false);
+			m_cbxDataRetention = new JCheckBox(JAPMessages.getString(MSG_FILTER_NO_DATA_RETENTION), false);
+			p.add(m_cbxSocks5);
+			p.add(m_cbxDataRetention);
 			
 			c.gridx += 2;
 			c.gridwidth = 1;
