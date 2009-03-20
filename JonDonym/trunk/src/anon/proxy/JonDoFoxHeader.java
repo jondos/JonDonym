@@ -52,7 +52,7 @@ public final class JonDoFoxHeader implements HTTPConnectionListener {
 			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_LANGUAGE, JONDOFOX_LANGUAGE);
 			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_CHARSET, JONDOFOX_CHARSET);
 			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT, JONDOFOX_CONTENT_TYPES);
-			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_ENCODING, JONDOFOX_ENCODING);
+			//connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_ENCODING, JONDOFOX_ENCODING);
 			//connHeader.removeRequestHeader(HTTPProxyCallback.HTTP_KEEP_ALIVE);
 			//connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_PROXY_CONNECTION, "close");
 			connHeader.removeRequestHeader(HTTPProxyCallback.HTTP_IE_UA_CPU);
