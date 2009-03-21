@@ -1,0 +1,6 @@
+AuthUserFile /home/bavoigt/pay/.htpasswd
+AuthGroupFile /dev/null
+AuthName EnterPassword
+AuthType Basic
+
+require user bi-admin

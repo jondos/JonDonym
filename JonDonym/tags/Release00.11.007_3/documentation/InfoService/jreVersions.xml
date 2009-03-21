@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JavaVersionInfos>
+    <JavaVersion vendor="Sun">
+        <LatestVersion>1.5.0_08</LatestVersion> 
+        <VendorLongName>Sun Microsystems Inc.</VendorLongName>  
+        <DownloadURL>http://java.sun.com/javase/downloads/index.jsp</DownloadURL>
+        <!--<UpdateURL>http://java.sun.com</UpdateURL>-->
+    </JavaVersion>
+    <JavaVersion vendor="Blackdown">
+        <LatestVersion>1.4.2-03</LatestVersion> <!-- Most recent JRE version number of this vendor -->
+        <VendorLongName>Blackdown Java-Linux Team</VendorLongName> <!-- Optional additional identifier -->
+        <DownloadURL>http://www.blackdown.org/java-linux/java-linux-d2.html</DownloadURL> <!-- URL to download the JRE -->
+    </JavaVersion>    
+</JavaVersionInfos>
