@@ -211,11 +211,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	private int m_idStatusMessage = 0;
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
-	 * @param a_strText A text that is shown withing the content pane. The text is interpreted as HTML. If
+	 * @param a_strText A text that is shown within the content pane. The text is interpreted as HTML. If
 	 * you call pack() on the dialog when it is updated with this content pane, the text length is
 	 * auto-formatted so that its width is not bigger than the content with respect to a minimum size.
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
@@ -226,11 +226,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
-	 * @param a_strText A text that is shown withing the content pane. The text is interpreted as HTML. If
+	 * @param a_strText A text that is shown within the content pane. The text is interpreted as HTML. If
 	 * you call pack() on the dialog when it is updated with this content pane, the text length is
 	 * auto-formatted so that its width is not bigger than the content with respect to a minimum size.
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
@@ -241,11 +241,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
-	 * @param a_strText A text that is shown withing the content pane. The text is interpreted as HTML. If
+	 * @param a_strText A text that is shown within the content pane. The text is interpreted as HTML. If
 	 * you call pack() on the dialog when it is updated with this content pane, the text length is
 	 * auto-formatted so that its width is not bigger than the content with respect to a minimum size.
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
@@ -257,11 +257,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
-	 * @param a_strText A text that is shown withing the content pane. The text is interpreted as HTML. If
+	 * @param a_strText A text that is shown within the content pane. The text is interpreted as HTML. If
 	 * you call pack() on the dialog when it is updated with this content pane, the text length is
 	 * auto-formatted so that its width is not bigger than the content with respect to a minimum size.
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
@@ -273,11 +273,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
-	 * @param a_strText A text that is shown withing the content pane. The text is interpreted as HTML. If
+	 * @param a_strText A text that is shown within the content pane. The text is interpreted as HTML. If
 	 * you call pack() on the dialog when it is updated with this content pane, the text length is
 	 * auto-formatted so that its width is not bigger than the content with respect to a minimum size.
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
@@ -289,11 +289,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
-	 * @param a_strText A text that is shown withing the content pane. The text is interpreted as HTML. If
+	 * @param a_strText A text that is shown within the content pane. The text is interpreted as HTML. If
 	 * you call pack() on the dialog when it is updated with this content pane, the text length is
 	 * auto-formatted so that its width is not bigger than the content with respect to a minimum size.
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
@@ -305,11 +305,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
-	 * @param a_strText A text that is shown withing the content pane. The text is interpreted as HTML. If
+	 * @param a_strText A text that is shown within the content pane. The text is interpreted as HTML. If
 	 * you call pack() on the dialog when it is updated with this content pane, the text length is
 	 * auto-formatted so that its width is not bigger than the content with respect to a minimum size.
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
@@ -322,11 +322,11 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
-	 * @param a_strText A text that is shown withing the content pane. The text is interpreted as HTML. If
+	 * @param a_strText A text that is shown within the content pane. The text is interpreted as HTML. If
 	 * you call pack() on the dialog when it is updated with this content pane, the text length is
 	 * auto-formatted so that its width is not bigger than the content with respect to a minimum size.
 	 * Notice: this only works correctly if you call pack() on an invisible dialog.
@@ -339,7 +339,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
@@ -350,7 +350,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
@@ -361,7 +361,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
@@ -373,7 +373,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
@@ -385,7 +385,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
@@ -397,7 +397,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
@@ -409,7 +409,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
@@ -422,7 +422,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	}
 
 	/**
-	 * Contructs a new dialog content pane. Its layout is predefined, but may change if the content pane
+	 * Constructs a new dialog content pane. Its layout is predefined, but may change if the content pane
 	 * is part of a wizard.
 	 * @param a_parentDialog the parent dialog; a content pane is always registered to a dialog, and
 	 * may not change it in lifetime.
@@ -613,7 +613,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 				new JAPHtmlMultiLineLabel("<font color=#000000>" + m_strText + "</font>", a_alignment);
 			m_lblText.setFontStyle(JAPHtmlMultiLineLabel.FONT_STYLE_PLAIN);
 		}
-		// set the contraints for the text label; they are used later
+		// set the constraints for the text label; they are used later
 		m_textConstraints = new GridBagConstraints();
 		m_textConstraints.gridx = 0;
 		m_textConstraints.gridy = 1;
@@ -846,7 +846,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 	/**
 	 * Defines the general layout of a dialog.
 	 */
-	public static final class Layout
+	public static class Layout
 	{
 		private String m_strTitle;
 		private int m_messageType;
@@ -966,7 +966,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		 * (may be an empty String), a status bar is shown between the content pane and the buttons.
 		 * @return the title of the dialog content pane
 		 */
-		public String getTitle()
+		public final String getTitle()
 		{
 			return m_strTitle;
 		}
@@ -975,7 +975,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		 * The content pane's message type, e.g. MESSAGE_TYPE_PLAIN, MESSAGE_TYPE_ERROR, ...
 		 * @return content pane's message type
 		 */
-		public int getMessageType()
+		public final int getMessageType()
 		{
 			return m_messageType;
 		}
@@ -985,7 +985,7 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		 * depending on the message type.
 		 * @return icon for the content pane.
 		 */
-		public Icon getIcon()
+		public final Icon getIcon()
 		{
 			return m_icon;
 		}
@@ -1382,8 +1382,8 @@ public class DialogContentPane implements JAPHelpContext.IHelpContext, IDialogOp
 		contraints.gridx = 0;
 		contraints.gridy = 3;
 		contraints.weightx = 1;
-		//contraints.weighty = 1;
-		contraints.weighty = 0;
+		contraints.weighty = 1;
+		//contraints.weighty = 0;
 		contraints.anchor = GridBagConstraints.NORTH;
 		contraints.fill = GridBagConstraints.BOTH;
 

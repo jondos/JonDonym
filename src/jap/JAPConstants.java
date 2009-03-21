@@ -48,8 +48,8 @@ public final class JAPConstants
 	//to the date of the last commit of this file
 
 	//Never change the layout of the next two lines as several automated tools use these lines to do fancy things...
-	public final static boolean m_bReleasedVersion = false; //Set to true if this is a stable (release) Version
-	private static final String RELEASE_DATE = "2008/08/06 12:11:16"; // Set only to a Value, if m_bReleaseVersion=true
+	public final static boolean m_bReleasedVersion = true; //Set to true if this is a stable (release) Version
+	private static final String RELEASE_DATE = "2009/03/21 18:10:00"; // Set only to a Value, if m_bReleaseVersion=true
 
 	public static final String CURRENT_CONFIG_VERSION = aktVersion;
 
@@ -322,7 +322,7 @@ public final class JAPConstants
 	 */
 	public static final long TIME_RESTART_AFTER_SOCKET_ERROR = 1000 * 60;
 
-	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr"}; // "zh", "ca", "es", "ru"}; //pt
+	private static final String[] SUPPORTED_LANGUAGES = {"en", "de", "cs", "nl", "fr", "ru"}; // "zh", "ca", "es", "ru"}; //pt
 
 	public static String[] getSupportedLanguages()
 	{

@@ -3,19 +3,13 @@ package jap;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.text.DateFormat;
-import java.util.Locale;
 
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 
 import jap.pay.wizardnew.TermsAndConditionsPane;
 import gui.JapHtmlPane;
 import gui.dialog.JAPDialog;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
-import anon.infoservice.InfoServiceHolder;
-import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.TermsAndConditionsTranslation;
@@ -40,8 +34,6 @@ public class TermsAndConditionsDialog extends JAPDialog
 		m_ret.setError(true);
 		
 		setResizable(false);
-		
-		m_panel = new TermsAndConditionsPane(this, false);
 		
 		// try to find the TnC
 		//TermsAndConditions tc = TermsAndConditions.getById(a_op.getId());
@@ -68,6 +60,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 		
 		fr.importData(tc);*/
 		
+		m_panel = new TermsAndConditionsPane(this, false, new TermsAndConditionsPane.TermsAndConditionsMessages());
 		m_panel.setText(htmlText);
 		
 		m_panel.updateDialog();

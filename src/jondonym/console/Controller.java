@@ -51,7 +51,6 @@ import anon.infoservice.AbstractDatabaseEntry;
 import anon.infoservice.Database;
 import anon.infoservice.IDistributable;
 import anon.infoservice.IDistributor;
-import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.MixCascade;
@@ -86,7 +85,7 @@ import anon.util.Updater.ObservableInfo;
  */
 public class Controller
 {
-	private static final String VERSION = "00.00.004";
+	private static final String VERSION = "00.00.005";
 	private static final String XML_ROOT_NODE = "ConsoleController";
 	
 	private static final String PI_JONDOS = "ECD365B98453B316B210B55546731F52DA445F40";

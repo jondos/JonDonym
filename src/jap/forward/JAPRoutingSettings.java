@@ -38,10 +38,8 @@ import org.w3c.dom.Element;
 
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.InfoServiceDBEntry;
-import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
 import anon.infoservice.ProxyInterface;
-import anon.shared.ProxyConnection;
 import anon.transport.address.AddressMappingException;
 import anon.transport.address.Endpoint;
 import anon.transport.address.IAddress;
