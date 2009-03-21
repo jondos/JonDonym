@@ -353,6 +353,14 @@ public class WorkerContentPane extends DialogContentPane implements
 
 		public synchronized void run()
 		{
+			if (m_workerRunnable == null)
+			{
+				interruptWorkerThread();
+				setButtonValue(RETURN_VALUE_OK);
+				moveToNextContentPane();
+				return;
+			}
+			
 			setButtonValue(RETURN_VALUE_UNINITIALIZED);
 			m_workerThread = new InternalThread(m_workerRunnable);
 			m_workerThread.setPriority(Thread.MIN_PRIORITY);
@@ -430,7 +438,7 @@ public class WorkerContentPane extends DialogContentPane implements
 	 */
 	public Object getValue()
 	{
-		if (m_workerRunnable instanceof IReturnRunnable)
+		if (m_workerRunnable instanceof IReturnRunnable && m_workerRunnable != null)
 		{
 			return ( (IReturnRunnable) m_workerRunnable).getValue();
 		}
