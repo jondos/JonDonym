@@ -130,7 +130,6 @@ import jap.JAPController;
 import jap.JAPControllerMessage;
 import jap.JAPModel;
 import jap.JAPUtil;
-import jap.pay.wizardnew.CancellationPolicyPane;
 import jap.pay.wizardnew.JpiSelectionPane;
 import jap.pay.wizardnew.MethodSelectionPane;
 import jap.pay.wizardnew.PassivePaymentPane;
@@ -1389,7 +1388,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				else
 				{
 					//long dep = balance.getVolumeKBytesLeft()*1000 + balance.getSpent();
-					long dep = selectedAccount.getCurrentCredit()*1000 + selectedAccount.getCurrentSpent();
+					//long dep = selectedAccount.getCurrentCredit()*1000 + selectedAccount.getCurrentSpent();
 					deposit = PaymentMainPanel.FULL_AMOUNT * 1000;
 					//long credit = balance.getVolumeKBytesLeft() * 1000;
 					long credit = selectedAccount.getCurrentCredit() * 1000;
@@ -1502,7 +1501,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		final JAPDialog d = new JAPDialog(getRootPanel(),
 										  JAPMessages.getString(TermsAndConditionsPane.MSG_HEADING), true);
 		d.setDefaultCloseOperation(JAPDialog.DISPOSE_ON_CLOSE);
-		d.setResizable(false);
+		//d.setResizable(false);
 
 		//************ fetch AGBs (terms and conditions) *******//
 		final WorkerContentPane fetchTermsPane = new WorkerContentPane(d,
@@ -1510,7 +1509,8 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			new FetchTermsRunnable(d, a_account.getBI(), a_account.getTerms()));
 		fetchTermsPane.setInterruptThreadSafe(false);
 
-		TermsAndConditionsPane pane = new TermsAndConditionsPane(d, fetchTermsPane, false)
+		TermsAndConditionsPane pane = new TermsAndConditionsPane(d, fetchTermsPane, false, 
+				new TermsAndConditionsPane.TermsAndConditionsMessages())
 		{
 			public CheckError[] checkUpdate()
 			{
@@ -1639,10 +1639,36 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	   final VolumePlanSelectionPane planSelectionPane = new VolumePlanSelectionPane(a_parentDialog,
 		   fetchPlansPane, isNewAccount);
 
-		// ********** fetch payment options *********************//
-	   IReturnRunnable fetchOptions = new IReturnRunnable()
+	   WorkerContentPane dummyPane = new WorkerContentPane(a_parentDialog, (String)null, 
+			   planSelectionPane, (Runnable)null)
 	   {
-		   private XMLPaymentOptions m_paymentOptions;
+		   public Object getValue()
+		   {
+			   return a_accountCreationThread.getAccount().getTerms();
+		   }
+	   };
+	   
+	 //************ show terms and conditions, only moving forward if user confirms  ******//
+		final TermsAndConditionsPane termsPane =
+			new TermsAndConditionsPane(a_parentDialog, dummyPane, true, 
+					new TermsAndConditionsPane.TermsAndConditionsMessages())
+		{
+			public boolean isSkippedAsNextContentPane()
+			{
+				return isTermsAccepted();
+			}
+			
+			public boolean isSkippedAsPreviousContentPane()
+			{
+				return true;
+			}
+		};
+
+/*
+	   //****************** fetch cancellation policy **********************
+	   IReturnRunnable fetchPolicy = new IReturnRunnable()
+	   {
+		   private XMLGenericText cancellationPolicy;
 		   public void run()
 		   {
 			   BIConnection piConn = null;
@@ -1650,13 +1676,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			   {
 				   PaymentInstanceDBEntry pi = a_accountCreationThread.getAccount().getBI();
 				   piConn = new BIConnection(pi);
-
 				   piConn.connect();
-				   piConn.authenticate(a_accountCreationThread.getAccount().getAccountCertificate(),
-									   //  PayAccountsFile.getInstance().getActiveAccount().getAccountCertificate(),
-									   a_accountCreationThread.getAccount().getPrivateKey());
-				   LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching payment options");
-				   m_paymentOptions = piConn.getPaymentOptions();
+
+				   //authentication is neither necessary nor possible (creating first account -> user does not yet have an account to authenticate with)
+				   LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching cancellation policy");
+				   String lang = JAPMessages.getLocale().getLanguage();
+				   cancellationPolicy = piConn.getCancellationPolicy(lang);
 				   piConn.disconnect();
 			   }
 			   catch (Exception e)
@@ -1671,10 +1696,11 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					   {
 					   }
 				   }
+
 				   if (!Thread.currentThread().isInterrupted())
 				   {
 					   LogHolder.log(LogLevel.EXCEPTION, LogType.NET,
-									 "Error fetching payment options: " + e.getMessage());
+									 "Error fetching cancellation policy: ", e);
 					   showPIerror(a_parentDialog.getContentPane(), e);
 					   Thread.currentThread().interrupt();
 				   }
@@ -1683,12 +1709,93 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 		   public Object getValue()
 		   {
-			   return m_paymentOptions;
+			   return cancellationPolicy;
+		   }
+
+	   };
+	   final WorkerContentPane fetchPolicyPane = new WorkerContentPane(a_parentDialog,
+		   JAPMessages.getString(MSG_FETCHINGPOLICY), termsPane , fetchPolicy)
+	   {
+		   public boolean isSkippedAsNextContentPane()
+		   {
+			   return getValue() != null;
+		   }
+		   
+		   public boolean isMoveForwardAllowed()
+		   {
+			   return a_parentDialog.isVisible() ;
 		   }
 	   };
+	   fetchPolicyPane.setInterruptThreadSafe(false);
 
+	   //************* show cancellation policy ***************************
+		final TermsAndConditionsPane policyPane =
+			new TermsAndConditionsPane(a_parentDialog, fetchPolicyPane, true, 
+					new TermsAndConditionsPane.CancellationPolicyMessages())
+	   {
+			public boolean isSkippedAsNextContentPane()
+			{
+				return isTermsAccepted();
+			}
+			
+		   public boolean isSkippedAsPreviousContentPane()
+		   {
+			   return true;
+		   }
+		};
+	   */
+		// ********** fetch payment options *********************//
+		   IReturnRunnable fetchOptions = new IReturnRunnable()
+		   {
+			   private XMLPaymentOptions m_paymentOptions;
+			   public void run()
+			   {
+				   BIConnection piConn = null;
+				   try
+				   {
+					   PaymentInstanceDBEntry pi = a_accountCreationThread.getAccount().getBI();
+					   piConn = new BIConnection(pi);
+
+					   piConn.connect();
+					   piConn.authenticate(a_accountCreationThread.getAccount().getAccountCertificate(),
+										   //  PayAccountsFile.getInstance().getActiveAccount().getAccountCertificate(),
+										   a_accountCreationThread.getAccount().getPrivateKey());
+					   LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching payment options");
+					   m_paymentOptions = piConn.getPaymentOptions();
+					   piConn.disconnect();
+				   }
+				   catch (Exception e)
+				   {
+					   if (piConn != null)
+					   {
+						   try
+						   {
+							   piConn.disconnect();
+						   }
+						   catch (Exception ex)
+						   {
+						   }
+					   }
+					   if (!Thread.currentThread().isInterrupted())
+					   {
+						   LogHolder.log(LogLevel.EXCEPTION, LogType.NET,
+										 "Error fetching payment options: " + e.getMessage());
+						   showPIerror(a_parentDialog.getContentPane(), e);
+						   Thread.currentThread().interrupt();
+					   }
+				   }
+			   }
+
+			   public Object getValue()
+			   {
+				   return m_paymentOptions;
+			   }
+		   };
+		
+		
 		final WorkerContentPane fetchOptionsPane = new WorkerContentPane(a_parentDialog,
-			JAPMessages.getString(MSG_FETCHINGOPTIONS), planSelectionPane, fetchOptions)
+			JAPMessages.getString(MSG_FETCHINGOPTIONS), termsPane, //policyPane, 
+			fetchOptions)
 		{
 			public boolean isSkippedAsNextContentPane()
 			{
@@ -1699,7 +1806,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				}
 				else //no coupon used = regular volume plan
 				{
-
 					return false;
 				}
 			}
@@ -2372,7 +2478,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	{
 		final JAPDialog a_parentDialog = new JAPDialog(getRootPanel(), JAPMessages.getString(MSG_ACCOUNTCREATE), true);
 		a_parentDialog.setDefaultCloseOperation(JAPDialog.DO_NOTHING_ON_CLOSE);
-		a_parentDialog.setResizable(false);
+		//a_parentDialog.setResizable(false);
 
 		/******************** get available JPIs   ********************/
 		IReturnRunnable fetchJpisThread = new IReturnRunnable()
@@ -2487,6 +2593,12 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			JAPMessages.getString(MSG_FETCHINGTERMS), jpiPane ,
 			new FetchTermsRunnable(a_parentDialog, jpiPane))
 		{
+			 public boolean isSkippedAsNextContentPane()
+			   {
+				   return getValue() != null;
+			   }
+			
+			
 			public boolean isMoveForwardAllowed()
 			{
 				return a_parentDialog.isVisible() ;
@@ -2494,83 +2606,6 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		};
 		fetchTermsPane.setInterruptThreadSafe(false);
 
-		//************ show terms and conditions, only moving forward if user confirms  ******//
-		final TermsAndConditionsPane termsPane =
-			new TermsAndConditionsPane(a_parentDialog, fetchTermsPane, true)
-		{
-			public boolean isSkippedAsPreviousContentPane()
-			{
-				return true;
-			}
-		};
-
-
-	   //****************** fetch cancellation policy **********************//
-	   IReturnRunnable fetchPolicy = new IReturnRunnable()
-	   {
-		   private XMLGenericText cancellationPolicy;
-		   public void run()
-		   {
-			   BIConnection piConn = null;
-			   try
-			   {
-				   PaymentInstanceDBEntry pi = jpiPane.getSelectedPaymentInstance();
-				   piConn = new BIConnection(pi);
-				   piConn.connect();
-
-				   //authentication is neither necessary nor possible (creating first account -> user does not yet have an account to authenticate with)
-				   LogHolder.log(LogLevel.DEBUG, LogType.PAY, "Fetching cancellation policy");
-				   String lang = JAPMessages.getLocale().getLanguage();
-				   cancellationPolicy = piConn.getCancellationPolicy(lang);
-				   piConn.disconnect();
-			   }
-			   catch (Exception e)
-			   {
-				   if (piConn != null)
-				   {
-					   try
-					   {
-						   piConn.disconnect();
-					   }
-					   catch (Exception ex)
-					   {
-					   }
-				   }
-
-				   if (!Thread.currentThread().isInterrupted())
-				   {
-					   LogHolder.log(LogLevel.EXCEPTION, LogType.NET,
-									 "Error fetching cancellation policy: ", e);
-					   showPIerror(a_parentDialog.getContentPane(), e);
-					   Thread.currentThread().interrupt();
-				   }
-			   }
-		   }
-
-		   public Object getValue()
-		   {
-			   return cancellationPolicy;
-		   }
-
-	   };
-	   final WorkerContentPane fetchPolicyPane = new WorkerContentPane(a_parentDialog,
-		   JAPMessages.getString(MSG_FETCHINGPOLICY), termsPane , fetchPolicy)
-	   {
-		   public boolean isMoveForwardAllowed()
-		   {
-			   return a_parentDialog.isVisible() ;
-		   }
-	   };
-		fetchTermsPane.setInterruptThreadSafe(false);
-
-	   //************* show cancellation policy ***************************//
-	   final CancellationPolicyPane policyPane = new CancellationPolicyPane(a_parentDialog, fetchPolicyPane)
-	   {
-		   public boolean isSkippedAsPreviousContentPane()
-		   {
-			   return true;
-		   }
-		};
 
 	    /*************** create keypair ****************/
 		final IReturnRunnable keyCreationThread = new IReturnRunnable()
@@ -2596,7 +2631,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			}
 		};
 		final WorkerContentPane keyWorkerPane = new WorkerContentPane(
-			a_parentDialog, JAPMessages.getString(MSG_CREATE_KEY_PAIR) + "...", policyPane, keyCreationThread);
+			a_parentDialog, JAPMessages.getString(MSG_CREATE_KEY_PAIR) + "...", fetchTermsPane, keyCreationThread);
 		keyWorkerPane.getButtonCancel().setEnabled(false);
 
 		m_bReady = true;

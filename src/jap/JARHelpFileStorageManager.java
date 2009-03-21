@@ -409,7 +409,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 	private boolean isHelpInstalled()
 	{
 		File helpFolder = getHelpFolder();
-		if(helpFolder == null)
+		if (helpFolder == null)
 		{
 			return false;
 		}

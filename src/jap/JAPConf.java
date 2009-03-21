@@ -429,7 +429,8 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 	{
 		// synchronize with updateValues of AbstractJAPConfModul AWT thread so that updates and pack events do not overlap
 		boolean bError = false;
-		boolean bRetry = true;
+		//boolean bRetry = true;
+		boolean bRetry = false;
 		
 		m_moduleSystem.revalidate();
 		while (!bError)

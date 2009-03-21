@@ -571,8 +571,8 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 				{
 					System.arraycopy(buff, 0, newJarBuff, currentPos, len);
 					currentPos +=  len;
-					// the Download has the Zone from 5 to 455 in the ProgressBar
-					int value = (int)(((450 * (long)currentPos) / (long)lenTotal));
+					// the Download has the Zone from 5 to 405 in the ProgressBar
+					int value = (int)(((400 * (long)currentPos) / (long)lenTotal));
 					downloadPage.progressBar.setValue(value + 5);
 					downloadPage.progressBar.repaint();
 					if (updateAborted)
@@ -724,8 +724,8 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 			fos.write(m_arBufferNewJapJar);
 			fos.flush();
 			fos.close();
-			// the creatNewJapJar step has the Zone from 455 to 490 in the ProgressBar
-			downloadPage.progressBar.setValue(490);
+			// the creatNewJapJar step has the Zone from 405 to 440 in the ProgressBar
+			downloadPage.progressBar.setValue(440);
 			downloadPage.progressBar.repaint();
 			downloadPage.m_labelIconStep3.setIcon(downloadPage.stepfinished);
 			return 0;
@@ -756,7 +756,7 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 			}
 			downloadPage.m_labelIconStep3.setIcon(downloadPage.arrow);
 			// the creatNewJapJar step has the Zone from 455 to 490 in the ProgressBar
-			downloadPage.progressBar.setValue(490);
+			downloadPage.progressBar.setValue(440);
 			downloadPage.progressBar.repaint();
 			downloadPage.m_labelIconStep3.setIcon(downloadPage.stepfinished);
 			return 0;
@@ -831,7 +831,7 @@ private boolean checkSignature()
 					m_fileNewJapJar = fileTemp;
 				}
 				
-				AbstractOS.AbstractRetryCopyProcess retryDialog = new AbstractOS.AbstractRetryCopyProcess(9)
+				AbstractOS.AbstractRetryCopyProcess retryDialog = new AbstractOS.AbstractRetryCopyProcess(12)
 				{
 					public boolean checkRetry()
 					{
@@ -843,7 +843,7 @@ private boolean checkSignature()
 					{
 						if (super.incrementProgress())
 						{
-							downloadPage.progressBar.setValue(491 + getCurrentStep());
+							downloadPage.progressBar.setValue(440 + (getCurrentStep() + 1) * 5);
 							downloadPage.progressBar.repaint();
 							return true;
 						}
@@ -853,18 +853,18 @@ private boolean checkSignature()
 					public void reset()
 					{
 						super.reset();
-						downloadPage.progressBar.setValue(490);
+						downloadPage.progressBar.setValue(440);
 					}
 				};
 				
 				host.lockDialog();
 				boolean copySuccess = AbstractOS.getInstance().copyAsRoot(m_fileNewJapJar, 
 						new File(m_fileAktJapJar.getParent()), retryDialog);
-				host.unlockDialog();
 				if (!copySuccess || !RecursiveFileTool.equals(m_fileNewJapJar, m_fileAktJapJar, true))
 				{
 					throw new Exception ("Administrator copy failed!");
 				}
+				host.unlockDialog();
 			}
 			
 			downloadPage.progressBar.setValue(500);
@@ -874,6 +874,7 @@ private boolean checkSignature()
 		}
 		catch (Exception e)
 		{
+			host.unlockDialog();
 			LogHolder.log(LogLevel.ERR, LogType.MISC, e);
 			GUIUtils.setLoadImages(true);
 			return -1;
