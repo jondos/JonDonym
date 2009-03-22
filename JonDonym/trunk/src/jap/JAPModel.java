@@ -306,7 +306,7 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		{
 //			build environment; use the browser to open the local help files
 			m_helpFileStorageManager =	
-				new LocalHelpFileStorageManager(JAPConstants.APPLICATION_NAME);
+				new LocalHelpFileStorageManager(JAPConstants.APPLICATION_CONFIG_DIR_NAME);
 		}
 		else
 		{			
@@ -1363,7 +1363,7 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	{
 		return (m_helpPath != null || m_bPortableHelp) ?
 				m_helpPath : AbstractOS.getInstance().getDefaultHelpPath(
-						JAPConstants.APPLICATION_NAME);
+						JAPConstants.APPLICATION_CONFIG_DIR_NAME);
 		
 	}
 	
@@ -1414,7 +1414,7 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		blockedPath = AbstractOS.getInstance().getenv("ALLUSERSPROFILE");
 		if (blockedPath != null && helpPath != null && helpPath.startsWith(blockedPath))
 		{
-			if (helpPath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
+			if (helpPath.indexOf(JAPConstants.APPLICATION_CONFIG_DIR_NAME) >= 0)
 			{
 				RecursiveFileTool.deleteRecursion(new File(helpPath));
 			}
@@ -1676,11 +1676,11 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 		
 		if (!m_bPortableHelp && m_helpPath == null 
 				&& m_helpFileStorageManager.helpInstallationExists(
-				AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME)) &&
-				helpPathValidityCheck(AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME)).equals(
+				AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_CONFIG_DIR_NAME)) &&
+				helpPathValidityCheck(AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_CONFIG_DIR_NAME)).equals(
 						AbstractHelpFileStorageManager.HELP_JONDO_EXISTS))
 		{
-			m_helpPath = AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_NAME);
+			m_helpPath = AbstractOS.getInstance().getDefaultHelpPath(JAPConstants.APPLICATION_CONFIG_DIR_NAME);
 			helpInstallationExists = true;
 			setChanged();
 		}

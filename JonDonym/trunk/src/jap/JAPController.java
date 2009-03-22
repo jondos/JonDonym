@@ -532,6 +532,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		catch (Exception e)
 		{
 			LogHolder.log(LogLevel.EMERG, LogType.NET, e);
+			System.exit(-1);
 		}
 		/* set a default infoservice */
 		try
@@ -1061,7 +1062,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				 * exist -> store the configuration in the OS-specific directory
 				 */
 				JAPModel.getInstance().setConfigFile(AbstractOS.getInstance().getConfigPath(
-						JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN);
+						JAPConstants.APPLICATION_CONFIG_DIR_NAME) + JAPConstants.XMLCONFFN);
 			}
 		}
 		Document doc = null;
@@ -1206,6 +1207,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					String messageText = a_splash.getText();
 					a_splash.setText(JAPMessages.getString(MSG_UPDATING_HELP));
+					try
+						{
 					JAPModel.getInstance().getHelpURL();
 					if (!JAPModel.getInstance().isHelpPathDefined() &&
 						AbstractOS.getInstance().isHelpAutoInstalled() &&
@@ -1213,8 +1216,14 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						JAPModel.getInstance().setHelpPath(new File(
 								AbstractOS.getInstance().getDefaultHelpPath(
-										JAPConstants.APPLICATION_NAME)));
+										JAPConstants.APPLICATION_CONFIG_DIR_NAME)));
 					}
+						}
+					catch(Throwable t)
+						{
+							LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Error while installing help");
+							LogHolder.log(LogLevel.EXCEPTION, LogType.MISC,t);
+						}
 					a_splash.setText(messageText);
 				}
 
@@ -2056,7 +2065,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				}
 				else
 				{
-					/* try to get the info from the MixCascade node */
+					// try to get the info from the MixCascade node 
 					Element mixCascadeNode = (Element) XMLUtil.getFirstChildByName(root,
 						MixCascade.XML_ELEMENT_NAME);
 					try
@@ -2161,13 +2170,13 @@ public final class JAPController extends Observable implements IProxyListener, O
 			// ok, there is no (more) such a config file
 		}
 		/* Now remove the application data directory at its default path if it exists. */
-		strDataPath = AbstractOS.getInstance().getAppdataDefaultDirectory(JAPConstants.APPLICATION_NAME);
+		strDataPath = AbstractOS.getInstance().getAppdataDefaultDirectory(JAPConstants.APPLICATION_CONFIG_DIR_NAME);
 		if (strDataPath != null)
 		{
 			dataDir = new File(strDataPath);
 			classdir = ClassUtil.getClassDirectory(JAPController.class);
 			if (dataDir.exists() && dataDir.isDirectory() &&
-					dataDir.getPath().indexOf(JAPConstants.APPLICATION_NAME) >= 0 &&
+					dataDir.getPath().indexOf(JAPConstants.APPLICATION_CONFIG_DIR_NAME) >= 0 &&
 				(classdir == null || !classdir.equals(dataDir)))
 			{
 				/* the above checks should be sufficient to safely delete this directory now */
@@ -2272,7 +2281,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			/* no config file at any position->use OS-specific path for storing a new one*/
 			m_Model.setConfigFile(AbstractOS.getInstance().getConfigPath(
-					JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN);
+					JAPConstants.APPLICATION_CONFIG_DIR_NAME) + JAPConstants.XMLCONFFN);
 
 			/* As this is the first JAP start, show the config assistant */
 			m_bShowConfigAssistant = true;
@@ -2371,7 +2380,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private boolean loadConfigFileOSdependent()
 	{
 		String japConfFile = AbstractOS.getInstance().getConfigPath(
-				JAPConstants.APPLICATION_NAME) + JAPConstants.XMLCONFFN;
+				JAPConstants.APPLICATION_CONFIG_DIR_NAME) + JAPConstants.XMLCONFFN;
 		LogHolder.log(LogLevel.INFO, LogType.MISC,
 					  "Trying to load configuration from: " + japConfFile);
 		try

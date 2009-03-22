@@ -163,9 +163,9 @@ public class JAP
 	 */
 	public void startJAP()
 	{		
-		String javaVersion = System.getProperty("java.version");
-		String vendor = System.getProperty("java.vendor");
-		String os = System.getProperty("os.name");
+		String javaVersion = System.getProperty("java.version","");
+		String vendor = System.getProperty("java.vendor","");
+		String os = System.getProperty("os.name","");
 		String mrjVersion = System.getProperty("mrj.version");
 		boolean bConsoleOnly = false;
 		boolean bUninstall = false;		
@@ -186,9 +186,10 @@ public class JAP
 		
 		if (isArgumentSet("--version") || isArgumentSet("-v"))
 		{
-			System.out.println(strname + " version: " + JAPConstants.aktVersion + "\n" +
-							   "Java Vendor: " + vendor + "\n" +
-							   "Java Version: " + javaVersion + "\n");
+			System.out.println(strname + " version: " + JAPConstants.aktVersion);
+			System.out.println("Java Vendor: " + vendor);
+			System.out.println( "Java Version: " + javaVersion);
+			System.out.println( "OS Version: " + 	os);
 			System.exit(0);
 		}
 
@@ -201,10 +202,11 @@ public class JAP
 		}
 		
 		SystemErrLog templog = new SystemErrLog();
+		//FileLog fl=new FileLog("jap.log",100000,10);
 		LogHolder.setLogInstance(templog);
 		templog.setLogType(LogType.ALL);
 		templog.setLogLevel(LogLevel.WARNING);		
-		
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Pre configuration debug output enabled.");
 		
 		//Macintosh Runtime for Java (MRJ) on Mac OS
 		// Test (part 1) for right JVM
@@ -311,7 +313,7 @@ public class JAP
 				System.out.println(msg + javaVersion);
 				System.exit(0);
 			}
-			if (javaVersion.compareTo("1.1.2") <= 0)
+			if (javaVersion.compareTo("1.1.2") <= 0) //Note: 1.1.2 also check that Microsofts JVM is not too old
 			{
 				JAPMessages.init(JAPConstants.MESSAGESFN);
 				if (bConsoleOnly)
@@ -332,8 +334,9 @@ public class JAP
 		if(!isArgumentSet("--allow-multiple") && !isArgumentSet("-a"))
 		{
 			// Try to detect running instances of JAP
+			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Allow multiple instances not set - try to detect running instances of JAP");
 			Vector activeVMs = AbstractOS.getInstance().getActiveVMs();
-			Object vm;
+			Object vm=null;
 			int numJAPInstances = 0;
 			for(int i = 0; i < activeVMs.size(); i++)
 			{
@@ -371,6 +374,7 @@ public class JAP
 					}
 				}
 			}
+			LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Detection finished.");
 		}
 		
 		// init controller and preload config

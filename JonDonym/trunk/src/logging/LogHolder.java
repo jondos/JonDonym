@@ -69,7 +69,7 @@ public final class LogHolder
 	/**
 	 * The current detail level of all log messages.
 	 */
-	private static int m_messageDetailLevel = DETAIL_LEVEL_HIGHEST;
+	private static int m_messageDetailLevel = DETAIL_LEVEL_LOWEST;
 
 	/**
 	 * Stores the Log instance.
@@ -377,7 +377,9 @@ public final class LogHolder
 					{
 						strOwnClass = strCurrentMethod.substring(0, index);
 					}
-					strOwnClass = strOwnClass.substring(0, strOwnClass.lastIndexOf('.'));
+					int ind=strOwnClass.lastIndexOf('.');
+					if(ind>=0)
+						strOwnClass = strOwnClass.substring(0, ind);
 					// filter out internal classes
 					if (strOwnClass.indexOf("$") > 0)
 					{

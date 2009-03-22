@@ -72,7 +72,7 @@ public class URLDecoder
 
 				if ( (i < a_strURL.length() && a_strURL.charAt(i) != '%') || i >= a_strURL.length())
 				{
-					output.append(new String(enc, 0, bytes, "UTF-8"));
+					output.append(new String(enc, 0, bytes, "UTF8"));
 					bytes = 0;
 				}
 			}

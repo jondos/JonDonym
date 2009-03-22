@@ -732,7 +732,7 @@ public final class XMLSignature
 	public static byte[] toCanonical(Node a_inputNode, Vector a_excludedNodes) throws XMLParseException
 	{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		if (makeCanonical(a_inputNode, out, false, a_excludedNodes, false, "UTF-8") == -1)
+		if (makeCanonical(a_inputNode, out, false, a_excludedNodes, false, "UTF8") == -1)
 		{
 			throw new XMLParseException(a_inputNode.getNodeName(),
 										"Could not make the node canonical!");
@@ -859,7 +859,7 @@ public final class XMLSignature
 	private static int makeCanonical
 		(Node node, OutputStream o, boolean bSiblings, Node excludeNode, boolean a_bKeepSpaces)
 	{
-		return makeCanonical(node, o, bSiblings, Util.toVector(excludeNode), a_bKeepSpaces, "UTF-8");
+		return makeCanonical(node, o, bSiblings, Util.toVector(excludeNode), a_bKeepSpaces, "UTF8");
 	}
 
 	/**
@@ -1023,6 +1023,7 @@ public final class XMLSignature
 		}
 		catch (Exception e)
 		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "Error while making canonical XML", e);
 			return -1;
 		}
 	}

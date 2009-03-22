@@ -601,7 +601,7 @@ final public class JAPDll {
 					tempDir = AbstractOS.getInstance().getTempPath();
 					if (tempDir == null)
 					{
-						tempDir = AbstractOS.getInstance().getConfigPath(JAPConstants.APPLICATION_NAME);
+						tempDir = AbstractOS.getInstance().getConfigPath(JAPConstants.APPLICATION_CONFIG_DIR_NAME);
 					}
 					tempDir += DLL_LIBRARY_NAME + File.separator;
 
