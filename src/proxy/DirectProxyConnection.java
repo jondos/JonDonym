@@ -635,7 +635,7 @@ final class DirectProxyConnection
 						strPossibleRequest = new String(buff,0, len).toUpperCase();
 						if (strPossibleRequest.startsWith("GET") || strPossibleRequest.startsWith("POST") ||
 							strPossibleRequest.startsWith("HEAD") || strPossibleRequest.startsWith("PUT") || 
-							strPossibleRequest.startsWith("DETETE") || strPossibleRequest.startsWith("TRACE") ||
+							strPossibleRequest.startsWith("DELETE") || strPossibleRequest.startsWith("TRACE") ||
 							strPossibleRequest.startsWith("OPTIONS") || strPossibleRequest.startsWith("CONNECT"))
 						{
 							// This is a new request!
