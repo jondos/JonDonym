@@ -36,7 +36,7 @@ import anon.mixminion.Mixminion;
 public final class JAPConstants
 {
 	// Note: probably you like to change anon.AnonService.ANONLIB_VERSION as well
-	public static final String aktVersion = "00.11.006"; //Never change the layout of this line!
+	public static final String aktVersion = "00.11.008"; //Never change the layout of this line!
 	
 	public final static boolean m_bUnstableVersion = false; //Set to true if this is an unstable (development) Version
 
@@ -76,7 +76,7 @@ public final class JAPConstants
 
 	public static final boolean DEBUG = false;
 	
-	public static final String APPLICATION_NAME = "JonDo";
+	public static final String APPLICATION_CONFIG_DIR_NAME = "JonDo";
 
 	public static final int DEFAULT_PORT_NUMBER = 4001;
 	public static final boolean DEFAULT_LISTENER_IS_LOCAL = true;

@@ -126,7 +126,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 		{
 			File hpFile = new File(a_absolutePath);
 			
-			if (a_absolutePath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
+			if (a_absolutePath.indexOf(JAPConstants.APPLICATION_CONFIG_DIR_NAME) >= 0)
 			{
 				// this definitely is a JonDo application folder
 				a_bIgnoreExistingHelpDir = true;
@@ -473,7 +473,7 @@ public final class JARHelpFileStorageManager extends AbstractHelpFileStorageMana
 		setHelpPath(helpPath);
 		if(helpVersionMismatch() || !isHelpInstalled())
 		{
-			if (m_helpPath != null && m_helpPath.indexOf(JAPConstants.APPLICATION_NAME) >= 0)
+			if (m_helpPath != null && m_helpPath.indexOf(JAPConstants.APPLICATION_CONFIG_DIR_NAME) >= 0)
 			{
 				// this is definitely a JonDo application folder
 				return installHelp(true);

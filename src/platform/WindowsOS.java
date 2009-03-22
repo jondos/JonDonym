@@ -81,6 +81,7 @@ public class WindowsOS extends AbstractOS
 		{
 			initEnv("cmd.exe /c set");
 		}
+		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "platform.WindowsOS instantiated.");		
 	}
 
 	protected boolean openLink(String a_link)

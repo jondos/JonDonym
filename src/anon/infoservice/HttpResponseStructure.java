@@ -229,7 +229,7 @@ public final class HttpResponseStructure
 		{
 			// try UTF8
 			m_httpReturnData = createHttpMessage(HTTP_RETURN_OK, a_httpDataType, a_httpEncoding,
-									a_httpData.getBytes("UTF-8"), false);
+									a_httpData.getBytes("UTF8"), false);
 		}
 		catch(UnsupportedEncodingException ex)
 		{
