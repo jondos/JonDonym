@@ -79,11 +79,11 @@ final class DirectProxyResponse implements Runnable
 
 			byte[] buff = new byte[1000];
 			int len;
-			while ( (len = m_inputStream.read(buff)) != -1)
+			while ((len = m_inputStream.read(buff)) != -1)
 			{
 				if (len > 0)
 				{
-					LogHolder.log(LogLevel.DEBUG, LogType.NET, "R(" + m_threadNumber + ") - "+new String(buff,0,len));
+					LogHolder.log(LogLevel.DEBUG, LogType.NET, "R(" + m_threadNumber + ") - "+ new String(buff,0,len));
 					m_outputStream.write(buff, 0, len);
 					m_outputStream.flush();
 				}

@@ -3424,15 +3424,16 @@ public final class JAPController extends Observable implements IProxyListener, O
 						m_proxyAnon.setProxyListener(m_Controller);
 						m_proxyAnon.setDummyTraffic(JAPModel.getDummyTraffic());
 
-						// -> we can try to start anonymity
-						if (m_proxyDirect != null)
-						{
-							m_proxyDirect.shutdown(true);
-						}
-						m_proxyDirect = null;
-
 						LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to start AN.ON service...");
 					}
+					
+					// -> we can try to start anonymity
+					if (m_proxyDirect != null)
+					{
+						m_proxyDirect.shutdown(true);
+					}
+					m_proxyDirect = null;
+					
 					//JAPExtension.doIt();
 					//System.out.println("Try to start AN.ON service...");
 					ret = m_proxyAnon.start(cascadeContainer);

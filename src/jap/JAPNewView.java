@@ -1700,7 +1700,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			lang = "_de";
 		}
 		
-		if (bAnonMode && bConnected)
+		if (bAnonMode && bConnected && a_cascade != null)
 		{
 			if (a_cascade.getDistribution() > 0)
 			{
@@ -1714,13 +1714,18 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						IMG_METER_NO_MEASURE, new Object[]{lang}), true, true); //No measure available
 			}
 		}
-		else if (bAnonMode && !bConnected && bConnectionErrorShown)
+		else if (bAnonMode && !bConnected && bConnectionErrorShown && a_cascade != null)
 		{
 			//System.out.println("connection lost");
 			return GUIUtils.loadImageIcon(IMG_METER_CONNECTING, true, true); // connection lost
 		}
 		else
 		{
+			if (a_cascade == null)
+			{
+				// init
+				GUIUtils.loadImageIcon(IMG_METER_CONNECTING, true, true);
+			}
 			//System.out.println("AnonMode:" + bAnonMode + " " + "Connected:" + bConnected + " " +
 			//			   "ShowError:" + bConnectionErrorShown);
 			//System.out.println("deactivated");			

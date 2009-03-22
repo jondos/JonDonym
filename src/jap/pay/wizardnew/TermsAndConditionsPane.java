@@ -44,11 +44,14 @@ import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 
 import anon.pay.xml.XMLGenericText;
 import anon.util.JAPMessages;
 import gui.dialog.DialogContentPane.IWizardSuitable;
 import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 /**
  * Shows the terms and conditions as gotten from the JPI.
@@ -98,6 +101,11 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		m_fetchTermsPane = a_previousContentPane;
 		
 		init(a_bShowCheckAccept);
+		
+		if (a_bShowCheckAccept)
+		{
+			m_accepted.setSelected(false);
+		}
 	}
 	
 	public TermsAndConditionsPane(JAPDialog a_parentDialog, boolean a_bAccepted, IMessages a_messages)
@@ -187,7 +195,6 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		m_termsPane.addHyperlinkListener(new JAPHyperlinkAdapter());
 		m_scrollingTerms = new JScrollPane(m_termsPane);
 		m_scrollingTerms.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		/**@todo make this dynamic */
 		m_scrollingTerms.setPreferredSize(new Dimension(400,200));
 		m_rootPanel.add(m_scrollingTerms, m_c);
 
@@ -200,6 +207,22 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 			m_c.gridy++;
 			m_rootPanel.add(m_accepted, m_c);
 		}
+		
+		this.addComponentListener(new ComponentAdapter()
+		{
+			public void componentShown(ComponentEvent a_event)
+			{
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						// this may be needed so tat the scrollbar is not scrolled to its last value
+						m_scrollingTerms.getVerticalScrollBar().setValue(0);
+					}
+				});
+				
+			}
+		});
 	}
 	
 	public boolean isTermsAccepted()
@@ -227,13 +250,11 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 			termsHtml = theTerms.getText();
 		}
 		m_termsPane.setText(termsHtml);
-		m_scrollingTerms.revalidate();
 	}
 	
 	public void setText(String a_text)
 	{
 		m_termsPane.setText(a_text);
-		m_scrollingTerms.revalidate();
 	}
 
 	public CheckError[] checkYesOK()
@@ -250,14 +271,6 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
 		return errors;
 	}
 
-	public void resetSelection()
-	{
-		if (m_accepted != null)
-		{
-			m_accepted.setSelected(false);
-		}
-	}
-
     public CheckError[] checkUpdate()
 	{
     	if (m_fetchTermsPane != null)
@@ -265,25 +278,6 @@ public class TermsAndConditionsPane extends DialogContentPane implements IWizard
     		showTerms();
     	}
     	
-		resetSelection();
 		return null;
 	}
-
-	/*public void hyperlinkUpdate(HyperlinkEvent e)
-	{
-		System.out.println("click");
-		if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
-		{
-			URL urlToOpen = e.getURL();
-			if (urlToOpen.getProtocol().startsWith("mailto") )
-			{
-				AbstractOS.getInstance().openEMail(urlToOpen.toString());
-			}
-			else
-			{
-				AbstractOS.getInstance().openURL(urlToOpen);
-			}
-		}
-	}*/
-
 }

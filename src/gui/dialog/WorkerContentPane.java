@@ -215,7 +215,7 @@ public class WorkerContentPane extends DialogContentPane implements
 	 * The caller waits until the thread has stopped. This is only needed if isInterruptThreadSafe()
 	 * returns false and the user closes the dialog or clicks cancel, otherwise this is done automatically.
 	 * Remember that a new thread started by this content pane is blocked until the old thread has stopped
-	 * and, if startet, it will overwrite the getValue() result of the old thread.
+	 * and, if started, it will overwrite the getValue() result of the old thread.
 	 */
 	public final void joinThread()
 	{
@@ -343,6 +343,13 @@ public class WorkerContentPane extends DialogContentPane implements
 		 */
 		public void componentShown(ComponentEvent a_event)
 		{
+			if (m_workerRunnable == null)
+			{
+				setButtonValue(RETURN_VALUE_OK);
+				moveToNextContentPane();
+				return;
+			}
+			
 			if (isVisible() && isReady())
 			{
 				m_internalThread = new Thread(this,"WorkerContentPane - componentShown()");

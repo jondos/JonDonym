@@ -2630,6 +2630,25 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				return m_keyPair;
 			}
 		};
+		
+		
+		 //************ show terms and conditions, only moving forward if user confirms  ******//
+		/*
+		final TermsAndConditionsPane termsPane =
+			new TermsAndConditionsPane(a_parentDialog, fetchTermsPane, true, 
+					new TermsAndConditionsPane.TermsAndConditionsMessages())
+		{
+			public boolean isSkippedAsNextContentPane()
+			{
+				return isTermsAccepted();
+			}
+			
+			public boolean isSkippedAsPreviousContentPane()
+			{
+				return true;
+			}
+		};*/
+		
 		final WorkerContentPane keyWorkerPane = new WorkerContentPane(
 			a_parentDialog, JAPMessages.getString(MSG_CREATE_KEY_PAIR) + "...", fetchTermsPane, keyCreationThread);
 		keyWorkerPane.getButtonCancel().setEnabled(false);
