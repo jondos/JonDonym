@@ -111,7 +111,8 @@ public class JobQueue
 								continue;
 							}
 						}
-						else if (m_jobs.size() > 0)
+						
+						if (m_jobs.size() > 0)
 						{
 							// no job is running; remove all jobs that are outdated
 							while (m_jobs.size() > 1)

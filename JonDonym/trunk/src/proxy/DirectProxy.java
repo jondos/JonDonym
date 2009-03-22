@@ -220,10 +220,15 @@ final public class DirectProxy implements Runnable, AnonService
 		{
 			return false;
 		}
+		
 		synchronized (THREAD_SYNC)
 		{
-			//stopService();
-			//threadRunLoop.join();
+			if (threadRunLoop != null && threadRunLoop.isAlive())
+			{
+				return true;
+			}
+			
+			shutdown(true);
 			threadRunLoop = new Thread(this, "JAP - Direct Proxy");
 			threadRunLoop.setDaemon(true);
 			threadRunLoop.start();
@@ -234,7 +239,6 @@ final public class DirectProxy implements Runnable, AnonService
 	public void run()
 	{
 		Hashtable rememberedDomains = new Hashtable();
-		Runnable doIt;
 		RequestInfo requestInfo;
 		RememberedRequestRight requestRight;
 
@@ -347,14 +351,12 @@ final public class DirectProxy implements Runnable, AnonService
 				if (getProxyInterface() != null && getProxyInterface().isValid() &&
 					getProxyInterface().getProtocol() == ProxyInterface.PROTOCOL_TYPE_HTTP)
 				{
-					doIt = new DirectConViaHTTPProxy(socket, clientInputStream);
+					new Thread(new DirectConViaHTTPProxy(socket, clientInputStream)).start();
 				}
 				else
 				{
-					doIt = new DirectProxyConnection(socket, clientInputStream, this);
+					new DirectProxyConnection(socket, clientInputStream, this);
 				}
-				Thread thread = new Thread(doIt);
-				thread.start();
 			}
 			else
 			{
@@ -362,10 +364,8 @@ final public class DirectProxy implements Runnable, AnonService
 						(rememberedDomains.size() > 0) ? requestRight: null));
 				thread.start();
 			}
-
 		}
 		LogHolder.log(LogLevel.INFO, LogType.NET, "Direct Proxy Server stopped.");
-
 	}
 
 	public synchronized void shutdown(boolean a_bResetTransferredBytes)
@@ -639,7 +639,7 @@ final public class DirectProxy implements Runnable, AnonService
 				// create Socket to Server
 				Socket serverSocket = new Socket(getProxyInterface().getHost(),
 												 getProxyInterface().getPort());
-				// Response from server is transfered to client in a sepatate thread
+				// Response from server is transfered to client in a separate thread
 				DirectProxyResponse pr = new DirectProxyResponse(serverSocket.getInputStream(),
 					m_clientSocket.getOutputStream());
 				Thread prt = new Thread(pr, "JAP - DirectProxyResponse");

@@ -42,7 +42,9 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Hashtable;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -55,8 +57,9 @@ import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.ProxyInterface;
 import anon.shared.ProxyConnection;
+import anon.util.Util;
 
-final class DirectProxyConnection implements Runnable
+final class DirectProxyConnection
 {
 	private Socket m_clientSocket;
 	private InputStream m_socketInputStream;
@@ -64,7 +67,7 @@ final class DirectProxyConnection implements Runnable
 	private int m_threadNumber;
 	private static int m_threadCount;
 
-	private DataInputStream m_inputStream = null;
+	private InputStream m_inputStream = null;
 
 	private String m_requestLine = null;
 
@@ -78,12 +81,55 @@ final class DirectProxyConnection implements Runnable
 	private static DateFormat m_DateFormat = SimpleDateFormat.getDateTimeInstance();
 	private static NumberFormat m_NumberFormat = NumberFormat.getInstance();
 	private DirectProxy m_parentProxy;
+	private Vector m_vecThreads;
 
 	public DirectProxyConnection(Socket s, InputStream a_socketInputStream, DirectProxy a_parentProxy)
 	{
 		m_parentProxy = a_parentProxy;
 		m_clientSocket = s;
 		m_socketInputStream = a_socketInputStream;
+		m_vecThreads = new Vector(); 
+		final Thread thread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				handleRequest(null);
+				synchronized(m_vecThreads)
+				{
+					m_vecThreads.removeElement(Thread.currentThread());
+					m_vecThreads.notifyAll();
+				}
+			}
+		});
+		m_vecThreads.addElement(thread);
+		thread.start();
+	}
+	
+	/**
+	 * TODO not tested or called yet; it looks like we don't need it...
+	 */
+	public void stop()
+	{
+		synchronized(m_vecThreads)
+		{
+			Thread thread;
+			if (m_vecThreads.size() > 0)
+			{
+				thread = (Thread)m_vecThreads.elementAt(0);
+				while (thread.isAlive())
+				{
+					thread.interrupt();
+					try 
+					{
+						m_vecThreads.wait(250);
+					} 
+					catch (InterruptedException e)
+					{
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	private static String readLine(InputStream inputStream, byte[] r_bytesRead, int[] len) throws Exception
@@ -240,8 +286,8 @@ final class DirectProxyConnection implements Runnable
 		}
 		return info;
 	}
-
-	public void run()
+	
+	private void handleRequest(InputStream a_inputStream)
 	{
 		m_threadNumber = getThreadNumber();
 		LogHolder.log(LogLevel.DEBUG, LogType.NET,
@@ -249,7 +295,11 @@ final class DirectProxyConnection implements Runnable
 		try
 		{
 			// open stream from client
-			if (m_socketInputStream != null)
+			if (a_inputStream != null)
+			{
+				m_inputStream = a_inputStream;
+			}
+			else if (m_socketInputStream != null)
 			{
 				m_inputStream = new DataInputStream(m_socketInputStream);
 			}
@@ -310,6 +360,7 @@ final class DirectProxyConnection implements Runnable
 			{
 				// Handle HTTP Connections
 				URL url = new URL(m_strURI);
+				
 				m_strProtocol = url.getProtocol();
 				//LogHolder.log(LogLevel.DEBUG,LogType.NET,"C("+threadNumber+") - Protocol: >" + protocol +"<");
 				m_strHost = url.getHost();
@@ -325,7 +376,7 @@ final class DirectProxyConnection implements Runnable
 
 				if (m_strProtocol.equalsIgnoreCase("http"))
 				{
-					handleHTTP();
+					handleHTTP(m_strMethod.equalsIgnoreCase("POST"));
 				}
 				else if (m_strProtocol.equalsIgnoreCase("ftp"))
 				{
@@ -430,7 +481,7 @@ final class DirectProxyConnection implements Runnable
 			toClient.write("HTTP/1.0 200 Connection established\r\n\r\n");
 			toClient.flush();
 
-			// Response from server is transfered to client in a sepatate thread
+			// Response from server is transfered to client in a separate thread
 			DirectProxyResponse pr = new DirectProxyResponse(serverSocket.getInputStream(),
 				m_clientSocket.getOutputStream());
 			Thread prt = new Thread(pr, "JAP - DirectProxyResponse");
@@ -447,7 +498,7 @@ final class DirectProxyConnection implements Runnable
 					outputStream.flush();
 				}
 			}
-			// wait unitl response thread has finished
+			// wait until response thread has finished
 			LogHolder.log(LogLevel.DEBUG, LogType.NET, "\n");
 			LogHolder.log(LogLevel.DEBUG, LogType.THREAD,
 						  "C(" + m_threadNumber + ") - Waiting for resonse thread...");
@@ -465,12 +516,17 @@ final class DirectProxyConnection implements Runnable
 		}
 	}
 
-	private void handleHTTP() throws Exception
+	private void handleHTTP(boolean a_bPost) throws Exception
 	{
+		Exception ex = null;
+		Socket serverSocket = null;
+		OutputStream outputStream = null;
+		boolean bKeepStream = false;
+		
 		try
 		{
 			// create Socket to Server
-			Socket serverSocket = null;
+			
 			ProxyConnection p = null;
 			if (m_parentProxy.getProxyInterface()!=null&&
 				m_parentProxy.getProxyInterface().isValid()
@@ -485,7 +541,7 @@ final class DirectProxyConnection implements Runnable
 			}
 			// Send request --> server
 			serverSocket = p.getSocket();
-			OutputStream outputStream = serverSocket.getOutputStream();
+			outputStream = serverSocket.getOutputStream();
 			// Send response --> client
 			String protocolString = "";
 			// protocolString += method+" "+file+ " "+version;
@@ -498,10 +554,32 @@ final class DirectProxyConnection implements Runnable
 
 			LogHolder.log(LogLevel.DEBUG, LogType.NET,
 						  "C(" + m_threadNumber + ") - Header: >" + nextLine + "<");
+
+			long lPostContentLength = 0;
 			while (nextLine.length() != 0)
 			{
 				if (!filter(nextLine))
 				{
+					if (a_bPost)
+					{
+						if (nextLine.toLowerCase().indexOf("content-length:") >= 0)
+						{
+							StringTokenizer tokenizer = new StringTokenizer(nextLine, ":");
+							tokenizer.nextToken();
+							if (tokenizer.hasMoreTokens())
+							{
+								try
+								{
+									lPostContentLength = Long.parseLong(tokenizer.nextToken().trim());
+								}
+								catch (Exception a_e)
+								{
+									LogHolder.log(LogLevel.EXCEPTION, LogType.NET, 
+											"Could not parse post content length!", a_e);
+								}
+							}
+						}
+					}
 					// write single lines to server
 					outputStream.write( (nextLine + "\r\n").getBytes());
 				}
@@ -519,23 +597,72 @@ final class DirectProxyConnection implements Runnable
 			outputStream.write("\r\n".getBytes());
 			outputStream.flush();
 
-			// Response from server is transfered to client in a sepatate thread
+			// Response from server is transfered to client in a separate thread
 			DirectProxyResponse pr = new DirectProxyResponse(serverSocket.getInputStream(),
 				m_clientSocket.getOutputStream());
 			Thread prt = new Thread(pr, "JAP - DirectProxyResponse");
 			prt.start();
 
 			LogHolder.log(LogLevel.DEBUG, LogType.NET,
-						  "C(" + m_threadNumber + ") - Headers sended, POST data may follow");
+						  "C(" + m_threadNumber + ") - Headers sent, POST data may follow");
+			
 			byte[] buff = new byte[1000];
 			int len;
+			final PushbackInputStream isPushback = new PushbackInputStream(m_inputStream, 1000);
+			String strPossibleRequest;
+			int writeLen;			
 			try
 			{
-				while ( (len = m_inputStream.read(buff)) != -1)
+				while ((len = isPushback.read(buff)) != -1)
 				{
-					if (len > 0)
+					writeLen = len;
+					if (lPostContentLength > 0)
 					{
-						outputStream.write(buff, 0, len);
+						if (len <= lPostContentLength)
+						{
+							lPostContentLength -= len;
+						}
+						else
+						{		
+							writeLen = (int)lPostContentLength;
+							LogHolder.log(LogLevel.WARNING, LogType.NET, "Overbuffered POST: " + (len - writeLen));
+							isPushback.unread(buff, writeLen, len - writeLen);
+							lPostContentLength = 0;
+						}
+					}
+					else
+					{
+						strPossibleRequest = new String(buff,0, len).toUpperCase();
+						if (strPossibleRequest.startsWith("GET") || strPossibleRequest.startsWith("POST") ||
+							strPossibleRequest.startsWith("HEAD") || strPossibleRequest.startsWith("PUT") || 
+							strPossibleRequest.startsWith("DETETE") || strPossibleRequest.startsWith("TRACE") ||
+							strPossibleRequest.startsWith("OPTIONS") || strPossibleRequest.startsWith("CONNECT"))
+						{
+							// This is a new request!
+							isPushback.unread(buff, 0, len);
+							Thread thread = new Thread(new Runnable()
+							{
+								public void run()
+								{
+									handleRequest(isPushback);
+									synchronized(m_vecThreads)
+									{
+										m_vecThreads.removeElement(Thread.currentThread());
+										m_vecThreads.notifyAll();
+									}
+								}
+							});
+							m_vecThreads.addElement(thread);
+							thread.start();
+							
+							bKeepStream = true;
+							break;
+						}
+					}
+					
+					if (writeLen > 0)
+					{
+						outputStream.write(buff, 0, writeLen);
 						outputStream.flush();
 					}
 				}
@@ -549,14 +676,30 @@ final class DirectProxyConnection implements Runnable
 			prt.join();
 			LogHolder.log(LogLevel.DEBUG, LogType.THREAD,
 						  "C(" + m_threadNumber + ") -                  ...finished!");
-
-			outputStream.close();
-			m_inputStream.close();
-			serverSocket.close();
 		}
 		catch (Exception e)
 		{
-			throw e;
+			ex = e;
+		}
+		
+		Util.closeStream(outputStream);
+		if (!bKeepStream)
+		{
+			Util.closeStream(m_inputStream);	
+		}
+		
+		try
+		{
+			serverSocket.close();
+		}
+		catch (Exception a_e)
+		{
+			// ignore;
+		}
+		
+		if (ex != null)
+		{
+			throw ex;
 		}
 	}
 
