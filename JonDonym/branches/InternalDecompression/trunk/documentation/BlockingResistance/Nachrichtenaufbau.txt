@@ -1,0 +1,15 @@
+Aufbau der Protokoll-Nachrichten:
+
+8 Bytes Header: 4 Bytes Message-Start-Identifikation (FF 00 F0 0F)
+                4 Bytes Länge der Nachricht (Netto-Inhalt, ohne Header / Trailer)
+
+xxx Bytes Nachricht (XML-Dokument)
+
+4 Bytes Trailer: Message-Ende-Identifikation (FF 00 E1 1E)
+
+
+
+
+Dies gilt nur wärend der Protokollphase beim Aufbau der Verbindung. Beim eigentlichen
+Forwarden (Transparenzmodus), werden die Pakete 1:1 weitergeschickt, d.h. es ist das
+gleiche Format, wie bei der normalen Verbindung JAP - Mixkaskade.

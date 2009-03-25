@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<jnlp spec="1.0+" version="00.01.016"
+				codebase="http://infoservice.inf.tu-dresden.de:8080/jap/"
+	  		href="http://infoservice.inf.tu-dresden.de/japDevelopment.jnlp">
+		<information>
+  		<title>JAP (Development Version)</title>
+      <vendor>The JAP-Team</vendor>
+      <homepage href="http://anon.inf.tu-dresden.de/"/>
+      <description kind="one-line" >JAP is a tool for privacy and anonymity in the Internet</description>
+      <description kind="tooltip" >A tool for anonymity in the Internet</description>
+      <description>JAP is a tool for privacy and anonymity in the Internet</description>
+      <icon href="jap.gif"/>
+		</information>
+    	<information locale="de">
+ 		    <title>JAP (Entwickler-Version)</title>
+ 	      <vendor>JAP-Team</vendor>
+      <description>JAP ist ein Programm zum Datenschutz und anonymen Surfen</description>
+ 	</information>
+<resources>
+    	<j2se version="1.2+"/>
+    	<jar href="signedJAP.jar" version="00.01.016" main="true" part="jap"/>
+    </resources>
+    <security>
+    	<all-permissions/>
+    </security>
+    <application-desc main-class="JAP"/>
+  </jnlp>
