@@ -1296,9 +1296,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	{
 		Vector list = Database.getInstance(MixCascade.class).getEntryList();
 
-		for(int i = 0; i < list.size(); i++)
+		for (int i = 0; i < list.size(); i++)
 		{
-			if(isTrusted((MixCascade)list.elementAt(i))) return true;
+			if (isTrusted((MixCascade)list.elementAt(i))) return true;
 		}
 
 		return false;

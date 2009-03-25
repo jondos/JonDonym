@@ -96,6 +96,10 @@ public class DataRetentionInformation
 	public static final int OUTPUT_TARGET_IP_ADDRESS = 512;
 	public static final int OUTPUT_TARGET_DOMAIN = 1024;
 	
+	public static final String FIELD_NAME_INPUT_SOURCE_IP_ADDRESS_MIX = "INPUT_SOURCE_IP_ADDRESS_MIX";
+	
+	public static final String FIELD_NAME_INPUT_SOURCE_IP_PORT_MIX = "INPUT_SOURCE_IP_PORT_MIX";
+	
 	private static final int[] FIELDS = 
 	{INPUT_TIME, OUTPUT_TIME, INPUT_CHANNEL_ID, OUTPUT_CHANNEL_ID, 
 		INPUT_SOURCE_IP_ADDRESS, INPUT_SOURCE_IP_PORT, OUTPUT_SOURCE_IP_ADDRESS,

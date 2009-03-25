@@ -1357,7 +1357,6 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	private void fetchCascades(final boolean bErr, final boolean a_bCheckInfoServiceUpdateStatus)
 	{
 		m_reloadCascadesButton.setEnabled(false);
-		final Component component = getRootPanel();
 		Runnable doIt = new Runnable()
 		{
 			public void run()
@@ -1846,7 +1845,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			TrustModel.getCurrentTrustModel().copyFrom(m_trustModelCopy);
 			
 			// Display a warning if the new model won't have any trusted cascades
-			if (!TrustModel.getCurrentTrustModel().hasTrustedCascades())
+			if (!TrustModel.getCurrentTrustModel().hasTrustedCascades() &&
+				!JAPController.getInstance().getCurrentMixCascade().isShownAsTrusted())
 			{
 				JAPDialog.showWarningDialog(m_filterPanel, JAPMessages.getString(MSG_EXPLAIN_NO_CASCADES));
 			}
