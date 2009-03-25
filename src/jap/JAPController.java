@@ -689,7 +689,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		LogHolder.log(LogLevel.INFO, LogType.MISC, "Initial run of JAP...");
 
-		// start update threads and prevent waining for locks by using a thread
+		// start update threads and prevent waiting for locks by using a thread
 		Database.getInstance(JAPMinVersion.class).addObserver(this);
 		Thread run = new Thread(new Runnable()
 		{
@@ -723,7 +723,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 					if (!m_paymentInstanceUpdater.isFirstUpdateDone())
 					{
-						m_paymentInstanceUpdater.update();
+						m_paymentInstanceUpdater.updateAsync();
 					}
 					if (!m_MixCascadeUpdater.isFirstUpdateDone())
 					{
@@ -5234,18 +5234,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 	public void connectionEstablished(AnonServerDescription a_serverDescription)
 	{
-		Thread run = new Thread(new Runnable()
+		if (!JAPModel.isInfoServiceDisabled())
 		{
-			public void run()
-			{
-				if (!JAPModel.isInfoServiceDisabled())
-				{
-					m_feedback.update();
-				}
-			}
-		});
-		run.setDaemon(true);
-		run.start();
+			m_feedback.updateAsync();
+		}
 
 		synchronized (m_anonServiceListener)
 		{
@@ -5260,7 +5252,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		transferedBytes(0, IProxyListener.PROTOCOL_WWW);
 		transferedBytes(0, IProxyListener.PROTOCOL_OTHER);
 		
-		if(isPortableMode() && m_Model.getStartPortableFirefox())
+		if (isPortableMode() && m_Model.getStartPortableFirefox())
 		{
 			if(!m_firstPortableFFStart && AbstractOS.getInstance().isDefaultURLAvailable())
 			{

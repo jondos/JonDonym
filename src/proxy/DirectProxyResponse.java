@@ -83,7 +83,10 @@ final class DirectProxyResponse implements Runnable
 			{
 				if (len > 0)
 				{
-					LogHolder.log(LogLevel.DEBUG, LogType.NET, "R(" + m_threadNumber + ") - "+ new String(buff,0,len));
+					if (LogHolder.isLogged(LogLevel.DEBUG, LogType.NET))
+					{
+						LogHolder.log(LogLevel.DEBUG, LogType.NET, "R(" + m_threadNumber + ") - "+ new String(buff,0,len));
+					}
 					m_outputStream.write(buff, 0, len);
 					m_outputStream.flush();
 				}

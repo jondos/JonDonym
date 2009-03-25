@@ -71,7 +71,7 @@ public class DataRetentionDialog
 		show(component, a_cascade, -1);
 	}
 
-	public static void show(Component component, MixCascade a_cascade, int a_mixID)
+	public static void show(Component component, MixCascade a_cascade, int a_mixPosition)
 	{
 		String strMessage = "";
 		JAPDialog.LinkedInformationAdapter adapter = null;
@@ -84,11 +84,11 @@ public class DataRetentionDialog
 		boolean bDataAboutRequestedPages = false;
 		XMLDuration duration;
 		
-		if (a_mixID >= 0)
+		if (a_mixPosition >= 0)
 		{
-			if (a_cascade != null && a_cascade.getMixInfo(a_mixID) != null)
+			if (a_cascade != null && a_cascade.getMixInfo(a_mixPosition) != null)
 			{
-				drInfo = a_cascade.getMixInfo(a_mixID).getDataRetentionInformation();
+				drInfo = a_cascade.getMixInfo(a_mixPosition).getDataRetentionInformation();
 			}
 		}
 		else if (a_cascade != null)
@@ -124,7 +124,7 @@ public class DataRetentionDialog
 		{
 			// store first mix info for later usage
 			drInfoFirstMix = a_cascade.getMixInfo(0).getDataRetentionInformation();
-			if (a_mixID < 0 && drInfo.isLogged(DataRetentionInformation.NOTHING))
+			if (a_mixPosition < 0 && drInfo.isLogged(DataRetentionInformation.NOTHING))
 			{
 				// it seems that there are no common log entries; investigate  the first Mix only!
 				if (drInfoFirstMix != null)
@@ -140,7 +140,7 @@ public class DataRetentionDialog
 			drInfoLastMix = a_cascade.getMixInfo(a_cascade.getNumberOfMixes() - 1).getDataRetentionInformation();
 		}
 		
-		if (a_mixID < 0 && (drInfoFirstMix == null || drInfoFirstMix.isLogged(DataRetentionInformation.NOTHING)))
+		if (a_mixPosition < 0 && (drInfoFirstMix == null || drInfoFirstMix.isLogged(DataRetentionInformation.NOTHING)))
 		{
 			// nothing is logged!!
 			strMessage += JAPMessages.getString(MSG_NO_LOGS, "<i>" + a_cascade.getName() + "</i>");
@@ -151,20 +151,20 @@ public class DataRetentionDialog
 			{
 				strMessage = JAPMessages.getString(MSG_ENTRY_MIX_STORES, "<i>" + a_cascade.getName() + "</i>");
 			}
-			else if (a_mixID < 0)
+			else if (a_mixPosition < 0)
 			{
 				strMessage = JAPMessages.getString(MSG_CASCADE_STORES, "<i>" + a_cascade.getName() + "</i>");
 			}
 			else
 			{	
 				String strOperator = "unknown";
-				if (a_cascade.getMixInfo(a_mixID).getServiceOperator() != null)
+				if (a_cascade.getMixInfo(a_mixPosition).getServiceOperator() != null)
 				{
-					strOperator = a_cascade.getMixInfo(a_mixID).getServiceOperator().getOrganization();
+					strOperator = a_cascade.getMixInfo(a_mixPosition).getServiceOperator().getOrganization();
 				}
 				
 				strMessage = JAPMessages.getString(MSG_MIX_STORES, new String[]{
-						"<i>" + a_cascade.getMixInfo(a_mixID).getName() + "</i>", "<i>" + strOperator + "</i>"});
+						"<i>" + a_cascade.getMixInfo(a_mixPosition).getName() + "</i>", "<i>" + strOperator + "</i>"});
 			}
 			
 			strMessage += "<ul>";
@@ -172,23 +172,31 @@ public class DataRetentionDialog
 			{
 				if (!drInfo.isLogged(DataRetentionInformation.getLoggedElementID(i)))
 				{
-					if (a_mixID < 0) // cascade
+					if (a_mixPosition < 0) // cascade
 					{
 						// test the logs that are relevant for the first mix
 						if (drInfoFirstMix != null && (
-							i == DataRetentionInformation.INPUT_SOURCE_IP_ADDRESS ||
-							i == DataRetentionInformation.INPUT_SOURCE_IP_PORT ||
-							i == DataRetentionInformation.INPUT_TIME ||
-							i == DataRetentionInformation.OUTPUT_TIME) &&
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.INPUT_SOURCE_IP_ADDRESS ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.INPUT_SOURCE_IP_PORT ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.INPUT_TIME ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_TIME) &&
 							drInfoFirstMix.isLogged(i)) 
 						{
 							// show this element as logged
 						}
 						else if (drInfoLastMix != null && (
-								i == DataRetentionInformation.OUTPUT_SOURCE_IP_ADDRESS ||
-								i == DataRetentionInformation.OUTPUT_SOURCE_IP_PORT ||
-								i == DataRetentionInformation.OUTPUT_TARGET_IP_ADDRESS ||
-								i == DataRetentionInformation.OUTPUT_TARGET_DOMAIN) &&
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_SOURCE_IP_ADDRESS ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_SOURCE_IP_PORT ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_TARGET_IP_ADDRESS ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_TARGET_DOMAIN) &&
 								drInfoLastMix.isLogged(i))
 						{
 							// show this element as logged
@@ -203,8 +211,44 @@ public class DataRetentionDialog
 						continue;
 					}
 				}
+				else if (a_mixPosition >= 0 && a_cascade.getNumberOfOperatorsShown() > 1)
+				{
+					// test the logs that are relevant for this mix
+					if (a_mixPosition == 0 && (
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_SOURCE_IP_ADDRESS ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_SOURCE_IP_PORT ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_TARGET_IP_ADDRESS ||
+							DataRetentionInformation.getLoggedElementID(i) == 
+								DataRetentionInformation.OUTPUT_TARGET_DOMAIN))
+					{
+						// this Mix cannot log this element
+						continue;
+					}
+					else if (a_mixPosition >= 0)
+					{
+						if (DataRetentionInformation.getLoggedElementID(i) == 
+							DataRetentionInformation.INPUT_SOURCE_IP_ADDRESS)
+						{
+							strMessage += "<li>" + JAPMessages.getString(
+									DataRetentionInformation.class.getName() + "_" + 
+								DataRetentionInformation.FIELD_NAME_INPUT_SOURCE_IP_ADDRESS_MIX) + "</li>";
+							continue;
+						}
+						else if (DataRetentionInformation.getLoggedElementID(i) == 
+							DataRetentionInformation.INPUT_SOURCE_IP_PORT)
+						{
+							strMessage += "<li>" + JAPMessages.getString(
+									DataRetentionInformation.class.getName() + "_" + 
+									DataRetentionInformation.FIELD_NAME_INPUT_SOURCE_IP_PORT_MIX) + "</li>";
+							continue;
+						}
+					}
+				}
 			
-				strMessage += "<li>" + JAPMessages.getString(ClassUtil.getClassNameStatic() + "_" +
+				strMessage += "<li>" + JAPMessages.getString(DataRetentionInformation.class.getName() + "_" +
 						(DataRetentionInformation.getLoggedElementName(i))) + "</li>";
 			}
 			
