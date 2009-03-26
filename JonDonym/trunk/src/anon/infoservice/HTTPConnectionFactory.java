@@ -219,7 +219,7 @@ public class HTTPConnectionFactory
 	 */
 	public synchronized HTTPConnection createHTTPConnection(ListenerInterface target)
 	{
-		return createHTTPConnection(target, HTTP_ENCODING_PLAIN, true);
+		return createHTTPConnection(target, HTTP_ENCODING_PLAIN, true, null);
 	}
 
 	/**
@@ -235,8 +235,23 @@ public class HTTPConnectionFactory
 	 * @return A new instance of HTTPConnection with a connection to the specified target and the
 	 *         current proxy settings.
 	 */
+	
 	public synchronized HTTPConnection createHTTPConnection(ListenerInterface target,
 			int a_encoding, boolean a_bGet)
+	{
+		return createHTTPConnection(target, a_encoding, a_bGet, null);
+	}
+	
+	/**
+	 * 
+	 * @param target
+	 * @param a_encoding
+	 * @param a_bGet
+	 * @param a_vecNVPairHeaderReplacements you may add some HTTPClient.NVPair headers
+	 * @return
+	 */
+	public synchronized HTTPConnection createHTTPConnection(ListenerInterface target,
+			int a_encoding, boolean a_bGet, Vector a_vecNVPairHeaderReplacements)
 	{
 		HTTPConnection newConnection = null;
 		synchronized (this)
@@ -264,7 +279,6 @@ public class HTTPConnectionFactory
 							 */
 							if (bAlreadyTried)
 							{
-
 								// password seems to be bad; request new password
 								if (m_proxyInterface instanceof ProxyInterface)
 								{
@@ -296,6 +310,17 @@ public class HTTPConnectionFactory
 		/* set some header infos */
 		replaceHeader(newConnection, new NVPair("Cache-Control", "no-cache"));
 		replaceHeader(newConnection, new NVPair("Pragma", "no-cache"));
+		if (a_vecNVPairHeaderReplacements != null)
+		{
+			synchronized (a_vecNVPairHeaderReplacements)
+			{
+				for (int i = 0; i < a_vecNVPairHeaderReplacements.size(); i++)
+				{
+					replaceHeader(newConnection, (NVPair)a_vecNVPairHeaderReplacements.elementAt(i));
+				}
+			}
+		}
+		
 		if (a_encoding != HTTP_ENCODING_PLAIN)
 		{
 			if ((a_encoding & HTTP_ENCODING_ZLIB) > 0)
@@ -340,7 +365,7 @@ public class HTTPConnectionFactory
 	public synchronized HTTPConnection createHTTPConnection(ListenerInterface target,
 			ImmutableProxyInterface a_proxySettings)
 	{
-		return createHTTPConnection(target, a_proxySettings, HTTP_ENCODING_PLAIN, true);
+		return createHTTPConnection(target, a_proxySettings, HTTP_ENCODING_PLAIN, true, null);
 	}
 
 	/**
@@ -361,7 +386,7 @@ public class HTTPConnectionFactory
 	 *         current proxy settings.
 	 */
 	public synchronized HTTPConnection createHTTPConnection(ListenerInterface target,
-			ImmutableProxyInterface a_proxySettings, int a_encoding, boolean a_bGet)
+			ImmutableProxyInterface a_proxySettings, int a_encoding, boolean a_bGet, Vector a_vecNVPairHeaderReplacements)
 	{
 		/*
 		 * tricky: change the global proxy settings, create the connection and
@@ -370,7 +395,7 @@ public class HTTPConnectionFactory
 		 */
 		ImmutableProxyInterface oldProxySettings = m_proxyInterface;
 		setNewProxySettings(a_proxySettings, m_bUseAuth);
-		HTTPConnection createdConnection = createHTTPConnection(target, a_encoding, a_bGet);
+		HTTPConnection createdConnection = createHTTPConnection(target, a_encoding, a_bGet, a_vecNVPairHeaderReplacements);
 		setNewProxySettings(oldProxySettings, m_bUseAuth);
 		return createdConnection;
 	}

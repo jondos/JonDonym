@@ -39,6 +39,7 @@ import java.util.Vector;
 import anon.infoservice.Constants;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.HttpResponseStructure;
+import anon.infoservice.InfoServiceDBEntry;
 import anon.util.TimedOutputStream;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -249,6 +250,11 @@ final public class InfoServiceConnection implements Runnable
 						}
 					}
 
+					if (currentHeaderFieldName.toLowerCase().startsWith(InfoServiceDBEntry.HEADER_STATISTICS.toLowerCase()))
+					{
+						ISRuntimeStatistics.putClientVersion(currentHeaderFieldName, currentHeaderFieldValue);
+					}
+					
 					if ((currentHeaderFieldName.equalsIgnoreCase("Accept-Encoding") &&
 						(internalRequestMethodCode == Constants.REQUEST_METHOD_GET ||
 						 internalRequestMethodCode == Constants.REQUEST_METHOD_HEAD)) ||

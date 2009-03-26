@@ -61,7 +61,7 @@ public class StatusStatisticsEntry {
   
   /**
    * This is the number of updates of the statistics in this statistics period. We need it for
-   * calculting the average number of users. So we count only updates, where the number of
+   * calculating the average number of users. So we count only updates, where the number of
    * active users is not -1.
    */
   private int m_userStatisticsUpdates;
