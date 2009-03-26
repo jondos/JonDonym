@@ -25,12 +25,25 @@ public class DSAKeyPool
 	private int m_certainty;
 	private int m_keyLength;
 	
-	public DSAKeyPool()
-	{		
+	public DSAKeyPool(int a_poolsize)
+	{
 		m_keys = new Vector();
-		m_poolSize = 2;
+		if (a_poolsize <= 0)
+		{
+			m_poolSize = 1;
+		}
+		else if (a_poolsize > 1000)
+		{
+			m_poolSize = 1000;
+		}
+		m_poolSize = a_poolsize;
 		m_certainty = 80;
 		m_keyLength = DSAKeyPair.KEY_LENGTH_1024;
+	}
+	
+	public DSAKeyPool()
+	{		
+		this(1);
 	}
 	
 	public void start()
