@@ -817,7 +817,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	
 			properties = new Vector();
 			properties.addElement("os.name");
-			properties.addElement("os.version");
+			//properties.addElement("os.version");
 			addPropertyHeader(properties, headers);
 			
 			addPropertyHeader("anonlib.version", AnonService.ANONLIB_VERSION, headers);
@@ -857,6 +857,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		}
 		
 		String propertyName = null;
+		String propertyValue;
 		String newPropertyName;
 		int indexCurrent;
 		
@@ -873,7 +874,12 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				
 				try
 				{
-					strVersion += System.getProperty(newPropertyName);
+					propertyValue = System.getProperty(newPropertyName);
+					if (propertyValue != null && 
+						!propertyValue.trim().equals("Sun Microsystems Inc.")) // ignore default vendor
+					{
+						strVersion += propertyValue.trim();
+					}
 				}
 				catch (Exception a_e)
 				{

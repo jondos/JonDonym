@@ -293,6 +293,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	
 	private JCheckBox m_cbxSocks5;
 	private JCheckBox m_cbxDataRetention;
+	private JCheckBox m_cbxFreeOfCharge;
 	
 	//private ButtonGroup m_filterPaymentGroup;
 	private ButtonGroup m_filterCascadeGroup;
@@ -527,6 +528,12 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			if (bSelect != m_cbxDataRetention.isSelected())
 			{
 				m_cbxDataRetention.setSelected(bSelect);
+			}
+			
+			bSelect = m_trustModelCopy.getAttribute(TrustModel.PremiumAttribute.class).getTrustCondition() == TrustModel.TRUST_IF_NOT_TRUE;
+			if (bSelect != m_cbxFreeOfCharge.isSelected())
+			{
+				m_cbxFreeOfCharge.setSelected(bSelect);
 			}
 			
 			int trustCondition = m_trustModelCopy.getAttribute(TrustModel.NumberOfMixesAttribute.class).getTrustCondition();
@@ -1820,6 +1827,17 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 				trust = TrustModel.TRUST_ALWAYS;
 			}
 			m_trustModelCopy.setAttribute(TrustModel.DataRetentionAttribute.class, trust);
+			
+			
+			if (m_cbxFreeOfCharge.isSelected())
+			{
+				trust = TrustModel.TRUST_IF_NOT_TRUE;
+			}
+			else
+			{
+				trust = TrustModel.TRUST_ALWAYS;
+			}
+			m_trustModelCopy.setAttribute(TrustModel.PremiumAttribute.class, trust);
 			
 			cmd = m_filterCascadeGroup.getSelection().getActionCommand();
 			if(m_filterAtLeast2Mixes.isSelected()) value = 2;
@@ -3716,8 +3734,17 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			
 			m_cbxSocks5 = new JCheckBox(JAPMessages.getString(MSG_FILTER_SOCKS_ONLY), false);
 			m_cbxDataRetention = new JCheckBox(JAPMessages.getString(MSG_FILTER_NO_DATA_RETENTION), false);
+			if (JAPModel.getInstance().getContext().equals(JAPModel.CONTEXT_JONDONYM))
+			{
+				m_cbxFreeOfCharge = new JCheckBox(JAPMessages.getString(MSG_FILTER_NO_PAYMENT_ONLY), false);
+			}
+			else
+			{
+				m_cbxFreeOfCharge = new JCheckBox(JAPMessages.getString(MSG_FILTER_BUSINESS_ONLY), false);
+			}
 			p.add(m_cbxSocks5);
 			p.add(m_cbxDataRetention);
+			p.add(m_cbxFreeOfCharge);
 			
 			c.gridx += 2;
 			c.gridwidth = 1;

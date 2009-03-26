@@ -372,9 +372,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	};
 	
 	
-	public static class QualityAttribute extends TrustAttribute
+	public static class PremiumAttribute extends TrustAttribute
 	{
-		public QualityAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
+		public PremiumAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
 		{
 			super(a_trustCondition, a_conditionValue, a_bIgnoreNoDataAvailable);
 		}
@@ -684,14 +684,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		ms_trustModels.addElement(model);
 		
 		model = new TrustModel(MSG_SERVICES_BUSINESS, 0);
-		model.setAttribute(QualityAttribute.class, TRUST_IF_NOT_TRUE); // this might be altered when we have hybrid services...
+		model.setAttribute(PremiumAttribute.class, TRUST_IF_NOT_TRUE); // this might be altered when we have hybrid services...
 		model.setAttribute(ContextAttribute.class, TRUST_IF_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50), true);
 		CONTEXT_MODEL_BUSINESS = model;
 
 		model = new TrustModel(MSG_SERVICES_PREMIUM_PRIVATE, 2);
-		model.setAttribute(QualityAttribute.class, TRUST_IF_TRUE);
+		model.setAttribute(PremiumAttribute.class, TRUST_IF_TRUE);
 		model.setAttribute(ContextAttribute.class, TRUST_IF_NOT_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100), true);
@@ -699,7 +699,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		CONTEXT_MODEL_PREMIUM_PRIVATE = model;
 
 		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2);
-		model.setAttribute(QualityAttribute.class, TRUST_IF_TRUE);
+		model.setAttribute(PremiumAttribute.class, TRUST_IF_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100), true);
 		model.setAttribute(NumberOfMixesAttribute.class, TRUST_IF_AT_LEAST, 3);
@@ -708,7 +708,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		ms_trustModels.addElement(model);
 
 		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);
-		model.setAttribute(QualityAttribute.class, TRUST_IF_NOT_TRUE);
+		model.setAttribute(PremiumAttribute.class, TRUST_IF_NOT_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
 		CONTEXT_MODEL_FREE = model;
@@ -1278,7 +1278,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 
 	public boolean isPaymentForced()
 	{
-		TrustAttribute attr = getAttribute(QualityAttribute.class);
+		TrustAttribute attr = getAttribute(PremiumAttribute.class);
 
 		return (attr == null) ? false : (attr.getTrustCondition() == TRUST_IF_TRUE);
 	}
