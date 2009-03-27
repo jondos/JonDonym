@@ -119,6 +119,14 @@ final class ISRuntimeStatistics
 			return;
 		}
 		a_property = a_property.toLowerCase();
+		if (a_value.endsWith("Sun Microsystems Inc."))
+		{
+			a_value = a_value.substring(0, a_value.lastIndexOf("Sun Microsystems Inc.")).trim();
+		}
+		if (a_value.endsWith("/"))
+		{
+			a_value = a_value.substring(0, a_value.length() - 1).trim();
+		}
 		
 		synchronized(a_hashtable)
 		{	

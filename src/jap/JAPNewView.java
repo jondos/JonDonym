@@ -431,11 +431,16 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				}
 
 				Enumeration entries = vecVersions.elements();
-				JavaVersionDBEntry versionEntry = null;
-				if (!JAPController.getInstance().hasPortableJava() &&
-					JAPModel.getInstance().isReminderForJavaUpdateActivated())
+				JavaVersionDBEntry versionEntry;
+				if (!JAPController.getInstance().hasPortableJava() && (versionEntry = JavaVersionDBEntry.getNewJavaVersion()) != null &&
+					(versionEntry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated()))
 				{
-					versionEntry = JavaVersionDBEntry.getNewJavaVersion();
+					//versionEntry = JavaVersionDBEntry.getNewJavaVersion();
+					// ignore
+				}
+				else
+				{
+					versionEntry = null;
 				}
 
 				while (entries.hasMoreElements())
@@ -2264,7 +2269,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				final JavaVersionDBEntry entry = (JavaVersionDBEntry) message.getMessageData();
 				if (JavaVersionDBEntry.isJavaTooOld(entry))
 				{
-					if (JAPModel.getInstance().isReminderForJavaUpdateActivated())
+					if (entry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated())
 					{
 						synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
 						{
@@ -2278,7 +2283,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						}
 					}
 
-					if (JAPModel.getInstance().isReminderForJavaUpdateActivated() &&
+					if ((entry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated()) &&
 						!JAPController.getInstance().isConfigAssistantShown())
 					{
 						// do it as thread as otherwise this would block the database
@@ -2286,7 +2291,11 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						{
 							public void run()
 							{
-								JAPDialog.LinkedCheckBox checkbox = new JAPDialog.LinkedCheckBox(false);
+								JAPDialog.LinkedCheckBox checkbox = null;
+								if (!entry.isUpdateForced())
+								{
+									checkbox = new JAPDialog.LinkedCheckBox(false);
+								}
 								if (JAPDialog.showYesNoDialog(JAPController.getInstance().getCurrentView(),
 									JAPMessages.getString(MSG_OLD_JAVA_HINT,
 									new Object[]
@@ -2295,7 +2304,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 								{
 									showJavaUpdateDialog(entry);
 								}
-								if (checkbox.getState())
+								if (checkbox != null && checkbox.getState())
 								{
 									JAPModel.getInstance().setReminderForJavaUpdate(false);
 								}
@@ -2817,12 +2826,13 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 			}
 			break;
 		}
-
+		
+		JavaVersionDBEntry dummyEntry;
 		if ( (vi != null && vi.getJapVersion() != null &&
 			  vi.getJapVersion().compareTo(JAPConstants.aktVersion) > 0) ||
 			 ( !JAPController.getInstance().hasPortableJava() &&
-			   JAPModel.getInstance().isReminderForJavaUpdateActivated() &&
-			   JavaVersionDBEntry.getNewJavaVersion() != null))
+				(dummyEntry = JavaVersionDBEntry.getNewJavaVersion()) != null &&
+				(dummyEntry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated())))
 		{
 			synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
 			{
