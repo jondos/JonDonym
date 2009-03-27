@@ -63,6 +63,7 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 	private static final String XML_ATTR_OPERATING_SYSTEM = "os";
 	private static final String XML_ELEM_VERSION = "LatestVersion";
 	private static final String XML_ATTR_VERSION_NAME = "name";
+	private static final String XML_ATTR_FORCE = "force";
 	private static final String XML_ELEM_DOWNLOAD_URL = "DownloadURL";
 	private static final String XML_ELEM_VENDOR_LONG = "VendorLongName";
 	private static final String XML_ELEM_LAST_UPDATE = "LastUpdate";
@@ -81,6 +82,7 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 	private URL m_downloadURL;
 	private String m_vendorLongName;
 	private String m_versionName;
+	private boolean m_bForce;
 
 	/**
 	 * Stores the XML representation of this DBEntry.
@@ -166,6 +168,7 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 				{
 					m_latestVersion = XMLUtil.parseValue(nodes.item(i), null);
 					m_versionName = XMLUtil.parseAttribute(nodes.item(i), XML_ATTR_VERSION_NAME, null);
+					m_bForce =  XMLUtil.parseAttribute(nodes.item(i), XML_ATTR_FORCE, false); 
 				}
 				catch (Exception a_e)
 				{
@@ -218,6 +221,11 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 		m_xmlDescription = a_xmlElement;
 	}
 
+	public boolean isUpdateForced()
+	{
+		return m_bForce;
+	}
+	
 	public static JavaVersionDBEntry getNewJavaVersion()
 	{
 		Enumeration versions = Database.getInstance(JavaVersionDBEntry.class).getEntrySnapshotAsEnumeration();
