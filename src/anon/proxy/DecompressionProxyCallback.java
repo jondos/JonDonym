@@ -44,8 +44,8 @@ import logging.LogType;
  * This class provides functionality for inflating zlib- or gzip-compressed content.
  * Due to http header replacement the JonDo may specify some content-encodings
  * which a client (i.e wget) does not support. In this case the JonDo decodes the content 
- * itself using this class. To use it's fucntionality, an object of this class must be registered 
- * in the proxycallback-framework.
+ * itself using this class. To use its functionality, an object of this class must be registered 
+ * in the Poxycallback-framework.
  * @author Simon Pecher
  */
 public class DecompressionProxyCallback implements ProxyCallback
