@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<InfoService id="(user)127.0.0.1%3A50">
+    <!--This xml structure has been created by anon.infoservice.InfoServiceDBEntry.-->
+    <!--The calling test class was anon.infoservice.test.InfoServiceDBEntryTest.-->
+    <Name>127.0.0.1:50</Name>
+    <Software>
+        <Version>unknown</Version>
+    </Software>
+    <Network>
+        <ListenerInterfaces>
+            <ListenerInterface>
+                <Type>HTTP/TCP</Type>
+                <Port>50</Port>
+                <Host>127.0.0.1</Host>
+            </ListenerInterface>
+        </ListenerInterfaces>
+    </Network>
+    <LastUpdate>1130768628795</LastUpdate>
+    <Expire>1130768628795</Expire>
+    <ForwarderList/>
+    <UserDefined/>
+</InfoService>

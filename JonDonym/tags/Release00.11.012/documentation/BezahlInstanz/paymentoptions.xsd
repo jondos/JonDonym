@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns="http://www.w3.org/1999/xhtml">
+	<xs:element name="PaymentOptions">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" name="Currency"/>
+				<xs:element maxOccurs="unbounded" name="PaymentOption">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element maxOccurs="unbounded" name="Heading">
+								<xs:complexType>
+									<xs:attribute name="lang" type="xs:string" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element maxOccurs="unbounded" name="DetailedInfo">
+								<xs:complexType>
+									<xs:attribute name="lang" type="xs:string" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element maxOccurs="unbounded" name="ExtraInfo">
+								<xs:complexType>
+									<xs:attribute name="lang" type="xs:string" use="required"/>
+									<xs:attribute name="type" type="xs:string" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element minOccurs="0" name="ImageLink"/>
+							<xs:element maxOccurs="unbounded" minOccurs="0" name="input">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="label">
+											<xs:complexType>
+												<xs:attribute name="lang" type="xs:string" use="required"/>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="ref" type="xs:string" use="required"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="name" type="xs:string" use="required"/>
+						<xs:attribute name="type" type="xs:string" use="required"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
