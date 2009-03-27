@@ -52,6 +52,7 @@ import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.IXMLEncodable;
+import anon.util.JAPMessages;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
@@ -238,6 +239,25 @@ public class TermsAndConditions implements IXMLEncodable
 		addTranslation(new Translation(translationRoot), false);
 	}
 	
+	public TermsAndConditionsTranslation initializeEmptyTranslation(String locale)
+	{
+		//TODO: should we add or not?
+		Translation t = new Translation();
+		t.setLocale(locale.trim().toLowerCase());
+		try 
+		{
+			addTranslation(t, false);
+		}
+		catch (SignatureException e) 
+		{
+		}
+		return t;
+	}
+	
+	public TermsAndConditionsTranslation initializeEmptyTranslation(Locale locale)
+	{
+		return initializeEmptyTranslation(locale.getLanguage());
+	}
 	
 	private synchronized void addTranslation(Translation t, boolean withSignatureCheck) throws SignatureException
 	{
@@ -619,6 +639,11 @@ public class TermsAndConditions implements IXMLEncodable
 			this(translationElement, true);
 		}
 		
+		private Translation()
+		{
+			
+		}
+		
 		private Translation(Element translationElement, boolean withAttributeCheck) throws XMLParseException
 		{
 			this.templateReferenceId = XMLUtil.parseAttribute(translationElement, XML_ATTR_REFERENCE_ID, "");
@@ -690,6 +715,7 @@ public class TermsAndConditions implements IXMLEncodable
 		public void setDefaultTranslation(boolean defaultTranslation)
 		{
 			this.defaultTranslation = defaultTranslation;
+			TermsAndConditions.this.defaultTl = this;
 		}
 		
 		public Element getTranslationElement()
@@ -731,7 +757,8 @@ public class TermsAndConditions implements IXMLEncodable
 		
 		public boolean equals(Object obj) 
 		{
-			if(obj == null) return false;
+			if( (obj == null) || 
+				!(obj instanceof TermsAndConditionsTranslation) ) return false;
 			return this.locale.equals(((Translation) obj).locale);
 		}
 		
@@ -776,15 +803,15 @@ public class TermsAndConditions implements IXMLEncodable
 			{
 				root.setAttribute(XML_ATTR_DEFAULT_LOCALE, "true");
 			}
-			if(!privacyPolicyUrl.equals(""))
+			if( (privacyPolicyUrl != null) && !privacyPolicyUrl.equals(""))
 			{
 				XMLUtil.createChildElementWithValue(root, XML_ELEMENT_PRIVACY_POLICY, privacyPolicyUrl);
 			}
-			if(!legalOpinionsUrl.equals(""))
+			if( (legalOpinionsUrl != null) && !legalOpinionsUrl.equals(""))
 			{
 				XMLUtil.createChildElementWithValue(root, XML_ELEMENT_LEGAL_OPINIONS, legalOpinionsUrl);
 			}
-			if(!operationalAgreementUrl.equals(""))
+			if( (operationalAgreementUrl != null) && !operationalAgreementUrl.equals(""))
 			{
 				XMLUtil.createChildElementWithValue(root, XML_ELEMENT_OPERATIONAL_AGREEMENT, operationalAgreementUrl);
 			}
@@ -817,7 +844,7 @@ public class TermsAndConditions implements IXMLEncodable
 		
 		public String toString()
 		{
-			return new Locale(locale, "").getDisplayLanguage(Locale.ENGLISH) + (defaultTranslation ? " (default)" : "");
+			return new Locale(locale, "").getDisplayLanguage(JAPMessages.getLocale()) + (defaultTranslation ? " (default)" : "");
 		}
 		
 		public Date getDate() 

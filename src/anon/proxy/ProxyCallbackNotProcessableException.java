@@ -31,15 +31,15 @@ package anon.proxy;
 /**
  * Exception for the ProxyCallback framework in case a chunk cannot be properly processed
  */
-public class ChunkNotProcessableException extends Exception 
+public class ProxyCallbackNotProcessableException extends Exception 
 {
 
-	public ChunkNotProcessableException()
+	public ProxyCallbackNotProcessableException()
 	{
 		super();
 	}
 
-	public ChunkNotProcessableException(String message)
+	public ProxyCallbackNotProcessableException(String message)
 	{
 		super(message);
 	}

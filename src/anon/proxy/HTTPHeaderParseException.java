@@ -30,7 +30,7 @@ package anon.proxy;
 
 import anon.infoservice.HttpResponseStructure;
 
-public class HTTPHeaderParseException extends ChunkNotProcessableException
+public class HTTPHeaderParseException extends ProxyCallbackNotProcessableException
 {
 	
 	private int errorCode = 0;

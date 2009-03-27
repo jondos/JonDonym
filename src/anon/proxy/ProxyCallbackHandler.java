@@ -47,32 +47,54 @@ public class ProxyCallbackHandler
 		callbacks = new Vector();
 	}
 	
-	public synchronized byte[] deliverUpstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
+	public void deliverUpstream(AnonProxyRequest anonRequest, ProxyCallbackBuffer buffer) 
+		throws ProxyCallbackNotProcessableException, ProxyCallbackDelayException
 	{
-		if(anonRequest == null)
+		int currentStatus = ProxyCallback.STATUS_PROCESSABLE;
+		ProxyCallback[] currentCallbacks = toArray();
+		if(currentCallbacks != null)
 		{
-			throw new NullPointerException("AnonProxyRequest must not be null!");
+			for (int i = 0; i < currentCallbacks.length; i++) 
+			{
+				currentStatus = currentCallbacks[i].handleUpstreamChunk(anonRequest, buffer);
+				if(currentStatus == ProxyCallback.STATUS_DELAY)
+				{
+					throw new ProxyCallbackDelayException();
+				}
+				else if(currentStatus == ProxyCallback.STATUS_FINISHED)
+				{
+					break;
+				}
+			}
 		}
-		for (Enumeration enumeration = callbacks.elements(); enumeration.hasMoreElements();) 
-		{
-			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();
-			chunk = callback.handleUpstreamChunk(anonRequest, chunk, len);
-		}
-		return chunk;
 	}
 	
-	public synchronized byte[] deliverDownstreamChunk(AnonProxyRequest anonRequest, byte[] chunk, int len) throws ChunkNotProcessableException
+	
+	public void deliverDownstream(AnonProxyRequest anonRequest, ProxyCallbackBuffer buffer) 
+		throws ProxyCallbackNotProcessableException, ProxyCallbackDelayException
 	{
 		if(anonRequest == null)
 		{
 			throw new NullPointerException("AnonProxyRequest must not be null!");
 		}
-		for (Enumeration enumeration = callbacks.elements(); enumeration.hasMoreElements();) 
+		
+		int currentStatus = ProxyCallback.STATUS_PROCESSABLE;
+		ProxyCallback[] currentCallbacks = toArray();
+		if(currentCallbacks != null)
 		{
-			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();
-			chunk = callback.handleDownstreamChunk(anonRequest, chunk, len);
+			for (int i = 0; i < currentCallbacks.length; i++) 
+			{	
+				currentStatus = currentCallbacks[i].handleDownstreamChunk(anonRequest, buffer);
+				if(currentStatus == ProxyCallback.STATUS_DELAY)
+				{
+					throw new ProxyCallbackDelayException();
+				}
+				else if(currentStatus == ProxyCallback.STATUS_FINISHED)
+				{
+					break;
+				}
+			}
 		}
-		return chunk;
 	}
 	
 	public synchronized void closeRequest(AnonProxyRequest anonRequest)
@@ -86,7 +108,17 @@ public class ProxyCallbackHandler
 			ProxyCallback callback = (ProxyCallback) enumeration.nextElement();
 			callback.closeRequest(anonRequest);
 		}
-		
+	}
+	
+	private synchronized ProxyCallback[] toArray()
+	{
+		ProxyCallback[] currentCallbacks = 
+			new ProxyCallback[callbacks.size()];
+		for (int i = 0; i < currentCallbacks.length; i++) 
+		{
+			currentCallbacks[i] = (ProxyCallback) callbacks.elementAt(i);
+		}
+		return currentCallbacks;
 	}
 	
 	public synchronized void registerProxyCallback(ProxyCallback callback)

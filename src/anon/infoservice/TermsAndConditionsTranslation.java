@@ -28,6 +28,7 @@ public interface TermsAndConditionsTranslation
 	
 	public String getLocale();
 	
+	public void setDefaultTranslation(boolean defaultTranslation);
 	public boolean isDefaultTranslation();
 	
 	public Element getTranslationElement();
