@@ -111,6 +111,15 @@ final class ISRuntimeStatistics
 	{
 		Hashtable hashProperty;
 		BigInteger count;
+		
+		// this is just a flooding protection
+		if (a_property.length() > 100 || a_value.length() > 100)
+		{
+			// do nothing
+			return;
+		}
+		a_property = a_property.toLowerCase();
+		
 		synchronized(a_hashtable)
 		{	
 			hashProperty = (Hashtable)a_hashtable.get(a_property);
@@ -126,16 +135,16 @@ final class ISRuntimeStatistics
 				hashProperty = new Hashtable();
 			}
 			
-			// this is just a flooding protection
-			if (a_property.length() > 100 || a_value.length() > 100 || hashProperty.size() > 20)
-			{
-				// do nothing
-				return;
-			}
-			
 			count = (BigInteger)hashProperty.get(a_value);
 			if (count == null)
 			{
+				// this is just a flooding protection
+				if (hashProperty.size() > 100)
+				{
+					// do nothing
+					return;
+				}
+				
 				count = a_addedValue;
 			}
 			else
@@ -223,6 +232,7 @@ final class ISRuntimeStatistics
 		BigInteger totalCounts;
 		BigInteger currentCount;
 		Vector vecValues;
+		BigInteger allStatisticsCount = BigInteger.valueOf(0);
 		
 		enumProperties = hashVersionStrings.keys();
 		while (enumProperties.hasMoreElements())
@@ -249,6 +259,7 @@ final class ISRuntimeStatistics
 				vecValues.insertElementAt(strValue, i);
 				totalCounts = totalCounts.add(currentCount);
 			}
+			allStatisticsCount = allStatisticsCount.add(totalCounts);
 			
 			enumValues = vecValues.elements();
 			while (enumValues.hasMoreElements())
@@ -256,16 +267,19 @@ final class ISRuntimeStatistics
 				strValue = (String)enumValues.nextElement();
 				currentCount = (BigInteger)hashValue.get(strValue);
 				currentCount = currentCount.multiply(BigInteger.valueOf(1000));
-				
-				
-				sb.append(strValue + " (" + currentCount.divide(totalCounts).doubleValue() / 10.0 + "%)");
-				
-				if (enumValues.hasMoreElements())
+				currentCount = currentCount.divide(totalCounts);
+				//if (currentCount.intValue() > 0)
 				{
-					sb.append(", ");
+					sb.append(strValue + " (" + currentCount.doubleValue() / 10.0 + "%)");
+					
+					if (enumValues.hasMoreElements())
+					{
+						sb.append(", ");
+					}
 				}
 			}
 		}
+		sb.append("</td></tr><tr><td>statistics total: </td><td>" + allStatisticsCount.toString());
 		
 		sb.append("</td></tr><tr><td><br></td><td>");
 		sb.append("</td></tr><tr><td>Total Memory: </td><td>");
