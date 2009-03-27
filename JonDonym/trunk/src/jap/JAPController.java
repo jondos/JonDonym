@@ -3393,6 +3393,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					
 					m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 					m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());	
+					m_proxyAnon.setHTTPDecompressionEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 					
 					if (!JAPModel.isInfoServiceDisabled())
 					{
@@ -4986,7 +4987,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						{
 							m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 							m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-							
+							m_proxyAnon.setHTTPDecompressionEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
 						}
 					}
 				}

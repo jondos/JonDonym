@@ -74,11 +74,13 @@ public final class AnonProxyRequest implements Runnable
 	private Object m_syncObject;
 	
 	private ProxyCallbackHandler m_callbackHandler = null;
-
-	/*AnonProxyRequest(AnonProxy proxy, Socket clientSocket, Object a_syncObject) throws IOException
-	{
-		this(proxy, clientSocket, a_syncObject, null);
-	}*/
+	
+	/* indicates that the JonDo has to perform the contentEncoding
+	 * itself. May happen if, due to the header replacement, the JonDo
+	 * specifies content encodings which the client does not support.
+	 */
+	private String[] contentEncodings;
+	private boolean internalEncodingRequired = false;
 	
 	AnonProxyRequest(AnonProxy proxy, Socket clientSocket, Object a_syncObject, ProxyCallbackHandler callbackHandler) throws IOException
 	{
@@ -101,7 +103,7 @@ public final class AnonProxyRequest implements Runnable
 	{
 		return ms_nrOfRequests;
 	}
-
+	
 	public void run()
 	{
 		ms_nrOfRequests++;
@@ -242,7 +244,7 @@ public final class AnonProxyRequest implements Runnable
 			aktPos = 1;
 		}
 		byte[] buff = null;
-		byte[] dsChunk = null;
+		ProxyCallbackBuffer pcBuffer = null;
 		try
 		{
 			m_InChannel = newChannel.getInputStream();
@@ -285,20 +287,19 @@ public final class AnonProxyRequest implements Runnable
 				{
 					if(m_callbackHandler != null)
 					{
-						dsChunk = m_callbackHandler.deliverUpstreamChunk(this, buff, len);
-						if(dsChunk == null)
+						pcBuffer =
+							new ProxyCallbackBuffer(buff, 0, len);
+						try 
+						{
+							m_callbackHandler.deliverUpstream(this, pcBuffer);
+						} 
+						catch (ProxyCallbackDelayException e) 
 						{
 							aktPos = 0;
 							continue;
 						}
-						if(dsChunk != buff)
-						{
-							m_OutChannel.write(dsChunk);
-						}
-						else
-						{
-							m_OutChannel.write(buff, 0, len );
-						}
+						m_OutChannel.write(pcBuffer.getChunk(), 0, 
+								pcBuffer.getPayloadLength());
 					}
 					else
 					{
@@ -322,7 +323,7 @@ public final class AnonProxyRequest implements Runnable
 						/*callback processing has most likely caused this exception
 						 * and needs another handling.
 						 */
-						sendRemainingBytesRecursion(dsChunk, e.getBytesSent(), m_OutChannel);
+						sendRemainingBytesRecursion(pcBuffer, e.getBytesSent(), m_OutChannel);
 						//Postcondition: aktPos is always 0, because we sent the whole chunk away; 
 						aktPos = 0;
 					}
@@ -345,7 +346,7 @@ public final class AnonProxyRequest implements Runnable
 		{
 			LogHolder.log(LogLevel.DEBUG,LogType.NET,"Exception in AnonProxyRequest - upstream loop.", e );
 		}
-		catch ( ChunkNotProcessableException cnpe)
+		catch ( ProxyCallbackNotProcessableException cnpe)
 		{
 			try 
 			{
@@ -360,20 +361,21 @@ public final class AnonProxyRequest implements Runnable
 		m_Proxy.decNumChannels();
 	}
 
-	private static void sendRemainingBytesRecursion(byte[] overfullBuffer, 
+	private static void sendRemainingBytesRecursion(ProxyCallbackBuffer pcBuffer, 
 													int sentBytes, 
 													OutputStream outputStream) throws IOException
 	{
-		byte[] tempBuff = new byte[overfullBuffer.length - sentBytes];
-		System.arraycopy(overfullBuffer, sentBytes, tempBuff, 0, tempBuff.length);
-		System.arraycopy(tempBuff, 0, overfullBuffer, 0, tempBuff.length);
+		byte[] tempBuff = new byte[pcBuffer.getPayloadLength() - sentBytes];
+		System.arraycopy(pcBuffer.getChunk(), sentBytes, tempBuff, 0, tempBuff.length);
+		System.arraycopy(tempBuff, 0, pcBuffer.getChunk(), 0, tempBuff.length);
 		try
 		{
 			outputStream.write(tempBuff);
 		}
 		catch(TooMuchDataForPacketException e)
 		{
-			sendRemainingBytesRecursion(tempBuff, e.getBytesSent(), outputStream);
+			pcBuffer.setChunk(tempBuff);
+			sendRemainingBytesRecursion(pcBuffer, e.getBytesSent(), outputStream);
 		}
 	}
 	
@@ -421,6 +423,26 @@ public final class AnonProxyRequest implements Runnable
 		}
 	}
 
+	public boolean isInternalEncodingRequired() 
+	{
+		return internalEncodingRequired;
+	}
+
+	public void setInternalEncodingRequired(boolean internalEncodingRequired) 
+	{
+		this.internalEncodingRequired = internalEncodingRequired;
+	}
+
+	public String[] getContentEncodings() 
+	{
+		return contentEncodings;
+	}
+
+	public void setContentEncodings(String[] contentEncodings) 
+	{
+		this.contentEncodings = contentEncodings;
+	}
+
 	final class Response implements Runnable
 	{
 		Response()
@@ -434,7 +456,7 @@ public final class AnonProxyRequest implements Runnable
 			
 			try 
 			{	
-				
+				ProxyCallbackBuffer pcBuffer = null;
 mainLoop:		do
 				{
 					len = m_InChannel.read(buff, 0, CHUNK_SIZE);
@@ -449,19 +471,35 @@ mainLoop:		do
 						{
 							if(m_callbackHandler != null)
 							{
-								byte[] dsChunk = m_callbackHandler.deliverDownstreamChunk(AnonProxyRequest.this, buff, len);
-								if(dsChunk == null)
+								//  strange looking but tests if a 
+								//  a proxy callback correctly
+								//  processes chunk offsets
+								//  byte[] nchunk = new byte[len+10];
+//								for (int i = 0; i < 10; i++) 
+//								{
+//									nchunk[i] = (byte)'e';
+//								}
+//								System.arraycopy(buff, 0, nchunk, 10, len);
+//								pcBuffer = new ProxyCallbackBuffer(nchunk, 10, len+10);
+								
+								pcBuffer = new ProxyCallbackBuffer(buff, 0, len);
+								try 
+								{
+									m_callbackHandler.deliverDownstream(AnonProxyRequest.this, pcBuffer);
+								} 
+								catch (ProxyCallbackDelayException e) 
 								{
 									continue mainLoop;
 								}
-								if(dsChunk != buff)
+								m_OutSocket.write(pcBuffer.getChunk(), 0, pcBuffer.getPayloadLength());
+								if(pcBuffer.getStatus() == ProxyCallback.STATUS_FINISHED)
 								{
-									m_OutSocket.write(dsChunk);
+									break mainLoop;
 								}
-								else
-								{
-									m_OutSocket.write(buff, 0, len);
-								}
+								//belongs to the above mentioned offset test
+//								byte[] nnchunk = new byte[pcBuffer.getPayloadLength()-10];
+//								System.arraycopy(pcBuffer.getChunk(), 10, nnchunk, 0, pcBuffer.getPayloadLength()-10);
+//								m_OutSocket.write(nnchunk, 0, pcBuffer.getPayloadLength()-10);
 							}
 							else
 							{
@@ -490,7 +528,7 @@ mainLoop:		do
 			{
 				LogHolder.log(LogLevel.ERR, LogType.NET, e);
 			}
-			catch (ChunkNotProcessableException cnpe)
+			catch (ProxyCallbackNotProcessableException cnpe)
 			{
 				LogHolder.log(LogLevel.ERR, LogType.NET, cnpe);
 				try 

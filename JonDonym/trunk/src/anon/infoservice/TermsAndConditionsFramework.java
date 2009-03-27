@@ -250,6 +250,15 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 					if( (currentUrlElement != null) && 
 						(replaceValues[i] != null) )
 					{
+						//a workaround for the setTextContent which replaces an already existing TextNode.
+						if(currentUrlElement.hasChildNodes())
+						{
+							NodeList nl = currentUrlElement.getChildNodes();
+							for (int k = 0; k < nl.getLength(); k++) 
+							{
+								currentUrlElement.removeChild(nl.item(k));
+							}
+						}
 						XMLUtil.setValue(currentUrlElement, replaceValues[i]);
 					}
 				}
