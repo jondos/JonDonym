@@ -274,11 +274,11 @@ final class ISRuntimeStatistics
 			{
 				strValue = (String)enumValues.nextElement();
 				currentCount = (BigInteger)hashValue.get(strValue);
-				currentCount = currentCount.multiply(BigInteger.valueOf(1000));
+				currentCount = currentCount.multiply(BigInteger.valueOf(10000));
 				currentCount = currentCount.divide(totalCounts);
 				//if (currentCount.intValue() > 0)
 				{
-					sb.append(strValue + " (" + currentCount.doubleValue() / 10.0 + "%)");
+					sb.append(strValue + " (" + currentCount.doubleValue() / 100.0 + "%)");
 					
 					if (enumValues.hasMoreElements())
 					{

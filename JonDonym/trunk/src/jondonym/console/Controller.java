@@ -502,6 +502,9 @@ public class Controller
 	        }
 	        
 	        ms_jondonymProxy = new AnonProxy(ms_socketListener, null);
+	        ms_jondonymProxy.setHTTPHeaderProcessingEnabled(true);
+	        ms_jondonymProxy.setJonDoFoxHeaderEnabled(true);
+	        ms_jondonymProxy.setHTTPDecompressionEnabled(true);
 	        ms_jondonymProxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
 	        ms_serviceContainer = new AutoSwitchedMixCascadeContainer(cascade);
 	        ms_jondonymProxy.start(ms_serviceContainer);
