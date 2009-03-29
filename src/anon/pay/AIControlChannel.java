@@ -52,7 +52,6 @@ import anon.util.XMLUtil;
 
 import java.util.Vector;
 import java.util.Enumeration;
-import anon.infoservice.IMutableProxyInterface;
 import anon.ErrorCodes;
 import anon.IServiceContainer;
 import anon.infoservice.MixCascade;
@@ -75,7 +74,6 @@ public class AIControlChannel extends XmlControlChannel
 	public static final long MAX_PREPAID_INTERVAL = 3000000; // 3MB
 	public static final long MIN_PREPAID_INTERVAL = 5000; // 500 kb
 	public static final long AI_LOGIN_TIMEOUT = 120000; // 2 minutes
-	private static final long NO_CHARGED_ACCOUNT_UPDATE = 1000 * 60 * 5; // 5 minutes
 
 	private static final int FIRST_MIX = 0;
 	private static final String SYNCH_AI_LOGIN_MIXVERSION = "00.07.20";
@@ -343,9 +341,11 @@ public AIControlChannel(Multiplexer a_multiplexer,
 
 	//if sent, process cost confirmation
     XMLEasyCC cc = request.getCC();
-    if (cc != null) {
-      try {
-		 if(PayAccountsFile.getInstance().getActiveAccount().isCharged(new Timestamp(System.currentTimeMillis())))
+    if (cc != null) 
+    {
+      try 
+      {
+		 if (PayAccountsFile.getInstance().getActiveAccount().isCharged(new Timestamp(System.currentTimeMillis())))
 		 {
 			 processCcToSign(cc);
 		 }
@@ -355,7 +355,8 @@ public AIControlChannel(Multiplexer a_multiplexer,
 					 new XMLErrorMessage(XMLErrorMessage.ERR_ACCOUNT_EMPTY));
 		 }
       }
-      catch (Exception ex1) {
+      catch (Exception ex1) 
+      {
         // the account stated by the AI does not exist or is not currently
         // active
         // @todo handle this exception
@@ -619,9 +620,7 @@ public AIControlChannel(Multiplexer a_multiplexer,
 				  for (int i = 0; i < accounts.size(); i++)
 				  {
 					  currentAccount = (PayAccount) accounts.elementAt(i);
-					  if (currentAccount.getBalance() == null ||
-						  currentAccount.getBalance().getTimestamp().getTime() <
-						  (now.getTime() - NO_CHARGED_ACCOUNT_UPDATE))
+					  if (currentAccount.getBalance() == null || currentAccount.shouldUpdateAccountInfo())
 					  {
 						  // update the account if the timestamp is quite old
 						  updateBalance(currentAccount, true);

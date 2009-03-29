@@ -38,8 +38,8 @@ import logging.LogType;
 
 public class AccountUpdater extends Updater
 {
-	private static final long UPDATE_INTERVAL_MS = 1000 * 60 * 5l; // 5 minutes
 	private boolean m_successfulUpdate = false;
+	private boolean m_bFirstUpdateDone = false;
 
 	public AccountUpdater()
 	{
@@ -47,7 +47,7 @@ public class AccountUpdater extends Updater
 		{
 			public long getUpdateInterval()
 			{
-				return UPDATE_INTERVAL_MS;
+				return PayAccount.ACCOUNT_MAX_UPDATE_INTERVAL_MS;
 			}
 		}
 		,new ObservableInfo(PayAccountsFile.getInstance())
@@ -95,19 +95,22 @@ public class AccountUpdater extends Updater
 			return;
 		}
 
-
 		Enumeration accounts = PayAccountsFile.getInstance().getAccounts();
-
 		while (accounts.hasMoreElements() && !Thread.currentThread().isInterrupted())
 		{
 			PayAccount account = (PayAccount) accounts.nextElement();
 			try
 			{
-				LogHolder.log(LogLevel.DEBUG, LogType.PAY,
-							  "Fetching statement for account: " + account.getAccountNumber());
-				if (account.fetchAccountInfo(false) != null)
+				if (account.shouldUpdateAccountInfo())
 				{
-					m_successfulUpdate = true;
+					LogHolder.log(LogLevel.DEBUG, LogType.PAY,
+								  "Fetching statement for account: " + account.getAccountNumber());
+					account.fetchAccountInfo(false);
+					if (account.getAccountInfo() != null)
+					{
+						m_successfulUpdate = true;
+						m_bFirstUpdateDone = true;
+					}
 				}
 			}
 			catch (Exception e)
@@ -125,6 +128,11 @@ public class AccountUpdater extends Updater
 		}
 	}
 
+	public boolean isFirstUpdateDone()
+	{
+		return m_bFirstUpdateDone;
+	}
+	
 	/**
 	 * wasUpdateSuccessful
 	 *

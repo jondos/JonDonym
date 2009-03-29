@@ -411,7 +411,30 @@ public class PaymentMainPanel extends FlippingPanel
 		{
 			public void mouseClicked(MouseEvent a_event)
 			{
-				if (((JLabel)a_event.getSource()).getCursor() != Cursor.getDefaultCursor())
+				String tooltip = ((JLabel)a_event.getSource()).getToolTipText();
+				if (tooltip != null && tooltip.equals(JAPMessages.getString(
+						AccountSettingsPanel.MSG_BILLING_ERROR_TOOLTIP)))
+				{
+					PayAccount account = PayAccountsFile.getInstance().getActiveAccount();
+					if (account != null)
+					{
+						String pi = "";
+						if (account.getBI() != null)
+						{
+							pi = account.getBI().getName();
+						}
+						JAPDialog.LinkedInformation adapter = new
+							JAPDialog.LinkedInformation("payment@jondos.de");
+						JAPDialog.showWarningDialog(m_view, 
+								JAPMessages.getString(AccountSettingsPanel.MSG_BILLING_ERROR_EXPLAIN, new String[]{
+										pi,
+								"" + Util.formatBytesValueWithUnit(
+										account.getCurrentCreditCalculated() - 
+										account.getCurrentCreditFromBalance()), 
+									"" + account.getAccountNumber()}), adapter);
+					}
+				}
+				else  if (((JLabel)a_event.getSource()).getCursor() != Cursor.getDefaultCursor())
 				{
 					if (((JLabel)a_event.getSource()).getForeground() == Color.blue)
 					{
@@ -477,6 +500,7 @@ public class PaymentMainPanel extends FlippingPanel
 					m_labelValidUntil.setText("");
 					m_BalanceText.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 					m_BalanceText.setToolTipText(JAPMessages.getString(MSG_TT_CREATE_ACCOUNT));
+					m_BalanceText.setIcon(null);
 					m_BalanceText.setText(JAPMessages.getString(MSG_PAYMENTNOTACTIVE));
 					m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 					m_BalanceProgressBar.setValue(0);
@@ -488,9 +512,6 @@ public class PaymentMainPanel extends FlippingPanel
 				// we got everything under control, situation normal
 				else
 				{
-					m_BalanceText.setCursor(Cursor.getDefaultCursor());
-					m_BalanceText.setToolTipText(null);
-
 					XMLBalance balance = activeAccount.getBalance();
 					Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -501,6 +522,23 @@ public class PaymentMainPanel extends FlippingPanel
 						m_BalanceText.setText(Util.formatBytesValueWithUnit(activeAccount.getCurrentCredit() * 1000));
 //							JAPUtil.MAX_FORMAT_KBYTES));
 						m_BalanceText.setForeground(m_labelValidUntil.getForeground());
+						
+						if (activeAccount.isAccountInfoUpdated() && 
+								activeAccount.getCurrentCreditCalculated() > 
+						activeAccount.getCurrentCreditFromBalance() + 40000000l)
+						{
+							m_BalanceText.setIcon(GUIUtils.loadImageIcon("warning.gif"));
+							m_BalanceText.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+							m_BalanceText.setToolTipText(JAPMessages.getString(
+									AccountSettingsPanel.MSG_BILLING_ERROR_TOOLTIP));
+						}
+						else
+						{
+							m_BalanceText.setIcon(null);
+							m_BalanceText.setCursor(Cursor.getDefaultCursor());
+							m_BalanceText.setToolTipText(null);
+						}
+						
 						m_labelValidUntil.setText(JAPUtil.formatTimestamp(balance.getFlatEnddate(), false,
 							JAPMessages.getLocale().getLanguage()));
 						//m_labelBalanceInEuros.setText(JAPUtil.formatEuroCentValue(balance.getBalance()));
@@ -538,12 +576,15 @@ public class PaymentMainPanel extends FlippingPanel
 					}
 					else
 					{
+						m_BalanceText.setIcon(null);
 						m_BalanceProgressBar.setValue(0);
 						m_BalanceProgressBar.setEnabled(false);
 
 						if (balance == null)
 						{
 							m_labelValidUntil.setText("");
+							m_BalanceText.setCursor(Cursor.getDefaultCursor());
+							m_BalanceText.setToolTipText(null);
 							m_BalanceText.setText(Util.formatBytesValueWithUnit(0));
 							m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 						}
@@ -583,7 +624,7 @@ public class PaymentMainPanel extends FlippingPanel
 									//activeAccount.getSpent() == 0 && 
 									activeAccount.getCurrentSpent() == 0 && 
 									!expired)
-							{								
+							{				
 								if (activeAccount.getTransCerts().size() > 0 &&	!activeAccount.isTransactionExpired())
 								{
 									m_BalanceText.setText(JAPMessages.getString(AccountSettingsPanel.
@@ -661,6 +702,7 @@ public class PaymentMainPanel extends FlippingPanel
 				}
 
 				m_BalanceTextSmall.setText(m_BalanceText.getText());
+				m_BalanceTextSmall.setIcon(m_BalanceText.getIcon());
 				m_BalanceTextSmall.setForeground(m_BalanceText.getForeground());
 				m_BalanceTextSmall.setToolTipText(m_BalanceText.getToolTipText());
 				m_BalanceTextSmall.setCursor(m_BalanceText.getCursor());

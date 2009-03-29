@@ -31,6 +31,7 @@ import java.util.EventListener;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.lang.reflect.InvocationTargetException;
 import javax.accessibility.Accessible;
@@ -76,6 +77,7 @@ import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import anon.crypto.AbstractX509AlternativeName;
 import anon.util.JAPMessages;
 
 import platform.AbstractOS;
@@ -592,6 +594,68 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 	}
 
+	public static class LinkedInformation extends LinkedInformationAdapter
+	{
+		private String m_message;
+		private String m_eMail;
+		private URL m_url;
+		
+		public LinkedInformation(String a_link)
+		{
+			this(a_link, null);
+		}
+		
+		public LinkedInformation(String a_link, String a_message)
+		{
+			m_message = a_message;
+			if (AbstractX509AlternativeName.isValidEMail(a_link))
+			{
+				m_eMail = a_link;
+				if (m_message == null)
+				{
+					m_message = m_eMail;
+				}
+			}
+			else 
+			{
+				try 
+				{
+					m_url = new URL(a_link);
+					if (m_message == null)
+					{
+						m_message = m_url.toString();
+					}
+				} 
+				catch (MalformedURLException e) 
+				{
+					// ignore this link
+				}
+			}
+		}
+		
+		public final int getType()
+		{
+			return TYPE_LINK;
+		}
+		
+		public final void clicked(boolean a_bState)
+		{
+			if (m_eMail != null)
+			{
+				AbstractOS.getInstance().openEMail(m_eMail);
+			}
+			else if (m_url != null)
+			{
+				AbstractOS.getInstance().openURL(m_url);
+			}
+		}
+		
+		public final String getMessage()
+		{
+			return m_message;
+		}
+	}
+	
 	/**
 	 * This class does nothing but implementing all ILinkedInformation methods.
 	 */

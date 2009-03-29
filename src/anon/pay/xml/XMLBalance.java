@@ -184,7 +184,7 @@ public class XMLBalance implements IXMLEncodable
 
 		elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Timestamp");
 		str = XMLUtil.parseValue(elem, (String)null);
-		if (m_Timestamp != null)
+		if (str != null)
 		{
 			m_Timestamp = java.sql.Timestamp.valueOf(str);
 		}
@@ -199,7 +199,7 @@ public class XMLBalance implements IXMLEncodable
 	    elem = (Element) XMLUtil.getFirstChildByName(elemRoot, "Message");
 		if (elem == null)
 		{
-			; // no message existsx for this account, that's OK
+			; // no message exists for this account, that's OK
 		}
 		else
 		{
