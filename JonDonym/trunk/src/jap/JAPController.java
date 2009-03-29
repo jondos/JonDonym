@@ -263,8 +263,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private JobQueue queueFetchAccountInfo;
 	private long m_lastBalanceUpdateMS = 0;
 	private long m_lastBalanceUpdateBytes = 0;
-	/** How many milliseconds to wait before requesting a new account statement */
-	private static final long ACCOUNT_UPDATE_INTERVAL_MS = 60000;
 
 
 	/**
@@ -706,6 +704,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					m_minVersionUpdater.start(false);
 					m_javaVersionUpdater.start(false);
 					m_messageUpdater.start(false);	
+					m_AccountUpdater.start(false);
 				}
 				else
 				{
@@ -741,9 +740,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						m_messageUpdater.updateAsync();
 					}
+					if (!m_AccountUpdater.isFirstUpdateDone())
+					{
+						m_AccountUpdater.updateAsync();
+					}
 				}
-
-				m_AccountUpdater.start(false);
 			}
 		});
 		run.setDaemon(true);
@@ -5388,7 +5389,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 					return;
 				}
 
-				if (System.currentTimeMillis() - ACCOUNT_UPDATE_INTERVAL_MS > m_lastBalanceUpdateMS ||
+				if (System.currentTimeMillis() - PayAccount.ACCOUNT_MIN_UPDATE_INTERVAL_MS >
+					m_lastBalanceUpdateMS ||
 					a_totalBytes  - (cascade.getPrepaidInterval() / 2) >
 					m_lastBalanceUpdateBytes)
 				{

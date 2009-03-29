@@ -323,6 +323,15 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		while (interfaces.size() > 0)
 		{
 			currentIndex = Math.abs(random.nextInt() % interfaces.size());
+			/*
+			if (((ListenerInterface)interfaces.elementAt(currentIndex)).getHost().equals("91.184.37.84"))
+			{
+				interfacesReturned.removeAllElements();
+				interfacesReturned.addElement(interfaces.elementAt(currentIndex));
+				System.out.println("use pi1 interface");
+				break;
+			}*/
+			
 			interfacesReturned.addElement(interfaces.elementAt(currentIndex));
 			interfaces.removeElementAt(currentIndex);
 		}

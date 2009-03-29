@@ -1008,7 +1008,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				final Vector headerContentEncoding = new Vector();
 
 				// * we need the possibility to interrupt the infoservice communication,
-				// * but also we need to know whether the operation was interupted by an
+				// * but also we need to know whether the operation was interrupted by an
 				// * external call of Thread.interrupt() or a timeout, thus it is not
 				// * enough to catch the InteruptedIOException because that Exception is
 				// * thrown in both cases, so we cannot distinguish the both -> solution

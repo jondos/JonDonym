@@ -100,6 +100,9 @@ public class PayAccount implements IXMLEncodable
 	private static final String XML_ATTR_ACTIVE = "active";
 	private static final String XML_BACKUP_DONE = "backupDone";
 
+	public static final long ACCOUNT_MIN_UPDATE_INTERVAL_MS = 60000;
+	public static final long ACCOUNT_MAX_UPDATE_INTERVAL_MS = 300000;
+	
 	private final Object SYNC_BYTES = new Object();
 
 	private static final long NEW_ACCOUNT_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7; // seven days
@@ -132,6 +135,9 @@ public class PayAccount implements IXMLEncodable
 
 	private long m_lBackupDone = 0;
 
+	private long m_lastAccountInfoUpdate = 0;
+	private boolean m_bAccountInfoUpdateRunning = false;
+	
 	private Calendar m_termsDate;
 
 	private static final long TRANSACTION_EXPIRATION = 1000 * 60 * 60 * 24 * 14; // two weeks
@@ -677,6 +683,33 @@ public class PayAccount implements IXMLEncodable
 		return 0L;
 	}*/
 
+	public long getCurrentCreditCalculated()
+	{
+		long jonDoCountedCredit;
+		
+		if (m_accountInfo == null)
+		{
+			return -1l;
+		}
+		
+		synchronized(m_accountInfo)
+		{
+			jonDoCountedCredit = (m_accountInfo.getBalance().getSpent() + 
+				 m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
+				m_accountInfo.getAllCCsTransferredBytes();
+			if (jonDoCountedCredit < 0)
+			{
+				jonDoCountedCredit = 0;
+			}
+		}
+		return jonDoCountedCredit;
+	}
+	
+	public long getCurrentCreditFromBalance()
+	{
+		return getBalance().getVolumeKBytesLeft() * 1000;
+	}
+	
 	/**
 	 * Returns the current credit (i. e. deposit - spent) as counted by the Jap
 	 * itself. It is possible that this value is outdated, so it may be a good
@@ -690,18 +723,14 @@ public class PayAccount implements IXMLEncodable
 		{
 			synchronized(m_accountInfo)
 			{
-				long jonDoCountedCredit = 
-					(m_accountInfo.getBalance().getSpent() + 
-					 m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
-					m_accountInfo.getAllCCsTransferredBytes();
-				jonDoCountedCredit /= 1000;
-				if((jonDoCountedCredit) > getBalance().getVolumeKBytesLeft())
+				long jonDoCountedCredit = getCurrentCreditCalculated() / 1000;
+				if (jonDoCountedCredit < 0 || jonDoCountedCredit > getBalance().getVolumeKBytesLeft())
 				{
 					return getBalance().getVolumeKBytesLeft();
 				}
 				else
 				{
-					return (jonDoCountedCredit < 0) ? 0l : jonDoCountedCredit;
+					return jonDoCountedCredit;
 				}
 			}
 		}
@@ -991,22 +1020,21 @@ public class PayAccount implements IXMLEncodable
 	 * PayAccountsFile.isBalanceAutoUpdateEnabled()
 	 * @throws Exception
 	 * @return XMLAccountInfo
-	 * @todo switch SSL on
-	 * @throws java.lang.SecurityException if the account is encrypted an not usable
+	 * @throws java.lang.SecurityException if the account is encrypted and therefore not usable
 	 */
-	public XMLAccountInfo fetchAccountInfo(boolean a_bForce)
+	public void fetchAccountInfo(boolean a_bForce)
 		throws SecurityException, Exception
 	{
-		return fetchAccountInfo(a_bForce, 0);
+		fetchAccountInfo(a_bForce, 0);
 	}
 	
-	public XMLAccountInfo fetchAccountInfo(boolean a_bForce,
-			int a_connectionTimeout)
+	public void fetchAccountInfo(boolean a_bForce, int a_connectionTimeout)
 		throws SecurityException, Exception
 	{
-		if (!a_bForce && !PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled())
+		if (!a_bForce && (!PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled() ||
+			m_bAccountInfoUpdateRunning))
 		{
-			return null;
+			return;
 		}
 
 		if (getPrivateKey() == null)
@@ -1019,9 +1047,10 @@ public class PayAccount implements IXMLEncodable
 		m_theBI = this.getBI();
 		if (m_theBI == null)
 		{			
-			return null;
+			return;
 		}
 		BIConnection biConn = null;
+		m_bAccountInfoUpdateRunning = true;
 		try
 		{
 			biConn = new BIConnection(m_theBI);
@@ -1047,13 +1076,74 @@ public class PayAccount implements IXMLEncodable
 			{
 				// ignore
 			}
+			m_bAccountInfoUpdateRunning = false;
 			throw a_e;
 		}
+		m_bAccountInfoUpdateRunning = false;
 
 		// save in the account object
-		setAccountInfo(info); // do not access field directly here!!
-		fireChangeEvent();
-		return info;
+		if (info != null)
+		{
+			m_lastAccountInfoUpdate = System.currentTimeMillis();
+			setAccountInfo(info); // do not access field directly here!!		
+			fireChangeEvent();
+		}
+
+		return;
+	}
+	
+	/**
+	 * Returns true if the account info/balance has been updated at least once at runtime.
+	 * @return
+	 */
+	public boolean isAccountInfoUpdated()
+	{
+		return m_lastAccountInfoUpdate > 0;
+	}
+	
+	public boolean shouldUpdateAccountInfo()
+	{
+		long lInterval;
+		
+		if (!PayAccountsFile.getInstance().isBalanceAutoUpdateEnabled() || 
+			m_bAccountInfoUpdateRunning)
+		{
+			return false;
+		}
+		
+		if (PayAccountsFile.getInstance().getActiveAccount() == this)
+		{
+			lInterval = ACCOUNT_MIN_UPDATE_INTERVAL_MS;
+		}
+		else
+		{
+			lInterval = ACCOUNT_MAX_UPDATE_INTERVAL_MS;
+		}
+		if (m_lastAccountInfoUpdate == 0)
+		{
+			// no update was done yet
+			if (m_accountInfo == null)
+			{
+				return true;
+			}
+			synchronized (m_accountInfo)
+			{
+				if (m_accountInfo.getBalance() == null || 
+						m_accountInfo.getBalance().getTimestamp() == null ||
+						m_accountInfo.getBalance().getTimestamp().getTime() > 
+					System.currentTimeMillis() ||
+						m_accountInfo.getBalance().getTimestamp().getTime() < 
+					System.currentTimeMillis() - lInterval)
+				{
+					return true;
+				}
+			}
+		}
+		else if (m_lastAccountInfoUpdate < System.currentTimeMillis() - lInterval)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/**

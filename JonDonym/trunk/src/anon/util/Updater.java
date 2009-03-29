@@ -399,6 +399,8 @@ public abstract class Updater implements Observer
 		long getUpdateInterval();
 	}
 
+	public abstract boolean isFirstUpdateDone();
+	
 	/**
 	 * Does the update and should tell if it was successful or not.
 	 */

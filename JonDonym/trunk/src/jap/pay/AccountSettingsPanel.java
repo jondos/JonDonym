@@ -87,7 +87,6 @@ import anon.client.TrustModel;
 import anon.crypto.AsymmetricCryptoKeyPair;
 import anon.crypto.DSAKeyPair;
 import anon.crypto.XMLEncryption;
-import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.MixCascade;
 import anon.pay.BIConnection;
 import anon.pay.IPaymentListener;
@@ -317,7 +316,13 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		AccountSettingsPanel.class.getName() + "_askIfNotSaved";
 	private static final String MSG_NEW_CAPTCHA_HINT =
 		AccountSettingsPanel.class.getName() + "_newCaptchaHint";
-
+	
+	private static final String MSG_BILLING_ERROR =
+		AccountSettingsPanel.class.getName() + "_billingError";
+	public static final String MSG_BILLING_ERROR_EXPLAIN =
+		AccountSettingsPanel.class.getName() + "_billingErrorExplain";
+	public static final String MSG_BILLING_ERROR_TOOLTIP =
+		AccountSettingsPanel.class.getName() + "_billingErrorClick";
 
 	public static final String MSG_SHOW_TRANSACTION_DETAILS =
 		AccountSettingsPanel.class.getName() + "_showTransactionDetails";
@@ -382,6 +387,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	private JLabel m_labelSpent;
 	private JLabel m_labelValid;
 	private JLabel m_labelVolume;
+	private JLabel m_labelVolumeWarning;
 	private JLabel m_lblInactiveMessage, m_lblNoBackupMessage;
 	private JProgressBar m_coinstack;
 	private JList m_listAccounts;
@@ -444,8 +450,17 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		 */
 		public void creditChanged(PayAccount acc)
 		{
+			if (acc != null && acc == getSelectedAccount())
+			{
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						doShowDetails(getSelectedAccount());
+					}
+				});
+			}
 		}
-
 
 		public void gotCaptcha(ICaptchaSender a_source, IImageEncodedCaptcha a_captcha)
 		{
@@ -646,7 +661,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		c.weightx = 1.0;
 		m_lblInactiveMessage = new JLabel();
 		m_lblInactiveMessage.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		m_lblInactiveMessage.setForeground(Color.red);
+		//m_lblInactiveMessage.setForeground(Color.red);
 		m_lblInactiveMessage.addMouseListener(new MouseAdapter()
 		{
 			public void mouseClicked(MouseEvent a_event)
@@ -666,7 +681,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 			}
 		});
 		m_lblNoBackupMessage.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		m_lblNoBackupMessage.setForeground(Color.red);
+		//m_lblNoBackupMessage.setForeground(Color.red);
 		rootPanel.add(m_lblNoBackupMessage, c);
 
 		c.gridy++;
@@ -800,9 +815,20 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		c.gridx++;
 		p.add(new JLabel(JAPMessages.getString(MSG_ACCOUNT_FLAT_VOLUME) + ":"), c);		
 		c.gridx++;
+		c.gridwidth = 1;
 		m_labelVolume = new JLabel();
 		m_labelVolume.addMouseListener(myActionListener);
 		p.add(m_labelVolume, c);
+		
+		c.gridx++;
+		c.gridwidth = 1;
+		m_labelVolumeWarning = new JLabel();
+		m_labelVolumeWarning.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		//m_labelVolumeWarning.setForeground(Color.red);
+		m_labelVolumeWarning.addMouseListener(myActionListener);
+		p.add(m_labelVolumeWarning, c);
+		c.gridx--;
+		c.gridwidth = 2;
 		
 
 		/*
@@ -908,7 +934,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		c.weighty = 1;
 		c.gridx = 0;
 		c.gridy++;
-		c.gridwidth = 3;
+		c.gridwidth = 4;
 		p.add(buttonsPanel, c);
 
 		return p;
@@ -1091,6 +1117,27 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 							showOpenTransaction(getSelectedAccount());
 						}
 					}
+					else if (source == m_labelVolumeWarning)
+					{
+						PayAccount account = getSelectedAccount();
+						if (account != null)
+						{
+							String pi = "";
+							if (account.getBI() != null)
+							{
+								pi = account.getBI().getName();
+							}
+							JAPDialog.LinkedInformation adapter = new
+								JAPDialog.LinkedInformation("payment@jondos.de");
+							JAPDialog.showWarningDialog(AccountSettingsPanel.this.getRootPanel(), 
+									JAPMessages.getString(MSG_BILLING_ERROR_EXPLAIN, new String[]{
+											pi,
+									"" + Util.formatBytesValueWithUnit(
+											account.getCurrentCreditCalculated() - 
+											account.getCurrentCreditFromBalance()), 
+										"" + account.getAccountNumber()}), adapter);
+						}
+					}
 					else if (source == m_labelTermsAndConditions)
 					{
 						showTermsAndConditions(getSelectedAccount());
@@ -1200,7 +1247,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	/**
 	 * doShowDetails - shows account details in the details panel
 	 */
-	private void doShowDetails(PayAccount selectedAccount)
+	private synchronized void doShowDetails(PayAccount selectedAccount)
 	{
 		if (selectedAccount == null)
 		{
@@ -1230,21 +1277,25 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		   }*/
 		if (selectedAccount.getPrivateKey() == null)
 		{
+			m_lblInactiveMessage.setIcon(GUIUtils.loadImageIcon("warning.gif"));
 			m_lblInactiveMessage.setText(JAPMessages.getString(MSG_ACCOUNT_DISABLED));
 			m_lblInactiveMessage.setToolTipText(JAPMessages.getString(MSG_TOOL_TIP_ACTIVATE));
 		}
 		else
 		{
+			m_lblInactiveMessage.setIcon(null);
 			m_lblInactiveMessage.setText("");
 			m_lblInactiveMessage.setToolTipText("");
 		}
 		if (!selectedAccount.isBackupDone())
 		{
+			m_lblNoBackupMessage.setIcon(GUIUtils.loadImageIcon("warning.gif"));
 			m_lblNoBackupMessage.setText(JAPMessages.getString(MSG_NO_BACKUP));
 			m_lblNoBackupMessage.setToolTipText(JAPMessages.getString(MSG_TOOL_TIP_NO_BACKUP));
 		}
 		else
 		{
+			m_lblNoBackupMessage.setIcon(null);
 			m_lblNoBackupMessage.setText("");
 			m_lblNoBackupMessage.setToolTipText("");
 		}
@@ -1320,6 +1371,22 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 				//m_labelEnddate.setText(JAPUtil.formatTimestamp(flatEnddate, false, curLang));
 				//if (balance.getVolumeKBytesLeft() > 0)
+				if (selectedAccount.isAccountInfoUpdated() && 
+					selectedAccount.getCurrentCreditCalculated() > 
+				selectedAccount.getCurrentCreditFromBalance() + 40000000l)
+				{
+					m_labelVolumeWarning.setIcon(GUIUtils.loadImageIcon("warning.gif"));
+					m_labelVolumeWarning.setText(JAPMessages.getString(MSG_BILLING_ERROR));
+					m_labelVolumeWarning.setToolTipText(JAPMessages.getString(MSG_BILLING_ERROR_TOOLTIP));
+				}
+				else
+				{
+					m_labelVolumeWarning.setIcon(null);
+					m_labelVolumeWarning.setText("");
+					m_labelVolumeWarning.setToolTipText(null);
+				}
+
+				
 				if (selectedAccount.getCurrentCredit() > 0)
 				{
 					m_labelVolume.setText(((expired ? "(" : "") +

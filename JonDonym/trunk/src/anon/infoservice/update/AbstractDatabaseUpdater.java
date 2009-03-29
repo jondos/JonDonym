@@ -249,7 +249,7 @@ public abstract class AbstractDatabaseUpdater extends Updater
 		return bUpdated;
 	}
 
-	public boolean isFirstUpdateDone()
+	public final boolean isFirstUpdateDone()
 	{
 		return m_bFirstUpdateDone;
 	}
