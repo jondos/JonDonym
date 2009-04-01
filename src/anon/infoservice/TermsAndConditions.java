@@ -239,6 +239,16 @@ public class TermsAndConditions implements IXMLEncodable
 		addTranslation(new Translation(translationRoot), false);
 	}
 	
+	public TermsAndConditionsTranslation removeTranslation(String locale)
+	{
+		return (TermsAndConditionsTranslation) translations.remove(locale.trim().toLowerCase());
+	}
+	
+	public TermsAndConditionsTranslation removeTranslation(Locale locale)
+	{
+		return removeTranslation(locale.getLanguage());
+	}
+	
 	public TermsAndConditionsTranslation initializeEmptyTranslation(String locale)
 	{
 		//TODO: should we add or not?
@@ -715,7 +725,10 @@ public class TermsAndConditions implements IXMLEncodable
 		public void setDefaultTranslation(boolean defaultTranslation)
 		{
 			this.defaultTranslation = defaultTranslation;
-			TermsAndConditions.this.defaultTl = this;
+			if(defaultTranslation)
+			{
+				TermsAndConditions.this.defaultTl = this;
+			}
 		}
 		
 		public Element getTranslationElement()

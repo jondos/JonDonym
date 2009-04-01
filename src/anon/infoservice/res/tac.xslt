@@ -43,7 +43,7 @@
 		<xsl:value-of select="PostalCode" /> - <xsl:value-of select="City" /><br />
 		<xsl:value-of select="OperatorCountry" /><br />
 		<br />
-		VAT: <xsl:value-of select="VAT" /><br />
+		VAT: <xsl:value-of select="Vat" /><br />
 		Fax: <xsl:value-of select="Fax" /><br />
 		E-Mail: <xsl:value-of select="EMail" /><br />
 	</xsl:template>

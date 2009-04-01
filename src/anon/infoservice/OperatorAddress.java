@@ -27,21 +27,21 @@ public class OperatorAddress
 {
 	
 	public final static String NODE_NAME_STREET = "Street";
-	public final static String NODE_NAME_POST = "PostalCode";
+	public final static String NODE_NAME_POSTALCODE = "PostalCode";
 	public final static String NODE_NAME_CITY = "City";
-	public final static String NODE_NAME_VAT = "VAT";
+	public final static String NODE_NAME_VAT = "Vat";
 	public final static String NODE_NAME_FAX = "Fax";
 	public final static String NODE_NAME_VENUE = "Venue";
 	
 	public final static String PROPERTY_NAME_STREET = "street";
-	public final static String PROPERTY_NAME_POST = "post";
+	public final static String PROPERTY_NAME_POSTALCODE = "postalCode";
 	public final static String PROPERTY_NAME_CITY = "city";
 	public final static String PROPERTY_NAME_VAT = "vat";
 	public final static String PROPERTY_NAME_FAX = "fax";
 	public final static String PROPERTY_NAME_VENUE = "venue";
 	
 	private String street;
-	private String post;
+	private String postalCode;
 	private String city;
 	private String vat;
 	private String fax;
@@ -83,7 +83,9 @@ public class OperatorAddress
 				currElement = (Element) nl.item(i);
 				try 
 				{
-					currField = this.getClass().getDeclaredField(currElement.getTagName().toLowerCase());
+					String name = currElement.getTagName();
+					name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+					currField = this.getClass().getDeclaredField(name);
 					currField.set(this, XMLUtil.parseValue(currElement, (String)null));
 				} catch (SecurityException e) {
 				} catch (NoSuchFieldException e) {
@@ -106,14 +108,14 @@ public class OperatorAddress
 		this.street = street;
 	}
 	
-	public String getPost() 
+	public String getPostalCode() 
 	{
-		return post;
+		return postalCode;
 	}
 	
-	public void setPost(String post) 
+	public void setPostalCode(String postalCode) 
 	{
-		this.post = post;
+		this.postalCode = postalCode;
 	}
 	
 	public String getCity() 
