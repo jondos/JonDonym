@@ -663,7 +663,6 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		c.fill = GridBagConstraints.HORIZONTAL;
 		p.add(panelDebugFileName, c);
 
-		final String debugLevels[] = LogLevel.STR_Levels;
 		JPanel panelDebugLevels = new JPanel();
 		m_sliderDebugLevel = new JSlider(SwingConstants.VERTICAL, 0, 7, 0);
 		m_sliderDebugLevel.addChangeListener(new ChangeListener()
@@ -671,17 +670,17 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 			public void stateChanged(ChangeEvent e)
 			{
 				Dictionary d = m_sliderDebugLevel.getLabelTable();
-				for (int i = 0; i < debugLevels.length; i++)
+				for (int i = 0; i < LogLevel.getLevelCount(); i++)
 				{
 					( (JLabel) d.get(new Integer(i))).setEnabled(i <= m_sliderDebugLevel.getValue());
 				}
 			}
 		});
 
-		Hashtable ht = new Hashtable(debugLevels.length, 1.0f);
-		for (int i = 0; i < debugLevels.length; i++)
+		Hashtable ht = new Hashtable(LogLevel.getLevelCount(), 1.0f);
+		for (int i = 0; i < LogLevel.getLevelCount(); i++)
 		{
-			ht.put(new Integer(i), new JLabel(" " + debugLevels[i]));
+			ht.put(new Integer(i), new JLabel(" " + LogLevel.getLevelName(i)));
 		}
 		m_sliderDebugLevel.setLabelTable(ht);
 		m_sliderDebugLevel.setPaintLabels(true);

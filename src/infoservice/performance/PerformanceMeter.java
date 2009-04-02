@@ -880,16 +880,17 @@ public class PerformanceMeter implements Runnable, Observer
 		    errorCode = m_proxy.start(new SimpleMixCascadeContainer(a_cascade));
 		    if (errorCode == ErrorCodes.E_CONNECT || errorCode == ErrorCodes.E_UNKNOWN)
 		    {
+		    	m_proxy.stop();
+		    	
 		    	errors++;
 		    	if (errors > maxErrors)
 		    	{
 		    		break;
 		    	}
 		    	//	try to recover from this error; maybe a temporary problem
-		    	m_proxy.stop();
 				try
 				{
-					Thread.sleep(400);
+					Thread.sleep(200);
 				}
 				catch (InterruptedException e)
 				{
@@ -901,6 +902,7 @@ public class PerformanceMeter implements Runnable, Observer
 		    {
 		    	if (errorCode != ErrorCodes.E_SUCCESS)
 		    	{
+		    		m_proxy.stop();
 		    		LogHolder.log(LogLevel.WARNING, LogType.NET, 
 		    				"Error connecting to cascade " + a_cascade.getMixNames() + ": " + errorCode);
 		    	}

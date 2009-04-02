@@ -156,7 +156,7 @@ final public class JAPDebug extends Observable implements ActionListener, Log
 			{
 				synchronized (this)
 				{
-					String str = "[" + dateFormatter.format(new Date()) + LogLevel.STR_Levels[level] + "] " +
+					String str = "[" + dateFormatter.format(new Date()) + LogLevel.getLevelName(level) + "] " +
 						txt +
 						"\n";
 					if (!m_bConsole)

@@ -33,7 +33,7 @@ import java.util.Properties;
 import java.util.Locale;
 import java.util.Observer;
 import java.util.Observable;
-import platform.signal.SignalHandler;
+//import platform.signal.SignalHandler;
 
 import infoservice.PassiveInfoServiceInitializer;
 import infoservice.performance.PerformanceMeter;
@@ -135,10 +135,11 @@ public class InfoService implements Observer
 				InfoService.ms_perfMeter = null;
 			}
 			
-			SignalHandler handler = new SignalHandler();
+			/*SignalHandler handler = new SignalHandler();
 			handler.addObserver(s1);
 			handler.addSignal("HUP");
 			handler.addSignal("TERM");
+			*/
 			
 			JAPMessages.setLocale(Locale.ENGLISH);			
 

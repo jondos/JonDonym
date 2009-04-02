@@ -267,7 +267,8 @@ final class ISRuntimeStatistics
 				vecValues.insertElementAt(strValue, i);
 				totalCounts = totalCounts.add(currentCount);
 			}
-			allStatisticsCount = allStatisticsCount.add(totalCounts);
+			
+			allStatisticsCount = allStatisticsCount.max(totalCounts);
 			
 			enumValues = vecValues.elements();
 			while (enumValues.hasMoreElements())
@@ -287,7 +288,7 @@ final class ISRuntimeStatistics
 				}
 			}
 		}
-		sb.append("</td></tr><tr><td>statistics total: </td><td>" + allStatisticsCount.toString());
+		sb.append("</td></tr><tr><td>statistics total: </td><td>" + ms_NumberFormat.format(allStatisticsCount.longValue()));
 		
 		sb.append("</td></tr><tr><td><br></td><td>");
 		sb.append("</td></tr><tr><td>Total Memory: </td><td>");
