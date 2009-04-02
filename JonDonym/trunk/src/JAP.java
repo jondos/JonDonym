@@ -71,7 +71,6 @@ import jap.JAPNewView;
 import jap.JAPSplash;
 import jap.JAPViewIconified;
 import jap.MacOSXLib;
-import logging.FileLog;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

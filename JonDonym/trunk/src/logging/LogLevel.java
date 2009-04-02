@@ -52,7 +52,7 @@ final public class LogLevel
 
 	/** Indicates level type of message, e.g. a simple debugging message to output something */
 	public final static int DEBUG = 7;
-	public final static String STR_Levels[] =
+	private final static String STR_Levels[] =
 		{
 		"Emergency",
 		"Alert    ",
@@ -63,5 +63,24 @@ final public class LogLevel
 		"Info     ",
 		"Debug    "
 	};
+	
+	/**
+	 * Returns the number of log levels. Each log level is represented by an integer
+	 * value from 0 to getLevelCount() - 1.
+	 * @return
+	 */
+	public static int getLevelCount()
+	{
+		return STR_Levels.length;
+	}
+	
+	public static String getLevelName(int a_level)
+	{
+		if (a_level < 0 || a_level > STR_Levels.length - 1)
+		{
+			return null;
+		}
+		return STR_Levels[a_level];
+	}
 
 }

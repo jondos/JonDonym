@@ -30,6 +30,9 @@ package jondonym.console;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import java.security.SignatureException;
+import java.sql.Timestamp;
+import java.util.Enumeration;
 import java.util.Observable;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -43,6 +46,7 @@ import anon.pay.BIConnection;
 import anon.pay.PayAccount;
 import anon.pay.PayAccountsFile;
 import anon.pay.PaymentInstanceDBEntry;
+import anon.pay.PayAccountsFile.AccountAlreadyExistingException;
 import anon.pay.xml.XMLGenericStrings;
 import anon.pay.xml.XMLPassivePayment;
 import anon.pay.xml.XMLTransCert;
@@ -66,12 +70,17 @@ import logging.SystemErrLog;
 import anon.client.AbstractAutoSwitchedMixCascadeContainer;
 import anon.client.DummyTrafficControlChannel;
 import anon.client.ITermsAndConditionsContainer;
+import anon.client.TrustException;
 import anon.client.TrustModel;
+import anon.client.TrustModel.NumberOfMixesAttribute;
+import anon.client.TrustModel.TrustAttribute;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.util.ClassUtil;
 import anon.util.Configuration;
+import anon.util.IMiscPasswordReader;
 import anon.util.JAPMessages;
+import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.Updater.ObservableInfo;
 
@@ -85,11 +94,24 @@ import anon.util.Updater.ObservableInfo;
  */
 public class Controller
 {
-	private static final String VERSION = "00.00.005";
+	public static final int LOG_DETAIL_LEVEL_LOWEST = LogHolder.DETAIL_LEVEL_LOWEST;
+	public static final int LOG_DETAIL_LEVEL_LOWER = LogHolder.DETAIL_LEVEL_LOWER;
+	public static final int LOG_DETAIL_LEVEL_HIGH = LogHolder.DETAIL_LEVEL_HIGH;
+	public static final int LOG_DETAIL_LEVEL_HIGHEST = LogHolder.DETAIL_LEVEL_HIGHEST;
+	
+	private static final String VERSION = "00.00.007";
 	private static final String XML_ROOT_NODE = "ConsoleController";
+	
+	private static final String XML_ATTR_LOG_DETAIL = "logDetail";
+	private static final String XML_ATTR_LOG_LEVEL = "logLevel";
 	
 	private static final String PI_JONDOS = "ECD365B98453B316B210B55546731F52DA445F40";
 	//private static final String PI_TEST = "3ADE1713CAFA6470FADCC3395415F8950C42CD2E";
+	
+	private static final long TIMEOUT_RECHARGE = 1000 * 60 * 60 * 24 * 14; // 14 days
+	
+	private static final String MSG_NO_CHARGED_ACCOUNT = Controller.class.getName() + "_noChargedAccount";
+	private static final String MSG_DEFAULT_TRUST_MODEL = Controller.class.getName() + "_trustModelDefault";
 	
 	private static InfoServiceUpdater ms_isUpdater;
 	private static MixCascadeUpdater ms_cascadeUpdater;
@@ -99,6 +121,9 @@ public class Controller
 	private static AutoSwitchedMixCascadeContainer ms_serviceContainer;
 	private static String ms_currentPIID = PI_JONDOS;
 	private static Configuration ms_configuration;
+	private static Log ms_logger;
+	private static PayAccount ms_currentlyCreatedAccount;
+	private static int m_iInitLogLevel = LogLevel.WARNING;
 	
 	private static final String DEFAULT_INFOSERVICE_NAMES[] =
 		new String[]{"880D9306B90EC8309178376B43AC26652CE52B74",
@@ -120,15 +145,14 @@ public class Controller
 		{
 			return;
 		}		
-		
-		Log templog;
+	
 		if (a_logger == null)
 		{
-			templog = new SystemErrLog();
+			ms_logger = new SystemErrLog();
 		}
 		else
 		{
-			templog = new AbstractLog4jLog()
+			ms_logger = new AbstractLog4jLog()
 			{
 				  protected Logger getLogger()
 					{
@@ -137,9 +161,9 @@ public class Controller
 			};
 		}
 		
-   		LogHolder.setLogInstance(templog);
-   		templog.setLogType(LogType.ALL);
-   		templog.setLogLevel(LogLevel.WARNING);
+   		LogHolder.setLogInstance(ms_logger);
+   		ms_logger.setLogType(LogType.ALL);
+   		ms_logger.setLogLevel(m_iInitLogLevel);
    		
    		LogHolder.log(LogLevel.ALERT, LogType.MISC, "Initialising " + ClassUtil.getClassNameStatic() + " version " + VERSION + "...");
    		
@@ -185,6 +209,14 @@ public class Controller
 		ms_cascadeUpdater = new MixCascadeUpdater(a_observableInfo);
 		ms_paymentUpdater = new PaymentInstanceUpdater(a_observableInfo);
 		
+		
+		// predefine trust model; force premium services if charged account is available, but do not use them if not
+		TrustModel modelDynamicPremium = new TrustModel(MSG_DEFAULT_TRUST_MODEL, TrustModel.FIRST_UNRESERVED_MODEL_ID);
+		modelDynamicPremium.setAttribute(ForcePremiumIfAccountAvailableAttribute.class, TrustModel.TRUST_IF_TRUE);
+		modelDynamicPremium.setAttribute(NumberOfMixesAttribute.class, TrustModel.TRUST_IF_AT_LEAST, 3);
+		TrustModel.addTrustModel(modelDynamicPremium);
+		TrustModel.setCurrentTrustModel(modelDynamicPremium);
+		
 		ms_configuration = a_configuration;
 		if (ms_configuration == null)
 		{
@@ -199,6 +231,10 @@ public class Controller
 				Element elem;
 				XMLUtil.removeComments(root);
 				XMLUtil.assertNodeName(root, XML_ROOT_NODE);
+				
+				LogHolder.setDetailLevel(XMLUtil.parseAttribute(root, XML_ATTR_LOG_DETAIL, LogHolder.getDetailLevel()));
+				ms_logger.setLogLevel(XMLUtil.parseAttribute(root, XML_ATTR_LOG_LEVEL, ms_logger.getLogLevel()));
+				
 				elem = (Element)XMLUtil.getFirstChildByName(root, PayAccountsFile.XML_ELEMENT_NAME);
 				if (elem != null)
 				{
@@ -219,6 +255,66 @@ public class Controller
 				LogHolder.log(LogLevel.WARNING, LogType.MISC, "Configuration is empty!");
 			}
 		}
+	}
+	
+	
+	/**
+	 * Returns the number of log levels. Each log level is represented by an integer
+	 * value from 0 to getLogLevelCount() - 1.
+	 * @return
+	 */
+	public static int getLogLevelCount()
+	{
+		return LogLevel.getLevelCount();
+	}
+	
+	public static String getLogLevelName(int a_level)
+	{
+		return LogLevel.getLevelName(a_level);
+	}
+	
+	public static synchronized int getLogLevel()
+	{
+		if (ms_logger != null)
+		{
+			return ms_logger.getLogLevel();
+		}
+		else
+		{
+			return m_iInitLogLevel;
+		}
+	}
+	
+	public static synchronized void setLogLevel(int a_level)
+	{
+		if (ms_logger != null)
+		{
+			ms_logger.setLogLevel(a_level);
+		}
+		else
+		{
+			m_iInitLogLevel = a_level;
+		}
+	}
+	
+	public static String getLogDetailName(int a_detail)
+	{
+		return LogHolder.getDetailLevelName(a_detail);
+	}
+	
+	public static int getLogDetail()
+	{
+		return LogHolder.getDetailLevel();
+	}
+	
+	public static int getLogDetailCount()
+	{
+		return LogHolder.getDetailLevelCount();
+	}
+	
+	public static boolean setLogDetail(int a_logDetail)
+	{
+		return LogHolder.setDetailLevel(a_logDetail);
 	}
 	
 	public static synchronized void stop()
@@ -328,7 +424,7 @@ public class Controller
 		}
 	}
 	
-	public static PayAccount createAccount() throws Exception
+	private static PayAccount createAccount() throws Exception
 	{
 		PaymentInstanceDBEntry entry = PayAccountsFile.getInstance().getBI(ms_currentPIID);
 		
@@ -339,7 +435,7 @@ public class Controller
 		return PayAccountsFile.getInstance().createAccount(entry, null);
 	}
 	
-	public static boolean activateCouponCode(String a_code, PayAccount a_account, boolean a_bPreCheck) throws Exception
+	private static boolean activateCouponCode(String a_code, PayAccount a_account, boolean a_bPreCheckOnly) throws Exception
 	{	
 		boolean bValid = true;
 		
@@ -354,7 +450,7 @@ public class Controller
 		}
 		
 		BIConnection piConn = null;
-		if (a_bPreCheck)
+		if (a_bPreCheckOnly)
 		{
 			bValid = false;
 			try
@@ -442,19 +538,254 @@ public class Controller
 	}
 	
 	/**
-	 * Tells the program to save the configuration. Note that a configuration is automatically loaded, butt will not
-	 * be save unless this method is called from outside this class.
+	 * 
+	 * @param a_code
+	 * @return
+	 * @throws Exception if the account could not be created
+	 */
+	public static synchronized boolean validateCoupon(String a_code) throws Exception
+	{
+		Exception ex = null;
+		if (ms_currentlyCreatedAccount == null)
+		{
+			try
+			{
+				ms_currentlyCreatedAccount = createAccount();
+			}
+			catch (Exception a_e)
+			{
+				ex = a_e;
+			}
+			if (ms_currentlyCreatedAccount == null || ex != null)
+			{
+				LogHolder.log(LogLevel.EMERG, LogType.PAY, 
+						"Could not create account for PI " + Controller.getActivePaymentInstanceID() + "!");
+				if (ex != null)
+				{
+					throw ex;
+				}
+				return false;
+			}
+			else
+			{
+				saveConfiguration();
+			}
+		}
+		try
+		{
+			return activateCouponCode(a_code, ms_currentlyCreatedAccount, true);
+		}
+		catch (Exception a_e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+			return false;
+		}
+	}
+	
+	/**
+	 * Returns whether the user should recharge.
+	 * @return whether the user should recharge
+	 */
+	public static synchronized boolean shouldRecharge()
+	{
+		if (getCurrentCredit(System.currentTimeMillis() + TIMEOUT_RECHARGE) == 0 ||
+			getCurrentCredit() <= 500000000)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns the current credit in bytes.
+	 * @return
+	 */
+	public static synchronized long getCurrentCredit()
+	{
+		return getCurrentCredit(System.currentTimeMillis());
+	}
+	
+	
+	private static synchronized long getCurrentCredit(long a_time)
+	{
+		long credits = 0;
+		Vector accounts = PayAccountsFile.getInstance().getAccounts(getActivePaymentInstanceID());
+		for (int i = 0; i < accounts.size(); i++)
+		{
+			if (((PayAccount)accounts.elementAt(i)).isCharged(new Timestamp(a_time)))
+			{
+				credits += ((PayAccount)accounts.elementAt(i)).getCurrentCredit() * 1000; // recalculate value to bytes
+			}
+		}
+		return credits;
+	}
+	
+	/**
+	 * Call this method always before validation of the coupon code. If it fails, 
+	 * execute validateCoupon until the user gives up or the coupon code works.
+	 * Then you may call this method again. If it succeeds, no further validation is 
+	 * needed, as the account has been activated successfully.
+	 * @param a_code
+	 * @return
+	 * @throws Exception
+	 */
+	public static synchronized boolean activateCoupon(String a_code) throws Exception
+	{
+		boolean bRet;
+	
+		if (ms_currentlyCreatedAccount == null)
+		{
+			return false;
+		}
+		
+		PayAccount account = ms_currentlyCreatedAccount;
+		ms_currentlyCreatedAccount = null;
+		bRet = activateCouponCode(a_code, account, false);
+		
+		if (bRet)
+		{
+			try
+			{
+				account.fetchAccountInfo(true);
+			}
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.EMERG, LogType.PAY, "A problem occured while updating your charged account!", a_e);
+			}
+			
+			LogHolder.log(LogLevel.NOTICE, LogType.PAY, "You have created an account with " + account.getCurrentCredit() + " kbytes!");
+			checkActiveAccount(account);
+		}
+		else
+		{
+			// this account seems to be unusable; delete it
+			PayAccountsFile.getInstance().deleteAccount(account);
+		}
+		
+		return bRet;
+	}
+	
+	private static void checkActiveAccount(PayAccount a_account)
+	{
+		if (a_account == null)
+		{
+			return;
+		}
+		PayAccount accountActive = PayAccountsFile.getInstance().getActiveAccount();
+		if (accountActive == null || accountActive.getCurrentCredit() == 0  ||
+			(!accountActive.getPIID().equals(getActivePaymentInstanceID()) && 
+				a_account.getPIID().equals(getActivePaymentInstanceID())))
+		{
+			PayAccountsFile.getInstance().setActiveAccount(a_account);
+		}
+	}
+	
+	/**
+	 * Tells the program to save the configuration. Note that a configuration is automatically loaded, but might not
+	 * be saved unless this method is called from outside this class.
 	 * @throws Exception if an error occurs while saving the configuration
 	 */
 	public static synchronized void saveConfiguration() throws Exception
 	{
 		if (ms_configuration != null)
 		{
+			// delete accounts that are clearly unusable or already completely used
+			Enumeration enumAccounts = PayAccountsFile.getInstance().getAccounts();
+			PayAccount currentAccount;
+			while (enumAccounts.hasMoreElements())
+			{
+				currentAccount = (PayAccount)enumAccounts.nextElement();
+				if (currentAccount.getBalance() != null && currentAccount.getBalance().getSpent() > 0 && 
+						currentAccount.getCurrentCredit() == 0)
+				{
+					PayAccountsFile.getInstance().deleteAccount(currentAccount);
+				}
+			}
+			
 			Document doc = XMLUtil.createDocument();
-			doc.appendChild(doc.createElement(XML_ROOT_NODE));
+			Element root = doc.createElement(XML_ROOT_NODE);
+			XMLUtil.setAttribute(root, XML_ATTR_LOG_DETAIL, LogHolder.getDetailLevel());
+			XMLUtil.setAttribute(root, XML_ATTR_LOG_LEVEL, ms_logger.getLogLevel());
+			
+			doc.appendChild(root);
 			doc.getDocumentElement().appendChild(PayAccountsFile.getInstance().toXmlElement(doc));
 			doc.getDocumentElement().appendChild(TrustModel.toXmlElement(doc, TrustModel.XML_ELEMENT_CONTAINER_NAME));
 			ms_configuration.write(XMLUtil.toString(doc));
+		}
+	}
+	
+	public static String exportAccounts(String a_password)
+	{
+		Document doc = XMLUtil.createDocument();
+		doc.appendChild(PayAccountsFile.getInstance().toXmlElement(doc, a_password));
+		return XMLUtil.toString(doc);
+	}
+	
+	
+	public static boolean importAccounts(String a_accountData, final char[] a_password)
+	{
+		boolean bImportSucceeded = importAccounts_internal(a_accountData, a_password);
+		if (bImportSucceeded)
+		{
+			checkActiveAccount(PayAccountsFile.getInstance().getChargedAccount(getActivePaymentInstanceID()));
+		}
+		return bImportSucceeded;
+	}
+	
+	private static boolean importAccounts_internal(String a_accountData, final char[] a_password)
+	{
+		Document doc;
+		IMiscPasswordReader pwReader;
+		
+		try
+		{
+			doc = XMLUtil.toXMLDocument(a_accountData);
+		}
+		catch (XMLParseException a_e)
+		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+			return false;
+		}
+		
+		pwReader = new IMiscPasswordReader()
+		{
+			public String readPassword(Object message)
+			{
+				return new String(a_password);
+			}
+		};
+		
+		if (doc.getDocumentElement().getNodeName().equals(PayAccount.XML_ELEMENT_NAME))
+		{
+			try 
+			{
+				PayAccountsFile.getInstance().addAccount(new PayAccount(doc.getDocumentElement(), pwReader));
+				return true;
+			} 
+			catch (AccountAlreadyExistingException a_e) 
+			{
+				// just ignore
+				LogHolder.log(LogLevel.ERR, LogType.PAY, a_e);
+				return true;
+				
+			} 
+			catch (Exception a_e) 
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+				return false;
+			}
+		}
+		else
+		{
+			try
+			{
+				return PayAccountsFile.getInstance().importAccounts(doc.getDocumentElement(), pwReader);
+			}
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+				return false;
+			}
 		}
 	}
 	
@@ -568,4 +899,31 @@ public class Controller
 			// do nothing
 		}
 	}
+	
+	public static class ForcePremiumIfAccountAvailableAttribute extends TrustAttribute
+	{
+		public ForcePremiumIfAccountAvailableAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
+		{
+			super(a_trustCondition, a_conditionValue, a_bIgnoreNoDataAvailable);
+		}
+
+		public void checkTrust(MixCascade a_cascade) throws TrustException, SignatureException
+		{
+			if (a_cascade.isPayment())
+			{
+				if (PayAccountsFile.getInstance().getChargedAccount(a_cascade.getPIID()) != null)
+				{
+					return;
+				}
+				else
+				{
+					throw new TrustException(MSG_NO_CHARGED_ACCOUNT);
+				}
+			}
+			else if (PayAccountsFile.getInstance().getChargedAccount(getActivePaymentInstanceID()) != null)
+			{
+				throw new TrustException(TrustModel.MSG_EXCEPTION_FREE_CASCADE);
+			}
+		}
+	};
 }

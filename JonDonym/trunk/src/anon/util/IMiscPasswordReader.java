@@ -1,7 +1,7 @@
 package anon.util;
 
 /**
- * An object  implementing this interface reads passwords
+ * An object implementing this interface reads passwords
  * from a user interface.
  * @author Bastian Voigt
  */

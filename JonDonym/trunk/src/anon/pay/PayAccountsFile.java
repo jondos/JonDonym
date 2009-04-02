@@ -35,6 +35,7 @@ import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import anon.ErrorCodes;
 import anon.crypto.AsymmetricCryptoKeyPair;
@@ -205,6 +206,44 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 		return m_bIgnoreAIAccountErrorMessages;
 	}
 
+	public boolean importAccounts(Element elemAccountsFile, IMiscPasswordReader a_passwordReader) throws XMLParseException,
+		Exception
+	{
+		boolean bAccountAdded = false;
+		
+		XMLUtil.assertNodeName(elemAccountsFile, XML_ELEMENT_NAME);
+		Element elemAccounts = (Element) XMLUtil.getFirstChildByName(elemAccountsFile, "Accounts");
+		Node elemAccount = XMLUtil.getFirstChildByName(elemAccounts, PayAccount.XML_ELEMENT_NAME);
+		while (elemAccount != null)
+		{
+			PayAccount theAccount = new PayAccount((Element)elemAccount, a_passwordReader);
+
+			getInstance().addAccount(theAccount);
+			bAccountAdded = true;
+			//do NOT explicitly add PayAccountsFile as MessageListener - addAccount() already includes that, would duplicate all messages to have two Listeners
+			//theAccount.addMessageListener(PayAccountsFile.getInstance());
+
+
+			//load messages from the balances we already have (future messages are only displayed if different from existing ones)
+			if (theAccount.getAccountInfo() != null)
+			{
+				XMLBalance existingBalance = theAccount.getAccountInfo().getBalance();
+				if (existingBalance != null)
+				{
+					PayMessage existingMessage = existingBalance.getMessage();
+					if (existingMessage != null && !existingMessage.getShortMessage().equals(""))
+					{
+						getInstance().messageReceived(existingMessage);
+					}
+				}
+			}
+			
+			// Move to next sibling until we find the next element or until the list is empty.
+			while ((elemAccount = elemAccount.getNextSibling()) != null && !(elemAccount instanceof Element));
+		}
+		return bAccountAdded;
+	}
+	
 	/**
 	 * Performs the initialization.
 	 * @param a_passwordReader  a password reader for encrypted account files; message: AccountNumber
@@ -213,61 +252,38 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	public static boolean init(Element elemAccountsFile, IMiscPasswordReader a_passwordReader,
 							   boolean a_bForceAIErrors)
 	{
-		if (ms_AccountsFile == null)
-		{
-			ms_AccountsFile = new PayAccountsFile();
-		}
 		//ms_AccountsFile.m_theBI = theBI;
 		if (elemAccountsFile != null && elemAccountsFile.getNodeName().equals(XML_ELEMENT_NAME))
 		{
 			if (a_bForceAIErrors)
 			{
-				ms_AccountsFile.m_bIgnoreAIAccountErrorMessages = false;
+				getInstance().m_bIgnoreAIAccountErrorMessages = false;
 			}
 			else
 			{
-				ms_AccountsFile.m_bIgnoreAIAccountErrorMessages =
+				getInstance().m_bIgnoreAIAccountErrorMessages =
 					XMLUtil.parseAttribute(elemAccountsFile, XML_ATTR_IGNORE_AI_ERRORS, false);
 			}
-			ms_AccountsFile.m_bEnableBalanceAutoUpdate =
+			getInstance().m_bEnableBalanceAutoUpdate =
 				XMLUtil.parseAttribute(elemAccountsFile, XML_ATTR_ENABLE_BALANCE_AUTO_UPDATE, true);
 			Element elemActiveAccount = (Element) XMLUtil.getFirstChildByName(elemAccountsFile,
 				"ActiveAccountNumber");
 			long activeAccountNumber = Long.parseLong(XMLUtil.parseValue(elemActiveAccount, "0"));
 
-			Element elemAccounts = (Element) XMLUtil.getFirstChildByName(elemAccountsFile, "Accounts");
-			Element elemAccount = (Element) XMLUtil.getFirstChildByName(elemAccounts, PayAccount.XML_ELEMENT_NAME);
-			while (elemAccount != null)
+			try
 			{
-				try
-				{
-					PayAccount theAccount = new PayAccount(elemAccount, a_passwordReader);
-
-					ms_AccountsFile.addAccount(theAccount);
-					//do NOT explicitly add PayAccountsFile as MessageListener - addAccount() already includes that, would duplicate all messages to have two Listeners
-					//theAccount.addMessageListener(PayAccountsFile.getInstance());
-
-
-					//load messages from the balances we already have (future messages are only displayed if different from existing ones)
-					XMLBalance existingBalance = theAccount.getAccountInfo().getBalance();
-					PayMessage existingMessage = existingBalance.getMessage();
-					if (existingMessage != null && !existingMessage.getShortMessage().equals(""))
-					{
-						ms_AccountsFile.messageReceived(existingMessage);
-					}
-
-					elemAccount = (Element) elemAccount.getNextSibling();
-				}
-				catch (Exception e)
-				{
-					return false;
-				}
+				getInstance().importAccounts(elemAccountsFile, a_passwordReader);
+			}
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+				return false;
 			}
 
 			// find activeAccount
 			if (activeAccountNumber > 0)
 			{
-				Enumeration e = ms_AccountsFile.m_Accounts.elements();
+				Enumeration e = getInstance().m_Accounts.elements();
 				while (e.hasMoreElements())
 				{
 					PayAccount current = (PayAccount) e.nextElement();
@@ -275,7 +291,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 					{
 						try
 						{
-							ms_AccountsFile.setActiveAccount(current);
+							getInstance().setActiveAccount(current);
 						}
 						catch (Exception ex)
 						{
@@ -570,6 +586,11 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	
 	public synchronized PayAccount getChargedAccount(String a_piid, PayAccount a_excludeAccount)
 	{
+		if (a_piid == null)
+		{
+			return null;
+		}
+		
 		Vector accounts = PayAccountsFile.getInstance().getAccounts(a_piid);
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		PayAccount currentAccount = null;

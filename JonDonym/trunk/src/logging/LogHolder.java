@@ -31,6 +31,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.StringTokenizer;
 
+import anon.util.JAPMessages;
 import anon.util.Util;
 
 /**
@@ -55,6 +56,9 @@ public final class LogHolder
 	 * additionally prints the whole stack trace of an error log if available
 	 */
 	public static final int DETAIL_LEVEL_HIGHEST = 3;
+	
+	private static final String[] DETAIL_LEVEL_NAMES = new String[]{
+		"_detailLowest", "_detailLower", "_detailHigh", "_detailHighest"};
 
 	private static final String TRACED_LOG_MESSAGE = "[Traced log Message]:";
 	private static final String LOGGED_THROWABLE = " Logged Throwable: ";
@@ -95,25 +99,42 @@ public final class LogHolder
 		super.finalize();
 	}
 
+	public static int getDetailLevelCount()
+	{
+		return DETAIL_LEVEL_NAMES.length;
+	}
+	
+	public static String getDetailLevelName(int a_detail)
+	{
+		if (a_detail < 0 || a_detail >= DETAIL_LEVEL_NAMES.length)
+		{
+			return null;
+		}
+		return JAPMessages.getString(LogHolder.class.getName() + DETAIL_LEVEL_NAMES[a_detail]);
+	}
+	
 	/**
 	 * Sets the detail level of all log messages. Use one of the class constants to set it.
 	 * The detail levels range from 0 (DETAIL_LEVEL_LOWEST) to DETAIL_LEVEL_HIGHEST.
 	 * The higher the detail level, the more detailed information will be written to the logs.
 	 * @param a_messageDetailLevel the detail level of all log messages
 	 */
-	public static void setDetailLevel(int a_messageDetailLevel)
+	public static boolean setDetailLevel(int a_messageDetailLevel)
 	{
 		if (a_messageDetailLevel < DETAIL_LEVEL_LOWEST)
 		{
 			m_messageDetailLevel = DETAIL_LEVEL_LOWEST;
+			return false;
 		}
 		else if (a_messageDetailLevel > DETAIL_LEVEL_HIGHEST)
 		{
 			m_messageDetailLevel = DETAIL_LEVEL_HIGHEST;
+			return false;
 		}
 		else
 		{
 			m_messageDetailLevel = a_messageDetailLevel;
+			return true;
 		}
 	}
 

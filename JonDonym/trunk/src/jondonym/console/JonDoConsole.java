@@ -31,11 +31,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 
-import java.util.Enumeration;
 import java.util.Vector;
 
-import anon.pay.PayAccount;
-import anon.pay.PayAccountsFile;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.client.TrustModel;
 import anon.infoservice.Database;
@@ -59,7 +56,7 @@ public class JonDoConsole
 		MixCascade defaultCascade = null;
 		Configuration configuration = new LocalFileConfiguration();
 		
-		// TODO put a command line parser here...
+		// TODO put a real command line parser here...
 		if (args != null && args.length > 0)
 		{
 			if (args[0].equals("--noConfiguration"))
@@ -72,7 +69,7 @@ public class JonDoConsole
 				try 
 				{
 					defaultCascade = new MixCascade(args[0], Integer.parseInt(args[1]));
-				} 
+				}
 				catch (Exception e) 
 				{
 					e.printStackTrace();
@@ -84,6 +81,7 @@ public class JonDoConsole
 		
 		try
 		{
+			Controller.setLogDetail(Controller.LOG_DETAIL_LEVEL_HIGHEST);
 			Controller.init(null, configuration);
 		}
 		catch (Exception a_e)
@@ -93,13 +91,13 @@ public class JonDoConsole
 			return;
 		}
 		
-		// TODO put a command line parser here...
 		if (defaultCascade != null)
 		{
 			TrustModel.setCurrentTrustModel(TrustModel.TRUST_MODEL_USER_DEFINED);
 		}
 		
-		Controller.start(defaultCascade); // the cascade argument is here only for debugging; use Controller.start() otherwise
+		System.out.println("Initialising...");
+		Controller.start(defaultCascade); // the cascade argument is here only for debugging; use Controller.start() by default
 		
 		if (!Controller.isRunning())
 		{
@@ -118,9 +116,12 @@ public class JonDoConsole
 		Vector cascades = null;
 		Vector vecPIs = null;
 		boolean bPI = false;
-		PayAccount account = null;
+		boolean bSwitchLogDetails = false;
+		boolean bSwitchLogLevel = false;
 		boolean bSwitchTrust = false;
 		Vector vecTrustModels = null;
+		String strTemp;
+		boolean bTemp;
 		int index;
 		
 		while (true)
@@ -143,13 +144,18 @@ public class JonDoConsole
 				{
 					System.out.println("Please enter the number of the trust filter you wish to activate or 'break'.");
 				}
+				else if (bSwitchLogDetails || bSwitchLogLevel)
+				{
+					System.out.println("Please enter the desired logging mode number or 'break'.");
+				}
 				else
 				{
 					System.out.println();
 					System.out.println("Type <ENTER> for more information,\n'choose' to choose another service," +
 							"\n'force' to prevent auto-switching,\n'charge' to create an account," + 
 							"\n'pi' to switch to another payment instance," +
-									"\n'trust' to activate another trust model, or\n'exit' to quit.");
+									"\n'trust' to activate another trust filter, " +
+									"\n'logdetails' or 'loglevel' for altering the logging modes or\n'exit' to quit.");
 				}
 			}
 			
@@ -178,25 +184,12 @@ public class JonDoConsole
 
 			if (entered.equals("break") || entered.equals("exit"))
 			{
-				boolean bSaved = false;
-				PayAccountsFile.getInstance().deleteAccount(account);
-				if (account != null)
-				{
-					// this account is deleted as it is of no further use and only consumes memory
-					PayAccountsFile.getInstance().deleteAccount(account);
-					bSaved = true;
-					saveConfiguration();
-				}
-				account = null;
 				bChoose = false;
 				bCreate = false;
 				if (entered.equals("exit"))
 				{
 					Controller.stop();
-					if (!bSaved)
-					{
-						saveConfiguration();
-					}
+					saveConfiguration();
 					break;
 				}
 			}
@@ -217,6 +210,42 @@ public class JonDoConsole
 				}
 				System.out.println("Sorry, this service is not available.");
 			}
+			else if (bSwitchLogDetails)
+			{
+				bSwitchLogDetails = false;
+				bTemp = false;
+				try
+				{
+					index = Integer.parseInt(entered) - 1;
+					bTemp = Controller.setLogDetail(index);
+				}
+				catch (NumberFormatException a_e)
+				{
+				}
+				if (!bTemp)
+				{
+					System.out.println("Sorry, there is no such detail level for logging.");
+				}
+				System.out.println("Log detail is now: '" + Controller.getLogDetailName(Controller.getLogDetail()) + "'");
+			}
+			else if (bSwitchLogLevel)
+			{
+				bSwitchLogLevel = false;
+				try
+				{
+					index = Integer.parseInt(entered) - 1;
+					if (index >= 0 && index < Controller.getLogLevelCount())
+					{
+						Controller.setLogLevel(index);
+						System.out.println("Log level is now: '" + Controller.getLogLevelName(index) + "'");
+						continue;
+					}	
+				}
+				catch (NumberFormatException a_e)
+				{
+				}
+				System.out.println("Sorry, there is no such log level.");				
+			}
 			else if (bSwitchTrust)
 			{
 				bSwitchTrust = false;
@@ -231,8 +260,8 @@ public class JonDoConsole
 						{
 							Controller.switchCascade();
 						}
-					}
-					continue;
+						continue;
+					}	
 				}
 				catch (NumberFormatException a_e)
 				{
@@ -261,55 +290,23 @@ public class JonDoConsole
 			{
 				try
 				{
-					if (!Controller.activateCouponCode(entered, account, true))
+					if (Controller.validateCoupon(entered))
 					{
-						System.out.println("This does not seem to be a valid coupon code: '" + entered + "'");
+						bCreate = false;
+						System.out.println("Coupon code accepted, charging account...");
+						if (Controller.activateCoupon(entered))
+						{
+							System.out.println("Account charged! We have a total of " + 
+									Util.formatBytesValueWithUnit(Controller.getCurrentCredit()) + " now.");
+						}
+						else
+						{
+							System.out.println("Could not charge account with valid coupon code!");
+						}
 					}
 					else
 					{
-						System.out.println("Coupon code accepted, charging account...");
-						
-						final String tEntered = entered;
-						final PayAccount tAccount = account;
-						account = null;
-						bCreate = false;
-						
-						Thread useCode = new Thread(new Runnable()
-						{
-							public void run()
-							{
-								try
-								{
-									if (Controller.activateCouponCode(tEntered, tAccount, false))
-									{
-										try
-										{
-											tAccount.fetchAccountInfo(true);
-										}
-										catch (Exception a_e)
-										{
-											LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
-											System.out.println("A problem occured while updating your charged account!");
-										}
-										
-										System.out.println("Your have created an account with " + tAccount.getCurrentCredit() + " kbytes!");
-										if (PayAccountsFile.getInstance().getActiveAccount() == null || 
-											PayAccountsFile.getInstance().getActiveAccount().getCurrentCredit() == 0  ||
-											!PayAccountsFile.getInstance().getActiveAccount().getPIID().equals(Controller.getActivePaymentInstanceID()))
-										{
-											PayAccountsFile.getInstance().setActiveAccount(tAccount);
-										}
-									}
-								}
-								catch (Exception a_e)
-								{
-									LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
-									System.out.println("A problem occured when validating your code!");
-								}
-							}
-						});
-						useCode.setDaemon(false);
-						useCode.start();
+						System.out.println("This does not seem to be a valid coupon code: '" + entered + "'");
 					}
 				}
 				catch (Exception a_e)
@@ -318,79 +315,129 @@ public class JonDoConsole
 					System.out.println("A problem occured when validating your code!");
 				}	
 			}
-			else if (entered.equals("choose"))
+			else if (entered.trim().equals("choose"))
 			{
 				cascades = Controller.getAvailableCascades();
 				for (int i = 0; i < cascades.size(); i++)
 				{
-					System.out.println((i+1) + ". " + cascades.elementAt(i));
+					if (Controller.getCurrentCascade().equals(cascades.elementAt(i)))
+					{
+						strTemp = "* ";
+					}
+					else
+					{
+						strTemp = "";
+					}
+					System.out.println(strTemp + (i+1) + ". " + cascades.elementAt(i));
 				}
 				bChoose = true;
 				
 				continue;
 			}
-			else if (entered.equals("pi"))
+			else if (entered.trim().equals("pi"))
 			{
 				vecPIs = Database.getInstance(PaymentInstanceDBEntry.class).getEntryList();
 				for (int i = 0; i < vecPIs.size(); i++)
 				{
-					System.out.println((i+1) + ". " + ((PaymentInstanceDBEntry)vecPIs.elementAt(i)).getName() + " (" +
+					if (Controller.getActivePaymentInstanceID().equals(((PaymentInstanceDBEntry)vecPIs.elementAt(i)).getId()))
+					{
+						strTemp = "* ";
+					}
+					else
+					{
+						strTemp = "";
+					}
+					System.out.println(strTemp + (i+1) + ". " + ((PaymentInstanceDBEntry)vecPIs.elementAt(i)).getName() + " (" +
 							((PaymentInstanceDBEntry)vecPIs.elementAt(i)).getId() + ")");
 				}
 				bPI = true;
 				
 				continue;
 			}
-			else  if (entered.equals("trust"))
+			else if (entered.trim().equals("trust"))
 			{
 				vecTrustModels = TrustModel.getTrustModels();
 				for (int i = 0; i < vecTrustModels.size(); i++)
 				{
-					System.out.println((i+1) + ". " + ((TrustModel)vecTrustModels.elementAt(i)).getName());
+					if (TrustModel.getCurrentTrustModel().equals(vecTrustModels.elementAt(i)))
+					{
+						strTemp = "* ";
+					}
+					else
+					{
+						strTemp = "";
+					}
+					System.out.println(strTemp + (i+1) + ". " + ((TrustModel)vecTrustModels.elementAt(i)).getName());
 				}
 				bSwitchTrust = true;
 				
 				continue;
 			}
-			else if (entered.equals("force"))
+			else if (entered.trim().equals("logdetails"))
+			{
+				for (int i = 0; i < Controller.getLogDetailCount(); i++)
+				{
+					if (Controller.getLogDetail() == i)
+					{
+						strTemp = "* ";
+					}
+					else
+					{
+						strTemp = "";
+					}
+					System.out.println(strTemp + (i+1) + ". " + Controller.getLogDetailName(i));
+				}
+				
+				bSwitchLogDetails = true;
+			}
+			else if (entered.trim().equals("loglevel"))
+			{
+				for (int i = 0; i < Controller.getLogLevelCount(); i++)
+				{
+					if (Controller.getLogLevel() == i)
+					{
+						strTemp = "* ";
+					}
+					else
+					{
+						strTemp = "";
+					}
+					System.out.println(strTemp + (i+1) + ". " + Controller.getLogLevelName(i));
+				}
+				bSwitchLogLevel = true;
+			}
+			else if (entered.trim().equals("force"))
 			{
 				Controller.setCascadeAutoSwitched(!Controller.isCascadeAutoSwitched());
 				System.out.println("Auto-switch is " + (Controller.isCascadeAutoSwitched() ? "ON" : "OFF") + ".");
 			}
-			else if (entered.equals("charge"))
+			else if (entered.trim().equals("charge"))
 			{
 				bCreate = true;
 				try
 				{
-					account = Controller.createAccount();
-					saveConfiguration();
+					Controller.activateCoupon(null); //reset payment if needed
 				}
 				catch (Exception a_e)
 				{
 					LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
-				}
-				if (account == null)
-				{
-					bCreate = false;
-					System.out.println("Could not create account for PI " + Controller.getActivePaymentInstanceID() + "!");
+					System.out.println("Resetting coupon methods failed!");
 				}
 			}
 			else
 			{
-				String balance = ")";
-				if (PayAccountsFile.getInstance().getActiveAccount() != null &&
-					PayAccountsFile.getInstance().getActiveAccount().getBalance() != null)
+				String strRecharge = ")";
+				if (Controller.getCurrentCredit() > 0 && Controller.shouldRecharge())
 				{
-					balance = ", balance: " + 
-						Util.formatBytesValueWithUnit(
-								PayAccountsFile.getInstance().getActiveAccount().getCurrentCredit() * 1000) + ")";
+					strRecharge = ", credits will run out soon)";
 				}
+				String balance = ", balance: " + Util.formatBytesValueWithUnit(Controller.getCurrentCredit()) + strRecharge;
 				
 				System.out.println(Controller.getCurrentCascade().getName() + " (" + (Controller.isConnected() ? "connected, " +
 						"auto-switch:" + ((Controller.isCascadeAutoSwitched() ? "ON" : "OFF")) : "disconnected") + 
 						", TrustModel:'" + TrustModel.getCurrentTrustModel().getName() + "'" + balance);
 				  
-	            System.out.println("Memory usage: " + 
+	            System.out.print("Memory usage: " + 
 	            		Util.formatBytesValueWithUnit(Runtime.getRuntime().totalMemory()) + ", Max VM memory: " +
 
 						 Util.formatBytesValueWithUnit(Runtime.getRuntime().maxMemory()) + ", Free memory: " +
@@ -401,20 +448,6 @@ public class JonDoConsole
 	
 	private static void saveConfiguration()
 	{
-		// delete all empty accounts (save the coupon codes if you would like to save them...
-		Enumeration enumAccounts = PayAccountsFile.getInstance().getAccounts();
-		PayAccount currentAccount;
-		while (enumAccounts.hasMoreElements())
-		{
-			currentAccount = (PayAccount)enumAccounts.nextElement();
-			if (currentAccount.getBalance() != null && currentAccount.getBalance().getSpent() > 0 && 
-					currentAccount.getCurrentCredit() == 0)
-			{
-				// delete accounts that are clearly unusable or already completely used
-				PayAccountsFile.getInstance().deleteAccount(currentAccount);
-			}
-		}
-		
 		try
 		{
 			Controller.saveConfiguration();
@@ -440,6 +473,7 @@ public class JonDoConsole
 			if (CONFIGURATION.exists())
 			{
 				System.out.println("Loading configuration from " + CONFIGURATION.getAbsolutePath());
+				// this is a fast-hacked implementation for reading the document; it assumes it is XML; you should not do that normally...
 				return XMLUtil.toString(XMLUtil.readXMLDocument(CONFIGURATION));
 			}
 			return null;
@@ -447,6 +481,7 @@ public class JonDoConsole
 		public void write(String a_configurationContent) throws Exception
 		{
 			System.out.println("Writing configuration to " + CONFIGURATION.getAbsolutePath());
+			// this is a fast-hacked implementation for writing the document; it assumes it is XML; you should not do that normally...
 			XMLUtil.write(XMLUtil.toXMLDocument(a_configurationContent), CONFIGURATION);
 		}
 	}

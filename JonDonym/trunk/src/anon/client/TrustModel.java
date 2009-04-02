@@ -68,6 +68,12 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	public static final Integer NOTIFY_TRUST_MODEL_ADDED = new Integer(1);
 	public static final Integer NOTIFY_TRUST_MODEL_REMOVED = new Integer(2);
 
+	/**
+	 * Unreserved IDs may be used by controller classes to define more models.
+	 * IDs lower than FIRST_UNRESERVED_MODEL_ID may not be used.
+	 */
+	public static final int FIRST_UNRESERVED_MODEL_ID = 5;
+	
 	public static final String XML_ELEMENT_NAME = "TrustModel";
 	public static final String XML_ELEMENT_CONTAINER_NAME = "TrustModels";
 	private static final String XML_ATTR_CURRENT_TRUST_MODEL = "currentTrustModel";
@@ -129,9 +135,9 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	private static final String MSG_EXCEPTION_NO_SOCKS = TrustModel.class.getName() + "_exceptionNoSocks";
 	private static final String MSG_EXCEPTION_DATA_RETENTION = TrustModel.class.getName() + "_exceptionDataRetention";
 	private static final String MSG_EXCEPTION_PAY_CASCADE = TrustModel.class.getName() + "_exceptionPayCascade";
-	private static final String MSG_EXCEPTION_FREE_CASCADE = TrustModel.class.getName() + "_exceptionFreeCascade";
+	public static final String MSG_EXCEPTION_FREE_CASCADE = TrustModel.class.getName() + "_exceptionFreeCascade";
 	private static final String MSG_EXCEPTION_WRONG_SERVICE_CONTEXT = TrustModel.class.getName() + "_wrongServiceContext";
-	private static final String MSG_EXCEPTION_NOT_ENOUGH_MIXES = TrustModel.class.getName() + "_exceptionNotEnoughMixes";
+	public static final String MSG_EXCEPTION_NOT_ENOUGH_MIXES = TrustModel.class.getName() + "_exceptionNotEnoughMixes";
 	private static final String MSG_EXCEPTION_EXPIRED_CERT = TrustModel.class.getName() + "_exceptionExpiredCert";
 	private static final String MSG_EXCEPTION_NOT_USER_DEFINED = TrustModel.class.getName() + "_exceptionNotUserDefined";
 	private static final String MSG_EXCEPTION_TOO_FEW_COUNTRIES = TrustModel.class.getName() + "_exceptionTooFewCountries";
@@ -186,7 +192,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		private int m_trustCondition;
 		private Object m_conditionValue;
 
-		private TrustAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
+		protected TrustAttribute(int a_trustCondition, Object a_conditionValue, boolean a_bIgnoreNoDataAvailable)
 		{
 			m_trustCondition = a_trustCondition;
 			m_conditionValue = a_conditionValue;
@@ -332,7 +338,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			try
 			{
 				return (TrustAttribute) a_attr.getConstructor(new Class[] { int.class, Object.class, boolean.class })
-			 	.newInstance(new Object[] { new Integer(a_trustCondition), a_conditionValue, new Boolean(a_bIgnoreNoDataAvailable)});
+			 	.newInstance(new Object[] {new Integer(a_trustCondition), a_conditionValue, new Boolean(a_bIgnoreNoDataAvailable)});
 			}
 			catch(Exception ex) 
 			{
@@ -675,7 +681,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		// Initialize basic trust models
 		TrustModel model;
 
-		model = new TrustModel(MSG_ALL_SERVICES, 0);
+		model = new TrustModel(MSG_ALL_SERVICES, 0, true);
 		model.setAttribute(ContextAttribute.class, TRUST_RESERVED);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50), true);
@@ -683,14 +689,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		CONTEXT_MODEL_ALL = model;
 		ms_trustModels.addElement(model);
 		
-		model = new TrustModel(MSG_SERVICES_BUSINESS, 0);
+		model = new TrustModel(MSG_SERVICES_BUSINESS, 0, true);
 		model.setAttribute(PremiumAttribute.class, TRUST_IF_NOT_TRUE); // this might be altered when we have hybrid services...
 		model.setAttribute(ContextAttribute.class, TRUST_IF_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50), true);
 		CONTEXT_MODEL_BUSINESS = model;
 
-		model = new TrustModel(MSG_SERVICES_PREMIUM_PRIVATE, 2);
+		model = new TrustModel(MSG_SERVICES_PREMIUM_PRIVATE, 2, true);
 		model.setAttribute(PremiumAttribute.class, TRUST_IF_TRUE);
 		model.setAttribute(ContextAttribute.class, TRUST_IF_NOT_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000), true);
@@ -698,7 +704,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		model.setAttribute(NumberOfMixesAttribute.class, TRUST_IF_AT_LEAST, 3);
 		CONTEXT_MODEL_PREMIUM_PRIVATE = model;
 
-		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2);
+		model = new TrustModel(MSG_SERVICES_WITH_COSTS, 2, true);
 		model.setAttribute(PremiumAttribute.class, TRUST_IF_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(4000), true);
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(100), true);
@@ -707,14 +713,14 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		CONTEXT_MODEL_PREMIUM = model;
 		ms_trustModels.addElement(model);
 
-		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3);
+		model = new TrustModel(MSG_SERVICES_WITHOUT_COSTS, 3, true);
 		model.setAttribute(PremiumAttribute.class, TRUST_IF_NOT_TRUE);
 		//model.setAttribute(DelayAttribute.class, TRUST_IF_AT_MOST, new Integer(8000));
 		//model.setAttribute(SpeedAttribute.class, TRUST_IF_AT_LEAST, new Integer(50));
 		CONTEXT_MODEL_FREE = model;
 		ms_trustModels.addElement(model);
 
-		model = new TrustModel(MSG_SERVICES_USER_DEFINED, 4)
+		model = new TrustModel(MSG_SERVICES_USER_DEFINED, 4, true)
 		{
 			public boolean isAdded()
 			{
@@ -805,7 +811,16 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	 */
 	public TrustModel(String a_strName, long a_id)
 	{
+		this(a_strName, a_id, false);
+	}
+	
+	private TrustModel(String a_strName, long a_id, boolean b_allowReservedID)
+	{
 		//m_id = ms_trustModels.size();
+		if (!b_allowReservedID && a_id < FIRST_UNRESERVED_MODEL_ID)
+		{
+			throw new IllegalArgumentException("Trust model ID " + a_id + " is reserved!");
+		}
 		m_id = a_id;
 		m_strName = a_strName == null ? "Default trust model" : a_strName;
 	}
@@ -835,6 +850,10 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		XMLUtil.assertNotNull(a_trustModelElement, XML_ATTR_NAME);
 
 		m_id = XMLUtil.parseAttribute(a_trustModelElement, XML_ATTR_ID, -1l);
+		if (m_id < FIRST_UNRESERVED_MODEL_ID)
+		{
+			throw new XMLParseException("Reserved model ID: " + m_id);
+		}
 		m_strName = XMLUtil.parseAttribute(a_trustModelElement, XML_ATTR_NAME, null);
 		m_bEditable = true;
 
@@ -1149,7 +1168,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 			{
 				try
 				{
-					TrustModel model = new TrustModel( (Element) elements.item(i));
+					TrustModel model = new TrustModel((Element) elements.item(i));
 					TRUST_MODEL_CUSTOM_FILTER = model;
 					addTrustModel(model);					
 					trustModelsAdded++;
@@ -1165,7 +1184,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 		
 		if (trustModelsAdded == 0)
 		{
-			TrustModel model = new TrustModel("", 5);
+			TrustModel model = new TrustModel("", 5, true);
 			model.setEditable(true);
 			TRUST_MODEL_CUSTOM_FILTER = model;
 			addTrustModel(model);
@@ -1176,7 +1195,7 @@ public class TrustModel extends BasicTrustModel implements IXMLEncodable
 	{
 		removeTrustModel(TRUST_MODEL_CUSTOM_FILTER);
 	
-		TrustModel model = new TrustModel("", 5);
+		TrustModel model = new TrustModel("", 5, true);
 		model.setEditable(true);
 		TRUST_MODEL_CUSTOM_FILTER = model;
 		addTrustModel(model);
