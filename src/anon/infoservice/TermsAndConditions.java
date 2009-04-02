@@ -95,12 +95,16 @@ public class TermsAndConditions implements IXMLEncodable
 	
 	private final static Hashtable tcHashtable = new Hashtable();
 	
+	public TermsAndConditions(ServiceOperator operator, String date) throws ParseException
+	{
+		this(operator, new SimpleDateFormat(DATE_FORMAT).parse(date));
+	}
 	/**
 	 * Creates an empty Terms And Condition object for the specified id and validation date
 	 * which serves as a container for the different translations.
 	 * @throws ParseException 
 	 */
-	public TermsAndConditions(ServiceOperator operator, String date) throws ParseException
+	public TermsAndConditions(ServiceOperator operator, Date date) throws ParseException
 	{
 		if(operator == null)
 		{
@@ -113,7 +117,7 @@ public class TermsAndConditions implements IXMLEncodable
 			throw new NullPointerException("Date of terms and conditions must not be null!");
 		}
 		
-		m_date = new SimpleDateFormat(DATE_FORMAT).parse(date);
+		m_date = date;
 		if(m_date == null)
 		{
 			throw new IllegalArgumentException("Date has not the valid format "+DATE_FORMAT);
@@ -587,15 +591,13 @@ public class TermsAndConditions implements IXMLEncodable
 		return (m_date.equals(toWhichDate) || m_date.after(toWhichDate));
 	}
 	
-	private Element xmlOut(Document a_doc, boolean signedTranslations) 
+	private Element xmlOut(Document doc, boolean signedTranslations) 
 	{
 		if(!hasTranslations() || !hasDefaultTranslation())
 		{
 			return null;
 		}
-		Element tcRoot = a_doc.createElement(XML_ELEMENT_NAME);
-		XMLUtil.setAttribute(tcRoot, XML_ATTR_ID, operator.getId());
-		XMLUtil.setAttribute(tcRoot, XML_ATTR_DATE, getDateString());
+		Element tcRoot = createTCRoot(doc);
 		Enumeration allTranslations = null;
 		synchronized (this)
 		{
@@ -609,9 +611,17 @@ public class TermsAndConditions implements IXMLEncodable
 		while (allTranslations.hasMoreElements()) 
 		{
 			 tcRoot.appendChild(signedTranslations ?
-					 ((Translation)allTranslations.nextElement()).toXmlElement(a_doc) : 
-					 ((Translation)allTranslations.nextElement()).createXMLOutput(a_doc) );	
+					 ((Translation)allTranslations.nextElement()).toXmlElement(doc) : 
+					 ((Translation)allTranslations.nextElement()).createXMLOutput(doc) );	
 		}
+		return tcRoot;
+	}
+	
+	public Element createTCRoot(Document doc)
+	{
+		Element tcRoot = doc.createElement(XML_ELEMENT_NAME);
+		XMLUtil.setAttribute(tcRoot, XML_ATTR_ID, operator.getId());
+		XMLUtil.setAttribute(tcRoot, XML_ATTR_DATE, getDateString());
 		return tcRoot;
 	}
 	
