@@ -1,5 +1,6 @@
 package jap;
 
+import gui.JAPHyperlinkAdapter;
 import gui.OperatorsCellRenderer;
 
 import java.awt.Dimension;

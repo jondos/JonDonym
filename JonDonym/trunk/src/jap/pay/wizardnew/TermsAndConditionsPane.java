@@ -28,8 +28,8 @@
 
 package jap.pay.wizardnew;
 
+import gui.JAPHyperlinkAdapter;
 import gui.dialog.DialogContentPane;
-import jap.JAPHyperlinkAdapter;
 
 import java.awt.GridBagConstraints;
 

@@ -29,6 +29,7 @@ package jap;
 
 import forward.server.ForwardServerManager;
 import gui.GUIUtils;
+import gui.TermsAndConditionsDialog;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.PasswordContentPane;

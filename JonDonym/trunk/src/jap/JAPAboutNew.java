@@ -37,6 +37,7 @@ import javax.swing.JScrollPane;
 import anon.util.JAPMessages;
 import anon.util.ResourceLoader;
 import gui.JAPDll;
+import gui.JAPHyperlinkAdapter;
 import gui.dialog.DialogContentPane;
 import gui.dialog.DialogContentPaneOptions;
 import gui.dialog.JAPDialog;
