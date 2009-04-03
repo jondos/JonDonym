@@ -26,7 +26,7 @@
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-package jap.pay.wizardnew;
+package gui.wizard;
 
 import gui.JAPHyperlinkAdapter;
 import gui.dialog.DialogContentPane;
