@@ -341,7 +341,7 @@ public class Controller
 	{
 		if (ms_jondonymProxy != null && ms_serviceContainer != null)
 		{
-			ms_serviceContainer.setCurrentCascade(ms_serviceContainer.getNextCascade());
+			ms_serviceContainer.setCurrentCascade(ms_serviceContainer.getNextRandomCascade());
 			ms_jondonymProxy.stop();
 			ms_jondonymProxy.start(ms_serviceContainer);
 		}
@@ -621,8 +621,8 @@ public class Controller
 	}
 	
 	/**
-	 * Call this method always before validation of the coupon code. If it fails, 
-	 * execute validateCoupon until the user gives up or the coupon code works.
+	 * Call this method always before validation of the coupon code with "null" as
+	 * argument. Then execute validateCoupon until the user gives up or the coupon code works.
 	 * Then you may call this method again. If it succeeds, no further validation is 
 	 * needed, as the account has been activated successfully.
 	 * @param a_code

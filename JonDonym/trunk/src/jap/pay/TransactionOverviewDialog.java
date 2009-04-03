@@ -62,7 +62,6 @@ import gui.GUIUtils;
 import gui.dialog.JAPDialog;
 import gui.dialog.WorkerContentPane;
 import jap.JAPConstants;
-import jap.JAPModel;
 import jap.JAPUtil;
 import logging.LogHolder;
 import logging.LogLevel;

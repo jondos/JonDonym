@@ -70,7 +70,7 @@ public class JonDoConsole
 				{
 					defaultCascade = new MixCascade(args[0], Integer.parseInt(args[1]));
 				}
-				catch (Exception e) 
+				catch (Exception e)
 				{
 					e.printStackTrace();
 					System.out.println("Could not parse input as [hostname] and [port] of a cascade!");
