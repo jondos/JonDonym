@@ -62,6 +62,7 @@ import anon.util.IXMLEncodable;
 public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncodable
 {
 	public static final long WEEK_SEVEN_DAYS_TIMEOUT = 7 * 24 * 60 * 60 * 1000l;
+	public static final long ONE_DAY_TIMEOUT = 24 * 60 * 60 * 1000l;
 	
 	/**
 	 * Remove the worst x% results.
@@ -369,109 +370,111 @@ public class PerformanceEntry extends AbstractDatabaseEntry implements IXMLEncod
 	private PerformanceAttributeEntry addPerformanceAttributeEntry(
 			int a_attribute, long a_timestamp, int a_value, boolean a_bImport)
 	{
-		PerformanceAttributeEntry entry = null;
-		PerformanceAttributeEntry previousEntry;
-		
-		// if time stamp is older than 7 days, ignore it
-		if (System.currentTimeMillis() - a_timestamp >= WEEK_SEVEN_DAYS_TIMEOUT)
+		synchronized (m_entries)
 		{
-			return null;
-		}
-		
-		if (a_timestamp > System.currentTimeMillis())
-		{
-			LogHolder.log(LogLevel.WARNING, LogType.MISC, 
-					"Performance timestamp has future value and is ignored: " + 
-					a_timestamp + " , current: " + System.currentTimeMillis());
-			return null;
-		}
-		
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date(a_timestamp));
-		
-		int day = cal.get(Calendar.DAY_OF_WEEK);
-		int hour = cal.get(Calendar.HOUR_OF_DAY);
-		
-		if (m_bPassive)
-		{
-			// passive mode
+			PerformanceAttributeEntry entry = null;
+			PerformanceAttributeEntry previousEntry;
+			
+			// if time stamp is older than 7 days, ignore it
+			if (System.currentTimeMillis() - a_timestamp >= WEEK_SEVEN_DAYS_TIMEOUT)
+			{
+				return null;
+			}
+			
+			if (a_timestamp > System.currentTimeMillis())
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, 
+						"Performance timestamp has future value and is ignored: " + 
+						a_timestamp + " , current: " + System.currentTimeMillis());
+				return null;
+			}
+			
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(new Date(a_timestamp));
+			
+			int day = cal.get(Calendar.DAY_OF_WEEK);
+			int hour = cal.get(Calendar.HOUR_OF_DAY);
+			
+			if (m_bPassive)
+			{
+				// passive mode
+				if (hour > 0)
+				{
+					hour -= 1;
+				}
+				else if (day == Calendar.SUNDAY)
+				{
+					day = Calendar.SATURDAY;
+					hour = 23;
+				}
+				else
+				{
+					day -= 1;
+					hour = 23;
+				}
+				cal.set(Calendar.HOUR_OF_DAY, hour);
+				cal.set(Calendar.DAY_OF_WEEK, day);
+				a_timestamp = cal.getTime().getTime();
+			}
+			
+			
+			// check if entries are obsolete
+			for (int i = hour; i < 24; i++)
+			{
+				if (m_entries[a_attribute][day][i] == null)
+				{
+					continue;
+				}
+				
+				// we've found at least one value in the entry that is older than 1 day
+				if (System.currentTimeMillis() - 
+						m_entries[a_attribute][day][i].getDayTimestamp() > ONE_DAY_TIMEOUT)
+				{
+					// invalidate the whole entry
+					m_entries[a_attribute][day][i] = null;
+				}
+			}
+			
+			// look for the attribute entry
+			entry = m_entries[a_attribute][day][hour];
+			// create one if necessary
+			if (entry == null)
+			{
+				m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute, m_bPassive);
+			}
+			else if (m_bPassive)
+			{
+				// only one entry at a time is allowed per hour
+				return null;
+			}
+			
 			if (hour > 0)
 			{
-				hour -= 1;
+				previousEntry = m_entries[a_attribute][day][hour-1];
 			}
 			else if (day == Calendar.SUNDAY)
 			{
-				day = Calendar.SATURDAY;
-				hour = 23;
+				previousEntry = m_entries[a_attribute][Calendar.SATURDAY][23];
 			}
 			else
 			{
-				day -= 1;
-				hour = 23;
-			}
-			cal.set(Calendar.HOUR_OF_DAY, hour);
-			cal.set(Calendar.DAY_OF_WEEK, day);
-			a_timestamp = cal.getTime().getTime();
-		}
-		
-		
-
-		// check if entries are obsolete
-		for(int i = hour; i < 24; i++)
-		{
-			if (m_entries[a_attribute][day][i] == null)
-			{
-				continue;
+				previousEntry = m_entries[a_attribute][day-1][23];
 			}
 			
-			// we've found at least one value in the entry that is older than 7 days
-			if (System.currentTimeMillis() - 
-					m_entries[a_attribute][day][i].getDayTimestamp() >= WEEK_SEVEN_DAYS_TIMEOUT)
+			// add the value to the entry
+			entry.addValue(a_timestamp, a_value, previousEntry);
+			
+			if (a_bImport)
 			{
-				// invalidate the whole entry
-				m_entries[a_attribute][day][i] = null;
+				if (!m_bPassive)
+				{
+					// add the value to the floating time entry
+					m_floatingTimeEntries[a_attribute].addValue(a_timestamp, a_value);
+				}
 			}
+			
+			return entry;
 		}
-		
-		// look for the attribute entry
-		entry = m_entries[a_attribute][day][hour];
-		// create one if necessary
-		if (entry == null)
-		{
-			m_entries[a_attribute][day][hour] = entry = new PerformanceAttributeEntry(a_attribute, m_bPassive);
-		}
-		else if (m_bPassive)
-		{
-			// only one entry at a time is allowed per hour
-			return null;
-		}
-		
-		if (hour > 0)
-		{
-			previousEntry = m_entries[a_attribute][day][hour-1];
-		}
-		else if (day == Calendar.SUNDAY)
-		{
-			previousEntry = m_entries[a_attribute][Calendar.SATURDAY][23];
-		}
-		else
-		{
-			previousEntry = m_entries[a_attribute][day-1][23];
-		}
-		
-		// add the value to the entry
-		entry.addValue(a_timestamp, a_value, previousEntry);
-		
-		if (a_bImport)
-		{
-			if (!m_bPassive)
-			{
-				// add the value to the floating time entry
-				m_floatingTimeEntries[a_attribute].addValue(a_timestamp, a_value);
-			}
-		}
-		
-		return entry;
 	}
 	
 	/**

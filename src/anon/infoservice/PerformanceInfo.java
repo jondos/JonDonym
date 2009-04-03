@@ -7,8 +7,6 @@ import org.w3c.dom.NodeList;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import anon.crypto.CertPath;
-import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
