@@ -26,16 +26,12 @@
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-package gui.wizard;
+package gui.dialog;
 
 import gui.JAPHyperlinkAdapter;
-import gui.dialog.DialogContentPane;
 
 import java.awt.GridBagConstraints;
 
-import gui.dialog.DialogContentPaneOptions;
-import gui.dialog.WorkerContentPane;
-import gui.dialog.JAPDialog;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Container;
@@ -48,7 +44,6 @@ import javax.swing.SwingUtilities;
 
 import anon.pay.xml.XMLGenericText;
 import anon.util.JAPMessages;
-import gui.dialog.DialogContentPane.IWizardSuitable;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -61,7 +56,8 @@ import java.awt.event.ComponentEvent;
  *
  * @author Elmar Schraml
  */
-public class TermsAndConditionsPane extends DialogContentPane implements IWizardSuitable /*, HyperlinkListener */
+public class TermsAndConditionsPane extends DialogContentPane implements 
+	DialogContentPane.IWizardSuitable /*, HyperlinkListener */
 {
 	public static final String MSG_HEADING = TermsAndConditionsPane.class.getName() + "_heading";
     private static final String MSG_ERROR_HAVE_TO_ACCEPT = TermsAndConditionsPane.class.getName() + "_havetoaccept";

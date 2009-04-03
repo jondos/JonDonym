@@ -7,7 +7,7 @@ import java.awt.Frame;
 import javax.swing.JDialog;
 
 import gui.dialog.JAPDialog;
-import gui.wizard.TermsAndConditionsPane;
+import gui.dialog.TermsAndConditionsPane;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
 import anon.infoservice.TermsAndConditionsFramework;
 import anon.infoservice.TermsAndConditions;
