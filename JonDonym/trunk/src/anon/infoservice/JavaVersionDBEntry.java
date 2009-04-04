@@ -59,6 +59,7 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 
 	private static final String OS_NAME = System.getProperty("os.name", "");
 
+	private static final String XML_ATTR_SUPPORT_FROM_VERSION = "supportFromVersion";
 	private static final String XML_ATTR_VENDOR = "vendor";
 	private static final String XML_ATTR_OPERATING_SYSTEM = "os";
 	private static final String XML_ELEM_VERSION = "LatestVersion";
@@ -70,14 +71,12 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 
 	private static final String[] VENDOR_IDS = {VENDOR_ID_SUN_JAVA, VENDOR_ID_BLACKDOWN_JAVA};
 
-	/**
-	 * This should be an infinite timeout (1000 years are infinite enough).
-	 */
 	private static final long TIMEOUT = Long.MAX_VALUE;
 
 
 	private long m_lastUpdate;
 	private String m_latestVersion;
+	private String m_lastSupportedVersion;
 	private String m_vendor;
 	private URL m_downloadURL;
 	private String m_vendorLongName;
@@ -157,6 +156,9 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 		{
 			throw new XMLParseException(XML_ELEMENT_NAME, "Unknown vendor!");
 		}
+		
+		m_lastSupportedVersion = XMLUtil.parseAttribute(a_xmlElement, 
+				XML_ATTR_SUPPORT_FROM_VERSION, "");
 
 		nodes = a_xmlElement.getElementsByTagName(XML_ELEM_VERSION);
 		for (int i = 0; i < nodes.getLength(); i++)
@@ -233,7 +235,7 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 		while (versions.hasMoreElements())
 		{
 			currentVersion =  (JavaVersionDBEntry)versions.nextElement();
-			if (isJavaTooOld(currentVersion))
+			if (currentVersion.isJavaTooOld())
 			{
 				return currentVersion;
 			}
@@ -242,19 +244,30 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 		return null;
 	}
 
-
-	public static boolean isJavaTooOld(JavaVersionDBEntry a_entry)
+	public boolean isJavaTooOld()
 	{
-		if (a_entry == null || CURRENT_JAVA_VENDOR == null)
+		return isJavaOK(false);
+	}
+	
+	public boolean isJavaNoMoreSupported()
+	{
+		return isJavaOK(true);
+	}
+	
+	private boolean isJavaOK(boolean a_bCheckStillSupported)
+	{
+		if (CURRENT_JAVA_VENDOR == null)
 		{
 			return false;
 		}
 
-		String vendor = a_entry.getVendor().toLowerCase();
+		String vendor = getVendor().toLowerCase();
 		String currentVendor = CURRENT_JAVA_VENDOR.toLowerCase();
 		if ((currentVendor.indexOf("microsoft") >= 0) ||
 			(currentVendor.indexOf(vendor) >= 0 && (CURRENT_JAVA_VERSION == null ||
-			 CURRENT_JAVA_VERSION.compareTo(a_entry.getJREVersion()) < 0)))
+			 CURRENT_JAVA_VERSION.compareTo(
+					 (a_bCheckStillSupported ? 
+							 getLastSupportedJREVersion() : getJREVersion())) < 0)))
 		{
 			return true;
 		}
@@ -262,6 +275,10 @@ public class JavaVersionDBEntry  extends AbstractDistributableDatabaseEntry
 		return false;
 	}
 
+	public String getLastSupportedJREVersion()
+	{
+		return m_lastSupportedVersion;
+	}
 
 	/**
 	 * Returns the URL where this Java version is available.

@@ -47,7 +47,6 @@ import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
 import anon.infoservice.JavaVersionDBEntry;
-import anon.util.*;
 import anon.infoservice.IDistributable;
 
 /**
@@ -126,7 +125,7 @@ public class UpdateInformationHandler implements Runnable
 					 * stored there
 					 */
 					distributable = (JAPVersionInfo) (Database.getInstance(JAPVersionInfo.class).
-						getEntryById(JAPVersionInfo.ID_RELEASE));
+						getEntryById(JAPVersionInfo.ID_STABLE));
 					if (distributable != null)
 					{
 						/* we have found a old entry in the database -> better than nothing */
@@ -153,7 +152,7 @@ public class UpdateInformationHandler implements Runnable
 					 * stored there
 					 */
 					distributable = (JAPVersionInfo) (Database.getInstance(JAPVersionInfo.class).
-						getEntryById(JAPVersionInfo.ID_DEVELOPMENT));
+						getEntryById(JAPVersionInfo.ID_BETA));
 					if (distributable != null)
 					{
 						/* we have found a old entry in the database -> better than nothing */
@@ -252,9 +251,9 @@ public class UpdateInformationHandler implements Runnable
 				 */
 				distributables = Database.getInstance(JavaVersionDBEntry.class).getEntryList();
 				distributables.addElement(Database.getInstance(JAPVersionInfo.class).
-										  getEntryById(JAPVersionInfo.ID_RELEASE));
+										  getEntryById(JAPVersionInfo.ID_STABLE));
 				distributables.addElement(Database.getInstance(JAPVersionInfo.class).
-										  getEntryById(JAPVersionInfo.ID_DEVELOPMENT));
+										  getEntryById(JAPVersionInfo.ID_BETA));
 				distributables.addElement(Database.getInstance(JAPMinVersion.class).
 										  getEntryById(JAPMinVersion.DEFAULT_ID));
 

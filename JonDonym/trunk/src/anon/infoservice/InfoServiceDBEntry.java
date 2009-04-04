@@ -1687,9 +1687,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 				AbstractDistributableDatabaseEntry.getHttpRequestString(a_distributable)));
 		}
 
-		/** @todo check signatures for java versions, too! */
-		if (! (a_distributable.equals(JavaVersionDBEntry.class) && !a_bSerials) &&
-			!SignatureVerifier.getInstance().verifyXml(doc.getDocumentElement(),
+		if (!SignatureVerifier.getInstance().verifyXml(doc.getDocumentElement(),
 			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
 		{
 			LogHolder.log(LogLevel.INFO, LogType.MISC, "Cannot verify the signature for " +

@@ -42,8 +42,8 @@ import anon.util.XMLUtil;
  */
 public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
 {
-	public static final String ID_DEVELOPMENT = "/japDevelopment.jnlp";
-	public static final String ID_RELEASE = "/japRelease.jnlp";
+	public static final String ID_BETA = "/japDevelopment.jnlp";
+	public static final String ID_STABLE = "/japRelease.jnlp";
 
   /**
    * Describes a JAP release version.
@@ -125,6 +125,7 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
     m_versionInfoType = a_versionInfoType;
     /* parse the document */
     m_version = XMLUtil.parseAttribute(a_jnlpRootNode, "version", "");
+    m_version = m_version.trim();
     try {
       String strDate = a_jnlpRootNode.getAttribute("releaseDate") + " GMT";
 	  try
@@ -162,7 +163,43 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
     m_xmlStructure = a_jnlpRootNode;
   }
 
-
+  public static JAPVersionInfo getRecommendedUpdate(String a_currentVersion, boolean a_bStable)
+  {
+	  JAPVersionInfo viStable = 
+			(JAPVersionInfo)Database.getInstance(JAPVersionInfo.class).getEntryById(JAPVersionInfo.ID_STABLE);
+	  JAPVersionInfo viBeta = 
+		  (JAPVersionInfo)Database.getInstance(JAPVersionInfo.class).getEntryById(JAPVersionInfo.ID_BETA);
+		
+	  if (a_bStable)
+	  {
+		  if (viStable != null && viStable.getJapVersion().compareTo(a_currentVersion) > 0)
+		  {
+			  return viStable;
+		  }
+		  return null;
+	  }
+	  
+	  if (viStable != null)
+	  {
+		  if (viBeta == null && viStable.getJapVersion().compareTo(a_currentVersion) > 0)
+		  {
+			  return viStable;
+		  }
+		  if (viBeta != null && (viStable.getJapVersion().equals(viBeta.getJapVersion()) || 
+				  (viStable.getJapVersion().compareTo(a_currentVersion) > 0 &&
+						  viBeta.getJapVersion().compareTo(a_currentVersion) > 0)))
+		  {
+			  return viStable;
+		  }
+	  }
+	
+	  if (viBeta != null && viBeta.getJapVersion().compareTo(a_currentVersion) > 0)
+	  {
+		  return viBeta;
+	  }
+	  
+	  return null;
+  }
 
 
   /**
@@ -174,15 +211,13 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
    */
   public String getId()
   {
-    String versionInfoId = ID_RELEASE;
+    String versionInfoId = ID_STABLE;
     if (m_versionInfoType == JAP_DEVELOPMENT_VERSION)
 	{
-      versionInfoId = ID_DEVELOPMENT;
+      versionInfoId = ID_BETA;
     }
     return versionInfoId;
   }
-
-
 
   /**
    * Returns the time when this version information was created by the root-of-update-information

@@ -4507,9 +4507,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 		LogHolder.log(LogLevel.NOTICE, LogType.MISC,
 					  "Checking if new " + versionType + " version of JAP is available...");
 
-		JAPVersionInfo vi = null;
-		JAPVersionInfo viRelease = null;
-		String updateVersionNumber = null;
+		JAPVersionInfo viDefault = null;
+		JAPVersionInfo viRecommended;
+		String updateVersionNumber;
 
 
 		Database.getInstance(JAPVersionInfo.class).update(
@@ -4517,73 +4517,52 @@ public final class JAPController extends Observable implements IProxyListener, O
 		Database.getInstance(JAPVersionInfo.class).update(
 			  InfoServiceHolder.getInstance().getJAPVersionInfo(JAPVersionInfo.JAP_DEVELOPMENT_VERSION));
 
-		vi = (JAPVersionInfo)Database.getInstance(JAPVersionInfo.class).getEntryById(
-			  JAPVersionInfo.ID_RELEASE);
-		if (!JAPConstants.m_bReleasedVersion)
+		if (JAPConstants.m_bReleasedVersion)
 		{
-			viRelease = vi;
-			vi = (JAPVersionInfo) Database.getInstance(JAPVersionInfo.class).getEntryById(
-				JAPVersionInfo.ID_DEVELOPMENT);
+			viDefault = (JAPVersionInfo) Database.getInstance(JAPVersionInfo.class).getEntryById(
+				JAPVersionInfo.ID_STABLE);
 		}
+		else
+		{
+			viDefault = (JAPVersionInfo) Database.getInstance(JAPVersionInfo.class).getEntryById(
+					JAPVersionInfo.ID_BETA);
+		}
+		viRecommended = 
+			JAPVersionInfo.getRecommendedUpdate(JAPConstants.aktVersion, JAPConstants.m_bReleasedVersion);
 
-		if (vi == null)
+		if (viDefault == null)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.MISC,
 						  "Could not get the current JAP version from infoservice.");
 			return 1;
 		}
-		if (viRelease != null && viRelease.getJapVersion() != null && vi.getJapVersion() != null &&
-			//Util.convertVersionStringToNumber(viRelease.getJapVersion()) + 2 >= //patch
-			//Util.convertVersionStringToNumber(vi.getJapVersion()) &&  // patch
-			//viRelease.getJapVersion().compareTo(JAPConstants.aktVersion) > 0) // patch
-			viRelease.getJapVersion().equals(vi.getJapVersion()))
+		if (viRecommended != null && !viDefault.equals(viRecommended))
 		{
-			// developer and release version are equal; recommend to switch to release
+			// beta and stable version are equal or both newer than the current version 
+			// recommend to switch to stable
 			recommendToSwitchToRelease = true;
+			updateVersionNumber = viRecommended.getJapVersion();
+		}
+		else
+		{
+			updateVersionNumber = viDefault.getJapVersion();
 		}
 
-		/*
-		if (a_bForced)
-		{
-			updateVersionNumber = a_minVersion;
-		}*/
-
-		if (updateVersionNumber == null)
-		{
-			updateVersionNumber = vi.getJapVersion();
-		}
-
-		if (updateVersionNumber == null)
-		{
-			/* can't get the current version number from the infoservices. Ignore this,
-			 * as this is not a problem!
-			 */
-			LogHolder.log(LogLevel.ERR, LogType.MISC,
-						  "Could not get the current JAP version number from infoservice.");
-			/*
-				JAPDialog.showErrorDialog(m_View, JAPMessages.getString("errorConnectingInfoService"),
-					LogType.NET);*/
-			//notifyJAPObservers();
-			return 1;
-		}
-
-		if (!a_bForced && !recommendToSwitchToRelease)
-		{
-			if (updateVersionNumber.compareTo(JAPConstants.aktVersion) <= 0 || isConfigAssistantShown()
-				|| !JAPModel.getInstance().isReminderForOptionalUpdateActivated())
-			{
-				// no update needed; do not show dialog
-				return 0;
-			}
-		}
-
-		updateVersionNumber = updateVersionNumber.trim();
-		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Local version: " + JAPConstants.aktVersion);
 		if (updateVersionNumber.compareTo(JAPConstants.aktVersion) <= 0)
 		{
 			/* the local JAP version is up to date -> exit */
 			return 0;
 		}
+		
+		if (!a_bForced && !recommendToSwitchToRelease)
+		{
+			if (isConfigAssistantShown() || !JAPModel.getInstance().isReminderForOptionalUpdateActivated())
+			{
+				// no update needed; do not show dialog
+				return 0;
+			}
+		}
+		
 		/* local version is not up to date, new version is available -> ask the user whether to
 		 * download the new version or not
 		 */
@@ -4611,7 +4590,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			try
 			{
 				URL tempURL;
-				if (vi.getId().equals(JAPVersionInfo.ID_RELEASE))
+				if (viDefault.getId().equals(JAPVersionInfo.ID_STABLE) || 
+					(viRecommended != null && viRecommended.equals(JAPVersionInfo.ID_STABLE)))
 				{
 					tempURL = 
 						new URL(JAPMessages.getString(JAPWelcomeWizardPage.MSG_CHANGELOG_URL));
@@ -4634,7 +4614,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		if (recommendToSwitchToRelease)
 		{
 			message += "<br><br>" + JAPMessages.getString(MSG_ASK_WHICH_VERSION);
-			options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO_CANCEL)
+			options = new JAPDialog.Options(JAPDialog.OPTION_TYPE_YES_NO)
 			{
 				public String getYesOKText()
 				{
@@ -4674,12 +4654,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			if (bAnswer == JAPDialog.RETURN_VALUE_NO)
 			{
-				vi = viRelease;
+				viDefault = viRecommended;
 			}
 			/* User has selected to download new version of JAP -> Download, Alert, exit program */
 			//store current configuration first
 			saveConfigFile();
-			JAPUpdateWizard wz = new JAPUpdateWizard(vi, getCurrentView());
+			JAPUpdateWizard wz = new JAPUpdateWizard(viDefault, getCurrentView());
 			/* we got the JAPVersionInfo from the infoservice */
 			/* Assumption: If we are here, the download failed for some resaons, otherwise the
 			 * program would quit
