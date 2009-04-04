@@ -92,7 +92,7 @@ public class JAPWelcomeWizardPage extends BasicWizardPage implements ActionListe
 		setPageTitle(JAPMessages.getString("updateWelcomeWizardPageTitle",
 										   new Object[]{
 										   a_versionInfo.getJapVersion() +
-										   (a_versionInfo.getId().equals(JAPVersionInfo.ID_RELEASE) ?
+										   (a_versionInfo.getId().equals(JAPVersionInfo.ID_STABLE) ?
 											"" : "-dev")}));
 
 		GridBagLayout m_panelComponentsLayout = new GridBagLayout();
@@ -112,7 +112,7 @@ public class JAPWelcomeWizardPage extends BasicWizardPage implements ActionListe
 		try
 		{
 			URL tempURL;
-			if (a_versionInfo.getId().equals(JAPVersionInfo.ID_RELEASE))
+			if (a_versionInfo.getId().equals(JAPVersionInfo.ID_STABLE))
 			{
 				tempURL = new URL(JAPMessages.getString(MSG_CHANGELOG_URL));
 			}

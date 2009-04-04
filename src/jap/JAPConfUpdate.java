@@ -430,9 +430,9 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 		else
 		{
 			JAPVersionInfo devVersion = (JAPVersionInfo)
-				Database.getInstance(JAPVersionInfo.class).getEntryById(JAPVersionInfo.ID_DEVELOPMENT);
+				Database.getInstance(JAPVersionInfo.class).getEntryById(JAPVersionInfo.ID_BETA);
 			JAPVersionInfo releaseVersion = (JAPVersionInfo)
-				Database.getInstance(JAPVersionInfo.class).getEntryById(JAPVersionInfo.ID_RELEASE);
+				Database.getInstance(JAPVersionInfo.class).getEntryById(JAPVersionInfo.ID_STABLE);
 			if (devVersion != null && releaseVersion != null)
 			{
 				m_releaseVersion = releaseVersion;

@@ -89,6 +89,7 @@ import anon.infoservice.ClickedMessageIDDBEntry;
 import anon.infoservice.Database;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
+import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.JavaVersionDBEntry;
 import anon.infoservice.PerformanceInfo;
@@ -187,7 +188,12 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 	private static final String MSG_OBSERVABLE_TITLE = JAPNewView.class.getName() + "_observableTitle";	
 	
 	private static final String MSG_DISTRIBUTION = JAPNewView.class.getName() + "_lblDistribution";
-	private static final String MSG_USER_ACTIVITY = JAPNewView.class.getName() + "_lblUserActivity";	
+	private static final String MSG_USER_ACTIVITY = JAPNewView.class.getName() + "_lblUserActivity";
+	
+	private static final String MSG_JAVA_FORCED_TITLE = JAPNewView.class.getName() + "_javaForcedTitle";
+	private static final String MSG_JAVA_FORCED_EXPLAIN = JAPNewView.class.getName() + "_javaForcedExplain";
+	private static final String MSG_JAVA_FORCED_OS = JAPNewView.class.getName() + "_javaForcedOS";
+	private static final String MSG_JAVA_FORCED_QUESTION = JAPNewView.class.getName() + "_javaForcedQuestion";
 
 	private static final String MSG_LBL_ENCRYPTED_DATA =
 		JAPNewView.class.getName() + "_lblEncryptedData";
@@ -414,23 +420,24 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				m_comboAnonServices.closeCascadePopupMenu();
 				
 				boolean bUpdated = false;
-				Vector vecVersions = new Vector();
-				JAPVersionInfo viTemp;
+				
+				JAPVersionInfo vi = 
+					JAPVersionInfo.getRecommendedUpdate(JAPConstants.aktVersion, JAPConstants.m_bReleasedVersion);
 
-				viTemp = (JAPVersionInfo) Database.getInstance(JAPVersionInfo.class).getEntryById(
-					JAPVersionInfo.ID_RELEASE);
-				if (viTemp != null)
+				if (vi == null)
 				{
-					vecVersions.addElement(viTemp);
-				}
-				viTemp = (JAPVersionInfo) Database.getInstance(JAPVersionInfo.class).getEntryById(
-					JAPVersionInfo.ID_DEVELOPMENT);
-				if (viTemp != null)
-				{
-					vecVersions.addElement(viTemp);
+					if (JAPConstants.m_bReleasedVersion)
+					{
+						vi = (JAPVersionInfo) Database.getInstance(JAPVersionInfo.class).getEntryById(
+								JAPVersionInfo.ID_STABLE);
+					}
+					else
+					{
+						vi = (JAPVersionInfo) Database.getInstance(JAPVersionInfo.class).getEntryById(
+								JAPVersionInfo.ID_BETA);
+					}
 				}
 
-				Enumeration entries = vecVersions.elements();
 				JavaVersionDBEntry versionEntry;
 				if (!JAPController.getInstance().hasPortableJava() && (versionEntry = JavaVersionDBEntry.getNewJavaVersion()) != null &&
 					(versionEntry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated()))
@@ -443,34 +450,25 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 					versionEntry = null;
 				}
 
-				while (entries.hasMoreElements())
+				if (vi != null && vi.getJapVersion().compareTo(JAPConstants.aktVersion) > 0)
 				{
-					JAPVersionInfo vi = (JAPVersionInfo) entries.nextElement();
-					if (vi != null && vi.getJapVersion() != null &&
-						vi.getJapVersion().compareTo(JAPConstants.aktVersion) > 0)
+					JAPUpdateWizard wz = new JAPUpdateWizard(vi,
+						JAPController.getInstance().getCurrentView());
+					/* we got the JAPVersionInfo from the infoservice */
+					if (wz.getStatus() == JAPUpdateWizard.UPDATESTATUS_ERROR)
 					{
-						if (JAPConstants.m_bReleasedVersion && !vi.getId().equals(JAPVersionInfo.ID_RELEASE))
-						{
-							continue;
-						}
-						JAPUpdateWizard wz = new JAPUpdateWizard(vi,
-							JAPController.getInstance().getCurrentView());
-						/* we got the JAPVersionInfo from the infoservice */
-						if (wz.getStatus() == JAPUpdateWizard.UPDATESTATUS_ERROR)
-						{
-							/* Download failed -> alert, and reset anon mode to false */
-							LogHolder.log(LogLevel.ERR, LogType.MISC, "Some update problem.");
-							JAPDialog.showErrorDialog(JAPController.getInstance().getCurrentView(),
-								JAPMessages.getString("downloadFailed") +
-								JAPMessages.getString("infoURL"), LogType.MISC);
-						}
-						else if (wz.getStatus() == JAPUpdateWizard.UPDATESTATUS_SUCCESS)
-						{
-							bUpdated = true;
-						}
-						break;
+						/* Download failed -> alert, and reset anon mode to false */
+						LogHolder.log(LogLevel.ERR, LogType.MISC, "Some update problem.");
+						JAPDialog.showErrorDialog(JAPController.getInstance().getCurrentView(),
+							JAPMessages.getString("downloadFailed") +
+							JAPMessages.getString("infoURL"), LogType.MISC);
+					}
+					else if (wz.getStatus() == JAPUpdateWizard.UPDATESTATUS_SUCCESS)
+					{
+						bUpdated = true;
 					}
 				}
+				
 				// Do not execute other objects after successfully finishing the wizard!
 
 				if (!bUpdated && versionEntry != null)
@@ -2267,7 +2265,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 				  message.getMessageCode() == DatabaseMessage.ENTRY_RENEWED))
 			{
 				final JavaVersionDBEntry entry = (JavaVersionDBEntry) message.getMessageData();
-				if (JavaVersionDBEntry.isJavaTooOld(entry))
+				if (entry != null && (entry.isJavaTooOld() || entry.isJavaNoMoreSupported()))
 				{
 					if (entry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated())
 					{
@@ -2283,30 +2281,73 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						}
 					}
 
-					if ((entry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated()) &&
+					if ((entry.isUpdateForced() || entry.isJavaNoMoreSupported() ||
+						JAPModel.getInstance().isReminderForJavaUpdateActivated()) &&
 						!JAPController.getInstance().isConfigAssistantShown())
-					{
+					{						
 						// do it as thread as otherwise this would block the database
 						new Runnable()
 						{
 							public void run()
 							{
+								int iMessageType = DialogContentPane.MESSAGE_TYPE_QUESTION;
+								int iOptionType = DialogContentPane.OPTION_TYPE_YES_NO;
+								String strTitle = JAPMessages.getString(MSG_TITLE_OLD_JAVA);
+								String strMessage = "";
+								
+								if (entry.isUpdateForced() || entry.isJavaNoMoreSupported())
+								{
+									iMessageType = DialogContentPane.MESSAGE_TYPE_WARNING;
+									strTitle = JAPMessages.getString(MSG_JAVA_FORCED_TITLE);
+									strMessage = "<p><b>" + JAPMessages.getString(MSG_JAVA_FORCED_EXPLAIN,
+											JavaVersionDBEntry.CURRENT_JAVA_VERSION) + "</b></p>";
+									if (entry.isJavaNoMoreSupported() && !entry.isJavaTooOld())
+									{
+										// operating system too old!!
+										iOptionType = DialogContentPane.OPTION_TYPE_DEFAULT;
+										strMessage += "<br><p><b>" + JAPMessages.getString(MSG_JAVA_FORCED_OS,
+												"\u2265 " + entry.getLastSupportedJREVersion()) + "</b></p>";
+									}
+									else
+									{
+										strMessage += "<br><p>" + JAPMessages.getString(MSG_JAVA_FORCED_QUESTION) + "</p>";
+									}
+								}
+								else
+								{
+									strMessage = JAPMessages.getString(MSG_OLD_JAVA_HINT,
+											new Object[]{entry.getJREVersion()});
+								}
+								
 								JAPDialog.LinkedCheckBox checkbox = null;
-								if (!entry.isUpdateForced())
+								if (!entry.isUpdateForced() && !entry.isJavaNoMoreSupported())
 								{
 									checkbox = new JAPDialog.LinkedCheckBox(false);
 								}
-								if (JAPDialog.showYesNoDialog(JAPController.getInstance().getCurrentView(),
-									JAPMessages.getString(MSG_OLD_JAVA_HINT,
-									new Object[]
-									{entry.getJREVersion()}), JAPMessages.getString(MSG_TITLE_OLD_JAVA),
-									checkbox))
+								if (JAPDialog.showConfirmDialog(JAPController.getInstance().getCurrentView(),
+									strMessage, strTitle, iOptionType, iMessageType, checkbox) == 
+										JAPDialog.RETURN_VALUE_OK)
 								{
-									showJavaUpdateDialog(entry);
+									if (iOptionType != DialogContentPane.OPTION_TYPE_DEFAULT)
+									{
+										showJavaUpdateDialog(entry);
+									}
 								}
 								if (checkbox != null && checkbox.getState())
 								{
 									JAPModel.getInstance().setReminderForJavaUpdate(false);
+									synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
+									{
+										if (JAPVersionInfo.getRecommendedUpdate(
+												JAPConstants.aktVersion, JAPConstants.m_bReleasedVersion) == null)
+										{
+											if (m_updateAvailableID >= 0)
+											{
+												m_StatusPanel.removeStatusMsg(m_updateAvailableID);
+												m_updateAvailableID = -1;
+											}
+										}
+									}
 								}
 							}
 						}.run();
@@ -2813,28 +2854,22 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 		/*
 		 * Only things that have really changed are updated!
 		 */
-		Enumeration entries =
-			Database.getInstance(JAPVersionInfo.class).getEntrySnapshotAsEnumeration();
-		JAPVersionInfo vi = null;
-		while (entries.hasMoreElements())
+
+		boolean bUpdateAvailable = 
+			JAPVersionInfo.getRecommendedUpdate(
+					JAPConstants.aktVersion, JAPConstants.m_bReleasedVersion) != null;
+
+		JavaVersionDBEntry dummyEntry;
+		if (!JAPController.getInstance().hasPortableJava() &&
+				(dummyEntry = JavaVersionDBEntry.getNewJavaVersion()) != null &&
+				(dummyEntry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated()))
 		{
-			vi = (JAPVersionInfo) entries.nextElement();
-			if (JAPConstants.m_bReleasedVersion && !vi.getId().equals(JAPVersionInfo.ID_RELEASE))
-			{
-				vi = null;
-				continue;
-			}
-			break;
+			bUpdateAvailable = true;
 		}
 		
-		JavaVersionDBEntry dummyEntry;
-		if ( (vi != null && vi.getJapVersion() != null &&
-			  vi.getJapVersion().compareTo(JAPConstants.aktVersion) > 0) ||
-			 ( !JAPController.getInstance().hasPortableJava() &&
-				(dummyEntry = JavaVersionDBEntry.getNewJavaVersion()) != null &&
-				(dummyEntry.isUpdateForced() || JAPModel.getInstance().isReminderForJavaUpdateActivated())))
+		synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
 		{
-			synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
+			if (bUpdateAvailable)
 			{
 				if (m_updateAvailableID < 0)
 				{
@@ -2843,10 +2878,7 @@ final public class JAPNewView extends AbstractJAPMainView implements IJAPMainVie
 						false, m_listenerUpdate);
 				}
 			}
-		}
-		else
-		{
-			synchronized (SYNC_STATUS_UPDATE_AVAILABLE)
+			else
 			{
 				if (m_updateAvailableID >= 0)
 				{
