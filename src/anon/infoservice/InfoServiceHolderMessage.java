@@ -50,6 +50,11 @@ public class InfoServiceHolderMessage extends AbstractMessage {
    * only the pererred infoservice is used all the time).
    */
   public static final int INFOSERVICE_MANAGEMENT_CHANGED = 2;
+  
+  /**
+   * Indicated that all InfoServices either have invalid or expired certificates.
+   */
+  public static final int INFOSERVICES_NOT_VERIFYABLE = 3;
 
 
   /**

@@ -84,6 +84,11 @@ public class MultiCertPath implements IXMLEncodable
 	 */
 	public boolean isValid(Date a_date)
 	{
+		if(!this.needsVerification())
+		{
+			return true;
+		}
+		
 		synchronized (m_certPaths)
 		{
 			//check if we have a verified path

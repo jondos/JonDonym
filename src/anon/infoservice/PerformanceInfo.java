@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -143,9 +144,18 @@ public class PerformanceInfo extends AbstractCertifiedDatabaseEntry implements I
 	
 	public boolean isVerified()
 	{
-		if (m_signature != null)
+		if (m_certPath != null)
 		{
-			return m_signature.isVerified();
+			return m_certPath.isVerified();
+		}
+		return false;
+	}
+	
+	public boolean isValid()
+	{
+		if (m_certPath != null)
+		{	
+			return m_certPath.isValid(new Date());
 		}
 		return false;
 	}

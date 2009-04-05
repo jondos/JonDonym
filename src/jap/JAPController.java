@@ -57,6 +57,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -93,6 +94,7 @@ import anon.client.AnonClient;
 import anon.client.ITermsAndConditionsContainer;
 import anon.client.TermsAndConditionsResponseHandler;
 import anon.client.TrustModel;
+import anon.crypto.ExpiredSignatureException;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.infoservice.BlacklistedCascadeIDEntry;
@@ -107,6 +109,7 @@ import anon.infoservice.IDistributor;
 import anon.infoservice.IServiceContextContainer;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.InfoServiceHolder;
+import anon.infoservice.InfoServiceHolderMessage;
 import anon.infoservice.JAPMinVersion;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.ListenerInterface;
@@ -219,6 +222,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 	public static final String MSG_FORWARDER_REG_ERROR_SHORT = JAPController.class.getName() + "_forwardErrorShort";
 	public static final String MSG_READ_NEW_HELP = JAPController.class.getName() + "_readNewHelp";
 	
+	public static final String MSG_WARNING_IS_CERTS_EXPIRED = JAPController.class.getName() + "_warningISCertsExpired";
+	public static final String MSG_WARNING_IS_CERTS_INVALID = JAPController.class.getName() + "_warningISCertsInvalid";
+	
 	
 
 	private static final String XML_ELEM_LOOK_AND_FEEL = "LookAndFeel";
@@ -306,6 +312,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private boolean mbDoNotAbuseReminder = false; // indicates if new warning message in setAnonMode (containing Do no abuse) has been shown
 	private boolean m_bForwarderNotExplain = false; //indicates if the warning message about forwarding should be shown
 
+	private boolean m_bExpiredISCertificatesShown = false;
+	private final Object SYNC_EXPIRED_IS_CERTS = new Object();
+	
 	private boolean m_bAskSavePayment;
 	private boolean m_bPresentationMode = false;
 	private boolean m_bPortableJava = false;
@@ -568,6 +577,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		JAPModel.getInstance().getRoutingSettings().getRegistrationStatusObserver().addObserver(this);
 		m_Model.addObserver(this);
 		Database.getInstance(PerformanceInfo.class).addObserver(this);
+		InfoServiceHolder.getInstance().addObserver(this);
 		m_iStatusPanelMsgIdForwarderServerStatus = -1;
 	}
 
@@ -4429,7 +4439,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 
 		LogHolder.log(LogLevel.INFO, LogType.MISC, "Trying to fetch mixcascades from infoservice.");
-		while (!m_MixCascadeUpdater.update())
+		while (!m_MixCascadeUpdater.update() && !m_bExpiredISCertificatesShown)
 		{
 			LogHolder.log(LogLevel.ERR, LogType.NET, "No connection to infoservices.");
 			if (!JAPModel.isSmallDisplay() &&
@@ -4915,6 +4925,37 @@ public final class JAPController extends Observable implements IProxyListener, O
 				{
 					/* the registration status of the local forwarding server has changed */
 					notifyJAPObservers();
+				}
+			}
+			else if (a_notifier == InfoServiceHolder.getInstance())
+			{
+				final InfoServiceHolderMessage message = (InfoServiceHolderMessage)a_message;
+				
+				synchronized (SYNC_EXPIRED_IS_CERTS)
+				{
+					if (!m_bExpiredISCertificatesShown && message != null && 
+							message.getMessageData() != null)
+					{
+						m_bExpiredISCertificatesShown = true;
+						new Thread(new Runnable()
+						{
+							public void run()
+							{
+								JAPDialog.LinkedHelpContext context = new JAPDialog.LinkedHelpContext("certificates");
+								if (message.getMessageData() instanceof ExpiredSignatureException)
+								{
+									JAPDialog.showWarningDialog(getCurrentView(), 
+											JAPMessages.getString(MSG_WARNING_IS_CERTS_EXPIRED), context);
+								}
+								else if (message.getMessageData() instanceof SignatureException)
+								{
+									JAPDialog.showWarningDialog(getCurrentView(), 
+											JAPMessages.getString(MSG_WARNING_IS_CERTS_INVALID), context);
+								}
+								m_bExpiredISCertificatesShown = false;
+							}
+						}).start();
+					}
 				}
 			}
 			else if (a_notifier == Database.getInstance(JAPMinVersion.class) && a_message != null &&

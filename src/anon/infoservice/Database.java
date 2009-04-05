@@ -31,6 +31,7 @@
 package anon.infoservice;
 
 import java.lang.reflect.Constructor;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -752,7 +753,8 @@ public final class Database extends Observable implements IXMLEncodable
 				}
 				
 				if (a_bVerify && instance instanceof ICertifiedDatabaseEntry &&
-					!((ICertifiedDatabaseEntry) instance).isVerified())
+					(!((ICertifiedDatabaseEntry) instance).isVerified() ||
+					!((ICertifiedDatabaseEntry) instance).isValid()))
 				{
 					// not verified
 					LogHolder.log(LogLevel.WARNING, LogType.MISC, 
