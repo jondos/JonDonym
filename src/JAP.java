@@ -36,6 +36,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.ProxySelector;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Hashtable;
@@ -172,9 +174,7 @@ public class JAP
 		int listenPort = 0;
 		MixCascade commandlineCascade = null;
 		
-		/* system wide socks settings should not not apply to JAP */
-		System.getProperties().remove("socksProxyHost");
-		System.getProperties().remove("socksProxyPort");
+
 		
 		JAPModel.getInstance().setProgramName(getArgumentValue("--programName"));
 		String strname = JAPModel.getInstance().getProgramName();
@@ -206,6 +206,23 @@ public class JAP
 		templog.setLogType(LogType.ALL);
 		templog.setLogLevel(LogLevel.WARNING);		
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Pre configuration debug output enabled.");
+		
+
+		/* system wide socks settings should not not apply to JAP */
+		System.getProperties().remove("socksProxyHost");
+		System.getProperties().remove("socksProxyPort");
+		try 
+		{
+			//ProxySelector.setDefault(null);
+			Class classProxySelector = Class.forName("java.net.ProxySelector");
+			classProxySelector.getMethod("setDefault", 
+					new Class[]{classProxySelector}).invoke(classProxySelector, new Object[]{null});
+		} 
+		catch (Exception e) 
+		{
+			LogHolder.log(LogLevel.ERR, LogType.NET, "Could not reset ProxySelector!", e);
+		} 
+		
 		
 		//Macintosh Runtime for Java (MRJ) on Mac OS
 		// Test (part 1) for right JVM
