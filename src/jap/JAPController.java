@@ -357,7 +357,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		}
 	};
 
-	private DirectProxy.AllowUnprotectedConnectionCallback m_proxyCallback;
+	private DirectProxy.AllowProxyConnectionCallback m_proxyCallback;
 
 	/** Holds the MsgID of the status message after the forwarding server was started.*/
 	private int m_iStatusPanelMsgIdForwarderServerStatus;
@@ -441,9 +441,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 		// initialise HTTP proxy
 		if (!JAPModel.isSmallDisplay())
 		{
-			m_proxyCallback = new DirectProxy.AllowUnprotectedConnectionCallback()
+			m_proxyCallback = new DirectProxy.AllowProxyConnectionCallback()
 			{
-				public DirectProxy.AllowUnprotectedConnectionCallback.Answer callback(
+				public DirectProxy.AllowProxyConnectionCallback.Answer callback(
 						DirectProxy.RequestInfo a_requestInfo)
 				{	
 					String uri;

@@ -10,7 +10,10 @@ public final class JonDoFoxHeader implements HTTPConnectionListener {
 	final static String HTTP_ENCODING_DEFLATE = "deflate";
 	
 	public final static String JONDOFOX_USER_AGENT = "Mozilla/5.0 Gecko/20070713 Firefox/2.0.0.0";
+	public final static String JONDOFOX_USER_AGENT_NEW = "Mozilla/5.0 (en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7";
+		
 	public final static String JONDOFOX_LANGUAGE = "en";
+	public final static String JONDOFOX_LANGUAGE_NEW = "en-US";
 	public final static String JONDOFOX_CHARSET = "utf-8,*";
 	public final static String JONDOFOX_CONTENT_TYPES = "*/*";
 	public final static String JONDOFOX_ENCODING = HTTP_ENCODING_GZIP+","+HTTP_ENCODING_DEFLATE;
@@ -26,7 +29,7 @@ public final class JonDoFoxHeader implements HTTPConnectionListener {
 
 	public void requestHeadersReceived(HTTPConnectionEvent event) 
 	{
-		if(event == null)
+		if (event == null)
 		{
 			return;
 		}
@@ -51,6 +54,17 @@ public final class JonDoFoxHeader implements HTTPConnectionListener {
 							connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_REFERER, domain);
 						}
 					}
+				}
+			}
+			
+			if (event.getConnectionHeader().getRequestLine().startsWith("CONNECT"))
+			{
+				// this is a CONNECT tunneling command - ask the user what to do now
+				String[] uaHeader = connHeader.getRequestHeader(HTTPProxyCallback.HTTP_USER_AGENT);
+				if (uaHeader == null || uaHeader.length != 1 || uaHeader[0] == null || 
+					(!uaHeader[0].equals(JONDOFOX_USER_AGENT) && !uaHeader[0].equals(JONDOFOX_USER_AGENT_NEW)))
+				{
+					event.setNeedsConfirmation(true);
 				}
 			}
 			

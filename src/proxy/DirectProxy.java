@@ -65,7 +65,7 @@ final public class DirectProxy implements Runnable, AnonService
 {
 	private static final String GENERAL_RULE = "*";
 	
-	private static AllowUnprotectedConnectionCallback ms_callback;
+	private static AllowProxyConnectionCallback ms_callback;
 
 	private AnonService m_tor;
 	private ServerSocket m_socketListener;
@@ -77,7 +77,7 @@ final public class DirectProxy implements Runnable, AnonService
 		m_socketListener = s;
 	}
 
-	public static void setAllowUnprotectedConnectionCallback(AllowUnprotectedConnectionCallback a_callback)
+	public static void setAllowUnprotectedConnectionCallback(AllowProxyConnectionCallback a_callback)
 	{
 		ms_callback = a_callback;
 		
@@ -113,7 +113,7 @@ final public class DirectProxy implements Runnable, AnonService
 	}
 
 
-	public static abstract class AllowUnprotectedConnectionCallback
+	public static abstract class AllowProxyConnectionCallback
 	{
 		public static class Answer
 		{
@@ -319,15 +319,15 @@ final public class DirectProxy implements Runnable, AnonService
 			}
 			if (requestRight == null)
 			{
-				AllowUnprotectedConnectionCallback.Answer answer;
-				AllowUnprotectedConnectionCallback callback = ms_callback;
+				AllowProxyConnectionCallback.Answer answer;
+				AllowProxyConnectionCallback callback = ms_callback;
 				if (callback != null)
 				{
 					answer = callback.callback(requestInfo);
 				}
 				else
 				{
-					answer = new AllowUnprotectedConnectionCallback.Answer(false, false);
+					answer = new AllowProxyConnectionCallback.Answer(false, false);
 				}
 				
 				
