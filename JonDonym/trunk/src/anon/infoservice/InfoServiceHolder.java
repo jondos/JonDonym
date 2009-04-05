@@ -28,6 +28,7 @@
 package anon.infoservice;
 
 import java.lang.reflect.Field;
+import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -38,6 +39,7 @@ import anon.util.ThreadPool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import anon.crypto.ExpiredSignatureException;
 import anon.crypto.SignatureVerifier;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.util.ClassUtil;
@@ -398,6 +400,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 			int askInfoServices = 1;
 			currentInfoService = getPreferredInfoService();
 			Vector infoServiceList = null;
+			Exception exVerifyable = null;
+			boolean bExpired;
 			
 			if (m_changeInfoServices)
 			{
@@ -410,19 +414,33 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				for (int i = 0; i <  copyList.size(); i++)
 				{
 					isTemp = (InfoServiceDBEntry)copyList.elementAt(i);
-					if (SignatureVerifier.getInstance().isCheckSignatures() &&
-							SignatureVerifier.getInstance().isCheckSignatures(
-									SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+	
+					bExpired = false;
+					if ((isTemp.isBootstrap() || isTemp.isUserDefined()) && isTemp.getCertPath() == null)
 					{
-						if ((isTemp.isBootstrap() || isTemp.isUserDefined()) && isTemp.getCertPath() == null)
+						// we nevertheless use this InfoService
+					}
+					else if (isTemp.getCertPath() == null || 
+						!isTemp.getCertPath().isVerified() || (bExpired = !isTemp.isValid()))
+					{
+						if (bExpired)
 						{
-							// we nevertheless use this InfoService
+							if (exVerifyable == null || 
+									exVerifyable instanceof ExpiredSignatureException)
+							{
+								exVerifyable = 
+									new ExpiredSignatureException("Signature expired for IS " + 
+											isTemp.getId() + ".");
+							}
 						}
-						else if (isTemp.getCertPath() == null || 
-							!isTemp.getCertPath().isVerified() || !isTemp.isValid())
+						else
 						{
-							infoServiceList.removeElement(isTemp);
+							exVerifyable = 
+								new SignatureException("No valid signature for IS " + 
+										isTemp.getId() + ".");
 						}
+						
+						infoServiceList.removeElement(isTemp);
 					}
 				}
 			}
@@ -470,7 +488,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					}
 				}
 			}
-
+			
 			if (functionNumber == GET_STATUSINFO || functionNumber == GET_STATUSINFO_TIMEOUT)
 			{
 				/*
@@ -488,7 +506,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					currentInfoService = (InfoServiceDBEntry) (infoServiceList.elementAt(
 						Math.abs(random.nextInt()) % infoServiceList.size()));
 				}
-
+				
+				/*
 				if ((currentInfoService.getCertPath() != null && !currentInfoService.getCertPath().isVerified()))// ||
 					//(SignatureVerifier.getInstance().isCheckSignatures() && !currentInfoService.isValid()))
 				{
@@ -497,7 +516,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					infoServiceList.removeElement(currentInfoService);
 					currentInfoService = null;
 					continue;
-				}
+				}*/
 				
 				//if (functionNumber == GET_LATEST_JAVA_SERIALS)
 				{
@@ -752,9 +771,22 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					 */
 					infoServiceList.removeElement(currentInfoService);
 					currentInfoService = null;
+					if (exVerifyable == null)
+					{
+						exVerifyable = e;
+					}
+					else if (exVerifyable instanceof ExpiredSignatureException || 
+							!(e instanceof ExpiredSignatureException))
+					{
+						if (exVerifyable instanceof SignatureException ||
+							!(e instanceof SignatureException))
+						{
+							exVerifyable = e;
+						}
+					}
 				}
 			}
-
+			
 			if (result != null && (! (result instanceof Hashtable) || ( (Hashtable) result).size() > 0))
 			{
 				if (functionNumber == GET_CASCADEINFO)
@@ -780,7 +812,22 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 						  (arguments == null || arguments.elementAt(0) == null ? "." : " for argument: " +
 								  arguments.elementAt(0)),
 						  true);
+			
 			m_result = null;
+			
+			if (exVerifyable != null && exVerifyable instanceof SignatureException)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.CRYPTO, 
+						"Could not contact InfoServices due to certificate problems.", 
+						exVerifyable);
+				synchronized (getInstance())
+				{
+					setChanged();
+					// send the last signature exception as message
+					notifyObservers(new InfoServiceHolderMessage(
+							InfoServiceHolderMessage.INFOSERVICES_NOT_VERIFYABLE, exVerifyable));
+				}
+			}
 		}
 	}
 
@@ -1141,7 +1188,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 		}
 
 		/* InfoServices node found -> load it into the database of known infoservices */
-		Database.getInstance(InfoServiceDBEntry.class).loadFromXml(infoServicesNode);
+		Database.getInstance(InfoServiceDBEntry.class).loadFromXml(infoServicesNode, true);
 		//InfoServiceDBEntry.loadFromXml(infoServicesNode, Database.getInstance(InfoServiceDBEntry.class));
 		Element preferredInfoServiceNode = (Element) (XMLUtil.getFirstChildByName(a_infoServiceManagementNode,
 			"PreferredInfoService"));
@@ -1172,6 +1219,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 		for (int i = 0; i < currentEntries.size(); i++)
 		{
 			entry = (InfoServiceDBEntry)currentEntries.elementAt(i);
+		
+			// remove all IS with invalid certificates
+			if (!entry.isBootstrap() && !entry.isUserDefined() && (!entry.isVerified() || !entry.isValid()))
+			{
+				Database.getInstance(InfoServiceDBEntry.class).remove(entry.getId());
+				continue;
+			}
+			
 			if (entry.isBootstrap())
 			{
 				bootstrapIDs.addElement(entry.getId());
@@ -1181,6 +1236,8 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 				nrLoadedIS++;
 			}
 		}
+		
+		
 		if (nrLoadedIS >= 3) // we need at least 3 InfoServices for some majority calculations
 		{
 			// remove all bootstrap entries

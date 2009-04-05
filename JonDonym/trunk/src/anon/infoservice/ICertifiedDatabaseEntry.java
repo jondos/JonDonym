@@ -23,6 +23,8 @@
 */
 package anon.infoservice;
 
+import java.util.Date;
+
 import anon.crypto.MultiCertPath;
 import anon.crypto.XMLSignature;
 
@@ -37,6 +39,8 @@ public interface ICertifiedDatabaseEntry
 	public XMLSignature getSignature();
 
 	public boolean isVerified();
+	
+	public boolean isValid();
 
 	/**
 	 * Checks if the ID is valid.

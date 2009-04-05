@@ -54,13 +54,13 @@ import HTTPClient.HTTPConnection;
 import HTTPClient.HTTPResponse;
 import HTTPClient.NVPair;
 import anon.AnonService;
+import anon.crypto.ExpiredSignatureException;
 import anon.crypto.IVerifyable;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.pay.PaymentInstanceDBEntry;
-import anon.util.Base64;
 import anon.util.ClassUtil;
 import anon.util.IXMLEncodable;
 import anon.util.Util;
@@ -1294,7 +1294,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		boolean m_bJAPContext;
 	}
 
-	private Hashtable getEntries(EntryGetter a_getter) throws Exception
+	private Hashtable getEntries(EntryGetter a_getter) 
+		throws ExpiredSignatureException, SignatureException, Exception
 	{
 		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest(a_getter.m_postFile),
 									  HTTPConnectionFactory.HTTP_ENCODING_ZLIB);
@@ -1303,15 +1304,24 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		{
 			throw new SignatureException("Document could not be verified!");
 		}
-		else if (SignatureVerifier.getInstance().isCheckSignatures() &&  
-				SignatureVerifier.getInstance().isCheckSignatures(SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE))
+		else
 		{
 			XMLSignature signature = SignatureVerifier.getInstance().getVerifiedXml(doc.getDocumentElement(), 
 					SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
-			
-			if (signature == null || !signature.isVerified() || !signature.getMultiCertPath().isValid(new Date()))
+			boolean bExpired = false;
+			if (signature == null || !signature.isVerified() || 
+				(bExpired = !signature.getMultiCertPath().isValid(new Date())))
 			{
-				throw new SignatureException("Document could not be verified!");
+				if (bExpired)
+				{
+					throw new ExpiredSignatureException("Document signature validity has expired for " +
+							"InfoService " + getId() + "!");
+				}
+				else
+				{
+					throw new SignatureException("Document could not be verified for " +
+							"InfoService " + getId() + "!");
+				}
 			}
 		}
 

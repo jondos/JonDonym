@@ -35,7 +35,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Vector;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -89,7 +88,6 @@ import anon.infoservice.ClickedMessageIDDBEntry;
 import anon.infoservice.Database;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
-import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.JavaVersionDBEntry;
 import anon.infoservice.PerformanceInfo;
