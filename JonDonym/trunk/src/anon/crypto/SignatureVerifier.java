@@ -236,7 +236,6 @@ public class SignatureVerifier implements IXMLEncodable
          *         trusted certificates or false if not.
          *
          * @todo The ID within the document should be compared to the ID stored in the certificate.
-		 * @todo the return value should be the certificate that successfully verified the signature
          */
         public boolean verifyXml(Element a_rootNode, int a_documentClass)
         {

@@ -30,6 +30,7 @@ public final class JonDoFoxHeader implements HTTPConnectionListener {
 		{
 			return;
 		}
+		
 		HTTPConnectionHeader connHeader = event.getConnectionHeader();
 		if(connHeader != null)
 		{
@@ -54,19 +55,22 @@ public final class JonDoFoxHeader implements HTTPConnectionListener {
 			}
 			
 			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_USER_AGENT, JONDOFOX_USER_AGENT);
-			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_LANGUAGE, JONDOFOX_LANGUAGE);
-			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_CHARSET, JONDOFOX_CHARSET);
-			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT, JONDOFOX_CONTENT_TYPES);
-			String[] clientSupportedencodings = connHeader.getRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_ENCODING);
-			event.getAnonRequest().setInternalEncodingRequired(
-					detectInternaEncodingRequired(clientSupportedencodings));
-			//will be determined when the server response is received
-			event.getAnonRequest().setContentEncodings(null);
+			if (!event.getConnectionHeader().getRequestLine().startsWith("CONNECT"))
+			{
+				connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_LANGUAGE, JONDOFOX_LANGUAGE);
+				connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_CHARSET, JONDOFOX_CHARSET);
+				connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT, JONDOFOX_CONTENT_TYPES);
+				String[] clientSupportedencodings = connHeader.getRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_ENCODING);
+				event.getAnonRequest().setInternalEncodingRequired(
+						detectInternaEncodingRequired(clientSupportedencodings));
+				//will be determined when the server response is received
+				event.getAnonRequest().setContentEncodings(null);
 			
-			connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_ENCODING, JONDOFOX_ENCODING);
-			//connHeader.removeRequestHeader(HTTPProxyCallback.HTTP_KEEP_ALIVE);
-			//connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_PROXY_CONNECTION, "close");
-			connHeader.removeRequestHeader(HTTPProxyCallback.HTTP_IE_UA_CPU);
+				connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_ACCEPT_ENCODING, JONDOFOX_ENCODING);
+				//connHeader.removeRequestHeader(HTTPProxyCallback.HTTP_KEEP_ALIVE);
+				//connHeader.replaceRequestHeader(HTTPProxyCallback.HTTP_PROXY_CONNECTION, "close");
+				connHeader.removeRequestHeader(HTTPProxyCallback.HTTP_IE_UA_CPU);
+			}
 		}
 	}
 
