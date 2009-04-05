@@ -36,6 +36,7 @@ public class HTTPConnectionEvent
 	private volatile long upStreamContentBytes;
 	private volatile long downStreamContentBytes;
 	private AnonProxyRequest anonRequest;
+	private boolean m_bNeedsConfirmation = false;
 	
 	public HTTPConnectionEvent() 
 	{
@@ -56,7 +57,16 @@ public class HTTPConnectionEvent
 		return connectionHeader;
 	}
 
-
+	public void setNeedsConfirmation(boolean a_bNeedsConfirmation)
+	{
+		m_bNeedsConfirmation = a_bNeedsConfirmation;
+	}
+	
+	public boolean isConfirmationNeeded()
+	{
+		return m_bNeedsConfirmation;
+	}
+	
 	public void setConnectionHeader(HTTPConnectionHeader connectionHeader) 
 	{
 		this.connectionHeader = connectionHeader;

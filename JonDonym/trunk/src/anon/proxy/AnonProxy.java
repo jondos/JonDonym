@@ -256,18 +256,21 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	
 	public void setHTTPHeaderProcessingEnabled(boolean enable)
 	{
-		if(enable)
+		synchronized (m_callbackHandler)
 		{
-			if(m_httpProxyCallback == null)
+			if (enable)
 			{
-				m_httpProxyCallback = new HTTPProxyCallback();
+				if (m_httpProxyCallback == null)
+				{
+					m_httpProxyCallback = new HTTPProxyCallback();
+				}
+				enableProxyCallback(m_httpProxyCallback);
 			}
-			enableProxyCallback(m_httpProxyCallback);
-		}
-		else
-		{
-			disableProxyCallback(m_httpProxyCallback);
-			m_httpProxyCallback = null;
+			else
+			{
+				disableProxyCallback(m_httpProxyCallback);
+				m_httpProxyCallback = null;
+			}
 		}
 	}
 	

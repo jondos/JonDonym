@@ -250,6 +250,10 @@ public class HTTPProxyCallback implements ProxyCallback
 			if (connHeader != null && connHeader.getRequestLine() != null)
 			{
 				byte[] newHeaders = a_helper.dumpHeader(this, connHeader, anonRequest);
+				if (getEvent(anonRequest).isConfirmationNeeded())
+				{
+					// TODO check whether we are allowed to perform this request
+				}
 				
 				countContentBytes(anonRequest, contentBytes, byteCounter, FIRE_EVENT);
 				
@@ -734,10 +738,10 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	public synchronized void fireRequestHeadersReceived(HTTPConnectionEvent event)
 	{
-		for(Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
+		for (Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
 		{
 			HTTPConnectionListener listener = (HTTPConnectionListener) enumeration.nextElement();
-			if(listener != null)
+			if (listener != null)
 			{
 				listener.requestHeadersReceived(event);
 			}
@@ -746,10 +750,10 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	public synchronized void fireResponseHeadersReceived(HTTPConnectionEvent event)
 	{
-		for(Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
+		for (Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
 		{
 			HTTPConnectionListener listener = (HTTPConnectionListener) enumeration.nextElement();
-			if(listener != null)
+			if( listener != null)
 			{
 				listener.responseHeadersReceived(event);
 			}
@@ -758,10 +762,10 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	public synchronized void fireDownstreamContentBytesReceived(HTTPConnectionEvent event)
 	{
-		for(Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
+		for (Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
 		{
 			HTTPConnectionListener listener = (HTTPConnectionListener) enumeration.nextElement();
-			if(listener != null)
+			if (listener != null)
 			{
 				listener.downstreamContentBytesReceived(event);
 			}
@@ -770,10 +774,10 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	public synchronized void fireUpstreamContentBytesReceived(HTTPConnectionEvent event)
 	{
-		for(Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
+		for (Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
 		{
 			HTTPConnectionListener listener = (HTTPConnectionListener) enumeration.nextElement();
-			if(listener != null)
+			if (listener != null)
 			{
 				listener.upstreamContentBytesReceived(event);
 			}
