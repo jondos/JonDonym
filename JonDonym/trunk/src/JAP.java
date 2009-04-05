@@ -36,8 +36,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.ProxySelector;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Hashtable;

@@ -41,10 +41,10 @@ public final class JAPConstants
 	public final static boolean m_bUnstableVersion = false; //Set to true if this is an unstable (development) Version
 
 	
-	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2009-02-26 21:16:39 $";
+	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2009-04-03 19:37:48 $";
 
 	//Warning: This is a little bit tricky,
-	//because CVS will expand the $Date: 2009-02-26 21:16:39 $
+	//because CVS will expand the $Date: 2009-04-03 19:37:48 $
 	//to the date of the last commit of this file
 
 	//Never change the layout of the next two lines as several automated tools use these lines to do fancy things...
