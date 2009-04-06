@@ -209,7 +209,7 @@ public class LanguageMapper extends AbstractISOCodeMapper
 	/**
 	 * Returns a Vector with LanguageMappers for all officially assigned
 	 * language codes.
-	 * @param a_loc the locale that is used in all contructed LanguageMappers
+	 * @param a_loc the locale that is used in all constructed LanguageMappers
 	 * @param a_maxTextLength the maximum length of the toString() output
 	 * @return a Vector with LanguageMappers for all officially assigned
 	 * language codes
