@@ -10,6 +10,7 @@
 	<xsl:template match="TermsAndConditionsFramework">
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 			<head>
+				<title><xsl:value-of select="@name" /></title>
 				<style style="text/css">
 					body { font-family: Lucida Grande, Arial; font-size: 90% }
 					h1 { text-align: center }
