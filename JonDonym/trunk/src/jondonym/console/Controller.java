@@ -30,6 +30,7 @@ package jondonym.console;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.sql.Timestamp;
 import java.util.Enumeration;
@@ -74,6 +75,7 @@ import anon.client.TrustException;
 import anon.client.TrustModel;
 import anon.client.TrustModel.NumberOfMixesAttribute;
 import anon.client.TrustModel.TrustAttribute;
+import anon.client.crypto.KeyPool;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.util.ClassUtil;
@@ -99,7 +101,7 @@ public class Controller
 	public static final int LOG_DETAIL_LEVEL_HIGH = LogHolder.DETAIL_LEVEL_HIGH;
 	public static final int LOG_DETAIL_LEVEL_HIGHEST = LogHolder.DETAIL_LEVEL_HIGHEST;
 	
-	private static final String VERSION = "00.00.007";
+	private static final String VERSION = "00.00.008";
 	private static final String XML_ROOT_NODE = "ConsoleController";
 	
 	private static final String XML_ATTR_LOG_DETAIL = "logDetail";
@@ -124,6 +126,11 @@ public class Controller
 	private static Log ms_logger;
 	private static PayAccount ms_currentlyCreatedAccount;
 	private static int m_iInitLogLevel = LogLevel.WARNING;
+	
+	private static Thread ms_starterThread;
+	private static RunnableStarter ms_starter;
+	private static final Object SYNC_STARTER = new Object();
+	private static boolean m_bShuttingDown = false;
 	
 	private static final String DEFAULT_INFOSERVICE_NAMES[] =
 		new String[]{"880D9306B90EC8309178376B43AC26652CE52B74",
@@ -169,6 +176,28 @@ public class Controller
    		
    		JAPMessages.init("JAPMessages");
    		
+   		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising random number generator...");
+   		Thread secureRandomThread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				KeyPool.start();
+				new SecureRandom().nextInt();
+			}
+		});
+		secureRandomThread.setPriority(Thread.MIN_PRIORITY);
+		secureRandomThread.start();
+		try
+		{
+			secureRandomThread.join();
+		}
+		catch (InterruptedException a_e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.CRYPTO, "Interrupted while initialising random number generator!");
+		}
+		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Random number generator initialised.");
+   		
+		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising general settings...");
 		ClassUtil.enableFindSubclasses(false); // This would otherwise start non-daemon AWT threads, blow up memory and prevent closing the app.
 		XMLUtil.setStorageMode(XMLUtil.STORAGE_MODE_AGRESSIVE); // Store as few XML data as possible for memory optimization.
 		SignatureVerifier.getInstance().setCheckSignatures(true);
@@ -176,7 +205,9 @@ public class Controller
 		Util.addDefaultCertificates("acceptedInfoServiceCAs/", JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE);
 		Util.addDefaultCertificates("acceptedMixCAs/", JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX);
 		Util.addDefaultCertificates("acceptedPIs/", JAPCertificate.CERTIFICATE_TYPE_PAYMENT);
+		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "General settings initialised.");
      
+		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising database updaters...");
 		// simulate database distributor and suppress distributor warnings
 		Database.registerDistributor(new IDistributor()
 		{
@@ -204,18 +235,23 @@ public class Controller
 				return false;
 			}
 		};		
-		
 		ms_isUpdater = new InfoServiceUpdater(a_observableInfo);
 		ms_cascadeUpdater = new MixCascadeUpdater(a_observableInfo);
 		ms_paymentUpdater = new PaymentInstanceUpdater(a_observableInfo);
 		
+		ms_isUpdater.start(true);
+        ms_paymentUpdater.start(true);
+        ms_cascadeUpdater.start(true);
+		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Database updaters initialised.");
 		
+		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising trust filters...");
 		// predefine trust model; force premium services if charged account is available, but do not use them if not
 		TrustModel modelDynamicPremium = new TrustModel(MSG_DEFAULT_TRUST_MODEL, TrustModel.FIRST_UNRESERVED_MODEL_ID);
 		modelDynamicPremium.setAttribute(ForcePremiumIfAccountAvailableAttribute.class, TrustModel.TRUST_IF_TRUE);
 		modelDynamicPremium.setAttribute(NumberOfMixesAttribute.class, TrustModel.TRUST_IF_AT_LEAST, 3);
 		TrustModel.addTrustModel(modelDynamicPremium);
 		TrustModel.setCurrentTrustModel(modelDynamicPremium);
+		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Trust filters initialised.");
 		
 		ms_configuration = a_configuration;
 		if (ms_configuration == null)
@@ -227,6 +263,7 @@ public class Controller
 			String conf = ms_configuration.read();
 			if (conf != null)
 			{
+				LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Parsing configuration...");
 				Element root = XMLUtil.toXMLDocument(conf).getDocumentElement();
 				Element elem;
 				XMLUtil.removeComments(root);
@@ -238,17 +275,22 @@ public class Controller
 				elem = (Element)XMLUtil.getFirstChildByName(root, PayAccountsFile.XML_ELEMENT_NAME);
 				if (elem != null)
 				{
+					LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising pay accounts from configuration...");
 					PayAccountsFile.init(elem, null, false);
+					LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Pay accounts initialised from configuration.");
 				}
 				elem = (Element)XMLUtil.getFirstChildByName(root, TrustModel.XML_ELEMENT_CONTAINER_NAME);
 				if (elem != null)
 				{
+					LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising trust filters from configuration...");
 					TrustModel.fromXmlElement(elem);
 					if (TrustModel.getCurrentTrustModel() == TrustModel.getTrustModelUserDefined())
 					{
 						TrustModel.setCurrentTrustModel(TrustModel.getTrustModelDefault());
 					}
+					LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Trust filters initialised from configuration.");
 				}
+				LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Configuration parsed completely.");
 			}
 			else
 			{
@@ -317,23 +359,54 @@ public class Controller
 		return LogHolder.setDetailLevel(a_logDetail);
 	}
 	
-	public static synchronized void stop()
+	public static void stop()
 	{
-		if (ms_jondonymProxy != null)
+		if (m_bShuttingDown)
 		{
-			ms_jondonymProxy.stop();
+			return;
 		}
-		if (ms_socketListener != null)
+		
+		synchronized (SYNC_STARTER)
 		{
-			try 
+			if (ms_socketListener == null)
 			{
-				ms_socketListener.close();
-			} 
-			catch (IOException a_e) 
-			{
-				LogHolder.log(LogLevel.EXCEPTION, LogType.NET, a_e);
+				return;
 			}
-			ms_socketListener = null;
+			
+			m_bShuttingDown = true;
+			
+			while (ms_starterThread != null && !ms_starter.isFinished())
+			{
+				LogHolder.log(LogLevel.NOTICE, LogType.THREAD, "Interrupting startup thread...");
+				ms_starterThread.interrupt();
+				try 
+				{
+					SYNC_STARTER.wait(200);
+				} 
+				catch (InterruptedException e) 
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.THREAD, e);
+				}
+			}
+			
+			if (ms_jondonymProxy != null)
+			{
+				ms_jondonymProxy.stop();
+			}
+			if (ms_socketListener != null)
+			{
+				try 
+				{
+					ms_socketListener.close();
+				} 
+				catch (IOException a_e) 
+				{
+					LogHolder.log(LogLevel.EXCEPTION, LogType.NET, a_e);
+				}
+				ms_socketListener = null;
+			}
+			
+			m_bShuttingDown = false;
 		}
 	}
 	
@@ -396,7 +469,15 @@ public class Controller
 	{
 		if (ms_jondonymProxy == null)
 		{
-			return null;
+			try
+			{
+				return new MixCascade("-", "-", "0.0.0.0", 6544);
+			}
+			catch (Exception a_e)
+			{
+				LogHolder.log(LogLevel.EMERG, LogType.MISC, a_e);
+				return null;
+			}
 		}
 		return ms_jondonymProxy.getMixCascade();
 	}
@@ -721,6 +802,15 @@ public class Controller
 		return XMLUtil.toString(doc);
 	}
 	
+	/**
+	 * Optionally import without the possibility to enter a password.
+	 * @param a_accountData
+	 * @return
+	 */
+	public static boolean importAccounts(String a_accountData)
+	{
+		return importAccounts(a_accountData, null);
+	}
 	
 	public static boolean importAccounts(String a_accountData, final char[] a_password)
 	{
@@ -749,9 +839,23 @@ public class Controller
 		
 		pwReader = new IMiscPasswordReader()
 		{
-			public String readPassword(Object message)
+			private boolean m_bTriedOnce = false;
+			public synchronized String readPassword(Object message)
 			{
-				return new String(a_password);
+				if (!m_bTriedOnce)
+				{
+					m_bTriedOnce = true;
+					if (a_password == null)
+					{
+						return "";
+					}
+					return new String(a_password);
+				}
+				else
+				{
+					// send this password only once and then cancel
+					return null;
+				}
 			}
 		};
 		
@@ -789,61 +893,120 @@ public class Controller
 		}
 	}
 	
-	public static synchronized void start()
+	private static class RunnableStarter implements Runnable
 	{
-		start(null);
-	}
-	
-	protected static synchronized void start(MixCascade a_cascade)
-	{
-		if (ms_socketListener != null)
+		private MixCascade m_cascadeDefault;
+		private boolean m_bFinished = false;
+		
+		public RunnableStarter(MixCascade a_cascade)
 		{
-			return;
+			m_cascadeDefault = a_cascade;
+		}
+		public boolean isFinished()
+		{
+			return m_bFinished;
 		}
 		
-		try
+		public void run()
 		{
-			ms_socketListener = new ServerSocket(4001);
-			
-	        ms_isUpdater.start(true);
-	        ms_isUpdater.update();
-	        ms_paymentUpdater.start(true);
-	        ms_paymentUpdater.update();
-	        ms_cascadeUpdater.start(true);
-	        ms_cascadeUpdater.update();
-	         
-	        MixCascade cascade;
-	        if (a_cascade != null)
-	        {
-	        	cascade = a_cascade;
-	        }
-	        else if (ms_jondonymProxy == null || ms_jondonymProxy.getMixCascade() == null)
-	        {
-		        cascade = (MixCascade)Database.getInstance(MixCascade.class).getRandomEntry();
-	        }
-	        else
-	        {
-	        	cascade = ms_jondonymProxy.getMixCascade();
-	        }
-	       
-	        if (cascade == null)
-	        {
-	        	// cascade = new MixCascade("mix.inf.tu-dresden.de", 6544);
-	        	cascade = new MixCascade("none", 6544);
-	        }
-	        
-	        ms_jondonymProxy = new AnonProxy(ms_socketListener, null);
-	        ms_jondonymProxy.setHTTPHeaderProcessingEnabled(true);
-	        ms_jondonymProxy.setJonDoFoxHeaderEnabled(true);
-	        ms_jondonymProxy.setHTTPDecompressionEnabled(true);
-	        ms_jondonymProxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
-	        ms_serviceContainer = new AutoSwitchedMixCascadeContainer(cascade);
-	        ms_jondonymProxy.start(ms_serviceContainer);
+			try
+			{
+		        if (!ms_isUpdater.isFirstUpdateDone())
+		        {
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Updating infoservices...");
+		        	ms_isUpdater.update();
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Infoservices updated.");
+		        }
+		        if (!ms_paymentUpdater.isFirstUpdateDone())
+		        {
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Updating payment instances...");
+		        	ms_paymentUpdater.update();
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Payment instances updated.");
+		        }
+		        if (!ms_cascadeUpdater.isFirstUpdateDone())
+		        {
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Updating Mix cascades...");
+		        	ms_cascadeUpdater.update();
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Mix cascades updated.");
+		        }
+		         
+		        MixCascade cascade;
+		        if (m_cascadeDefault != null)
+		        {
+		        	cascade = m_cascadeDefault;
+		        }
+		        else if (ms_jondonymProxy == null || ms_jondonymProxy.getMixCascade() == null)
+		        {
+			        cascade = (MixCascade)Database.getInstance(MixCascade.class).getRandomEntry();
+		        }
+		        else
+		        {
+		        	cascade = ms_jondonymProxy.getMixCascade();
+		        }
+		       
+		        if (cascade == null)
+		        {
+		        	cascade = new MixCascade("-", "-", "0.0.0.0", 6544);
+		        }
+		        
+		        ms_jondonymProxy = new AnonProxy(ms_socketListener, null);
+		        ms_jondonymProxy.setHTTPHeaderProcessingEnabled(true);
+		        ms_jondonymProxy.setJonDoFoxHeaderEnabled(true);
+		        ms_jondonymProxy.setHTTPDecompressionEnabled(true);
+		        ms_jondonymProxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
+		        ms_serviceContainer = new AutoSwitchedMixCascadeContainer(cascade);
+		        ms_jondonymProxy.start(ms_serviceContainer);
+		        m_bFinished = true;
+			}
+			catch (Exception e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
+				m_bFinished = true;
+				stop();
+			}
+			synchronized (SYNC_STARTER)
+			{
+				ms_starter = null;
+				ms_starterThread = null;
+			}
 		}
-		catch (Exception e)
+	}
+	
+	public static boolean start()
+	{
+		return start(null);
+	}
+	
+	protected static boolean start(MixCascade a_cascade)
+	{
+		if (m_bShuttingDown)
 		{
-			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
-			stop();
+			return false;
+		}
+		
+		synchronized(SYNC_STARTER)
+		{
+			if (ms_starter != null || ms_socketListener != null)
+			{
+				// could not initialize startup thread as it is still starting up from another command call or we are already up
+				return true;
+			}
+			
+			try
+			{
+				ms_socketListener = new ServerSocket(4001);
+			}
+			catch (Exception e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
+				stop();
+				return false;
+			}
+			
+			ms_starter = new RunnableStarter(a_cascade);
+			ms_starterThread = new Thread(ms_starter);
+			ms_starterThread.start();
+			return true;
 		}
 	}
 	
