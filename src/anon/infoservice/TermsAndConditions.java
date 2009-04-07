@@ -744,7 +744,7 @@ public class TermsAndConditions implements IXMLEncodable
 		
 		public Element getTranslationElement()
 		{
-			return (Element) translationElement.cloneNode(true);
+			return (translationElement != null) ? (Element) translationElement.cloneNode(true) : null;
 		}
 
 		public XMLSignature getSignature()
