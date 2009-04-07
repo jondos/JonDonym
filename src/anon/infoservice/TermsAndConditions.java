@@ -670,7 +670,8 @@ public class TermsAndConditions implements IXMLEncodable
 			
 			if(withAttributeCheck && this.templateReferenceId.equals(""))
 			{
-				throw new XMLParseException("TC translation must refer to a valid TC template");
+				//throw new XMLParseException("TC translation must refer to a valid TC template");
+				LogHolder.log(LogLevel.WARNING, LogType.MISC, "TC translation must refer to a valid TC template");
 			}
 			
 			this.locale = XMLUtil.parseAttribute(translationElement, XML_ATTR_LOCALE, "");
