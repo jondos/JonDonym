@@ -1,24 +1,30 @@
 package anon.infoservice;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureCreator;
@@ -26,9 +32,6 @@ import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
 public class TermsAndConditionsFramework extends AbstractDistributableCertifiedDatabaseEntry
 {
@@ -418,45 +421,46 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			parent.replaceChild(node.cloneNode(true), list.item(i));
 		}
 	}
-	
 	public String transform()
 	{
-		try
-		{		
-			//File xsltFile = new File("tac.xslt");
-			//File output = new File("output.html");
-			//FileOutputStream stream = new FileOutputStream(output);
-			
-			Source xmlSource = new DOMSource(m_docWorkingCopy);
-			
-			Source xsltSource = new StreamSource(this.getClass().getResourceAsStream(XSLT_PATH));
-			
-			TransformerFactory factory = TransformerFactory.newInstance();
-			Transformer transformer = factory.newTransformer(xsltSource);
-			
-			//transformer.transform(xmlSource, new StreamResult(stream));
-			//stream.close();
-			
+		try 
+		{
 			StringWriter writer = new StringWriter();
-			transformer.transform(xmlSource, new StreamResult(writer));
+			transform(writer);
 			writer.close();
-			
 			String s = writer.toString();
 			
 			// otherwise inserted elements such as Venue or OperatorCountry 
 			// will have additional whitespace after them. 
 			// TODO: find a better way to deal with this
-			s = anon.util.Util.replaceAll(s, "\n", "");
-			s = anon.util.Util.replaceAll(s, "\r", "");
+			//s = anon.util.Util.replaceAll(s, "\n", "");
+			//s = anon.util.Util.replaceAll(s, "\r", "");
 			
 			// this is needed on some older java versions (mainly 1.5)
 			// otherwise br's will not be displayed correctly
 			return anon.util.Util.replaceAll(s, "<br/>", "<br>");
-		}
-		catch(Exception ex)
+		} 
+		catch (IOException e) 
 		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "IOException caught while transforming terms and conditions.");
+			return null;
+		} 
+		catch (TransformerException e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.MISC, "Could not transform terms and conditions.");
 			return null;
 		}
+	}
+	
+	public void transform(Writer writer) throws IOException, TransformerException
+	{
+		Source xmlSource = new DOMSource(m_docWorkingCopy);
+		Source xsltSource = new StreamSource(this.getClass().getResourceAsStream(XSLT_PATH));
+		
+		TransformerFactory factory = TransformerFactory.newInstance();
+		Transformer transformer = factory.newTransformer(xsltSource);
+	
+		transformer.transform(xmlSource, new StreamResult(writer));
 	}
 	
 	public String getId() 
