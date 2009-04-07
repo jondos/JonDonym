@@ -174,7 +174,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		{
 			// find the ServiceOperator object to our T&C
 			ServiceOperator op = tcTranslation.getOperator();
-			
+			OperatorAddress opAddress = tcTranslation.getOperatorAddress();
 			if(op == null)
 			{
 				//Must never happen!
@@ -182,13 +182,8 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			}
 			
 			// create the operator node
-			Element tcTranslationElement = tcTranslation.getTranslationElement();
-			if(tcTranslationElement == null)
-			{
-				throw new XMLParseException("Translation node must not be null. Mix violates T&C protocol.");
-			}
-			
-			Element operator = operator = op.toXMLElement(XMLUtil.createDocument(), tcTranslation.getOperatorAddress(), false);
+			Element operator = operator = 
+				op.toXMLElement(XMLUtil.createDocument(), tcTranslation.getOperatorAddress(), false);
 			if(operator == null)
 			{
 				throw new XMLParseException("Operator must not be null.");
@@ -236,8 +231,8 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 					tcTranslation.getPrivacyPolicyUrl(),
 					tcTranslation.getLegalOpinionsUrl(),
 					tcTranslation.getOperationalAgreementUrl(),
-					tcTranslation.getOperatorAddress().getCity(),
-					tcTranslation.getOperatorAddress().getVenue(),
+					(opAddress != null) ? tcTranslation.getOperatorAddress().getCity() : "",
+					(opAddress != null) ? tcTranslation.getOperatorAddress().getVenue() : "",
 					DateFormat.getDateInstance(DateFormat.MEDIUM, tcLoc).format(tcTranslation.getDate())
             };
 			
