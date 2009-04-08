@@ -42,7 +42,7 @@ import java.util.Vector;
  */
 public class CountryMapper extends AbstractISOCodeMapper
 {
-	private static final String[] ms_ctrArr =
+	private static final String[] DEFAULT_COUNTRIES =
 		{
 		// Officially assigned code elements
 		"AD", "AE", "AF", "AG", "AI", "AL", "AM", "AN", "AO", "AQ", "AR", "AS",
@@ -80,6 +80,23 @@ public class CountryMapper extends AbstractISOCodeMapper
 
 	private static final String MSG_CHOOSE_COUNTRY = CountryMapper.class.getName() + "_ChooseCountry";
 
+	private static final String[] COUNTRIES;
+	
+	static
+	{
+		String[] codesJava = Locale.getISOCountries();
+		if (codesJava.length < DEFAULT_COUNTRIES.length)
+		{
+			// old java versions do not support all countries; newer version may have more countries
+			COUNTRIES = DEFAULT_COUNTRIES;
+		}
+		else
+		{
+			COUNTRIES = codesJava;
+		}
+	}
+	
+	
 	/**
 	 * Constructs an empty CountryMapper object. Its toString() method
 	 * returns a message that requests to choose a valid country code.
@@ -195,7 +212,7 @@ public class CountryMapper extends AbstractISOCodeMapper
 	/**
 	 * Returns a Vector with CountryMappers for all officially assigned
 	 * country codes.
-	 * @param a_loc the locale that is used in all contructed CountryMappers
+	 * @param a_loc the locale that is used in all constructed CountryMappers
 	 * @param a_maxCountryLength the maximum length of the toString() output
 	 * @return a Vector with CountryMappers for all officially assigned
 	 * country codes
@@ -205,10 +222,10 @@ public class CountryMapper extends AbstractISOCodeMapper
 	{
 		Vector localisedCountries = new Vector();
 
-		for (int i = 0; i < ms_ctrArr.length; i++)
+		for (int i = 0; i < COUNTRIES.length; i++)
 		{
 			localisedCountries.addElement(
-				 new CountryMapper(ms_ctrArr[i], a_maxCountryLength, a_loc));
+				 new CountryMapper(COUNTRIES[i], a_maxCountryLength, a_loc));
 		}
 		return Util.sortStrings(localisedCountries);
 	}

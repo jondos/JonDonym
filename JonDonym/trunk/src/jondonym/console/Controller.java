@@ -34,6 +34,7 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.sql.Timestamp;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -104,6 +105,8 @@ public class Controller
 	
 	private static final String VERSION = "00.00.009";
 	private static final String XML_ROOT_NODE = "ConsoleController";
+	
+	private static final String MESSAGES = "JAPMessages";
 	
 	private static final String XML_ATTR_LOG_DETAIL = "logDetail";
 	private static final String XML_ATTR_LOG_LEVEL = "logLevel";
@@ -176,7 +179,7 @@ public class Controller
    		
    		LogHolder.log(LogLevel.ALERT, LogType.MISC, "Initialising " + ClassUtil.getClassNameStatic() + " version " + VERSION + "...");
    		
-   		JAPMessages.init("JAPMessages");
+   		JAPMessages.init(MESSAGES);
    		
    		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising random number generator...");
    		Thread secureRandomThread = new Thread(new Runnable()
@@ -348,6 +351,16 @@ public class Controller
 		return LogHolder.getDetailLevelName(a_detail);
 	}
 	
+	public static void setLocale(Locale a_locale)
+	{
+		JAPMessages.init(a_locale, MESSAGES);
+	}
+	
+	public static Locale getLocale()
+	{
+		return JAPMessages.getLocale();
+	}
+	
 	public static int getLogDetail()
 	{
 		return LogHolder.getDetailLevel();
@@ -471,19 +484,24 @@ public class Controller
 	
 	public static synchronized MixCascade getCurrentCascade()
 	{
-		if (ms_jondonymProxy == null)
+		MixCascade cascade = null;
+		if (ms_jondonymProxy != null)
+		{
+			cascade = ms_jondonymProxy.getMixCascade();
+		}
+		
+		if (cascade == null)
 		{
 			try
 			{
-				return new MixCascade("-", "-", "0.0.0.0", 6544);
+				cascade = new MixCascade("-", "-", "0.0.0.0", 6544);
 			}
 			catch (Exception a_e)
 			{
 				LogHolder.log(LogLevel.EMERG, LogType.MISC, a_e);
-				return null;
 			}
 		}
-		return ms_jondonymProxy.getMixCascade();
+		return cascade;
 	}
 	
 	public static synchronized boolean isRunning()

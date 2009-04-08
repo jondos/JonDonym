@@ -897,4 +897,23 @@ public final class Util
 		}
 		return df.format(d);
 	}	
+	
+	public static String toHTMLEntities(String buf)
+	{
+		final StringBuffer b = new StringBuffer();
+		for (int i = 0; i < buf.length(); i++) 
+		{
+			final char ch = buf.charAt(i);
+			if (!(ch >= '\u0000' && ch <= '\u007f')) 
+			{
+				// an UTF-8 character to be changed
+				b.append("&#").append(Integer.toString((int)ch)).append(";");
+			} 
+			else 
+			{
+				b.append(ch);
+			}
+		}
+		return b.toString();
+	}
 }
