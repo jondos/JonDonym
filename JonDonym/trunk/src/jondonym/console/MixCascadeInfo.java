@@ -84,7 +84,7 @@ public class MixCascadeInfo
 	 * Get the minimum delay to expect on this cascade in ms.
 	 * @return the minimum delay to expect on this cascade in ms
 	 */
-	public int getMimimumDelay()
+	public int getMinimumDelay()
 	{
 		return PerformanceInfo.getLowestCommonBoundEntry(m_cascade.getId()).getBestBound(
 				PerformanceEntry.DELAY);
