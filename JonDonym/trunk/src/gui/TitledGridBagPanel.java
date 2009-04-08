@@ -75,7 +75,7 @@ public final class TitledGridBagPanel extends JPanel
 	/**
 	 * Sets new insets for this panel. All following rows will get the new
 	 * insets.
-	 * @param a_insets new Insets; if null, the pabnel will use the default
+	 * @param a_insets new Insets; if null, the panel will use the default
 	 * insets
 	 */
 	public void setInsets(Insets a_insets)
