@@ -229,7 +229,7 @@ public final class JAPMessages
 	 */
 	public static String getString(String a_key)
 	{
-		if(ms_cachedMessages == null)
+		if (ms_cachedMessages == null)
 		{
 			return a_key;
 		}

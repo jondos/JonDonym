@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 
+import java.util.Hashtable;
 import java.util.Vector;
 
 import anon.pay.PaymentInstanceDBEntry;
@@ -38,6 +39,7 @@ import anon.client.TrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.util.Configuration;
+import anon.util.CountryMapper;
 import anon.util.Util;
 import anon.util.XMLUtil;
 import logging.LogHolder;
@@ -82,6 +84,7 @@ public class JonDoConsole
 		try
 		{
 			Controller.setLogDetail(Controller.LOG_DETAIL_LEVEL_HIGHEST);
+			//MixCascadeInfo.initToStringAsHTML(createDummyISO2CountryHashtable()); //, "/dummyUserImage.gif", "/dummySecurityImage.jpg");
 			Controller.init(null, configuration);
 		}
 		catch (Exception a_e)
@@ -326,6 +329,11 @@ public class JonDoConsole
 			{
 				Controller.stop();
 			}
+			else if (entered.trim().equals("viewCascade"))
+			{
+				System.out.println(Controller.getCurrentCascade().getName() + " | " + 
+						new MixCascadeInfo(Controller.getCurrentCascade()).toString());
+			}
 			else if (entered.trim().equals("choose"))
 			{
 				cascades = Controller.getAvailableCascades();
@@ -495,5 +503,18 @@ public class JonDoConsole
 			// this is a fast-hacked implementation for writing the document; it assumes it is XML; you should not do that normally...
 			XMLUtil.write(XMLUtil.toXMLDocument(a_configurationContent), CONFIGURATION);
 		}
+	}
+	
+	private static Hashtable createDummyISO2CountryHashtable()
+	{
+		Vector vecCountries = CountryMapper.getLocalisedCountries();
+		Hashtable dummy = new Hashtable(vecCountries.size());
+		String code;
+		for (int i = 0; i < vecCountries.size(); i++)
+		{
+			code = ((CountryMapper)vecCountries.elementAt(i)).getISOCode();
+			dummy.put(code, "/dummy/path/toImage_" + code + ".png");
+		}
+		return dummy;
 	}
 }
