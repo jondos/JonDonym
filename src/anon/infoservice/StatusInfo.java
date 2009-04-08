@@ -30,7 +30,6 @@ package anon.infoservice;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.security.SignatureException;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -45,10 +44,7 @@ import anon.util.XMLUtil;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
-import anon.crypto.CertPath;
 import anon.crypto.IVerifyable;
-import anon.crypto.JAPCertificate;
-import anon.crypto.X509SubjectKeyIdentifier;
 import anon.util.XMLParseException;
 
 /**

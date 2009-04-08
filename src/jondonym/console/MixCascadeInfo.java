@@ -29,7 +29,11 @@ package jondonym.console;
 
 import java.util.Vector;
 
+import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
+import anon.infoservice.PerformanceEntry;
+import anon.infoservice.PerformanceInfo;
+import anon.infoservice.StatusInfo;
 
 public class MixCascadeInfo 
 {
@@ -46,16 +50,79 @@ public class MixCascadeInfo
 		}
 	}
 	
+	/**
+	 * Get the minimum speed to expect on this cascade in kbit/s.
+	 * @return the minimum speed to expect on this cascade in kbit/s
+	 */
+	public int getMinimumSpeed()
+	{
+		return PerformanceInfo.getLowestCommonBoundEntry(m_cascade.getId()).getBound(
+				PerformanceEntry.SPEED).getBound();
+	}
+	
+	/**
+	 * Get the maximum speed to expect on this cascade in kbit/s.
+	 * @return the maximum speed to expect on this cascade in kbit/s
+	 */
+	public int getMaximumSpeed()
+	{
+		return PerformanceInfo.getLowestCommonBoundEntry(m_cascade.getId()).getBestBound(
+				PerformanceEntry.SPEED);
+	}
+	
+	/**
+	 * Get the maximum delay to expect on this cascade in ms.
+	 * @return the maximum delay to expect on this cascade in ms
+	 */
+	public int getMaximumDelay()
+	{
+		return PerformanceInfo.getLowestCommonBoundEntry(m_cascade.getId()).getBound(
+				PerformanceEntry.DELAY).getBound();
+	}
+	
+	/**
+	 * Get the minimum delay to expect on this cascade in ms.
+	 * @return the minimum delay to expect on this cascade in ms
+	 */
+	public int getMimimumDelay()
+	{
+		return PerformanceInfo.getLowestCommonBoundEntry(m_cascade.getId()).getBestBound(
+				PerformanceEntry.DELAY);
+	}
+	
 	public int countMixes()
 	{
 		return m_cascade.getNumberOfMixes();
 	}
 	
+	/**
+	 * The number of countries counted for this cascade. The maximum is three. This does
+	 * neither need to be the number of operator countries, nor the number of countries 
+	 * where the mixes are located. It is an evaluation on how distributed this 
+	 * cascade is.
+	 * @return the number of evaluated countries; ranges from a minimum of 0 (worst value) 
+	 * to a maximum of 3 (best value)
+	 */
 	public int countCountries()
 	{
 		return m_cascade.getNumberOfCountries();
 	}
 	
+	public int countUsers()
+	{
+		StatusInfo status = (StatusInfo)Database.getInstance(StatusInfo.class).getEntryById(m_cascade.getId());
+		if (status == null)
+		{
+			return -1;
+		}
+		return status.getNrOfActiveUsers();
+	}
+	
+	/**
+	 * Returns information about all mixes in this cascade from 0 to countMixes() - 1.
+	 * @param a_position from 0 to countMixes() - 1
+	 * @return
+	 */
 	public MixInfo getMixInfo(int a_position)
 	{
 		return (MixInfo)m_cachedMixInfos.elementAt(a_position);
@@ -84,7 +151,7 @@ public class MixCascadeInfo
 	 * The maximum number of users allowed on this cascade.
 	 * @return
 	 */
-	public int getMaxUsers()
+	public int getUserLimit()
 	{
 		return m_cascade.getMaxUsers();
 	}
