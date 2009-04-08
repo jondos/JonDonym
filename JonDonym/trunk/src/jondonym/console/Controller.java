@@ -62,6 +62,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.update.AbstractMixCascadeUpdater;
 import anon.infoservice.update.InfoServiceUpdater;
 import anon.infoservice.update.PaymentInstanceUpdater;
+import anon.infoservice.update.PerformanceInfoUpdater;
 import logging.AbstractLog4jLog;
 import logging.Log;
 import logging.LogHolder;
@@ -101,7 +102,7 @@ public class Controller
 	public static final int LOG_DETAIL_LEVEL_HIGH = LogHolder.DETAIL_LEVEL_HIGH;
 	public static final int LOG_DETAIL_LEVEL_HIGHEST = LogHolder.DETAIL_LEVEL_HIGHEST;
 	
-	private static final String VERSION = "00.00.008";
+	private static final String VERSION = "00.00.009";
 	private static final String XML_ROOT_NODE = "ConsoleController";
 	
 	private static final String XML_ATTR_LOG_DETAIL = "logDetail";
@@ -118,6 +119,7 @@ public class Controller
 	private static InfoServiceUpdater ms_isUpdater;
 	private static MixCascadeUpdater ms_cascadeUpdater;
 	private static PaymentInstanceUpdater ms_paymentUpdater;
+	private static PerformanceInfoUpdater ms_perfUpdater;
 	private static ServerSocket ms_socketListener;
 	private static AnonProxy ms_jondonymProxy;
 	private static AutoSwitchedMixCascadeContainer ms_serviceContainer;
@@ -238,10 +240,12 @@ public class Controller
 		ms_isUpdater = new InfoServiceUpdater(a_observableInfo);
 		ms_cascadeUpdater = new MixCascadeUpdater(a_observableInfo);
 		ms_paymentUpdater = new PaymentInstanceUpdater(a_observableInfo);
+		ms_perfUpdater = new PerformanceInfoUpdater(a_observableInfo);
 		
 		ms_isUpdater.start(true);
         ms_paymentUpdater.start(true);
         ms_cascadeUpdater.start(true);
+        ms_perfUpdater.start(true);
 		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Database updaters initialised.");
 		
 		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising trust filters...");
@@ -928,6 +932,12 @@ public class Controller
 		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Updating Mix cascades...");
 		        	ms_cascadeUpdater.update();
 		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Mix cascades updated.");
+		        }
+		        if (!ms_perfUpdater.isFirstUpdateDone())
+		        {
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Updating performance data...");
+		        	ms_perfUpdater.update();
+		        	LogHolder.log(LogLevel.NOTICE, LogType.NET, "Performance data updated.");
 		        }
 		         
 		        MixCascade cascade;
