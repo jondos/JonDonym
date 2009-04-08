@@ -1,10 +1,15 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JPanel;
 
 import gui.dialog.JAPDialog;
 import gui.dialog.TermsAndConditionsPane;
@@ -69,7 +74,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 	}
 	
 	public static void previewTranslation(Frame owner,
-										TermsAndConditionsTranslation tcTranslation)
+										TermsAndConditionsTranslation tcTranslation, JButton exportButton)
 	{
 		String htmlText = null;
 		try 
@@ -87,7 +92,27 @@ public class TermsAndConditionsDialog extends JAPDialog
 		}
 		JapHtmlPane htmlPane = new JapHtmlPane(htmlText);
 		htmlPane.setPreferredSize(new Dimension(800,600));
-		JDialog displayDialog = new JDialog(owner, "Translation preview ["+tcTranslation+"]");
+		final JDialog displayDialog = new JDialog(owner, "Translation preview ["+tcTranslation+"]");
+		
+		displayDialog.setLayout(new BorderLayout());
+		JPanel buttonPanel = new JPanel();
+		
+		if(exportButton != null)
+		{
+			buttonPanel.add(exportButton);
+		}
+		JButton closeButton = new JButton(JAPMessages.getString("bttnClose"));
+		closeButton.addActionListener(
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e) 
+					{
+						displayDialog.dispose();
+					}
+				});
+		buttonPanel.add(closeButton);
+		displayDialog.add(buttonPanel, BorderLayout.NORTH);
+		displayDialog.add(htmlPane, BorderLayout.SOUTH);
 		displayDialog.add(htmlPane);
 		displayDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		displayDialog.pack();

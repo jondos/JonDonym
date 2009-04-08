@@ -174,6 +174,7 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		{
 			// find the ServiceOperator object to our T&C
 			ServiceOperator op = tcTranslation.getOperator();
+			Element translationElement = tcTranslation.getTranslationElement();
 			OperatorAddress opAddress = tcTranslation.getOperatorAddress();
 			if(op == null)
 			{
@@ -196,25 +197,12 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 			
 			Element country = m_docWorkingCopy.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
 			XMLUtil.setValue(country, loc.getDisplayCountry(tcLoc));
-			//operator.appendChild(country);
-			
-			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_STREET);
-			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_POSTAL_CODE);
-			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_CITY);
-			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_VAT);
-			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_FAX);
-			//appendChildNodeFromTC(a_data, operator, XML_ELEMENT_OPERATOR_EMAIL); 
 			
 			replaceNode(operator, XML_ELEMENT_OPERATOR);
 			Element replacedOpNode = (Element)
 				XMLUtil.getFirstChildByNameUsingDeepSearch(m_docWorkingCopy.getDocumentElement(), XML_ELEMENT_OPERATOR);
-			//XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_NAME, op.getOrganization());
-			//XMLUtil.createChildElementWithValue(replacedOpNode, XML_ELEMENT_OPERATOR_EMAIL, op.getEMail());
 			
 			replaceNode(country, XML_ELEMENT_OPERATOR_COUNTRY);
-			
-			// replace PrivacyPolicyUrl
-			//replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_PRIVACY_POLICY_URL);
 			
 			String[] replaceElements = new String[]
 			{
@@ -261,56 +249,45 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 					}
 				}
 			}
-			// replace LegalOpinionsUrl
-			//replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_LEGAL_OPINIONS_URL);
 			
-			// replace OperationalAgreementUrl
-			//replaceNodeFromTC(tcTranslationElement, XML_ELEMENT_OPERATIONAL_AGREEMENT_URL);
-			
-			// replace Location
-			//replaceNodeFromTC(operator, XML_ELEMENT_OPERATOR_CITY);
-			
-			// replace Venue
-			//replaceNodeFromTC(operator, XML_ELEMENT_VENUE);
-			
-			// ExtendedOperatorCountry
-			//replaceNodeFromTC(tcTranslationElement, "ExtendedOperatorCountry");
-			
-			// loop through all Paragraph nodes in our import document
-			NodeList paragraphs = tcTranslation.getTranslationElement().getElementsByTagName(XML_ELEMENT_PARAGRAPH);
-			for(int i = 0; i < paragraphs.getLength(); i++)
+			if(translationElement != null)
 			{
-				Node importParagraph = XMLUtil.importNode(m_docWorkingCopy, paragraphs.item(i), true);
-				String id = XMLUtil.parseAttribute(importParagraph, XML_ATTR_ID, "-1");
-				
-				// try to find it in our original document
-				Node para = findParagraphById(id);
-				Node section = null;
-				// insert it if the paragraph doesn't exist yet
-				if(para == null)
+				// loop through all Paragraph nodes in our import document
+				NodeList paragraphs = translationElement.getElementsByTagName(XML_ELEMENT_PARAGRAPH);
+				for(int i = 0; i < paragraphs.getLength(); i++)
 				{
-					// invalid id, skip
-					if(id.length() < 2)
+					Node importParagraph = XMLUtil.importNode(m_docWorkingCopy, paragraphs.item(i), true);
+					String id = XMLUtil.parseAttribute(importParagraph, XML_ATTR_ID, "-1");
+					
+					// try to find it in our original document
+					Node para = findParagraphById(id);
+					Node section = null;
+					// insert it if the paragraph doesn't exist yet
+					if(para == null)
 					{
-						continue;
+						// invalid id, skip
+						if(id.length() < 2)
+						{
+							continue;
+						}
+						
+						String sectionId = id.substring(0, 1);
+						section = findSectionById(sectionId);
+						
+						// invalid section id, skip
+						if(section == null)
+						{
+							continue;
+						}
+						
+						section.appendChild(importParagraph);
 					}
-					
-					String sectionId = id.substring(0, 1);
-					section = findSectionById(sectionId);
-					
-					// invalid section id, skip
-					if(section == null)
+					// replace it otherwise
+					else
 					{
-						continue;
+						section = para.getParentNode();
+						section.replaceChild(importParagraph, para);
 					}
-					
-					section.appendChild(importParagraph);
-				}
-				// replace it otherwise
-				else
-				{
-					section = para.getParentNode();
-					section.replaceChild(importParagraph, para);
 				}
 			}
 		}
