@@ -686,7 +686,7 @@ public class TermsAndConditions implements IXMLEncodable
 			}
 			
 			this.locale = this.locale.trim().toLowerCase();
-			this.defaultTranslation = XMLUtil.parseAttribute(translationElement, XML_ATTR_DEFAULT_LOCALE, false);
+			setDefaultTranslation(XMLUtil.parseAttribute(translationElement, XML_ATTR_DEFAULT_LOCALE, false));
 	
 			privacyPolicyUrl = XMLUtil.parseValue(XMLUtil.getFirstChildByName(translationElement, XML_ELEMENT_PRIVACY_POLICY), "");
 			legalOpinionsUrl = XMLUtil.parseValue(XMLUtil.getFirstChildByName(translationElement, XML_ELEMENT_LEGAL_OPINIONS), "");
@@ -743,6 +743,10 @@ public class TermsAndConditions implements IXMLEncodable
 			this.defaultTranslation = defaultTranslation;
 			if(defaultTranslation)
 			{
+				if(TermsAndConditions.this.defaultTl != null)
+				{
+					TermsAndConditions.this.defaultTl.setDefaultTranslation(false);
+				}
 				TermsAndConditions.this.defaultTl = this;
 			}
 		}
