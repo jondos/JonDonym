@@ -80,7 +80,7 @@ public class TermsAndConditions implements IXMLEncodable
 	public final static String XML_ELEMENT_NAME = "TermsAndConditions";
 	public final static String XML_ELEMENT_TRANSLATION_NAME = Translation.XML_ELEMENT_NAME;
 
-	private static final String DATE_FORMAT = "yyyyMMdd"; 
+	public static final String DATE_FORMAT = "yyyyMMdd"; 
 	
 	//private String m_strId;
 	private ServiceOperator operator;
@@ -245,7 +245,12 @@ public class TermsAndConditions implements IXMLEncodable
 	
 	public TermsAndConditionsTranslation removeTranslation(String locale)
 	{
-		return (TermsAndConditionsTranslation) translations.remove(locale.trim().toLowerCase());
+		Translation removedTranslation = (Translation) translations.remove(locale.trim().toLowerCase());
+		if(defaultTl == removedTranslation)
+		{
+			defaultTl = null;
+		}
+		return (TermsAndConditionsTranslation) removedTranslation;
 	}
 	
 	public TermsAndConditionsTranslation removeTranslation(Locale locale)
