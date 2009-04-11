@@ -110,11 +110,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	private final Object SHUTDOWN_SYNC = new Object();
 	private boolean bShuttingDown = false;
 
-	private ProxyCallbackHandler m_callbackHandler = new ProxyCallbackHandler();
+	private final ProxyCallbackHandler m_callbackHandler = new ProxyCallbackHandler();
 	private HTTPProxyCallback m_httpProxyCallback = null;
 	private DecompressionProxyCallback m_decompressionProxyCallback = null;
-	
-	private JonDoFoxHeader m_jfxHeader = null;
 	
 	/**
 	 * Stores the MixCascade we are connected to.
@@ -292,41 +290,47 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		}
 	}
 	
+	public synchronized void removeHTTPConnectionListener(AbstractHTTPConnectionListener listener)
+	{
+		if (listener == null)
+		{
+			return;
+		}
+		
+		if (m_callbackHandler == null)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "No Callbackhandler activated: cannot activate JonDoFox headers.");
+			return;
+		}
+		
+		synchronized (m_callbackHandler)
+		{	
+			if (m_httpProxyCallback != null)
+			{
+				m_httpProxyCallback.removeHTTPConnectionListener(listener);
+			}
+		}
+	}
+	
 	/* TODO: this also enables the experimental ConnectionWatch
 	 * has to be handled by another enable method
 	 */
-	public void setJonDoFoxHeaderEnabled(boolean enable)
+	public void addHTTPConnectionListener(AbstractHTTPConnectionListener listener)
 	{
-		if(enable)
+		if (m_callbackHandler == null)
 		{
-			if( m_callbackHandler == null)
-			{
-				LogHolder.log(LogLevel.WARNING, LogType.NET, "No Callbackhandler activated: cannot activate JonDoFox headers.");
-				return;
-			}
-			if(m_httpProxyCallback == null)
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "No Callbackhandler activated: cannot activate JonDoFox headers.");
+			return;
+		}
+		synchronized (m_callbackHandler)
+		{
+			if (m_httpProxyCallback == null)
 			{
 				LogHolder.log(LogLevel.WARNING, LogType.NET, "No HTTPProxyCallback activated: cannot activate JonDoFox headers.");
 				return;
 			}
-			
-			if(m_jfxHeader == null)
-			{
-				m_jfxHeader = new JonDoFoxHeader();
-			}
-			m_httpProxyCallback.addHTTPConnectionListener(m_jfxHeader);
+			m_httpProxyCallback.addHTTPConnectionListener(listener);
 			enableProxyCallback(m_httpProxyCallback);
-		}
-		else
-		{
-			if (m_httpProxyCallback != null )
-			{
-				if(m_jfxHeader != null)
-				{
-					m_httpProxyCallback.removeHTTPConnectionListener(m_jfxHeader);
-					m_jfxHeader = null;
-				}
-			}
 		}
 	}
 	

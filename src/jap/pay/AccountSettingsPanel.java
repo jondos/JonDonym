@@ -1722,7 +1722,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 		{
 			public boolean isSkippedAsNextContentPane()
 			{
-				return isTermsAccepted();
+				return planSelectionPane.isCouponUsed() || isTermsAccepted();
 			}
 			
 			public boolean isSkippedAsPreviousContentPane()
@@ -3235,13 +3235,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 					}
 
 					Document doc = XMLUtil.createDocument();
-					Element elemRoot = doc.createElement("root");
-					elemRoot.setAttribute("filetype", "JapAccountFile");
-					elemRoot.setAttribute("version", "1.1");
-
-					doc.appendChild(elemRoot);
-					Element elemAccount = selectedAccount.toXmlElement(doc, strPassword);
-					elemRoot.appendChild(elemAccount);
+					doc.appendChild(selectedAccount.toXmlElement(doc, strPassword));
 					/*
 					  if (strPassword != null && strPassword.length() > 0)
 					  {
@@ -3315,47 +3309,14 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 				Document doc = XMLUtil.readXMLDocument(f);
 				XMLUtil.removeComments(doc);
 				Element elemRoot = doc.getDocumentElement();
-				elemAccount = (Element) XMLUtil.getFirstChildByName(elemRoot, PayAccount.XML_ELEMENT_NAME);
-
-				// maybe it was encrypted; only for compatibility with old export format 1.0, remove!
-				if (elemAccount == null)
+				// only for backwards compatibility; remove after 00.11.019 is released
+				if (elemRoot.getNodeName().equals("root"))
 				{
-					Element elemCrypt =
-						(Element) XMLUtil.getFirstChildByName(elemRoot, XMLEncryption.XML_ELEMENT_NAME);
-					if (elemCrypt != null)
-					{
-						String strPassword = null;
-
-						while (true)
-						{
-							JAPDialog d = new JAPDialog(GUIUtils.getParentWindow(this.getRootPanel()),
-								JAPMessages.getString(MSG_ACCPASSWORDTITLE), true);
-							PasswordContentPane p = new PasswordContentPane(d,
-								PasswordContentPane.PASSWORD_ENTER, "");
-							p.updateDialog();
-							d.pack();
-							d.setVisible(true);
-							if (p.getButtonValue() != PasswordContentPane.RETURN_VALUE_CANCEL &&
-								p.getButtonValue() != PasswordContentPane.RETURN_VALUE_CLOSED)
-							{
-								strPassword = new String(p.getPassword());
-							}
-							if (strPassword == null)
-							{
-								break;
-							}
-							try
-							{
-								elemAccount = XMLEncryption.decryptElement(elemCrypt, strPassword);
-							}
-							catch (Exception ex)
-							{
-								strPassword = null;
-								continue;
-							}
-							break ;
-						}
-					}
+					elemAccount = (Element) XMLUtil.getFirstChildByName(elemRoot, PayAccount.XML_ELEMENT_NAME);
+				}
+				else
+				{
+					elemAccount = elemRoot;
 				}
 			}
 			catch (Exception e)

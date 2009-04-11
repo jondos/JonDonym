@@ -285,7 +285,7 @@ public AIControlChannel(Multiplexer a_multiplexer,
 	  }
 	  //Although it is deprecated to receive the prepaid bytes with the challenge
 	  //they're still handled here for backward compatibility reasons.
-	  if(!m_prepaidAmountInPayRequest)
+	  if (!m_prepaidAmountInPayRequest)
 	  {
 		  handlePrepaidBytesReceived(chal.getPrepaidBytes(), acc);
 	  }
@@ -324,7 +324,7 @@ public AIControlChannel(Multiplexer a_multiplexer,
 
 	 
 	//if requested, send account certificate
-	if(request.isInitialCCRequest())
+	if (request.isInitialCCRequest())
 	{
 		if(m_prepaidAmountInPayRequest)
 		handlePrepaidBytesReceived(request.getPrepaidBytes(), PayAccountsFile.getInstance().getActiveAccount());
@@ -611,8 +611,8 @@ public AIControlChannel(Multiplexer a_multiplexer,
 				  PayAccountsFile.getInstance().setActiveAccount(openTransactionAccount);
 			  }
 			  // check if the account is charged; if not, try to get the latest balance from each account
-			  if (PayAccountsFile.getInstance().getActiveAccount() == null ||
-				  !PayAccountsFile.getInstance().getActiveAccount().isCharged(now) &&
+			  if ((PayAccountsFile.getInstance().getActiveAccount() == null ||
+				  !PayAccountsFile.getInstance().getActiveAccount().isCharged(now)) &&
 				  accounts.size() > 0)
 			  {
 				  LogHolder.log(LogLevel.WARNING, LogType.PAY,

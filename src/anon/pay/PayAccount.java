@@ -208,11 +208,8 @@ public class PayAccount implements IXMLEncodable
 	 */
 	private void setValues(Element elemRoot, final IMiscPasswordReader a_passwordReader) throws Exception
 	{
-		if (elemRoot == null || !(elemRoot.getTagName().equals(XML_ELEMENT_NAME) ))
-//								||  (elemRoot.getAttribute(XML_VERSION).compareTo(VERSION)) > 0))
-		{
-			throw new XMLParseException("PayAccount wrong XML format");
-		}
+		XMLUtil.assertNodeName(elemRoot, XML_ELEMENT_NAME);
+		
 		boolean bActive = XMLUtil.parseAttribute(elemRoot, XML_ATTR_ACTIVE, true);
 		// for compatibility
 		boolean bBackupDone = XMLUtil.parseAttribute(elemRoot, XML_BACKUP_DONE, false);
@@ -248,7 +245,7 @@ public class PayAccount implements IXMLEncodable
 
 	    //set terms
 		Element elemTerms = (Element) XMLUtil.getFirstChildByName(elemRoot,XMLGenericText.XML_ELEMENT_NAME);
-		if (elemTerms != null)
+		if (elemTerms != null && XMLUtil.getStorageMode() != XMLUtil.STORAGE_MODE_AGRESSIVE)
 		{
 
 			//unzip if necessary

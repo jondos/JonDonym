@@ -136,13 +136,18 @@ import anon.pay.PayAccount;
 import anon.pay.PayAccountsFile;
 import anon.pay.PaymentInstanceDBEntry;
 import anon.proxy.AnonProxy;
+import anon.proxy.HTTPConnectionEvent;
+import anon.proxy.HTTPProxyCallback;
+import anon.proxy.HttpConnectionListenerAdapter;
 import anon.proxy.IProxyListener;
+import anon.proxy.JonDoFoxHeader;
 import anon.tor.TorAnonServerDescription;
 import anon.transport.address.IAddress;
 import anon.util.Base64;
 import anon.util.ClassUtil;
 import anon.util.IMiscPasswordReader;
 import anon.util.IPasswordReader;
+import anon.util.IReturnRunnable;
 import anon.util.JAPMessages;
 import anon.util.JobQueue;
 import anon.util.RecursiveFileTool;
@@ -224,6 +229,12 @@ public final class JAPController extends Observable implements IProxyListener, O
 	
 	public static final String MSG_WARNING_IS_CERTS_EXPIRED = JAPController.class.getName() + "_warningISCertsExpired";
 	public static final String MSG_WARNING_IS_CERTS_INVALID = JAPController.class.getName() + "_warningISCertsInvalid";
+	
+	public static final String MSG_WARNING_INSUFFICIENT_BALANCE = JAPController.class.getName() + "_warningInsufficientBalance";
+	public static final String MSG_WARNING_SHORT_BALANCE = JAPController.class.getName() + "_warningShortBalance";
+	public static final String MSG_WARNING_SHORT_BALANCE_CONTINUE = 
+		JAPController.class.getName() + "_warningShortBalanceContinue";
+	
 	
 	
 
@@ -358,6 +369,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	};
 
 	private DirectProxy.AllowProxyConnectionCallback m_proxyCallback;
+	
+	private WarnSmallBalanceOnDownloadListener m_smallBalanceWarningListener;
 
 	/** Holds the MsgID of the status message after the forwarding server was started.*/
 	private int m_iStatusPanelMsgIdForwarderServerStatus;
@@ -510,6 +523,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 			DirectProxy.setAllowUnprotectedConnectionCallback(m_proxyCallback);
 		}
+		
+		m_smallBalanceWarningListener = new WarnSmallBalanceOnDownloadListener(-10); 
+		
 		/* set a default mixcascade */
 		try
 		{
@@ -3403,9 +3419,19 @@ public final class JAPController extends Observable implements IProxyListener, O
 						}
 					}
 					
-					m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-					m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());	
-					m_proxyAnon.setHTTPDecompressionEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+					m_proxyAnon.setHTTPHeaderProcessingEnabled(true);
+					m_proxyAnon.addHTTPConnectionListener(m_smallBalanceWarningListener);
+					if (JAPModel.getInstance().isAnonymizedHttpHeaders())
+					{
+						m_proxyAnon.addHTTPConnectionListener(new JonDoFoxHeader(0));
+						m_proxyAnon.setHTTPDecompressionEnabled(true);
+					}
+					else
+					{
+						m_proxyAnon.removeHTTPConnectionListener(new JonDoFoxHeader(0));
+						m_proxyAnon.setHTTPDecompressionEnabled(false);
+					}
+					
 					
 					if (!JAPModel.isInfoServiceDisabled())
 					{
@@ -5008,9 +5034,18 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						if(m_proxyAnon != null)
 						{
-							m_proxyAnon.setHTTPHeaderProcessingEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-							m_proxyAnon.setJonDoFoxHeaderEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
-							m_proxyAnon.setHTTPDecompressionEnabled(JAPModel.getInstance().isAnonymizedHttpHeaders());
+							m_proxyAnon.setHTTPHeaderProcessingEnabled(true);
+							m_proxyAnon.addHTTPConnectionListener(m_smallBalanceWarningListener);
+							if (JAPModel.getInstance().isAnonymizedHttpHeaders())
+							{
+								m_proxyAnon.addHTTPConnectionListener(new JonDoFoxHeader(0));
+								m_proxyAnon.setHTTPDecompressionEnabled(true);
+							}
+							else
+							{
+								m_proxyAnon.removeHTTPConnectionListener(new JonDoFoxHeader(0));
+								m_proxyAnon.setHTTPDecompressionEnabled(false);
+							}
 						}
 					}
 				}
@@ -5535,5 +5570,192 @@ public final class JAPController extends Observable implements IProxyListener, O
 	public Locale getDisplayLanguageLocale() 
 	{
 		return JAPMessages.getLocale();
+	}
+	
+	private class WarnSmallBalanceOnDownloadListener extends HttpConnectionListenerAdapter
+	{
+		public WarnSmallBalanceOnDownloadListener(int a_priority)
+		{
+			super(a_priority);
+		}
+		
+		public void responseHeadersReceived(HTTPConnectionEvent event) 
+		{
+			if (JAPDialog.isConsoleOnly() || event == null || event.getConnectionHeader() == null)
+			{
+				return;
+			}
+			String[] strResponseHeader = event.getConnectionHeader().getResponseHeader(
+					HTTPProxyCallback.HTTP_CONTENT_LENGTH);
+			long contentLength = 0;
+			
+			if (strResponseHeader == null || strResponseHeader.length == 0)
+			{
+				return;
+			}
+			
+			try
+			{
+				contentLength = Long.parseLong(strResponseHeader[0]);
+			}
+			catch (NumberFormatException a_e)
+			{
+				LogHolder.log(LogLevel.WARNING, LogType.FILTER, a_e);
+				return;
+			}
+			PayAccount account = PayAccountsFile.getInstance().getActiveAccount();
+			if (account == null)
+			{
+				return;
+			}
+			
+			
+			if (contentLength > 10000000 && isAnonConnected() && getCurrentMixCascade().isPayment())
+			{
+				final JAPDialog.LinkedInformationAdapter adapter = new JAPDialog.LinkedInformationAdapter()
+				{
+					public boolean isOnTop()
+					{
+						return true;
+					}
+				};
+				final JAPDialog.Options options = new JAPDialog.Options(DialogContentPane.OPTION_TYPE_OK_CANCEL)
+				{
+					public String getYesOKText()
+					{
+						return JAPMessages.getString(MSG_WARNING_SHORT_BALANCE_CONTINUE);
+					}
+				};
+				int retVal = JAPDialog.RETURN_VALUE_OK;
+				final long lContentLength = contentLength;
+				
+				// warn when downloading large files that may break because of insufficient balance
+				if ((contentLength * 1.1) > 
+					account.getCurrentCredit() * 1000 + getCurrentMixCascade().getPrepaidInterval())
+				{
+					// credits are not sufficient!
+					LogHolder.log(LogLevel.WARNING, LogType.PAY, "Insufficient balance for downloading file!");
+					// timeout if user does not answer
+				
+					IReturnRunnable runnable = new IReturnRunnable()
+					{
+						private Integer m_retVal = null;
+						public void run()
+						{
+							m_retVal = new Integer(JAPDialog.showConfirmDialog(getCurrentView(), 
+									JAPMessages.getString(MSG_WARNING_INSUFFICIENT_BALANCE,
+											Util.formatBytesValueWithUnit(lContentLength)), 
+											options, 
+									DialogContentPane.MESSAGE_TYPE_WARNING, adapter));
+						}
+						public Object getValue()
+						{
+							return m_retVal;
+						}
+					};
+					Thread timoutThread = new Thread(runnable);
+					timoutThread.start();
+					try 
+					{
+						timoutThread.join(10000);
+					} 
+					catch (InterruptedException e) 
+					{
+						// ignore
+					}
+					if (runnable.getValue() == null)
+					{
+						while (timoutThread.isAlive())
+						{
+							timoutThread.interrupt();
+							try 
+							{
+								timoutThread.join(200);
+							} 
+							catch (InterruptedException e) 
+							{
+								// ignore
+							}
+							Thread.yield();
+						}
+						retVal = JAPDialog.RETURN_VALUE_CANCEL;
+					}
+					else
+					{
+						retVal = ((Integer)runnable.getValue()).intValue();
+					}
+				}
+				else if ((contentLength * 1.3) > account.getCurrentCredit() * 1000)
+				{
+					// show warning only
+					LogHolder.log(LogLevel.WARNING, LogType.PAY, 
+							"Balance might be insufficient balance for downloading file.");
+					
+					IReturnRunnable runnable = new IReturnRunnable()
+					{
+						private Integer m_retVal = null;
+						public void run()
+						{
+							m_retVal = JAPDialog.showConfirmDialog(getCurrentView(), 
+									JAPMessages.getString(MSG_WARNING_SHORT_BALANCE,
+											Util.formatBytesValueWithUnit(lContentLength)), 
+											options, 
+									DialogContentPane.MESSAGE_TYPE_WARNING, adapter);
+						}
+						public Object getValue()
+						{
+							return m_retVal;
+						}
+					};
+					Thread timoutThread = new Thread(runnable);
+					timoutThread.start();
+					try 
+					{
+						// wait only 60 seconds to prevent memory overflow on fast downloads and a browser break
+						timoutThread.join(60000);
+					} 
+					catch (InterruptedException e) 
+					{
+						// ignore
+					}
+					if (runnable.getValue() == null)
+					{
+						while (timoutThread.isAlive())
+						{
+							timoutThread.interrupt();
+							try 
+							{
+								timoutThread.join(200);
+							} 
+							catch (InterruptedException e) 
+							{
+								// ignore
+							}
+							Thread.yield();
+						}
+						retVal = JAPDialog.RETURN_VALUE_OK; // OK is default if the user does not choose anything
+					}
+					else
+					{
+						retVal = ((Integer)runnable.getValue()).intValue();
+					}
+				}
+				if (retVal != JAPDialog.RETURN_VALUE_OK)
+				{
+					// cancel this download
+					event.getConnectionHeader().replaceResponseHeader(HTTPProxyCallback.HTTP_CONNECTION, "close");
+					event.getConnectionHeader().replaceResponseHeader(HTTPProxyCallback.HTTP_CONTENT_LENGTH, "0");
+					if (event.getConnectionHeader().getResponseLine() != null &&
+						event.getConnectionHeader().getResponseLine().indexOf("HTTP/1.1") >= 0)
+					{
+						event.getConnectionHeader().replaceResponseLine("HTTP/1.1 204 No Content");
+					}
+					else
+					{
+						event.getConnectionHeader().replaceResponseLine("HTTP/1.0 204 No Content");
+					}
+				}
+			}
+		}
 	}
 }
