@@ -2098,7 +2098,7 @@ public final class GUIUtils
 				try
 				{
 					Thread.sleep(2000); // 2 seconds should be enough for showing this dialog!
-					System.out.println(a_chooser.isDisplayable() + ":" + a_chooser.isEnabled() + ":" + a_chooser.isFocusable() + ":" + a_chooser.isShowing());
+					//System.out.println(a_chooser.isDisplayable() + ":" + a_chooser.isEnabled() + ":" + a_chooser.isFocusable() + ":" + a_chooser.isShowing());
 					while ((!a_chooser.isVisible() || !a_chooser.isShowing()) && !bFinished.get())
 					{
 						LogHolder.log(LogLevel.ALERT, LogType.GUI, 

@@ -5696,11 +5696,11 @@ public final class JAPController extends Observable implements IProxyListener, O
 						private Integer m_retVal = null;
 						public void run()
 						{
-							m_retVal = JAPDialog.showConfirmDialog(getCurrentView(), 
+							m_retVal = new Integer(JAPDialog.showConfirmDialog(getCurrentView(), 
 									JAPMessages.getString(MSG_WARNING_SHORT_BALANCE,
 											Util.formatBytesValueWithUnit(lContentLength)), 
 											options, 
-									DialogContentPane.MESSAGE_TYPE_WARNING, adapter);
+									DialogContentPane.MESSAGE_TYPE_WARNING, adapter));
 						}
 						public Object getValue()
 						{
