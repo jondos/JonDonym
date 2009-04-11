@@ -53,6 +53,7 @@ import anon.pay.xml.XMLGenericStrings;
 import anon.pay.xml.XMLPassivePayment;
 import anon.pay.xml.XMLTransCert;
 import anon.proxy.AnonProxy;
+import anon.proxy.JonDoFoxHeader;
 import anon.infoservice.AbstractDatabaseEntry;
 import anon.infoservice.Database;
 import anon.infoservice.IDistributable;
@@ -834,9 +835,9 @@ public class Controller
 		return importAccounts(a_accountData, null);
 	}
 	
-	public static boolean importAccounts(String a_accountData, final char[] a_password)
+	public static boolean importAccounts(String a_accountData, IMiscPasswordReader a_pwReader)
 	{
-		boolean bImportSucceeded = importAccounts_internal(a_accountData, a_password);
+		boolean bImportSucceeded = importAccounts_internal(a_accountData, a_pwReader);
 		if (bImportSucceeded)
 		{
 			checkActiveAccount(PayAccountsFile.getInstance().getChargedAccount(getActivePaymentInstanceID()));
@@ -844,10 +845,9 @@ public class Controller
 		return bImportSucceeded;
 	}
 	
-	private static boolean importAccounts_internal(String a_accountData, final char[] a_password)
+	private static boolean importAccounts_internal(String a_accountData, IMiscPasswordReader a_pwReader)
 	{
 		Document doc;
-		IMiscPasswordReader pwReader;
 		
 		try
 		{
@@ -859,33 +859,12 @@ public class Controller
 			return false;
 		}
 		
-		pwReader = new IMiscPasswordReader()
-		{
-			private boolean m_bTriedOnce = false;
-			public synchronized String readPassword(Object message)
-			{
-				if (!m_bTriedOnce)
-				{
-					m_bTriedOnce = true;
-					if (a_password == null)
-					{
-						return "";
-					}
-					return new String(a_password);
-				}
-				else
-				{
-					// send this password only once and then cancel
-					return null;
-				}
-			}
-		};
 		
 		if (doc.getDocumentElement().getNodeName().equals(PayAccount.XML_ELEMENT_NAME))
 		{
 			try 
 			{
-				PayAccountsFile.getInstance().addAccount(new PayAccount(doc.getDocumentElement(), pwReader));
+				PayAccountsFile.getInstance().addAccount(new PayAccount(doc.getDocumentElement(), a_pwReader));
 				return true;
 			} 
 			catch (AccountAlreadyExistingException a_e) 
@@ -905,7 +884,7 @@ public class Controller
 		{
 			try
 			{
-				return PayAccountsFile.getInstance().importAccounts(doc.getDocumentElement(), pwReader);
+				return PayAccountsFile.getInstance().importAccounts(doc.getDocumentElement(), a_pwReader);
 			}
 			catch (Exception a_e)
 			{
@@ -979,7 +958,7 @@ public class Controller
 		        
 		        ms_jondonymProxy = new AnonProxy(ms_socketListener, null);
 		        ms_jondonymProxy.setHTTPHeaderProcessingEnabled(true);
-		        ms_jondonymProxy.setJonDoFoxHeaderEnabled(true);
+		        ms_jondonymProxy.addHTTPConnectionListener(new JonDoFoxHeader(0));
 		        ms_jondonymProxy.setHTTPDecompressionEnabled(true);
 		        ms_jondonymProxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
 		        ms_serviceContainer = new AutoSwitchedMixCascadeContainer(cascade);

@@ -82,7 +82,7 @@ import logging.LogType;
 
 public class PaymentMainPanel extends FlippingPanel
 {
-	public static final long WARNING_AMOUNT = 25 * 1000; // 25 MB (db stores in Kbyte!)
+	public static final long WARNING_AMOUNT = 50 * 1000; // 50 MB (db stores in Kbyte!)
 	public static final long WARNING_TIME = 1000 * 60 * 60 * 24 * 7; // seven days
 	public static final long FULL_AMOUNT = WARNING_AMOUNT * 4; // 25 MB (db stores in Kbyte!)	
 

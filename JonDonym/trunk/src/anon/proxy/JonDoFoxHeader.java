@@ -4,7 +4,7 @@ import java.util.StringTokenizer;
 
 import anon.proxy.HTTPProxyCallback.HTTPConnectionHeader;
 
-public final class JonDoFoxHeader implements HTTPConnectionListener {
+public final class JonDoFoxHeader extends AbstractHTTPConnectionListener {
 
 	final static String HTTP_ENCODING_GZIP = "gzip";
 	final static String HTTP_ENCODING_DEFLATE = "deflate";
@@ -17,6 +17,11 @@ public final class JonDoFoxHeader implements HTTPConnectionListener {
 	public final static String JONDOFOX_CHARSET = "utf-8,*";
 	public final static String JONDOFOX_CONTENT_TYPES = "*/*";
 	public final static String JONDOFOX_ENCODING = HTTP_ENCODING_GZIP+","+HTTP_ENCODING_DEFLATE;
+	
+	public JonDoFoxHeader(int a_priority)
+	{
+		super(a_priority);
+	}
 	
 	public void handleRequest(HTTPConnectionEvent event)
 	{

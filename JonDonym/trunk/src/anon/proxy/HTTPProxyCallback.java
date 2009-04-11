@@ -91,6 +91,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	public final static String HTTP_ACCEPT_CHARSET = "Accept-Charset";
 	public final static String HTTP_KEEP_ALIVE = "Keep-Alive";
 	public final static String HTTP_PROXY_CONNECTION = "Proxy-Connection";
+	public final static String HTTP_CONNECTION = "Connection";
 	public final static String HTTP_REFERER = "Referer";
 	public final static String HTTP_CACHE_CONTROL = "Cache-Control";
 	public final static String HTTP_PRAGMA = "Pragma";
@@ -718,20 +719,29 @@ public class HTTPProxyCallback implements ProxyCallback
 		}
 	}
 	
-	public synchronized void addHTTPConnectionListener(HTTPConnectionListener listener)
+	public synchronized void addHTTPConnectionListener(AbstractHTTPConnectionListener listener)
 	{
-		if(! m_httpConnectionListeners.contains(listener) )
+		if (!m_httpConnectionListeners.contains(listener))
 		{
-			m_httpConnectionListeners.addElement(listener);
+			int i = 0;
+			for (; i < m_httpConnectionListeners.size(); i++)
+			{
+				if (((AbstractHTTPConnectionListener)m_httpConnectionListeners.elementAt(i)).
+						getPriority() >= listener.getPriority())
+				{
+					break;
+				}
+			}
+			m_httpConnectionListeners.insertElementAt(listener, i);
 		}
 	}
 	
-	public synchronized void removeHTTPConnectionListener(HTTPConnectionListener listener)
+	public synchronized void removeHTTPConnectionListener(AbstractHTTPConnectionListener listener)
 	{
 		m_httpConnectionListeners.removeElement(listener);
 	}
 	
-	public synchronized void removeAlllHTTPConnectionListeners()
+	public synchronized void removeAllHTTPConnectionListeners()
 	{
 		m_httpConnectionListeners.removeAllElements();
 	}
@@ -740,7 +750,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	{
 		for (Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
 		{
-			HTTPConnectionListener listener = (HTTPConnectionListener) enumeration.nextElement();
+			AbstractHTTPConnectionListener listener = (AbstractHTTPConnectionListener) enumeration.nextElement();
 			if (listener != null)
 			{
 				listener.requestHeadersReceived(event);
@@ -752,7 +762,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	{
 		for (Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
 		{
-			HTTPConnectionListener listener = (HTTPConnectionListener) enumeration.nextElement();
+			AbstractHTTPConnectionListener listener = (AbstractHTTPConnectionListener) enumeration.nextElement();
 			if( listener != null)
 			{
 				listener.responseHeadersReceived(event);
@@ -764,7 +774,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	{
 		for (Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
 		{
-			HTTPConnectionListener listener = (HTTPConnectionListener) enumeration.nextElement();
+			AbstractHTTPConnectionListener listener = (AbstractHTTPConnectionListener) enumeration.nextElement();
 			if (listener != null)
 			{
 				listener.downstreamContentBytesReceived(event);
@@ -776,7 +786,7 @@ public class HTTPProxyCallback implements ProxyCallback
 	{
 		for (Enumeration enumeration = m_httpConnectionListeners.elements(); enumeration.hasMoreElements();)
 		{
-			HTTPConnectionListener listener = (HTTPConnectionListener) enumeration.nextElement();
+			AbstractHTTPConnectionListener listener = (AbstractHTTPConnectionListener) enumeration.nextElement();
 			if (listener != null)
 			{
 				listener.upstreamContentBytesReceived(event);
@@ -786,8 +796,8 @@ public class HTTPProxyCallback implements ProxyCallback
 	
 	public synchronized void closeRequest(AnonProxyRequest anonRequest)
 	{
-		HTTPConnectionHeader connHeader = (HTTPConnectionHeader) 
-		m_connectionHTTPHeaders.get(anonRequest);
+		HTTPConnectionHeader connHeader = 
+			(HTTPConnectionHeader)m_connectionHTTPHeaders.get(anonRequest);
 	
 		if( (connHeader != null) )
 		{
@@ -795,10 +805,11 @@ public class HTTPProxyCallback implements ProxyCallback
 			connHeader.clearResponse();
 			m_upstreamBytes.remove(anonRequest);
 			m_downstreamBytes.remove(anonRequest);
+			m_connectionHTTPHeaders.remove(anonRequest);
 		}
 	}
 	
-	protected final class HTTPConnectionHeader
+	public final class HTTPConnectionHeader
 	{
 		private Hashtable reqHeaders = new Hashtable();
 		private Hashtable resHeaders = new Hashtable();
@@ -854,12 +865,12 @@ public class HTTPProxyCallback implements ProxyCallback
 			setHeader(resHeaders, resHeaderOrder, header, value);
 		}
 		
-		protected synchronized void replaceRequestHeader(String header, String value)
+		public synchronized void replaceRequestHeader(String header, String value)
 		{
 			replaceHeader(reqHeaders, reqHeaderOrder, header, value);
 		}
 		
-		protected synchronized void replaceResponseHeader(String header, String value)
+		public synchronized void replaceResponseHeader(String header, String value)
 		{
 			replaceHeader(resHeaders, resHeaderOrder, header, value);
 		}
@@ -874,6 +885,13 @@ public class HTTPProxyCallback implements ProxyCallback
 			return getStartLine(resHeaders);
 		}
 		
+		public synchronized void replaceResponseLine(String a_newResponseLine)
+		{
+			Vector responseLine = new Vector();
+			responseLine.addElement(a_newResponseLine);
+			resHeaders.put(HTTP_START_LINE_KEY.toLowerCase(), responseLine);
+		}
+		
 		public synchronized String[] getRequestHeader(String header)
 		{
 			return getHeader(reqHeaders, header);
@@ -884,12 +902,12 @@ public class HTTPProxyCallback implements ProxyCallback
 			return getHeader(resHeaders, header);
 		}
 		
-		protected synchronized String[] removeRequestHeader(String header)
+		public synchronized String[] removeRequestHeader(String header)
 		{
 			return removeHeader(reqHeaders, reqHeaderOrder, header);
 		}
 		
-		protected synchronized String[] removeResponseHeader(String header)
+		public synchronized String[] removeResponseHeader(String header)
 		{
 			return removeHeader(resHeaders, resHeaderOrder, header);
 		}
@@ -974,18 +992,18 @@ public class HTTPProxyCallback implements ProxyCallback
 			Vector valueContainer = (Vector) headerMap.get(HTTP_START_LINE_KEY.toLowerCase());
 			if (valueContainer == null || valueContainer.size() == 0)
 			{
-				LogHolder.log(LogLevel.ERR, LogType.NET, "Invalid request because it contains no startline");
+				LogHolder.log(LogLevel.ERR, LogType.FILTER, "Invalid request because it contains no startline");
 				return null;
 			}
 		
-			if(valueContainer.size() > 1)
+			if (valueContainer.size() > 1)
 			{
 				String errOutput = "";
 				for (int i = 0; i < valueContainer.size(); i++) 
 				{
 					errOutput+= valueContainer.elementAt(i) + "\n";
 				}
-				LogHolder.log(LogLevel.ERR, LogType.NET, 
+				LogHolder.log(LogLevel.ERR, LogType.FILTER, 
 						"This HTTP message seems to be invalid, because it has multiple start lines:\n"
 					+errOutput);
 			}
@@ -1034,7 +1052,7 @@ public class HTTPProxyCallback implements ProxyCallback
 				{
 					if(!allHeaders.equals(""))
 					{
-						LogHolder.log(LogLevel.ERR, LogType.NET, "HTTP startline set after Message-Header. " +
+						LogHolder.log(LogLevel.ERR, LogType.FILTER, "HTTP startline set after Message-Header. " +
 								"This is a Bug. please report this.");
 						throw new  IllegalStateException("HTTP startline set after Message-Header. " +
 								"This is a Bug. please report this.");
@@ -1054,9 +1072,9 @@ public class HTTPProxyCallback implements ProxyCallback
 				}
 			}
 			allHeaders += CRLF;
-			if (LogHolder.isLogged(LogLevel.INFO, LogType.NET))
+			if (LogHolder.isLogged(LogLevel.INFO, LogType.FILTER))
 			{
-				LogHolder.log(LogLevel.INFO, LogType.NET, Thread.currentThread().getName()+": header dump:\n"+allHeaders);
+				LogHolder.log(LogLevel.INFO, LogType.FILTER, Thread.currentThread().getName()+": header dump:\n"+allHeaders);
 			}
 			return allHeaders.getBytes();
 		}

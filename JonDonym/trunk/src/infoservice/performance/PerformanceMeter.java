@@ -331,7 +331,6 @@ public class PerformanceMeter implements Runnable, Observer
 		
 		// disable header processing and jondofox headers. these used to cause problems with the test.
 		m_proxy.setHTTPHeaderProcessingEnabled(false);
-		m_proxy.setJonDoFoxHeaderEnabled(false);
 		
 		m_ownInfoService =
 			new InfoServiceDBEntry(Configuration.getInstance().getOwnName(),

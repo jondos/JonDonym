@@ -78,6 +78,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.FontUIResource;
 
+import anon.util.BooleanVariable;
 import anon.util.ClassUtil;
 import anon.util.CountryMapper;
 import anon.util.IReturnRunnable;
@@ -2072,16 +2073,16 @@ public final class GUIUtils
 	  }
 	  return new Dimension(totalWidth,totalHeight);
   }
-
+  
   /**
-   * This method shows a JFileChooser. If the JFileChooser does not show up, the current thread (the thread
-   * that called this method) will be interrupted. This happened on Windows Vista 32 (not often,
-   * but it did) with JRE 6. It might also happen on other systems.
-   * @param parent
-   * @param currentDirectoryPath
+   * This method shows a JFileChooser. If the JFileChooser does not show up, the AWT event
+   * dispatch thread  will be interrupted. This happened on Windows Vista 32 (not often,
+   * but it did) with JRE 6. It might also happen on other systems and with other JREs.
+   * @param a_chooser a file chooser
+   * @param a_parent the parent component over which the file chooser should be displayed
    * @return the return value of the JFileChooser object 
    */
-  public static int showMonitoredFileChooser(final JFileChooser a_chooser, Component parent)
+  public static int showMonitoredFileChooser(final JFileChooser a_chooser, Component a_parent)
   {
 	  if (a_chooser == null)
 	  {
@@ -2089,19 +2090,23 @@ public final class GUIUtils
 	  }
 	  
 	  int result;
-	  final Thread thisThread = Thread.currentThread();
+	  final BooleanVariable bFinished = new BooleanVariable(false);
 	  Thread timeoutThread = new Thread(new Runnable()
 		{
 			public void run()
 			{
-				try 
+				try
 				{
-					Thread.sleep(10000); // 10 seconds should be enough for showing this dialog!
-					if (!a_chooser.isVisible())
+					Thread.sleep(2000); // 2 seconds should be enough for showing this dialog!
+					System.out.println(a_chooser.isDisplayable() + ":" + a_chooser.isEnabled() + ":" + a_chooser.isFocusable() + ":" + a_chooser.isShowing());
+					while ((!a_chooser.isVisible() || !a_chooser.isShowing()) && !bFinished.get())
 					{
-						LogHolder.log(LogLevel.ALERT, LogType.GUI, "File chooser dialog blocked and was interrupted!");
-						thisThread.interrupt();
-						a_chooser.setVisible(false);
+						LogHolder.log(LogLevel.ALERT, LogType.GUI, 
+							"File chooser dialog blocked and is now interrupted!");
+						//System.out.println(a_chooser.isDisplayable() + ":" + a_chooser.isEnabled() + ":" + a_chooser.isFocusable() + ":" + a_chooser.isShowing());
+
+						interruptAWTEventThread();
+						Thread.sleep(200);
 					}
 				} 
 				catch (InterruptedException e) 
@@ -2113,13 +2118,14 @@ public final class GUIUtils
 		timeoutThread.start();
 		try
 		{
-			result = a_chooser.showOpenDialog(parent);
+			result = a_chooser.showOpenDialog(a_parent);
 		}
 		catch (Exception a_e)
 		{
 			LogHolder.log(LogLevel.ALERT, LogType.GUI, a_e);
 			result = JFileChooser.ERROR_OPTION;
 		}
+		bFinished.set(true);
 		timeoutThread.interrupt();
 		return result;
   }
@@ -2308,5 +2314,26 @@ public final class GUIUtils
 		}
 	
 		return strLocation;
+	}
+	
+	private static void interruptAWTEventThread()
+	{
+		Thread[] allThreads = new Thread[Thread.activeCount()];
+		Thread.enumerate(allThreads);
+		for (int i = 0; i < allThreads.length; i++) 
+		{
+			if (allThreads[i].getName().startsWith("AWT-EventQueue-")) 
+			{
+				try 
+				{
+					LogHolder.log(LogLevel.EMERG, LogType.GUI, "Interrupting AWT event dispatch thread!");
+					allThreads[i].interrupt();
+				} 
+				catch(Throwable a_e) 
+				{
+					LogHolder.log(LogLevel.EMERG, LogType.GUI, a_e);
+				}
+			}
+		}
 	}
 }

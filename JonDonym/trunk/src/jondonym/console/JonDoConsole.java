@@ -40,6 +40,7 @@ import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
 import anon.util.Configuration;
 import anon.util.CountryMapper;
+import anon.util.IMiscPasswordReader;
 import anon.util.Util;
 import anon.util.XMLUtil;
 import logging.LogHolder;
@@ -111,6 +112,35 @@ public class JonDoConsole
 		run();
 	}
 	
+	private static String readLine()
+	{
+		String entered = null;
+		while (entered == null)
+		{
+			try
+			{
+				entered = new BufferedReader(new InputStreamReader(System.in)).readLine();
+			}
+			catch(Throwable t)
+			{
+			}
+			if (entered == null)
+			{
+				//Hm something is strange... do not simply continue but wait some time
+				//BTW: That are situations when this could happen?
+				// One is if JAP is run on VNC based X11 server
+				try
+				{
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e)
+				{
+				}
+			}
+		}
+		return entered;
+	}
+	
 	private static void run()
 	{
 		String entered = "";
@@ -125,6 +155,7 @@ public class JonDoConsole
 		Vector vecTrustModels = null;
 		String strTemp;
 		boolean bTemp;
+		boolean bImport = false;
 		int index;
 		
 		while (true)
@@ -151,38 +182,21 @@ public class JonDoConsole
 				{
 					System.out.println("Please enter the desired logging mode number or 'break'.");
 				}
+				else if (bImport)
+				{
+					System.out.println("Please enter the absolute file path to the account file to be imported:");
+				}
 				else
 				{
 					System.out.println();
 					System.out.println("Type <ENTER> or 'viewCascade' for more information,\n'choose', 'switch', 'start' or 'stop' for controlling services," +
 							"\n'trust' to activate another trust filter," + " 'force' to prevent service auto-switching," +
-									"\n'charge' to create an account," + " 'pi' to switch to another payment instance," +
+									"\n'charge' to create an account," + " 'import' to import an account," + " 'pi' to switch to another payment instance," +
 									"\n'logdetails' or 'loglevel' for altering the logging modes or 'exit' to quit.");
 				}
 			}
 			
-			entered = null;
-			try
-			{
-				entered = new BufferedReader(new InputStreamReader(System.in)).readLine();
-			}
-			catch(Throwable t)
-			{
-			}
-			if (entered == null)
-			{
-				//Hm something is strange... do not simply continue but wait some time
-				//BTW: That are situations when this could happen?
-				// One is if JAP is run on VNC based X11 server
-				try
-				{
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e)
-				{
-				}
-				continue;
-			}
+			entered = readLine();
 
 			if (entered.equals("break") || entered.equals("exit"))
 			{
@@ -270,6 +284,52 @@ public class JonDoConsole
 				}
 				System.out.println("Sorry, there is no such trust model.");
 			}
+			else if (bImport)
+			{
+				boolean bImportSucceeded = false;
+		
+				File fileAccounts = new File(entered);
+				String strData = null;
+				try
+				{
+					strData = XMLUtil.toString(XMLUtil.readXMLDocument(fileAccounts));
+				}
+				catch (Exception a_e)
+				{
+					LogHolder.log(LogLevel.ERR, LogType.FILE, a_e);
+				}
+				if (strData != null)
+				{
+					IMiscPasswordReader pwReader = new IMiscPasswordReader()
+					{
+						public synchronized String readPassword(Object message)
+						{
+							String strPW;
+							
+							System.out.println("Please enter password for account " + message + " or 'break':");
+							strPW = readLine();
+							if (strPW.equals("break"))
+							{
+								return null;
+							}
+							
+							return strPW;
+						}
+					};
+					
+					bImportSucceeded = Controller.importAccounts(strData, pwReader);
+				}
+				if (bImportSucceeded)
+				{
+					System.out.println("Import was successful!");
+				}
+				else
+				{
+					System.out.println("Could not import any account!");
+				}
+				
+				bImport = false;
+			}
 			else if (bPI)
 			{
 				bPI = false;
@@ -320,6 +380,10 @@ public class JonDoConsole
 			else if (entered.trim().equals("switch"))
 			{
 				Controller.switchCascade();
+			}
+			else if (entered.trim().equals("import"))
+			{
+				bImport = true;
 			}
 			else if (entered.trim().equals("start"))
 			{

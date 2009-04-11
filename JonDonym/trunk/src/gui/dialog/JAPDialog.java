@@ -3917,7 +3917,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 
 									try
 									{
-										( (Component) src).dispatchEvent(event);
+										((Component) src).dispatchEvent(event);
 									}
 									catch (IllegalMonitorStateException a_e)
 									{
@@ -3972,6 +3972,10 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 				try
 				{
 					SwingUtilities.invokeAndWait(dialogThread);
+				}
+				catch (InterruptedException a_e)
+				{
+					setVisible(false);
 				}
 				catch (Exception a_e)
 				{

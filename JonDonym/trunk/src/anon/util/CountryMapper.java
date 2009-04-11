@@ -84,10 +84,22 @@ public class CountryMapper extends AbstractISOCodeMapper
 	
 	static
 	{
-		String[] codesJava = Locale.getISOCountries();
-		if (codesJava.length < DEFAULT_COUNTRIES.length)
+		String[] codesJava = null;
+		
+		try 
 		{
-			// old java versions do not support all countries; newer version may have more countries
+			//codesJava = Locale.getISOCountries();
+			codesJava = (String[])Locale.class.getMethod("getISOCountries", (Class[])null).invoke(Locale.class, (Object[])null);
+			
+		} 
+		catch (Exception e) 
+		{
+			// ignore
+		}
+		
+		if (codesJava == null || codesJava.length < DEFAULT_COUNTRIES.length)
+		{
+			// old java versions do not support all countries; newer version may have more countries or show no countries at all
 			COUNTRIES = DEFAULT_COUNTRIES;
 		}
 		else
