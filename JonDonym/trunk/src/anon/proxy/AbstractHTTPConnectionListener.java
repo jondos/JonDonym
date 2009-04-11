@@ -28,15 +28,45 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package anon.proxy;
 
-import anon.proxy.HTTPProxyCallback.HTTPConnectionHeader;
-
-public interface HTTPConnectionListener 
+public abstract class AbstractHTTPConnectionListener 
 {
-	public void requestHeadersReceived(HTTPConnectionEvent event);
+	private int m_priority;
+	public AbstractHTTPConnectionListener(int a_priority)
+	{
+		m_priority = a_priority;
+	}
 	
-	public void responseHeadersReceived(HTTPConnectionEvent event);
+	public final int getPriority()
+	{
+		return m_priority;
+	}
 	
-	public void upstreamContentBytesReceived(HTTPConnectionEvent event);
+	public abstract void requestHeadersReceived(HTTPConnectionEvent event);
 	
-	public void downstreamContentBytesReceived(HTTPConnectionEvent event);
+	public abstract void responseHeadersReceived(HTTPConnectionEvent event);
+	
+	public abstract void upstreamContentBytesReceived(HTTPConnectionEvent event);
+	
+	public abstract void downstreamContentBytesReceived(HTTPConnectionEvent event);
+	
+	public final boolean equals(Object a_object)
+	{
+		if (a_object == null)
+		{
+			return false;
+		}
+		if (a_object.getClass() == getClass())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	public final int hashCode()
+	{
+		return getClass().getName().hashCode();
+	}
 }
