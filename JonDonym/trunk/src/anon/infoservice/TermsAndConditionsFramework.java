@@ -596,4 +596,9 @@ public class TermsAndConditionsFramework extends AbstractDistributableCertifiedD
 		// TODO Auto-generated method stub
 		return m_certPath;
 	}
+	
+	public Document getDocument() 
+	{
+		return m_docWorkingCopy;
+	}
 }
