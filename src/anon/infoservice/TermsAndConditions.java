@@ -197,10 +197,10 @@ public class TermsAndConditions implements IXMLEncodable
 				(Element) XMLUtil.getNextSiblingByName(currentTranslation, 
 									Translation.XML_ELEMENT_NAME);
 		}
-		if (!hasTranslations())
+		/*if (!hasTranslations())
 		{
 			throw new XMLParseException("TC of operator "+this.operator.getId()+" is invalid because it has no translations");
-		}
+		}*/
 		
 		read = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, null) != null;
 		accepted = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, false);
@@ -598,10 +598,10 @@ public class TermsAndConditions implements IXMLEncodable
 	
 	private Element xmlOut(Document doc, boolean signedTranslations) 
 	{
-		if(!hasTranslations() || !hasDefaultTranslation())
+		/*if(!hasTranslations() || !hasDefaultTranslation())
 		{
 			return null;
-		}
+		}*/
 		Element tcRoot = createTCRoot(doc);
 		Enumeration allTranslations = null;
 		synchronized (this)
