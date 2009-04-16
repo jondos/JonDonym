@@ -816,7 +816,9 @@ final public class InfoServiceCommands implements JWSInternalCommands
 							HttpResponseStructure.HTTP_TYPE_TEXT_XML,
 							//HttpResponseStructure.HTTP_ENCODING_ZLIB,
 							HttpResponseStructure.HTTP_ENCODING_PLAIN,
-							ZLibTools.compress(XMLUtil.toByteArray(entry.getXmlStructure())));
+							XMLUtil.toByteArray(entry.getXmlStructure())
+							//ZLibTools.compress(XMLUtil.toByteArray(entry.getXmlStructure()))
+							);
 			}
 		}
 		catch (Exception e)
