@@ -47,13 +47,16 @@ public class JAPHyperlinkAdapter implements HyperlinkListener
 		if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
 		{
 			URL urlToOpen = e.getURL();
-			if (urlToOpen.getProtocol().startsWith(AbstractOS.URL_MAIL_TO) )
+			if(urlToOpen != null)
 			{
-				AbstractOS.getInstance().openEMail(urlToOpen.toString());
-			}
-			else
-			{
-				AbstractOS.getInstance().openURL(urlToOpen);
+				if (urlToOpen.getProtocol().startsWith(AbstractOS.URL_MAIL_TO) )
+				{
+					AbstractOS.getInstance().openEMail(urlToOpen.toString());
+				}
+				else
+				{
+					AbstractOS.getInstance().openURL(urlToOpen);
+				}
 			}
 		}
 	}

@@ -114,6 +114,7 @@ import anon.infoservice.JAPMinVersion;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.MixCascade;
+import anon.infoservice.MixInfo;
 import anon.infoservice.PerformanceInfo;
 import anon.infoservice.PreviouslyKnownCascadeIDEntry;
 import anon.infoservice.ProxyInterface;
@@ -3804,6 +3805,24 @@ public final class JAPController extends Observable implements IProxyListener, O
 			return currentCascade;
 		}
 		return null;
+	}
+	
+	public boolean isTCRejectingPossible(TermsAndConditions tc)
+	{
+		MixCascade connectedCascade = getConnectedCascade();
+		if(connectedCascade != null)
+		{
+			MixInfo info = null;
+			for (int i = 0; i < connectedCascade.getNumberOfMixes(); i++) 
+			{
+				info = connectedCascade.getMixInfo(i);
+				if(info.getServiceOperator().equals(tc.getOperator()))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 	
 	public boolean isAnonConnected()
