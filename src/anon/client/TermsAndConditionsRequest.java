@@ -238,7 +238,7 @@ public class TermsAndConditionsRequest implements IXMLEncodable
 	/**
 	 * To be called after the mix response was handled.
 	 * checks if the mix really has sent all requested resources.
-	 * This method performs the necessary cleanups when the the terms and conditions container are
+	 * This method performs the necessary cleanups when the the terms and conditions containers are
 	 * not in a consistent state. 
 	 * @throws IllegalRequestPostConditionException if not all resources were sent
 	 * or the container are in an inconsistent state (e.g because of invalid signatures)
@@ -266,7 +266,8 @@ public class TermsAndConditionsRequest implements IXMLEncodable
 				else
 				{
 					String templateRefid = currentTnCs.getTemplateReferenceId(currentReqKey.getLangCode());
-					if(TermsAndConditionsFramework.getById(templateRefid, false) == null)
+					if( (templateRefid == null) ||
+						(TermsAndConditionsFramework.getById(templateRefid, false) == null) )
 					{
 						irpce.addErrorMessage("Template '"+templateRefid+"' for translation ["+
 								currentReqKey.getLangCode()+"] of terms and conditions of operator "+
@@ -280,6 +281,10 @@ public class TermsAndConditionsRequest implements IXMLEncodable
 					//in this case remove the terms and conditions
 					TermsAndConditions.removeTermsAndConditions(currentReqKey.getOperator());
 				}
+			}
+			else
+			{
+				irpce.addErrorMessage("Translation for "+currentReqKey+" not loaded.");
 			}
 		}
 		if(irpce.hasErrorMessages()) throw irpce;

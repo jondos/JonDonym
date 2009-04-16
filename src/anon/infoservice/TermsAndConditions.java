@@ -140,7 +140,7 @@ public class TermsAndConditions implements IXMLEncodable
 	 */
 	public TermsAndConditions(Element termsAndConditionRoot) throws XMLParseException, ParseException, SignatureException
 	{
-		this(termsAndConditionRoot, null);
+		this(termsAndConditionRoot, null, true);
 	}
 	
 	/**
@@ -155,7 +155,7 @@ public class TermsAndConditions implements IXMLEncodable
 	 * @throws SignatureException if the signature of a Terms and Conditions translation
 	 * has no valid signature.
 	 */
-	public TermsAndConditions(Element termsAndConditionRoot, ServiceOperator operator) throws XMLParseException, ParseException, SignatureException
+	public TermsAndConditions(Element termsAndConditionRoot, ServiceOperator operator, boolean withSignatureCheck) throws XMLParseException, ParseException, SignatureException
 	{
 		if(operator != null)
 		{
@@ -192,7 +192,7 @@ public class TermsAndConditions implements IXMLEncodable
 		//TODO: enable signature check if working
 		while (currentTranslation != null)
 		{
-			addTranslation(new Translation(currentTranslation), false);
+			addTranslation(new Translation(currentTranslation), withSignatureCheck);
 			currentTranslation = 
 				(Element) XMLUtil.getNextSiblingByName(currentTranslation, 
 									Translation.XML_ELEMENT_NAME);
@@ -224,10 +224,10 @@ public class TermsAndConditions implements IXMLEncodable
 	 * 'locale' attribute which specifies the language is not set.
 	 * @throws SignatureException if translationRoot does not contain a valid signature
 	 */
-	public void addTranslation(Element translationRoot, boolean withSignatureCheck) throws XMLParseException, SignatureException
+	/*public void addTranslation(Element translationRoot, boolean withSignatureCheck) throws XMLParseException, SignatureException
 	{
 		addTranslation(new Translation(translationRoot), withSignatureCheck);
-	}
+	}*/
 	
 	/**
 	 * adds a T&C translation which specified by the DOMElement translationRoot
@@ -235,12 +235,12 @@ public class TermsAndConditions implements IXMLEncodable
 	 * T&Cs container
 	 * @throws XMLParseException if the translation does not refer to a valid T&C template or the
 	 * 'locale' attribute which specifies the language is not set.
-	 * @throws SignatureException if translationRoot does not conatin a valid signature
+	 * @throws SignatureException if translationRoot does not contain a valid signature
 	 */
 	public void addTranslation(Element translationRoot) throws XMLParseException, SignatureException
 	{
 		//TODO: enable signature check if working
-		addTranslation(new Translation(translationRoot), false);
+		addTranslation(new Translation(translationRoot), true);
 	}
 	
 	public TermsAndConditionsTranslation removeTranslation(String locale)
@@ -260,7 +260,6 @@ public class TermsAndConditions implements IXMLEncodable
 	
 	public TermsAndConditionsTranslation initializeEmptyTranslation(String locale)
 	{
-		//TODO: should we add or not?
 		Translation t = new Translation();
 		t.setLocale(locale.trim().toLowerCase());
 		try 
