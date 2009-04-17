@@ -551,8 +551,8 @@ public class TermsAndConditions implements IXMLEncodable
 		}
 		//default translation must never be null
 		
-		TermsAndConditionsFramework displayTemplate = 
-			TermsAndConditionsFramework.getById(translation.getTemplateReferenceId(), false);
+		TermsAndConditionsTemplate displayTemplate = 
+			TermsAndConditionsTemplate.getById(translation.getTemplateReferenceId(), false);
 		if(displayTemplate == null)
 		{ 
 			throw new NullPointerException("Associated template '"+translation.getTemplateReferenceId()+"' for" +

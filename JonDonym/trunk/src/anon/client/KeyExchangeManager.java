@@ -62,7 +62,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.MixInfo;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
-import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsTemplate;
 import anon.infoservice.TermsAndConditionsMixInfo;
 import anon.util.Base64;
 import anon.util.XMLParseException;
@@ -391,7 +391,7 @@ public class KeyExchangeManager {
 							if(!langCode.equals(tncInfo.getDefaultLanguage()) && !tc.hasDefaultTranslation())
 							{
 								m_tnCRequest.addCustomizedSectionsRequest(currentOperator, tncInfo.getDefaultLanguage());
-								if(TermsAndConditionsFramework.getById(tncInfo.getDefaultTemplateRefId(), false) == null)
+								if(TermsAndConditionsTemplate.getById(tncInfo.getDefaultTemplateRefId(), false) == null)
 								{
 									m_tnCRequest.addTemplateRequest(currentOperator, 
 											tncInfo.getDefaultLanguage(), 
@@ -400,7 +400,7 @@ public class KeyExchangeManager {
 							}
 							
 							String templateRefID = tncInfo.getTemplateRefId(langCode);
-							if(TermsAndConditionsFramework.getById(templateRefID, false) == null)
+							if(TermsAndConditionsTemplate.getById(templateRefID, false) == null)
 							{
 								m_tnCRequest.addTemplateRequest(currentOperator, langCode, templateRefID);
 							}

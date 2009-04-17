@@ -7,7 +7,7 @@
     encoding="utf-8"
 	omit-xml-declaration="yes" />
 
-	<xsl:template match="TermsAndConditionsFramework">
+	<xsl:template match="TermsAndConditionsTemplate">
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 			<head>
 				<title><xsl:value-of select="@name" /></title>

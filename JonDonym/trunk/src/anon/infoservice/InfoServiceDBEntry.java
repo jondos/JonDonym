@@ -1441,12 +1441,12 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 *
 	 * @return The MixInfo for the mix with the given ID.
 	 */
-	public TermsAndConditionsFramework getTCFramework(String a_id) throws Exception
+	public TermsAndConditionsTemplate getTCTemplate(String a_id) throws Exception
 	{
-		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest("/tcframework/" + a_id), 
+		Document doc = getXmlDocument(HttpRequestStructure.createGetRequest("/tctemplate/" + a_id), 
 				HTTPConnectionFactory.HTTP_ENCODING_ZLIB);
 		
-		NodeList nodes = doc.getElementsByTagName("TermsAndConditionsFramework");
+		NodeList nodes = doc.getElementsByTagName(TermsAndConditionsTemplate.XML_ELEMENT_NAME);
 		if (nodes.getLength() == 0)
 		{
 			throw (new Exception("Error in XML structure for mix with ID " + a_id));
@@ -1454,7 +1454,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		
 		Element el = (Element) nodes.item(0);
 		
-		TermsAndConditionsFramework framework = new TermsAndConditionsFramework(el, true);
+		TermsAndConditionsTemplate framework = new TermsAndConditionsTemplate(el, true);
 		/* check the signature */
 		if (!framework.isVerified())
 		{

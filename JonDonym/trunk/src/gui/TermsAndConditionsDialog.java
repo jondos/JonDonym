@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 import gui.dialog.JAPDialog;
 import gui.dialog.TermsAndConditionsPane;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
-import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsTemplate;
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.TermsAndConditionsTranslation;
 import anon.util.JAPMessages;
@@ -53,9 +53,9 @@ public class TermsAndConditionsDialog extends JAPDialog
 		}
 		//TermsAndConditions.getTranslationById(a_op.getId(), JAPMessages.getLocale());
 		
-		// try to find the TnC framework
-		/*TermsAndConditionsFramework fr = 
-			TermsAndConditionsFramework.getById(tc.getReferenceId(), a_bUpdateFromInfoService);
+		// try to find the TnC template
+		/*TermsAndConditionsTemplate fr = 
+			TermsAndConditionsTemplate.getById(tc.getReferenceId(), a_bUpdateFromInfoService);
 		
 		if(fr == null)
 		{
@@ -79,8 +79,8 @@ public class TermsAndConditionsDialog extends JAPDialog
 		String htmlText = null;
 		try 
 		{
-			TermsAndConditionsFramework displayTemplate = 
-				TermsAndConditionsFramework.getById(tcTranslation.getTemplateReferenceId(), false);
+			TermsAndConditionsTemplate displayTemplate = 
+				TermsAndConditionsTemplate.getById(tcTranslation.getTemplateReferenceId(), false);
 			displayTemplate.importData(tcTranslation);
 			htmlText = displayTemplate.transform();
 		}

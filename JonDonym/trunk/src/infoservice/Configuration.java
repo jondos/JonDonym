@@ -52,7 +52,7 @@ import anon.crypto.SignatureVerifier;
 import anon.infoservice.Constants;
 import anon.infoservice.ListenerInterface;
 import anon.infoservice.Database;
-import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsTemplate;
 import infoservice.tor.TorDirectoryAgent;
 import infoservice.tor.TorDirectoryServer;
 import infoservice.tor.TorDirectoryServerUrl;
