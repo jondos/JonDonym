@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
 
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
-import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsTemplate;
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
 
@@ -267,7 +267,7 @@ public class TermsAndConditionsRequest implements IXMLEncodable
 				{
 					String templateRefid = currentTnCs.getTemplateReferenceId(currentReqKey.getLangCode());
 					if( (templateRefid == null) ||
-						(TermsAndConditionsFramework.getById(templateRefid, false) == null) )
+						(TermsAndConditionsTemplate.getById(templateRefid, false) == null) )
 					{
 						irpce.addErrorMessage("Template '"+templateRefid+"' for translation ["+
 								currentReqKey.getLangCode()+"] of terms and conditions of operator "+

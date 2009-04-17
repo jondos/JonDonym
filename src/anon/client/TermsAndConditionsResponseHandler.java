@@ -45,7 +45,7 @@ import org.w3c.dom.Node;
 import anon.infoservice.Database;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.TermsAndConditions;
-import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsTemplate;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
@@ -107,8 +107,8 @@ public class TermsAndConditionsResponseHandler extends Observable
 					TermsAndConditionsRequest.XML_ELEMENT_RESOURCE_TEMPLATE);
 			while(currentResourceNode != null)
 			{
-				TermsAndConditionsFramework fr = new TermsAndConditionsFramework((Element)currentResourceNode.getFirstChild());
-				Database db = Database.getInstance(TermsAndConditionsFramework.class);
+				TermsAndConditionsTemplate fr = new TermsAndConditionsTemplate((Element)currentResourceNode.getFirstChild());
+				Database db = Database.getInstance(TermsAndConditionsTemplate.class);
 				db.update(fr);
 				currentResourceNode = (Element) XMLUtil.getNextSiblingByName(currentResourceNode, 
 						TermsAndConditionsRequest.XML_ELEMENT_RESOURCE_TEMPLATE);

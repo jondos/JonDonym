@@ -121,7 +121,7 @@ import anon.infoservice.ProxyInterface;
 import anon.infoservice.ServiceOperator;
 import anon.infoservice.StatusInfo;
 import anon.infoservice.TermsAndConditions;
-import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsTemplate;
 import anon.infoservice.update.AccountUpdater;
 import anon.infoservice.update.InfoServiceUpdater;
 import anon.infoservice.update.JavaVersionUpdater;
@@ -2126,7 +2126,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 				}*/
 				TermsAndConditions.loadTermsAndConditionsFromXMLElement((Element) XMLUtil.getFirstChildByName(root,TermsAndConditions.XML_ELEMENT_CONTAINER_NAME));
-				Database.getInstance(TermsAndConditionsFramework.class).loadFromXml((Element) XMLUtil.getFirstChildByName(root,TermsAndConditionsFramework.XML_ELEMENT_CONTAINER_NAME));
+				Database.getInstance(TermsAndConditionsTemplate.class).loadFromXml((Element) XMLUtil.getFirstChildByName(root,TermsAndConditionsTemplate.XML_ELEMENT_CONTAINER_NAME));
 				
 			}
 			catch (Exception e)
@@ -3044,7 +3044,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			e.appendChild(JAPModel.getInstance().getRoutingSettings().toXmlElement(doc));
 			
 			e.appendChild(TermsAndConditions.getAllTermsAndConditionsAsXMLElement(doc));
-			e.appendChild(Database.getInstance(TermsAndConditionsFramework.class).toXmlElement(doc));
+			e.appendChild(Database.getInstance(TermsAndConditionsTemplate.class).toXmlElement(doc));
 
 			return doc;
 		}

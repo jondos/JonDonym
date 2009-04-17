@@ -562,7 +562,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					}
 					else if (functionNumber == GET_TC_FRAMEWORK)
 					{
-						result = currentInfoService.getTCFramework((String) (arguments.elementAt(0)));
+						result = currentInfoService.getTCTemplate((String) (arguments.elementAt(0)));
 					}
 					/*else if (functionNumber == GET_TCS)
 					{
@@ -915,9 +915,9 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	 * from preferred info service
 	 * @return
 	 */
-	public TermsAndConditionsFramework getTCFramework(String a_id)
+	public TermsAndConditionsTemplate getTCFramework(String a_id)
 	{
-		return (TermsAndConditionsFramework) (fetchInformation(GET_TC_FRAMEWORK, Util.toVector(a_id)));
+		return (TermsAndConditionsTemplate) (fetchInformation(GET_TC_FRAMEWORK, Util.toVector(a_id)));
 	}
 	
 	public Hashtable getTermsAndConditions()

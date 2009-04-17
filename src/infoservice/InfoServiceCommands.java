@@ -59,7 +59,7 @@ import anon.infoservice.MixCascade;
 import anon.infoservice.MixCascadeExitAddresses;
 import anon.infoservice.MixInfo;
 import anon.infoservice.StatusInfo;
-import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsTemplate;
 import anon.infoservice.TermsAndConditions;
 import anon.infoservice.PerformanceEntry;
 import anon.pay.PayAccount;
@@ -149,11 +149,11 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			return MixCascadeExitAddresses.class;
 		}
 	};
-	private final HTTPResponseGetter m_tcFrameworksResponseGetter = new HTTPResponseGetter()
+	private final HTTPResponseGetter m_tcTemplatesResponseGetter = new HTTPResponseGetter()
 	{
 		public Class getDatabaseClass()
 		{
-			return TermsAndConditionsFramework.class;
+			return TermsAndConditionsTemplate.class;
 		}
 	};
 	private final HTTPResponseGetter m_tcResponseGetter = new HTTPResponseGetter()
@@ -799,13 +799,13 @@ final public class InfoServiceCommands implements JWSInternalCommands
 		return httpResponse;
 	}
 	
-	private HttpResponseStructure japGetTCFramework(String a_id)
+	private HttpResponseStructure japGetTCTemplate(String a_id)
 	{
 		HttpResponseStructure httpResponse;
 		try
 		{
-			TermsAndConditionsFramework entry = (TermsAndConditionsFramework) 
-				(Database.getInstance(TermsAndConditionsFramework.class).getEntryById(a_id));
+			TermsAndConditionsTemplate entry = (TermsAndConditionsTemplate) 
+				(Database.getInstance(TermsAndConditionsTemplate.class).getEntryById(a_id));
 			if (entry == null)
 			{
 				httpResponse = new HttpResponseStructure(HttpResponseStructure.HTTP_RETURN_NOT_FOUND);
@@ -2157,17 +2157,21 @@ final public class InfoServiceCommands implements JWSInternalCommands
 			 */
 			httpResponse = cascadePostStatus(postData);
 		}
-		else if((command.equals("/tcframeworkserials")) && (method == Constants.REQUEST_METHOD_GET))
+		else if( (command.equals(TermsAndConditionsTemplate.INFOSERVICE_SERIALS_PATH)) && 
+				 (method == Constants.REQUEST_METHOD_GET))
 		{
-			httpResponse = m_tcFrameworksResponseGetter.fetchResponse(a_supportedEncodings, true);
+			httpResponse = m_tcTemplatesResponseGetter.fetchResponse(a_supportedEncodings, true);
 		}
-		else if((command.equals("/tcframeworks")) && (method == Constants.REQUEST_METHOD_GET))
+		else if( (command.equals(TermsAndConditionsTemplate.INFOSERVICE_CONTAINER_PATH)) && 
+				 (method == Constants.REQUEST_METHOD_GET))
 		{
-			httpResponse = m_tcFrameworksResponseGetter.fetchResponse(a_supportedEncodings, false);
+			httpResponse = m_tcTemplatesResponseGetter.fetchResponse(a_supportedEncodings, false);
 		}
-		else if((command.startsWith("/tcframework/")) && (method == Constants.REQUEST_METHOD_GET))
+		else if( (command.startsWith(TermsAndConditionsTemplate.INFOSERVICE_PATH)) && 
+				 (method == Constants.REQUEST_METHOD_GET))
 		{
-			httpResponse = japGetTCFramework(command.substring(13));
+			httpResponse = japGetTCTemplate(
+					command.substring(TermsAndConditionsTemplate.INFOSERVICE_PATH.length()));
 		}
 		/*else if((command.equals(TermsAndConditions.HTTP_SERIALS_REQUEST_STRING)) && (method == Constants.REQUEST_METHOD_GET))
 		{

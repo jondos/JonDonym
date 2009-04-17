@@ -43,7 +43,7 @@ import anon.infoservice.Database;
 import anon.infoservice.IDistributable;
 import anon.infoservice.IDistributor;
 import anon.infoservice.ListenerInterface;
-import anon.infoservice.TermsAndConditionsFramework;
+import anon.infoservice.TermsAndConditionsTemplate;
 import anon.infoservice.update.AccountUpdater;
 import anon.util.JAPMessages;
 import anon.util.ThreadPool;
@@ -151,12 +151,12 @@ public class InfoService implements Observer
 				{
 					while(true)
 					{
-						TermsAndConditionsFramework.loadFromDirectory(
+						TermsAndConditionsTemplate.loadFromDirectory(
 							Configuration.getInstance().getTermsAndConditionsDir());
 						
 						try
 						{
-							Thread.sleep(TermsAndConditionsFramework.TERMS_AND_CONDITIONS_UPDATE_INTERVAL);	
+							Thread.sleep(TermsAndConditionsTemplate.TERMS_AND_CONDITIONS_UPDATE_INTERVAL);	
 						}
 						catch(InterruptedException ex)
 						{

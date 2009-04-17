@@ -2,6 +2,7 @@ package jap;
 
 import gui.JAPHyperlinkAdapter;
 import gui.OperatorsCellRenderer;
+import gui.dialog.JAPDialog;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -34,6 +35,7 @@ import anon.util.JAPMessages;
 public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionListener, Observer
 {
 	private static final String MSG_TAB_TITLE = JAPConfTC.class.getName() + "_tabTitle";
+	private static final String MSG_ERR_REJECT_IMPOSSIBLE = JAPConfTC.class.getName() + "_errRejectImpossible";
 	
 	JTable m_tblOperators;
 	private JEditorPane m_termsPane;
@@ -146,7 +148,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 					return;
 				}
 				String tcHtmlText = tc.getHTMLText(JAPMessages.getLocale());
-				//TermsAndConditionsFramework fr = TermsAndConditionsFramework.getById(tc.getReferenceId(), true);
+				//TermsAndConditionsTemplate fr = TermsAndConditionsTemplate.getById(tc.getReferenceId(), true);
 				
 				//if(fr == null)
 				//{
@@ -336,8 +338,18 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 					ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
 					//if(op == null) return null; //must never happen
 					TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(op);
+					JAPController.getInstance();
 					//if(tc == null) return null; //must never happen
-					tc.setAccepted(value);
+					
+					if(!value && !JAPController.getInstance().isTCRejectingPossible(tc))
+					{
+						JAPDialog.showErrorDialog(JAPConf.getInstance(), 
+								JAPMessages.getString(MSG_ERR_REJECT_IMPOSSIBLE, op.getOrganization()), LogType.MISC);
+					}
+					else
+					{
+						tc.setAccepted(value);
+					}
 					tc.setRead(true);
 					break;
 				}
@@ -402,7 +414,6 @@ public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionLis
 
 	public void update(Observable o, Object arg) 
 	{
-		//System.out.println("Updating table");
 		//onUpdateValues();
 	}
 }
