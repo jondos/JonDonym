@@ -73,7 +73,7 @@ public final class LogHolder
 	/**
 	 * The current detail level of all log messages.
 	 */
-	private static int m_messageDetailLevel = DETAIL_LEVEL_LOWEST;
+	private static int m_messageDetailLevel = DETAIL_LEVEL_HIGHEST;
 
 	/**
 	 * Stores the Log instance.
