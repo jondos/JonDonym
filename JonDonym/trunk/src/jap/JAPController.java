@@ -1766,190 +1766,188 @@ public final class JAPController extends Observable implements IProxyListener, O
 				/* load Payment settings */
 				try
 				{
-					//if (loadPay)
+					Element elemPay = (Element) XMLUtil.getFirstChildByName(root,
+						JAPConstants.CONFIG_PAYMENT);
+					if (XMLUtil.parseAttribute(elemPay, XML_ALLOW_NON_ANONYMOUS_CONNECTION, true))
 					{
-						Element elemPay = (Element) XMLUtil.getFirstChildByName(root,
-							JAPConstants.CONFIG_PAYMENT);
-						if (XMLUtil.parseAttribute(elemPay, XML_ALLOW_NON_ANONYMOUS_CONNECTION, true))
+						JAPModel.getInstance().setPaymentAnonymousConnectionSetting(
+								  XMLUtil.parseAttribute(elemPay, XML_ALLOW_NON_ANONYMOUS_CONNECTION,
+										  JAPModel.CONNECTION_ALLOW_ANONYMOUS));
+					}
+					else
+					{
+						JAPModel.getInstance().setPaymentAnonymousConnectionSetting(
+										  JAPModel.CONNECTION_FORCE_ANONYMOUS);
+					}
+					
+					m_bAskSavePayment = XMLUtil.parseAttribute(elemPay, XML_ATTR_ASK_SAVE_PAYMENT, true);
+					BIConnection.setConnectionTimeout(XMLUtil.parseAttribute(elemPay,
+						BIConnection.XML_ATTR_CONNECTION_TIMEOUT,
+						BIConnection.TIMEOUT_DEFAULT));
+
+
+					Element elemAccounts = (Element) XMLUtil.getFirstChildByName(elemPay,
+						PayAccountsFile.XML_ELEMENT_NAME);
+
+					//Load known Payment instances
+					Node nodePaymentInstances = XMLUtil.getFirstChildByName(elemPay,
+						PaymentInstanceDBEntry.XML_ELEMENT_CONTAINER_NAME);
+					PaymentInstanceDBEntry piEntry;
+					if (nodePaymentInstances != null)
+					{
+						Node nodePI = nodePaymentInstances.getFirstChild();
+						while (nodePI != null)
 						{
-							JAPModel.getInstance().setPaymentAnonymousConnectionSetting(
-									  XMLUtil.parseAttribute(elemPay, XML_ALLOW_NON_ANONYMOUS_CONNECTION,
-											  JAPModel.CONNECTION_ALLOW_ANONYMOUS));
+							if (nodePI.getNodeName().equals(PaymentInstanceDBEntry.XML_ELEMENT_NAME))
+							{
+								try
+								{
+									piEntry = new PaymentInstanceDBEntry( (Element) nodePI, Long.MAX_VALUE);
+									if (piEntry.isVerified())
+									{
+										Database.getInstance(PaymentInstanceDBEntry.class).update(piEntry);
+									}
+								}
+								catch (Exception a_e)
+								{
+									LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
+								}
+							}
+							nodePI = nodePI.getNextSibling();
+						}
+					}
+
+
+					/** @todo implement password reader for console */
+					IMiscPasswordReader passwordReader;
+					final Hashtable completedAccounts = new Hashtable();
+					JAPDialog tempDialog = null;
+
+					if (JAPDialog.isConsoleOnly())
+					{
+						passwordReader = new IMiscPasswordReader()
+						{
+							public String readPassword(Object a_message)
+							{
+								return null;
+							}
+						};
+					}
+					else
+					{
+						final JAPDialog.LinkedInformationAdapter onTopAdapter =
+							new JAPDialog.LinkedInformationAdapter()
+						{
+							public boolean isOnTop()
+							{
+								return true;
+							}
+						};
+						Component background;
+						if (a_splash instanceof Component)
+						{
+							background = (Component)a_splash;
 						}
 						else
 						{
-							JAPModel.getInstance().setPaymentAnonymousConnectionSetting(
-											  JAPModel.CONNECTION_FORCE_ANONYMOUS);
+							background = new Frame();
 						}
-						
-						m_bAskSavePayment = XMLUtil.parseAttribute(elemPay, XML_ATTR_ASK_SAVE_PAYMENT, true);
-						BIConnection.setConnectionTimeout(XMLUtil.parseAttribute(elemPay,
-							BIConnection.XML_ATTR_CONNECTION_TIMEOUT,
-							BIConnection.TIMEOUT_DEFAULT));
+						final JAPDialog dialog = new JAPDialog(background,
+							"JAP: " + JAPMessages.getString(MSG_ACCPASSWORDENTERTITLE), true);
+						dialog.setResizable(false);
+						/** @todo does only work with java 1.5+ as the dll is not loaded at this time */
+						dialog.setAlwaysOnTop(true);
+						tempDialog = dialog;
+						dialog.setDefaultCloseOperation(JAPDialog.HIDE_ON_CLOSE);
+						PasswordContentPane temp = new PasswordContentPane(
+							dialog, PasswordContentPane.PASSWORD_ENTER,
+							JAPMessages.getString(
+								MSG_ACCPASSWORDENTER, new Long(Long.MAX_VALUE)));
+						temp.updateDialog();
+						dialog.pack();
 
-
-						Element elemAccounts = (Element) XMLUtil.getFirstChildByName(elemPay,
-							PayAccountsFile.XML_ELEMENT_NAME);
-
-						//Load known Payment instances
-						Node nodePaymentInstances = XMLUtil.getFirstChildByName(elemPay,
-							PaymentInstanceDBEntry.XML_ELEMENT_CONTAINER_NAME);
-						PaymentInstanceDBEntry piEntry;
-						if (nodePaymentInstances != null)
+						passwordReader = new IMiscPasswordReader()
 						{
-							Node nodePI = nodePaymentInstances.getFirstChild();
-							while (nodePI != null)
+							private Vector pwMatches = new Vector();
+							private Enumeration currentPWIteration = null;
+							private Object lastAccount = null;
+							private boolean skipAll = false;
+							
+							public String readPassword(Object a_message)
 							{
-								if (nodePI.getNodeName().equals(PaymentInstanceDBEntry.XML_ELEMENT_NAME))
-								{
-									try
-									{
-										piEntry = new PaymentInstanceDBEntry( (Element) nodePI, Long.MAX_VALUE);
-										if (piEntry.isVerified())
-										{
-											Database.getInstance(PaymentInstanceDBEntry.class).update(piEntry);
-										}
-									}
-									catch (Exception a_e)
-									{
-										LogHolder.log(LogLevel.ERR, LogType.MISC, a_e);
-									}
-								}
-								nodePI = nodePI.getNextSibling();
-							}
-						}
-
-
-						/** @todo implement password reader for console */
-						IMiscPasswordReader passwordReader;
-						final Hashtable completedAccounts = new Hashtable();
-						JAPDialog tempDialog = null;
-
-						if (JAPDialog.isConsoleOnly())
-						{
-							passwordReader = new IMiscPasswordReader()
-							{
-								public String readPassword(Object a_message)
+								String password = null;
+								PasswordContentPane panePassword = new PasswordContentPane(
+									dialog, PasswordContentPane.PASSWORD_ENTER,
+									JAPMessages.getString(MSG_ACCPASSWORDENTER, a_message));
+								panePassword.setDefaultButtonOperation(PasswordContentPane.
+																	   ON_CLICK_HIDE_DIALOG);
+								if(skipAll)
 								{
 									return null;
 								}
-							};
-						}
-						else
-						{
-							final JAPDialog.LinkedInformationAdapter onTopAdapter =
-								new JAPDialog.LinkedInformationAdapter()
-							{
-								public boolean isOnTop()
-								{
-									return true;
-								}
-							};
-							Component background;
-							if (a_splash instanceof Component)
-							{
-								background = (Component)a_splash;
-							}
-							else
-							{
-								background = new Frame();
-							}
-							final JAPDialog dialog = new JAPDialog(background,
-								"JAP: " + JAPMessages.getString(MSG_ACCPASSWORDENTERTITLE), true);
-							dialog.setResizable(false);
-							/** @todo does only work with java 1.5+ as the dll is not loaded at this time */
-							dialog.setAlwaysOnTop(true);
-							tempDialog = dialog;
-							dialog.setDefaultCloseOperation(JAPDialog.HIDE_ON_CLOSE);
-							PasswordContentPane temp = new PasswordContentPane(
-								dialog, PasswordContentPane.PASSWORD_ENTER,
-								JAPMessages.getString(
-									MSG_ACCPASSWORDENTER, new Long(Long.MAX_VALUE)));
-							temp.updateDialog();
-							dialog.pack();
-
-							passwordReader = new IMiscPasswordReader()
-							{
-								private Vector pwMatches = new Vector();
-								private Enumeration currentPWIteration = null;
-								private Object lastAccount = null;
-								private boolean skipAll = false;
 								
-								public String readPassword(Object a_message)
+								if(lastAccount == null)
 								{
-									String password = null;
-									PasswordContentPane panePassword = new PasswordContentPane(
-										dialog, PasswordContentPane.PASSWORD_ENTER,
-										JAPMessages.getString(MSG_ACCPASSWORDENTER, a_message));
-									panePassword.setDefaultButtonOperation(PasswordContentPane.
-																		   ON_CLICK_HIDE_DIALOG);
-									if(skipAll)
+									lastAccount = a_message;
+								}
+								
+								/* try to query a new account -> the last one matched */
+								if(!a_message.equals(lastAccount))
+								{
+									pwMatches.addElement(completedAccounts.get(lastAccount));
+									currentPWIteration = null;
+									currentPWIteration = pwMatches.elements();
+									lastAccount = a_message;
+								}
+								
+								if(currentPWIteration != null)
+								{
+									if(currentPWIteration.hasMoreElements())
 									{
-										return null;
+										return (String) currentPWIteration.nextElement();
 									}
-									
-									if(lastAccount == null)
+									else
 									{
-										lastAccount = a_message;
-									}
-									
-									/* try to query a new account -> the last one matched */
-									if(!a_message.equals(lastAccount))
-									{
-										pwMatches.addElement(completedAccounts.get(lastAccount));
 										currentPWIteration = null;
-										currentPWIteration = pwMatches.elements();
-										lastAccount = a_message;
 									}
-									
-									if(currentPWIteration != null)
+								}
+								
+								while (true)
+								{
+									password = panePassword.readPassword(null);
+									if (password == null)
 									{
-										if(currentPWIteration.hasMoreElements())
+										completedAccounts.remove(a_message);
+										
+										if (JAPDialog.showYesNoDialog(
+											(Component)a_splash,
+											JAPMessages.getString(MSG_LOSEACCOUNTDATA),
+											onTopAdapter))
 										{
-											return (String) currentPWIteration.nextElement();
-										}
-										else
-										{
-											currentPWIteration = null;
-										}
-									}
-									
-									while (true)
-									{
-										password = panePassword.readPassword(null);
-										if (password == null)
-										{
-											completedAccounts.remove(a_message);
-											
-											if (JAPDialog.showYesNoDialog(
-												(Component)a_splash,
-												JAPMessages.getString(MSG_LOSEACCOUNTDATA),
-												onTopAdapter))
-											{
-												// user clicked cancel
-												skipAll = true;
-												break;
-											}
-										}
-										else
-										{
-											completedAccounts.put(a_message, password);
+											// user clicked cancel
+											skipAll = true;
 											break;
 										}
 									}
-									return password;
+									else
+									{
+										completedAccounts.put(a_message, password);
+										break;
+									}
 								}
-							};
-						}
-						boolean accountLoaded = PayAccountsFile.init(elemAccounts, passwordReader, JAPConstants.m_bReleasedVersion);
-						if (tempDialog != null)
-						{
-							tempDialog.dispose();
-						}
-						if (completedAccounts.size() > 0)
-						{
-							setPaymentPassword((String)completedAccounts.elements().nextElement());
-						}
+								return password;
+							}
+						};
+					}
+					boolean accountLoaded = PayAccountsFile.init(elemAccounts, passwordReader, 
+							JAPConstants.m_bReleasedVersion, 1);
+					if (tempDialog != null)
+					{
+						tempDialog.dispose();
+					}
+					if (completedAccounts.size() > 0)
+					{
+						setPaymentPassword((String)completedAccounts.elements().nextElement());
 					}
 				}
 				catch (Exception e)
@@ -1976,6 +1974,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 						}
 					}
 				}
+				// just in case init wasn't called yet
+				PayAccountsFile.init(null, null, JAPConstants.m_bReleasedVersion, 1);
+				PayAccountsFile.getInstance();
 
 				/*loading Tor settings*/
 				try

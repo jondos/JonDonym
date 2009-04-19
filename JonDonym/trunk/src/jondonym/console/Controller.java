@@ -281,10 +281,10 @@ public class Controller
 				ms_logger.setLogLevel(XMLUtil.parseAttribute(root, XML_ATTR_LOG_LEVEL, ms_logger.getLogLevel()));
 				
 				elem = (Element)XMLUtil.getFirstChildByName(root, PayAccountsFile.XML_ELEMENT_NAME);
-				if (elem != null)
+				//if (elem != null)
 				{
 					LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising pay accounts from configuration...");
-					PayAccountsFile.init(elem, null, false);
+					PayAccountsFile.init(elem, null, false, 2);
 					LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Pay accounts initialised from configuration.");
 				}
 				elem = (Element)XMLUtil.getFirstChildByName(root, TrustModel.XML_ELEMENT_CONTAINER_NAME);

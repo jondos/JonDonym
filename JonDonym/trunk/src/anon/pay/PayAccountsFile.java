@@ -125,6 +125,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	private MyAccountListener m_MyAccountListener = new MyAccountListener();
 	
 	private DSAKeyPool m_keyPool;
+	private static int ms_keyPoolSize = 1;
 
 	/**
 	 * At this time, the implementation supports only one single BI. In the future
@@ -142,7 +143,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	// singleton!
 	private PayAccountsFile()
 	{
-		m_keyPool = new DSAKeyPool();
+		m_keyPool = new DSAKeyPool(ms_keyPoolSize);
 		m_keyPool.start();
 	}
 
@@ -249,9 +250,19 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	 * @param a_passwordReader  a password reader for encrypted account files; message: AccountNumber
 	 * @return boolean succeeded?
 	 */
-	public static boolean init(Element elemAccountsFile, IMiscPasswordReader a_passwordReader,
-							   boolean a_bForceAIErrors)
+	public static synchronized boolean init(Element elemAccountsFile, IMiscPasswordReader a_passwordReader,
+							   	boolean a_bForceAIErrors, int a_keyPoolSize)
 	{
+		if (ms_AccountsFile.m_bIsInitialized)
+		{
+			return false;
+		}
+		
+		if (a_keyPoolSize > 0)
+		{
+			ms_keyPoolSize = a_keyPoolSize;
+		}
+		
 		//ms_AccountsFile.m_theBI = theBI;
 		if (elemAccountsFile != null && elemAccountsFile.getNodeName().equals(XML_ELEMENT_NAME))
 		{

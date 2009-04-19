@@ -29,6 +29,10 @@ package anon.crypto;
 
 import java.security.SecureRandom;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
 import org.bouncycastle.crypto.generators.DSAParametersGenerator;
@@ -50,7 +54,7 @@ public class DSAKeyPair extends AsymmetricCryptoKeyPair
 	{
 		super(a_privateKey);
 	}
-
+	
 	/**
 	 * This creates a new DSA key pair.
 	 *
@@ -64,32 +68,103 @@ public class DSAKeyPair extends AsymmetricCryptoKeyPair
 	 */
 	public static DSAKeyPair getInstance(SecureRandom a_secureRandom, int a_keyLength, int a_certainty)
 	{
-		DSAKeyPair keyPair;
-
-		DSAParametersGenerator dsaParametersGenerator = new DSAParametersGenerator();
-		dsaParametersGenerator.init(a_keyLength, a_certainty, a_secureRandom);
-		DSAKeyPairGenerator dsaKeyPairGenerator = new DSAKeyPairGenerator();
-		dsaKeyPairGenerator.init(new DSAKeyGenerationParameters(a_secureRandom,
-			dsaParametersGenerator.generateParameters()));
-		AsymmetricCipherKeyPair asymmetricCipherKeyPair = dsaKeyPairGenerator.generateKeyPair();
-
-		try
+		DSAKeyPair keyPair = getInstanceJCE(a_secureRandom, a_keyLength, a_certainty);
+	
+		if (keyPair == null)
 		{
-			keyPair = new DSAKeyPair(
-				new MyDSAPrivateKey((DSAPrivateKeyParameters) asymmetricCipherKeyPair.getPrivate()));
+			DSAParametersGenerator dsaParametersGenerator = new DSAParametersGenerator();
+			dsaParametersGenerator.init(a_keyLength, a_certainty, a_secureRandom);
+			DSAKeyPairGenerator dsaKeyPairGenerator = new DSAKeyPairGenerator();
+			dsaKeyPairGenerator.init(new DSAKeyGenerationParameters(a_secureRandom,
+				dsaParametersGenerator.generateParameters()));
+			AsymmetricCipherKeyPair asymmetricCipherKeyPair = dsaKeyPairGenerator.generateKeyPair();
+	
+			try
+			{
+				keyPair = new DSAKeyPair(
+					new MyDSAPrivateKey((DSAPrivateKeyParameters) asymmetricCipherKeyPair.getPrivate()));
+			}
+			catch (Exception a_e)
+			{
+				keyPair = null;
+	
+			}
 		}
-		catch (Exception a_e)
-		{
-			keyPair = null;
-
-		}
-
 		if (!isValidKeyPair(keyPair))
 		{
 			return null;
 		}
 
-
+		return keyPair;
+	}
+	
+	private static DSAKeyPair getInstanceJCE(SecureRandom a_secureRandom, int a_keyLength, int a_certainty)
+	{
+		DSAKeyPair keyPair;
+		DSAPrivateKeyParameters dsaParameters;
+		
+		try 
+		{
+			/*
+			java.security.KeyPairGenerator kg = 
+				java.security.KeyPairGenerator.getInstance("DSA");
+			kg.initialize(a_keyLength, a_secureRandom);
+			java.security.KeyPair myKeypair = kg.generateKeyPair();
+			java.security.PrivateKey jcePrivateKey = myKeypair.getPrivate();*/
+			
+			
+			Class classKeyPairGenerator = Class.forName("java.security.KeyPairGenerator");
+			Class classKeyPair = Class.forName("java.security.KeyPair");
+			Class classDSAUtil = Class.forName("org.bouncycastle.jce.provider.DSAUtil");
+			Class classPrivateKey = Class.forName("java.security.PrivateKey");
+			Object jceKeyPair;
+			Object jcePrivateKey;
+	
+			Object kg = classKeyPairGenerator.getMethod("getInstance", new Class[]{String.class}).invoke(
+					classKeyPairGenerator, new Object[]{"DSA"});
+			classKeyPairGenerator.getMethod("initialize", new Class[]{int.class, SecureRandom.class}).
+				invoke(kg, new Object[]{new Integer(a_keyLength), a_secureRandom});
+			jceKeyPair = classKeyPairGenerator.getMethod("generateKeyPair", (Class[])null).invoke(
+					kg, (Object[])null);
+			jcePrivateKey = 
+				classKeyPair.getMethod("getPrivate", (Class[])null).invoke(jceKeyPair, (Object[])null);
+		
+			dsaParameters = (DSAPrivateKeyParameters) 
+			classDSAUtil.getMethod("generatePrivateKeyParameter", new Class[]{classPrivateKey}).invoke(
+					classDSAUtil, new Object[]{jcePrivateKey});
+		
+			
+			try
+			{
+				keyPair = new DSAKeyPair(new MyDSAPrivateKey(dsaParameters));
+			}
+			catch (Exception a_e)
+			{
+				keyPair = null;
+			}
+			
+			if (keyPair != null && !isValidKeyPair(keyPair))
+			{
+				LogHolder.log(LogLevel.ERR, LogType.CRYPTO, "Created illegal DSA certificate with JCE!");
+				keyPair = null;
+			}
+		} 
+		catch (ClassNotFoundException a_e)
+		{
+			LogHolder.log(LogLevel.DEBUG, LogType.CRYPTO, a_e);
+			keyPair = null;
+		}
+		catch (NoSuchMethodException a_e)
+		{
+			LogHolder.log(LogLevel.DEBUG, LogType.CRYPTO, a_e);
+			keyPair = null;
+		}
+		catch (Exception a_e)
+		{
+			LogHolder.log(LogLevel.ERR, LogType.CRYPTO, 
+					"Could not create DSA certificate with JCE!", a_e);
+			keyPair = null;
+		}
 		return keyPair;
 	}
 }

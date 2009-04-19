@@ -3295,12 +3295,15 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	private void doImportAccount()
 	{
+		LogHolder.log(LogLevel.WARNING, LogType.GUI, "Begin method import account...");
 		PayAccount importedAccount = null;
 		Element elemAccount = null;
 		JFileChooser chooser = new JFileChooser();
 		MyFileFilter filter = new MyFileFilter();
 		chooser.setFileFilter(filter);
+		LogHolder.log(LogLevel.WARNING, LogType.GUI, "Opening file chooser for importing account...");
 		int returnVal = GUIUtils.showMonitoredFileChooser(chooser, getRootPanel());
+		LogHolder.log(LogLevel.WARNING, LogType.GUI, "File chooser for importing account returned!");
 		if (returnVal == JFileChooser.APPROVE_OPTION)
 		{
 			File f = chooser.getSelectedFile();
