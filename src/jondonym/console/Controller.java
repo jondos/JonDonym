@@ -256,7 +256,6 @@ public class Controller
 		// predefine trust model; force premium services if charged account is available, but do not use them if not
 		TrustModel modelDynamicPremium = new TrustModel(MSG_DEFAULT_TRUST_MODEL, TrustModel.FIRST_UNRESERVED_MODEL_ID);
 		modelDynamicPremium.setAttribute(ForcePremiumIfAccountAvailableAttribute.class, TrustModel.TRUST_IF_TRUE);
-		modelDynamicPremium.setAttribute(NumberOfMixesAttribute.class, TrustModel.TRUST_IF_AT_LEAST, 3);
 		TrustModel.addTrustModel(modelDynamicPremium);
 		TrustModel.setCurrentTrustModel(modelDynamicPremium);
 		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Trust filters initialised.");
