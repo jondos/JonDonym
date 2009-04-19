@@ -2089,6 +2089,8 @@ public final class GUIUtils
 		  throw new NullPointerException("No file chooser given!");
 	  }
 	  
+	  LogHolder.log(LogLevel.WARNING, LogType.GUI, "Showing monitored file chooser...");
+	  
 	  int result;
 	  final BooleanVariable bFinished = new BooleanVariable(false);
 	  Thread timeoutThread = new Thread(new Runnable()
@@ -2098,6 +2100,7 @@ public final class GUIUtils
 				try
 				{
 					Thread.sleep(2000); // 2 seconds should be enough for showing this dialog!
+					LogHolder.log(LogLevel.WARNING, LogType.GUI, "Waiting in timeout thread of monitored file chooser...");
 					//System.out.println(a_chooser.isDisplayable() + ":" + a_chooser.isEnabled() + ":" + a_chooser.isFocusable() + ":" + a_chooser.isShowing());
 					while ((!a_chooser.isVisible() || !a_chooser.isShowing()) && !bFinished.get())
 					{
@@ -2125,8 +2128,10 @@ public final class GUIUtils
 			LogHolder.log(LogLevel.ALERT, LogType.GUI, a_e);
 			result = JFileChooser.ERROR_OPTION;
 		}
+		LogHolder.log(LogLevel.WARNING, LogType.GUI, "Finished monitored file chooser. Stopping thread.");
 		bFinished.set(true);
 		timeoutThread.interrupt();
+		LogHolder.log(LogLevel.WARNING, LogType.GUI, "Stopped monitored file chooser thread.");
 		return result;
   }
 

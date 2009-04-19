@@ -251,10 +251,6 @@ public class HTTPProxyCallback implements ProxyCallback
 			if (connHeader != null && connHeader.getRequestLine() != null)
 			{
 				byte[] newHeaders = a_helper.dumpHeader(this, connHeader, anonRequest);
-				if (getEvent(anonRequest).isConfirmationNeeded())
-				{
-					// TODO check whether we are allowed to perform this request
-				}
 				
 				countContentBytes(anonRequest, contentBytes, byteCounter, FIRE_EVENT);
 				

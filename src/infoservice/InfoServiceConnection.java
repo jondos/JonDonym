@@ -55,6 +55,8 @@ final public class InfoServiceConnection implements Runnable
 {
 
 	private static final int RESPONSE_CHUNK_SIZE = 5000;
+	
+	private static boolean ms_bLogAnonlibVersion = false;
 
 	/**
 	 * Stores the socket which is connected to the client we got the request from.
@@ -214,6 +216,7 @@ final public class InfoServiceConnection implements Runnable
 					return;
 				}
 				Enumeration headerLines = v.elements();
+				boolean bStatisticsHeaderFound = !headerLines.hasMoreElements(); // ignore requests with no headers
 				while (headerLines.hasMoreElements())
 				{
 					String currentHeaderLine = (String) (headerLines.nextElement());
@@ -252,7 +255,13 @@ final public class InfoServiceConnection implements Runnable
 
 					if (currentHeaderFieldName.toLowerCase().startsWith(InfoServiceDBEntry.HEADER_STATISTICS.toLowerCase()))
 					{
+						if (!ms_bLogAnonlibVersion && 
+							currentHeaderFieldName.equals("statistics-anonlib-version"))
+						{
+							ms_bLogAnonlibVersion = true;
+						}
 						ISRuntimeStatistics.putClientVersion(currentHeaderFieldName, currentHeaderFieldValue);
+						bStatisticsHeaderFound = true;
 					}
 					
 					if ((currentHeaderFieldName.equalsIgnoreCase("Accept-Encoding") &&
@@ -268,6 +277,15 @@ final public class InfoServiceConnection implements Runnable
 							supportedEncodings = HttpResponseStructure.HTTP_ENCODING_ZLIB;
 						}
 					}
+				}
+				
+				if (ms_bLogAnonlibVersion && 
+					internalRequestMethodCode == Constants.REQUEST_METHOD_GET &&
+					!bStatisticsHeaderFound)
+					
+				{
+					ISRuntimeStatistics.putClientVersion("statistics-anonlib-version",
+							"unknown");
 				}
 
 				/* read the POST data, if it is a POST request */
