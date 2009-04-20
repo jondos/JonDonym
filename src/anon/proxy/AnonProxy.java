@@ -767,8 +767,11 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			while (threadRun != null && m_currentMixCascade.isReconnectedAutomatically() &&
 				   !m_Anon.isConnected() && !bShuttingDown && !Thread.currentThread().isInterrupted())
 			{
-				LogHolder.log(LogLevel.WARNING, LogType.NET, "Try reconnect to AN.ON service");
-				int ret = m_Anon.initialize(m_currentMixCascade.getNextCascade(), m_currentMixCascade);
+				MixCascade cascadeNext = m_currentMixCascade.getNextCascade();
+				
+				LogHolder.log(LogLevel.WARNING, LogType.NET, "Try reconnect to AN.ON service. Connecting to " + cascadeNext.getName() + "...");
+				
+				int ret = m_Anon.initialize(cascadeNext, m_currentMixCascade);
 				if (ret == ErrorCodes.E_SUCCESS)
 				{
 					m_currentMixCascade.keepCurrentService(true);
@@ -862,9 +865,10 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			 m_Anon = AnonServiceFactory.getAnonServiceInstance(AnonServiceFactory.SERVICE_ANON);
 			   }*/
 
-			LogHolder.log(LogLevel.DEBUG, LogType.NET, "Try to initialize AN.ON");
+			MixCascade nextCascade = m_currentMixCascade.getNextCascade();
+			LogHolder.log(LogLevel.NOTICE, LogType.NET, "Connecting to AN.ON service " + nextCascade.getName() + "...");
 			m_numChannels = 0;
-			int ret = m_Anon.initialize(m_currentMixCascade.getNextCascade(), m_currentMixCascade);
+			int ret = m_Anon.initialize(nextCascade, m_currentMixCascade);
 
 			if (ret != ErrorCodes.E_SUCCESS)
 			{

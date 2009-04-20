@@ -137,6 +137,7 @@ public class DSAKeyPair extends AsymmetricCryptoKeyPair
 			try
 			{
 				keyPair = new DSAKeyPair(new MyDSAPrivateKey(dsaParameters));
+				LogHolder.log(LogLevel.INFO, LogType.CRYPTO, "Used JCE for creating DSA key pair.");
 			}
 			catch (Exception a_e)
 			{

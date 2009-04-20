@@ -93,6 +93,16 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	 */
 	private static IMutableProxyInterface ms_proxyInterface =
 		new IMutableProxyInterface.DummyMutableProxyInterface();
+	
+	private static IBrowserIdentification ms_browserIdentification = 
+		new IBrowserIdentification()
+	{
+		public String getBrowserName()
+		{
+			return null;
+		}
+	};
+	
 
 	/**
 	 * This is the ID of this infoservice.
@@ -447,6 +457,14 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		return m_getXmlConnectionTimeout;
 	}
 
+	public static void setBrowserIdentification(IBrowserIdentification a_browserIdentification)
+	{
+		if (a_browserIdentification != null)
+		{
+			ms_browserIdentification = a_browserIdentification;
+		}
+	}
+	
 	public static void setMutableProxyInterface(IMutableProxyInterface a_proxyInterface)
 	{
 		if (a_proxyInterface != null)
@@ -821,6 +839,12 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 			addPropertyHeader(properties, headers);
 			
 			addPropertyHeader("anonlib.version", AnonService.ANONLIB_VERSION, headers);
+			
+			String browserName = ms_browserIdentification.getBrowserName();
+			if (browserName != null)
+			{
+				addPropertyHeader("browser.name", browserName, headers);
+			}
 		}
 		catch (Exception a_e)
 		{

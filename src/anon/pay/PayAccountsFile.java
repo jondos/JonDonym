@@ -104,7 +104,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	private static final String XML_ATTR_IGNORE_AI_ERRORS = "ignoreAIErrorMessages";
 	private static final String XML_ATTR_ENABLE_BALANCE_AUTO_UPDATE = "autoUpdateBalance";
 
-	private boolean m_bIsInitialized = false;
+	private static boolean m_bIsInitialized = false;
 	private boolean m_bIgnoreAIAccountErrorMessages = false;
 	private boolean m_bEnableBalanceAutoUpdate = true;
 
@@ -253,7 +253,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	public static synchronized boolean init(Element elemAccountsFile, IMiscPasswordReader a_passwordReader,
 							   	boolean a_bForceAIErrors, int a_keyPoolSize)
 	{
-		if (ms_AccountsFile.m_bIsInitialized)
+		if (m_bIsInitialized)
 		{
 			return false;
 		}
@@ -312,7 +312,8 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 				}
 			}
 		}
-		ms_AccountsFile.m_bIsInitialized = true;
+		getInstance();
+		m_bIsInitialized = true;
 		return true;
 	}
 

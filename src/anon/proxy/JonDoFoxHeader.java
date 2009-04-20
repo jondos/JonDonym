@@ -13,6 +13,8 @@ public final class JonDoFoxHeader extends AbstractHTTPConnectionListener {
 	public final static String USER_AGENT_JONDOFOX_NEW = "Mozilla/5.0 (en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7";
 	public final static String USER_AGENT_TORBUTTON = 
 		"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7";
+	public final static String USER_AGENT_TORBUTTON_OLD = 
+		"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.16) Gecko/20080702 Firefox/2.0.0.16";
 		
 	public final static String JONDOFOX_LANGUAGE = "en";
 	public final static String JONDOFOX_LANGUAGE_NEW = "en-US";
