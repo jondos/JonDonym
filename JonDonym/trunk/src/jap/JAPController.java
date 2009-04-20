@@ -104,6 +104,7 @@ import anon.infoservice.Database;
 import anon.infoservice.DatabaseMessage;
 import anon.infoservice.DeletedMessageIDDBEntry;
 import anon.infoservice.HTTPConnectionFactory;
+import anon.infoservice.IBrowserIdentification;
 import anon.infoservice.IDistributable;
 import anon.infoservice.IDistributor;
 import anon.infoservice.IServiceContextContainer;
@@ -236,6 +237,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	public static final String MSG_WARNING_SHORT_BALANCE_CONTINUE = 
 		JAPController.class.getName() + "_warningShortBalanceContinue";
 	
+	public static final String MSG_WARNING_BROWSER_NOT_OPTIMIZED = JAPController.class.getName() + "_browserNotOptimized";
 	
 	
 
@@ -252,6 +254,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private static final String XML_ATTR_ASK_SAVE_PAYMENT = "askIfNotSaved";
 	private static final String XML_ATTR_SHOW_SPLASH_SCREEN = "ShowSplashScreen";
 	private static final String XML_ATTR_PORTABLE_BROWSER_PATH = "portableBrowserPath";
+	private static final String XML_ATTR_WARN_ON_INSECURE_BRWOSER = "warnInsecureBrowser";
 	
 	private static final String XML_ATTR_HELP_PATH ="helpPath";
 
@@ -372,6 +375,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private DirectProxy.AllowProxyConnectionCallback m_proxyCallback;
 	
 	private WarnSmallBalanceOnDownloadListener m_smallBalanceWarningListener;
+	private WarnNoJonDoFoxHttpListener m_warnNoJonDoFoxHttpListener;
 
 	/** Holds the MsgID of the status message after the forwarding server was started.*/
 	private int m_iStatusPanelMsgIdForwarderServerStatus;
@@ -525,7 +529,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			DirectProxy.setAllowUnprotectedConnectionCallback(m_proxyCallback);
 		}
 		
-		m_smallBalanceWarningListener = new WarnSmallBalanceOnDownloadListener(-10); 
+		m_smallBalanceWarningListener = new WarnSmallBalanceOnDownloadListener(-10);
+		m_warnNoJonDoFoxHttpListener = new WarnNoJonDoFoxHttpListener(-15, true);
 		
 		/* set a default mixcascade */
 		try
@@ -1202,6 +1207,10 @@ public final class JAPController extends Observable implements IProxyListener, O
 				JAPModel.getInstance().setAnonymizedHttpHeaders(
 						XMLUtil.parseAttribute(root, JAPModel.XML_ANONYMIZED_HTTP_HEADERS, 
 						JAPConstants.ANONYMIZED_HTTP_HEADERS));
+				m_warnNoJonDoFoxHttpListener = new WarnNoJonDoFoxHttpListener(-15, 
+						XMLUtil.parseAttribute(root, XML_ATTR_WARN_ON_INSECURE_BRWOSER, 
+								m_warnNoJonDoFoxHttpListener.isWarningShownOnInsecureBrowser()));
+				
 				
 				JAPModel.getInstance().setReminderForOptionalUpdate(
 								XMLUtil.parseAttribute(root, JAPModel.XML_REMIND_OPTIONAL_UPDATE,
@@ -2690,6 +2699,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 			XMLUtil.setAttribute(e, JAPModel.MACOSX_LIB_NEEDS_UPDATE, m_Model.isMacOSXLibraryUpdateAtStartupNeeded());
 			XMLUtil.setAttribute(e, JAPModel.DLL_VERSION_WARNING_BELOW, m_Model.getDLLWarningVersion());
 
+			XMLUtil.setAttribute(e, XML_ATTR_WARN_ON_INSECURE_BRWOSER, 
+					m_warnNoJonDoFoxHttpListener.isWarningShownOnInsecureBrowser());
 			XMLUtil.setAttribute(e, JAPModel.XML_ANONYMIZED_HTTP_HEADERS, 
 								JAPModel.getInstance().isAnonymizedHttpHeaders());
 			
@@ -3423,6 +3434,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					
 					m_proxyAnon.setHTTPHeaderProcessingEnabled(true);
 					m_proxyAnon.addHTTPConnectionListener(m_smallBalanceWarningListener);
+					m_proxyAnon.addHTTPConnectionListener(m_warnNoJonDoFoxHttpListener);
 					if (JAPModel.getInstance().isAnonymizedHttpHeaders())
 					{
 						m_proxyAnon.addHTTPConnectionListener(new JonDoFoxHeader(0));
@@ -5056,6 +5068,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 						{
 							m_proxyAnon.setHTTPHeaderProcessingEnabled(true);
 							m_proxyAnon.addHTTPConnectionListener(m_smallBalanceWarningListener);
+							m_proxyAnon.addHTTPConnectionListener(m_warnNoJonDoFoxHttpListener);
 							if (JAPModel.getInstance().isAnonymizedHttpHeaders())
 							{
 								m_proxyAnon.addHTTPConnectionListener(new JonDoFoxHeader(0));
@@ -5774,6 +5787,140 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						event.getConnectionHeader().replaceResponseLine("HTTP/1.0 204 No Content");
 					}
+				}
+			}
+		}
+	}
+	
+	private static class WarnNoJonDoFoxHttpListener extends HttpConnectionListenerAdapter implements IBrowserIdentification
+	{
+		public static final int BROWSER_RECOGNITION_UNINITIALISED = -1;
+		public static final int BROWSER_JONDOFOX = 0;
+		public static final int BROWSER_INTERNET_EXPLORER = 1;
+		public static final int BROWSER_FIREFOX = 2;
+		public static final int BROWSER_OPERA = 3;
+		public static final int BROWSER_SAFARI = 4;
+		public static final int BROWSER_CHROME = 5;
+		public static final int BROWSER_TORBUTTON = 6;
+		
+		private static final long[] BROWSER_OCCURENCE = new long[7];
+		private static final String[] BROWSER_NAME = 
+			new String[]{"JonDoFox", "Internet Explorer", "Firefox", "Opera", "Safari", "Chrome", "Tor"}; 
+		
+		private static boolean ms_bWarned;
+		private static boolean ms_bShowWarning;
+		
+		
+		public WarnNoJonDoFoxHttpListener(int a_priority, boolean a_bWarn)
+		{
+			super(a_priority);
+			ms_bWarned = !a_bWarn;
+			ms_bShowWarning = a_bWarn;
+			InfoServiceDBEntry.setBrowserIdentification(this);
+		}
+		
+		public int getMostFrequentBrowser()
+		{
+			int iBrowser = BROWSER_RECOGNITION_UNINITIALISED;
+			long iOccurence = 0;
+			
+			for (int i = 0; i < BROWSER_OCCURENCE.length; i++)
+			{
+				if (BROWSER_OCCURENCE[i] > iOccurence)
+				{
+					iOccurence = BROWSER_OCCURENCE[i];
+					iBrowser = i;
+				}
+			}
+			return iBrowser;
+		}
+		
+		public String getBrowserName()
+		{
+			int browser = getMostFrequentBrowser();
+			if (browser == BROWSER_RECOGNITION_UNINITIALISED)
+			{
+				return null;
+			}
+			return BROWSER_NAME[browser];
+		}
+		
+		public boolean isWarningShownOnInsecureBrowser()
+		{
+			return ms_bShowWarning;
+		}
+		            
+		public void requestHeadersReceived(HTTPConnectionEvent event) 
+		{
+			if (!event.getConnectionHeader().getRequestLine().startsWith("CONNECT"))
+			{
+				int detectedBrowser = -1;
+				String [] ua = event.getConnectionHeader().getRequestHeader(HTTPProxyCallback.HTTP_USER_AGENT);
+				if (ua.length > 0)
+				{
+					if (ua[0].indexOf("Firefox") >= 0)
+					{
+						if (ua[0].equals(JonDoFoxHeader.USER_AGENT_JONDOFOX_NEW) ||
+							ua[0].equals(JonDoFoxHeader.USER_AGENT_JONDOFOX))
+						{
+							detectedBrowser = BROWSER_JONDOFOX;
+						}
+						else if (ua[0].equals(JonDoFoxHeader.USER_AGENT_TORBUTTON) || 
+								 ua[0].equals(JonDoFoxHeader.USER_AGENT_TORBUTTON_OLD))
+						{
+							detectedBrowser = BROWSER_TORBUTTON;
+						}
+						else
+						{
+							detectedBrowser = BROWSER_FIREFOX;
+						}
+					}
+					else if (ua[0].indexOf("MSIE") >= 0)
+					{
+						detectedBrowser = BROWSER_INTERNET_EXPLORER;
+					}
+					else if (ua[0].indexOf("Opera") >= 0)
+					{
+						detectedBrowser = BROWSER_OPERA;
+					}
+					else if (ua[0].indexOf("Konqueror") >= 0)
+					{
+						detectedBrowser = BROWSER_SAFARI;
+					}
+					else if (ua[0].indexOf("Chrome") >= 0)
+					{
+						detectedBrowser = BROWSER_CHROME;
+					}
+					if (detectedBrowser >= 0)
+					{
+						BROWSER_OCCURENCE[detectedBrowser]++;
+					}
+				}
+				
+				if (!ms_bWarned && BROWSER_OCCURENCE[BROWSER_JONDOFOX] == 0 && detectedBrowser > BROWSER_JONDOFOX &&
+					BROWSER_OCCURENCE[detectedBrowser] > 200)
+				{
+					ms_bWarned = true;
+					new Thread(new Runnable()
+					{
+						public void run()
+						{
+							final JAPDialog.LinkedCheckBox adapter = new JAPDialog.LinkedCheckBox(false, "jondofox")
+							{
+								public boolean isOnTop()
+								{
+									return true;
+								}
+							};
+							
+							JAPDialog.showWarningDialog(JAPController.getInstance().getCurrentView(), 
+									JAPMessages.getString(MSG_WARNING_BROWSER_NOT_OPTIMIZED), adapter);
+							if (adapter.getState())
+							{
+								ms_bShowWarning = false;
+							}
+						}
+					}).start();
 				}
 			}
 		}

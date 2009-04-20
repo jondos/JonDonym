@@ -101,9 +101,10 @@ public class JonDoConsole
 		}
 		
 		System.out.println("Initialising...");
-		Controller.start(defaultCascade); // the cascade argument is here only for debugging; use Controller.start() by default
 		
-		if (!Controller.isRunning())
+		// the cascade argument is here only for debugging; use Controller.start() by default
+		if (!Controller.start(defaultCascade) || 
+			!Controller.isRunning())
 		{
 			System.out.println("Could not start controller! Exiting...");
 			return;

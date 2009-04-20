@@ -432,7 +432,22 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		//boolean bRetry = true;
 		boolean bRetry = false;
 		
-		m_moduleSystem.revalidate();
+		
+		try 
+		{
+			SwingUtilities.invokeAndWait(new Runnable()
+			{
+				public void run()
+				{
+					m_moduleSystem.revalidate();
+				}
+			});
+		} 
+		catch (Exception a_e) 
+		{
+			LogHolder.log(LogLevel.ERR, LogType.GUI, a_e);
+		} 
+		
 		while (!bError)
 		{
 			pack();
