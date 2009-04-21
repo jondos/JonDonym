@@ -40,7 +40,7 @@ public abstract class AbstractChannel {
 
   private int m_channelId;
 
-  private Multiplexer m_parentMultiplexer;
+  protected Multiplexer m_parentMultiplexer;
 
   private volatile boolean m_channelOpen;
 

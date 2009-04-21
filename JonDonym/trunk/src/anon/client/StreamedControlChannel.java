@@ -50,14 +50,17 @@ public abstract class StreamedControlChannel extends AbstractControlChannel
 	private int m_currentIndex;
 
 	private byte[] m_lengthBuffer;
-
+	
+	private boolean m_bIsEncrypted;
+	
 	public StreamedControlChannel(int a_channelId, Multiplexer a_multiplexer,
-								  IServiceContainer a_serviceContainer)
+								  IServiceContainer a_serviceContainer,boolean bEncrypted)
 	{
 		super(a_channelId, a_multiplexer, a_serviceContainer);
 		m_messageBuffer = new byte[0];
 		m_currentIndex = -2;
 		m_lengthBuffer = new byte[2];
+		m_bIsEncrypted=bEncrypted;
 	}
 
 	public int sendByteMessage(byte[] a_message)
@@ -72,12 +75,21 @@ public abstract class StreamedControlChannel extends AbstractControlChannel
 		{
 			dataOutputBuffer.writeShort(a_message.length);
 			dataOutputBuffer.flush();
-			outputBuffer.write(a_message);
+			byte[] buff=null;
+			if(m_bIsEncrypted&&m_parentMultiplexer.getControlChannelCipher()!=null)
+				{
+					buff=new byte[m_parentMultiplexer.getControlChannelCipher().getEncryptedOutputSize(a_message.length)];
+					m_parentMultiplexer.getControlChannelCipher().encryptGCM1(a_message, 0, buff,0, a_message.length);
+				}
+			else
+				buff=a_message;
+			outputBuffer.write(buff);
 			outputBuffer.flush();
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
-			/* cannot happen */
+			/* should not happen */
+			e.printStackTrace();
 		}
 		return sendRawMessage(outputBuffer.toByteArray());
 	}
@@ -100,8 +112,11 @@ public abstract class StreamedControlChannel extends AbstractControlChannel
 					/* we've got the length -> create the buffer for the message data */
 					try
 					{
-						m_messageBuffer = new byte[ (new DataInputStream(new ByteArrayInputStream(
-							m_lengthBuffer))).readUnsignedShort()];
+						int len=(new DataInputStream(new ByteArrayInputStream(
+								m_lengthBuffer))).readUnsignedShort();
+						if(m_bIsEncrypted&&m_parentMultiplexer.getControlChannelCipher()!=null)
+							len=m_parentMultiplexer.getControlChannelCipher().getEncryptedOutputSize(len);
+						m_messageBuffer = new byte[len];
 					}
 					catch (IOException e)
 					{
@@ -122,7 +137,22 @@ public abstract class StreamedControlChannel extends AbstractControlChannel
 			if (m_currentIndex == m_messageBuffer.length)
 			{
 				/* we've read a whole message -> process it and prepare to read the next one */
-				processMessage(m_messageBuffer); /** @todo react on unrecoverable errors */
+					byte[] buff=null;
+					if(m_bIsEncrypted&&m_parentMultiplexer.getControlChannelCipher()!=null)
+						{
+							buff=new byte[m_parentMultiplexer.getControlChannelCipher().getDecryptedOutputSize(m_messageBuffer.length)];
+							try{
+							m_parentMultiplexer.getControlChannelCipher().decryptGCM2(m_messageBuffer, 0, buff,0, m_messageBuffer.length);
+							}
+							catch(Exception e)
+								{
+									buff=null;
+								}
+						}
+					else
+						buff=m_messageBuffer;
+
+				processMessage(buff); /** @todo react on unrecoverable errors */
 				m_messageBuffer = new byte[0];
 				m_currentIndex = -2;
 			}

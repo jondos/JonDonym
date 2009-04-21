@@ -40,6 +40,7 @@ import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Vector;
 
+import anon.client.crypto.ControlChannelCipher;
 import anon.client.crypto.SymCipher;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -64,6 +65,8 @@ public class Multiplexer extends Observable implements Runnable
 	private SymCipher m_inputStreamCipher;
 
 	private SymCipher m_outputStreamCipher;
+	
+	private ControlChannelCipher m_controlchannelCiper;
 
 	private Object m_internalEventSynchronization;
 	
@@ -83,6 +86,7 @@ public class Multiplexer extends Observable implements Runnable
 		m_inputStreamCipher = a_keyExchangeManager.getMultiplexerInputStreamCipher();
 		m_outputStream = a_outputStream;
 		m_outputStreamCipher = a_keyExchangeManager.getMultiplexerOutputStreamCipher();
+		m_controlchannelCiper=a_keyExchangeManager.getControlChannelCipher();
 		Thread downstreamThread = new Thread(this, "Multiplexer: Receive-Thread");
 		downstreamThread.setDaemon(true);
 		downstreamThread.start();
@@ -347,5 +351,10 @@ public class Multiplexer extends Observable implements Runnable
 	{
 		return m_channelTable;
 	}
+	
+	public ControlChannelCipher getControlChannelCipher()
+		{
+			return m_controlchannelCiper;
+		}
 
 }

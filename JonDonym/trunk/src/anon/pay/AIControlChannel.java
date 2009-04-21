@@ -114,7 +114,7 @@ public class AIControlChannel extends XmlControlChannel
 public AIControlChannel(Multiplexer a_multiplexer,
 						  PacketCounter a_packetCounter, IServiceContainer a_serviceContainer,
 						  MixCascade a_connectedCascade) {
-    super(ChannelTable.CONTROL_CHANNEL_ID_PAY, a_multiplexer, a_serviceContainer);
+    super(ChannelTable.CONTROL_CHANNEL_ID_PAY, a_multiplexer, a_serviceContainer,true);
     m_packetCounter = a_packetCounter;
 	m_connectedCascade = a_connectedCascade;
 	m_aiLoginSyncObject = new Vector(1);

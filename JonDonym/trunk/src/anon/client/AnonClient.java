@@ -75,6 +75,8 @@ import anon.util.XMLParseException;
  */
 public class AnonClient implements AnonService, Observer, DataChainErrorListener
 {
+	private static boolean ENABLE_CONTROL_CHANNEL_TEST=false; 
+	
 	public static final int DEFAULT_LOGIN_TIMEOUT = 30000;
 	private static final int FAST_LOGIN_TIMEOUT = 4000; // try the fast timeout first
 	private static final int CONNECT_TIMEOUT = 8000;
@@ -116,6 +118,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	private Pay m_paymentInstance;
 
 	private boolean m_connected;
+	
+	
 	
 	static 
 	{
@@ -874,6 +878,14 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 					new DummyTrafficControlChannel(m_multiplexer, a_serviceContainer);
 				m_dummyTrafficControlChannel.setDummyTrafficInterval(m_dummyTrafficInterval);
 			}
+			//the Test Control Channel if used...
+			if(ENABLE_CONTROL_CHANNEL_TEST)
+				{
+					TestControlChannel t=new TestControlChannel(m_multiplexer, a_serviceContainer);
+					t.setMessageInterval(30000);
+				}
+			
+			
 			/* maybe we have to start some more services */
 			int errorCode = finishInitialization(m_multiplexer, m_keyExchangeManager, 
 												 m_packetCounter, a_connectionToMixCascade, a_serviceContainer,
