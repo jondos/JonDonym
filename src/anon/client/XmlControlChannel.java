@@ -46,8 +46,8 @@ import anon.IServiceContainer;
  */
 public abstract class XmlControlChannel extends StreamedControlChannel {
 
-  public XmlControlChannel(int a_channelId, Multiplexer a_multiplexer, IServiceContainer a_serviceContainer) {
-    super(a_channelId, a_multiplexer, a_serviceContainer);
+  public XmlControlChannel(int a_channelId, Multiplexer a_multiplexer, IServiceContainer a_serviceContainer,boolean bEncrypted) {
+    super(a_channelId, a_multiplexer, a_serviceContainer,bEncrypted);
   }
 
 
@@ -58,8 +58,7 @@ public abstract class XmlControlChannel extends StreamedControlChannel {
 
   protected void processMessage(byte[] a_message) {
     try {
-	  String msgReceived = new String(a_message);
-      processXmlMessage(XMLUtil.toXMLDocument(a_message));
+	    processXmlMessage(XMLUtil.toXMLDocument(a_message));
     }
     catch (XMLParseException e) {
       LogHolder.log(LogLevel.ERR, LogType.NET, "Error while parsing XML document!", e);

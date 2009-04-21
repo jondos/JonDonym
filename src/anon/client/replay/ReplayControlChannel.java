@@ -82,7 +82,7 @@ public class ReplayControlChannel extends XmlControlChannel {
 
 
   public ReplayControlChannel(Multiplexer a_multiplexer, IServiceContainer a_serviceContainer) {
-    super(ChannelTable.CONTROL_CHANNEL_ID_REPLAY, a_multiplexer, a_serviceContainer);
+    super(ChannelTable.CONTROL_CHANNEL_ID_REPLAY, a_multiplexer, a_serviceContainer,false);
     m_messageDistributor = new MessageDistributor();
     m_internalSynchronization = new Object();
   }

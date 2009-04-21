@@ -36,15 +36,15 @@ import anon.mixminion.Mixminion;
 public final class JAPConstants
 {
 	// Note: probably you like to change anon.AnonService.ANONLIB_VERSION as well
-	public static final String aktVersion = "00.11.021"; //Never change the layout of this line!
+	public static final String aktVersion = "00.11.022"; //Never change the layout of this line!
 	
 	public final static boolean m_bUnstableVersion = false; //Set to true if this is an unstable (development) Version
 
 	
-	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2009-04-03 19:37:48 $";
+	private static final String CVS_GENERATED_RELEASE_DATE = "$Date: 2009-04-20 23:14:59 $";
 
 	//Warning: This is a little bit tricky,
-	//because CVS will expand the $Date: 2009-04-03 19:37:48 $
+	//because CVS will expand the $Date: 2009-04-20 23:14:59 $
 	//to the date of the last commit of this file
 
 	//Never change the layout of the next two lines as several automated tools use these lines to do fancy things...

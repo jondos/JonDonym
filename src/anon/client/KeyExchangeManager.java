@@ -51,6 +51,7 @@ import anon.ErrorCodes;
 import anon.client.TermsAndConditionsResponseHandler.TermsAndConditionsReadException;
 import anon.client.crypto.ASymMixCipherPlainRSA;
 import anon.client.crypto.ASymMixCipherRSAOAEP;
+import anon.client.crypto.ControlChannelCipher;
 import anon.client.crypto.IASymMixCipher;
 import anon.client.crypto.KeyPool;
 import anon.client.crypto.SymCipher;
@@ -94,9 +95,11 @@ public class KeyExchangeManager {
 
   private boolean m_paymentRequired;
 
-  private boolean m_bEnhancedChannelEncryption; //uses 2 keys for symetric channel encryption
+  private boolean m_bEnhancedChannelEncryption; //uses 2 keys for symmetric channel encryption
   
   private SymCipher m_firstMixSymmetricCipher;
+  
+  private ControlChannelCipher m_controlchannelCipher;
 
   private boolean m_chainProtocolWithFlowControl;
   private int m_upstreamSendMe,m_downstreamSendMe;
@@ -266,6 +269,7 @@ public class KeyExchangeManager {
 				  "Unsupported payment protocol version ('" + m_cascade.getPaymentProtocolVersion() + "')."));
 		  }
 		  m_firstMixSymmetricCipher = null;
+		  m_controlchannelCipher=null;
 		  /*
 		   * lower protocol versions not listed here are obsolete and not supported
 		   * any more
@@ -531,7 +535,14 @@ public class KeyExchangeManager {
 					  throw (new UnknownProtocolVersionException(
 						  "Unknown chain protocol version used ('" + chainMixProtocolVersionValue + "')."));
 				  }
-			  }
+			  } else if(i==0)
+			  	{//first mix
+			  		if(XMLUtil.getFirstChildByName(currentMixNode, "SupportsEncrypedControlChannels")!=null)
+			  			{
+			  				m_controlchannelCipher=new ControlChannelCipher();	
+			  			}
+			  	}
+			  
 		  }
 		  /* sending symmetric keys for multiplexer stream encryption */
 		  m_multiplexerInputStreamCipher = new SymCipher();
@@ -590,6 +601,19 @@ public class KeyExchangeManager {
 			  XMLUtil.setValue(mixEncryptionNode, Base64.encode(mixKeys, true));
 			  japKeyExchangeNode.appendChild(mixEncryptionNode);
 			  keyDoc.appendChild(japKeyExchangeNode);
+			  
+			  if(m_controlchannelCipher!=null)
+			  	{
+					  Element controlchannelEncryptionNode = keyDoc.createElement("ControlChannelEncryption");
+					  byte[] controlchannelKeys = new byte[32];
+					  KeyPool.getKey(controlchannelKeys, 0);
+					  KeyPool.getKey(controlchannelKeys, 16);
+					  m_controlchannelCipher.setSentKey(controlchannelKeys, 0, 16);
+					  m_controlchannelCipher.setRecvKey(controlchannelKeys, 16, 16);
+					  XMLUtil.setValue(controlchannelEncryptionNode, Base64.encode(controlchannelKeys, true));
+					  japKeyExchangeNode.appendChild(controlchannelEncryptionNode);
+			  	}
+			  
 			  //jap.JAPExtension.sendDialog(keyDoc, m_cascade);
 			  Element mixReplayNode = keyDoc.createElement("ReplayDetection");
 			  if (m_protocolWithReplay)
@@ -817,5 +841,10 @@ public class KeyExchangeManager {
 	{
 		return m_bEnhancedChannelEncryption;
 	}
+
+	public ControlChannelCipher getControlChannelCipher()
+		{
+			return m_controlchannelCipher;
+		}
 
 }

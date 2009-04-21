@@ -50,6 +50,8 @@ public class ChannelTable implements IDataChannelCreator {
   public static final int CONTROL_CHANNEL_ID_REPLAY = 3;
   
   public static final int CONTROL_CHANNEL_ID_DUMMY = 4;
+ 
+  public static final int CONTROL_CHANNEL_ID_TEST = 255;
   
   
   private static final int MAX_OPEN_DATACHANNELS = 50;
