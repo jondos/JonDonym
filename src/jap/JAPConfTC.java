@@ -29,7 +29,7 @@ import logging.LogType;
 import anon.client.ITermsAndConditionsContainer;
 import anon.infoservice.Database;
 import anon.infoservice.ServiceOperator;
-import anon.infoservice.TermsAndConditions;
+import anon.terms.TermsAndConditions;
 import anon.util.JAPMessages;
 
 public class JAPConfTC extends AbstractJAPConfModule implements ListSelectionListener, Observer

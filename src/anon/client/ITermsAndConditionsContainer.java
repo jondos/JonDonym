@@ -3,7 +3,8 @@ package anon.client;
 import java.util.Locale;
 
 import anon.infoservice.ServiceOperator;
-import anon.infoservice.TermsAndConditions;
+import anon.terms.TermsAndConditions;
+import anon.terms.TermsAndConditionsResponseHandler;
 
 public interface ITermsAndConditionsContainer 
 {

@@ -27,7 +27,9 @@
  */
 package infoservice;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Locale;
@@ -43,11 +45,12 @@ import anon.infoservice.Database;
 import anon.infoservice.IDistributable;
 import anon.infoservice.IDistributor;
 import anon.infoservice.ListenerInterface;
-import anon.infoservice.TermsAndConditionsTemplate;
+import anon.terms.template.TermsAndConditionsTemplate;
 import anon.infoservice.update.AccountUpdater;
 import anon.util.JAPMessages;
 import anon.util.ThreadPool;
 import anon.util.TimedOutputStream;
+import anon.util.XMLParseException;
 import anon.util.Updater.ObservableInfo;
 import logging.LogHolder;
 import logging.LogLevel;
@@ -151,12 +154,12 @@ public class InfoService implements Observer
 				{
 					while(true)
 					{
-						TermsAndConditionsTemplate.loadFromDirectory(
+						loadTemplatesFromDirectory(
 							Configuration.getInstance().getTermsAndConditionsDir());
 						
 						try
 						{
-							Thread.sleep(TermsAndConditionsTemplate.TERMS_AND_CONDITIONS_UPDATE_INTERVAL);	
+							Thread.sleep(1000*60*60);	
 						}
 						catch(InterruptedException ex)
 						{
@@ -238,6 +241,43 @@ public class InfoService implements Observer
 		loadConfig();
 		
 		m_connectionCounter = 0;
+	}
+
+	public static void loadTemplatesFromDirectory(File a_dir)
+	{
+		File file = null;
+			
+		if(a_dir == null)
+		{
+			return;
+		}
+		
+		String[] files = a_dir.list();
+			
+		if(files == null)
+		{
+			return;
+		}
+			
+		/* Loop through all files in the directory to find XML files */
+		for (int i = 0; i < files.length; i++)
+		{
+			try
+			{
+				file = new File(a_dir.getAbsolutePath() + File.separator + files[i]);
+				TermsAndConditionsTemplate tac = new TermsAndConditionsTemplate(file);
+				
+				Database.getInstance(TermsAndConditionsTemplate.class).update(tac);
+			}
+			catch(XMLParseException ex)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "XMLParseException while loading Terms & Conditions: ", ex);
+			}
+			catch(IOException ex)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, "IOException while loading Terms & Conditions: ", ex);
+			}
+		}
 	}
 
 	private void loadConfig() throws Exception 

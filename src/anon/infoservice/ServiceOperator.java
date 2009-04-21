@@ -36,6 +36,7 @@ import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.X509DistinguishedName;
 import anon.crypto.X509SubjectAlternativeName;
+import anon.terms.TermsAndConditions;
 import anon.util.Util;
 import anon.util.XMLUtil;
 

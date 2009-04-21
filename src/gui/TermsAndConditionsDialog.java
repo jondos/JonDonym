@@ -14,9 +14,9 @@ import javax.swing.JPanel;
 import gui.dialog.JAPDialog;
 import gui.dialog.TermsAndConditionsPane;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
-import anon.infoservice.TermsAndConditionsTemplate;
-import anon.infoservice.TermsAndConditions;
-import anon.infoservice.TermsAndConditionsTranslation;
+import anon.terms.TermsAndConditions;
+import anon.terms.TermsAndConditionsTranslation;
+import anon.terms.template.TermsAndConditionsTemplate;
 import anon.util.JAPMessages;
 
 public class TermsAndConditionsDialog extends JAPDialog
@@ -81,8 +81,8 @@ public class TermsAndConditionsDialog extends JAPDialog
 		{
 			TermsAndConditionsTemplate displayTemplate = 
 				TermsAndConditionsTemplate.getById(tcTranslation.getTemplateReferenceId(), false);
-			displayTemplate.importData(tcTranslation);
-			htmlText = displayTemplate.transform();
+			//displayTemplate.importData(tcTranslation);
+			htmlText = displayTemplate.transform(tcTranslation);
 		}
 		catch(Exception e)
 		{

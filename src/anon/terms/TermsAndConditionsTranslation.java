@@ -1,4 +1,4 @@
-package anon.infoservice;
+package anon.terms;
 /*
 Copyright (c) 2008 The JAP-Team, JonDos GmbH
 
@@ -31,6 +31,9 @@ import java.util.Date;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import anon.infoservice.OperatorAddress;
+import anon.infoservice.ServiceOperator;
 
 public interface TermsAndConditionsTranslation 
 {
@@ -77,6 +80,8 @@ public interface TermsAndConditionsTranslation
 
 	public String getOperationalAgreementUrl();
 	public void setOperationalAgreementUrl(String operationalAgreementUrl);
+	
+	public TCComposite getSections();
 	
 	public TermsAndConditionsTranslation duplicateWithImports(Element xmlImport);
 }

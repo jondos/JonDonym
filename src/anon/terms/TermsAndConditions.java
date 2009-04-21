@@ -26,7 +26,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package anon.infoservice;
+package anon.terms;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Map;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -47,10 +48,16 @@ import logging.LogType;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.infoservice.Database;
+import anon.infoservice.OperatorAddress;
+import anon.infoservice.ServiceOperator;
+import anon.terms.template.Section;
+import anon.terms.template.TermsAndConditionsTemplate;
 import anon.util.IXMLEncodable;
 import anon.util.JAPMessages;
 import anon.util.XMLParseException;
@@ -559,8 +566,8 @@ public class TermsAndConditions implements IXMLEncodable
 					" translation ["+translation.getLocale()+"] of terms and conditions for operator '"
 					+operator.getOrganization()+"' not found.");
 		}
-		displayTemplate.importData(translation);
-		return displayTemplate.transform();
+		//displayTemplate.importData(translation);
+		return displayTemplate.transform(translation);
 	}
 	
 	public boolean equals(Object anotherTC)
@@ -658,6 +665,8 @@ public class TermsAndConditions implements IXMLEncodable
 		private XMLSignature signature = null;
 		private MultiCertPath certPath = null;
 		
+		private TCComposite sections = new TCComposite();
+		
 		Translation(Element translationElement) throws XMLParseException
 		{
 			this(translationElement, true);
@@ -710,6 +719,14 @@ public class TermsAndConditions implements IXMLEncodable
 			{
 				certPath = signature.getMultiCertPath();
 			}
+			
+			//load the templates section definitions
+			NodeList nl = translationElement.getElementsByTagName(Section.XML_ELEMENT_NAME);
+			for (int i = 0; i < nl.getLength(); i++) 
+			{
+				sections.addTCComponent(new Section(nl.item(i)));
+			}
+			System.out.println("Sections: "+sections);
 		}
 		
 		public void setTemplateReferenceId(String templateReferenceId) 
@@ -918,16 +935,25 @@ public class TermsAndConditions implements IXMLEncodable
 		{
 			this.operationalAgreementUrl = operationalAgreementUrl;
 		}
+		
+		public TCComposite getSections() 
+		{
+			return sections;
+		}
 
 		public TermsAndConditionsTranslation duplicateWithImports(
 				Element xmlImports)
 		{
 			try 
 			{
-				Translation newTrans = new Translation(xmlImports, false);
+				Translation importTrans = new Translation(xmlImports, false);
+				//create a deep copy of this translation
+				//Translation
 				Object currentValue = null;
 				Method currentGetter = null;
 				Method currentSetter = null;
+				
+				importTrans.sections = this.sections;
 				
 				PropertyDescriptor translationPDs[] =
 					Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors();
@@ -944,15 +970,15 @@ public class TermsAndConditions implements IXMLEncodable
 						if( (currentValue != null) && !currentValue.toString().equals(""))
 						{
 							currentSetter.invoke(
-									newTrans, 
+									importTrans, 
 									new Object[]{currentValue});
 						}
 					}
 				}
 				
-				if(newTrans.getOperator() == null)
+				if(importTrans.getOperator() == null)
 				{
-					newTrans.setOperatorAddress(operatorAddress);
+					importTrans.setOperatorAddress(operatorAddress);
 				}
 				else if(operatorAddress != null)
 				{
@@ -971,13 +997,13 @@ public class TermsAndConditions implements IXMLEncodable
 							if( (currentValue != null) && !currentValue.toString().equals(""))
 							{
 								currentSetter.invoke(
-										newTrans.operatorAddress, 
+										importTrans.operatorAddress, 
 										new Object[]{currentValue});
 							}
 						}
 					}
 				}
-				return newTrans;
+				return importTrans;
 			}
 			catch (XMLParseException e) 
 			{

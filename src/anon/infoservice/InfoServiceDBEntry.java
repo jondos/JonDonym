@@ -61,6 +61,7 @@ import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.pay.PaymentInstanceDBEntry;
+import anon.terms.template.TermsAndConditionsTemplate;
 import anon.util.ClassUtil;
 import anon.util.IXMLEncodable;
 import anon.util.Util;
@@ -1478,7 +1479,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		
 		Element el = (Element) nodes.item(0);
 		
-		TermsAndConditionsTemplate framework = new TermsAndConditionsTemplate(el, true);
+		TermsAndConditionsTemplate framework = new TermsAndConditionsTemplate(el);
 		/* check the signature */
 		if (!framework.isVerified())
 		{

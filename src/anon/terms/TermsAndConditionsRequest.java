@@ -26,7 +26,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package anon.client;
+package anon.terms;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -35,9 +35,9 @@ import java.util.Vector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import anon.client.IllegalTCRequestPostConditionException;
 import anon.infoservice.ServiceOperator;
-import anon.infoservice.TermsAndConditions;
-import anon.infoservice.TermsAndConditionsTemplate;
+import anon.terms.template.TermsAndConditionsTemplate;
 import anon.util.IXMLEncodable;
 import anon.util.XMLUtil;
 
