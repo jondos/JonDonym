@@ -32,13 +32,19 @@
 		<br />
 	</xsl:template>
 	
-	<xsl:template match="PreAmble">
+	<xsl:template match="b">
+		<b><xsl:value-of select="."></xsl:value-of></b>
+	</xsl:template>
+	
+	<xsl:template match="Preamble">
+		
 		<div id="preamble">
 			<xsl:apply-templates /><br />
 		</div>
+	
 	</xsl:template>
 		
-	<xsl:template match="PreAmble/Operator">
+	<xsl:template match="Preamble/Operator">
 		<xsl:value-of select="Organisation" /><br />
 		<xsl:value-of select="Street" /><br />
 		<xsl:value-of select="PostalCode" /> <xsl:text> </xsl:text> <xsl:value-of select="City" /><br />
@@ -48,9 +54,20 @@
 		<xsl:text>Fax: </xsl:text><xsl:value-of select="Fax" /><br />
 		<xsl:text>E-Mail: </xsl:text> <xsl:value-of select="EMail" /><br />
 	</xsl:template>
+	
+	<xsl:template match="Preamble/LeadingText">
+		<xsl:value-of select="."/>
+		<br/>
+		<br/>
+	</xsl:template>
+	
+	<xsl:template match="Preamble/TrailingText">
+		<br/>
+		<xsl:value-of select="."/>
+	</xsl:template>
 		
 	<xsl:template match="Section">
-		<h2>§ <xsl:value-of select="@id" /> - <xsl:value-of select="@name" /></h2>
+		<h2>§ <xsl:value-of select="position()" /> - <xsl:value-of select="@name" /></h2>
 		<xsl:choose>
 			<xsl:when test="@id=9"><b><xsl:apply-templates select="Paragraph" /></b></xsl:when>
 			<xsl:otherwise><xsl:apply-templates select="Paragraph" /></xsl:otherwise>

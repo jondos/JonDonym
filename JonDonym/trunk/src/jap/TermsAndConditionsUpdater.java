@@ -3,9 +3,9 @@ package jap;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import anon.infoservice.TermsAndConditions;
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.update.AbstractDatabaseUpdater;
+import anon.terms.TermsAndConditions;
 
 public class TermsAndConditionsUpdater extends AbstractDatabaseUpdater 
 {
