@@ -30,6 +30,7 @@ package anon.terms.template;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import logging.LogHolder;
@@ -61,6 +62,12 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 		hasElementNodes = false;
 	}
 	
+	public Paragraph(double id)
+	{
+		this();
+		setId(id);
+	}
+	
 	public Paragraph(Node root) throws XMLParseException
 	{
 		this();
@@ -81,7 +88,7 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 		{
 			throw new XMLParseException("Invalid Tag name: "+rootElement.getTagName());
 		}
-		this.id = XMLUtil.parseAttribute(rootElement, XML_ATTR_ID, -1);
+		this.id = XMLUtil.parseAttribute(rootElement, XML_ATTR_ID, (double) -1);
 		if(this.id < 0)
 		{
 			throw new XMLParseException("Attribute "+XML_ATTR_ID+" missing: "+XMLUtil.toString(root));
@@ -186,9 +193,14 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 		return (Vector) content;
 	}
 	
+	public boolean hasContent()
+	{
+		return super.hasContent() && (contentNodes().size() > 0);
+	}
+	
 	public Element toXmlElement(Document ownerDoc) 
 	{
-		if(id < 0) return null;
+		if(id < 0 || (contentNodes().size() == 0) ) return null;
 		Element rootElement = ownerDoc.createElement(XML_ELEMENT_NAME);
 		rootElement.setAttribute(XML_ATTR_ID, ""+this.id);
 		for (int i = 0; i < contentNodes().size(); i++) 
@@ -198,12 +210,40 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 		return rootElement;
 	}
 	
+	public Object clone()
+	{
+		Paragraph paragraph = new Paragraph();
+		paragraph.setId(id);
+		paragraph.setContent(
+				new NodeList()
+				{
+					public int getLength() 
+					{
+						return contentNodes().size();
+					}
+
+					public Node item(int index) 
+					{
+						return (Node) contentNodes().elementAt(index);
+					}
+				});
+		return paragraph;
+	}
+	
 	public String toString()
 	{
 		StringBuffer buff = new StringBuffer();
+		String currentNodeContent = null;
+		StringTokenizer contentTokenizer = null;
 		for (int i = 0; i < contentNodes().size(); i++) 
 		{
-			buff.append(XMLUtil.toString((Node) contentNodes().elementAt(i))+"\n");
+			currentNodeContent = XMLUtil.toString((Node) contentNodes().elementAt(i));
+			contentTokenizer = new StringTokenizer(currentNodeContent, "\n");
+			while (contentTokenizer.hasMoreTokens()) 
+			{
+				buff.append(contentTokenizer.nextToken().trim());
+				buff.append("\n");
+			}
 		}
 		return buff.toString();
 	}

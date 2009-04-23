@@ -15,6 +15,16 @@ public class TCComposite extends TCComponent
 {
 	protected Vector tcComponents = new Vector();
 	
+	public TCComposite()
+	{
+		super();
+	}
+	
+	public TCComposite(double id, Object content) 
+	{
+		super(id, content);
+	}
+
 	/**
 	 * Adds the specified TCComponent to this container.
 	 * The insertion will place the component according to its id
@@ -47,13 +57,13 @@ public class TCComposite extends TCComponent
 		tcComponents.addElement(tcComponent);
 	}
 	
-	public void removeTCComponent(String id)
+	public void removeTCComponent(double id)
 	{
 		TCComponent currentTCComponents = null;
 		for(int i = 0; i < tcComponents.size(); i++)
 		{
 			currentTCComponents = (TCComponent) tcComponents.elementAt(i);
-			if(currentTCComponents.equals(id))
+			if(currentTCComponents.getId() == id)
 			{
 				tcComponents.removeElementAt(i);
 			}
@@ -75,18 +85,23 @@ public class TCComposite extends TCComponent
 		return allComponents;
 	}
 	
-	public TCComponent getTCComponent(String id)
+	public TCComponent getTCComponent(double id)
 	{
 		TCComponent currentParagraph = null;
 		for(int i = 0; i < tcComponents.size(); i++)
 		{
-			currentParagraph = (Paragraph) tcComponents.elementAt(i);
-			if(currentParagraph.equals(id))
+			currentParagraph = (TCComponent) tcComponents.elementAt(i);
+			if(currentParagraph.getId() == id)
 			{
 				return currentParagraph;
 			}
 		}
 		return null;
+	}
+	
+	public boolean hasContent()
+	{
+		return super.hasContent() || (getTCComponentCount() > 0);
 	}
 	
 	public String toString()
@@ -99,10 +114,23 @@ public class TCComposite extends TCComponent
 	 */
 	public Object clone()
 	{
-		TCComposite composite = new TCComposite();
-		composite.id = id;
-		//composite.content = new String(content);
-		composite.tcComponents = (Vector) tcComponents.clone();
+		TCComposite composite = null;
+		try 
+		{
+			composite = (TCComposite) getClass().newInstance();
+		} 
+		catch (InstantiationException e) {}
+		catch (IllegalAccessException e) {}
+		if(composite != null)
+		{
+			composite.id = id;
+			composite.content = content; 
+			TCComponent[] allComponents = getTCComponents();
+			for (int i = 0; i < allComponents.length; i++) 
+			{
+				composite.tcComponents.addElement(allComponents[i].clone());
+			}
+		}
 		return composite;
 	}
 }

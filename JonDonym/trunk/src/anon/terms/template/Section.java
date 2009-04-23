@@ -46,6 +46,16 @@ public class Section extends TCComposite implements IXMLEncodable
 	
 	public static String XML_ATTR_NAME = "name";
 	
+	public Section()
+	{
+		super();
+	}
+	
+	public Section(double id, Object content)
+	{
+		super(id, content); 
+	}
+	
 	public Section(Node root) throws XMLParseException
 	{
 		Element rootElement = null;
@@ -65,14 +75,14 @@ public class Section extends TCComposite implements IXMLEncodable
 		{
 			throw new XMLParseException("Invalid Tag name: "+rootElement.getTagName());
 		}
-		this.id = XMLUtil.parseAttribute(rootElement, XML_ATTR_ID, -1);
+		this.id = XMLUtil.parseAttribute(rootElement, XML_ATTR_ID, (double) -1);
 		if(this.id < 0)
 		{
 			throw new XMLParseException("Attribute "+XML_ATTR_ID+" of "+XMLUtil.parseAttribute(rootElement, XML_ATTR_NAME, "")+" missing");
 		}
 		Element paragraphElement = 
 			(Element) XMLUtil.getFirstChildByName(rootElement, Paragraph.XML_ELEMENT_NAME);
-		setContent(XMLUtil.parseAttribute(rootElement, XML_ATTR_NAME, ""));
+		setContent(XMLUtil.parseAttribute(rootElement, XML_ATTR_NAME, null));
 		while (paragraphElement != null) 
 		{
 			addTCComponent(new Paragraph(paragraphElement));
@@ -97,18 +107,23 @@ public class Section extends TCComposite implements IXMLEncodable
 	
 	public Element toXmlElement(Document ownerDoc) 
 	{
+		if( (getId() < 0) || !hasContent() ) 
+		{
+			return null;
+		}
 		Element rootElement = ownerDoc.createElement(XML_ELEMENT_NAME);
 		rootElement.setAttribute(XML_ATTR_NAME, getContent().toString());
 		rootElement.setAttribute(XML_ATTR_ID, ""+getId());
+		
 		TCComponent[] allParagraphs = getTCComponents();
-		if( (getId() < 0) || 
-			(allParagraphs.length == 0) ) 
-			{
-				return null;
-			}
+		Paragraph currentParagraph = null;
 		for (int i = 0; i < allParagraphs.length; i++) 
 		{
-			rootElement.appendChild(((Paragraph)allParagraphs[i]).toXmlElement(ownerDoc));
+			currentParagraph = (Paragraph) allParagraphs[i];
+			if(currentParagraph.hasContent())
+			{
+				rootElement.appendChild(currentParagraph.toXmlElement(ownerDoc));
+			}
 		}
 		return rootElement;
 	}

@@ -187,6 +187,7 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 		signatureElement.appendChild(cityElement);
 		signatureElement.appendChild(dateElement);
 		
+		TCComposite copiedSections = getSections();
 		TCComponent[] allSections = null;
 		
 		tcRootElement.setAttribute(XML_ATTR_NAME, name);
@@ -211,11 +212,34 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 					DateFormat.getDateInstance(DateFormat.MEDIUM, tcLocale).format(tcTranslation.getDate()));
 			XMLUtil.setValue(operatorCountryElement, operatorLocale.getDisplayCountry(tcLocale));
 			
-			//add/replace the customized sections
+			//add/replace the customized sections/paragraphs
 			TCComponent[] translationSections = tcTranslation.getSections().getTCComponents();
+			Section currentTranslationSection = null;
+			Section currentSection = null;
+			TCComponent[] currentParagraphs = null;
 			for (int i = 0; i < translationSections.length; i++) 
 			{
-				this.sections.addTCComponent(translationSections[i]);
+				currentTranslationSection = (Section) translationSections[i];
+				currentSection = (Section) copiedSections.getTCComponent(currentTranslationSection.getId());
+				//if section has no content simply replace the section
+				if( !currentTranslationSection.hasContent() || 
+					(currentSection == null) )
+				{
+					copiedSections.addTCComponent(translationSections[i]);
+				}
+				else
+				{
+					if(currentTranslationSection.getContent() != null)
+					{
+						currentSection.setContent(currentTranslationSection.getContent());
+					}
+					currentParagraphs = currentTranslationSection.getTCComponents();
+					//... otherwise descend into paragraphs level to do the replacement
+					for (int j = 0; j < currentParagraphs.length; j++)
+					{
+						currentSection.addTCComponent(currentParagraphs[j]);
+					}
+				}
 			}
 	
 			//prepare List with all nodes to be replaced in the sections and paragraphs.
@@ -252,7 +276,7 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 			};
 	
 			//replace DOMElements in the sections and paragraphs.
-			allSections = sections.getTCComponents();
+			allSections = copiedSections.getTCComponents();
 			for (int i = 0; i < allSections.length; i++) 
 			{
 				((Section) allSections[i]).replaceElementNodes(replaceNodeList);
@@ -265,10 +289,15 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 		
 		Element sectionsElement = tcDocument.createElement(Section.XML_ELEMENT_CONTAINER_NAME);
 		
-		allSections = sections.getTCComponents();
+		allSections = copiedSections.getTCComponents();
+		Element sectionElement = null;
 		for (int i = 0; i < allSections.length; i++) 
 		{
-			sectionsElement.appendChild( ((Section) allSections[i]).toXmlElement(tcDocument));
+			sectionElement = ((Section) allSections[i]).toXmlElement(tcDocument);
+			if(sectionElement != null)
+			{
+				sectionsElement.appendChild(sectionElement);
+			}
 		}
 		tcRootElement.appendChild(sectionsElement);
 		tcRootElement.appendChild(signatureElement);
@@ -355,6 +384,11 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 			return m_certPath.isValid(new Date());
 		}
 		return false;
+	}
+	
+	public TCComposite getSections()
+	{
+		return (TCComposite) sections.clone();
 	}
 	
 	public static synchronized void store(Element root)
