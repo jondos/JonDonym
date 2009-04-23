@@ -722,11 +722,12 @@ public class TermsAndConditions implements IXMLEncodable
 			
 			//load the templates section definitions
 			NodeList nl = translationElement.getElementsByTagName(Section.XML_ELEMENT_NAME);
+			Section currentSection = null;
 			for (int i = 0; i < nl.getLength(); i++) 
 			{
-				sections.addTCComponent(new Section(nl.item(i)));
+				currentSection = new Section(nl.item(i));
+				sections.addTCComponent(currentSection);
 			}
-			System.out.println("Sections: "+sections);
 		}
 		
 		public void setTemplateReferenceId(String templateReferenceId) 
@@ -953,14 +954,16 @@ public class TermsAndConditions implements IXMLEncodable
 				Method currentGetter = null;
 				Method currentSetter = null;
 				
-				importTrans.sections = this.sections;
+				//even though it may be a waste of memory, it is necessary to clone the sections in case the
+				//translation copy will modify the sections.
+				importTrans.sections = (TCComposite) this.sections.clone();
 				
 				PropertyDescriptor translationPDs[] =
 					Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors();
 				for (int i = 0; i < translationPDs.length; i++) 
 				{
 					if( !translationPDs[i].getName().equals("operatorAddress") &&
-						//!translationPDs[i].getName().equals("operator") &&
+						!translationPDs[i].getName().equals("defaultTranslation") &&
 						translationPDs[i].getWriteMethod() != null)
 					{
 						currentGetter = translationPDs[i].getReadMethod();
@@ -1004,21 +1007,11 @@ public class TermsAndConditions implements IXMLEncodable
 					}
 				}
 				return importTrans;
-			}
-			catch (XMLParseException e) 
-			{
-			} 
-			catch (IntrospectionException e) 
-			{
+			} catch (XMLParseException e) {
+			} catch (IntrospectionException e) {
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 			return null;
 		}

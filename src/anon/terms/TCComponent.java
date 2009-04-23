@@ -1,32 +1,34 @@
 package anon.terms;
 
-public class TCComponent
+import java.util.Vector;
+
+public abstract class TCComponent
 {
 	/** the id of a TC component is represented by a String */
-	protected int id = -1;
+	protected double id = -1;
 	/** a TCComponent is only supposed to have String content */
 	protected Object content = null;
 	
 	public TCComponent() 
 	{}
 	
-	public TCComponent(int id) 
+	public TCComponent(double id) 
 	{
 		this.id = id;
 	}
 	
-	public TCComponent(int id, String content) 
+	public TCComponent(double id, Object content) 
 	{
 		this.id = id;
 		this.content = content;
 	}
-	
-	public int getId() 
+
+	public double getId() 
 	{
 		return id;
 	}
 
-	public void setId(int id) 
+	public void setId(double id) 
 	{
 		this.id = id;
 	}
@@ -41,10 +43,19 @@ public class TCComponent
 		this.content = content;
 	}
 	
+	public boolean hasContent()
+	{
+		return content != null;
+	}
+	
 	public boolean equals(Object anotherObject)
 	{
-		return ((TCComponent)anotherObject).getId() == id;
+		if(!(anotherObject instanceof TCComponent)) return false;
+		return (((TCComponent)anotherObject).getId() == id) && 
+			getClass().equals(anotherObject.getClass());
 	}
+	
+	public abstract Object clone();
 	
 	public String toString()
 	{
