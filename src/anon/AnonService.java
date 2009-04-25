@@ -37,18 +37,18 @@ import anon.infoservice.IMutableProxyInterface;
 public interface AnonService
 {
 	///The version of the AnonLib
-	String ANONLIB_VERSION = "00.11.021";
+	String ANONLIB_VERSION = "00.11.023";
 
 	/** Initializes this AnonService. Depending on the AnonService, this may establish a connection to
 	 *  an AnonServer, which is described through the
 	 *  anonService parameter. This method must be called before any Channels could be created.
 	 *  @param anonServer AnonServer to use
-	 *  @return E_SUCCESS, if the connection could be estblished
+	 *  @return E_SUCCESS, if the connection could be established
 	 *  @return E_ALREADY_CONNECTED, if this AnonService is already connected to a server
 	 *  @return E_INVALID_SERVICE, if anonService is not a valid server
 	 *  @return E_PROTOCOL_NOT_SUPPORTED, if the chosen AnonService uses a Protocol, which this version of
 	 *                                        the Anon-Lib does not understand
-	 *  @return E_CONNECT, if a general connection error occured
+	 *  @return E_CONNECT, if a general connection error occurred
 	 *
 	 */
 	int initialize(AnonServerDescription anonServer, IServiceContainer a_serviceContainer);
