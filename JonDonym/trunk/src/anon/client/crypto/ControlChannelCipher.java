@@ -27,7 +27,6 @@
  */
 package anon.client.crypto;
 
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
@@ -39,6 +38,7 @@ public class ControlChannelCipher
 	GCMBlockCipher m_recvEngine;
 
 	long m_EncMsgCounter;
+	long m_DecMsgCounter;
 
 	byte[] m_sentKey;
 	byte[] m_recvKey;
@@ -48,6 +48,7 @@ public class ControlChannelCipher
 		m_sentEngine =  new GCMBlockCipher(new AESFastEngine());
 		m_recvEngine =  new GCMBlockCipher(new AESFastEngine());
 		m_EncMsgCounter=0;
+		m_DecMsgCounter=0;
 	}
 
 
@@ -72,6 +73,7 @@ public class ControlChannelCipher
 			{
 				m_recvKey = new byte[16];
 				System.arraycopy(key, offset, m_recvKey, 0, 16);
+				m_DecMsgCounter=0;
 				return 0;
 			}
 			catch (Exception e)
@@ -81,46 +83,43 @@ public class ControlChannelCipher
 		}
 
 
-  private byte[] createIV() {
+  private byte[] createIV(long counter) {
     byte[] iv = new byte[12];
     for (int i = 0; i < 8; i++) iv[i] = 0;
-    iv[8] = (byte) (m_EncMsgCounter >> 24 & 0x00ff);
-    iv[9] = (byte) (m_EncMsgCounter >> 16 & 0x00ff);
-    iv[10] = (byte) (m_EncMsgCounter >> 8 & 0x00ff);
-    iv[11] = (byte) (m_EncMsgCounter & 0x00ff);
-    m_EncMsgCounter++;
+    iv[8] = (byte) (counter >> 24 & 0x00ff);
+    iv[9] = (byte) (counter >> 16 & 0x00ff);
+    iv[10] = (byte) (counter >> 8 & 0x00ff);
+    iv[11] = (byte) (counter & 0x00ff);
     return iv;
 }
 	public void encryptGCM1(byte[] from, int ifrom, byte[] to, int ito, int len) throws Exception
 	{
-		byte[] iv=createIV();
-		m_sentEngine.init(true, new AEADParameters(new KeyParameter(m_sentKey), 128,
-				iv, null));
-		System.arraycopy(iv, 0, to, ito, iv.length);
-		int outlen=m_sentEngine.processBytes(from, ifrom, len, to, ito+iv.length);
-		m_sentEngine.doFinal(to, ito+outlen+iv.length);
+		byte[] iv=createIV(m_EncMsgCounter);
+    m_EncMsgCounter++;
+		m_sentEngine.init(true, new AEADParameters(new KeyParameter(m_sentKey), 128,iv, null));
+		int outlen=m_sentEngine.processBytes(from, ifrom, len, to, ito);
+		m_sentEngine.doFinal(to, ito+outlen);
 	}
 
 	public void decryptGCM2(byte[] from, int ifrom, byte[] to, int ito, int len) throws Exception
 		{
-			byte[]iv=new byte[12];
-			System.arraycopy(from, ifrom, iv, 0, iv.length);
-			m_recvEngine.init(false, new AEADParameters(new KeyParameter(m_recvKey), 128,
-					iv, null));
-			int declen=m_recvEngine.processBytes(from, ifrom+iv.length, len-iv.length, to, ito);
+			byte[] iv=createIV(m_DecMsgCounter);
+	    m_DecMsgCounter++;
+			m_recvEngine.init(false, new AEADParameters(new KeyParameter(m_recvKey), 128,iv, null));
+			int declen=m_recvEngine.processBytes(from, ifrom, len, to, ito);
 			m_recvEngine.doFinal(to, ito+declen);				
 		}
 
 
 	public int getEncryptedOutputSize(int inputlength)
 		{
-			return inputlength+12+16;
+			return inputlength+16;
 		}
 
 
 	public int getDecryptedOutputSize(int enclength)
 		{
-			return enclength-12-16;
+			return enclength-16;
 		}
 
 }
