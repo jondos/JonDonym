@@ -1154,12 +1154,14 @@ final class JAPConfUI extends AbstractJAPConfModule
 	{
 		JAPModel model = JAPModel.getInstance();
 		int oldFontSize = model.getFontSize();
-		if (model.setFontSize(m_slidFontSize.getValue()) &&
-			!model.isConfigWindowSizeSaved())
+		if (model.setFontSize(m_slidFontSize.getValue()))
 		{
-			beforePack();
-			JAPConf.getInstance().doPack();
-			afterPack();
+			if (!model.isConfigWindowSizeSaved())
+			{
+				beforePack();
+				JAPConf.getInstance().doPack();
+				afterPack();
+			}
 		}
 		else
 		{

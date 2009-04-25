@@ -435,13 +435,20 @@ final public class JAPConf extends JAPDialog implements ActionListener, WindowLi
 		
 		try 
 		{
-			SwingUtilities.invokeAndWait(new Runnable()
+			if (SwingUtilities.isEventDispatchThread())
 			{
-				public void run()
+				m_moduleSystem.revalidate();
+			}
+			else
+			{	
+				SwingUtilities.invokeAndWait(new Runnable()
 				{
-					m_moduleSystem.revalidate();
-				}
-			});
+					public void run()
+					{
+						m_moduleSystem.revalidate();
+					}
+				});
+			}
 		} 
 		catch (Exception a_e) 
 		{
