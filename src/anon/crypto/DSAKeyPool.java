@@ -28,16 +28,16 @@ public class DSAKeyPool
 	public DSAKeyPool(int a_poolsize)
 	{
 		m_keys = new Vector();
-		if (a_poolsize <= 0)
+		if (a_poolsize < 0)
 		{
-			m_poolSize = 1;
+			m_poolSize = 0;
 		}
 		else if (a_poolsize > 1000)
 		{
 			m_poolSize = 1000;
 		}
 		m_poolSize = a_poolsize;
-		m_certainty = 80;
+		m_certainty = 60;
 		m_keyLength = DSAKeyPair.KEY_LENGTH_1024;
 	}
 	
@@ -95,14 +95,21 @@ public class DSAKeyPool
 		DSAKeyPair keyPair = null;
 		synchronized (m_keys)
 		{
+			boolean bTempPool = false;
 			if (m_keyCreationThread == null)
 			{
 				start();
 			}
+			if (m_poolSize == 0)
+			{
+				bTempPool = true;
+				m_poolSize = 1;
+			}
 			while (m_keys.size() == 0 && m_keyCreationThread != null && !m_bInterrupted)
 			{
-				try 
+				try
 				{
+					m_keys.notify();
 					m_keys.wait(500);
 				} 
 				catch (InterruptedException e) 
@@ -112,6 +119,10 @@ public class DSAKeyPool
 			}
 			if (m_keys.size() > 0)
 			{
+				if (bTempPool)
+				{
+					m_poolSize = 0;
+				}
 				keyPair = (DSAKeyPair)m_keys.firstElement();
 				m_keys.removeElementAt(0);
 				m_keys.notify();
@@ -148,7 +159,12 @@ public class DSAKeyPool
 							return;
 						}
 					}
+					if (m_keys.size() >= m_poolSize)
+					{
+						continue;
+					}
 				}
+				System.out.println("test:" + m_poolSize);
 				LogHolder.log(LogLevel.INFO, LogType.CRYPTO, 
 						"Creating DSA key pair " + (m_keys.size() + 1) + " of " + m_poolSize + "...");
 				

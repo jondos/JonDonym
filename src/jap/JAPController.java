@@ -436,7 +436,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		
 		// initialise IS update threads
 		m_feedback = new JAPFeedback();
-		m_AccountUpdater = new AccountUpdater();
+		//m_AccountUpdater = new AccountUpdater();
 		m_InfoServiceUpdater = new InfoServiceUpdater(m_observableInfo);
 		m_perfInfoUpdater = new PerformanceInfoUpdater(m_observableInfo);
 		m_paymentInstanceUpdater = new PaymentInstanceUpdater(m_observableInfo);
@@ -1950,6 +1950,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					}
 					boolean accountLoaded = PayAccountsFile.init(elemAccounts, passwordReader, 
 							JAPConstants.m_bReleasedVersion, 1);
+					m_AccountUpdater = new AccountUpdater();
 					if (tempDialog != null)
 					{
 						tempDialog.dispose();
@@ -5796,18 +5797,19 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		public static final int BROWSER_RECOGNITION_UNINITIALISED = -1;
 		public static final int BROWSER_UNKNOWN = 0;
-		public static final int BROWSER_JONDOFOX = 1;
-		public static final int BROWSER_INTERNET_EXPLORER = 2;
-		public static final int BROWSER_FIREFOX = 3;
-		public static final int BROWSER_OPERA = 4;
-		public static final int BROWSER_SAFARI = 5;
-		public static final int BROWSER_KONQUEROR = 6;
-		public static final int BROWSER_CHROME = 7;
-		public static final int BROWSER_TORBUTTON = 8;
+		public static final int BROWSER_TORBUTTON = 1;
+		public static final int BROWSER_JONDOFOX = 2;
+		public static final int BROWSER_INTERNET_EXPLORER = 3;
+		public static final int BROWSER_FIREFOX = 4;
+		public static final int BROWSER_OPERA = 5;
+		public static final int BROWSER_SAFARI = 6;
+		public static final int BROWSER_KONQUEROR = 7;
+		public static final int BROWSER_CHROME = 8;
+		
 		
 		private static final long[] BROWSER_OCCURENCE = new long[9];
 		private static final String[] BROWSER_NAME = 
-			new String[]{"other", "JonDoFox", "Internet Explorer", "Firefox", "Opera", "Safari", "Konqueror", "Chrome", "Tor"}; 
+			new String[]{"other", "Tor", "JonDoFox", "Internet Explorer", "Firefox", "Opera", "Safari", "Konqueror", "Chrome"}; 
 		
 		private static boolean ms_bWarned;
 		private static boolean ms_bShowWarning;
