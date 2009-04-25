@@ -1371,7 +1371,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 
 				//m_labelEnddate.setText(JAPUtil.formatTimestamp(flatEnddate, false, curLang));
 				//if (balance.getVolumeKBytesLeft() > 0)
-				if (selectedAccount.isAccountInfoUpdated() && 
+				if (!JAPConstants.m_bReleasedVersion && selectedAccount.isAccountInfoUpdated() && 
 					selectedAccount.getCurrentCreditCalculated() > 
 				selectedAccount.getCurrentCreditFromBalance() + 40000000l)
 				{

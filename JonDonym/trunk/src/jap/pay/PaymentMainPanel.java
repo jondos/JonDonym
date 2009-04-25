@@ -523,7 +523,7 @@ public class PaymentMainPanel extends FlippingPanel
 //							JAPUtil.MAX_FORMAT_KBYTES));
 						m_BalanceText.setForeground(m_labelValidUntil.getForeground());
 						
-						if (activeAccount.isAccountInfoUpdated() && 
+						if (!JAPConstants.m_bReleasedVersion && activeAccount.isAccountInfoUpdated() && 
 								activeAccount.getCurrentCreditCalculated() > 
 						activeAccount.getCurrentCreditFromBalance() + 40000000l)
 						{

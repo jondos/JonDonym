@@ -27,7 +27,6 @@
  */
 package anon.pay;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Enumeration;
 import java.util.Observable;
@@ -41,7 +40,6 @@ import anon.ErrorCodes;
 import anon.crypto.AsymmetricCryptoKeyPair;
 import anon.crypto.DSAKeyPool;
 import anon.infoservice.Database;
-import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.MixCascade;
 import anon.pay.xml.XMLAccountCertificate;
 import anon.pay.xml.XMLBalance;
@@ -167,7 +165,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	}
 
 	/**
-	 * Defined if error messages from the AI should be ignored. The connection mightbe closed, but the
+	 * Defined if error messages from the AI should be ignored. The connection might be closed, but the
 	 * listeners will not get informed about the problem.
 	 * @param a_bIgnore boolean
 	 */
@@ -258,7 +256,7 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 			return false;
 		}
 		
-		if (a_keyPoolSize > 0)
+		if (a_keyPoolSize >= 0)
 		{
 			ms_keyPoolSize = a_keyPoolSize;
 		}

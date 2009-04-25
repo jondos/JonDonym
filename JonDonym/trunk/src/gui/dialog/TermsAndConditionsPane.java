@@ -91,7 +91,28 @@ public class TermsAndConditionsPane extends DialogContentPane implements
 			{
 				return false;
 			}
-		},new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL, a_previousContentPane));
+		},new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL, a_previousContentPane)
+		{
+			public int countExtraButtons()
+			{
+				return 1;
+			}
+			
+			public AbstractDialogExtraButton getExtraButtonInternal(int a_buttonNr)
+			{
+				return new AbstractDialogExtraButton()
+				{
+					public String getText()
+					{
+						return "Drucken";
+					}
+					public void doAction()
+					{
+						System.out.println("print");
+					}
+				};
+			}
+		});
 
 		m_messages = a_messages;
 		m_fetchTermsPane = a_previousContentPane;
@@ -113,7 +134,28 @@ public class TermsAndConditionsPane extends DialogContentPane implements
 			{
 				return false;
 			}
-		},new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL));
+		},new DialogContentPaneOptions(OPTION_TYPE_OK_CANCEL)
+		{
+			public int countExtraButtons()
+			{
+				return 1;
+			}
+			
+			public AbstractDialogExtraButton getExtraButtonInternal(int a_buttonNr)
+			{
+				return new AbstractDialogExtraButton()
+				{
+					public String getText()
+					{
+						return "Drucken";
+					}
+					public void doAction()
+					{
+						System.out.println("print");
+					}
+				};
+			}
+		});
 		m_messages = a_messages;
 		
 		init(true);

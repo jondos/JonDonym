@@ -1,14 +1,13 @@
 package gui.dialog;
 
 import java.awt.Component;
-import java.awt.Container;
 
 import gui.JAPHelpContext;
 
 /**
  * Defines the buttons that are available in a dialog.
  */
-public final class DialogContentPaneOptions
+public class DialogContentPaneOptions
 {
 	private int m_optionType;
 	private DialogContentPane m_previousContentPane;
@@ -137,19 +136,50 @@ public final class DialogContentPaneOptions
 		m_previousContentPane = a_previousContentPane;
 	}
 
-	public int getOptionType()
+	public final int getOptionType()
 	{
 		return m_optionType;
 	}
 
-	public JAPHelpContext.IHelpContext getHelpContext()
+	public final JAPHelpContext.IHelpContext getHelpContext()
 	{
 		return m_helpContext;
 	}
 
-	public DialogContentPane getPreviousContentPane()
+	public final DialogContentPane getPreviousContentPane()
 	{
 		return m_previousContentPane;
 	}
+	
+	/**
+	 * Overwrite this method to return the number of extra buttons that you 
+	 * would like to introduce.
+	 * @return the number of extra buttons that you 
+	 * would like to introduce
+	 */
+	public int countExtraButtons()
+	{
+		return 0;
+	}
+	
+	/**
+	 * Overwrite this method to return your extra, custom button. The helper method
+	 * getExtraButton() will make sure that a_buttonNr ranges from 0 to countExtraButtons() - 1,
+	 * so you don't have to check for a valid index yourself.
+	 * @param a_buttonNr from 0 to countExtraButtons() - 1
+	 * @return your extra, custom button
+	 */
+	public AbstractDialogExtraButton getExtraButtonInternal(int a_buttonNr)
+	{
+		return null;
+	}
+	
+	protected final AbstractDialogExtraButton getExtraButton(int a_buttonNr)
+	{
+		if (a_buttonNr < 0 || a_buttonNr >= countExtraButtons())
+		{
+			return null;
+		}
+		return getExtraButtonInternal(a_buttonNr);
+	}	
 }
-
