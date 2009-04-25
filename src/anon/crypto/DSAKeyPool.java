@@ -164,7 +164,7 @@ public class DSAKeyPool
 						continue;
 					}
 				}
-				System.out.println("test:" + m_poolSize);
+
 				LogHolder.log(LogLevel.INFO, LogType.CRYPTO, 
 						"Creating DSA key pair " + (m_keys.size() + 1) + " of " + m_poolSize + "...");
 				

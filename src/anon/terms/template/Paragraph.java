@@ -125,8 +125,15 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 					{
 						deepElement = (Element) elementDeepList.item(k);
 						//ParentNode cannot be null.
-						deepElement.getParentNode().replaceChild(
-								deepElement.getParentNode().getOwnerDocument().importNode(substitute, true), deepElement);
+						try
+						{
+							deepElement.getParentNode().replaceChild(
+									XMLUtil.importNode(deepElement.getParentNode().getOwnerDocument(), substitute, true), deepElement);
+						}
+						catch (XMLParseException a_e)
+						{
+							LogHolder.log(LogLevel.EMERG, LogType.MISC, a_e);
+						}
 					}
 				}
 			}
@@ -183,7 +190,7 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 					elementNodes.addElement(n);
 					hasElementNodes = true;
 				}
-				contentNodes().add(n);
+				contentNodes().addElement(n);
 			}	
 		}
 	}
@@ -205,7 +212,14 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 		rootElement.setAttribute(XML_ATTR_ID, ""+this.id);
 		for (int i = 0; i < contentNodes().size(); i++) 
 		{
-			rootElement.appendChild(ownerDoc.importNode((Node) contentNodes().elementAt(i), true));
+			try
+			{
+				rootElement.appendChild(XMLUtil.importNode(ownerDoc, (Node) contentNodes().elementAt(i), true));
+			}
+			catch (XMLParseException a_e)
+			{
+				LogHolder.log(LogLevel.EMERG, LogType.MISC, a_e);
+			}
 		}
 		return rootElement;
 	}
