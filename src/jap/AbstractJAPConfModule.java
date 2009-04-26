@@ -29,7 +29,6 @@
 package jap;
 
 import java.awt.Component;
-import java.awt.Container;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.event.AncestorEvent;

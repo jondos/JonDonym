@@ -3996,20 +3996,40 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			try
 			{
-				if (host == null && JAPModel.isHttpListenerLocal())
+				if (JAPModel.isHttpListenerLocal())
 				{
-					host = JAPConstants.IN_ADDR_LOOPBACK_IPV4;
-				}
-				if (host != null)
-				{
-					//InetAddress[] a=InetAddress.getAllByName("localhost");
-					InetAddress[] a = InetAddress.getAllByName(host);
-					LogHolder.log(LogLevel.NOTICE, LogType.NET, "Try binding Listener on host: " + a[0]);
-					s = new ServerSocket(port, 50, a[0]);
+					if (host != null)
+					{
+						LogHolder.log(LogLevel.WARNING, LogType.NET, 
+								"Local listener forced, but host name was given (will be ignored): " + host);
+					}
+					LogHolder.log(LogLevel.NOTICE, LogType.NET, "Try binding Listener on local host.");
+					s = new ServerSocket(port);
 				}
 				else
 				{
-					s = new ServerSocket(port);
+					InetAddress address;
+					if (host == null)
+					{
+						//InetAddress[] a=InetAddress.getAllByName("localhost");
+						address = InetAddress.getByName(null);
+						//host = JAPConstants.IN_ADDR_LOOPBACK_IPV4;
+					}
+					else
+					{
+						address = InetAddress.getAllByName(host)[0];
+						if (address.isLoopbackAddress())
+						{
+							LogHolder.log(LogLevel.WARNING, LogType.NET, 
+									"Host is explicitly set, but it is a loopback address!");
+							address = InetAddress.getByName(null);
+						}
+					}
+					
+					LogHolder.log(LogLevel.NOTICE, LogType.NET, 
+							"Try binding Listener on host: " + address);
+					s = new ServerSocket(port, 50, address);
+
 				}
 				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Started listener on port " + port + ".");
 				/*
