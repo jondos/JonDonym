@@ -84,6 +84,8 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	private String m_strEmail;
 	
 	private String m_countryCode;
+	
+	private String m_commonName;
 
 	/**
 	 * The last update time.
@@ -112,7 +114,8 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		m_certPath = null;
 		/* get the organization name */
 		m_strOrganization = subject.getOrganisation();
-		if(m_strOrganization == null || m_strOrganization.trim().length() == 0)
+		m_commonName = subject.getCommonName();
+		if (m_strOrganization == null || m_strOrganization.trim().length() == 0)
 		{
 			// if no organization is given, use the common name
 			m_strOrganization = subject.getCommonName();
@@ -186,6 +189,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 			subject = path.getSecondCertificate().getSubject();
 			/* get the organization name */
 			m_strOrganization = subject.getOrganisation();
+			m_commonName = subject.getCommonName();
 			if(m_strOrganization == null || m_strOrganization.trim().length() == 0)
 			{
 				// if no organization is given, use the common name
@@ -312,6 +316,11 @@ public class ServiceOperator extends AbstractDatabaseEntry
 	public String getOrganization()
 	{
 		return m_strOrganization;
+	}
+	
+	public String getCommonName()
+	{
+		return m_commonName;
 	}
 	
 	public String getOrganizationUnit() 

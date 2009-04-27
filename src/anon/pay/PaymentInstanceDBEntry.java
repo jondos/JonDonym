@@ -104,15 +104,9 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		XMLUtil.assertNotNull(elemRoot);
 		String name;
 
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
-		{
-			m_xmlDescription = null;
-		}
-		else
-		{
-			/* store the XML representation */
-			m_xmlDescription = elemRoot;
-		}
+		/* store the XML representation */
+		m_xmlDescription = elemRoot;
+		
 
 		name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, XML_ELEM_NAME), null);
 		if (name == null) // || !name.equals(m_name))
@@ -136,11 +130,6 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		if(!checkId() ) 
 		{
 			throw new XMLParseException(elemRoot.getNodeName(),"Invalid Payment-Instance ID: " + m_strPaymentInstanceId );
-		}
-		
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
-		{
-			m_signature = null;
 		}
 		
 		m_name = XMLUtil.parseValue(XMLUtil.getFirstChildByName(elemRoot, XML_ELEM_NAME), "");
@@ -231,6 +220,20 @@ public class PaymentInstanceDBEntry extends AbstractDistributableCertifiedDataba
 		}
 
 		m_xmlDescription = elemRoot;
+	}
+	
+	public boolean isPersistanceDeletionAllowed()
+	{
+		return XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE;
+	}
+	
+	public void deletePersistence()
+	{
+		if (isPersistanceDeletionAllowed())
+		{
+			m_xmlDescription = null;
+			m_signature = null;
+		}
 	}
 
 	public boolean isVerified()

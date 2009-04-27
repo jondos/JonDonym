@@ -82,6 +82,15 @@ public abstract class AbstractDatabaseEntry
 		return false;
 	}
 
+	public boolean isPersistanceDeletionAllowed()
+	{
+		return false;
+	}
+	
+	public void deletePersistence()
+	{
+		// do nothing
+	}
 
 	/**
 	 * Returns a unique ID for a database entry.

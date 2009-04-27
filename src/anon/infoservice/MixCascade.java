@@ -322,10 +322,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix-Cascade ID: " + m_mixCascadeId);
 		}
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
-		{
-			m_signature = null;
-		}
 
 		m_mixProtocolVersion =
 			XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "MixProtocolVersion"), null);
@@ -462,8 +458,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		m_strName = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_mixCascadeNode, "Name"), null);
 		//@todo: rather use this for setting m_strName: generateNameFromMixNames()
 		//(when the mix providers support it)
-		if (m_strName == null && !m_bFromCascade)
+		if (!m_bFromCascade)
 		{
+			getDecomposedCascadeName();
 			generateNameFromMixNames();
 			//throw (new XMLParseException("Name"));	
 		}
@@ -504,25 +501,18 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			m_serial = XMLUtil.parseAttribute(a_mixCascadeNode, XML_ATTR_SERIAL, Long.MIN_VALUE);
 		}
-
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		
+		/* store the xml structure */
+		if (a_compressedMixCascadeNode != null)
 		{
-			m_compressedXmlStructure = null;
-			m_xmlStructure = null;
+			m_compressedXmlStructure = a_compressedMixCascadeNode;
 		}
 		else
 		{
-			/* store the xml structure */
-			if (a_compressedMixCascadeNode != null)
-			{
-				m_compressedXmlStructure = a_compressedMixCascadeNode;
-			}
-			else
-			{
-				m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(a_mixCascadeNode));
-			}
-			m_xmlStructure = a_mixCascadeNode;
+			m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(a_mixCascadeNode));
 		}
+		m_xmlStructure = a_mixCascadeNode;
+		
 
 		// restore the id if needed
 		if (m_bFromCascade && a_mixIDFromCascade.trim().length() > 0)
@@ -655,21 +645,30 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		/* some more values */
 		m_userDefined = true;
 		m_bDefaultVerified = true;
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
-		{
-			m_xmlStructure = null;
-			m_compressedXmlStructure = null;
-		}
-		else
-		{
-			m_xmlStructure = generateXmlRepresentation();
-			m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(m_xmlStructure));
-		}
+
+		m_xmlStructure = generateXmlRepresentation();
+		m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(m_xmlStructure));
+		
 		createMixIDString();
 		calculateOperatorsAndCountries();
 	}
 
-
+	public boolean isPersistanceDeletionAllowed()
+	{
+		return XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE;
+	}
+	
+	public void deletePersistence()
+	{
+		if (isPersistanceDeletionAllowed())
+		{
+			m_signature = null;
+			m_compressedXmlStructure = null;
+			m_xmlStructure = null;
+		}
+	}
+	
+	
 	/**
 	 * Returns whether a given cascade has another number of mixes or mixes with other IDs than this one.
 	 * @param a_cascade MixCascade
@@ -783,9 +782,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		return m_strMixNames;
 	}
 	
-	/* this function generates a cascadeName form the namefragments of the corresponding
-	 * mixes. (but only namefragments of mixes with different operators will appear)
-	 * this overwrites the existing cascadename
+	/* this function generates a cascadeName from the name fragments of the corresponding
+	 * mixes. (but only name fragments of mixes with different operators will appear)
+	 * this overwrites the existing cascade name
 	 */
 	private void generateNameFromMixNames()
 	{
@@ -794,37 +793,58 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		{
 			m_decomposedCascadeName = new Vector();
 		}
-		else
-		{
-			m_decomposedCascadeName.removeAllElements();
-		}
+		
 		
 		Vector operators = new Vector();
-		ServiceOperator currentOp = null;
 		String currentNameFragment = null;
-		m_strName = "";
 		
 		/* special case: If the operator of the first and the last mix are the same
 		 * only this operator is displayed. 
 		 */
-		if(m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
+		if (m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
 		{
-			//@todo: should we better use only the provider name in this case? 
-			currentNameFragment = m_mixInfos[0].getNameFragmentForCascade();
-			m_decomposedCascadeName.addElement(currentNameFragment);
-			m_strName = currentNameFragment;
+			if (m_strName == null || m_strName.trim().length() == 0 ||  m_decomposedCascadeName.size() == 0)
+			{
+				currentNameFragment = m_mixInfos[0].getNameFragmentForCascade();
+				m_decomposedCascadeName.addElement(currentNameFragment);
+				m_strName = currentNameFragment;
+			}
 			return;
 		}
 		
+		m_strName = "";
 		for (int i = 0; i < m_mixInfos.length; i++) 
 		{
-			currentOp = m_mixInfos[i].getServiceOperator();
-			if(! operators.contains(m_mixInfos[i].getServiceOperator()))
+			if (!operators.contains(m_mixInfos[i].getServiceOperator()))
 			{
-				currentNameFragment = m_mixInfos[i].getNameFragmentForCascade();
-				m_strName += (i == (m_mixInfos.length-1)) ? currentNameFragment : (currentNameFragment+"-");	
-				operators.addElement(currentOp);
-				m_decomposedCascadeName.addElement(currentNameFragment);
+				if (i > 0)
+				{
+					m_strName += "-";
+				}
+				
+				if (m_mixInfos[i].isCascadaNameFragmentUsed())
+				{
+					currentNameFragment = m_mixInfos[i].getNameFragmentForCascade();
+					operators.addElement(m_mixInfos[i].getServiceOperator());
+					if (m_decomposedCascadeName.size() < i)
+					{
+						m_decomposedCascadeName.addElement(currentNameFragment);
+					}
+					else
+					{
+						m_decomposedCascadeName.removeElementAt(i);
+						m_decomposedCascadeName.insertElementAt(currentNameFragment, i);
+					}
+					m_strName += currentNameFragment;	
+				}
+				else if (m_decomposedCascadeName.size() > i)
+				{
+					m_strName += m_decomposedCascadeName.elementAt(i);
+				}
+				else
+				{
+					m_strName += m_mixInfos[i].getName();
+				}
 			}
 		}
 	}
@@ -862,7 +882,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 
 	/**
 	 * @todo use generateNameFromMixNames when the operator short name is certified.
-	 * and this method only to return the container containg the name fragments
+	 * and this method only to return the container containing the name fragments
 	 * @return
 	 */
 	public Vector getDecomposedCascadeName()
@@ -1185,16 +1205,10 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			/* set the lastUpdate time */
 			m_lastUpdate = System.currentTimeMillis();
 		}
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
-		{
-			m_xmlStructure = null;
-			m_compressedXmlStructure = null;
-		}
-		else
-		{
-			m_xmlStructure = generateXmlRepresentation();
-			m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(m_xmlStructure));
-		}
+
+		m_xmlStructure = generateXmlRepresentation();
+		m_compressedXmlStructure = ZLibTools.compress(XMLSignature.toCanonical(m_xmlStructure));
+		
 		calculateOperatorsAndCountries();
 	}
 

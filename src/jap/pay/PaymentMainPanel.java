@@ -1147,6 +1147,8 @@ public class PaymentMainPanel extends FlippingPanel
 										JAPDialog.MESSAGE_TYPE_WARNING,  onTopadapter))
 							{
 								JAPModel.getInstance().setCascadeAutoSwitch(true);
+								JAPController.getInstance().switchToNextMixCascade();
+								JAPController.getInstance().setAnonMode(true);
 							}
 						}
 						else

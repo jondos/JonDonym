@@ -70,6 +70,8 @@ public class ServiceLocation
 	 * This is the country where the service is located.
 	 */
 	private String m_country;
+	
+	private String m_commonName;
 
 	/**
 	 * This is the longitude of the service location. Should be between -180.0 (west of Greenwich)
@@ -106,6 +108,8 @@ public class ServiceLocation
 
 			/* get the country */
 			m_country = subject.getCountryCode();
+			
+			m_commonName = subject.getCommonName();
 
 			// get the geolocation
 			AbstractX509Extension extension =
@@ -213,6 +217,11 @@ public class ServiceLocation
 	public String getCountryCode()
 	{
 		return m_country;
+	}
+	
+	public String getCommonName()
+	{
+		return m_commonName;
 	}
 
 	/**
