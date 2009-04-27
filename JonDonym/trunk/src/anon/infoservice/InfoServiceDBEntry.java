@@ -209,7 +209,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 	{
 		this(a_infoServiceNode, 0);
 	}
-
+	
 	/**
 	 * Creates a new InfoService from XML description (InfoService node).
 	 *
@@ -229,14 +229,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		}
 
 		/* store the XML representation */
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
-		{
-			m_xmlDescription = null;
-		}
-		else
-		{
-			m_xmlDescription = a_infoServiceNode;
-		}
+		m_xmlDescription = a_infoServiceNode;
 
 		// verify the signature
 		m_signature = SignatureVerifier.getInstance().getVerifiedXml(a_infoServiceNode,
@@ -435,13 +428,20 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		m_bPerfServerEnabled = a_bPerfServerEnabled;
 		
 		/* generate the XML representation for this InfoServiceDBEntry */
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
+		m_xmlDescription = generateXmlRepresentation();
+		
+	}
+	
+	public boolean isPersistanceDeletionAllowed()
+	{
+		return XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE;
+	}
+	
+	public void deletePersistence()
+	{
+		if (isPersistanceDeletionAllowed())
 		{
 			m_xmlDescription = null;
-		}
-		else
-		{
-			m_xmlDescription = generateXmlRepresentation();
 		}
 	}
 
@@ -696,14 +696,8 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		{
 			m_infoserviceSoftware = new ServiceSoftware(Constants.INFOSERVICE_VERSION);
 		}
-		if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
-		{
-			m_xmlDescription = null;
-		}
-		else
-		{
-			m_xmlDescription = generateXmlRepresentation();
-		}
+
+		m_xmlDescription = generateXmlRepresentation();
 	}
 	
 	public void markAsBootstrap()

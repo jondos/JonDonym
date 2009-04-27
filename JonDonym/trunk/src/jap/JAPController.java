@@ -4018,11 +4018,20 @@ public final class JAPController extends Observable implements IProxyListener, O
 					else
 					{
 						address = InetAddress.getAllByName(host)[0];
-						if (address.isLoopbackAddress())
+						//if (address.isLoopbackAddress())
+						try
 						{
-							LogHolder.log(LogLevel.WARNING, LogType.NET, 
-									"Host is explicitly set, but it is a loopback address!");
-							address = InetAddress.getByName(null);
+							if (((Boolean)InetAddress.class.getMethod("isLoopbackAddress", (Class[])null).invoke(
+									address, (Object[])null)).booleanValue())
+							{
+								LogHolder.log(LogLevel.WARNING, LogType.NET, 
+										"Host is explicitly set, but it is a loopback address!");
+								address = InetAddress.getByName(null);
+							}
+						}
+						catch (Exception a_e)
+						{
+							LogHolder.log(LogLevel.NOTICE, LogType.NET, a_e);
 						}
 					}
 					
@@ -5881,7 +5890,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 				int detectedBrowser = -1;
 				String strUA;
 				String[] ua = event.getConnectionHeader().getRequestHeader(HTTPProxyCallback.HTTP_USER_AGENT);
-				if (ua.length > 0)
+				if (ua != null && ua.length > 0)
 				{
 					strUA = ua[0].toLowerCase();
 					if (strUA.indexOf("firefox") >= 0)

@@ -81,7 +81,6 @@ import anon.client.crypto.KeyPool;
 import anon.crypto.JAPCertificate;
 import anon.crypto.SignatureVerifier;
 import anon.util.ClassUtil;
-import anon.util.Configuration;
 import anon.util.IMiscPasswordReader;
 import anon.util.JAPMessages;
 import anon.util.XMLParseException;
@@ -103,7 +102,7 @@ public class Controller
 	public static final int LOG_DETAIL_LEVEL_HIGH = LogHolder.DETAIL_LEVEL_HIGH;
 	public static final int LOG_DETAIL_LEVEL_HIGHEST = LogHolder.DETAIL_LEVEL_HIGHEST;
 	
-	private static final String VERSION = "00.00.010";
+	private static final String VERSION = "00.00.011";
 	private static final String XML_ROOT_NODE = "ConsoleController";
 	
 	private static final String MESSAGES = "JAPMessages";
@@ -229,6 +228,13 @@ public class Controller
 		}
 		InfoServiceHolder.getInstance().setPreferredInfoService(defaultInfoService[0]);
 		
+		if (a_configuration.getDatabaseInterface() != null)
+		{
+			Database.registerExternalDatabase(a_configuration.getDatabaseInterface().getDriverName(), 
+					a_configuration.getDatabaseInterface().getDatabaseURL());
+			Database.loadFromExternalDatabase();
+		}
+		
 		ObservableInfo a_observableInfo = new ObservableInfo(new Observable())
 		{
 			public Integer getUpdateChanged()
@@ -239,7 +245,7 @@ public class Controller
 			{
 				return false;
 			}
-		};		
+		};
 		ms_isUpdater = new InfoServiceUpdater(a_observableInfo);
 		ms_cascadeUpdater = new MixCascadeUpdater(a_observableInfo);
 		ms_paymentUpdater = new PaymentInstanceUpdater(a_observableInfo);

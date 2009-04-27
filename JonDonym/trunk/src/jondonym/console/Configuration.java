@@ -25,7 +25,7 @@
  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-package anon.util;
+package jondonym.console;
 
 public interface Configuration 
 {
@@ -42,4 +42,11 @@ public interface Configuration
 	 * @throws Exception
 	 */
 	public void write(String a_configurationContent) throws Exception;
+	
+	/**
+	 * Optional: an sqlite Ddatabase interface for caching the database entries.
+	 * Leads to a faster startup. May be null.
+	 * @return 
+	 */
+	public ISqlite getDatabaseInterface();
 }

@@ -31,7 +31,12 @@
 package anon.infoservice;
 
 import java.lang.reflect.Constructor;
-import java.util.Date;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Observable;
@@ -104,6 +109,37 @@ public final class Database extends Observable implements IXMLEncodable
 	public static void registerDistributor(IDistributor a_distributor)
 	{
 		ms_distributor = a_distributor;
+	}
+	
+	
+	
+	private static final Object SYNC_EXTERNAL_DATABASE = new Object();
+	private static String ms_dbURL;
+	private static boolean ms_bIsLoading = false;
+	
+	public static boolean registerExternalDatabase(String a_driverName, String a_dbURL)
+	{
+		synchronized (SYNC_EXTERNAL_DATABASE)
+		{
+			try
+			{
+				return testDB(a_driverName, a_dbURL);
+			}
+			catch (Exception a_e)
+			{
+				return false;
+			}
+		}
+	}
+	
+	
+	private static boolean testDB(String a_driverName, String a_dbURL) throws Exception
+	{
+		ms_dbURL = a_dbURL;
+		
+		Class.forName(a_driverName);
+		
+		return true;
 	}
 
 	/**
@@ -350,7 +386,12 @@ public final class Database extends Observable implements IXMLEncodable
 							LogHolder.log(LogLevel.INFO, LogType.MISC,
 										  "DatabaseEntry (" + entry.getClass().getName() + ")" +
 										  entry.getId() + " has reached the expire time and is removed.");
-							m_serviceDatabase.remove(entry.getId());
+							AbstractDatabaseEntry removedEntry = (AbstractDatabaseEntry)m_serviceDatabase.remove(entry.getId());
+							if (removedEntry != null && removedEntry.isPersistanceDeletionAllowed())
+							{
+								removeExternal(removedEntry);
+							}
+							
 							m_timeoutList.removeElementAt(0);
 							/* notify the observers about the removal */
 							setChanged();
@@ -417,7 +458,7 @@ public final class Database extends Observable implements IXMLEncodable
 			}
 		}
 	}
-
+	
 	/**
 	 * Updates an entry in the database. If the entry is an unknown or if it is newer then the
 	 * one stored in the database for this service, the new entry is stored in the database and
@@ -477,6 +518,11 @@ public final class Database extends Observable implements IXMLEncodable
 					// test first if the element has not yet expired
 					if (newEntry.getExpireTime() <= System.currentTimeMillis())
 					{
+						if (newEntry.isPersistanceDeletionAllowed())
+						{
+							newEntry.deletePersistence();
+						}
+						
 						LogHolder.log(LogLevel.INFO, LogType.NET, "Received an expired db entry: '" +
 									  newEntry.getId() + "' (" +  m_DatabaseEntryClass.toString() + 
 									  "). It was dropped immediatly.");
@@ -484,6 +530,10 @@ public final class Database extends Observable implements IXMLEncodable
 							(AbstractDatabaseEntry)m_serviceDatabase.remove(newEntry.getId());
 						if (removedEntry != null)
 						{
+							if (removedEntry.isPersistanceDeletionAllowed())
+							{
+								removeExternal(removedEntry);
+							}
 							/* There was an entry with a lower version number in the database, which was not
 							 * expired yet??? No matter why, now it was removed -> notify the observers.
 							 */
@@ -497,6 +547,11 @@ public final class Database extends Observable implements IXMLEncodable
 					while (m_timeoutList.removeElement(newEntry.getId()));
 	
 					// add the entry to the database
+					if (newEntry.isPersistanceDeletionAllowed())
+					{
+						addExternal(newEntry);
+						newEntry.deletePersistence();
+					}
 					m_serviceDatabase.put(newEntry.getId(), newEntry);
 	
 					/* update the timeoutList */
@@ -559,6 +614,10 @@ public final class Database extends Observable implements IXMLEncodable
 						}
 					}
 				}
+				else if (newEntry.isPersistanceDeletionAllowed())
+				{
+					newEntry.deletePersistence();
+				}
 			}
 			if (bStopThread)
 			{
@@ -618,6 +677,11 @@ public final class Database extends Observable implements IXMLEncodable
 					removedEntry = (AbstractDatabaseEntry) m_serviceDatabase.remove(a_entryID);
 					if (removedEntry != null)
 					{
+						if (removedEntry.isPersistanceDeletionAllowed())
+						{
+							removeExternal(removedEntry);
+						}
+						
 						m_timeoutList.removeElement(a_entryID);
 						if (m_timeoutList.size() > 0 && 
 							((AbstractDatabaseEntry)m_serviceDatabase.get(m_timeoutList.elementAt(0))).getExpireTime() ==
@@ -681,7 +745,7 @@ public final class Database extends Observable implements IXMLEncodable
 				m_serviceDatabase.clear();
 				m_timeoutList.removeAllElements();
 			}
-			stopThread();
+			//stopThread();
 		}
 		/* database was cleared -> notify the observers */
 		setChanged();
@@ -1035,4 +1099,194 @@ public final class Database extends Observable implements IXMLEncodable
 		}
 		return allWebInfosDoc;
 	}
+	
+	private void addExternal(AbstractDatabaseEntry a_newEntry)
+	{
+		if (ms_dbURL == null || !(a_newEntry instanceof IXMLEncodable) || ms_bIsLoading)
+		{
+			return;
+		}
+		synchronized (SYNC_EXTERNAL_DATABASE)
+		{
+			try
+			{
+				addExternal_int(a_newEntry);
+			}
+			catch (SQLException a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.DB, a_e);
+			}
+		}
+	}
+	
+	
+	
+	private void addExternal_int(AbstractDatabaseEntry a_newEntry) throws SQLException
+	{
+		Connection conn = DriverManager.getConnection(ms_dbURL);
+		Statement stat = conn.createStatement();
+		String tableName = Util.replaceAll(a_newEntry.getClass().getName(), ".", "__");
+		
+		stat.executeUpdate("create table if not exists " + tableName + " (id text, xml text);");
+		stat.executeUpdate("CREATE UNIQUE INDEX if not exists indexname ON " + tableName + "(id);");
+		stat.executeUpdate("replace into " + tableName + " values ('" + a_newEntry.getId() + "', " +
+				"'" + XMLUtil.toString(XMLUtil.toXMLDocument((IXMLEncodable)a_newEntry))  + "');");
+		
+		/*
+		ResultSet rs = stat.executeQuery("select * from " + tableName + ";");
+		while (rs.next()) {
+		      System.out.println("id = " + rs.getString("id"));
+		System.out.println("xml = " + rs.getString("xml"));
+		}
+		rs.close();*/
+		conn.close();
+	}
+	
+	private void removeExternal(AbstractDatabaseEntry a_newEntry) 
+	{
+		if (ms_dbURL == null || !(a_newEntry instanceof IXMLEncodable) || ms_bIsLoading)
+		{
+			return;
+		}
+		synchronized (SYNC_EXTERNAL_DATABASE)
+		{
+			try
+			{
+				removeExternal_int(a_newEntry);
+			}
+			catch (SQLException a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.DB, a_e);
+			}
+		}
+	}
+	
+	private void removeExternal_int(AbstractDatabaseEntry a_newEntry) throws SQLException
+	{
+		Connection conn = DriverManager.getConnection(ms_dbURL);
+		Statement stat = conn.createStatement();
+		String tableName = Util.replaceAll(a_newEntry.getClass().getName(), ".", "__");
+		
+		stat.executeUpdate("create table if not exists " + tableName + " (id text, xml text);");
+		stat.executeUpdate("CREATE UNIQUE INDEX if not exists indexname ON " + tableName + "(id);");
+		stat.executeUpdate("delete from " + tableName + " where id = ('" + a_newEntry.getId() + "');");
+		conn.close();
+	}
+	
+	public static void loadFromExternalDatabase()
+	{
+		if (ms_dbURL == null)
+		{
+			return;
+		}
+		synchronized (SYNC_EXTERNAL_DATABASE)
+		{
+			ms_bIsLoading = true;
+			try
+			{
+				loadFromExternalDatabase_int();
+			}
+			catch (SQLException a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.DB, a_e);
+			}
+			ms_bIsLoading = false;
+		}
+	}
+	
+	public static void loadFromExternalDatabase_int() throws SQLException
+	{
+		Connection conn = DriverManager.getConnection(ms_dbURL);
+		Statement stat = conn.createStatement();
+		String className;
+		String tableName;
+		String xml;
+		Vector vecToDelete = new Vector();
+		Class dbClass;
+		Constructor constructor = null;
+		AbstractDatabaseEntry instance;
+		Element xmlElement;
+		boolean bDelete;
+		
+		ResultSet rs = stat.executeQuery("select name from sqlite_master where type = 'table';");
+		while (rs.next()) 
+		{
+			vecToDelete.addElement(rs.getString("name"));
+		}
+		rs.close();
+		
+		for (int i = 0; i < vecToDelete.size(); i++)
+		{
+			tableName = vecToDelete.elementAt(i).toString();
+			className = Util.replaceAll(tableName, "__", ".");
+			bDelete = false;
+			
+			try
+			{
+				dbClass = Class.forName(className);
+		
+				
+				rs = stat.executeQuery("select xml from " + tableName + ";");
+				while (rs.next()) 
+				{
+					xml = rs.getString("xml");
+					try
+					{
+						xmlElement = XMLUtil.toXMLDocument(xml).getDocumentElement();
+					}
+					catch (Exception a_e)
+					{
+						LogHolder.log(LogLevel.EXCEPTION, LogType.DB, 
+								"Could not load cached DB entries for class " + className + ".", a_e);
+						bDelete = true;
+						break;
+					}
+					
+					try
+					{
+						// first try to find constructor with timeout and set timeout unlimited		
+						constructor = dbClass.getConstructor(
+								new Class[]{Element.class, long.class});
+						instance = (AbstractDatabaseEntry)constructor.newInstance(
+								new Object[]{xmlElement, new Long(Long.MAX_VALUE)});
+					}
+					catch (Exception a_e)
+					{
+						try
+						{
+							constructor =  dbClass.getConstructor(new Class[]{Element.class});
+							instance = (AbstractDatabaseEntry)constructor.newInstance(
+									new Object[]{xmlElement});
+						}
+						catch (Exception a_e2)
+						{
+							LogHolder.log(LogLevel.EXCEPTION, LogType.DB, 
+									"Could not load cached DB entries for class " + className + ".", a_e2);
+							bDelete = true;
+							break;
+						}
+					}
+				
+					LogHolder.log(LogLevel.INFO, LogType.DB, "Loading cached DB entry " + 
+							instance.getClass().getName() + ":" + instance.getId() + ".");
+					Database.getInstance(dbClass).update(instance);
+					
+				}
+				rs.close();
+			} 
+			catch (ClassNotFoundException a_e)
+			{
+				LogHolder.log(LogLevel.EXCEPTION, LogType.DB, 
+						"Could not load cached DB entries for class " + className + ".", a_e);
+				bDelete = true;
+			}				
+			if (bDelete)
+			{
+				stat.executeUpdate("drop table " + vecToDelete.elementAt(i) + ";");
+			}
+		}
+		
+		conn.close();
+	}
+
 }

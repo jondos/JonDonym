@@ -23,8 +23,6 @@
 */
 package anon.infoservice;
 
-import java.util.Date;
-
 import anon.crypto.MultiCertPath;
 import anon.crypto.XMLSignature;
 

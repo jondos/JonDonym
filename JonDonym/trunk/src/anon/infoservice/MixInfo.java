@@ -136,6 +136,8 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
    */
   private String m_nameFragmentForCascade;
   
+  private boolean m_bUseCascadeNameFragment = false;
+  
   /**
    * Some information about the location of the mix.
    */
@@ -309,11 +311,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  if (!checkId())
 	  {
 		  throw new XMLParseException(XMLParseException.ROOT_TAG, "Malformed Mix ID: " + m_mixId);
-	  }
-	  
-	  if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE)
-	  {
-		  m_mixSignature = null;
 	  }
 	  
 	  m_bSocks = XMLUtil.parseAttribute(
@@ -535,10 +532,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	   */
 	  m_freeMix = false;
 	  m_xmlStructure = a_mixNode;
-	  if (XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE && !a_bFromCascade)
-	  {
-		  m_xmlStructure = null;
-	  }
 
 	  /* a name type specifies whether the name should be extracted from the
 	   * operator- or the mix certificate.
@@ -551,26 +544,25 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_FOR_CASCADE, "" );// DEFAULT_NAME_TYPE);
 	  //uncomment the above line to enable a default name type 
 	  
-	  if( nameType.equals(NAME_TYPE_OPERATOR) && (m_mixCertPath != null))
+	  //nameType = NAME_TYPE_OPERATOR;
+	  
+	  if (nameType.equals(NAME_TYPE_OPERATOR) && (m_mixOperator != null))
 	  {
-		  m_nameFragmentForCascade = (m_mixOperator != null) ? m_mixOperator.getOrganization() : null;
-		  // right now the common name doesn't contain anything useful. Perhaps later it is useful
-		  // to use the common name of the operator cert instead of the organisation name
-		  //(m_operatorCertificate.getSubject() != null) ? 
-		  //	m_operatorCertificate.getSubject().getCommonName() : null; */
+		  m_nameFragmentForCascade = (m_mixOperator != null) ? m_mixOperator.getCommonName() : null;
+		  m_bUseCascadeNameFragment = true;
 	  }
-	  else if (nameType.equals(NAME_TYPE_MIX) && (m_mixCertPath != null) )
+	  else if (nameType.equals(NAME_TYPE_MIX) && (m_mixLocation != null) )
 	  {
-		  m_nameFragmentForCascade = ""+m_name;
-		  //same as above
-			  //(m_mixCertificate.getSubject() != null) ? 
-			  //	  m_mixCertificate.getSubject().getCommonName() : null;
+		  m_nameFragmentForCascade = m_mixLocation.getCommonName();
+		  m_bUseCascadeNameFragment = true;
 	  }
-	  if( m_nameFragmentForCascade == null )
+	  if (m_nameFragmentForCascade == null)
 	  {
-		  m_nameFragmentForCascade = ""+m_name;
+		  m_nameFragmentForCascade = "" + m_name;
 	  }
-
+	  //m_nameFragmentForCascade = "'" + m_nameFragmentForCascade + " " + m_name +"'";
+	  // AN.ON Operator Certificate
+	  //System.out.println(m_nameFragmentForCascade);
   }
   
   private void parseListenerAdresses(Node nodeMix) 
@@ -650,6 +642,21 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
           return LAST_MIX;
       throw new XMLParseException("MixType", "Unkonwn type: " + nodeValue);
   }
+  
+	public boolean isPersistanceDeletionAllowed()
+	{
+		return XMLUtil.getStorageMode() == XMLUtil.STORAGE_MODE_AGRESSIVE;
+	}
+	
+	public void deletePersistence()
+	{
+		if (isPersistanceDeletionAllowed())
+		{
+			m_mixSignature = null;
+			m_xmlStructure = null;
+		}
+	}
+  
 
   public Vector getVisibleAddresses()
   {
@@ -944,15 +951,21 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	   return -1;
    }
 
+   public boolean isCascadaNameFragmentUsed()
+   {
+	   return m_bUseCascadeNameFragment;
+   }
+   
 	public String getNameFragmentForCascade()
 	{
 		return m_nameFragmentForCascade;
 	}
 	
+	/*
 	public void setNameFragmentForCascade(String fragmentForCascade) 
 	{
 		m_nameFragmentForCascade = fragmentForCascade;
-	}
+	}*/
 	
 	public TermsAndConditionsMixInfo getTermsAndConditionMixInfo()
 	{

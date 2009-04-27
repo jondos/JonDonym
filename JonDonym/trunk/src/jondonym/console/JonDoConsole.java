@@ -38,7 +38,6 @@ import anon.pay.PaymentInstanceDBEntry;
 import anon.client.TrustModel;
 import anon.infoservice.Database;
 import anon.infoservice.MixCascade;
-import anon.util.Configuration;
 import anon.util.CountryMapper;
 import anon.util.IMiscPasswordReader;
 import anon.util.Util;
@@ -567,6 +566,24 @@ public class JonDoConsole
 			System.out.println("Writing configuration to " + CONFIGURATION.getAbsolutePath());
 			// this is a fast-hacked implementation for writing the document; it assumes it is XML; you should not do that normally...
 			XMLUtil.write(XMLUtil.toXMLDocument(a_configurationContent), CONFIGURATION);
+		}
+		
+		public ISqlite getDatabaseInterface()
+		{
+			/*
+			return new ISqlite()
+			{
+				public String getDriverName()
+				{
+					return "org.sqlite.JDBC";
+				}
+				public String getDatabaseURL()
+				{
+					return "jdbc:sqlite://C:/Users/jondos/workspace/test.sqlite";
+				}
+			};*/
+			
+			return null;
 		}
 	}
 	
