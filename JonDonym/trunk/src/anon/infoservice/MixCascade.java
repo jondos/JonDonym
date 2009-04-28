@@ -44,6 +44,7 @@ import anon.crypto.X509DistinguishedName;
 import anon.crypto.XMLSignature;
 import anon.crypto.CertPath;
 import anon.util.CountryMapper;
+import anon.util.Util;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 import anon.util.ZLibTools;
@@ -89,6 +90,8 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	public static final String INFOSERVICE_COMMAND_WEBINFOS = "/cascadewebinfos";
 	public static final String INFOSERVICE_COMMAND_WEBINFO = "/cascadewebinfo/";
 	
+	public static final int MAX_CASCADE_NAME_LENGTH = 35;
+	
 	//private static final String XML_ELEM_RSA_KEY_VALUE = "RSAKeyValue";
 
 	private boolean m_bDefaultVerified = false;
@@ -114,6 +117,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 * The name of the mixcascade.
 	 */
 	private String m_strName;
+	private final Object SYNC_NAME = new Object();
 	
 	private Vector m_decomposedCascadeName;
 
@@ -461,7 +465,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 		if (!m_bFromCascade)
 		{
 			getDecomposedCascadeName();
-			generateNameFromMixNames();
+			//generateNameFromMixNames();
 			//throw (new XMLParseException("Name"));	
 		}
 		
@@ -767,7 +771,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					{
 						m_strMixNames += "-";
 					}
-					m_strMixNames += m_mixInfos[i].getNameFragmentForCascade(); //m_mixInfos[i].getName();					
+					m_strMixNames += m_mixInfos[i].getName();					
 				}
 				if (m_strMixNames.length() == 0)
 				{
@@ -780,73 +784,6 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			}			
 		}
 		return m_strMixNames;
-	}
-	
-	/* this function generates a cascadeName from the name fragments of the corresponding
-	 * mixes. (but only name fragments of mixes with different operators will appear)
-	 * this overwrites the existing cascade name
-	 */
-	private void generateNameFromMixNames()
-	{
-		//no null checks necessary because NO NullPointers must occur! 
-		if (m_decomposedCascadeName == null)
-		{
-			m_decomposedCascadeName = new Vector();
-		}
-		
-		
-		Vector operators = new Vector();
-		String currentNameFragment = null;
-		
-		/* special case: If the operator of the first and the last mix are the same
-		 * only this operator is displayed. 
-		 */
-		if (m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
-		{
-			if (m_strName == null || m_strName.trim().length() == 0 ||  m_decomposedCascadeName.size() == 0)
-			{
-				currentNameFragment = m_mixInfos[0].getNameFragmentForCascade();
-				m_decomposedCascadeName.addElement(currentNameFragment);
-				m_strName = currentNameFragment;
-			}
-			return;
-		}
-		
-		m_strName = "";
-		for (int i = 0; i < m_mixInfos.length; i++) 
-		{
-			if (!operators.contains(m_mixInfos[i].getServiceOperator()))
-			{
-				if (i > 0)
-				{
-					m_strName += "-";
-				}
-				
-				if (m_mixInfos[i].isCascadaNameFragmentUsed())
-				{
-					currentNameFragment = m_mixInfos[i].getNameFragmentForCascade();
-					operators.addElement(m_mixInfos[i].getServiceOperator());
-					if (m_decomposedCascadeName.size() < i)
-					{
-						m_decomposedCascadeName.addElement(currentNameFragment);
-					}
-					else
-					{
-						m_decomposedCascadeName.removeElementAt(i);
-						m_decomposedCascadeName.insertElementAt(currentNameFragment, i);
-					}
-					m_strName += currentNameFragment;	
-				}
-				else if (m_decomposedCascadeName.size() > i)
-				{
-					m_strName += m_decomposedCascadeName.elementAt(i);
-				}
-				else
-				{
-					m_strName += m_mixInfos[i].getName();
-				}
-			}
-		}
 	}
 	
 	/**
@@ -887,89 +824,177 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 	 */
 	public Vector getDecomposedCascadeName()
 	{
-		if (m_strName == null)
-		{
-			return null;
-		}
-		synchronized (m_strName)
+		synchronized (SYNC_NAME)
 		{
 			if (m_decomposedCascadeName == null)
-			{			
+			{
 				m_decomposedCascadeName = new Vector();
-				
-				if (isUserDefined() || m_mixInfos.length == 0)
+				if (m_strName != null && (isUserDefined() || m_mixInfos.length == 0))
 				{
 					m_decomposedCascadeName.addElement(m_strName);
 					return m_decomposedCascadeName;
 				}					
 				
-				StringTokenizer tokenizer = new StringTokenizer(m_strName,"-");
-				StringTokenizer tempTokenizer;
-				String token;
-				
-				if (tokenizer.countTokens() == getNumberOfMixes())
+				boolean bResetName = false;
+				boolean bUseDecomposition = true;
+				Vector ops = new Vector();
+				ServiceOperator currentOp = null;
+				for (int i = 0; i < m_mixInfos.length; i++)
 				{
-					while (tokenizer.hasMoreTokens())
+					if (m_mixInfos[i] == null || m_mixInfos[i].getServiceOperator() == null)
 					{
-						token = tokenizer.nextToken().trim();
-						tempTokenizer = new StringTokenizer(token);
-						if (!tempTokenizer.hasMoreTokens())
+						// invalid cascade information
+						bResetName = true;
+						break;
+					}
+					else 
+					{
+						currentOp = m_mixInfos[i].getServiceOperator();
+						if (ops.contains(currentOp))
 						{
-//							cannot further decompose this name
+							// one or more operators are the same; do not use the decomposition
+							bUseDecomposition = false;
 							break;
 						}
-						token = tempTokenizer.nextToken().trim();						
-						
-						if (token.length() == 0)
-						{
-//							cannot further decompose this name
-							break;
-						}
-						if (token.length() > 15)
-						{
-							token = token.substring(0, 15);
-						}
-						m_decomposedCascadeName.addElement(token);
+						ops.addElement(currentOp);
 					}
 				}
 				
-				if (m_decomposedCascadeName.size() == 0)
+				if (m_strName != null)
 				{
-					// cannot decompose this name
-					m_decomposedCascadeName.addElement(m_strName);
+					StringTokenizer tokenizer = new StringTokenizer(m_strName,"-");
+					StringTokenizer tempTokenizer;
+					String token;
+					
+					if (tokenizer.countTokens() == getNumberOfMixes())
+					{
+						while (tokenizer.hasMoreTokens())
+						{
+							token = tokenizer.nextToken().trim();
+							tempTokenizer = new StringTokenizer(token);
+							if (!tempTokenizer.hasMoreTokens())
+							{
+	//							cannot further decompose this name
+								break;
+							}
+							token = tempTokenizer.nextToken().trim();						
+							
+							if (token.length() == 0)
+							{
+	//							cannot further decompose this name
+								break;
+							}
+							
+							m_decomposedCascadeName.addElement(token);
+						}
+					}
+					
+					if (m_decomposedCascadeName.size() == 0)
+					{
+						// cannot decompose this name
+						int i = 0;
+						for (; i < m_mixInfos.length; i++)
+						{
+							if (m_mixInfos[i] != null && m_mixInfos[i].isCascadaNameFragmentUsed())
+							{
+								// this cascade name will be ignored and will be replaced by separate names
+								break;
+							}
+						}
+						if (i == m_mixInfos.length)
+						{
+							// take the default name
+							m_strName = Util.cutString(m_strName, MAX_CASCADE_NAME_LENGTH);
+							m_decomposedCascadeName.addElement(m_strName);
+							return m_decomposedCascadeName;
+						}
+					}
 				}
+				
 				/* special case: If the operator of the first and the last mix are the same
 				 * only this operator is displayed. 
 				 */
-				else if (m_mixInfos[0] == null || m_mixInfos[0].getServiceOperator() == null ||
-						m_mixInfos[m_mixInfos.length-1] == null ||
-						m_mixInfos[m_mixInfos.length-1].getServiceOperator() == null ||
-						m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
-				{
-					m_strName = (String) m_decomposedCascadeName.elementAt(0);
+				if (bResetName || m_mixInfos[0].getServiceOperator().equals(m_mixInfos[m_mixInfos.length-1].getServiceOperator()))
+				{	
+					if (m_mixInfos[0] != null && m_mixInfos[0].isCascadaNameFragmentUsed())
+					{
+						m_strName = m_mixInfos[0].getNameFragmentForCascade();
+					}
+					else if (m_decomposedCascadeName.size() > 0)
+					{
+						m_strName = (String) m_decomposedCascadeName.elementAt(0);
+					}
+					else if (m_mixInfos[0] != null)
+					{
+						m_strName = m_mixInfos[0].getName();
+					}
+					else
+					{
+						m_strName = "Unknown";
+					}
+					m_strName = Util.cutString(m_strName, MAX_CASCADE_NAME_LENGTH);
 					m_decomposedCascadeName.removeAllElements();
 					m_decomposedCascadeName.addElement(m_strName);
 				}
 				else
 				{
-					Vector ops = new Vector();
-					ServiceOperator currentOp = null;
-					m_strName = "";
+					if (!bUseDecomposition)
+					{
+						m_decomposedCascadeName.removeAllElements();
+					}
 					
-					for (int i = 0; (i < m_decomposedCascadeName.size() ) && (i < m_mixInfos.length); i++)
+					ops = new Vector();
+					boolean bDecomposed = (m_decomposedCascadeName.size() > 0);
+					
+					for (int i = 0; i < m_mixInfos.length; i++)
 					{
 						currentOp = m_mixInfos[i].getServiceOperator();
-						if (currentOp == null)
-						{
-							m_strName = (String)m_decomposedCascadeName.elementAt(0);
-							break;
-						}
+		
 						if (!ops.contains(currentOp))
 						{
 							ops.addElement(currentOp);
+							
+							if (bDecomposed)
+							{
+								if (m_mixInfos[i].isCascadaNameFragmentUsed())
+								{
+									m_decomposedCascadeName.setElementAt(m_mixInfos[i].getNameFragmentForCascade(), i);
+								}
+							}
+							else
+							{
+								if (m_mixInfos[i].isCascadaNameFragmentUsed())
+								{
+									m_decomposedCascadeName.addElement(m_mixInfos[i].getNameFragmentForCascade());
+								}
+								else
+								{
+									m_decomposedCascadeName.addElement(m_mixInfos[i].getName());
+								}
+								if (m_decomposedCascadeName.elementAt(i) == null)
+								{
+									m_decomposedCascadeName.setElementAt("Unknown", i);
+								}
+							}
+						}
+					}
+					m_strName = "";
+					for (int i = 0; i < m_decomposedCascadeName.size(); i++)
+					{
+						m_strName += m_strName.equals("") ? "" : "-";
+						m_strName += m_decomposedCascadeName.elementAt(i);
+					}
+					int j = 15;
+					while (m_strName.length() > MAX_CASCADE_NAME_LENGTH)
+					{
+						m_strName = "";
+						for (int i = 0; i < m_decomposedCascadeName.size(); i++)
+						{
 							m_strName += m_strName.equals("") ? "" : "-";
+							m_decomposedCascadeName.setElementAt(Util.cutString(m_decomposedCascadeName.elementAt(i).toString(), j), i);
 							m_strName += m_decomposedCascadeName.elementAt(i);
 						}
+						j--;
 					}
 				}
 			}
