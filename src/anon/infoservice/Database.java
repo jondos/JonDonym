@@ -1181,10 +1181,12 @@ public final class Database extends Observable implements IXMLEncodable
 		}
 		synchronized (SYNC_EXTERNAL_DATABASE)
 		{
+			LogHolder.log(LogLevel.NOTICE, LogType.DB, "Reading cached objects from external database...");
 			ms_bIsLoading = true;
 			try
 			{
 				loadFromExternalDatabase_int();
+				LogHolder.log(LogLevel.NOTICE, LogType.DB, "Cached objects were read from external database.");
 			}
 			catch (SQLException a_e)
 			{
