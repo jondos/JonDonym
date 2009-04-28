@@ -1642,7 +1642,7 @@ public class XMLUtil
 
 		// if this is empty text, remove it!
 		if (a_element.getNodeType() == Document.TEXT_NODE &&
-			a_element.getNodeValue().trim().length() == 0)
+			(a_element.getNodeValue() == null || a_element.getNodeValue().trim().length() == 0))
 		{
 			if (a_element.getNextSibling() == null)
 			{
