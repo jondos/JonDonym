@@ -60,7 +60,7 @@ public class CascadePopupMenu extends PopupMenu
 {
 	private static final String MSG_EDIT_FILTER = JAPConfAnon.class.getName() + "_editFilter";
 	
-	private static final int MAX_CASCADE_NAME_LENGTH = 30;
+	private static final int MAX_CASCADE_NAME_LENGTH = MixCascade.MAX_CASCADE_NAME_LENGTH;
 	private final Color m_newCascadeColor = new Color(255, 255, 170);
 
 	private Hashtable m_menuItems;

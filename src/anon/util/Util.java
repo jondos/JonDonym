@@ -73,6 +73,15 @@ public final class Util
 	{
 	}
 
+	public static String cutString(String a_string, int a_maxLength)
+	{
+		if (a_string != null && a_string.length() > a_maxLength)
+		{
+			a_string = a_string.substring(0, a_maxLength);
+		}
+		return a_string;
+	}
+	
 	/**
 	 * Normalises a String to the given length by filling it up with spaces, if it
 	 * does not already have this length or is even longer.
