@@ -533,18 +533,17 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  m_freeMix = false;
 	  m_xmlStructure = a_mixNode;
 
-	  /* a name type specifies whether the name should be extracted from the
-	   * operator- or the mix certificate.
-	   */
-	  m_name = null;
 	  Node nameNode = XMLUtil.getFirstChildByName(a_mixNode, XML_ELEMENT_MIX_NAME);
 	  
 	  m_name = XMLUtil.parseValue(nameNode, DEFAULT_NAME);
 	  
-	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_FOR_CASCADE, "" );// DEFAULT_NAME_TYPE);
-	  //uncomment the above line to enable a default name type 
+	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_FOR_CASCADE, "" );
 	  
-	  //nameType = NAME_TYPE_OPERATOR;
+	  /*
+	  if (m_name.equals("Euklid"))
+	  {
+		  nameType = NAME_TYPE_OPERATOR;
+	  }*/
 	  
 	  if (nameType.equals(NAME_TYPE_OPERATOR) && (m_mixOperator != null))
 	  {
@@ -556,13 +555,41 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  m_nameFragmentForCascade = m_mixLocation.getCommonName();
 		  m_bUseCascadeNameFragment = true;
 	  }
-	  if (m_nameFragmentForCascade == null)
+	  
+	  if (m_nameFragmentForCascade != null && m_nameFragmentForCascade.equals("AN.ON Operator Certificate"))
 	  {
-		  m_nameFragmentForCascade = "" + m_name;
+		  if (m_mixLocation != null && m_mixLocation.getCommonName() != null && 
+				  !m_mixLocation.getCommonName().startsWith("<Mix id="))
+		  {
+			  m_nameFragmentForCascade = m_mixLocation.getCommonName();
+		  }
+		  else 
+		  {
+			  m_nameFragmentForCascade = null;
+		  }
 	  }
-	  //m_nameFragmentForCascade = "'" + m_nameFragmentForCascade + " " + m_name +"'";
-	  // AN.ON Operator Certificate
-	  //System.out.println(m_nameFragmentForCascade);
+	  
+	  if (m_nameFragmentForCascade == null || m_nameFragmentForCascade.startsWith("<Mix id="))
+	  {
+		  if (m_name != null)
+		  {
+			  m_nameFragmentForCascade = m_name;
+		  }
+		  else
+		  {
+			  LogHolder.log(LogLevel.WARNING, LogType.MISC, 
+					  "Could not set cascade name fragment for Mix!");
+			  m_nameFragmentForCascade = "Unknown";
+		  }
+	  }
+	  
+	  
+	  if (m_name == null && m_mixLocation != null)
+	  {
+		  m_name = m_mixLocation.getCommonName();
+	  }
+
+	  //System.out.println("'" + m_nameFragmentForCascade + "'");
   }
   
   private void parseListenerAdresses(Node nodeMix) 

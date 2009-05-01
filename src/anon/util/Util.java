@@ -77,7 +77,7 @@ public final class Util
 	{
 		if (a_string != null && a_string.length() > a_maxLength)
 		{
-			a_string = a_string.substring(0, a_maxLength);
+			a_string = a_string.substring(0, a_maxLength).trim();
 		}
 		return a_string;
 	}

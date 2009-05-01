@@ -5887,7 +5887,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			if (!event.getConnectionHeader().getRequestLine().startsWith("CONNECT"))
 			{
-				int detectedBrowser = -1;
+				int detectedBrowser = BROWSER_RECOGNITION_UNINITIALISED;
 				String strUA;
 				String[] ua = event.getConnectionHeader().getRequestHeader(HTTPProxyCallback.HTTP_USER_AGENT);
 				if (ua != null && ua.length > 0)
@@ -5934,7 +5934,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 					{
 						detectedBrowser = BROWSER_UNKNOWN;
 					}
-					if (detectedBrowser >= 0)
+					if (detectedBrowser > BROWSER_RECOGNITION_UNINITIALISED)
 					{
 						BROWSER_OCCURENCE[detectedBrowser]++;
 					}
