@@ -37,6 +37,7 @@ import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
+import anon.crypto.XMLSignatureElement;
 import anon.terms.TermsAndConditionsMixInfo;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
@@ -48,6 +49,7 @@ import anon.crypto.IVerifyable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -63,7 +65,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	public static final String NAME_TYPE_OPERATOR = "Operator";
 	public static final String DEFAULT_NAME_TYPE = NAME_TYPE_MIX;
 	
-	public static final String DEFAULT_NAME = "AN.ON Mix";
+	//public static final String DEFAULT_NAME = "Mix";
 	
 	public static final String XML_ELEMENT_CONTAINER_NAME = "Mixes";
 	public static final String XML_ELEMENT_NAME = "Mix";
@@ -216,15 +218,27 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 	  this(a_mixNode, a_expireTime, false);
   }
 
-  public MixInfo(String a_mixID, MultiCertPath a_certPath)
+  public MixInfo(MultiCertPath a_certPath)
   {
 	  super(Long.MAX_VALUE);
-	  if (a_mixID == null)
+	  if (a_certPath == null)
 	  {
-		  throw new IllegalArgumentException("No Mix ID!");
+		  throw new IllegalArgumentException("No Mix cert path!");
 	  }
-	  m_mixId = a_mixID;
-	  m_name = a_mixID;
+	  
+	  Vector certificates = new Vector();
+	  Vector certPaths = a_certPath.getPaths();
+	  for (int i = 0; i < certPaths.size(); i++)
+	  {
+		  certificates.addElement(((CertPath)certPaths.elementAt(i)).getFirstCertificate());
+	  }
+	  m_mixId = JAPCertificate.calculateXORofSKIs(certificates);
+	  
+	  m_name = a_certPath.getSubject().getCommonName();
+	  if (m_name == null)
+	  {
+		  m_name = "Mix";
+	  }
 	  m_type = -1;
 	  m_bFromCascade = true;
 	  m_mixCertPath = a_certPath;
@@ -535,7 +549,7 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 
 	  Node nameNode = XMLUtil.getFirstChildByName(a_mixNode, XML_ELEMENT_MIX_NAME);
 	  
-	  m_name = XMLUtil.parseValue(nameNode, DEFAULT_NAME);
+	  m_name = XMLUtil.parseValue(nameNode, null);
 	  
 	  String nameType = XMLUtil.parseAttribute(nameNode, XML_ATTRIBUTE_NAME_FOR_CASCADE, "" );
 	  
@@ -579,14 +593,22 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 		  {
 			  LogHolder.log(LogLevel.WARNING, LogType.MISC, 
 					  "Could not set cascade name fragment for Mix!");
-			  m_nameFragmentForCascade = "Unknown";
+			  m_nameFragmentForCascade = "Unknown Mix";
 		  }
 	  }
+
 	  
-	  
-	  if (m_name == null && m_mixLocation != null)
+	  if (m_name == null)
 	  {
-		  m_name = m_mixLocation.getCommonName();
+		  if (m_mixLocation != null && m_mixLocation.getCommonName() != null && 
+				  !m_mixLocation.getCommonName().startsWith("<Mix id="))
+		  {
+			  m_name = m_mixLocation.getCommonName();
+		  }
+		  else
+		  {
+			  m_name = m_nameFragmentForCascade;
+		  }
 	  }
 
 	  //System.out.println("'" + m_nameFragmentForCascade + "'");

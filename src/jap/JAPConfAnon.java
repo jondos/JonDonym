@@ -3053,7 +3053,7 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 			{
 				if (a_cascade.getCertPath() != null)
 				{
-					info = new MixInfo(MixInfo.DEFAULT_NAME, a_cascade.getCertPath());
+					info = new MixInfo(a_cascade.getCertPath());
 				}
 			}
 
