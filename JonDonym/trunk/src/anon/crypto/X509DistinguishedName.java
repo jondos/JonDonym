@@ -366,6 +366,7 @@ public final class X509DistinguishedName
 						attribute +=  (String)values.elementAt(i);
 					}
 				}
+				attribute = attribute.trim();
 			}
 		}
 

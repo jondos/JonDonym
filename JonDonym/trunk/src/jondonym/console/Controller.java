@@ -210,7 +210,7 @@ public class Controller
 		Util.addDefaultCertificates("acceptedMixCAs/", JAPCertificate.CERTIFICATE_TYPE_ROOT_MIX);
 		Util.addDefaultCertificates("acceptedPIs/", JAPCertificate.CERTIFICATE_TYPE_PAYMENT);
 		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "General settings initialised.");
-     
+
 		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising database updaters...");
 		// simulate database distributor and suppress distributor warnings
 		Database.registerDistributor(new IDistributor()
@@ -233,6 +233,11 @@ public class Controller
 			Database.registerExternalDatabase(a_configuration.getDatabaseInterface().getDriverName(), 
 					a_configuration.getDatabaseInterface().getDatabaseURL());
 			Database.loadFromExternalDatabase();
+		}
+		else
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.DB, 
+					"Sqlite chaching database is not used. It may take a while to fetch the InfoService data.");
 		}
 		
 		ObservableInfo a_observableInfo = new ObservableInfo(new Observable())
@@ -966,7 +971,9 @@ public class Controller
 		        ms_jondonymProxy.setHTTPDecompressionEnabled(true);
 		        ms_jondonymProxy.setDummyTraffic(DummyTrafficControlChannel.DT_MAX_INTERVAL_MS);
 		        ms_serviceContainer = new AutoSwitchedMixCascadeContainer(cascade);
+		        LogHolder.log(LogLevel.NOTICE, LogType.NET, "Initializing anonymous proxy connection...");
 		        ms_jondonymProxy.start(ms_serviceContainer);
+		        LogHolder.log(LogLevel.NOTICE, LogType.NET, "Anonymous proxy connection initialized!");
 		        m_bFinished = true;
 			}
 			catch (Exception e)
@@ -1005,7 +1012,9 @@ public class Controller
 			
 			try
 			{
+				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting socket listener...");
 				ms_socketListener = new ServerSocket(4001);
+				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Socket listener is running!");
 			}
 			catch (Exception e)
 			{
