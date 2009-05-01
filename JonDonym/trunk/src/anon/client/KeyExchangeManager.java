@@ -173,8 +173,7 @@ public class KeyExchangeManager {
 			  m_cascade.setUserDefined(true, a_cascade);
 			  Database.getInstance(MixCascade.class).remove(m_cascade);
 			  Database.getInstance(MixCascade.class).update(m_cascade);
-			  Database.getInstance(MixInfo.class).update(
-						   new MixInfo(MixInfo.DEFAULT_NAME, m_cascade.getCertPath()));
+			  Database.getInstance(MixInfo.class).update(new MixInfo(m_cascade.getCertPath()));
 			  a_trustModel.checkTrust(m_cascade);
 		  }
 		  else

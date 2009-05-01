@@ -139,7 +139,7 @@ public final class XMLSignature
 	/**
 	 * This method is used by the checkId()-methods of the database classes,
 	 * that compare the id of a given entry with the SubjectKeyIdentifier of
-	 * the assoicated cert(s). If there is only one cert its ski is returned, 
+	 * the associated cert(s). If there is only one cert its ski is returned, 
 	 * else the XOR of all included SKIs is returned.
 	 * @see anon.infoservice.AbstractCertifiedDatabaseEntry.checkId()
 	 * @see anon.infoservice.AbstractDistributableCertifiedDatabaseEntry.checkId()
