@@ -37,7 +37,6 @@ import anon.crypto.JAPCertificate;
 import anon.crypto.MultiCertPath;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
-import anon.crypto.XMLSignatureElement;
 import anon.terms.TermsAndConditionsMixInfo;
 import anon.util.IXMLEncodable;
 import anon.util.XMLParseException;
@@ -49,7 +48,6 @@ import anon.crypto.IVerifyable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -63,7 +61,6 @@ public class MixInfo extends AbstractDistributableCertifiedDatabaseEntry impleme
 {
 	public static final String NAME_TYPE_MIX = "Mix";
 	public static final String NAME_TYPE_OPERATOR = "Operator";
-	public static final String DEFAULT_NAME_TYPE = NAME_TYPE_MIX;
 	
 	//public static final String DEFAULT_NAME = "Mix";
 	
