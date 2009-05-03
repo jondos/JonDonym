@@ -47,18 +47,28 @@ public class X509KeyUsage extends AbstractX509Extension
 {
 	public static final String IDENTIFIER = X509Extensions.KeyUsage.getId();
 	
+	public static final int DIGITAL_SIGNATURE = KeyUsage.digitalSignature;
+	public static final int NON_REPUDIATION   = KeyUsage.nonRepudiation;
+	public static final int KEY_ENCIPHERMENT  = KeyUsage.keyEncipherment;
+	public static final int DATA_ENCIPHERMENT = KeyUsage.dataEncipherment;
+	public static final int KEY_AGREEMENT     = KeyUsage.keyAgreement;
+	public static final int KEY_CERT_SIGN     = KeyUsage.keyCertSign;
+    public static final int CRL_SIGN          = KeyUsage.cRLSign;
+    public static final int ENCIPHER_ONLY     = KeyUsage.encipherOnly;
+    public static final int DECIPHER_ONLY     = KeyUsage.decipherOnly;
+	
 	/** the Strings for the different KeyUsages as specified by RFC 5280 */
-	public static final String DIGITAL_SIGNATURE = "digitalSignature";
-	public static final String NON_REPUDIATION   = "nonRepudiation/contentCommitment";
-    public static final String KEY_ENCIPHERMENT  = "keyEncipherment";
-    public static final String DATA_ENCIPHERMENT = "dataEncipherment";
-    public static final String KEY_AGREEMENT     = "keyAgreement";
-    public static final String KEY_CERT_SIGN     = "keyCertSign";
-    public static final String CRL_SIGN          = "cRLSign";
-    public static final String ENCIPHER_ONLY     = "encipherOnly";
-    public static final String DECIPHER_ONLY     = "decipherOnly";
+	private static final String TXT_DIGITAL_SIGNATURE = "digitalSignature";
+	private static final String TXT_NON_REPUDIATION   = "nonRepudiation/contentCommitment";
+	private static final String TXT_KEY_ENCIPHERMENT  = "keyEncipherment";
+	private static final String TXT_DATA_ENCIPHERMENT = "dataEncipherment";
+	private static final String TXT_KEY_AGREEMENT     = "keyAgreement";
+    private static final String TXT_KEY_CERT_SIGN     = "keyCertSign";
+    private static final String TXT_CRL_SIGN          = "cRLSign";
+    private static final String TXT_ENCIPHER_ONLY     = "encipherOnly";
+    private static final String TXT_DECIPHER_ONLY     = "decipherOnly";
     
-    /** the different KeyUsage values packed into an arry for easiear Parsing */
+    /** the different KeyUsage values packed into an array for easier Parsing */
     private static final int[] USAGES = 
        {KeyUsage.digitalSignature, KeyUsage.nonRepudiation, KeyUsage.keyEncipherment, 
     	KeyUsage.dataEncipherment, KeyUsage.keyAgreement, KeyUsage.keyCertSign,
@@ -69,8 +79,8 @@ public class X509KeyUsage extends AbstractX509Extension
 	
     /** 
      * Creates a new X509KeyUsage object from the specified usage integer.
-     * This has to be constructet through the bitwise or ("|") from the
-     * differnet available usages in the BC-Class KeyUsage.
+     * This has to be constructed through the bitwise or ("|") from the
+     * different available usages in the BC-Class KeyUsage.
      * @param a_usage
      * @see org.bouncycastle.asn1.x509.KeyUsage;
      */
@@ -138,23 +148,23 @@ public class X509KeyUsage extends AbstractX509Extension
 		switch(a_usage)
 		{
 			case KeyUsage.digitalSignature:
-				return DIGITAL_SIGNATURE;
+				return TXT_DIGITAL_SIGNATURE;
 			case KeyUsage.nonRepudiation:
-				return NON_REPUDIATION;
+				return TXT_NON_REPUDIATION;
 			case KeyUsage.keyEncipherment:
-				return KEY_ENCIPHERMENT;
+				return TXT_KEY_ENCIPHERMENT;
 			case KeyUsage.dataEncipherment:
-				return DATA_ENCIPHERMENT;
+				return TXT_DATA_ENCIPHERMENT;
 			case KeyUsage.keyAgreement:
-				return KEY_AGREEMENT;
+				return TXT_KEY_AGREEMENT;
 			case KeyUsage.keyCertSign:
-				return KEY_CERT_SIGN;
+				return TXT_KEY_CERT_SIGN;
 			case KeyUsage.cRLSign:
-				return CRL_SIGN;
+				return TXT_CRL_SIGN;
 			case KeyUsage.encipherOnly:
-				return ENCIPHER_ONLY;
+				return TXT_ENCIPHER_ONLY;
 			case KeyUsage.decipherOnly:
-				return DECIPHER_ONLY;
+				return TXT_DECIPHER_ONLY;
 			default:
 				return null;
 		}

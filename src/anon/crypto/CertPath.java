@@ -696,7 +696,7 @@ public class CertPath implements IXMLEncodable
 		{
 			return false;
 		}
-		if(!m_valid)
+		if (!m_valid)
 		{
 			return false;
 		}

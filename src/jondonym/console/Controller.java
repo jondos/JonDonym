@@ -185,8 +185,10 @@ public class Controller
 		{
 			public void run()
 			{
-				KeyPool.start();
 				new SecureRandom().nextInt();
+				KeyPool.start();
+				LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, 
+						"Random number generator initialised.");
 			}
 		});
 		secureRandomThread.setPriority(Thread.MIN_PRIORITY);
@@ -199,7 +201,6 @@ public class Controller
 		{
 			LogHolder.log(LogLevel.ERR, LogType.CRYPTO, "Interrupted while initialising random number generator!");
 		}
-		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Random number generator initialised.");
    		
 		LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Initialising general settings...");
 		ClassUtil.enableFindSubclasses(false); // This would otherwise start non-daemon AWT threads, blow up memory and prevent closing the app.
