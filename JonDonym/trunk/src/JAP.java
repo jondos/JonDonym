@@ -559,14 +559,14 @@ public class JAP
 		{
 			public void run()
 			{
-				KeyPool.start();
 				new SecureRandom().nextInt();
+				KeyPool.start();
+				//splash.setText(JAPMessages.getString(MSG_FINISH_RANDOM));
 			}
 		});
 		secureRandomThread.setPriority(Thread.MIN_PRIORITY);
 		secureRandomThread.start();
 
-		//splash.setText(JAPMessages.getString(MSG_FINISH_RANDOM));
 		try
 		{
 			secureRandomThread.join();

@@ -829,11 +829,16 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 			if (m_decomposedCascadeName == null)
 			{
 				m_decomposedCascadeName = new Vector();
-				if (m_strName != null && (isUserDefined() || m_mixInfos.length == 0))
+				if (m_strName != null && (isUserDefined() || (m_mixInfos.length == 0 && isShownAsTrusted())))
 				{
 					m_decomposedCascadeName.addElement(m_strName);
 					return m_decomposedCascadeName;
-				}					
+				}
+				if (m_mixInfos.length == 0)
+				{
+					m_decomposedCascadeName.addElement("Unknown");
+					return m_decomposedCascadeName;
+				}
 				
 				boolean bResetName = false;
 				boolean bUseDecomposition = true;
@@ -862,7 +867,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 				
 				if (m_strName != null)
 				{
-					StringTokenizer tokenizer = new StringTokenizer(m_strName,"-");
+					StringTokenizer tokenizer = new StringTokenizer(m_strName,"-/\\");
 					StringTokenizer tempTokenizer;
 					String token;
 					
@@ -904,7 +909,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 						if (i == m_mixInfos.length)
 						{
 							// take the default name
-							m_strName = Util.cutString(m_strName, MAX_CASCADE_NAME_LENGTH);
+							m_strName = Util.cutString(Util.stripString(m_strName, "-/\\"), MAX_CASCADE_NAME_LENGTH);
 							m_decomposedCascadeName.addElement(m_strName);
 							return m_decomposedCascadeName;
 						}
@@ -932,7 +937,7 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 					{
 						m_strName = "Unknown";
 					}
-					m_strName = Util.cutString(m_strName, MAX_CASCADE_NAME_LENGTH);
+					m_strName = Util.cutString(Util.stripString(m_strName, "-/\\"), MAX_CASCADE_NAME_LENGTH);
 					m_decomposedCascadeName.removeAllElements();
 					m_decomposedCascadeName.addElement(m_strName);
 				}
@@ -976,6 +981,9 @@ public class MixCascade extends AbstractDistributableCertifiedDatabaseEntry
 									m_decomposedCascadeName.setElementAt("Unknown", i);
 								}
 							}
+							// remove everything from the name fragment that might seem as if there were more mixes
+							m_decomposedCascadeName.setElementAt(Util.stripString(
+									m_decomposedCascadeName.elementAt(i).toString(), "-/\\"), i);
 						}
 					}
 					m_strName = "";

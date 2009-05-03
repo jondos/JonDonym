@@ -84,7 +84,7 @@ public class MultiCertPath implements IXMLEncodable
 	 */
 	public boolean isValid(Date a_date)
 	{
-		if(!this.needsVerification())
+		if (!needsVerification())
 		{
 			return true;
 		}

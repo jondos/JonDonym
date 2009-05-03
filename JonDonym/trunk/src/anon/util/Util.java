@@ -82,6 +82,21 @@ public final class Util
 		return a_string;
 	}
 	
+	public static String stripString(String a_string, String a_charactersToStrip)
+	{
+		if (a_string == null || a_charactersToStrip == null)
+		{
+			return null;
+		}
+		String stripped = "";
+		StringTokenizer tokenizer = new StringTokenizer(a_string, a_charactersToStrip);
+		while (tokenizer.hasMoreTokens())
+		{
+			stripped += tokenizer.nextToken().trim();
+		}
+		return stripped;
+	}
+	
 	/**
 	 * Normalises a String to the given length by filling it up with spaces, if it
 	 * does not already have this length or is even longer.
