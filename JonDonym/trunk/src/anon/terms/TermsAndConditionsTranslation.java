@@ -81,6 +81,7 @@ public interface TermsAndConditionsTranslation
 	public String getOperationalAgreementUrl();
 	public void setOperationalAgreementUrl(String operationalAgreementUrl);
 	
+	public void setSections(TCComposite sections);
 	public TCComposite getSections();
 	
 	public TermsAndConditionsTranslation duplicateWithImports(Element xmlImport);

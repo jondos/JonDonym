@@ -936,11 +936,22 @@ public class TermsAndConditions implements IXMLEncodable
 			this.operationalAgreementUrl = operationalAgreementUrl;
 		}
 		
+		public void setSections(TCComposite sections) 
+		{
+			this.sections = sections;
+		}
+		
 		public TCComposite getSections() 
 		{
-			return sections;
+			//return sections;
+			return (TCComposite) sections.clone();
 		}
 
+		/*public TCComposite getSectionsCopy() 
+		{
+			return (TCComposite) sections.clone();
+		}*/
+		
 		public TermsAndConditionsTranslation duplicateWithImports(
 				Element xmlImports)
 		{
@@ -955,7 +966,7 @@ public class TermsAndConditions implements IXMLEncodable
 				
 				//even though it may be a waste of memory, it is necessary to clone the sections in case the
 				//translation copy will modify the sections.
-				importTrans.sections = (TCComposite) this.sections.clone();
+				//importTrans.sections = (TCComposite) this.sections.clone();
 				
 				PropertyDescriptor translationPDs[] =
 					Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors();

@@ -109,9 +109,6 @@ public class TCComposite extends TCComponent
 		return this.getClass()+"@"+this.id+": "+tcComponents.toString();
 	}
 	
-	/**
-	 * returns an object with a reference to a clone of the internal vector.
-	 */
 	public Object clone()
 	{
 		TCComposite composite = null;
