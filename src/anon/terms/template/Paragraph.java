@@ -151,48 +151,66 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 		contentNodes().removeAllElements();
 		hasElementNodes = false;
 		NodeList nl = null;
-		
-		if(!(o instanceof NodeList) )
-		{
-			//try to make a NodeList out the object content.
-			StringBuffer contentBuffer = new StringBuffer();
+		if(o != null)
+		{	
+			if(!(o instanceof NodeList) )
+			{
+				//try to make a NodeList out the object content.
+				StringBuffer contentBuffer = new StringBuffer();
+				
+				contentBuffer.append("<?xml version=\"1.0\"?><temp>");
+				contentBuffer.append(o);
+				contentBuffer.append("</temp>");	
+				try 
+				{
+					Document tempDoc = XMLUtil.readXMLDocument(new StringReader(contentBuffer.toString()));
+					nl = (tempDoc.getDocumentElement() != null) ? tempDoc.getDocumentElement().getChildNodes() : null;
+				} 
+				catch (IOException e) 
+				{
+					LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Cannot set content, reason: "+e.getMessage());
+				} 
+				catch (XMLParseException e) 
+				{
+					LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Cannot set content, reason: "+e.getMessage());
+				}
+			}
+			else
+			{
+				nl = (NodeList) o;
+			}
 			
-			contentBuffer.append("<?xml version=\"1.0\"?><temp>");
-			contentBuffer.append(o);
-			contentBuffer.append("</temp>");	
-			try 
+			if(nl != null)
 			{
-				Document tempDoc = XMLUtil.readXMLDocument(new StringReader(contentBuffer.toString()));
-				nl = (tempDoc.getDocumentElement() != null) ? tempDoc.getDocumentElement().getChildNodes() : null;
-			} 
-			catch (IOException e) 
-			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Cannot set content, reason: "+e.getMessage());
-			} 
-			catch (XMLParseException e) 
-			{
-				LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Cannot set content, reason: "+e.getMessage());
+				for (int i = 0; i < nl.getLength(); i++) 
+				{
+					Node n = nl.item(i).cloneNode(true);
+					
+					if(n.getNodeType() == Node.ELEMENT_NODE)
+					{
+						elementNodes.addElement(n);
+						hasElementNodes = true;
+					}
+					contentNodes().addElement(n);
+				}	
 			}
 		}
-		else
+	}
+	
+	public Object getContent()
+	{
+		return new NodeList()
 		{
-			nl = (NodeList) o;
-		}
-		
-		if(nl != null)
-		{
-			for (int i = 0; i < nl.getLength(); i++) 
+			public int getLength() 
 			{
-				Node n = nl.item(i).cloneNode(true);
-				
-				if(n.getNodeType() == Node.ELEMENT_NODE)
-				{
-					elementNodes.addElement(n);
-					hasElementNodes = true;
-				}
-				contentNodes().addElement(n);
-			}	
-		}
+				return contentNodes().size();
+			}
+
+			public Node item(int index) 
+			{
+				return (Node) contentNodes().elementAt(index);
+			}
+		};
 	}
 	
 	private Vector contentNodes()
@@ -228,19 +246,7 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 	{
 		Paragraph paragraph = new Paragraph();
 		paragraph.setId(id);
-		paragraph.setContent(
-				new NodeList()
-				{
-					public int getLength() 
-					{
-						return contentNodes().size();
-					}
-
-					public Node item(int index) 
-					{
-						return (Node) contentNodes().elementAt(index);
-					}
-				});
+		paragraph.setContent(getContent());
 		return paragraph;
 	}
 	

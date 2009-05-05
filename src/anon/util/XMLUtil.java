@@ -897,7 +897,7 @@ public class XMLUtil
 			case Node.TEXT_NODE:
 			{
 				Node tmpParent = a_source.getParentNode();
-				if (tmpParent != null && tmpParent.getNodeType() != Node.ATTRIBUTE_NODE)
+				if ( (tmpParent == null) || (tmpParent.getNodeType() != Node.ATTRIBUTE_NODE) )
 				{
 					newnode = a_doc.createTextNode(a_source.getNodeValue());
 				}
