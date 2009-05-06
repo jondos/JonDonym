@@ -132,7 +132,7 @@ public class ServiceLocation
 						try
 						{
 							longitude = coordinates.elementAt(0).toString();
-							Util.parseFloat(longitude);
+							Util.parseDouble(longitude);
 							longitude = longitude.trim();
 						}
 						catch (NumberFormatException a_e)
@@ -142,7 +142,7 @@ public class ServiceLocation
 						try
 						{
 							latitude = coordinates.elementAt(1).toString();
-							Util.parseFloat(latitude);
+							Util.parseDouble(latitude);
 							latitude = latitude.trim();
 						}
 						catch (NumberFormatException a_e)

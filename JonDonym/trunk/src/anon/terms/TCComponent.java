@@ -1,7 +1,5 @@
 package anon.terms;
 
-import java.util.Vector;
-
 public abstract class TCComponent
 {
 	/** the id of a TC component is represented by a String */

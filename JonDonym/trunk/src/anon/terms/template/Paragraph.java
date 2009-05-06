@@ -225,7 +225,12 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 	
 	public Element toXmlElement(Document ownerDoc) 
 	{
-		if(id < 0 || (contentNodes().size() == 0) ) return null;
+		return toXmlElement(ownerDoc, false);
+	}
+	
+	public Element toXmlElement(Document ownerDoc, boolean outputEmpty) 
+	{
+		if(id < 0 || ((contentNodes().size() == 0) && !outputEmpty) ) return null;
 		Element rootElement = ownerDoc.createElement(XML_ELEMENT_NAME);
 		rootElement.setAttribute(XML_ATTR_ID, ""+this.id);
 		for (int i = 0; i < contentNodes().size(); i++) 

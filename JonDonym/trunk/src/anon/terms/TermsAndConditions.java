@@ -878,6 +878,19 @@ public class TermsAndConditions implements IXMLEncodable
 					operatorAddressRoot.appendChild((Element) e.nextElement());
 				}
 			}
+			if(sections != null)
+			{
+				TCComponent[] allSects = sections.getTCComponents();
+				Element currentSectionElement = null;
+				for (int i = 0; i < allSects.length; i++) 
+				{
+					currentSectionElement = ((Section) allSects[i]).toXmlElement(doc, true);
+					if(currentSectionElement != null)
+					{
+						root.appendChild(currentSectionElement);
+					}
+ 				}
+			}
 			return root;
 		}
 		

@@ -355,7 +355,7 @@ public final class Util
 	 * @return float
 	 * @throws NumberFormatException
 	 */
-	public static float parseFloat(String a_string) throws NumberFormatException
+	public static double parseDouble(String a_string) throws NumberFormatException
 	{
 		char c;
 		int integerPart = 0;
@@ -401,7 +401,9 @@ public final class Util
 								"No valid float value '" + a_string + "'!");
 			}
 		}
-		return (integerPart + ( (float) mantissaPart / afterCommaDigits)) * sign;
+		
+		double d = (double) (integerPart + ( (double) mantissaPart / (double) afterCommaDigits)) * sign;
+		return d;
 	}
 
 

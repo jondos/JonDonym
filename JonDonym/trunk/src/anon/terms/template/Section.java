@@ -105,24 +105,39 @@ public class Section extends TCComposite implements IXMLEncodable
 		}
 	}
 	
-	public Element toXmlElement(Document ownerDoc) 
+	/*public boolean hasContent()
 	{
-		if( (getId() < 0) || !hasContent() ) 
+		return ((getContent() != null) ? !getContent().equals("") : false) || (getTCComponentCount() > 0);
+	}*/
+	
+	public Element toXmlElement(Document ownerDoc)
+	{
+		return toXmlElement(ownerDoc, false);
+	}
+	
+	public Element toXmlElement(Document ownerDoc, boolean outputEmpty) 
+	{
+		if( (getId() < 0) || (!hasContent() && !outputEmpty) ) 
 		{
 			return null;
 		}
 		Element rootElement = ownerDoc.createElement(XML_ELEMENT_NAME);
-		rootElement.setAttribute(XML_ATTR_NAME, getContent().toString());
+		if(getContent() != null)
+		{
+			rootElement.setAttribute(XML_ATTR_NAME, getContent().toString());
+		}
 		rootElement.setAttribute(XML_ATTR_ID, ""+getId());
 		
 		TCComponent[] allParagraphs = getTCComponents();
 		Paragraph currentParagraph = null;
+		Element currentParagraphElement = null;
 		for (int i = 0; i < allParagraphs.length; i++) 
 		{
 			currentParagraph = (Paragraph) allParagraphs[i];
-			if(currentParagraph.hasContent())
+			currentParagraphElement = currentParagraph.toXmlElement(ownerDoc, outputEmpty);
+			if(currentParagraphElement != null)
 			{
-				rootElement.appendChild(currentParagraph.toXmlElement(ownerDoc));
+				rootElement.appendChild(currentParagraphElement);
 			}
 		}
 		return rootElement;

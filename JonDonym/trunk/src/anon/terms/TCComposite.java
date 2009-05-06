@@ -2,11 +2,6 @@ package anon.terms;
 
 import java.util.Vector;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import anon.terms.template.Paragraph;
-
 /**
  * Container of TCComponents using the composite pattern
  *

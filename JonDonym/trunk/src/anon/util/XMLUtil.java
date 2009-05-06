@@ -274,7 +274,7 @@ public class XMLUtil
 		{
 			try
 			{
-				i = Util.parseFloat(s);
+				i = Util.parseDouble(s);
 			}
 			catch (Exception e)
 			{
@@ -377,7 +377,8 @@ public class XMLUtil
 
 		try
 		{
-			d = Util.parseFloat(parseAttribute(a_node, a_attribute, null));
+			d = Util.parseDouble(parseAttribute(a_node, a_attribute, null));
+			//d = Double.parseDouble(parseAttribute(a_node, a_attribute, null));
 		}
 		catch (Exception ex)
 		{
