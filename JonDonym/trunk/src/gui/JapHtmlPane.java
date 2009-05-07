@@ -1,16 +1,20 @@
 package gui;
 
 import gui.dialog.JAPDialog;
-import java.net.URL;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.SwingUtilities;
-import anon.util.ResourceLoader;
-import javax.swing.event.HyperlinkListener;
+
 import java.awt.Cursor;
-import javax.swing.text.Document;
 import java.io.IOException;
-import javax.swing.JScrollPane;
+import java.net.URL;
+
 import javax.swing.JEditorPane;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.Document;
+
+import anon.util.ResourceLoader;
 
 /**
  * Generalized form of the private class HtmlPane found in JAPHelp
@@ -29,12 +33,17 @@ public class JapHtmlPane extends JScrollPane implements HyperlinkListener
 	private URL url;
 	private Cursor cursor;
 
-	public JapHtmlPane(String a_textToShow)
+	public JapHtmlPane(String a_textToShow, JViewport customizedViewPort)
 	{
 		html = new JEditorPane("text/html", a_textToShow);
 		new JTextComponentToClipboardCopier(true).registerTextComponent(html);
 		html.setEditable(false);
 		html.addHyperlinkListener(this);
+		
+		if(customizedViewPort != null)
+		{
+			setViewport(customizedViewPort);
+		}
 		getViewport().add(html);
 		cursor = html.getCursor();
 	}
@@ -60,6 +69,8 @@ public class JapHtmlPane extends JScrollPane implements HyperlinkListener
 		}
 	}
 
+	
+	
 	private void linkActivated(URL u)
 	{
 		html.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -172,4 +183,4 @@ public class JapHtmlPane extends JScrollPane implements HyperlinkListener
 			}
 		}
 	}
-	}
+}
