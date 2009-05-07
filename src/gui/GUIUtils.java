@@ -1367,6 +1367,62 @@ public final class GUIUtils
 	}
 
 	/**
+	 * Convenience function to create a JLabel that can display large messages.
+	 * The message belonging to the specified key will be split and displayed in 
+	 * multiple lines if its size is too large to be displayed in a single line
+	 * @param messageKey key of the message
+	 * @param width of the label to enforce line breaks.
+	 * @return a JLabel with the message belonging to the specified key 
+	 */
+	public static JLabel createMultiLineLabel(String messageKey, int width)
+	{
+		JAPHtmlMultiLineLabel mLable = new JAPHtmlMultiLineLabel();
+		mLable.setText(JAPMessages.getString(messageKey));
+		mLable.setPreferredWidth(width);
+		return mLable;
+	}
+	
+	/**
+	 * Convenience function to create a JLabel with the message belonging to the specified key
+	 * @param messageKey key of the message
+	 * @return a JLabel with the message belonging to the specified key 
+	 */
+	public static JLabel createLabel(String messageKey)
+	{
+		return createLabel(new String[]{messageKey});
+	}
+	
+	/**
+	 * Convenience function to create a JLabel with two slash-separated messages belonging to the specified two keys 
+	 * @param messageKey1 key of the first message
+	 * @param messageKey2 key of the second message
+	 * @return a JLabel with two slash-separated messages belonging to the specified two keys 
+	 */
+	public static JLabel createLabel(String messageKey1, String messageKey2)
+	{
+		return createLabel(new String[]{messageKey1, messageKey2});
+	}
+	
+	/**
+	 * Generalization of the other createLabel methods. 
+	 * Creates a simple JLabel displaying the messages to the specified messageKeys separated by a slash.
+	 * @param messageKeys keys to the messages that shall be displayed by a JLabel
+	 * @return a simple JLabel with the properties as text that the specified message-keys
+	 * are mapping. The displayed properties are separated by a slash.
+	 */
+	public static JLabel createLabel(String[] messageKeys)
+	{
+		StringBuffer labelName = new StringBuffer("");
+		for (int i = 0; i < messageKeys.length; i++) 
+		{
+			labelName.append(
+					JAPMessages.getString(messageKeys[i])+
+					((i < messageKeys.length - 1) ? "/" : ""));
+		}
+		return new JLabel(labelName.toString());
+	}
+	
+	/**
 	 * Tests which mouse button was the cause for the specified MouseEvent.
 	 * Use the button masks from MouseEvent.
 	 * @param a_event a MouseEvent

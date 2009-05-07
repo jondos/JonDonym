@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -17,6 +18,7 @@ import java.io.OutputStreamWriter;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.JViewport;
 
 import logging.LogType;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
@@ -32,8 +34,6 @@ public class TermsAndConditionsDialog extends JAPDialog
 	
 	public final static String HTML_EXPORT_ENCODING = "ISO-8859-1";
 	
-	/*public TermsAndConditionsDialog(Component a_parent, ServiceOperator a_op, 
-			boolean a_bUpdateFromInfoService)*/
 	public TermsAndConditionsDialog(Component a_parent, TermsAndConditions tc)
 	{
 		this(a_parent, tc, JAPMessages.getLocale().getLanguage());
@@ -48,7 +48,6 @@ public class TermsAndConditionsDialog extends JAPDialog
 		setResizable(false);
 		
 		// try to find the TnC
-		//TermsAndConditions tc = TermsAndConditions.getById(a_op.getId());
 		if(tc == null)
 		{
 			return;
@@ -59,18 +58,6 @@ public class TermsAndConditionsDialog extends JAPDialog
 		{
 			return;
 		}
-		//TermsAndConditions.getTranslationById(a_op.getId(), JAPMessages.getLocale());
-		
-		// try to find the TnC template
-		/*TermsAndConditionsTemplate fr = 
-			TermsAndConditionsTemplate.getById(tc.getReferenceId(), a_bUpdateFromInfoService);
-		
-		if(fr == null)
-		{
-			return;
-		}
-		
-		fr.importData(tc);*/
 		
 		m_panel = new TermsAndConditionsPane(this, false, new TermsAndConditionsPane.TermsAndConditionsMessages());
 		m_panel.setText(htmlText);
@@ -88,7 +75,6 @@ public class TermsAndConditionsDialog extends JAPDialog
 		{
 			TermsAndConditionsTemplate displayTemplate = 
 				TermsAndConditionsTemplate.getById(tcTranslation.getTemplateReferenceId(), false);
-			//displayTemplate.importData(tcTranslation);
 			htmlTextBuffer.append(displayTemplate.transform(tcTranslation));
 		}
 		catch(Exception e)
@@ -99,7 +85,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 			htmlTextBuffer.append("</p>");
 		}
 		final String htmlText = htmlTextBuffer.toString();
-		JapHtmlPane htmlPane = new JapHtmlPane(htmlText);
+		JapHtmlPane htmlPane = new JapHtmlPane(htmlText, new UpperLeftStartViewPort());
 		htmlPane.setPreferredSize(new Dimension(800,600));
 		final JAPDialog displayDialog = new JAPDialog(parent, "Translation preview ["+tcTranslation+"]");
 		Container contentPane = displayDialog.getContentPane();
@@ -152,6 +138,16 @@ public class TermsAndConditionsDialog extends JAPDialog
 		m_ret.setAccepted(m_panel.isTermsAccepted());
 		
 		return m_ret;
+	}
+	
+	/** a hotfix workaround to avoid that the scroll-pane is scrolled to the end when it becomes visible */
+	private static class UpperLeftStartViewPort extends JViewport
+	{
+		public void scrollRectToVisible(Rectangle rect)
+		{
+			rect.y = 0;
+			super.scrollRectToVisible(rect);
+		}
 	}
 	
 	private static void actionExportHTMLToFile(Component parent, String htmlOutput, String suggestedFileName)
