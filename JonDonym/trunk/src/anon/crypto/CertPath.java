@@ -63,8 +63,11 @@ public class CertPath implements IXMLEncodable
 	public static final int ERROR_BASIC_CONSTRAINTS_IS_NO_CA		= 0x6;
 	public static final int ERROR_BASIC_CONSTRAINTS_PATH_TOO_LONG	= 0x7;
 	public static final int ERROR_KEY_USAGE							= 0x8;
+	public static final int ERROR_VALIDITY_SEVERE					= 0x9;
 	
 	private static final int VERIFICATION_INTERVAL = 3 * 60 * 1000;
+	
+	private static final long GRACE_PERIOD = (long) 60 * 24 * 60 * 60 * 1000; //60 days
 	
 	/** the certificate class of the certs that may verify this CertPath */
 	private int m_documentType;
@@ -253,7 +256,8 @@ public class CertPath implements IXMLEncodable
 						m_errorPosition = pathPosition;
 						if(m_pathError == ERROR_VERIFICATION 
 								|| m_pathError == ERROR_REVOCATION 
-								|| m_pathError == ERROR_UNKNOWN_CRITICAL_EXTENSION)
+								|| m_pathError == ERROR_UNKNOWN_CRITICAL_EXTENSION
+								|| m_pathError == ERROR_VALIDITY_SEVERE)
 						{
 							return false;
 						}
@@ -378,11 +382,6 @@ public class CertPath implements IXMLEncodable
 		{
 			return ERROR_VERIFICATION;
 		}
-		//check validity
-		if(!a_cert.getValidity().isValid(new Date()))
-		{
-			return ERROR_VALIDITY;
-		}
 		//check revocation
 		if(a_cert.isRevoked())
 		{
@@ -392,6 +391,20 @@ public class CertPath implements IXMLEncodable
 		if(a_cert.getExtensions().hasUnknownCriticalExtensions())
 		{
 			return ERROR_UNKNOWN_CRITICAL_EXTENSION;
+		}
+		//check validity
+		Date now = new Date();
+		if(!a_cert.getValidity().isValid(now))
+		{
+			//check if the cert was valid within some grace time
+			Date graceTime = new Date(now.getTime()-GRACE_PERIOD);
+			System.out.println(now);
+			System.out.println(graceTime);
+			if(!a_cert.getValidity().isValid(graceTime)) 
+			{
+				return ERROR_VALIDITY_SEVERE;
+			}
+			return ERROR_VALIDITY;
 		}
 		//check BasicConstraints extension (only if available)
 		X509BasicConstraints basicConstraints = 
