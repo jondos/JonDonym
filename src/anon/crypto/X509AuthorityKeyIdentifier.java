@@ -81,6 +81,19 @@ public class X509AuthorityKeyIdentifier extends AbstractX509KeyIdentifier {
 	}
 	
 	/**
+	 * Creates a new X509AuthorityKeyIdentifier from a public key, a distinguished name and
+	 * a certificate serial
+	 * @param a_publicKey the issuer's public key
+	 * @param a_name the issuer's distinguished name
+	 * @param a_serial the issuing certificate's serial number
+	 */
+	public X509AuthorityKeyIdentifier(IMyPublicKey a_publicKey, X509DistinguishedName a_name, BigInteger a_serial)
+	{
+		super(IDENTIFIER, createDEROctets(a_publicKey, new GeneralNames(new GeneralName(a_name.getX509Name())), a_serial));
+		createValue();
+	}
+	
+	/**
 	 * Creates an extension from a BouncyCastle DER sequence. For internal use only.
 	 * @param a_extension a DERSequence
 	 */
@@ -135,7 +148,7 @@ public class X509AuthorityKeyIdentifier extends AbstractX509KeyIdentifier {
 	}
 	
 	/**
-	 * Calculate the AuthorityKeyIdentifier value. The keyIdentifier is the stores as
+	 * Calculate the AuthorityKeyIdentifier value. The keyIdentifier is the stored as
 	 * a String in m_value
 	 */
 	private void createValue()
