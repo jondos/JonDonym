@@ -3992,28 +3992,18 @@ public final class JAPController extends Observable implements IProxyListener, O
 	{
 		LogHolder.log(LogLevel.DEBUG, LogType.MISC, "JAPModel:startListener on port: " + port);
 		ServerSocket s = null;
+		InetAddress address;
+		
 		for (int i = 0; i < 10; i++) //HAck for Mac!!
 		{
 			try
 			{
-				if (JAPModel.isHttpListenerLocal())
+				if (!JAPModel.isHttpListenerLocal())
 				{
-					if (host != null)
-					{
-						LogHolder.log(LogLevel.WARNING, LogType.NET, 
-								"Local listener forced, but host name was given (will be ignored): " + host);
-					}
-					LogHolder.log(LogLevel.NOTICE, LogType.NET, "Try binding Listener on local host.");
-					s = new ServerSocket(port);
-				}
-				else
-				{
-					InetAddress address;
 					if (host == null)
 					{
-						//InetAddress[] a=InetAddress.getAllByName("localhost");
-						address = InetAddress.getByName(null);
-						//host = JAPConstants.IN_ADDR_LOOPBACK_IPV4;
+						LogHolder.log(LogLevel.NOTICE, LogType.NET, "Try binding Listener on default host.");
+						s = new ServerSocket(port);						
 					}
 					else
 					{
@@ -4033,14 +4023,29 @@ public final class JAPController extends Observable implements IProxyListener, O
 						{
 							LogHolder.log(LogLevel.NOTICE, LogType.NET, a_e);
 						}
+						LogHolder.log(LogLevel.NOTICE, LogType.NET, 
+								"Try binding Listener on host: " + address);
+						s = new ServerSocket(port, 50, address);
 					}
+				}
+				else
+				{
+					if (host != null)
+					{
+						LogHolder.log(LogLevel.WARNING, LogType.NET, 
+								"Local listener forced, but host name was given (will be ignored): " + host);
+					}
+					
+					//InetAddress[] a=InetAddress.getAllByName("localhost");
+					address = InetAddress.getByName(null);
+					//host = JAPConstants.IN_ADDR_LOOPBACK_IPV4;
 					
 					LogHolder.log(LogLevel.NOTICE, LogType.NET, 
 							"Try binding Listener on host: " + address);
 					s = new ServerSocket(port, 50, address);
 
 				}
-				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Started listener on port " + port + ".");
+				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Started listener on host " + s.getInetAddress() + " and port " + port + ".");
 				/*
 				try
 				{
