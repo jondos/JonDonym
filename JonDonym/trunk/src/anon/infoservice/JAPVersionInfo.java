@@ -33,6 +33,7 @@ import java.util.Date;
 import java.text.ParseException;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import anon.util.XMLUtil;
@@ -88,6 +89,8 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
    * Stores the URL of the server, where the corresponding JAP software can be downloaded from.
    */
   private URL m_codeBase;
+  
+  private String m_lastSupportedJavaVersion;
 
   /**
    * Time (see System.currentTimeMillis()) when the root-of-update information infoservice has
@@ -126,6 +129,7 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
     /* parse the document */
     m_version = XMLUtil.parseAttribute(a_jnlpRootNode, "version", "");
     m_version = m_version.trim();
+
     try {
       String strDate = a_jnlpRootNode.getAttribute("releaseDate") + " GMT";
 	  try
@@ -141,8 +145,8 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
       m_releaseDate = null;
     }
     m_codeBase = new URL(a_jnlpRootNode.getAttribute("codebase"));
-    NodeList nlResources = a_jnlpRootNode.getElementsByTagName("resources");
-    NodeList nlJars = ( (Element) nlResources.item(0)).getElementsByTagName("jar");
+    Element nodeResources = (Element)XMLUtil.getFirstChildByName(a_jnlpRootNode, "resources");
+    NodeList nlJars = nodeResources.getElementsByTagName("jar");
     for (int i = 0; i < nlJars.getLength(); i++) {
       try {
         Element elemJar = (Element) nlJars.item(i);
@@ -154,6 +158,14 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
       catch (Exception e) {
       }
     }
+    Node nodeJ2se = XMLUtil.getFirstChildByName(nodeResources, "j2se");
+    m_lastSupportedJavaVersion = XMLUtil.parseAttribute(nodeJ2se, "version", JavaVersionDBEntry.CURRENT_JAVA_VERSION);
+    int indexPlus = m_lastSupportedJavaVersion.indexOf("+");
+    if (indexPlus > 0)
+    {
+    	m_lastSupportedJavaVersion = m_lastSupportedJavaVersion.substring(0, indexPlus);
+    }
+    
     m_lastUpdate = XMLUtil.parseValue(XMLUtil.getFirstChildByName(a_jnlpRootNode, "LastUpdate"), -1L);
     if (m_lastUpdate == -1) {
 		/**@todo FixMe Removed because new Is does not work..*/
@@ -162,7 +174,7 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
     }
     m_xmlStructure = a_jnlpRootNode;
   }
-
+  
   public static JAPVersionInfo getRecommendedUpdate(String a_currentVersion, boolean a_bStable)
   {
 	  JAPVersionInfo viStable = 
@@ -201,7 +213,20 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
 	  return null;
   }
 
-
+  public boolean isJavaVersionStillSupported()
+  {
+	  if (JavaVersionDBEntry.CURRENT_JAVA_VERSION.compareTo(m_lastSupportedJavaVersion) >= 0)
+	  {
+		  return true;
+	  }
+	  return false;
+  }
+  
+  public String getSupportedJavaVersion()
+  {
+	  return m_lastSupportedJavaVersion;
+  }
+  
   /**
    * Returns the ID of this version information. It's the filename where this version info is
    * available on the infoservice ('/japRelease.jnlp' or '/japDevelopment.jnlp' depending on the

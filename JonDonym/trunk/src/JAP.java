@@ -44,6 +44,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.zip.ZipFile;
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Window;
 
@@ -383,7 +384,7 @@ public class JAP
 								return true;
 							}*/
 						};
-						JAPDialog.showErrorDialog(null, errorString, LogType.MISC, test);
+						JAPDialog.showErrorDialog((Component)null, errorString, LogType.MISC, test);
 					System.exit(0);
 					}
 				}

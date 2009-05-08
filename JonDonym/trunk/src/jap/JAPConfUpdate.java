@@ -48,11 +48,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import anon.infoservice.InfoServiceHolder;
 import anon.infoservice.JAPVersionInfo;
 import anon.infoservice.Database;
+import anon.infoservice.JavaVersionDBEntry;
 import anon.util.JAPMessages;
 import gui.GUIUtils;
 import logging.LogHolder;
@@ -77,6 +79,7 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 
 	//private JDialog m_Dialog;
 	private JTextArea m_taInfo;
+	private JScrollPane m_taInfoScrollPane;
 	private JLabel m_labelVersion, m_labelDate;
 
 	// private JAPController japController;
@@ -287,7 +290,7 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 		m_taInfo = new JTextArea();
 		m_taInfo.setEditable(false);
 		m_taInfo.setHighlighter(null);
-		JScrollPane scrollpane = new JScrollPane(m_taInfo);
+		m_taInfoScrollPane = new JScrollPane(m_taInfo);
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
@@ -297,7 +300,7 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 		constraints.weighty = 1;
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.insets = new Insets(10, 0, 0, 0);
-		infoPanel.add(scrollpane, constraints);
+		infoPanel.add(m_taInfoScrollPane, constraints);
 
 		//Putting it all together
 		GridBagConstraints cFrame = new GridBagConstraints();
@@ -455,23 +458,33 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 
 			m_comboType.setEnabled(true);
 			String text = "";
+			JAPVersionInfo info;
 			if (JAPConstants.m_bReleasedVersion)
 			{
-				text = m_releaseVersion.getJapVersion();
+				info = m_releaseVersion;
 			}
 			else
 			{
-				text = m_devVersion.getJapVersion();
+				info = m_devVersion;
 			}
-			if (JAPConstants.aktVersion.compareTo(text) >= 0)
+			if (JAPConstants.aktVersion.compareTo(info.getJapVersion()) >= 0)
 			{
 				text = JAPMessages.getString("japUpdate_YouHaveAlreadyTheNewestVersion");
 			}
 			else
 			{
 				text = JAPMessages.getString("japUpdate_NewVersionAvailable");
+				if (!info.isJavaVersionStillSupported())
+				{
+					text += "\n" + JAPMessages.getString(JAPUpdateWizard.MSG_JAVA_TOO_OLD, 
+							new Object[]{JavaVersionDBEntry.CURRENT_JAVA_VERSION,
+							info.getSupportedJavaVersion()});
+				}
 			}
+			
 			m_taInfo.setText(text);
+			m_taInfoScrollPane.getHorizontalScrollBar().setValue(0);
+
 			m_labelVersion.setText(m_releaseVersion.getJapVersion());
 			if (m_releaseVersion.getDate() != null)
 			{
@@ -575,5 +588,13 @@ final class JAPConfUpdate extends AbstractJAPConfModule implements ActionListene
 	protected void onRootPanelShown()
 	{
 		updateVersionInfo(false);
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				// this may be needed so that the scrollbar is not scrolled to its last value
+				m_taInfoScrollPane.getHorizontalScrollBar().setValue(0);
+			}
+		});
 	}
 }

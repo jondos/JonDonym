@@ -2501,6 +2501,13 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		showErrorDialog(getInternalDialog(a_parentDialog), a_message, a_title, a_logType, (Throwable)null,
 						(ILinkedInformation)null);
 	}
+	
+	public static void showErrorDialog(JAPDialog a_parentDialog, String a_message,  int a_logType,
+			ILinkedInformation a_linkedInformation)
+	{
+		showErrorDialog(getInternalDialog(a_parentDialog), a_message, (String)null, a_logType, (Throwable)null,
+		(ILinkedInformation)null);
+	}
 
 	/**
 	 * Displays a dialog showing an error message to the user and logs the error message

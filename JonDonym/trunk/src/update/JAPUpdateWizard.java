@@ -44,6 +44,7 @@ import HTTPClient.HTTPResponse;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.IProxyInterfaceGetter;
 import anon.infoservice.JAPVersionInfo;
+import anon.infoservice.JavaVersionDBEntry;
 import anon.infoservice.ListenerInterface;
 import gui.wizard.BasicWizard;
 import gui.wizard.BasicWizardHost;
@@ -72,12 +73,14 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 	private BasicWizardHost host;
 	private String m_strTempDirectory;
 
-	//private Vector m_Pages;
+	public static final String MSG_JAVA_TOO_OLD = 
+		JAPUpdateWizard.class.getName() + "_javaTooOld";
 
 	private static final String MSG_ADMIN_RIGHTS_NEEDED = 
 		JAPUpdateWizard.class.getName() + "_adminRightsNeeded";
 	private static final String MSG_ENTER_ADMIN_PASSWORD = 
 		JAPUpdateWizard.class.getName() + "_enterAdminPassword";
+	
 
 	//private JAPUpdateWizard updateWizard;
 
@@ -141,13 +144,38 @@ public final class JAPUpdateWizard extends BasicWizard implements Runnable
 	private JAPUpdateWizard(JAPVersionInfo info, Object a_parent)
 	{
 		setWizardTitle("JAP Update Wizard");
+		
 		if (a_parent instanceof JAPDialog)
 		{
-			host = new BasicWizardHost((JAPDialog)a_parent, this);
+			if (info.isJavaVersionStillSupported())
+			{
+				host = new BasicWizardHost((JAPDialog)a_parent, this);
+			}
+			else
+			{
+				JAPDialog.showErrorDialog((JAPDialog)a_parent, 
+						JAPMessages.getString(MSG_JAVA_TOO_OLD, new Object[]{
+								JavaVersionDBEntry.CURRENT_JAVA_VERSION,
+								info.getSupportedJavaVersion()}),
+						LogType.MISC,  new JAPDialog.LinkedHelpContext("updateJava"));
+				return;
+			}
 		}
 		else
 		{
-			host = new BasicWizardHost((Component)a_parent, this);
+			if (info.isJavaVersionStillSupported())
+			{
+				host = new BasicWizardHost((Component)a_parent, this);
+			}
+			else
+			{
+				JAPDialog.showErrorDialog((Component)a_parent, 
+						JAPMessages.getString(MSG_JAVA_TOO_OLD, new Object[]{
+								JavaVersionDBEntry.CURRENT_JAVA_VERSION,
+								info.getSupportedJavaVersion()}),
+						LogType.MISC,  new JAPDialog.LinkedHelpContext("updateJava"));
+				return;
+			}
 		}
 		host.setHelpEnabled(false);
 		setHost(host);

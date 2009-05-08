@@ -1880,15 +1880,25 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		}
 		Element jnlpNode = (Element) (XMLUtil.getFirstChildByName(doc, JAPVersionInfo.getXmlElementName()));
 		/* verify the signature */
-		if (SignatureVerifier.getInstance().verifyXml(jnlpNode, SignatureVerifier.DOCUMENT_CLASS_UPDATE) == false)
+		XMLSignature signature = 
+			SignatureVerifier.getInstance().getVerifiedXml(jnlpNode, SignatureVerifier.DOCUMENT_CLASS_UPDATE);
+		if (!signature.isVerified())
 		{
 			/* signature is invalid -> throw an exception */
 			throw (new Exception(
 				"Cannot verify the signature for JAPVersionInfo entry: " +
 				XMLUtil.toString(jnlpNode)));
 		}
+		
+		JAPVersionInfo info = new JAPVersionInfo(jnlpNode, a_japVersionType);
+		
+		if (!signature.getMultiCertPath().isValid(new Date()))
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.MISC, "Found an expired JAP/JonDo update entry for " + 
+					info.getPostFile() + "! The update verification certificate might become invalid soon.");
+		}
 		/* signature was valid */
-		return new JAPVersionInfo(jnlpNode, a_japVersionType);
+		return info;
 	}
 
 	/**
