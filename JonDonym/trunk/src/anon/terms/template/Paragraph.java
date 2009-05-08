@@ -33,6 +33,8 @@ import java.io.StringReader;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import javax.swing.text.html.HTML;
+
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -41,6 +43,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 import anon.terms.TCComponent;
 import anon.util.IXMLEncodable;
@@ -199,18 +202,75 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 	
 	public Object getContent()
 	{
+		final Node[] contentNodesArray =
+			new Node[contentNodes().size()];
+		
+		for (int i = 0; i < contentNodesArray.length; i++) 
+		{
+			contentNodesArray[i] = (Node) contentNodes().elementAt(i);
+		}
+		
 		return new NodeList()
 		{
 			public int getLength() 
 			{
-				return contentNodes().size();
+				return contentNodesArray.length;
 			}
 
 			public Node item(int index) 
 			{
-				return (Node) contentNodes().elementAt(index);
+				return contentNodesArray[index];
 			}
 		};
+	}
+	
+	public void setTextContentBold()
+	{
+		if( (contentNodes().size() == 1) && 
+			(((Node)contentNodes().elementAt(0)).getNodeType() == Node.ELEMENT_NODE) && 
+			((Element)contentNodes().elementAt(0)).getTagName().equals(HTML.Tag.B.toString())) 
+		{
+			//don't put everything again in a B-Tag if this already done
+			return;
+		}
+		
+		Document tempDoc = XMLUtil.createDocument();
+		final Element[] boldEnclosing = new Element[]{tempDoc.createElement(HTML.Tag.B.toString())};
+		for (int i = 0; i < contentNodes().size(); i++) 
+		{
+			boldEnclosing[0].appendChild( tempDoc.importNode((Node) contentNodes().elementAt(i), true));
+		}
+		setContent(new NodeList(){
+			public int getLength() {return boldEnclosing.length;}
+			public Node item(int index) {return boldEnclosing[index];}
+		});
+		
+		/*please don't delete yet:
+		
+		Node currentNode = null;
+		Document tempDoc = null;
+		for (int i = 0; i < contentNodes().size(); i++) 
+		{
+			currentNode = ;
+			if( currentNode.getNodeType() == Node.TEXT_NODE )
+			{
+				Element boldEnclosing = null;
+				Node boldChild = currentNode;
+				if(currentNode.getOwnerDocument() == null)
+				{
+					boldEnclosing = currentNode.getOwnerDocument().createElement(HTML.Tag.B.toString());
+				}
+				else
+				{
+					if(tempDoc == null) 
+					boldEnclosing = tempDoc.createElement(HTML.Tag.B.toString());
+					boldChild = tempDoc.importNode(currentNode, false);
+				}
+				boldEnclosing.appendChild(boldChild);
+				contentNodes().removeElementAt(i);
+				contentNodes().insertElementAt(boldEnclosing, i);
+			}
+		}*/
 	}
 	
 	private Vector contentNodes()
@@ -270,6 +330,6 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 				buff.append("\n");
 			}
 		}
-		return buff.toString();
+		return buff.toString().trim();
 	}
 }
