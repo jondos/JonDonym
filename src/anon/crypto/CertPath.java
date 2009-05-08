@@ -67,7 +67,7 @@ public class CertPath implements IXMLEncodable
 	
 	private static final int VERIFICATION_INTERVAL = 3 * 60 * 1000;
 	
-	private static final long GRACE_PERIOD = (long) 60 * 24 * 60 * 60 * 1000; //60 days
+	private static final long GRACE_PERIOD = (long) 60 * 24 * 60 * 60 * 1000l; //60 days
 	
 	/** the certificate class of the certs that may verify this CertPath */
 	private int m_documentType;
@@ -387,7 +387,7 @@ public class CertPath implements IXMLEncodable
 		{
 			return ERROR_REVOCATION;
 		}
-		//check if there is an unknown critial extension in the cert
+		//check if there is an unknown critical extension in the cert
 		if(a_cert.getExtensions().hasUnknownCriticalExtensions())
 		{
 			return ERROR_UNKNOWN_CRITICAL_EXTENSION;
@@ -397,10 +397,7 @@ public class CertPath implements IXMLEncodable
 		if(!a_cert.getValidity().isValid(now))
 		{
 			//check if the cert was valid within some grace time
-			Date graceTime = new Date(now.getTime()-GRACE_PERIOD);
-			LogHolder.log(LogLevel.DEBUG, LogType.CRYPTO, "now: "+now);
-			LogHolder.log(LogLevel.DEBUG, LogType.CRYPTO, "graceTime: "+graceTime);
-			if(!a_cert.getValidity().isValid(graceTime)) 
+			if (a_cert.getValidity().getValidTo().getTime() + GRACE_PERIOD < now.getTime()) 
 			{
 				return ERROR_VALIDITY_SEVERE;
 			}

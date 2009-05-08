@@ -254,11 +254,10 @@ public class TermsAndConditionsPane extends DialogContentPane implements
 				{
 					public void run()
 					{
-						// this may be needed so tat the scrollbar is not scrolled to its last value
+						// this may be needed so that the scrollbar is not scrolled to its last value
 						m_scrollingTerms.getVerticalScrollBar().setValue(0);
 					}
 				});
-				
 			}
 		});
 	}
