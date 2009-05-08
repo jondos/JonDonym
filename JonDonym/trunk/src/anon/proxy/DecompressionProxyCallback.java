@@ -45,7 +45,7 @@ import logging.LogType;
  * Due to http header replacement the JonDo may specify some content-encodings
  * which a client (i.e wget) does not support. In this case the JonDo decodes the content 
  * itself using this class. To use its functionality, an object of this class must be registered 
- * in the Poxycallback-framework.
+ * in the PoxyCallback-framework.
  * @author Simon Pecher
  */
 public class DecompressionProxyCallback implements ProxyCallback
@@ -72,34 +72,34 @@ public class DecompressionProxyCallback implements ProxyCallback
 			throws DataFormatException
 	{
 		int index = offset;
-		int headerMagic = toUShort(data[index++], data[index++]);
+		int headerMagic = toUnsignedShort(data[index++], data[index++]);
 		if (headerMagic != GZIPInputStream.GZIP_MAGIC) 
 		{
 		    throw new DataFormatException("Not in GZIP format");
 		}
 		// Check compression method
-		if (toUByte(data[index++]) != 8) 
+		if (toUnsignedByte(data[index++]) != 8) 
 		{
 		    throw new DataFormatException("Unsupported compression method");
 		}
 		// Read flags
-		int flg = toUByte(data[index++]);
+		int flg = toUnsignedByte(data[index++]);
 		// Skip MTIME, XFL, and OS fields
 		index += 6;
 		// Skip optional extra field
 		if ((flg & FEXTRA) == FEXTRA) 
 		{
-			index += toUShort(data[index++], data[index++]);
+			index += toUnsignedShort(data[index++], data[index++]);
 		}
 		// Skip optional file name
 		if ((flg & FNAME) == FNAME) 
 		{		
-			while (toUShort(data[index++], data[index++]) != 0) ;
+			while (toUnsignedShort(data[index++], data[index++]) != 0) ;
 		}
 		// Skip optional file comment
 		if ((flg & FCOMMENT) == FCOMMENT) 
 		{
-			 while (toUShort(data[index++], data[index++]) != 0) ;
+			 while (toUnsignedShort(data[index++], data[index++]) != 0) ;
 		}
 		// Check optional header CRC
 		if ((flg & FHCRC) == FHCRC) 
@@ -117,12 +117,12 @@ public class DecompressionProxyCallback implements ProxyCallback
     /*
      * Reads unsigned short in Intel byte order.
      */
-	private int toUShort(byte lower, byte upper) 
+	private int toUnsignedShort(byte lower, byte upper) 
 	{
-		 return (toUByte(upper) << 8) | lower;
+		 return (toUnsignedByte(upper) << 8) | lower;
 	}
 
-	private int toUByte(byte nByte)
+	private int toUnsignedByte(byte nByte)
 	{
 		 return ((nByte < 0) ? 128 : 0) + (0x7F & nByte);
 	}
