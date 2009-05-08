@@ -398,8 +398,8 @@ public class CertPath implements IXMLEncodable
 		{
 			//check if the cert was valid within some grace time
 			Date graceTime = new Date(now.getTime()-GRACE_PERIOD);
-			System.out.println(now);
-			System.out.println(graceTime);
+			LogHolder.log(LogLevel.DEBUG, LogType.CRYPTO, "now: "+now);
+			LogHolder.log(LogLevel.DEBUG, LogType.CRYPTO, "graceTime: "+graceTime);
 			if(!a_cert.getValidity().isValid(graceTime)) 
 			{
 				return ERROR_VALIDITY_SEVERE;
