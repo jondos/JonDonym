@@ -17,7 +17,7 @@
 					h2 { text-align: center }
 					body { font-size: 12pt }
 					#preamble { text-align: center }
-					.operatorAddress { margin-left: 150px; }
+					.operatorAddress { text-align: center }
 					.url { text-align: center }
 				</style>
 			</head>
@@ -33,7 +33,18 @@
 	</xsl:template>
 	
 	<xsl:template match="b">
-		<b><xsl:value-of select="."></xsl:value-of></b>
+		<xsl:choose>
+			<xsl:when test="count(./child::*) = 0">
+				<b><xsl:value-of select="."/></b>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:for-each select="./child::*">
+					<b>
+						<xsl:apply-templates select="."/>
+					</b>
+				</xsl:for-each>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 	
 	<xsl:template match="Preamble">
@@ -44,48 +55,46 @@
 	
 	</xsl:template>
 		
-	<xsl:template match="Preamble/Operator">
-		<xsl:value-of select="Organisation" /><br />
-		<xsl:value-of select="Street" /><br />
-		<xsl:value-of select="PostalCode" /> <xsl:text> </xsl:text> <xsl:value-of select="City" /><br />
-		<xsl:value-of select="OperatorCountry" /><br />
-		<br />
-		<xsl:text>VAT: </xsl:text> <xsl:value-of select="Vat" /><br />
-		<xsl:text>Fax: </xsl:text><xsl:value-of select="Fax" /><br />
-		<xsl:text>E-Mail: </xsl:text> <xsl:value-of select="EMail" /><br />
+	<xsl:template match="//Operator">
+		<p class="operatorAddress">
+			<xsl:value-of select="Organisation" /><br />
+			<xsl:value-of select="Street" /><br />
+			<xsl:value-of select="PostalCode" /> <xsl:text> </xsl:text> <xsl:value-of select="City" /><br />
+			<xsl:value-of select="OperatorCountry" /><br />
+			<xsl:text>VAT: </xsl:text> <xsl:value-of select="Vat" /><br />
+			<xsl:text>Fax: </xsl:text><xsl:value-of select="Fax" /><br />
+			<xsl:text>E-Mail: </xsl:text> <xsl:value-of select="EMail" /><br />
+		</p>
 	</xsl:template>
 	
 	<xsl:template match="Preamble/LeadingText">
+		<p>
 		<xsl:value-of select="."/>
-		<br/>
-		<br/>
+		</p>
 	</xsl:template>
 	
 	<xsl:template match="Preamble/TrailingText">
-		<br/>
+		<p>
 		<xsl:value-of select="."/>
+		</p>
 	</xsl:template>
 		
 	<xsl:template match="Section">
 		<h2>§ <xsl:value-of select="position()" /> - <xsl:value-of select="@name" /></h2>
-		<xsl:choose>
-			<xsl:when test="@id=9"><b><xsl:apply-templates select="Paragraph" /></b></xsl:when>
-			<xsl:otherwise><xsl:apply-templates select="Paragraph" /></xsl:otherwise>
-		</xsl:choose>
-	</xsl:template>
-	
-	<xsl:template match="SeverabilityClause">
-		<h2>§ <xsl:value-of select="@id" /> - <xsl:value-of select="@name" /></h2>
-		<p>
-			<xsl:apply-templates />
-		</p>
+		<xsl:apply-templates select="Paragraph" />
 	</xsl:template>
 	
 	<xsl:template match="Paragraph">
-		<p>(<xsl:value-of select="position()" />) <xsl:apply-templates /></p>
+			<p>
+				<xsl:if test="count(../Paragraph) &gt;1">
+					(<xsl:value-of select="position()" />) 
+				</xsl:if>
+				<xsl:apply-templates />
+			</p>
 	</xsl:template>
 	
-	<xsl:template match="Paragraph/Operator">
+	<!-- <xsl:template match="//Operator">
+		<xsl:value-of select="."/>
 		<p class="operatorAddress">
 			<xsl:value-of select="Name" /><br />
 			<xsl:value-of select="Street" /><br />
@@ -93,10 +102,21 @@
 			<xsl:value-of select="Country" /><br />
 			<xsl:text>Fax: </xsl:text> <xsl:value-of select="Fax" /><br />
 			<xsl:text> E-Mail: </xsl:text> <xsl:value-of select="EMail" /><br />
-		</p>
-	</xsl:template>
+		</p> 
+	</xsl:template> -->
 	
-	<xsl:template match="Paragraph/Url">
+	<!--  <xsl:template match="Paragraph/Url">
+		<p class="url">
+			<a>
+				<xsl:attribute name="href">
+					<xsl:value-of select="." />
+				</xsl:attribute>
+				<xsl:value-of select="." />
+			</a>
+		</p>
+	</xsl:template> -->
+	
+	<xsl:template match="Url">
 		<p class="url">
 			<a>
 				<xsl:attribute name="href">
