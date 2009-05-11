@@ -150,53 +150,64 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 	
 	public void setContent(Object o)
 	{	
-		elementNodes.removeAllElements();
-		contentNodes().removeAllElements();
-		hasElementNodes = false;
 		NodeList nl = null;
+		
 		if(o != null)
 		{	
 			if(!(o instanceof NodeList) )
 			{
-				//try to make a NodeList out the object content.
-				StringBuffer contentBuffer = new StringBuffer();
-				
-				contentBuffer.append("<?xml version=\"1.0\"?><temp>");
-				contentBuffer.append(o);
-				contentBuffer.append("</temp>");	
-				try 
+				if(o instanceof Node[])
 				{
-					Document tempDoc = XMLUtil.readXMLDocument(new StringReader(contentBuffer.toString()));
-					nl = (tempDoc.getDocumentElement() != null) ? tempDoc.getDocumentElement().getChildNodes() : null;
-				} 
-				catch (IOException e) 
+					nl = toNodeList((Node[]) o);
+				}
+				else
 				{
-					LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Cannot set content, reason: "+e.getMessage());
-				} 
-				catch (XMLParseException e) 
-				{
-					LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Cannot set content, reason: "+e.getMessage());
+					//try to make a NodeList out the object content.
+					StringBuffer contentBuffer = new StringBuffer();
+					
+					contentBuffer.append("<?xml version=\"1.0\"?><temp>");
+					contentBuffer.append(o);
+					contentBuffer.append("</temp>");	
+					try 
+					{
+						Document tempDoc = XMLUtil.readXMLDocument(new StringReader(contentBuffer.toString()));
+						nl = (tempDoc.getDocumentElement() != null) ? tempDoc.getDocumentElement().getChildNodes() : null;
+					} 
+					catch (IOException e) 
+					{
+						LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Cannot set content, reason: "+e.getMessage());
+						return;
+					} 
+					catch (XMLParseException e) 
+					{
+						LogHolder.log(LogLevel.DEBUG, LogType.MISC, "Cannot set content, reason: "+e.getMessage());
+						return;
+					}
 				}
 			}
 			else
 			{
 				nl = (NodeList) o;
 			}
-			
-			if(nl != null)
+		}
+		
+		elementNodes.removeAllElements();
+		contentNodes().removeAllElements();
+		hasElementNodes = false;
+		
+		if(nl != null)
+		{
+			for (int i = 0; i < nl.getLength(); i++) 
 			{
-				for (int i = 0; i < nl.getLength(); i++) 
+				Node n = nl.item(i).cloneNode(true);
+				
+				if(n.getNodeType() == Node.ELEMENT_NODE)
 				{
-					Node n = nl.item(i).cloneNode(true);
-					
-					if(n.getNodeType() == Node.ELEMENT_NODE)
-					{
-						elementNodes.addElement(n);
-						hasElementNodes = true;
-					}
-					contentNodes().addElement(n);
-				}	
-			}
+					elementNodes.addElement(n);
+					hasElementNodes = true;
+				}
+				contentNodes().addElement(n);
+			}	
 		}
 	}
 	
@@ -224,53 +235,43 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 		};
 	}
 	
-	public void setTextContentBold()
+	public void setContentBold()
 	{
-		if( (contentNodes().size() == 1) && 
-			(((Node)contentNodes().elementAt(0)).getNodeType() == Node.ELEMENT_NODE) && 
-			((Element)contentNodes().elementAt(0)).getTagName().equals(HTML.Tag.B.toString())) 
-		{
-			//don't put everything again in a B-Tag if this already done
-			return;
-		}
-		
+		NodeList contentNodeList = (NodeList) getContent();
 		Document tempDoc = XMLUtil.createDocument();
-		final Element[] boldEnclosing = new Element[]{tempDoc.createElement(HTML.Tag.B.toString())};
-		for (int i = 0; i < contentNodes().size(); i++) 
-		{
-			boldEnclosing[0].appendChild( tempDoc.importNode((Node) contentNodes().elementAt(i), true));
-		}
-		setContent(new NodeList(){
-			public int getLength() {return boldEnclosing.length;}
-			public Node item(int index) {return boldEnclosing[index];}
-		});
+		Node boldElement = null;
 		
-		/*please don't delete yet:
+		elementNodes.removeAllElements();
+		contentNodes().removeAllElements();
 		
-		Node currentNode = null;
-		Document tempDoc = null;
-		for (int i = 0; i < contentNodes().size(); i++) 
+		for (int i = 0; i < contentNodeList.getLength(); i++) 
 		{
-			currentNode = ;
-			if( currentNode.getNodeType() == Node.TEXT_NODE )
+			if( (contentNodeList.item(i).getNodeType() == Node.ELEMENT_NODE) &&
+				((Element) contentNodeList.item(i)).getTagName().equals(HTML.Tag.B.toString()))
 			{
-				Element boldEnclosing = null;
-				Node boldChild = currentNode;
-				if(currentNode.getOwnerDocument() == null)
-				{
-					boldEnclosing = currentNode.getOwnerDocument().createElement(HTML.Tag.B.toString());
-				}
-				else
-				{
-					if(tempDoc == null) 
-					boldEnclosing = tempDoc.createElement(HTML.Tag.B.toString());
-					boldChild = tempDoc.importNode(currentNode, false);
-				}
-				boldEnclosing.appendChild(boldChild);
-				contentNodes().removeElementAt(i);
-				contentNodes().insertElementAt(boldEnclosing, i);
+				//don't enclose an already existing <b>-Tag.
+				boldElement = contentNodeList.item(i);
 			}
-		}*/
+			else if( (contentNodeList.item(i).getNodeType() != Node.TEXT_NODE) ||
+					( (contentNodeList.item(i).getNodeValue() != null) &&
+					  !(contentNodeList.item(i).getNodeValue().trim().equals(""))) )
+			{
+				
+				boldElement = tempDoc.createElement(HTML.Tag.B.toString()); 
+				boldElement.appendChild(tempDoc.importNode(contentNodeList.item(i), true));
+			}
+			else
+			{
+				boldElement = null;
+			}
+			
+			if(boldElement != null)
+			{
+				contentNodes().addElement(boldElement);
+				elementNodes.addElement(boldElement);
+			}
+		}
+		hasElementNodes = (elementNodes.size() > 0);
 	}
 	
 	private Vector contentNodes()
@@ -331,5 +332,22 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 			}
 		}
 		return buff.toString().trim();
+	}
+	
+	public static NodeList toNodeList(Node[] nodeArray)
+	{
+		final Node[] fNodeArray = nodeArray;
+		return new NodeList()
+		{
+			public int getLength() 
+			{
+				return fNodeArray.length;
+			}
+
+			public Node item(int index) 
+			{
+				return fNodeArray[index];
+			}
+		};
 	}
 }
