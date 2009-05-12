@@ -7,7 +7,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -18,7 +17,6 @@ import java.io.OutputStreamWriter;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
-import javax.swing.JViewport;
 
 import logging.LogType;
 import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
@@ -33,14 +31,15 @@ public class TermsAndConditionsDialog extends JAPDialog
 	TermsAndConditonsDialogReturnValues m_ret;
 	
 	public final static String HTML_EXPORT_ENCODING = "ISO-8859-1";
+	public final static String MSG_DIALOG_TITLE = TermsAndConditionsDialog.class.getName()+"_dialogTitle";
 	
-	public TermsAndConditionsDialog(Component a_parent, TermsAndConditions tc)
+	public TermsAndConditionsDialog(Component a_parent, boolean accepted, TermsAndConditions tc)
 	{
-		this(a_parent, tc, JAPMessages.getLocale().getLanguage());
+		this(a_parent, accepted, tc, JAPMessages.getLocale().getLanguage());
 	}
-	public TermsAndConditionsDialog(Component a_parent, TermsAndConditions tc, String langCode) 
+	public TermsAndConditionsDialog(Component a_parent, boolean accepted, TermsAndConditions tc, String langCode) 
 	{
-		super(a_parent, "T&C");
+		super(a_parent, JAPMessages.getString(MSG_DIALOG_TITLE, tc.getOperator().getOrganization()));
 		
 		m_ret = new TermsAndConditonsDialogReturnValues();
 		m_ret.setError(true);
@@ -59,7 +58,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 			return;
 		}
 		
-		m_panel = new TermsAndConditionsPane(this, false, new TermsAndConditionsPane.TermsAndConditionsMessages());
+		m_panel = new TermsAndConditionsPane(this, accepted, new TermsAndConditionsPane.TermsAndConditionsMessages());
 		m_panel.setText(htmlText);
 		
 		m_panel.updateDialog();
@@ -85,7 +84,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 			htmlTextBuffer.append("</p>");
 		}
 		final String htmlText = htmlTextBuffer.toString();
-		JapHtmlPane htmlPane = new JapHtmlPane(htmlText, new UpperLeftStartViewPort());
+		JapHtmlPane htmlPane = new JapHtmlPane(htmlText, new UpperLeftStartViewport());
 		htmlPane.setPreferredSize(new Dimension(800,600));
 		final JAPDialog displayDialog = new JAPDialog(parent, "Translation preview ["+tcTranslation+"]");
 		Container contentPane = displayDialog.getContentPane();
@@ -138,16 +137,6 @@ public class TermsAndConditionsDialog extends JAPDialog
 		m_ret.setAccepted(m_panel.isTermsAccepted());
 		
 		return m_ret;
-	}
-	
-	/** a hotfix workaround to avoid that the scroll-pane is scrolled to the end when it becomes visible */
-	private static class UpperLeftStartViewPort extends JViewport
-	{
-		public void scrollRectToVisible(Rectangle rect)
-		{
-			rect.y = 0;
-			super.scrollRectToVisible(rect);
-		}
 	}
 	
 	private static void actionExportHTMLToFile(Component parent, String htmlOutput, String suggestedFileName)

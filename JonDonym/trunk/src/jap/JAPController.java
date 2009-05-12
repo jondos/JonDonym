@@ -5587,7 +5587,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 	public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(TermsAndConditions tc)
 	{
 		//TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op, false); 
-		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(getCurrentView(), tc);
+		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(getCurrentView(), 
+				tc.isAccepted(), tc);
 		if(!dlg.hasError())
 		{
 			dlg.setVisible(true);
