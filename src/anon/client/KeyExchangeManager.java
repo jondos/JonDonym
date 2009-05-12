@@ -35,12 +35,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.security.SignatureException;
 import java.text.ParseException;
 import java.util.Locale;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -63,16 +67,12 @@ import anon.infoservice.MixInfo;
 import anon.infoservice.ServiceOperator;
 import anon.terms.TermsAndConditions;
 import anon.terms.TermsAndConditionsMixInfo;
-import anon.terms.TermsAndConditionsRequest;
-import anon.terms.TermsAndConditionsResponseHandler;
 import anon.terms.TermsAndConditionsReadException;
+import anon.terms.TermsAndConditionsRequest;
 import anon.terms.template.TermsAndConditionsTemplate;
 import anon.util.Base64;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
 
 
 /**
@@ -348,7 +348,7 @@ public class KeyExchangeManager {
 			  	// prepare request for Terms and Conditions resources, if necessary
 			  	if(m_cascade.isTermsAndConditionsConfirmationRequired())
 				{
-					ServiceOperator currentOperator = mixinfo.getServiceOperator();
+			  		ServiceOperator currentOperator = mixinfo.getServiceOperator();
 			  		if( a_tcContainer == null )
 					{
 						throw new NullPointerException("Terms and Conditions confirmation required but no tc container is specified!");
@@ -734,6 +734,7 @@ public class KeyExchangeManager {
 					 Document answerDoc = XMLUtil.toXMLDocument(answerData);
 					 if(answerDoc != null)
 					 {
+						 //System.out.println(XMLUtil.toString(answerDoc));
 						 a_tcContainer.getTermsAndConditionsResponseHandler().handleXMLResourceResponse(answerDoc, m_tnCRequest);
 					 }
 				  }

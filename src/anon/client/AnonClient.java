@@ -31,6 +31,9 @@
  */
 package anon.client;
 
+import gui.TermsAndConditionsInfoDialog;
+import jap.JAPController;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ConnectException;
@@ -54,17 +57,15 @@ import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.IServiceContainer;
 import anon.NotConnectedToMixException;
-import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
-import anon.terms.TermsAndConditionsReadException;
 import anon.client.replay.ReplayControlChannel;
 import anon.client.replay.TimestampUpdater;
 import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.MixCascade;
-import anon.terms.TermsAndConditions;
 import anon.pay.AIControlChannel;
 import anon.pay.Pay;
+import anon.terms.TermsAndConditionsReadException;
 import anon.transport.connection.ConnectionException;
 import anon.transport.connection.IStreamConnection;
 import anon.transport.connection.SocketConnection;
@@ -752,9 +753,17 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 								}
 								catch(TermsAndConditionsReadException tcie)
 								{
+									TermsAndConditionsInfoDialog d = 
+										new TermsAndConditionsInfoDialog(JAPController.getInstance().getViewWindow(),
+												tcie.getOperators(), ((MixCascade) a_mixCascade).getName() );
+									d.setVisible(true);
+									if(!d.areAllAccepted())
+									{
+										throw new IOException("Client rejected T&C after reading.");
+									}
 									//now the user gets all the time he needs to read the Terms and Conditions.
 									//after that the connection is reestablished
-									Enumeration tcsToshow = tcie.getTermsTermsAndConditonsToRead();
+									/*Enumeration tcsToshow = tcie.getTermsTermsAndConditonsToRead();
 									TermsAndConditions currentTCToShow = null;
 									TermsAndConditonsDialogReturnValues currentReturnValues = null;
 									while (tcsToshow.hasMoreElements()) 
@@ -769,7 +778,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 										{
 											throw new IOException("Client rejected T&C after reading.");
 										}
-									}
+									}*/
 									
 									//try to establish a new connection. for the second try to accept the Terms and Conditions
 									m_socketHandler =

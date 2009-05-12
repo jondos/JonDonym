@@ -121,6 +121,12 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	private Preamble preamble = null;
 	private TCComposite sections = new TCComposite();
 	
+	//constructor needed for being loaded by the database class 
+	public TermsAndConditionsTemplate(Element element, long aLong) throws XMLParseException
+	{
+		this(element);
+	}
+	
 	public TermsAndConditionsTemplate(Node rootNode) throws XMLParseException
 	{
 		super(Long.MAX_VALUE);
@@ -150,8 +156,15 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 		if (m_signature != null)
 		{
 			m_certPath = m_signature.getMultiCertPath();
-			signedDocument = 
-				(rootNode.getNodeType() == Node.DOCUMENT_NODE) ? (Document) rootNode : templateRoot.getOwnerDocument();	
+			if(rootNode.getNodeType() == Node.DOCUMENT_NODE)
+			{
+				signedDocument = (Document) rootNode;	
+			}
+			else
+			{
+				signedDocument = XMLUtil.createDocument();
+				signedDocument.appendChild(signedDocument.importNode(templateRoot, true));
+			}
 		}
 		
 		// get the defined sections of this template
@@ -521,6 +534,8 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	
 	public Element getXmlStructure() 
 	{
+		
+		
 		return getDocument().getDocumentElement();
 	}
 	

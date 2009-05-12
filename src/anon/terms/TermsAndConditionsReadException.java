@@ -31,6 +31,8 @@ package anon.terms;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import anon.infoservice.ServiceOperator;
+
 public class TermsAndConditionsReadException extends Exception
 {
 	Vector tcsTosShow = new Vector();
@@ -43,5 +45,20 @@ public class TermsAndConditionsReadException extends Exception
 	public Enumeration getTermsTermsAndConditonsToRead()
 	{
 		return tcsTosShow.elements();
+	}
+	
+	public Vector getOperators()
+	{
+		Vector v = new Vector();
+		ServiceOperator op = null;
+		for(int i = 0; i < tcsTosShow.size(); i++)
+		{
+			op = ((TermsAndConditions) tcsTosShow.elementAt(i)).getOperator();
+			if(!v.contains(op) )
+			{
+				v.add(op);
+			}
+		}
+		return v;
 	}
 }
