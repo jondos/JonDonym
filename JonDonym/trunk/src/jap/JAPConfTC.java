@@ -1,3 +1,31 @@
+/*
+Copyright (c) 2008 The JAP-Team, JonDos GmbH
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation and/or
+       other materials provided with the distribution.
+    * Neither the name of the University of Technology Dresden, Germany, nor the name of
+       the JonDos GmbH, nor the names of their contributors may be used to endorse or
+       promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package jap;
 
 import gui.JAPHyperlinkAdapter;
@@ -45,18 +73,18 @@ public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsA
 		m_tcc = tcc;
 	}
 	
-	/*protected boolean initObservers()
+	protected boolean initObservers()
 	{
 		if (super.initObservers())
 		{
 			synchronized(LOCK_OBSERVABLE)
 			{
-				//m_tcc.getTermsAndConditionsResponseHandler().addObserver(this);
+				m_tcc.getTermsAndConditionsResponseHandler().addObserver(this);
 				return true;
 			}
 		}
 		return false;
-	}*/
+	}
 	
 	public String getTabTitle() 
 	{
@@ -79,15 +107,11 @@ public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsA
 		m_tblOperators = new TermsAndConditionsOperatorTable();
 		m_tblOperators.setController(this);
 	
-		//m_tblOperators.getColumnModel().getColumn(OperatorsTableModel.ACCEPTED_COL).setMinWidth(4);
-		//m_tblOperators.getColumnModel().getColumn(OperatorsTableModel.ACCEPTED_COL).setPreferredWidth(4);
 		JScrollPane scroll;
 
 		scroll = new JScrollPane(m_tblOperators);
 		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		//scroll.setMinimumSize(new Dimension(100, 100));
-		//scroll.setPreferredSize(preferredSize);
-		
+
 		root.add(scroll, c);
 		
 		c.gridy++;
@@ -166,21 +190,13 @@ public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsA
 	public void update(Observable o, Object arg) 
 	{
 		onUpdateValues();
+		getRootPanel().revalidate();
 	}
 
-	//public void handleAcceptAction(TermsAndConditions terms, boolean accept) 
-	//{
-		/*if(!accept && !JAPController.getInstance().isTCRejectingPossible(terms))
-		{
-			JAPDialog.showErrorDialog(JAPConf.getInstance(), 
-			JAPMessages.getString(MSG_ERR_REJECT_IMPOSSIBLE, terms.getOperator().getOrganization()), LogType.MISC);
-		}
-		else
-		{
-			terms.setAccepted(accept);
-		}
-		terms.setRead(true);*/
-	//}
+	protected void onUpdateValues()
+	{
+		m_tblOperators.setOperators(Database.getInstance(ServiceOperator.class).getEntryList());
+	}
 
 	public boolean handleOperatorAction(ServiceOperator operator, boolean accepted) 
 	{

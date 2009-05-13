@@ -55,9 +55,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import anon.client.TrustModel.PremiumAttribute;
 import anon.crypto.MultiCertPath;
-import anon.crypto.SignatureCreator;
 import anon.crypto.SignatureVerifier;
 import anon.crypto.XMLSignature;
 import anon.infoservice.AbstractDistributableCertifiedDatabaseEntry;
@@ -67,7 +65,6 @@ import anon.infoservice.OperatorAddress;
 import anon.infoservice.ServiceOperator;
 import anon.terms.TCComponent;
 import anon.terms.TCComposite;
-import anon.terms.TermsAndConditions;
 import anon.terms.TermsAndConditionsTranslation;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;

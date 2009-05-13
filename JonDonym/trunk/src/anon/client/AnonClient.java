@@ -757,8 +757,10 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 										new TermsAndConditionsInfoDialog(JAPController.getInstance().getViewWindow(),
 												tcie.getOperators(), ((MixCascade) a_mixCascade).getName() );
 									d.setVisible(true);
+									a_serviceContainer.getTCContainer().getTermsAndConditionsResponseHandler().notifyAboutChanges();
 									if(!d.areAllAccepted())
 									{
+										a_serviceContainer.keepCurrentService(false);
 										throw new IOException("Client rejected T&C after reading.");
 									}
 									//now the user gets all the time he needs to read the Terms and Conditions.
