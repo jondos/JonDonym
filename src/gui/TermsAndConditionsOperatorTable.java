@@ -1,9 +1,34 @@
+/*
+Copyright (c) 2008 The JAP-Team, JonDos GmbH
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation and/or
+       other materials provided with the distribution.
+    * Neither the name of the University of Technology Dresden, Germany, nor the name of
+       the JonDos GmbH, nor the names of their contributors may be used to endorse or
+       promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package gui;
 
-import gui.dialog.JAPDialog;
-import jap.JAPConf;
 import jap.JAPConfTC;
-import jap.JAPController;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -13,7 +38,6 @@ import java.util.Vector;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.AbstractTableModel;
 
 import logging.LogHolder;
@@ -27,9 +51,6 @@ import anon.util.JAPMessages;
 
 public class TermsAndConditionsOperatorTable extends JTable implements MouseListener
 {
-	private static final String MSG_TAB_TITLE = JAPConfTC.class.getName() + "_tabTitle";
-	private static final String MSG_ERR_REJECT_IMPOSSIBLE = JAPConfTC.class.getName() + "_errRejectImpossible";
-	
 	/**
 	 * serial version UID
 	 */
@@ -47,8 +68,6 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 	
 	private TermsAndCondtionsTableController controller;
 	
-	
-
 	public TermsAndConditionsOperatorTable()
 	{
 		this(null);
@@ -62,6 +81,14 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 		setModel(model);
 		setDefaultRenderer(ServiceOperator.class, new OperatorsCellRenderer());
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		getColumnModel().getColumn(OPERATOR_COL).setMinWidth(200);
+		getColumnModel().getColumn(OPERATOR_COL).setPreferredWidth(200);
+		
+		getColumnModel().getColumn(DATE_COL).setMinWidth(100);
+		getColumnModel().getColumn(DATE_COL).setPreferredWidth(100);
+		
+		//getColumnModel().getColumn(ACCEPTED_COL).setMinWidth(4);
+		//getColumnModel().getColumn(ACCEPTED_COL).setPreferredWidth(4);
 		addMouseListener(this);
 	}
 	
@@ -78,7 +105,7 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 						new Boolean(controller.handleOperatorAction(selectedOp, accepted)),
 						getSelectedRow(), ACCEPTED_COL);
 			}
-			//Columm ACCEPTED Is handled by default ComBoxEditor
+			//Columm ACCEPTED is handled by default ComBoxEditor
 			else if ( (getSelectedColumn() != ACCEPTED_COL) )
 			{
 				controller.handleSelectLineAction(selectedOp);
@@ -101,20 +128,6 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 	public void setController(TermsAndCondtionsTableController controller) 
 	{
 		this.controller = controller;
-	}
-	
-	protected void handleAcceptAction(TermsAndConditions terms, boolean accept)
-	{
-		if(!accept && !JAPController.getInstance().isTCRejectingPossible(terms))
-		{
-			JAPDialog.showErrorDialog(JAPConf.getInstance(), 
-					JAPMessages.getString(MSG_ERR_REJECT_IMPOSSIBLE, terms.getOperator().getOrganization()), LogType.MISC);
-		}
-		else
-		{
-			terms.setAccepted(accept);
-		}
-		terms.setRead(true);
 	}
 	
 	public void setOperators(Vector operators)
@@ -243,8 +256,6 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 					}
 					case ACCEPTED_COL:
 					{
-						//ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
-						//TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(op);
 						return new Boolean(accepted.get(rowIndex));
 					}
 					default:
@@ -277,21 +288,11 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 				{
 					if(((Boolean)aValue).booleanValue()) 
 					{
-						System.out.println("set index: "+rowIndex);
 						accepted.set(rowIndex);
 					}
 					else 
 					{
-						System.out.println("clear index: "+rowIndex);
 						accepted.clear(rowIndex);
-					}
-					
-					if(controller != null)
-					{
-						//ServiceOperator op = (ServiceOperator) m_vecOperators.elementAt(rowIndex);
-						//TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(op);
-						//controller.handleAcceptAction(tc, ((Boolean)aValue).booleanValue());
-						
 					}
 					break;
 				}
@@ -366,12 +367,6 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 				}
 			}
 			return v;
-		}
-		
-		public void valueChanged(ListSelectionEvent e) 
-		{
-			// TODO Auto-generated method stub
-			
 		}
 	}
 }

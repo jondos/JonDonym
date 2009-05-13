@@ -1,6 +1,35 @@
+/*
+Copyright (c) 2008 The JAP-Team, JonDos GmbH
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation and/or
+       other materials provided with the distribution.
+    * Neither the name of the University of Technology Dresden, Germany, nor the name of
+       the JonDos GmbH, nor the names of their contributors may be used to endorse or
+       promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package gui;
 
-import jap.JAPConf;
+import gui.dialog.DialogContentPane;
+import gui.dialog.JAPDialog;
 import jap.JAPController;
 
 import java.awt.Component;
@@ -15,16 +44,13 @@ import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JTable;
-
-import logging.LogType;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
 import anon.infoservice.ServiceOperator;
 import anon.terms.TermsAndConditions;
 import anon.util.JAPMessages;
-
-import gui.dialog.DialogContentPane;
-import gui.dialog.JAPDialog;
 
 public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndCondtionsTableController, ActionListener
 {
@@ -41,30 +67,36 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 		super(parent, JAPMessages.getString(MSG_DIALOG_TITLE));
 		setDefaultCloseOperation(HIDE_ON_CLOSE);
 		
-		DialogContentPane dialogContentPane = 
-			new DialogContentPane(this, JAPMessages.getString(MSG_DIALOG_TEXT, serviceName));
-		Container contentPane = dialogContentPane.getContentPane();
+		Container contentPane = getContentPane();
 		contentPane.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		
+		contentPane.setPreferredSize(new Dimension(450,200));
 		c.gridx = 0;
 		c.gridy = 0;
-		c.insets = new Insets(3,3,3,3);
+		c.insets = new Insets(5,5,5,5);
 		c.gridheight = 1;
 		c.gridwidth = GridBagConstraints.REMAINDER;
-		c.weightx = 1.0;
-		c.weighty = 1.0;
 		c.fill = GridBagConstraints.BOTH;
+	
+		JTextArea dialogText = new JTextArea(JAPMessages.getString(MSG_DIALOG_TEXT, serviceName));
+		dialogText.setText(JAPMessages.getString(MSG_DIALOG_TEXT, serviceName));
+		dialogText.setEditable(false);
+		dialogText.setBackground(contentPane.getBackground());
+		dialogText.setLineWrap(true);
+		dialogText.setWrapStyleWord(true);
+		dialogText.setSelectionColor(contentPane.getBackground());
+		dialogText.setSelectedTextColor(dialogText.getForeground());
 		
+		contentPane.add(dialogText, c);
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		operatorTable = new TermsAndConditionsOperatorTable(operators);
 		operatorTable.setController(this);
-		operatorTable.setPreferredSize(new Dimension(400,300));
-		//tableModel = new InfoDialogTableModel(operators);
-		//operatorTable.setDefaultRenderer(ServiceOperator.class, new OperatorsCellRenderer());
-		//operatorTable.setModel(tableModel);
 		
-		okButtton = new JButton(JAPMessages.getString(JAPMessages.getString(DialogContentPane.MSG_OK)));
-		cancelButton = new JButton(JAPMessages.getString(JAPMessages.getString(DialogContentPane.MSG_CANCEL)));
+		JScrollPane scroll = new JScrollPane(operatorTable);
+		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		okButtton = new JButton(JAPMessages.getString(DialogContentPane.MSG_OK));
+		cancelButton = new JButton(JAPMessages.getString(DialogContentPane.MSG_CANCEL));
 		
 		okButtton.addActionListener(this);
 		cancelButton.addActionListener(this);
@@ -73,12 +105,15 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 		buttonPanel.add(okButtton);
 		buttonPanel.add(cancelButton);
 		
-		contentPane.add(operatorTable, c);
+		c.gridy++;
+		c.weightx = 1.0;
+		c.weighty = 1.0;
+		contentPane.add(scroll, c);
+		
 		c.gridy++;
 		c.weightx = 0.0;
 		c.weighty = 0.0;
 		contentPane.add(buttonPanel, c);
-		dialogContentPane.updateDialog();
 		pack();
 	}
 	
@@ -109,10 +144,7 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 		return accepted;
 	}
 
-	public void handleSelectLineAction(ServiceOperator operator) 
-	{
-		//none
-	}
+	public void handleSelectLineAction(ServiceOperator operator) {}
 
 	public void actionPerformed(ActionEvent e) 
 	{

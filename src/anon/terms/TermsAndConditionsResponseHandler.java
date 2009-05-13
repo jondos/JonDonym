@@ -30,9 +30,7 @@ package anon.terms;
 
 import java.io.IOException;
 import java.security.SignatureException;
-import java.util.Enumeration;
 import java.util.Observable;
-import java.util.Vector;
 
 import logging.LogHolder;
 import logging.LogLevel;
@@ -146,8 +144,11 @@ public class TermsAndConditionsResponseHandler extends Observable
 			currentResourceParentNode = XMLUtil.getNextSiblingByName(currentResourceParentNode, 
 					TermsAndConditionsRequest.XML_ELEMENT_NAME);
 		}
-		request.checkRequestPostCondition();
-		
+		request.checkRequestPostCondition();	
+	}
+	
+	public void notifyAboutChanges()
+	{
 		setChanged();
 		notifyObservers();
 	}

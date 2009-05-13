@@ -28,22 +28,23 @@
 
 package jap;
 
+import gui.AWTUpdateQueue;
+import gui.JAPHelpContext;
+
 import java.awt.Component;
-import javax.swing.JPanel;
+import java.awt.GridBagConstraints;
+import java.util.Observable;
+import java.util.Observer;
+
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import java.awt.GridBagConstraints;
-import java.util.Observer;
-import java.util.Observable;
-import javax.swing.SwingUtilities;
 
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
-
-import gui.AWTUpdateQueue;
-import gui.JAPHelpContext;
 
 /**
  * This is the generic implementation for a JAP configuration module.

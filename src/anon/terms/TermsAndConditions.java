@@ -97,7 +97,7 @@ public class TermsAndConditions implements IXMLEncodable
 	private Translation defaultTl = null;
 	
 	private boolean accepted;
-	private boolean read;
+	//private boolean read;
 	
 	private final static Hashtable tcHashtable = new Hashtable();
 	
@@ -130,7 +130,7 @@ public class TermsAndConditions implements IXMLEncodable
 		}
 		translations = new Hashtable();
 		accepted = false;
-		read = false;
+		//read = false;
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class TermsAndConditions implements IXMLEncodable
 			throw new XMLParseException("TC of operator "+this.operator.getId()+" is invalid because it has no translations");
 		}*/
 		
-		read = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, null) != null;
+		//read = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, null) != null;
 		accepted = XMLUtil.parseAttribute(termsAndConditionRoot, XML_ATTR_ACCEPTED, false);
 	}
 	
@@ -442,34 +442,6 @@ public class TermsAndConditions implements IXMLEncodable
 		return accepted;
 	}
 	
-	/**
-	 * for checking if these T&Cs were already read.
-	 * @return true if T&Cs were read, false otherwise
-	 */
-	public boolean isRead() 
-	{
-		return read;
-	}
-
-	/**
-	 * marks these T&Cs as read/unread
-	 * @param read true means read, false unread
-	 */
-	public synchronized void setRead(boolean read) 
-	{
-		this.read = read;
-	}
-	
-	/**
-	 * returns whether these T&Cs wer rejected.
-	 * this is true if and only if the T&Cs were read and and not accepted.
-	 * @return true if and only if the T&Cs were read and and not accepted, false otherwise.
-	 */
-	public synchronized boolean isRejected() 
-	{
-		return read && !accepted;
-	}
-	
 	public static void storeTermsAndConditions(TermsAndConditions tc)
 	{
 		tcHashtable.put(tc.operator, tc);
@@ -611,7 +583,7 @@ public class TermsAndConditions implements IXMLEncodable
 		Enumeration allTranslations = null;
 		synchronized (this)
 		{
-			if(read)
+			if(accepted)
 			{
 				XMLUtil.setAttribute(tcRoot, XML_ATTR_ACCEPTED, accepted);
 			}
