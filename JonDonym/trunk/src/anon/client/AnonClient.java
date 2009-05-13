@@ -763,37 +763,19 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 										a_serviceContainer.keepCurrentService(false);
 										throw new IOException("Client rejected T&C after reading.");
 									}
-									//now the user gets all the time he needs to read the Terms and Conditions.
-									//after that the connection is reestablished
-									/*Enumeration tcsToshow = tcie.getTermsTermsAndConditonsToRead();
-									TermsAndConditions currentTCToShow = null;
-									TermsAndConditonsDialogReturnValues currentReturnValues = null;
-									while (tcsToshow.hasMoreElements()) 
-									{
-										currentTCToShow = 
-											(TermsAndConditions) tcsToshow.nextElement();
-										currentReturnValues =
-											a_serviceContainer.getTCContainer().showTermsAndConditionsDialog(currentTCToShow);
-										currentTCToShow.setAccepted(currentReturnValues.hasAccepted());
-										currentTCToShow.setRead(true);
-										if(!currentReturnValues.hasAccepted())
-										{
-											throw new IOException("Client rejected T&C after reading.");
-										}
-									}*/
 									
-									//try to establish a new connection. for the second try to accept the Terms and Conditions
-									m_socketHandler =
-										new SocketHandler(
-												connectMixCascade( (MixCascade) a_mixCascade,
-														m_proxyInterface.getProxyInterface(false).getProxyInterface()));
+									tctry++;
 									if(tctry > 1)
 									{
 										LogHolder.log(LogLevel.ERR, LogType.NET, 
 												"Still requested  t&cs after the first try is not allowed!");
-										//TODO: throw a more specific Exception
-										throw new Exception("A second tc request must never be sent.");
+										throw new IOException("A second tc request must never be sent.");
 									}
+									
+									m_socketHandler =
+										new SocketHandler(
+												connectMixCascade( (MixCascade) a_mixCascade,
+														m_proxyInterface.getProxyInterface(false).getProxyInterface()));
 								}
 							}
 						}
