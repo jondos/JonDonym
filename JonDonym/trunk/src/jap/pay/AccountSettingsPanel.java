@@ -404,6 +404,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	public AccountSettingsPanel()
 	{
 		super(null);
+		updateAccountList();
 	}
 	
 	protected boolean initObservers()
@@ -3588,7 +3589,7 @@ public class AccountSettingsPanel extends AbstractJAPConfModule implements
 	 */
 	protected void onRootPanelShown()
 	{
-		updateAccountList();
+		//updateAccountList();
 	}
 
 	/**
