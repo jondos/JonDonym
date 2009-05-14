@@ -148,7 +148,7 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 		m_strId = m_type + "_" + m_locale + "_" + m_date;
 		m_lastUpdate = System.currentTimeMillis();
 		m_signature = SignatureVerifier.getInstance().getVerifiedXml(templateRoot,
-			SignatureVerifier.DOCUMENT_CLASS_INFOSERVICE);
+			SignatureVerifier.DOCUMENT_CLASS_TERMS);
 		
 		if (m_signature != null)
 		{

@@ -5316,6 +5316,9 @@ public final class JAPController extends Observable implements IProxyListener, O
 
 		addDefaultCertificates(JAPConstants.INFOSERVICE_CERTSPATH, JAPConstants.INFOSERVICE_ROOT_CERTS,
 							   JAPCertificate.CERTIFICATE_TYPE_ROOT_INFOSERVICE);
+		
+		addDefaultCertificates(JAPConstants.TERMS_CERTSPATH, JAPConstants.TERMS_CERTS,
+				   JAPCertificate.CERTIFICATE_TYPE_TERMS_AND_CONDITIONS);
 
 		addDefaultCertificates(JAPConstants.PAYMENT_ROOT_CERTSPATH, JAPConstants.PAYMENT_ROOT_CERTS,
 							   JAPCertificate.CERTIFICATE_TYPE_ROOT_PAYMENT);

@@ -574,6 +574,8 @@ public class CertPath implements IXMLEncodable
 				return JAPCertificate.CERTIFICATE_TYPE_ROOT_UPDATE;
 			case SignatureVerifier.DOCUMENT_CLASS_PAYMENT:
 				return JAPCertificate.CERTIFICATE_TYPE_ROOT_PAYMENT;
+			case SignatureVerifier.DOCUMENT_CLASS_TERMS:
+				return JAPCertificate.CERTIFICATE_TYPE_ROOT_TERMS_AND_CONDITIONS;
 			case SignatureVerifier.DOCUMENT_CLASS_NONE:
 				return JAPCertificate.CERTIFICATE_TYPE_ROOT;
 			default:
@@ -617,6 +619,8 @@ public class CertPath implements IXMLEncodable
 				return JAPCertificate.CERTIFICATE_TYPE_UPDATE;
 			case SignatureVerifier.DOCUMENT_CLASS_PAYMENT:
 				return JAPCertificate.CERTIFICATE_TYPE_PAYMENT;
+			case SignatureVerifier.DOCUMENT_CLASS_TERMS:
+				return JAPCertificate.CERTIFICATE_TYPE_TERMS_AND_CONDITIONS;
 			case SignatureVerifier.DOCUMENT_CLASS_NONE:
 				return JAPCertificate.CERTIFICATE_TYPE_ROOT;
 			default:
