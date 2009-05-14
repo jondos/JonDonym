@@ -30,6 +30,7 @@ package infoservice;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.SignatureException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Locale;
@@ -153,21 +154,29 @@ public class InfoService implements Observer
 				public void run()
 				{
 					while(true)
-					{
-						loadTemplatesFromDirectory(
-							Configuration.getInstance().getTermsAndConditionsDir());
-						
+					{							
 						try
 						{
-							Thread.sleep(1000*60*60);	
+							Thread.sleep(1000*60*60 * 5);	
 						}
 						catch(InterruptedException ex)
 						{
 							break;
 						}
+						try
+						{
+							loadTemplatesFromDirectory(
+									Configuration.getInstance().getTermsAndConditionsDir());
+						} 
+						catch (SignatureException e)
+						{
+							LogHolder.log(LogLevel.EMERG, LogType.CRYPTO, e);
+						}
 					}
 				}
 			};
+			loadTemplatesFromDirectory(
+					Configuration.getInstance().getTermsAndConditionsDir());
 			
 			tacLoader.start();
 		}
@@ -205,7 +214,7 @@ public class InfoService implements Observer
 			}
 		}
 		
-		if(signal.equals("SIGTERM"))
+		if (signal.equals("SIGTERM"))
 		{
 			System.out.println("Exiting...");
 			LogHolder.log(LogLevel.ALERT, LogType.ALL, "Caught SIGTERM. Exiting...");
@@ -243,7 +252,7 @@ public class InfoService implements Observer
 		m_connectionCounter = 0;
 	}
 
-	public static void loadTemplatesFromDirectory(File a_dir)
+	public static void loadTemplatesFromDirectory(File a_dir) throws SignatureException
 	{
 		File file = null;
 			
@@ -266,6 +275,10 @@ public class InfoService implements Observer
 			{
 				file = new File(a_dir.getAbsolutePath() + File.separator + files[i]);
 				TermsAndConditionsTemplate tac = new TermsAndConditionsTemplate(file);
+				if (!tac.isVerified())
+				{
+					throw new SignatureException("Cannot verify tac template file: " + tac.getId());
+				}
 				
 				Database.getInstance(TermsAndConditionsTemplate.class).update(tac);
 			}
