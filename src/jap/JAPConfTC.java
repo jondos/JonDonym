@@ -47,10 +47,10 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
 import logging.LogType;
-import anon.client.ITermsAndConditionsContainer;
 import anon.infoservice.Database;
 import anon.infoservice.ServiceOperator;
 import anon.terms.TermsAndConditions;
+import anon.terms.TermsAndConditionsResponseHandler;
 import anon.util.JAPMessages;
 
 public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsAndCondtionsTableController
@@ -61,16 +61,11 @@ public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsA
 	private TermsAndConditionsOperatorTable m_tblOperators;
 	private JEditorPane m_termsPane;
 	private JScrollPane m_scrollingTerms;
-	private ITermsAndConditionsContainer m_tcc;
 	
-	protected JAPConfTC(IJAPConfSavePoint savePoint, ITermsAndConditionsContainer tcc)
+	
+	protected JAPConfTC(IJAPConfSavePoint savePoint)
 	{
 		super(null);
-		if (tcc == null)
-		{
-			throw new NullPointerException();
-		}
-		m_tcc = tcc;
 	}
 	
 	protected boolean initObservers()
@@ -79,7 +74,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsA
 		{
 			synchronized(LOCK_OBSERVABLE)
 			{
-				m_tcc.getTermsAndConditionsResponseHandler().addObserver(this);
+				TermsAndConditionsResponseHandler.get().addObserver(this);
 				return true;
 			}
 		}

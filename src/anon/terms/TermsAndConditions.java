@@ -82,6 +82,8 @@ public class TermsAndConditions implements IXMLEncodable
 	public static final String XML_ATTR_ACCEPTED = "accepted";
 	public static final String XML_ATTR_DATE = "date";
 	
+	private static final String MSG_DISPLAY_ERROR = TermsAndConditions.class.getName()+"_displayError";
+	
 	public final static String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsList";
 	public final static String XML_ELEMENT_NAME = "TermsAndConditions";
 	public final static String XML_ELEMENT_TRANSLATION_NAME = Translation.XML_ELEMENT_NAME;
@@ -514,31 +516,52 @@ public class TermsAndConditions implements IXMLEncodable
 		return getHTMLText(locale.getLanguage());
 	}
 	
-	/* if language is not supported get the defaultLanguage text */
 	public String getHTMLText(String language)
 	{
-		if(!hasTranslations())
-		{
-			throw new IllegalStateException("T&C document "+operator.getId()+
-					" cannot be created when no translations are loaded.");
-		}
 		TermsAndConditionsTranslation translation = getTranslation(language);
 		if(translation == null)
 		{
+			/* if language is not supported get the defaultLanguage text */
 			translation = getDefaultTranslation();
 		}
-		//default translation must never be null
+		return getHTMLText(translation);
+	}
+	
+	
+	public static String getHTMLText(TermsAndConditionsTranslation translation)
+	{
+		try
+		{
+			if(translation == null)
+			{
+				throw new NullPointerException("Translation is null!)");
+			}
 		
-		TermsAndConditionsTemplate displayTemplate = 
-			TermsAndConditionsTemplate.getById(translation.getTemplateReferenceId(), false);
-		if(displayTemplate == null)
-		{ 
-			throw new NullPointerException("Associated template '"+translation.getTemplateReferenceId()+"' for" +
-					" translation ["+translation.getLocale()+"] of terms and conditions for operator '"
-					+operator.getOrganization()+"' not found.");
+			TermsAndConditionsTemplate displayTemplate = 
+				TermsAndConditionsTemplate.getById(translation.getTemplateReferenceId(), false);
+			
+			if(displayTemplate == null)
+			{ 
+				throw new NullPointerException("Associated template '"+translation.getTemplateReferenceId()+"' for" +
+						" translation ["+translation.getLocale()+"] of terms and conditions for operator '"
+						+translation.getOperator().getOrganization()+"' not found.");
+			}
+			return displayTemplate.transform(translation);
 		}
-		//displayTemplate.importData(translation);
-		return displayTemplate.transform(translation);
+		catch (Exception e)
+		{
+			StringBuffer htmlErrorTextBuffer = new StringBuffer();
+			htmlErrorTextBuffer.append("<html><head><title>");
+			htmlErrorTextBuffer.append(JAPMessages.getString("error"));
+			htmlErrorTextBuffer.append("</title></head><body><head><h1>");
+			htmlErrorTextBuffer.append(JAPMessages.getString("error"));
+			htmlErrorTextBuffer.append("</h1><h2>");
+			htmlErrorTextBuffer.append(JAPMessages.getString(MSG_DISPLAY_ERROR));
+			htmlErrorTextBuffer.append("</h2><p>");
+			htmlErrorTextBuffer.append(e);
+			htmlErrorTextBuffer.append("</p></body></html>");
+			return htmlErrorTextBuffer.toString();
+		}
 	}
 	
 	public boolean equals(Object anotherTC)

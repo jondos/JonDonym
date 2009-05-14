@@ -1,6 +1,5 @@
 package anon.infoservice;
 
-import anon.client.ITermsAndConditionsContainer;
 
 /**
  * Takes and returns a single MixCascade.
@@ -40,10 +39,5 @@ public class SimpleMixCascadeContainer extends AbstractMixCascadeContainer
 
 	public void keepCurrentService(boolean a_bKeepCurrentCascade)
 	{
-	}
-	
-	public ITermsAndConditionsContainer getTCContainer()
-	{
-		return null;
 	}
 }

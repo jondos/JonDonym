@@ -98,8 +98,8 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 		{
 			ServiceOperator selectedOp = (ServiceOperator) getModel().getValueAt(getSelectedRow(), OPERATOR_COL);
 			boolean accepted = ((Boolean) getModel().getValueAt(getSelectedRow(), ACCEPTED_COL)).booleanValue();
-			if ((getSelectedColumn() == OPERATOR_COL) &&
-					e.getClickCount() > 1)
+			if (((getSelectedColumn() == OPERATOR_COL) || (getSelectedColumn() == DATE_COL)) &&
+				(e.getClickCount() > 1) )
 			{
 				getModel().setValueAt(
 						new Boolean(controller.handleOperatorAction(selectedOp, accepted)),

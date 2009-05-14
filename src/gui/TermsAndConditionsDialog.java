@@ -1,5 +1,6 @@
 package gui;
 
+import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import gui.dialog.TermsAndConditionsPane;
 
@@ -19,16 +20,16 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
 import logging.LogType;
-import anon.client.ITermsAndConditionsContainer.TermsAndConditonsDialogReturnValues;
 import anon.terms.TermsAndConditions;
 import anon.terms.TermsAndConditionsTranslation;
-import anon.terms.template.TermsAndConditionsTemplate;
 import anon.util.JAPMessages;
 
 public class TermsAndConditionsDialog extends JAPDialog
 {
 	TermsAndConditionsPane m_panel;
 	TermsAndConditonsDialogReturnValues m_ret;
+	
+	boolean acceptInitialValue = false;
 	
 	public final static String HTML_EXPORT_ENCODING = "ISO-8859-1";
 	public final static String MSG_DIALOG_TITLE = TermsAndConditionsDialog.class.getName()+"_dialogTitle";
@@ -42,48 +43,17 @@ public class TermsAndConditionsDialog extends JAPDialog
 		super(a_parent, JAPMessages.getString(MSG_DIALOG_TITLE, tc.getOperator().getOrganization()));
 		
 		m_ret = new TermsAndConditonsDialogReturnValues();
-		m_ret.setError(true);
-		
 		setResizable(false);
-		
-		// try to find the TnC
-		if(tc == null)
-		{
-			return;
-		}
-	
-		String htmlText = tc.getHTMLText(langCode);
-		if(htmlText == null)
-		{
-			return;
-		}
-		
+
 		m_panel = new TermsAndConditionsPane(this, accepted, new TermsAndConditionsPane.TermsAndConditionsMessages());
-		m_panel.setText(htmlText);
-		
+		m_panel.setText(tc.getHTMLText(langCode));
 		m_panel.updateDialog();
 		pack();
-		
-		m_ret.setError(false);
 	}
 	
 	public static void previewTranslation(Component parent, TermsAndConditionsTranslation tcTranslation)
 	{
-		StringBuffer htmlTextBuffer = new StringBuffer();
-		try 
-		{
-			TermsAndConditionsTemplate displayTemplate = 
-				TermsAndConditionsTemplate.getById(tcTranslation.getTemplateReferenceId(), false);
-			htmlTextBuffer.append(displayTemplate.transform(tcTranslation));
-		}
-		catch(Exception e)
-		{
-			htmlTextBuffer.append(
-					"<html><head><title><Preview error></title></head><body><head><h1>Error creating tc preview</h1><h2>Reason:</h2><p>");
-			htmlTextBuffer.append(e);
-			htmlTextBuffer.append("</p>");
-		}
-		final String htmlText = htmlTextBuffer.toString();
+		final String htmlText = TermsAndConditions.getHTMLText(tcTranslation);
 		JapHtmlPane htmlPane = new JapHtmlPane(htmlText, new UpperLeftStartViewport());
 		htmlPane.setPreferredSize(new Dimension(800,600));
 		final JAPDialog displayDialog = new JAPDialog(parent, "Translation preview ["+tcTranslation+"]");
@@ -127,15 +97,10 @@ public class TermsAndConditionsDialog extends JAPDialog
 		displayDialog.setVisible(true);
 	}
 	
-	public boolean hasError()
-	{
-		return m_ret.hasError();
-	}
-	
 	public TermsAndConditonsDialogReturnValues getReturnValues()
 	{
+		m_ret.setCancelled(m_panel.getButtonValue() != DialogContentPane.RETURN_VALUE_OK);
 		m_ret.setAccepted(m_panel.isTermsAccepted());
-		
 		return m_ret;
 	}
 	
@@ -191,6 +156,32 @@ public class TermsAndConditionsDialog extends JAPDialog
 			{
 				break;
 			}
+		}
+	}
+	
+	class TermsAndConditonsDialogReturnValues
+	{
+		private boolean cancelled = false;
+		private boolean accepted = false;
+		
+		public boolean isCancelled() 
+		{
+			return cancelled;
+		}
+
+		public void setCancelled(boolean cancelled) 
+		{
+			this.cancelled = cancelled;
+		}
+
+		public boolean isAccepted()
+		{
+			return accepted;
+		}
+		
+		public void setAccepted(boolean accepted)
+		{
+			this.accepted = accepted;
 		}
 	}
 }

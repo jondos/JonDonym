@@ -69,8 +69,10 @@ import anon.terms.TermsAndConditions;
 import anon.terms.TermsAndConditionsMixInfo;
 import anon.terms.TermsAndConditionsReadException;
 import anon.terms.TermsAndConditionsRequest;
+import anon.terms.TermsAndConditionsResponseHandler;
 import anon.terms.template.TermsAndConditionsTemplate;
 import anon.util.Base64;
+import anon.util.JAPMessages;
 import anon.util.XMLParseException;
 import anon.util.XMLUtil;
 
@@ -136,7 +138,7 @@ public class KeyExchangeManager {
    * @todo remove MixInfo entries when changes in the certificate ID of a mix are discovered
    */
   public KeyExchangeManager(InputStream a_inputStream, OutputStream a_outputStream, MixCascade a_cascade,
-							ITrustModel a_trustModel, ITermsAndConditionsContainer a_tcContainer)
+							ITrustModel a_trustModel)
 	  throws XMLParseException, SignatureException, IOException, UnknownProtocolVersionException,
 	  TrustException, TermsAndConditionsReadException, IllegalTCRequestPostConditionException
   {
@@ -349,10 +351,6 @@ public class KeyExchangeManager {
 			  	if(m_cascade.isTermsAndConditionsConfirmationRequired())
 				{
 			  		ServiceOperator currentOperator = mixinfo.getServiceOperator();
-			  		if( a_tcContainer == null )
-					{
-						throw new NullPointerException("Terms and Conditions confirmation required but no tc container is specified!");
-					}
 					TermsAndConditionsMixInfo tncInfo = mixinfo.getTermsAndConditionMixInfo();
 					if(tncInfo != null)
 					{
@@ -386,7 +384,7 @@ public class KeyExchangeManager {
 								}
 							}
 							
-							Locale currentLocale = a_tcContainer.getDisplayLanguageLocale();
+							Locale currentLocale = JAPMessages.getLocale();
 							
 							String langCode = 
 								tncInfo.hasTranslation(currentLocale) ? 
@@ -734,8 +732,7 @@ public class KeyExchangeManager {
 					 Document answerDoc = XMLUtil.toXMLDocument(answerData);
 					 if(answerDoc != null)
 					 {
-						 //System.out.println(XMLUtil.toString(answerDoc));
-						 a_tcContainer.getTermsAndConditionsResponseHandler().handleXMLResourceResponse(answerDoc, m_tnCRequest);
+						 TermsAndConditionsResponseHandler.get().handleXMLResourceResponse(answerDoc, m_tnCRequest);
 					 }
 				  }
 			  }

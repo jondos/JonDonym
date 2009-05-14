@@ -91,7 +91,6 @@ import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.client.AbstractAutoSwitchedMixCascadeContainer;
 import anon.client.AnonClient;
-import anon.client.ITermsAndConditionsContainer;
 import anon.client.TrustModel;
 import anon.crypto.ExpiredSignatureException;
 import anon.crypto.JAPCertificate;
@@ -160,7 +159,7 @@ import anon.util.Updater.ObservableInfo;
 
 /* This is the Controller of All. It's a Singleton!*/
 public final class JAPController extends Observable implements IProxyListener, Observer,
-	AnonServiceEventListener, IAIEventListener, ITermsAndConditionsContainer
+	AnonServiceEventListener, IAIEventListener
 {
 	/** Messages */
 	public static final String MSG_ERROR_SAVING_CONFIG = JAPController.class.getName() +
@@ -313,7 +312,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 	private MessageUpdater m_messageUpdater;
 	private PerformanceInfoUpdater m_perfInfoUpdater;
 	//private TermsAndConditionsUpdater m_termsUpdater;
-	private TermsAndConditionsResponseHandler m_tcResponseHandler;
 	
 	private Object LOCK_VERSION_UPDATE = new Object();
 	private boolean m_bShowingVersionUpdate = false;
@@ -445,7 +443,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		m_javaVersionUpdater = new JavaVersionUpdater(m_observableInfo);
 		m_messageUpdater = new MessageUpdater(m_observableInfo);
 		//m_termsUpdater = new TermsAndConditionsUpdater();
-		m_tcResponseHandler = new TermsAndConditionsResponseHandler();
+		
 		m_anonJobQueue = new JobQueue("Anon mode job queue");
 		m_Model.setAnonConnectionChecker(new AnonConnectionChecker());
 		InfoServiceDBEntry.setMutableProxyInterface(m_Model.getInfoServiceProxyInterface());
@@ -5539,8 +5537,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 		};
 		queueFetchAccountInfo.addJob(job);
 
-
-
 		synchronized (m_anonServiceListener)
 		{
 			Enumeration e = m_anonServiceListener.elements();
@@ -5550,53 +5546,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 			}
 		}
 	}
-	
-	public void acceptTermsAndConditions(ServiceOperator a_op)
-	{
-		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();
-		
-		if(a_op != null)
-		{
-			tcs.put(a_op.getId(), new Long(System.currentTimeMillis()));
-		}
-	}
-	
-	public void acceptTermsAndConditions(String a_ski, long a_timestamp)
-	{
-		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();
-		tcs.put(a_ski, new Long(a_timestamp));
-	}
-	
-	public boolean hasAcceptedTermsAndConditions(ServiceOperator a_op)
-	{
-		// TODO: check for newer TnCs
-		return (a_op == null) ? false : JAPModel.getInstance().getAcceptedTCs().containsKey(a_op.getId());
-	}
-	
-	public void revokeTermsAndConditions(ServiceOperator a_op)
-	{
-		Hashtable tcs = JAPModel.getInstance().getAcceptedTCs();
-		
-		if(a_op != null)
-		{
-			tcs.remove(a_op.getId());
-		}
-	}
-	
-	//public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(ServiceOperator a_op)
-	public TermsAndConditonsDialogReturnValues showTermsAndConditionsDialog(TermsAndConditions tc)
-	{
-		//TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(this.getViewWindow(), a_op, false); 
-		TermsAndConditionsDialog dlg = new TermsAndConditionsDialog(getCurrentView(), 
-				tc.isAccepted(), tc);
-		if(!dlg.hasError())
-		{
-			dlg.setVisible(true);
-		}
-		
-		return dlg.getReturnValues();
-	}
-
 
 	private class AutoSwitchedMixCascadeContainer extends AbstractAutoSwitchedMixCascadeContainer
 	{
@@ -5624,21 +5573,6 @@ public final class JAPController extends Observable implements IProxyListener, O
 		{
 			return JAPModel.isAutomaticallyReconnected();
 		}
-		
-		public ITermsAndConditionsContainer getTCContainer()
-		{
-			return JAPController.this;
-		}
-	}
-
-	public TermsAndConditionsResponseHandler getTermsAndConditionsResponseHandler() 
-	{
-		return m_tcResponseHandler;
-	}
-
-	public Locale getDisplayLanguageLocale() 
-	{
-		return JAPMessages.getLocale();
 	}
 	
 	private class WarnSmallBalanceOnDownloadListener extends HttpConnectionListenerAdapter
