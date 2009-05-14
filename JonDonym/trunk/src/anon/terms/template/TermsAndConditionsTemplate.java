@@ -109,7 +109,7 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	public long m_date;
 	
 	public Document signedDocument = null;
-	
+
 	private XMLSignature m_signature = null;
 
 	private MultiCertPath m_certPath = null;
@@ -527,6 +527,11 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	public Document getSignedDocument()
 	{
 		return signedDocument;
+	}
+	
+	public void setSignedDocument(Document signedDocument) 
+	{
+		this.signedDocument = signedDocument;
 	}
 	
 	public Element getXmlStructure() 
