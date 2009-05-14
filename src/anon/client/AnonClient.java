@@ -167,45 +167,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		final MixCascade mixCascade = (MixCascade) a_mixCascade;
 
 		m_serviceContainer = a_serviceContainer;
-
-		int cascadeLength = mixCascade.getNumberOfMixes();
-		ITermsAndConditionsContainer tcc = m_serviceContainer.getTCContainer();
-		
-		/*if(tcc != null)
-		{
-			for (int i = 0; i < cascadeLength; i++) 
-			{
-				MixInfo info = mixCascade.getMixInfo(i);
-				if(info == null)
-				{
-					continue; // ignore
-				}			
-			
-				ServiceOperator op = info.getServiceOperator();
-				if(op != null && !tcc.hasAcceptedTermsAndConditions(op) &&
-				op.hasTermsAndConditions())
-				{
-					Boolean bError = Boolean.TRUE;
-					Boolean bAcceptedTC = Boolean.FALSE;
-					
-					TermsAndConditonsDialogReturnValues ret = tcc.showTermsAndConditionsDialog(op);
-					
-					// only continue if we successfully displayed the TnC dialog
-					if(ret != null && !ret.hasError())
-					{	
-						if(!ret.hasAccepted())
-						{
-							tcc.revokeTermsAndConditions(op);
-							return ErrorCodes.E_INTERRUPTED;
-						}
-						else
-						{
-							tcc.acceptTermsAndConditions(op);
-						}
-					}
-				}
-			}
-		}*/
 		
 		StatusThread run = new StatusThread()
 		{
@@ -761,15 +722,15 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 									if(!d.areAllAccepted())
 									{
 										a_serviceContainer.keepCurrentService(false);
-										throw new IOException("Client rejected T&C after reading.");
+										throw new InterruptedException("Client rejected T&C after reading.");
 									}
 									
 									tctry++;
 									if(tctry > 1)
 									{
 										LogHolder.log(LogLevel.ERR, LogType.NET, 
-												"Still requested  t&cs after the first try is not allowed!");
-										throw new IOException("A second tc request must never be sent.");
+												"Requesting t&cs after the first try is not allowed!");
+										throw new InterruptedException("A second tc request must never be sent.");
 									}
 									
 									m_socketHandler =

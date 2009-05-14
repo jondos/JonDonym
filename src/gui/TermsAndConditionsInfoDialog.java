@@ -52,6 +52,14 @@ import anon.infoservice.ServiceOperator;
 import anon.terms.TermsAndConditions;
 import anon.util.JAPMessages;
 
+/**
+ * This dialog shows up when the user connects to a cascade and needs
+ * to confirm terms and conditions of at least one of its operators.
+ * The dialog gives an overview of the corresponding operators and 
+ * shows the terms when clicking on a specific operator.
+ * @author Simon Pecher
+ *
+ */
 public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndCondtionsTableController, ActionListener
 {
 	public static String MSG_DIALOG_TEXT = TermsAndConditionsInfoDialog.class.getName()+"_dialogText";
@@ -114,9 +122,12 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 		c.weightx = 0.0;
 		c.weighty = 0.0;
 		contentPane.add(buttonPanel, c);
+		okButtton.setEnabled(!operatorTable.areTermsRejected());
 		pack();
 	}
 	
+	//This methods checks if the stored terms are accepted.
+	//It does not refer to the internal table model.
 	public boolean areAllAccepted()
 	{
 		Vector v = operatorTable.getOperators();
@@ -128,6 +139,7 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 		return true;
 	}
 
+	//show the terms of the selected operator in a new display dialog
 	public boolean handleOperatorAction(ServiceOperator operator, boolean accepted) 
 	{
 		TermsAndConditions terms = TermsAndConditions.getTermsAndConditions(operator);
@@ -147,29 +159,40 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 	public void handleSelectLineAction(ServiceOperator operator) {}
 
 	public void actionPerformed(ActionEvent e) 
-	{
+	{	
 		if(e.getSource() == okButtton)
 		{
-			Vector[] allHandledTerms = new Vector[]
-      		{
-      			operatorTable.getTermsAccepted(),
-      			operatorTable.getTermsRejected()
-      		};
-      		TermsAndConditions terms = null;
-      		boolean accept = false;
-      		boolean errorDialogShown = false;
-      		
-      		for(int j=0; j < allHandledTerms.length; j++)
-      		{
-      			accept = (j==0);
-      			if(allHandledTerms[j] == null) continue;
-  				for(int i = 0; i < allHandledTerms[j].size(); i++)
-  				{
-  					terms = (TermsAndConditions) allHandledTerms[j].elementAt(i);
-  					if(terms != null) terms.setAccepted(accept);
-  				}
-      		}
+			commitActions();
 		}
 		dispose();
 	}
+
+	//commit the accept/reject actions to the stored terms and conditions
+	public void commitActions()
+	{
+		Vector[] allHandledTerms = new Vector[]
+		{
+			operatorTable.getTermsAccepted(),
+			operatorTable.getTermsRejected()
+		};
+		TermsAndConditions terms = null;
+		boolean accept = false;
+		
+		for(int j=0; j < allHandledTerms.length; j++)
+		{
+			accept = (j==0);
+			if(allHandledTerms[j] == null) continue;
+			for(int i = 0; i < allHandledTerms[j].size(); i++)
+			{
+				terms = (TermsAndConditions) allHandledTerms[j].elementAt(i);
+				if(terms != null) terms.setAccepted(accept);
+			}
+		}
+	}
+	
+	public void handleAcceptAction(ServiceOperator operator, boolean accept) 
+	{
+		okButtton.setEnabled(!operatorTable.areTermsRejected());
+	}
+
 }

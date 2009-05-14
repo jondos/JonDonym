@@ -34,5 +34,5 @@ public interface TermsAndCondtionsTableController
 {
 	public boolean handleOperatorAction(ServiceOperator operator, boolean accepted);
 	public void handleSelectLineAction(ServiceOperator operator);
-	//public void handleAcceptAction(TermsAndConditions terms, boolean accept);
+	public void handleAcceptAction(ServiceOperator operator, boolean accept);
 }

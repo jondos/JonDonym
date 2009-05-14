@@ -161,7 +161,7 @@ public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsA
 					terms = (TermsAndConditions) allHandledTerms[j].elementAt(i);
 					if(terms != null)
 					{
-						if(!accept && !JAPController.getInstance().isTCRejectingPossible(terms))
+						if(!accept && !JAPController.getInstance().isOperatorOfConnectedMix(terms.getOperator()))
 						{
 							if(!errorDialogShown)
 							{
@@ -212,5 +212,15 @@ public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsA
 		}
 		String tcHtmlText = tc.getHTMLText(JAPMessages.getLocale());
 		m_termsPane.setText(tcHtmlText);
+	}
+
+	public void handleAcceptAction(ServiceOperator operator, boolean accept) 
+	{
+		if(!accept && !JAPController.getInstance().isOperatorOfConnectedMix(operator) )
+		{
+				JAPDialog.showErrorDialog(JAPConf.getInstance(), 
+						JAPMessages.getString(MSG_ERR_REJECT_IMPOSSIBLE, operator.getOrganization()), LogType.MISC);
+				throw new IllegalStateException(JAPMessages.getString(MSG_ERR_REJECT_IMPOSSIBLE, operator.getOrganization()));
+		}
 	}
 }
