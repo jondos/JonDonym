@@ -405,7 +405,7 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 				if( o.hasTermsAndConditions() && 
 					(accepted.get(i) == acceptStatus))
 				{
-					v.add(TermsAndConditions.getTermsAndConditions(o));
+					v.addElement(TermsAndConditions.getTermsAndConditions(o));
 				}
 			}
 			return v;
