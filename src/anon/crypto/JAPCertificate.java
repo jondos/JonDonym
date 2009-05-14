@@ -126,6 +126,8 @@ public final class JAPCertificate implements IXMLEncodable, Cloneable, ICertific
 
 	/** Other certificate types */
 	public static final int CERTIFICATE_TYPE_PAYMENT = 7;
+	public static final int CERTIFICATE_TYPE_TERMS_AND_CONDITIONS = 9;
+	public static final int CERTIFICATE_TYPE_ROOT_TERMS_AND_CONDITIONS = 10;
 	public static final int CERTIFICATE_TYPE_ROOT = 0;
 
 	public static final String XML_ELEMENT_NAME = "X509Certificate";

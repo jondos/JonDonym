@@ -2679,14 +2679,14 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		LogHolder.log(LogLevel.ERR, a_logType, a_message, true);
 		if (a_throwable != null)
 		{
-			// the exception is only shown in debug mode or in case of an application error
+			// the exception is only shown in info mode or in case of an application error
 			if (bPossibleApplicationError)
 			{
 				LogHolder.log(LogLevel.ERR, a_logType, a_throwable);
 			}
 			else
 			{
-				LogHolder.log(LogLevel.DEBUG, a_logType, a_throwable);
+				LogHolder.log(LogLevel.INFO, a_logType, a_throwable);
 			}
 		}
 

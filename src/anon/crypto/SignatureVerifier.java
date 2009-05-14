@@ -62,6 +62,8 @@ public class SignatureVerifier implements IXMLEncodable
         public static final int DOCUMENT_CLASS_UPDATE = 3;
 
 		public static final int DOCUMENT_CLASS_PAYMENT = 4;
+		
+		public static final int DOCUMENT_CLASS_TERMS = 5;
 
         /**
          * Stores the name of the root node of the XML settings for this class.
@@ -303,6 +305,12 @@ public class SignatureVerifier implements IXMLEncodable
 					{
 						additionalCertificateInfoStructures = m_trustedCertificates.
 							getAvailableCertificatesByType(JAPCertificate.CERTIFICATE_TYPE_PAYMENT);
+						break;
+					}
+					case DOCUMENT_CLASS_TERMS:
+					{
+						additionalCertificateInfoStructures = m_trustedCertificates.
+							getAvailableCertificatesByType(JAPCertificate.CERTIFICATE_TYPE_TERMS_AND_CONDITIONS);
 						break;
 					}
 				}
