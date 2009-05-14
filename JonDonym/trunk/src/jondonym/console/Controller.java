@@ -73,7 +73,6 @@ import logging.LogLevel;
 import logging.SystemErrLog;
 import anon.client.AbstractAutoSwitchedMixCascadeContainer;
 import anon.client.DummyTrafficControlChannel;
-import anon.client.ITermsAndConditionsContainer;
 import anon.client.TrustException;
 import anon.client.TrustModel;
 import anon.client.TrustModel.TrustAttribute;
@@ -1058,11 +1057,6 @@ public class Controller
 		public boolean isReconnectedAutomatically()
 		{
 			return true;
-		}
-		
-		public ITermsAndConditionsContainer getTCContainer()
-		{
-			return null;
 		}
 	}	
 	

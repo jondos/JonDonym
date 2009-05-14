@@ -79,6 +79,11 @@ public class TermsAndConditionsResponseHandler extends Observable
 	public static final String XML_ELEMENT_INVALID_REQUEST_NAME = "InvalidTermsAndConditionsRequest";
 	public static final String XML_ELEMENT_RESPONSE_NAME = "TermsAndConditionsResponse";
 	
+	private static final TermsAndConditionsResponseHandler SINGLETON = 
+		new TermsAndConditionsResponseHandler();
+	
+	private TermsAndConditionsResponseHandler() {}
+	
 	public void handleXMLResourceResponse(Document answerDoc, TermsAndConditionsRequest request) throws XMLParseException, IOException, IllegalTCRequestPostConditionException
 	{
 		if(answerDoc.getDocumentElement().getTagName().equals(XML_ELEMENT_INVALID_REQUEST_NAME))
@@ -151,5 +156,10 @@ public class TermsAndConditionsResponseHandler extends Observable
 	{
 		setChanged();
 		notifyObservers();
+	}
+	
+	public static TermsAndConditionsResponseHandler get()
+	{
+		return SINGLETON;
 	}
 }

@@ -43,7 +43,6 @@ import anon.ErrorCodes;
 import anon.NotConnectedToMixException;
 import anon.client.AnonClient;
 import anon.client.DummyTrafficControlChannel;
-import anon.client.ITermsAndConditionsContainer;
 import anon.infoservice.MixCascade;
 import anon.infoservice.AbstractMixCascadeContainer;
 import anon.mixminion.MixminionServiceDescription;
@@ -1151,11 +1150,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		{
 			return false;
 		}
-		
-		public ITermsAndConditionsContainer getTCContainer()
-		{
-			return null;
-		}
 	}
 
 	private class EncapsulatedMixCascadeContainer extends AbstractMixCascadeContainer
@@ -1196,11 +1190,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		{
 			/** @todo reconnect is not yet supported with forwarded connections */
 			return!m_forwardedConnection && m_mixCascadeContainer.isReconnectedAutomatically();
-		}
-		
-		public ITermsAndConditionsContainer getTCContainer()
-		{
-			return m_mixCascadeContainer.getTCContainer();
 		}
 	}
 }

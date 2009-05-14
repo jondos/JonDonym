@@ -531,8 +531,6 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	
 	public Element getXmlStructure() 
 	{
-		
-		
 		return getDocument().getDocumentElement();
 	}
 	

@@ -79,11 +79,6 @@ public abstract class AbstractControlChannel extends AbstractChannel
 				{
 					return false;
 				}
-				
-				public ITermsAndConditionsContainer getTCContainer()
-				{
-					return null;
-				}
 			};
 		}
 		/* register the channel */

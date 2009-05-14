@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package gui;
 
+import gui.TermsAndConditionsDialog.TermsAndConditonsDialogReturnValues;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
 import jap.JAPController;
@@ -142,18 +143,19 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 	//show the terms of the selected operator in a new display dialog
 	public boolean handleOperatorAction(ServiceOperator operator, boolean accepted) 
 	{
+		
 		TermsAndConditions terms = TermsAndConditions.getTermsAndConditions(operator);
-		if(terms != null)
-		{
-			TermsAndConditionsDialog dlg = 
+		//terms == null must never happen
+		//if(terms != null)
+		//{
+			TermsAndConditionsDialog dialog = 
 				new TermsAndConditionsDialog(JAPController.getInstance().getCurrentView(), accepted, terms);
-			if(!dlg.hasError())
-			{
-				dlg.setVisible(true);
-				return dlg.getReturnValues().hasAccepted();
-			}
-		}
-		return accepted;
+			dialog.setVisible(true);
+			TermsAndConditonsDialogReturnValues dialogResult = dialog.getReturnValues(); 
+			
+			return dialogResult.isCancelled() ? accepted : dialogResult.isAccepted();
+		//}
+		
 	}
 
 	public void handleSelectLineAction(ServiceOperator operator) {}

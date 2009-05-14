@@ -66,6 +66,7 @@ import anon.infoservice.MixCascade;
 import anon.pay.AIControlChannel;
 import anon.pay.Pay;
 import anon.terms.TermsAndConditionsReadException;
+import anon.terms.TermsAndConditionsResponseHandler;
 import anon.transport.connection.ConnectionException;
 import anon.transport.connection.IStreamConnection;
 import anon.transport.connection.SocketConnection;
@@ -119,8 +120,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	private Pay m_paymentInstance;
 
 	private boolean m_connected;
-	
-	
 	
 	static 
 	{
@@ -708,8 +707,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 								try
 								{
 									m_keyExchangeManager = new KeyExchangeManager(m_socketHandler.getInputStream(),
-											m_socketHandler.getOutputStream(), (MixCascade) a_mixCascade,
-											a_serviceContainer, a_serviceContainer.getTCContainer());
+											m_socketHandler.getOutputStream(), (MixCascade) a_mixCascade, a_serviceContainer);
 									tcRetry = false;
 								}
 								catch(TermsAndConditionsReadException tcie)
@@ -718,7 +716,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 										new TermsAndConditionsInfoDialog(JAPController.getInstance().getViewWindow(),
 												tcie.getOperators(), ((MixCascade) a_mixCascade).getName() );
 									d.setVisible(true);
-									a_serviceContainer.getTCContainer().getTermsAndConditionsResponseHandler().notifyAboutChanges();
+									TermsAndConditionsResponseHandler.get().notifyAboutChanges();
 									if(!d.areAllAccepted())
 									{
 										a_serviceContainer.keepCurrentService(false);
