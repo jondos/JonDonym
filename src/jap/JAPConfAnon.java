@@ -2109,21 +2109,20 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 	protected void onRootPanelShown()
 	{
 		//updateValues(false); // deadlock in MacOS
-		new Thread(new Runnable()
+		/*new Thread(new Runnable()
 		{
 			public void run()
 			{
 				updateValues(false);
 			}
-		}).start();
-		//fetchCascades(false, false, true);
+		}).start();*/
 
 		if (m_tableMixCascade.getRowCount() > 0 && m_tableMixCascade.getSelectedRow() < 0)
 		{
 			m_tableMixCascade.getSelectionModel().setSelectionInterval(0, 0);
 		}
 		
-		this.updateValues(false);
+		/*this.updateValues(false);*/
 	}
 
 	public void setSelectedCascade(MixCascade a_cascade)

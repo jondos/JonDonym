@@ -190,7 +190,8 @@ public class JAPConfTC extends AbstractJAPConfModule implements Observer, TermsA
 
 	protected void onUpdateValues()
 	{
-		m_tblOperators.setOperators(Database.getInstance(ServiceOperator.class).getEntryList());
+		// is this update really needed?
+		//m_tblOperators.setOperators(Database.getInstance(ServiceOperator.class).getEntryList());
 	}
 
 	public boolean handleOperatorAction(ServiceOperator operator, boolean accepted) 
