@@ -130,40 +130,49 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 		this.controller = controller;
 	}
 	
+	//these methods all delegate to the model
 	public void setOperators(Vector operators)
 	{
-		if(getModel() != null && getModel() instanceof OperatorTableModel)
-		{
-			((OperatorTableModel) getModel()).setOperators(operators);
-		}
+		checkModel();
+		((OperatorTableModel) getModel()).setOperators(operators);
 		repaint();
 	}
 	
 	public Vector getOperators()
 	{
-		if(getModel() != null && getModel() instanceof OperatorTableModel)
-		{
-			return ((OperatorTableModel) getModel()).getOperators();
-		}
-		return null;
+		checkModel();
+		return ((OperatorTableModel) getModel()).getOperators();
 	}
 	
 	public Vector getTermsAccepted()
 	{
-		if(getModel() != null && getModel() instanceof OperatorTableModel)
-		{
-			return ((OperatorTableModel) getModel()).getTermsAccepted();
-		}
-		return null;
+		checkModel();
+		return ((OperatorTableModel) getModel()).getTermsAccepted();
 	}
 	
 	public Vector getTermsRejected()
 	{
-		if(getModel() != null && getModel() instanceof OperatorTableModel)
+		checkModel();
+		return ((OperatorTableModel) getModel()).getTermsRejected();
+	}
+	
+	public boolean areTermsRejected()
+	{
+		checkModel();
+		return ((OperatorTableModel) getModel()).areTermsRejected();
+	}
+	
+	//table operations are only supported for an OperatorTableModel
+	private void checkModel()
+	{
+		if(getModel() == null)
 		{
-			return ((OperatorTableModel) getModel()).getTermsRejected();
+			throw new IllegalStateException("Current model is null");
 		}
-		return null;
+		if(!(getModel() instanceof OperatorTableModel)) 
+		{
+			throw new IllegalStateException("Wrong model set "+getModel().getClass());
+		}
 	}
 	
 	public void setAccepted(int row, boolean value)
@@ -286,14 +295,24 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 				}
 				case ACCEPTED_COL:
 				{
-					if(((Boolean)aValue).booleanValue()) 
+					boolean accept = ((Boolean)aValue).booleanValue();
+					setAccepted(rowIndex, accept);
+					
+					if(controller != null)
 					{
-						accepted.set(rowIndex);
+						try
+						{
+							controller.handleAcceptAction((ServiceOperator)getValueAt(rowIndex, OPERATOR_COL), accept);
+						}
+						catch(IllegalStateException e)
+						{
+							//reset state if the handler reports that the user action lead to
+							//an invalid state
+							setAccepted(rowIndex, !accept);
+						}
 					}
-					else 
-					{
-						accepted.clear(rowIndex);
-					}
+					
+					
 					break;
 				}
 				default:
@@ -351,6 +370,29 @@ public class TermsAndConditionsOperatorTable extends JTable implements MouseList
 		public Vector getTermsRejected()
 		{
 			return getTermsWithAcceptStatus(false);
+		}
+		
+		public boolean areTermsRejected()
+		{
+			for (int i = 0; i < m_vecOperators.size(); i++)
+			{
+				if(!accepted.get(i)) return true;
+			}
+			return false;
+		}
+		
+		// simple workaround because the corresponding bitset operation is 
+		//not available for Java < 1.4
+		public void setAccepted(int index, boolean value)
+		{
+			if(value) 
+			{
+				accepted.set(index);
+			}
+			else 
+			{
+				accepted.clear(index);
+			}
 		}
 		
 		private Vector getTermsWithAcceptStatus(boolean acceptStatus)

@@ -3821,7 +3821,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 		return null;
 	}
 	
-	public boolean isTCRejectingPossible(TermsAndConditions tc)
+	public boolean isOperatorOfConnectedMix(ServiceOperator operator)
 	{
 		MixCascade connectedCascade = getConnectedCascade();
 		if(connectedCascade != null)
@@ -3830,7 +3830,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			for (int i = 0; i < connectedCascade.getNumberOfMixes(); i++) 
 			{
 				info = connectedCascade.getMixInfo(i);
-				if(info.getServiceOperator().equals(tc.getOperator()))
+				if(info.getServiceOperator().equals(operator))
 				{
 					return false;
 				}
