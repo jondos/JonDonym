@@ -56,7 +56,7 @@ public class TermsAndConditionsReadException extends Exception
 			op = ((TermsAndConditions) tcsTosShow.elementAt(i)).getOperator();
 			if(!v.contains(op) )
 			{
-				v.add(op);
+				v.addElement(op);
 			}
 		}
 		return v;

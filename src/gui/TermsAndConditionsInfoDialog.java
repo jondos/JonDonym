@@ -79,7 +79,7 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		contentPane.setPreferredSize(new Dimension(450,200));
+		//contentPane.setPreferredSize(new Dimension(450,200)); // use pack(); this method is only available in java >=1.5
 		c.gridx = 0;
 		c.gridy = 0;
 		c.insets = new Insets(5,5,5,5);
