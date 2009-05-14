@@ -84,7 +84,8 @@ public class TermsAndConditionsResponseHandler extends Observable
 	
 	private TermsAndConditionsResponseHandler() {}
 	
-	public void handleXMLResourceResponse(Document answerDoc, TermsAndConditionsRequest request) throws XMLParseException, IOException, IllegalTCRequestPostConditionException
+	public void handleXMLResourceResponse(Document answerDoc, TermsAndConditionsRequest request) throws 
+		XMLParseException, IOException, IllegalTCRequestPostConditionException, SignatureException
 	{
 		if(answerDoc.getDocumentElement().getTagName().equals(XML_ELEMENT_INVALID_REQUEST_NAME))
 		{
@@ -111,6 +112,10 @@ public class TermsAndConditionsResponseHandler extends Observable
 			while(currentResourceNode != null)
 			{
 				TermsAndConditionsTemplate fr = new TermsAndConditionsTemplate((Element)currentResourceNode.getFirstChild());
+				if (!fr.isVerified())
+				{
+					throw new SignatureException("TermsAndConditionsTemplate cannot be verified!");
+				}
 				Database db = Database.getInstance(TermsAndConditionsTemplate.class);
 				db.update(fr);
 				currentResourceNode = (Element) XMLUtil.getNextSiblingByName(currentResourceNode, 
