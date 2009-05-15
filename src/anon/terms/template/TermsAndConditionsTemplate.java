@@ -76,6 +76,9 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	private static final String XML_ATTR_NAME = "name";
 	private static final String XML_ATTR_TYPE = "type";
 	
+	private final static String[] REQUIRED_ATTRIBUTES =
+		new String[]{XML_ATTR_TYPE, XML_ATTR_LOCALE, XML_ATTR_DATE, XML_ATTR_ID, XML_ATTR_NAME};
+	
 	private static final String XML_ELEMENT_OPERATOR_COUNTRY = "OperatorCountry";
 	private static final String XML_ELEMENT_SIGNATURE = "Sig";
 	private static final String XML_ELEMENT_DATE = "Date";
@@ -102,11 +105,11 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	public static String XML_ELEMENT_NAME = "TermsAndConditionsTemplate";
 	
 	public String m_strId = null;
-	public Locale m_locale = null;
+	public String m_locale = null;
 	public String m_type = null;
 	
-	public long m_lastUpdate;
-	public long m_date;
+	//public long m_lastUpdate;
+	public String m_date;
 	
 	public Document signedDocument = null;
 
@@ -142,11 +145,10 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 		}
 		
 		name = XMLUtil.parseAttribute(templateRoot, XML_ATTR_NAME, "");
-		m_date = XMLUtil.parseAttribute(templateRoot, XML_ATTR_DATE, -1);
-		m_locale = new Locale(XMLUtil.parseAttribute(templateRoot, XML_ATTR_LOCALE, Locale.ENGLISH.toString()), "");
+		m_date = XMLUtil.parseAttribute(templateRoot, XML_ATTR_DATE, "");
+		m_locale = XMLUtil.parseAttribute(templateRoot, XML_ATTR_LOCALE, "");
 		m_type = XMLUtil.parseAttribute(templateRoot, XML_ATTR_TYPE, TERMS_AND_CONDITIONS_TYPE_COMMON_LAW);
 		m_strId = m_type + "_" + m_locale + "_" + m_date;
-		m_lastUpdate = System.currentTimeMillis();
 		m_signature = SignatureVerifier.getInstance().getVerifiedXml(templateRoot,
 			SignatureVerifier.DOCUMENT_CLASS_TERMS);
 		
@@ -200,7 +202,14 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 		TCComposite copiedSections = getSections();
 		TCComponent[] allSections = null;
 		
-		tcRootElement.setAttribute(XML_ATTR_NAME, name);
+		String[] requiredAttributeValues = 
+			new String[]{m_type, m_locale, m_date, m_strId, name};
+		
+		for (int i = 0; i < REQUIRED_ATTRIBUTES.length; i++) 
+		{
+			tcRootElement.setAttribute(REQUIRED_ATTRIBUTES[i], 
+					requiredAttributeValues[i]);
+		}
 		tcDocument.appendChild(tcRootElement);
 		
 		if(tcTranslation != null)
@@ -309,6 +318,7 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 				sectionsElement.appendChild(sectionElement);
 			}
 		}
+		
 		tcRootElement.appendChild(sectionsElement);
 		tcRootElement.appendChild(signatureElement);
 		return tcDocument;
@@ -364,10 +374,15 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 
 	public long getLastUpdate()
 	{
-		return m_lastUpdate;
+		return 0l;
 	}
 	
 	public long getVersionNumber()
+	{
+		return 0l;
+	}
+	
+	public String getDate()
 	{
 		return m_date;
 	}
