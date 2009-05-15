@@ -1643,11 +1643,17 @@ public class XMLUtil
 
 		// if this is empty text, remove it!
 		if (a_element.getNodeType() == Document.TEXT_NODE &&
-			(a_element.getNodeValue() == null || a_element.getNodeValue().trim().length() == 0))
+			(a_element.getNodeValue() == null || 
+			(a_element.getNodeValue().trim().length() == 0 && 
+			(a_element.getNodeValue().indexOf('\n') == -1) )))
 		{
-			if (a_element.getNextSibling() == null)
+			if (a_element.getNextSibling() == null &&
+				((a_element.getPreviousSibling() == null) || 
+				 (a_element.getPreviousSibling().getNodeType() != Node.TEXT_NODE) ||
+				 (a_element.getPreviousSibling().getNodeValue().indexOf('\n') == -1)) )
 			{
-				// this is a last node; append a new line and space
+				// this is a last node; append a new line and space, but only if there is no
+				//preceding textnode with a newline
 				space = new String();
 				for (int i = 0; i < a_level - 1; i++)
 				{
@@ -1672,40 +1678,52 @@ public class XMLUtil
 		if ( (a_element.getOwnerDocument().getDocumentElement() != a_element) &&
 			(a_element.getNodeType() != Document.TEXT_NODE))
 		{
+			node = a_element.getNextSibling();
+			StringBuffer spaceBuffer = new StringBuffer();
+			for (int i = 0; i < a_level; i++)
+			{
+				spaceBuffer.append(DEFAULT_FORMAT_SPACE);
+			}
+			space = spaceBuffer.toString();
 			// insert a new line before this element, if this is the first element
 			if (a_element == a_element.getParentNode().getFirstChild())
 			{
-				newLine = a_element.getOwnerDocument().createTextNode("\n");
+				newLine = a_element.getOwnerDocument().createTextNode("\n"+space);
 				a_element.getParentNode().insertBefore(newLine, a_element);
 				added++; // count one more
 			}
 
 			// insert space before the element according to the layer
-			space = new String();
-			for (int i = 0; i < a_level; i++)
-			{
-				space += DEFAULT_FORMAT_SPACE;
-			}
-			newLine = a_element.getOwnerDocument().createTextNode(space);
-			a_element.getParentNode().insertBefore(newLine, a_element);
-			added++; // count one more
-
+			
 			// insert a new line after the current element
+			
+			//append additional text content only if the previous node is no text node 
+			/*if( (previousSibling == null) ||
+				(previousSibling.getNodeType() != Node.TEXT_NODE) )
+			{
+				newLine = a_element.getOwnerDocument().createTextNode(space);
+				a_element.getParentNode().insertBefore(newLine, a_element);
+				added++; // count one more
+			}*/
+			//append additional text content only if the next node is no text node
 			node = a_element.getNextSibling();
-			if (node != null)
+			if ((node != null) && (node.getNodeType() != Node.TEXT_NODE) )
 			{
 				// add a new line before the next node
-				newLine = a_element.getOwnerDocument().createTextNode("\n");
+				newLine = a_element.getOwnerDocument().createTextNode("\n" + space);
 				a_element.getParentNode().insertBefore(newLine, node);
+				added++;
 			}
-			else
+			else if(node == null)
 			{
 				// this is the last node; append a new line and space
 				space = space.substring(0, space.length() - DEFAULT_FORMAT_SPACE.length());
 				newLine = a_element.getOwnerDocument().createTextNode("\n" + space);
 				a_element.getParentNode().appendChild(newLine);
+				added++;
 			}
-			added++; // count one more
+				 
+			//}// count one more
 		}
 
 		return added;
