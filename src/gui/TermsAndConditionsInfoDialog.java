@@ -103,7 +103,7 @@ public class TermsAndConditionsInfoDialog extends JAPDialog implements TermsAndC
 		
 		JScrollPane scroll = new JScrollPane(operatorTable);
 		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		
+		scroll.setPreferredSize(new Dimension(400, 120));
 		okButtton = new JButton(JAPMessages.getString(DialogContentPane.MSG_OK));
 		cancelButton = new JButton(JAPMessages.getString(DialogContentPane.MSG_CANCEL));
 		
