@@ -31,9 +31,6 @@
  */
 package anon.client;
 
-import gui.TermsAndConditionsInfoDialog;
-import jap.JAPController;
-
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ConnectException;
@@ -712,6 +709,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 								}
 								catch(TermsAndConditionsReadException tcie)
 								{
+									/*
 									TermsAndConditionsInfoDialog d = 
 										new TermsAndConditionsInfoDialog(JAPController.getInstance().getViewWindow(),
 												tcie.getOperators(), ((MixCascade) a_mixCascade).getName() );
@@ -735,6 +733,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 										new SocketHandler(
 												connectMixCascade( (MixCascade) a_mixCascade,
 														m_proxyInterface.getProxyInterface(false).getProxyInterface()));
+									*/
 								}
 							}
 						}

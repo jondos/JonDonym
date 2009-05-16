@@ -158,8 +158,23 @@ public class JAPVersionInfo extends AbstractDistributableDatabaseEntry
       catch (Exception e) {
       }
     }
-    Node nodeJ2se = XMLUtil.getFirstChildByName(nodeResources, "j2se");
-    m_lastSupportedJavaVersion = XMLUtil.parseAttribute(nodeJ2se, "version", JavaVersionDBEntry.CURRENT_JAVA_VERSION);
+    NodeList listJ2se = XMLUtil.getElementsByTagName(nodeResources, "j2se");
+    String verTemp;
+   
+    m_lastSupportedJavaVersion = JavaVersionDBEntry.CURRENT_JAVA_VERSION;
+    
+    if (listJ2se != null)
+    {
+	    for (int i = 0; i < listJ2se.getLength(); i++)
+	    {
+	    	verTemp = XMLUtil.parseAttribute(listJ2se.item(i), "version", JavaVersionDBEntry.CURRENT_JAVA_VERSION);
+	    	if (m_lastSupportedJavaVersion.compareTo(verTemp) > 0)
+	    	{
+	    		m_lastSupportedJavaVersion = verTemp;
+	    	}
+	    }
+    }
+   
     int indexPlus = m_lastSupportedJavaVersion.indexOf("+");
     if (indexPlus > 0)
     {

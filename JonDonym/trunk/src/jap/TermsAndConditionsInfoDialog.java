@@ -26,12 +26,13 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gui;
+package jap;
 
+import gui.TermsAndConditionsDialog;
+import gui.TermsAndCondtionsTableController;
 import gui.TermsAndConditionsDialog.TermsAndConditonsDialogReturnValues;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;
-import jap.JAPController;
 
 import java.awt.Component;
 import java.awt.Container;

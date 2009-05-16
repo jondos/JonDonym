@@ -29,7 +29,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package jap;
 
 import gui.JAPHyperlinkAdapter;
-import gui.TermsAndConditionsOperatorTable;
 import gui.TermsAndCondtionsTableController;
 import gui.UpperLeftStartViewport;
 import gui.dialog.JAPDialog;
