@@ -254,8 +254,15 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 					  !(contentNodeList.item(i).getNodeValue().trim().equals(""))) )
 			{
 				
-				boldElement = tempDoc.createElement("b"); 
-				boldElement.appendChild(tempDoc.importNode(contentNodeList.item(i), true));
+				boldElement = tempDoc.createElement("b");
+				try
+				{
+					boldElement.appendChild(XMLUtil.importNode(tempDoc, contentNodeList.item(i), true));
+				}
+				catch (XMLParseException a_e)
+				{
+					LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e);
+				}
 			}
 			else
 			{

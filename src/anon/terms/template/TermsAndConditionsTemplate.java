@@ -162,7 +162,7 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 			else
 			{
 				signedDocument = XMLUtil.createDocument();
-				signedDocument.appendChild(signedDocument.importNode(templateRoot, true));
+				signedDocument.appendChild(XMLUtil.importNode(signedDocument, templateRoot, true));
 			}
 		}
 		
