@@ -33,8 +33,6 @@ import java.io.StringReader;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.swing.text.html.HTML;
-
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;
@@ -43,7 +41,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 import anon.terms.TCComponent;
 import anon.util.IXMLEncodable;
@@ -247,7 +244,7 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 		for (int i = 0; i < contentNodeList.getLength(); i++) 
 		{
 			if( (contentNodeList.item(i).getNodeType() == Node.ELEMENT_NODE) &&
-				((Element) contentNodeList.item(i)).getTagName().equals(HTML.Tag.B.toString()))
+				((Element) contentNodeList.item(i)).getTagName().toLowerCase().equals("b"))
 			{
 				//don't enclose an already existing <b>-Tag.
 				boldElement = contentNodeList.item(i);
@@ -257,7 +254,7 @@ public class Paragraph extends TCComponent implements IXMLEncodable
 					  !(contentNodeList.item(i).getNodeValue().trim().equals(""))) )
 			{
 				
-				boldElement = tempDoc.createElement(HTML.Tag.B.toString()); 
+				boldElement = tempDoc.createElement("b"); 
 				boldElement.appendChild(tempDoc.importNode(contentNodeList.item(i), true));
 			}
 			else
