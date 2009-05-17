@@ -159,7 +159,7 @@ public class TermsAndConditionsDialog extends JAPDialog
 		}
 	}
 	
-	class TermsAndConditonsDialogReturnValues
+	public class TermsAndConditonsDialogReturnValues
 	{
 		private boolean cancelled = false;
 		private boolean accepted = false;
