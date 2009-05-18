@@ -46,6 +46,7 @@ import anon.client.DummyTrafficControlChannel;
 import anon.infoservice.MixCascade;
 import anon.infoservice.AbstractMixCascadeContainer;
 import anon.mixminion.MixminionServiceDescription;
+import anon.terms.TermsAndConditionConfirmation;
 import anon.tor.TorAnonServerDescription;
 import anon.transport.connection.IStreamConnection;
 import logging.LogHolder;
@@ -113,6 +114,8 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	private HTTPProxyCallback m_httpProxyCallback = null;
 	private DecompressionProxyCallback m_decompressionProxyCallback = null;
 	
+	private TermsAndConditionConfirmation termsConfirmation = null;
+	
 	/**
 	 * Stores the MixCascade we are connected to.
 	 */
@@ -154,9 +157,9 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	 *          A ServerSocket, where the AnonProxy listens for new requests (e.g.
 	 *          from a web browser).
 	 */
-	public AnonProxy(ServerSocket a_listener)
+	public AnonProxy(ServerSocket a_listener, TermsAndConditionConfirmation termsConfirmation)
 	{
-		this (a_listener, null);
+		this (a_listener, null, termsConfirmation);
 	}
 
 	/**
@@ -175,7 +178,8 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	 *          connections to the anon servers (e.g. if you are behind some
 	 *          firewall etc.)
 	 */
-	public AnonProxy(ServerSocket a_listener, IMutableProxyInterface a_proxyInterface)
+	public AnonProxy(ServerSocket a_listener, IMutableProxyInterface a_proxyInterface, 
+			TermsAndConditionConfirmation termsConfirmation)
 	{
 		if (a_listener == null)
 		{
@@ -195,6 +199,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_anonServiceListener = new Vector();
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
+		this.termsConfirmation = termsConfirmation;
 		// SOCKS\uFFFD
 	}
 
@@ -217,7 +222,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 	 *          server side.
 	 */
 	public AnonProxy(ServerSocket a_listener, IStreamConnection a_proxyConnection,
-					 int a_maxDummyTrafficInterval)
+					 int a_maxDummyTrafficInterval, TermsAndConditionConfirmation termsConfirmation)
 	{
 		if (a_listener == null)
 		{
@@ -231,6 +236,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		m_anonServiceListener = new Vector();
 		m_Anon.removeEventListeners();
 		m_Anon.addEventListener(this);
+		this.termsConfirmation = termsConfirmation;
 	}
 	
 	public void enableProxyCallback(ProxyCallback callback)
@@ -770,7 +776,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 				
 				LogHolder.log(LogLevel.WARNING, LogType.NET, "Try reconnect to AN.ON service. Connecting to " + cascadeNext.getName() + "...");
 				
-				int ret = m_Anon.initialize(cascadeNext, m_currentMixCascade);
+				int ret = m_Anon.initialize(cascadeNext, m_currentMixCascade, termsConfirmation);
 				if (ret == ErrorCodes.E_SUCCESS)
 				{
 					m_currentMixCascade.keepCurrentService(true);
@@ -867,7 +873,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 			MixCascade nextCascade = m_currentMixCascade.getNextCascade();
 			LogHolder.log(LogLevel.NOTICE, LogType.NET, "Connecting to AN.ON service " + nextCascade.getName() + "...");
 			m_numChannels = 0;
-			int ret = m_Anon.initialize(nextCascade, m_currentMixCascade);
+			int ret = m_Anon.initialize(nextCascade, m_currentMixCascade, termsConfirmation);
 
 			if (ret != ErrorCodes.E_SUCCESS)
 			{
@@ -910,7 +916,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 				{
 					m_Tor = AnonServiceFactory.getAnonServiceInstance(AnonServiceFactory.SERVICE_TOR);
 					m_Tor.setProxy(m_proxyInterface);
-					m_Tor.initialize(m_currentTorParams, null);
+					m_Tor.initialize(m_currentTorParams, null, termsConfirmation);
 					LogHolder.log(LogLevel.DEBUG, LogType.NET, "Tor initialized");
 				}
 				if (m_currentMixminionParams != null)
@@ -918,7 +924,7 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 					m_Mixminion = AnonServiceFactory.getAnonServiceInstance(AnonServiceFactory.
 						SERVICE_MIXMINION);
 					m_Mixminion.setProxy(m_proxyInterface);
-					m_Mixminion.initialize(m_currentMixminionParams, null);
+					m_Mixminion.initialize(m_currentMixminionParams, null, termsConfirmation);
 					LogHolder.log(LogLevel.DEBUG, LogType.NET, "Mixminion initialized");
 				}
 			}

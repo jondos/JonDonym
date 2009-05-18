@@ -39,6 +39,7 @@ import anon.AnonService;
 import anon.AnonServiceEventListener;
 import anon.IServiceContainer;
 import anon.infoservice.IMutableProxyInterface;
+import anon.terms.TermsAndConditionConfirmation;
 
 /** This class implements the Mixminion anonymity service, which can be used to sent anonymous e-mail
  *
@@ -59,7 +60,8 @@ public class Mixminion implements AnonService
 	{
 	}
 
-	public int initialize(AnonServerDescription anonServer, IServiceContainer a_serviceContainer)
+	public int initialize(AnonServerDescription anonServer, IServiceContainer a_serviceContainer, 
+			TermsAndConditionConfirmation termsConfirmation)
 	{
 		m_serviceDescription = (MixminionServiceDescription)anonServer;
 		return 0;

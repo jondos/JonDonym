@@ -139,6 +139,7 @@ import anon.proxy.HTTPProxyCallback;
 import anon.proxy.HttpConnectionListenerAdapter;
 import anon.proxy.IProxyListener;
 import anon.proxy.JonDoFoxHeader;
+import anon.terms.TermsAndConditionConfirmation;
 import anon.terms.TermsAndConditions;
 import anon.terms.TermsAndConditionsResponseHandler;
 import anon.terms.template.TermsAndConditionsTemplate;
@@ -159,7 +160,7 @@ import anon.util.Updater.ObservableInfo;
 
 /* This is the Controller of All. It's a Singleton!*/
 public final class JAPController extends Observable implements IProxyListener, Observer,
-	AnonServiceEventListener, IAIEventListener
+	AnonServiceEventListener, IAIEventListener, TermsAndConditionConfirmation
 {
 	/** Messages */
 	public static final String MSG_ERROR_SAVING_CONFIG = JAPController.class.getName() +
@@ -3427,7 +3428,8 @@ public final class JAPController extends Observable implements IProxyListener, O
 						if (!bSwitchCascade)
 						{
 							m_proxyAnon = new AnonProxy(
-								m_socketHTTPListener, JAPModel.getInstance().getMutableProxyInterface());
+								m_socketHTTPListener, JAPModel.getInstance().getMutableProxyInterface(), 
+								JAPController.getInstance());
 						}
 					}
 					
@@ -5910,5 +5912,15 @@ public final class JAPController extends Observable implements IProxyListener, O
 				}
 			}
 		}
+	}
+
+	public boolean confirmTermsAndConditions(Vector operators, Vector terms) 
+	{
+		TermsAndConditionsInfoDialog d = 
+			new TermsAndConditionsInfoDialog(JAPController.getInstance().getViewWindow(),
+					operators, (getCurrentMixCascade() != null) ? getCurrentMixCascade().getName() : "");
+		d.setVisible(true);
+		TermsAndConditionsResponseHandler.get().notifyAboutChanges();
+		return d.areAllAccepted();
 	}
 }

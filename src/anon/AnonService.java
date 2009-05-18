@@ -30,6 +30,7 @@ package anon;
 import java.net.ConnectException;
 
 import anon.infoservice.IMutableProxyInterface;
+import anon.terms.TermsAndConditionConfirmation;
 
 /** This class is used for accessing the AnonService. An instance is created
  *  via AnonServiceFactory.
@@ -51,7 +52,8 @@ public interface AnonService
 	 *  @return E_CONNECT, if a general connection error occurred
 	 *
 	 */
-	int initialize(AnonServerDescription anonServer, IServiceContainer a_serviceContainer);
+	int initialize(AnonServerDescription anonServer, IServiceContainer a_serviceContainer,
+			TermsAndConditionConfirmation termsConfirmation);
 
 	/** Sets the settings ofr the proxy, which should be used to establish network connections
 	 * @return E_SUCCESS, if ok

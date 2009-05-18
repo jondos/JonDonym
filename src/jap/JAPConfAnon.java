@@ -34,7 +34,6 @@ import gui.JAPJIntField;
 import gui.MapBox;
 import gui.MixDetailsDialog;
 import gui.MultiCertOverview;
-import gui.OperatorsCellRenderer;
 import gui.dialog.JAPDialog;
 import jap.forward.JAPRoutingMessage;
 

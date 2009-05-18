@@ -29,7 +29,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package jap;
 
 import gui.TermsAndConditionsDialog;
-import gui.TermsAndCondtionsTableController;
 import gui.TermsAndConditionsDialog.TermsAndConditonsDialogReturnValues;
 import gui.dialog.DialogContentPane;
 import gui.dialog.JAPDialog;

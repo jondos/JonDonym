@@ -40,6 +40,7 @@ import anon.infoservice.HTTPConnectionFactory;
 import anon.infoservice.InfoServiceDBEntry;
 import anon.infoservice.MixCascade;
 import anon.infoservice.ProxyInterface;
+import anon.terms.TermsAndConditionConfirmation;
 import anon.transport.address.AddressMappingException;
 import anon.transport.address.Endpoint;
 import anon.transport.address.IAddress;
@@ -1084,7 +1085,8 @@ final public class JAPRoutingSettings extends Observable implements IXMLEncodabl
 		{
 			if (getRoutingMode() == ROUTING_MODE_CLIENT)
 			{
-				anonProxy = new AnonProxy(a_listener, m_forwardedConnection, m_maxDummyTrafficInterval);
+				anonProxy = new AnonProxy(a_listener, m_forwardedConnection, m_maxDummyTrafficInterval,
+						new TermsAndConditionConfirmation.AlwaysAccept());
 			}
 		}
 		return anonProxy;
