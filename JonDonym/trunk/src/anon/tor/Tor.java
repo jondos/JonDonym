@@ -47,6 +47,7 @@ import anon.crypto.MyRandom;
 import anon.infoservice.Database;
 import anon.infoservice.ImmutableProxyInterface;
 //import anon.tor.ordescription.InfoServiceORListFetcher;
+import anon.terms.TermsAndConditionConfirmation;
 import anon.tor.ordescription.ORDescriptor;
 import anon.tor.ordescription.ORList;
 import anon.tor.ordescription.PlainORListFetcher;
@@ -780,7 +781,8 @@ public class Tor implements Runnable, AnonService
 	 * @return
 	 * error code
 	 */
-	public synchronized int initialize(AnonServerDescription torDirServer, IServiceContainer a_serviceContainer)
+	public synchronized int initialize(AnonServerDescription torDirServer, IServiceContainer a_serviceContainer,
+			TermsAndConditionConfirmation termsConfirmation)
 	{
 		if (! (torDirServer instanceof TorAnonServerDescription))
 		{

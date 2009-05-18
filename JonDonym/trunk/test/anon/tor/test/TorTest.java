@@ -25,7 +25,7 @@ public class TorTest extends PrivateTestCase
 	public void setUp()
 	{
 		tor = Tor.getInstance();
-		tor.initialize(new TorAnonServerDescription(), null);
+		tor.initialize(new TorAnonServerDescription(), null, null);
 	}
 
 	public void tearDown()

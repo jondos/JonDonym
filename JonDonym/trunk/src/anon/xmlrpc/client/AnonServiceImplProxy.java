@@ -40,6 +40,7 @@ import anon.AnonServiceEventListener;
 import anon.ErrorCodes;
 import anon.IServiceContainer;
 import anon.infoservice.IMutableProxyInterface;
+import anon.terms.TermsAndConditionConfirmation;
 public class AnonServiceImplProxy implements AnonService
 {
 	String m_RpcServerHost;
@@ -54,7 +55,8 @@ public class AnonServiceImplProxy implements AnonService
 		m_ClientID = ( (Integer) o).intValue();
 	}
 
-	public int initialize(AnonServerDescription mixCascade, IServiceContainer a_serviceContainer)
+	public int initialize(AnonServerDescription mixCascade, IServiceContainer a_serviceContainer,
+			TermsAndConditionConfirmation termsConfirmation)
 	{
 		return 0;
 	}

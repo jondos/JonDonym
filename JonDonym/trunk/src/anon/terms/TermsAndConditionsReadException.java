@@ -42,9 +42,9 @@ public class TermsAndConditionsReadException extends Exception
 		tcsTosShow.addElement(tc);
 	}
 	
-	public Enumeration getTermsTermsAndConditonsToRead()
+	public Vector getTermsTermsAndConditonsToRead()
 	{
-		return tcsTosShow.elements();
+		return (Vector) tcsTosShow.clone();
 	}
 	
 	public Vector getOperators()

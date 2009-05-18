@@ -62,6 +62,7 @@ import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.MixCascade;
 import anon.pay.AIControlChannel;
 import anon.pay.Pay;
+import anon.terms.TermsAndConditionConfirmation;
 import anon.terms.TermsAndConditionsReadException;
 import anon.terms.TermsAndConditionsResponseHandler;
 import anon.transport.connection.ConnectionException;
@@ -154,7 +155,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	}
 
 	public int initialize(final AnonServerDescription a_mixCascade,
-						  final IServiceContainer a_serviceContainer)
+						  final IServiceContainer a_serviceContainer, 
+						  final TermsAndConditionConfirmation termsConfirmation)
 	{
 		if (! (a_mixCascade instanceof MixCascade))
 		{
@@ -226,7 +228,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 						}
 						return;
 					}
-					status = initializeProtocol(connectionToMixCascade, a_mixCascade, a_serviceContainer);
+					status = initializeProtocol(connectionToMixCascade, a_mixCascade, 
+							a_serviceContainer, termsConfirmation);
 					synchronized (m_threadInitialise)
 					{
 						m_threadInitialise.notifyAll();
@@ -664,7 +667,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 	}
 
 	private int initializeProtocol(IStreamConnection a_connectionToMixCascade, final AnonServerDescription a_mixCascade,
-								   final IServiceContainer a_serviceContainer)
+								   final IServiceContainer a_serviceContainer, final TermsAndConditionConfirmation termsConfirmation)
 	{
 		synchronized (m_internalSynchronization)
 		{
@@ -709,13 +712,8 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 								}
 								catch(TermsAndConditionsReadException tcie)
 								{
-									/*
-									TermsAndConditionsInfoDialog d = 
-										new TermsAndConditionsInfoDialog(JAPController.getInstance().getViewWindow(),
-												tcie.getOperators(), ((MixCascade) a_mixCascade).getName() );
-									d.setVisible(true);
-									TermsAndConditionsResponseHandler.get().notifyAboutChanges();
-									if(!d.areAllAccepted())
+									if(!termsConfirmation.confirmTermsAndConditions(tcie.getOperators(),
+											tcie.getTermsTermsAndConditonsToRead()))
 									{
 										a_serviceContainer.keepCurrentService(false);
 										throw new InterruptedException("Client rejected T&C after reading.");
@@ -733,7 +731,7 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 										new SocketHandler(
 												connectMixCascade( (MixCascade) a_mixCascade,
 														m_proxyInterface.getProxyInterface(false).getProxyInterface()));
-									*/
+									
 								}
 							}
 						}

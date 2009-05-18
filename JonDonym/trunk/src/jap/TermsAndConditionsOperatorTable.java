@@ -28,8 +28,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package jap;
 
-import gui.OperatorsCellRenderer;
-import gui.TermsAndCondtionsTableController;
 
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;

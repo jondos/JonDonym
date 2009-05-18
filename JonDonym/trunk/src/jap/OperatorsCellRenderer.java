@@ -1,4 +1,6 @@
-package gui;
+package jap;
+
+import gui.GUIUtils;
 
 import java.awt.Color;
 import java.awt.Component;

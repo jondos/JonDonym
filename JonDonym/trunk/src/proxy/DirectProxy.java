@@ -59,6 +59,7 @@ import anon.AnonServiceFactory;
 import anon.infoservice.MixCascade;
 import anon.IServiceContainer;
 import anon.infoservice.IMutableProxyInterface;
+import anon.terms.TermsAndConditionConfirmation;
 import anon.util.JAPMessages;
 
 final public class DirectProxy implements Runnable, AnonService
@@ -203,7 +204,8 @@ final public class DirectProxy implements Runnable, AnonService
 		}
 	}
 
-	public int initialize(AnonServerDescription a_mixCascade, IServiceContainer a_serviceContainer)
+	public int initialize(AnonServerDescription a_mixCascade, IServiceContainer a_serviceContainer, 
+			TermsAndConditionConfirmation termsConfirmation)
 	{
 		if (! (a_mixCascade instanceof MixCascade) || a_mixCascade == null)
 		{
