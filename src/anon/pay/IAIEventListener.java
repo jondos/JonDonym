@@ -27,7 +27,9 @@
  */
 package anon.pay;
 
+import anon.infoservice.MixCascade;
+
 public interface IAIEventListener
-{
-	public void unrealisticBytes(long a_bytes);
+{	
+	public void accountEmpty(PayAccount a_account, MixCascade a_cascade);
 }

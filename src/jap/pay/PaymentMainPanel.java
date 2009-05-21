@@ -831,7 +831,6 @@ public class PaymentMainPanel extends FlippingPanel
 			{
 				JAPController.getInstance().setAnonMode(false);
 				bSuccess = ErrorCodes.E_ACCOUNT_EMPTY;
-
 				run = new Runnable()
 				{
 					public void run()
@@ -1014,27 +1013,37 @@ public class PaymentMainPanel extends FlippingPanel
 			/* When "account empty" is signaled the connection should always be closed.
 			 * But this should not be controlled by a GUI component.
 			 */
-			/*if (a_msg.getErrorCode() != XMLErrorMessage.ERR_ACCOUNT_EMPTY &&
-				cascade.equals(JAPController.getInstance().switchToNextMixCascade()))
-			{*/
-				// there are no other cascades to switch to
-				LogHolder.log(LogLevel.WARNING, LogType.NET, "There are no other cascades to choose!");
-				for (int i = 0; i < 5 &&
-					 (JAPController.getInstance().getAnonMode() ||
-					  JAPController.getInstance().isAnonConnected()); i++)
+			
+			if (a_msg.getErrorCode() == XMLErrorMessage.ERR_ACCOUNT_EMPTY)
+			{
+				if (!cascade.isPayment() || 
+					PayAccountsFile.getInstance().getChargedAccount(cascade.getPIID()) != null)
 				{
-					// does not work well as of auto-reconnection
-					JAPController.getInstance().setAnonMode(false);
-					try
-					{
-						Thread.sleep(200);
-					}
-					catch (InterruptedException ex)
-					{
-						break;
-					}
+					return;
 				}
-			//}
+			}
+			else if (!cascade.equals(JAPController.getInstance().switchToNextMixCascade()))
+			{
+				return;
+			}
+			
+			// there is no other suitable cascade to switch to
+			LogHolder.log(LogLevel.WARNING, LogType.NET, "There are no other cascades to choose!");
+			for (int i = 0; i < 5 &&
+				 (JAPController.getInstance().getAnonMode() ||
+				  JAPController.getInstance().isAnonConnected()); i++)
+			{
+				// does not work well as of auto-reconnection
+				JAPController.getInstance().setAnonMode(false);
+				try
+				{
+					Thread.sleep(200);
+				}
+				catch (InterruptedException ex)
+				{
+					break;
+				}
+			}
 			
 			piEntry = (PaymentInstanceDBEntry)Database.getInstance(PaymentInstanceDBEntry.class).getEntryById(
 					cascade.getPIID());
@@ -1055,6 +1064,7 @@ public class PaymentMainPanel extends FlippingPanel
 						String message = //JAPMessages.getString(MSG_FREE_OF_CHARGE) + "<br><br>" +
 							translateBIError(msg);
 						Component parent = PaymentMainPanel.this;
+						Component parentWindow;
 						final JAPDialog.LinkedHelpContext adapter =			
 							new JAPDialog.LinkedHelpContext("premium")
 						{
@@ -1073,7 +1083,8 @@ public class PaymentMainPanel extends FlippingPanel
 							}
 						};
 
-						if (!GUIUtils.getParentWindow(parent).isVisible())
+						parentWindow = GUIUtils.getParentWindow(parent);
+						if (parentWindow == null || !parentWindow.isVisible())
 						{
 							parent = JAPController.getInstance().getCurrentView();
 						}

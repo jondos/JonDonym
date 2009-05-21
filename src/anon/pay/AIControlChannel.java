@@ -50,6 +50,8 @@ import anon.pay.xml.XMLResponse;
 import anon.pay.xml.XMLPriceCertificate;
 import anon.util.XMLUtil;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Vector;
 import java.util.Enumeration;
 import anon.ErrorCodes;
@@ -90,10 +92,13 @@ public class AIControlChannel extends XmlControlChannel
 
   private boolean m_bPrepaidReceived = false;
   private long m_prepaidBytes = 0;
+  private boolean m_bMultiplexerClosed = false;
 
   private Vector m_aiListeners = new Vector();
 
   private PacketCounter m_packetCounter;
+  private Observer m_packetCountEmptyObserver;
+  private boolean m_bEmptyMessageSent = false;
 
   private MixCascade m_connectedCascade;
 
@@ -118,6 +123,7 @@ public AIControlChannel(Multiplexer a_multiplexer,
     m_packetCounter = a_packetCounter;
 	m_connectedCascade = a_connectedCascade;
 	m_aiLoginSyncObject = new Vector(1);
+	
 	//m_synchronizedAILogin =  true;
 	
 	String firstMixSoftwareVersion = 
@@ -150,9 +156,13 @@ public AIControlChannel(Multiplexer a_multiplexer,
   }
 
   public void addAIListener(IAIEventListener a_aiListener) {
-    if (!m_aiListeners.contains(a_aiListener)) {
-      m_aiListeners.addElement(a_aiListener);
-    }
+	 synchronized (m_aiListeners)
+	 {
+	    if (!m_aiListeners.contains(a_aiListener)) 
+	    {
+	      m_aiListeners.addElement(a_aiListener);
+	    }
+	 }
   }
 
   /**
@@ -191,7 +201,6 @@ public AIControlChannel(Multiplexer a_multiplexer,
 		  }
 		  else if (tagName.equals(XMLErrorMessage.XML_ELEMENT_NAME))
 		  {
-
 			  XMLErrorMessage error = new XMLErrorMessage(elemRoot);
 			  LogHolder.log(LogLevel.EXCEPTION, LogType.PAY,
 						"For account " + PayAccountsFile.getInstance().getActiveAccountNumber() + ", processing AI ErrorMessage "+error.getErrorCode()+": "+error.getMessage());
@@ -339,21 +348,10 @@ public AIControlChannel(Multiplexer a_multiplexer,
 		}
 	}
 
-	//if sent, process cost confirmation
-    XMLEasyCC cc = request.getCC();
-    if (cc != null) 
-    {
+	//if sent, process cost confirmation    
       try 
       {
-		 if (PayAccountsFile.getInstance().getActiveAccount().isCharged(new Timestamp(System.currentTimeMillis())))
-		 {
-			 processCcToSign(cc);
-		 }
-		 else
-		 {
-			 PayAccountsFile.getInstance().signalAccountError(
-					 new XMLErrorMessage(XMLErrorMessage.ERR_ACCOUNT_EMPTY));
-		 }
+			 processCcToSign(request.getCC());
       }
       catch (Exception ex1) 
       {
@@ -362,7 +360,7 @@ public AIControlChannel(Multiplexer a_multiplexer,
         // @todo handle this exception
         LogHolder.log(LogLevel.ERR, LogType.PAY, ex1);
       }
-    }
+
   }
 
   private void updateBalance(final PayAccount currentAccount, final boolean a_bSynchronous)
@@ -419,6 +417,11 @@ public AIControlChannel(Multiplexer a_multiplexer,
 	 */
 	private synchronized void processCcToSign(XMLEasyCC cc) throws Exception
 	{
+		if (cc == null)
+		{
+			return;
+		}
+		
 		PayAccount currentAccount = PayAccountsFile.getInstance().getActiveAccount();
 		long transferedBytes;
 		XMLEasyCC myLastCC;
@@ -432,7 +435,7 @@ public AIControlChannel(Multiplexer a_multiplexer,
 		/*
 		if (!m_bInitialCCSent)
 		{
-			LogHolder.log(LogLevel.WARNING, LogType.PAY, "CC requested before inital CC was sent!");
+			LogHolder.log(LogLevel.WARNING, LogType.PAY, "CC requested before initial CC was sent!");
 		}*/
 
 
@@ -556,8 +559,82 @@ public AIControlChannel(Multiplexer a_multiplexer,
 
 	  //System.out.println(cc.getTransferredBytes());
 
+	 if (!PayAccountsFile.getInstance().getActiveAccount().isCharged(new Timestamp(System.currentTimeMillis())))
+	 {
+		 synchronized(m_aiLoginSyncObject)
+		 {
+			 if (!m_bMultiplexerClosed && m_packetCountEmptyObserver == null)
+			 {
+				 m_packetCountEmptyObserver = new EmptyAccountPacketObserver(cc.getConcatenatedPriceCertHashes());
+				 m_packetCounter.addObserver(m_packetCountEmptyObserver);
+			 }
+		 }
+	 }
 	  sendXmlMessage(XMLUtil.toXMLDocument(cc));
-  }
+	 
+	}
+	 
+	 private final class EmptyAccountPacketObserver implements Observer
+	 {
+		 private String m_concatenatedPCHashes;
+		private EmptyAccountPacketObserver(String a_concatenatedPCHashes)
+		{
+			m_concatenatedPCHashes = a_concatenatedPCHashes;
+		}
+		 
+		 public void update(Observable o, Object arg)
+		 {
+			 synchronized(m_aiLoginSyncObject)
+			 {
+				 if (!m_bEmptyMessageSent)
+				 {
+					 PayAccount account =  PayAccountsFile.getInstance().getActiveAccount();
+					 try
+					 {
+						 long prepaidBytes;
+						 long diff;
+						 account.updateCurrentBytes(m_packetCounter);
+						 XMLEasyCC myLastCC = account.getAccountInfo().getCC(m_concatenatedPCHashes);
+						 prepaidBytes = myLastCC.getTransferredBytes() - account.getCurrentBytes() + m_prepaidBytes;
+						 diff =  account.getCurrentCreditCalculatedAlsoNegative();
+						 if (diff < 0)
+						 {
+							 prepaidBytes += diff;
+						 }
+						 //System.out.println(prepaidBytes);
+						if (prepaidBytes > 0)
+						{
+							return;
+						}
+					 }
+					 catch (Exception a_e)
+					 {
+						 LogHolder.log(LogLevel.EXCEPTION, LogType.PAY, a_e);
+					 }
+					 /*
+					 if (PayAccountsFile.getInstance().getChargedAccount(m_connectedCascade.getPIID()) == null)
+					 {
+						 new Thread()
+						 {
+							 public void run()
+							 {*/
+								 PayAccountsFile.getInstance().signalAccountError(
+											new XMLErrorMessage(XMLErrorMessage.ERR_ACCOUNT_EMPTY));
+							 /*}
+						 }.start();
+					 }*/
+					 
+					 // close the current connection by notifying an empty account
+					 for (int i = 0; i < m_aiListeners.size(); i++)
+					 {
+						 ((IAIEventListener)m_aiListeners.elementAt(i)).accountEmpty(
+								 PayAccountsFile.getInstance().getActiveAccount(), m_connectedCascade);
+					 }
+					 m_bEmptyMessageSent = true;
+				 }
+			 }
+		 }
+	 }
 
 
   public int sendAccountCert()
@@ -896,6 +973,11 @@ public AIControlChannel(Multiplexer a_multiplexer,
 	{
 		synchronized(m_aiLoginSyncObject)
 		{
+			m_bMultiplexerClosed = true;
+			if (m_packetCountEmptyObserver != null)
+			{
+				m_packetCounter.deleteObserver(m_packetCountEmptyObserver);
+			}
 			m_aiLoginSyncObject.notifyAll();
 		}
 	}

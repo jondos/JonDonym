@@ -124,7 +124,15 @@ public class JobQueue
 							// start the newest job
 							m_currentJob = (Job) m_jobs.elementAt(0);
 							m_currentJobThread = (Thread) m_jobThreads.elementAt(0);
-							m_currentJobThread.start();
+							try
+							{
+								m_currentJobThread.start();
+							}
+							catch (IllegalThreadStateException a_e)
+							{
+								// maybe we are shutting down the program...
+								LogHolder.log(LogLevel.ERR, LogType.THREAD, a_e);
+							}
 						}
 					}
 					// stop all threads
