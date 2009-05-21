@@ -686,7 +686,26 @@ public class PayAccount implements IXMLEncodable
 		
 		if (m_accountInfo == null)
 		{
-			return -1l;
+			return Long.MIN_VALUE;
+		}
+		
+		jonDoCountedCredit = getCurrentCreditCalculatedAlsoNegative();
+		
+		if (jonDoCountedCredit < 0)
+		{
+			jonDoCountedCredit = 0;
+		}
+		
+		return jonDoCountedCredit;
+	}
+	
+	public long getCurrentCreditCalculatedAlsoNegative()
+	{
+		long jonDoCountedCredit;
+		
+		if (m_accountInfo == null)
+		{
+			return Long.MIN_VALUE;
 		}
 		
 		synchronized(m_accountInfo)
@@ -694,10 +713,6 @@ public class PayAccount implements IXMLEncodable
 			jonDoCountedCredit = (m_accountInfo.getBalance().getSpent() + 
 				 m_accountInfo.getBalance().getVolumeKBytesLeft()*1000l) -
 				m_accountInfo.getAllCCsTransferredBytes();
-			if (jonDoCountedCredit < 0)
-			{
-				jonDoCountedCredit = 0;
-			}
 		}
 		return jonDoCountedCredit;
 	}

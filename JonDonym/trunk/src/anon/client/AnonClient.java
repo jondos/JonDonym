@@ -61,7 +61,9 @@ import anon.infoservice.IMutableProxyInterface;
 import anon.infoservice.ImmutableProxyInterface;
 import anon.infoservice.MixCascade;
 import anon.pay.AIControlChannel;
-import anon.pay.Pay;
+import anon.pay.IAIEventListener;
+import anon.pay.PayAccount;
+import anon.pay.PayAccountsFile;
 import anon.terms.TermsAndConditionConfirmation;
 import anon.terms.TermsAndConditionsReadException;
 import anon.terms.TermsAndConditionsResponseHandler;
@@ -115,9 +117,9 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 
 	private IStreamConnection m_streamConnection;
 
-	private Pay m_paymentInstance;
-
 	private boolean m_connected;
+	
+	private IAIEventListener m_aiEventListener;
 	
 	static 
 	{
@@ -133,7 +135,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		m_dummyTrafficInterval = -1;
 		m_keyExchangeManager = null;
 		m_streamConnection = null;
-		m_paymentInstance = null;
 		m_internalSynchronization = new Object();
 		m_internalSynchronizationForSocket = new Object();
 		m_internalSynchronizationForDummyTraffic = new Object();
@@ -402,10 +403,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				m_keyExchangeManager.removeCertificateLock();
 				m_keyExchangeManager = null;
 			}
-			if (m_paymentInstance != null)
-			{
-				m_paymentInstance = null;
-			}
 			/*
 			synchronized (m_eventListeners)
 			{
@@ -486,37 +483,45 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		}
 	}
 
+	private void reconnect(final Object a_argument)
+	{
+		/* shutdown everything */
+		new Thread(new Runnable()
+		{
+			/** @todo We use a thread to avoid deadlocks - is this really the best solution? */
+			public void run()
+			{
+				shutdown(!m_serviceContainer.isReconnectedAutomatically());
+				synchronized (m_eventListeners)
+				{
+					final Enumeration eventListenersList = m_eventListeners.elements();
+					Thread notificationThread = new Thread(new Runnable()
+					{
+						public void run()
+						{
+							if (a_argument != null && a_argument instanceof Exception)
+							{
+								LogHolder.log(LogLevel.INFO, LogType.NET, (Exception)a_argument);
+							}
+							while (eventListenersList.hasMoreElements())
+							{
+								( (AnonServiceEventListener) (eventListenersList.nextElement())).
+									connectionError();
+							}
+						}
+					}, "ConnectionError notification");
+					notificationThread.setDaemon(true);
+					notificationThread.start();
+				}
+			}
+		}).start();
+	}
+	
 	public void update(Observable a_object, final Object a_argument)
 	{
 		if ( (a_object == m_socketHandler) && (a_argument instanceof IOException))
 		{
-			/* shutdown everything */
-			new Thread(new Runnable()
-			{
-				/** @todo We use a thread to avoid deadlocks - is this really the best solution? */
-				public void run()
-				{
-					shutdown(!m_serviceContainer.isReconnectedAutomatically());
-					synchronized (m_eventListeners)
-					{
-						final Enumeration eventListenersList = m_eventListeners.elements();
-						Thread notificationThread = new Thread(new Runnable()
-						{
-							public void run()
-							{
-								LogHolder.log(LogLevel.INFO, LogType.NET, (IOException)a_argument);
-								while (eventListenersList.hasMoreElements())
-								{
-									( (AnonServiceEventListener) (eventListenersList.nextElement())).
-										connectionError();
-								}
-							}
-						}, "ConnectionError notification");
-						notificationThread.setDaemon(true);
-						notificationThread.start();
-					}
-				}
-			}).start();
+			reconnect(a_argument);
 		}
 		else if (a_object == m_packetCounter)
 		{
@@ -578,11 +583,6 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 				m_dummyTrafficControlChannel.setDummyTrafficInterval(a_interval);
 			}
 		}
-	}
-
-	public Pay getPay()
-	{
-		return m_paymentInstance;
 	}
 
 	private IStreamConnection connectMixCascade(final MixCascade a_mixCascade, ImmutableProxyInterface a_proxyInterface) throws
@@ -928,9 +928,17 @@ public class AnonClient implements AnonService, Observer, DataChainErrorListener
 		 */
 		AIControlChannel aiControlChannel =
 			new AIControlChannel(a_multiplexer, a_packetCounter, a_serviceContainer, a_cascade);
-		m_paymentInstance = new Pay(aiControlChannel);
+		//aiControlChannel.addAIListener(a_aiListener)
 		if (a_keyExchangeManager.isPaymentRequired())
 		{	
+			aiControlChannel.addAIListener(new IAIEventListener()
+			{
+				public void accountEmpty(PayAccount a_account, MixCascade a_cascade)
+				{
+					// close the connection due to an empty account; if set, reconnection will be done automatically
+					reconnect(null);
+				}
+			});
 			aiControlChannel.setAILoginTimeout(m_loginTimeout);
 			return aiControlChannel.sendAccountCert();
 		}

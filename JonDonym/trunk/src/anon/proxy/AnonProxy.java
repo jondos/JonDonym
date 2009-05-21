@@ -1077,25 +1077,6 @@ final public class AnonProxy implements Runnable, AnonServiceEventListener
 		return service != null && service.isConnected();
 	}
 
-	public void addAIListener(IAIEventListener a_aiListener)
-	{
-		/** @todo check if needed */
-		//synchronized (THREAD_SYNC)
-		{
-			//if (m_Anon instanceof AnonClient)
-			{
-				try
-				{
-					(( (AnonClient) m_Anon).getPay()).getAIControlChannel().addAIListener(a_aiListener);
-				}
-				catch (ClassCastException a_e)
-				{
-					LogHolder.log(LogLevel.EMERG, LogType.NET, a_e);
-				}
-			}
-		}
-	}
-
 	public void packetMixed(long a_totalBytes)
 	{
 		if (isConnected() || a_totalBytes == 0)

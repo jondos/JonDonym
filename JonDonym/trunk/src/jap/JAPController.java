@@ -160,7 +160,7 @@ import anon.util.Updater.ObservableInfo;
 
 /* This is the Controller of All. It's a Singleton!*/
 public final class JAPController extends Observable implements IProxyListener, Observer,
-	AnonServiceEventListener, IAIEventListener, TermsAndConditionConfirmation
+	AnonServiceEventListener, TermsAndConditionConfirmation
 {
 	/** Messages */
 	public static final String MSG_ERROR_SAVING_CONFIG = JAPController.class.getName() +
@@ -3606,6 +3606,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 							{
 								if (bWaitingForConnection)
 								{
+									/*
 									try
 									{
 										proxyAnon.addAIListener(JAPController.getInstance());
@@ -3613,7 +3614,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 									catch (Exception a_e)
 									{
 										// do nothing
-									}
+									}*/
 									JAPController.getInstance().removeEventListener(this);
 									bWaitingForConnection = false;
 								}
@@ -5453,30 +5454,7 @@ public final class JAPController extends Observable implements IProxyListener, O
 			}
 		}
 	}
-
-	public void unrealisticBytes(long a_bytes)
-	{
-		JAPDialog.LinkedInformationAdapter adapter =
-			new JAPDialog.LinkedInformationAdapter()
-		{
-			public boolean isOnTop()
-			{
-				return true;
-			}
-		};
-
-		boolean choice = JAPDialog.showYesNoDialog(
-			getCurrentView(),
-			JAPMessages.getString("unrealBytesDesc") + "<p>" +
-			JAPMessages.getString("unrealBytesDifference") + " " + Util.formatBytesValueWithUnit(a_bytes),
-			JAPMessages.getString("unrealBytesTitle"),adapter
-			);
-
-		if (!choice)
-		{
-			this.setAnonMode(false);
-		}
-	}
+	
 
 	/**
 	 * Gets the password for payment data encryption
