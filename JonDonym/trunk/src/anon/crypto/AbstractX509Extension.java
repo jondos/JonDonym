@@ -168,7 +168,6 @@ public abstract class AbstractX509Extension
 						ms_classExtensions.addElement(AVAILABLE_EXTENSIONS[i]);
 					}
 				}
-
 			}
 		}
 

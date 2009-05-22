@@ -202,6 +202,31 @@ public final class X509Extensions
 
 		return null;
 	}
+	
+	/**
+	 * Returns the extensions with the specified identifier if they are contained in this
+	 * X509Extensions object.
+	 * @param a_identifier an X509 extension identifier
+	 * @return the extensions with the specified identifier or an empty Vector if it is not contained in this
+	 *         X509Extensions object
+	 */
+	public Vector getExtensions(String a_identifier)
+	{
+		Vector extensionsFound = new Vector();
+		AbstractX509Extension currentExtension;
+
+		for (int i = 0; i < m_vecExtensions.size(); i++)
+		{
+			currentExtension = (AbstractX509Extension)m_vecExtensions.elementAt(i);
+
+			if (currentExtension.getIdentifier().equals(a_identifier))
+			{
+				extensionsFound.addElement(currentExtension);
+			}
+		}
+
+		return extensionsFound;
+	}
 
 	/**
 	 * Returns a Vector with all X509 extensions that are contained in this object as

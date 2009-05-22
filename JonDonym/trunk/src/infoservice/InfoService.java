@@ -52,7 +52,6 @@ import anon.util.JAPMessages;
 import anon.util.ThreadPool;
 import anon.util.TimedOutputStream;
 import anon.util.XMLParseException;
-import anon.util.Updater.ObservableInfo;
 import logging.LogHolder;
 import logging.LogLevel;
 import logging.LogType;

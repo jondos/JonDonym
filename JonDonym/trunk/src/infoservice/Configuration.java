@@ -402,6 +402,9 @@ final public class Configuration
 				loadTrustedCertificateFiles(a_properties, "trustedUpdateCertificateFiles", 
 						JAPCertificate.CERTIFICATE_TYPE_UPDATE, "update", true);
 				
+				loadTrustedCertificateFiles(a_properties, "trustedTermsCertificateFiles", 
+						JAPCertificate.CERTIFICATE_TYPE_TERMS_AND_CONDITIONS, "terms and conditions", true);
+				
 				loadTrustedCertificateFiles(a_properties, "trustedPICertificateFiles", 
 						JAPCertificate.CERTIFICATE_TYPE_PAYMENT, "PI", true);			
 				

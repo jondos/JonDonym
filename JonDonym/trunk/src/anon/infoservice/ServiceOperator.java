@@ -131,11 +131,11 @@ public class ServiceOperator extends AbstractDatabaseEntry
 		}
 			
 		// get the URL
-		AbstractX509Extension extension =
-			operatorCertificate.getExtensions().getExtension(X509SubjectAlternativeName.IDENTIFIER);
-		if (extension != null && extension instanceof X509SubjectAlternativeName)
+		Vector extensionsFound = operatorCertificate.getExtensions().getExtensions(X509SubjectAlternativeName.IDENTIFIER);
+		for (int j = 0; j < extensionsFound.size(); j++)
 		{
-			X509SubjectAlternativeName alternativeName = (X509SubjectAlternativeName) extension;
+			X509SubjectAlternativeName alternativeName = (X509SubjectAlternativeName) extensionsFound.elementAt(j);
+			
 			Vector tags = alternativeName.getTags();
 			Vector values = alternativeName.getValues();
 			if (tags.size() == values.size())
@@ -206,11 +206,11 @@ public class ServiceOperator extends AbstractDatabaseEntry
 			}
 			
 			// get the URL
-			AbstractX509Extension extension =
-				path.getSecondCertificate().getExtensions().getExtension(X509SubjectAlternativeName.IDENTIFIER);
-			if (extension != null && extension instanceof X509SubjectAlternativeName)
+			Vector extensionsFound = path.getSecondCertificate().getExtensions().getExtensions(X509SubjectAlternativeName.IDENTIFIER);
+			X509SubjectAlternativeName alternativeName;
+			for (int j = 0; j < extensionsFound.size(); j++)
 			{
-				X509SubjectAlternativeName alternativeName = (X509SubjectAlternativeName) extension;
+				alternativeName = (X509SubjectAlternativeName) extensionsFound.elementAt(j);
 				Vector tags = alternativeName.getTags();
 				Vector values = alternativeName.getValues();
 				if (tags.size() == values.size())
@@ -231,6 +231,7 @@ public class ServiceOperator extends AbstractDatabaseEntry
 						}
 					}
 				}
+				
 			}
 			
 			/** Create ID */
