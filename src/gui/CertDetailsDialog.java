@@ -832,7 +832,6 @@ public class CertDetailsDialog extends JAPDialog implements MouseListener
 				lbl_val.setFont(VALUE_FONT);
 				detailsPanel.addRow(lbl_key, null, lbl_val);
 			}
-
 			else
 			{
 				lbl_key = new JLabel(extensionsVect.getExtension(i).getName(), JLabel.RIGHT);
