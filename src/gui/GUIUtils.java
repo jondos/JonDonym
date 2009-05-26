@@ -27,57 +27,71 @@
  */
 package gui;
 
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.Hashtable;
-import java.util.Vector;
+import gui.dialog.JAPDialog;
 
+import java.applet.Applet;
+import java.awt.AWTEvent;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.IllegalComponentStateException;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.awt.MenuComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.IllegalComponentStateException;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.awt.AWTEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.MouseListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.ColorModel;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import javax.swing.JFileChooser;
-import javax.swing.ToolTipManager;
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.JComponent;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.KeyStroke;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.FontUIResource;
 
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+import anon.infoservice.ServiceLocation;
 import anon.util.BooleanVariable;
 import anon.util.ClassUtil;
 import anon.util.CountryMapper;
@@ -85,19 +99,6 @@ import anon.util.IReturnRunnable;
 import anon.util.JAPMessages;
 import anon.util.JobQueue;
 import anon.util.ResourceLoader;
-import anon.infoservice.ServiceLocation;
-import gui.dialog.JAPDialog;
-import logging.LogHolder;
-import logging.LogLevel;
-import logging.LogType;
-import java.util.Enumeration;
-import java.awt.EventQueue;
-import java.awt.MenuComponent;
-import java.applet.Applet;
-import java.awt.Container;
-import java.awt.image.ColorModel;
-import java.lang.reflect.Field;
-import java.lang.reflect.Constructor;
 
 /**
  * This class contains helper methods for the GUI.
@@ -1401,6 +1402,11 @@ public final class GUIUtils
 	public static JLabel createLabel(String messageKey1, String messageKey2)
 	{
 		return createLabel(new String[]{messageKey1, messageKey2});
+	}
+
+	public static JButton createButton(String messageKey)
+	{
+		return new JButton(JAPMessages.getString(messageKey));
 	}
 	
 	/**
