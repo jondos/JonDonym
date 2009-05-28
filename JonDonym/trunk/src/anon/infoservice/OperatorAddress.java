@@ -33,6 +33,7 @@ public class OperatorAddress
 	public final static String NODE_NAME_VAT = "Vat";
 	public final static String NODE_NAME_FAX = "Fax";
 	public final static String NODE_NAME_VENUE = "Venue";
+	public final static String NODE_NAME_OPERATORCOUNTRY = "OperatorCountry";
 	
 	public final static String PROPERTY_NAME_STREET = "street";
 	public final static String PROPERTY_NAME_POSTALCODE = "postalCode";
@@ -45,6 +46,7 @@ public class OperatorAddress
 	private String postalCode;
 	private String city;
 	private String vat;
+	private String operatorCountry;
 	private String fax;
 	private String venue;
 	
@@ -147,6 +149,16 @@ public class OperatorAddress
 	public void setFax(String fax) 
 	{
 		this.fax = fax;
+	}
+	
+	public String getOperatorCountry()
+	{
+		return operatorCountry;
+	}
+	
+	public void setOperatorCountry(String a_operatorCountry)
+	{
+		operatorCountry = a_operatorCountry;
 	}
 	
 	public String getVenue() 

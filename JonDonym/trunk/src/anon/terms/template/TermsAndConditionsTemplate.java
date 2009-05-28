@@ -217,8 +217,10 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 			operator = tcTranslation.getOperator();
 			address = tcTranslation.getOperatorAddress();
 			
-			Locale operatorLocale = new Locale(operator.getCountryCode(), operator.getCountryCode());
+			Locale operatorLocale = new Locale(tcTranslation.getLocale(), operator.getCountryCode());
 			Locale tcLocale = new Locale(tcTranslation.getLocale(), "", "");
+			
+			address.setOperatorCountry(operatorLocale.getDisplayCountry(tcLocale));
 			
 			Element operatorElement = operator.toXMLElement(tcDocument, address, false);
 			Element operatorCountryElement = tcDocument.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
@@ -229,7 +231,9 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 					(address != null) ? tcTranslation.getOperatorAddress().getVenue() : "");
 			XMLUtil.setValue(dateElement,
 					DateFormat.getDateInstance(DateFormat.MEDIUM, tcLocale).format(tcTranslation.getDate()));
-			XMLUtil.setValue(operatorCountryElement, operatorLocale.getDisplayCountry(tcLocale));
+			operatorElement.appendChild(operatorCountryElement);
+			
+			XMLUtil.setValue(operatorCountryElement, address.getOperatorCountry());
 			
 			//add/replace the customized sections/paragraphs
 			TCComponent[] translationSections = tcTranslation.getSections().getTCComponents();
@@ -500,7 +504,7 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 			return tc;
 		}
 		
-		tc = InfoServiceHolder.getInstance().getTCFramework(a_id);
+		tc = InfoServiceHolder.getInstance().getTCTemplate(a_id);
 		Database.getInstance(TermsAndConditionsTemplate.class).update(tc);
 		
 		return tc;
