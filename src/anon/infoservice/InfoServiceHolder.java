@@ -137,12 +137,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	private static final int GET_STATUSINFO_TIMEOUT = 19;
 	private static final int GET_PERFORMANCE_INFO = 20;
 	
-	private static final int GET_TC_FRAMEWORK = 21;
+	private static final int GET_TC_TEMPLATE = 21;
 	
 	private static final int GET_TCS = 22;
 	private static final int GET_TC_SERIALS = 23;
 	
 	private static final int GET_EXIT_ADDRESSES = 24;
+	
+	private static final int GET_TC_TEMPLATES = 25;
 	
 	/**
 	 * Function number for fetchInformation() - getMixInfo().
@@ -562,7 +564,7 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 					{
 						tempHashtable = currentInfoService.getLatestJavaSerials();
 					}
-					else if (functionNumber == GET_TC_FRAMEWORK)
+					else if (functionNumber == GET_TC_TEMPLATE)
 					{
 						result = currentInfoService.getTCTemplate((String) (arguments.elementAt(0)));
 					}
@@ -917,9 +919,14 @@ public class InfoServiceHolder extends Observable implements IXMLEncodable
 	 * from preferred info service
 	 * @return
 	 */
-	public TermsAndConditionsTemplate getTCFramework(String a_id)
+	public TermsAndConditionsTemplate getTCTemplate(String a_id)
 	{
-		return (TermsAndConditionsTemplate) (fetchInformation(GET_TC_FRAMEWORK, Util.toVector(a_id)));
+		return (TermsAndConditionsTemplate) (fetchInformation(GET_TC_TEMPLATE, Util.toVector(a_id)));
+	}
+	
+	public Hashtable getTCTemplates()
+	{
+		return (Hashtable) (fetchInformation(GET_TC_TEMPLATES, null));
 	}
 	
 	public Hashtable getTermsAndConditions()

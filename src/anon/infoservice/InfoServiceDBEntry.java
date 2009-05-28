@@ -351,6 +351,12 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		this(null, null, new ListenerInterface(a_host, a_port).toVector(), false, true, 0, 0, false);
 		setUserDefined(true);
 	}
+	
+	public InfoServiceDBEntry(Vector a_ListenerInterfaces) throws IllegalArgumentException
+	{
+		this(null, null, a_ListenerInterfaces, false, true, 0, 0, false);
+		setUserDefined(true);
+	}
 
 	/**
 	 * Creates a new InfoServiceDBEntry. The ID is set to a generic value derived from the host and
@@ -670,6 +676,17 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 		while (listenerInterfacesEnumeration.hasMoreElements())
 		{
 			r_listenerInterfacesList.addElement(listenerInterfacesEnumeration.nextElement());
+		}
+		return r_listenerInterfacesList;
+	}
+	
+	public ListenerInterface[] getListenerInterfacesArray()
+	{
+		ListenerInterface[] r_listenerInterfacesList = new ListenerInterface[m_listenerInterfaces.size()];
+		Enumeration listenerInterfacesEnumeration = m_listenerInterfaces.elements();
+		for (int i = 0; i <  r_listenerInterfacesList.length; i++)
+		{
+			r_listenerInterfacesList[i] = (ListenerInterface)listenerInterfacesEnumeration.nextElement();
 		}
 		return r_listenerInterfacesList;
 	}
