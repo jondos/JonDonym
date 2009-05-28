@@ -61,10 +61,18 @@
 			<xsl:value-of select="Street" /><br />
 			<xsl:value-of select="PostalCode" /> <xsl:text> </xsl:text> <xsl:value-of select="City" /><br />
 			<xsl:value-of select="OperatorCountry" /><br />
-			<xsl:text>VAT: </xsl:text> <xsl:value-of select="Vat" /><br />
-			<xsl:text>Fax: </xsl:text><xsl:value-of select="Fax" /><br />
+			<xsl:apply-templates select="./Vat"/>
+			<xsl:apply-templates select="./Fax"/>
 			<xsl:text>E-Mail: </xsl:text> <xsl:value-of select="EMail" /><br />
 		</p>
+	</xsl:template>
+	
+	<xsl:template match="Operator/Vat">
+		<xsl:text>VAT: </xsl:text> <xsl:value-of select="." /><br />
+	</xsl:template>
+	
+	<xsl:template match="Operator/Fax">
+			<xsl:text>Fax: </xsl:text><xsl:value-of select="." /><br />
 	</xsl:template>
 	
 	<xsl:template match="Preamble/LeadingText">
