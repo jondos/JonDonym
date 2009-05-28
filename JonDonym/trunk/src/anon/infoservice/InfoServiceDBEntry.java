@@ -382,7 +382,7 @@ public class InfoServiceDBEntry extends AbstractDistributableCertifiedDatabaseEn
 							  boolean a_primaryForwarderList, boolean a_japClientContext,
 							  long a_creationTime, long a_serialNumber, boolean a_bPerfServerEnabled) throws IllegalArgumentException
 	{
-		super(a_japClientContext ? System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE_JAP :
+		super(a_japClientContext ? Long.MAX_VALUE :
 			  System.currentTimeMillis() + Constants.TIMEOUT_INFOSERVICE);
 
 		if (a_listeners == null)

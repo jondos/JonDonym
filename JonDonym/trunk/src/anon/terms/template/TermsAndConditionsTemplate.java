@@ -104,14 +104,14 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	public static String XML_ELEMENT_CONTAINER_NAME = "TermsAndConditionsTemplates";
 	public static String XML_ELEMENT_NAME = "TermsAndConditionsTemplate";
 	
-	public String m_strId = null;
-	public String m_locale = null;
-	public String m_type = null;
+	private String m_strId = null;
+	private String m_locale = null;
+	private String m_type = null;
 	
 	//public long m_lastUpdate;
-	public String m_date;
+	private String m_date;
 	
-	public Document signedDocument = null;
+	private Document signedDocument = null;
 
 	private XMLSignature m_signature = null;
 
@@ -384,6 +384,11 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 	public long getVersionNumber()
 	{
 		return 0l;
+	}
+	
+	public String getLanguage()
+	{
+		return m_locale;
 	}
 	
 	public String getDate()
