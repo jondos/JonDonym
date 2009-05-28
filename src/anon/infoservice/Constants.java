@@ -45,12 +45,6 @@ final public class Constants
 	public static final int MAX_NR_OF_CONCURRENT_CONNECTIONS = 50;
 
 	/**
-	 * The standard timeout for infoservice database entries in a JAP client. This should be an
-	 * infinite timeout (1000 years should be infinite enough).
-	 */
-	public static final long TIMEOUT_INFOSERVICE_JAP = 1000 * 365 * 24 * 3600 * 1000L;
-
-	/**
 	 * The standard timeout for infoservice database entries in an infoservice.
 	 */
 	public static final long TIMEOUT_INFOSERVICE = 15 * 60 * 1000L; // 15 minutes
