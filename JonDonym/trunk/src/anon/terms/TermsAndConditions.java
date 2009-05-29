@@ -724,6 +724,11 @@ public class TermsAndConditions implements IXMLEncodable
 			}
 		}
 		
+		public boolean hasContent()
+		{
+			return sections.hasContent();
+		}
+		
 		public void setTemplateReferenceId(String templateReferenceId) 
 		{
 			this.templateReferenceId = templateReferenceId;

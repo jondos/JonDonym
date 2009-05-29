@@ -371,6 +371,11 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 		transformer.transform(xmlSource, new StreamResult(writer));
 	}
 	
+	public String getType()
+	{
+		return m_type;
+	}
+	
 	public String getId() 
 	{
 		return m_strId;
