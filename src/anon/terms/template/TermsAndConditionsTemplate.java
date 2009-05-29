@@ -220,7 +220,10 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 			Locale operatorLocale = new Locale(tcTranslation.getLocale(), operator.getCountryCode());
 			Locale tcLocale = new Locale(tcTranslation.getLocale(), "", "");
 			
-			address.setOperatorCountry(operatorLocale.getDisplayCountry(tcLocale));
+			if (address != null)
+			{
+				address.setOperatorCountry(operatorLocale.getDisplayCountry(tcLocale));
+			}
 			
 			Element operatorElement = operator.toXMLElement(tcDocument, address, false);
 			Element operatorCountryElement = tcDocument.createElement(XML_ELEMENT_OPERATOR_COUNTRY);
@@ -233,7 +236,8 @@ public class TermsAndConditionsTemplate extends AbstractDistributableCertifiedDa
 					DateFormat.getDateInstance(DateFormat.MEDIUM, tcLocale).format(tcTranslation.getDate()));
 			operatorElement.appendChild(operatorCountryElement);
 			
-			XMLUtil.setValue(operatorCountryElement, address.getOperatorCountry());
+			
+			XMLUtil.setValue(operatorCountryElement, operatorLocale.getDisplayCountry(tcLocale));
 			
 			//add/replace the customized sections/paragraphs
 			TCComponent[] translationSections = tcTranslation.getSections().getTCComponents();

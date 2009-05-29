@@ -532,7 +532,7 @@ public class TermsAndConditions implements IXMLEncodable
 	{
 		try
 		{
-			if(translation == null)
+			if (translation == null)
 			{
 				throw new NullPointerException("Translation is null!)");
 			}
@@ -550,6 +550,7 @@ public class TermsAndConditions implements IXMLEncodable
 		}
 		catch (Exception e)
 		{
+			LogHolder.log(LogLevel.EXCEPTION, LogType.MISC, e);
 			StringBuffer htmlErrorTextBuffer = new StringBuffer();
 			htmlErrorTextBuffer.append("<html><head><title>");
 			htmlErrorTextBuffer.append(JAPMessages.getString("error"));
