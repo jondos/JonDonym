@@ -33,6 +33,7 @@ public class OperatorAddress
 	public final static String NODE_NAME_VAT = "Vat";
 	public final static String NODE_NAME_FAX = "Fax";
 	public final static String NODE_NAME_VENUE = "Venue";
+	public final static String NODE_NAME_ADDITIONALINFO = "AdditionalInfo";
 	public final static String NODE_NAME_OPERATORCOUNTRY = "OperatorCountry";
 	
 	public final static String PROPERTY_NAME_STREET = "street";
@@ -41,6 +42,7 @@ public class OperatorAddress
 	public final static String PROPERTY_NAME_VAT = "vat";
 	public final static String PROPERTY_NAME_FAX = "fax";
 	public final static String PROPERTY_NAME_VENUE = "venue";
+	public final static String PROPERTY_NAME_ADDITIONALINFO = "additionalInfo";
 	
 	private String street;
 	private String postalCode;
@@ -49,6 +51,7 @@ public class OperatorAddress
 	private String operatorCountry;
 	private String fax;
 	private String venue;
+	private String additionalInfo;
 	
 	private static Hashtable propertyDescriptors = new Hashtable();
 	
@@ -110,6 +113,17 @@ public class OperatorAddress
 	{
 		this.street = street;
 	}
+	
+	public void setAdditionalInfo(String a_additionalInfo)
+	{
+		additionalInfo = a_additionalInfo;
+	}
+	
+	public String getAdditionalInfo()
+	{
+		return additionalInfo;
+	}
+	
 	
 	public String getPostalCode() 
 	{

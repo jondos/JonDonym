@@ -58,6 +58,7 @@
 	<xsl:template match="//Operator">
 		<p class="operatorAddress">
 			<xsl:value-of select="Organisation" /><br />
+			<xsl:apply-templates select="./AdditionalInfo"/>
 			<xsl:value-of select="Street" /><br />
 			<xsl:value-of select="PostalCode" /> <xsl:text> </xsl:text> <xsl:value-of select="City" /><br />
 			<xsl:value-of select="OperatorCountry" /><br />
@@ -69,6 +70,10 @@
 	
 	<xsl:template match="Operator/Vat">
 		<xsl:text>VAT: </xsl:text> <xsl:value-of select="." /><br />
+	</xsl:template>
+	
+	<xsl:template match="Operator/AdditionalInfo">
+		<xsl:value-of select="." /><br />
 	</xsl:template>
 	
 	<xsl:template match="Operator/Fax">

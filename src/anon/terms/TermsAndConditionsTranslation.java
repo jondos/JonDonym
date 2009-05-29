@@ -83,6 +83,7 @@ public interface TermsAndConditionsTranslation
 	
 	public void setSections(TCComposite sections);
 	public TCComposite getSections();
+	public boolean hasContent();
 	
 	public TermsAndConditionsTranslation duplicateWithImports(Element xmlImport);
 }
