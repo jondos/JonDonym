@@ -658,16 +658,53 @@ public final class Util
 	
 	public static String replaceAll(String a_source, String a_toReplace, String a_replaceWith)
 	{
+		return replaceAll(a_source, a_toReplace, a_replaceWith, null);
+	}
+	
+	/**
+	 * String replace algorithm. Strings specified in omit will not be replaced even if their prefices matches
+	 * a_toReplace
+	 * 
+	 * @param a_source Source String
+	 * @param a_toReplace substring which is to be replaced
+	 * @param a_replaceWith string which should replace a_toReplace
+	 * @param omit Strings that not be replaced when their prefix matches a_toReplace
+	 * @return a new string with all replacements
+	 */
+	public static String replaceAll(String a_source, String a_toReplace, String a_replaceWith, String[] omit)
+	{
 		StringBuffer buf = new StringBuffer("");
 		int index = a_source.indexOf(a_toReplace, 0);
 		int lastIndex = 0;
+		
+		boolean replace = true;
+		String omitTemp = null;
+		
 		while(index != -1)
 		{
-			buf.append(a_source.substring(lastIndex, index));				
-			buf.append(a_replaceWith);
-			lastIndex = index+a_toReplace.length();
-			index = a_source.indexOf(a_toReplace, lastIndex);
+			replace = true;
+			if(omit != null)
+			{
+				omitTemp = a_source.substring(index);
+				for (int i = 0; i < omit.length; i++) 
+				{	
+					if(omitTemp.startsWith(omit[i]))
+					{
+						replace = false;
+						break;
+					}
+				}
+			}
+			if(replace)
+			{
+				buf.append(a_source.substring(lastIndex, index));				
+				buf.append(a_replaceWith);
+				lastIndex = index + a_toReplace.length();
+			}
+			index = a_source.indexOf(a_toReplace, 
+					(replace ? lastIndex : (index + a_toReplace.length())) );
 		}
+		
 		buf.append(a_source.substring(lastIndex));
 		return buf.toString();
 	}

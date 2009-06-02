@@ -90,6 +90,9 @@ public class XMLUtil
 	
 	private static int ms_storageMode = STORAGE_MODE_NORMAL;
 
+	private static String[] SPECIAL_CHARS = new String[] {"&", "<", ">"};
+    private static String[] ENTITIES = new String[] {"&amp;", "&lt;", "&gt;"};
+	
 	static
 	{
 		if (ms_DocumentBuilderFactory == null)
@@ -1641,6 +1644,19 @@ public class XMLUtil
 			}
 		}
 
+		//replace special characters with entities
+		if(a_element.getNodeType() == Node.TEXT_NODE)
+		{
+			String content = a_element.getNodeValue();
+			for (int i = 0; i < SPECIAL_CHARS.length; i++) 
+			{
+				//if the special character "&" is to be replaced, specify the entities for not being replaced.
+				content = Util.replaceAll(content, SPECIAL_CHARS[i], ENTITIES[i], 
+						(SPECIAL_CHARS[i].equals("&") ? ENTITIES : null));
+			}
+			a_element.setNodeValue(content);
+		}
+		
 		// if this is empty text, remove it!
 		if (a_element.getNodeType() == Document.TEXT_NODE &&
 			(a_element.getNodeValue() == null || 
