@@ -408,6 +408,8 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		 */
 		public boolean isOnTop();
 		
+		public boolean isModal();
+		
 		/**
 		 * Returns if a click on the close button of the dialog closes the window.
 		 * @return if a click on the close button of the dialog closes the window
@@ -705,6 +707,11 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		public boolean isOnTop()
 		{
 			return false;
+		}
+		
+		public boolean isModal()
+		{
+			return true;
 		}
 		
 		public boolean isCloseWindowActive()
@@ -1547,6 +1554,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		JComponent linkLabel;
 		boolean bForceApplicationModality = false;
 		boolean bOnTop = false;
+		boolean bModal = true;
 		boolean bIsCloseWindowActive = true;
 		String yesOKText = null;
 		String cancelText = null;
@@ -1589,6 +1597,7 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		{
 			bForceApplicationModality = a_linkedInformation.isApplicationModalityForced();
 			bOnTop = a_linkedInformation.isOnTop();
+			bModal = a_linkedInformation.isModal();
 			bIsCloseWindowActive = a_linkedInformation.isCloseWindowActive();
 			strToolTip = a_linkedInformation.getTooltipText();
 
@@ -2004,7 +2013,11 @@ public class JAPDialog implements Accessible, WindowConstants, RootPaneContainer
 		}
 		dialog.addWindowListener(new SimpleDialogButtonFocusWindowAdapter(dialogContentPane));
 		dialog.m_bOnTop = bOnTop;
-		dialog.setVisible(true);		
+		if (!bModal)
+		{
+			dialog.setModal(false);
+		}
+		dialog.setVisible(true);
 		dialog = null;
 
 		return dialogContentPane.getButtonValue();
