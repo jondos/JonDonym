@@ -565,6 +565,12 @@ public class TermsAndConditions implements IXMLEncodable
 		}
 	}
 	
+	public boolean isSignatureObsolete()
+	{
+		//TODO: checks whether the operator has a new Certificate not matching the SKI o the old one
+		return false;
+	}
+	
 	public boolean equals(Object anotherTC)
 	{
 		return operator.equals( ( (TermsAndConditions) anotherTC).operator);
