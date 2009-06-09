@@ -39,7 +39,6 @@ import javax.swing.ImageIcon;
 import anon.util.JAPMessages;
 import anon.util.ResourceLoader;
 import gui.GUIUtils;
-import gui.JAPAboutAutoScroller;
 import gui.dialog.JAPDialog;
 
 final class JAPAbout extends JAPDialog
