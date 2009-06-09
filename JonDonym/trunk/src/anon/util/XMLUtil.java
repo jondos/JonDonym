@@ -90,8 +90,8 @@ public class XMLUtil
 	
 	private static int ms_storageMode = STORAGE_MODE_NORMAL;
 
-	private static String[] SPECIAL_CHARS = new String[] {"&", "<", ">"};
-    private static String[] ENTITIES = new String[] {"&amp;", "&lt;", "&gt;"};
+	public final static String[] SPECIAL_CHARS = new String[] {"&", "<", ">"};
+    public final static String[] ENTITIES = new String[] {"&amp;", "&lt;", "&gt;"};
 	
 	static
 	{

@@ -978,6 +978,15 @@ public final class XMLSignature
 				{
 					textNode = textNode.trim();
 				}
+				
+				//encode special characters in entities
+				for (int i = 0; i < XMLUtil.SPECIAL_CHARS.length; i++) 
+				{
+					//if the special character "&" is to be replaced, specify the entities for not being replaced.
+					textNode = Util.replaceAll(textNode, XMLUtil.SPECIAL_CHARS[i], XMLUtil.ENTITIES[i], 
+							(XMLUtil.SPECIAL_CHARS[i].equals("&") ? XMLUtil.ENTITIES : null));
+				}
+				
 				if(charsetName != null)
 				{
 					o.write(textNode.getBytes(charsetName));
