@@ -357,19 +357,31 @@ public class KeyExchangeManager {
 						try
 						{
 							TermsAndConditions tc = TermsAndConditions.getTermsAndConditions(currentOperator);
-							if( (tc == null) || !tc.isMostRecent(tncInfo.getDate()))
+							if( (tc == null) || !tc.isMostRecent(tncInfo.getDate()) || tc.isSignatureObsolete() )
 							{
+								boolean previouslyAccepted = false;
 								if(tc != null) 
 								{
 									//T & C is obsolete: get the new one.
 									TermsAndConditions.removeTermsAndConditions(tc);
+									//if only the certificate  of the operator has changed, there is no need to re-accept the terms.
+									previouslyAccepted = tc.isSignatureObsolete() ? tc.isAccepted() : false;
 								}
 								tc = new TermsAndConditions(currentOperator, tncInfo.getDate());
-								if(tcrException == null)
+								
+								//if only the certificate of the operator has changed, there is no need to re-read the terms.
+								if(!previouslyAccepted)
 								{
-									tcrException = new TermsAndConditionsReadException();
+									if(tcrException == null)
+									{
+										tcrException = new TermsAndConditionsReadException();
+									}
+									tcrException.addTermsAndConditonsToRead(tc);
 								}
-								tcrException.addTermsAndConditonsToRead(tc);
+								else
+								{
+									tc.setAccepted(true);
+								}
 								TermsAndConditions.storeTermsAndConditions(tc);
 							}
 							else
