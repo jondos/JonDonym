@@ -394,14 +394,14 @@ public class XMLEasyCC implements IXMLEncodable
 					}
 					hashes[i] = m_priceCerts.get(currentKey).toString();
 				}
-				if (m_bOldHashFormat)
-				{
+				//if (m_bOldHashFormat)
+				//{
 					Util.sort(ids, hashes);
-				}
-				else
-				{
-					Util.sort(hashes, ids);
-				}
+				//}
+				//else
+				//{
+				//	Util.sort(hashes, ids);
+				//}
 
 				m_priceCertHashesConcatenated = "";
 				for (int i = 0; i < hashes.length; i++)
