@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<CC version="1.2">
+    <TransferredBytes>38763354</TransferredBytes>
+    <AccountNumber>494787697006</AccountNumber>
+    <PIID>ECD365B98453B316B210B55546731F52DA445F40</PIID>
+    <Cascade>B2F4130C6516035B758B0DA27E14101E9ACA75A7</Cascade>
+    <PriceCertificates>
+        <PriceCertHash id="E24728BED30C8C32ABED1FD039E97A6F6C74AE87" position="2">ceITzrYgMGzwiKAPnQKnEiwxBEM=</PriceCertHash>
+        <PriceCertHash id="B2F4130C6516035B758B0DA27E14101E9ACA75A7" position="0">EUUVx1aLTn8gvFvRdE1Ser3bel0=</PriceCertHash>
+        <PriceCertHash id="63E6DA68631E10D00D3913BDF26C589328190FFA" position="1">KdmP1dHmVIfKcyV7S7ykbyeukN0=</PriceCertHash>
+    </PriceCertificates>
+    <Signature>
+        <SignedInfo>
+            <CanonicalizationMethod></CanonicalizationMethod>
+            <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#dsa-sha1"></SignatureMethod>
+            <Reference>
+                <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></DigestMethod>
+                <DigestValue>sd0+p+DqN25SIJVF6Zq9hdvNWZM=</DigestValue>
+            </Reference>
+        </SignedInfo>
+        <SignatureValue>WlSfYEPNh6vCKqBZUVC++6O7Tj90yysH0syJjKstc6RgecrVBJc8vw==</SignatureValue>
+    </Signature>
+</CC>

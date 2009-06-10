@@ -1,5 +1,7 @@
 package anon.pay;
 
+import anon.pay.xml.XMLEasyCC;
+import anon.pay.xml.XMLEasyCCTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -14,6 +16,7 @@ public class AllTests
 	{
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		suite.addTest(BalanceTest.suite());
+		suite.addTest(XMLEasyCCTest.suite());
 		return suite;
 	}
 }
