@@ -12,7 +12,7 @@ import org.w3c.dom.Document;
 import anon.util.XMLUtil;
 
 /**
- * This compares the correctness of the price certificate hash concatenation
+ * This checks the correctness of the price certificate hash concatenation
  * @author simon
  *
  */
@@ -55,7 +55,6 @@ public class XMLEasyCCTest extends XtendedPrivateTestCase
 			Document doc = 
 				XMLUtil.readXMLDocument(
 						this.getClass().getResourceAsStream("res/"+currentCC+".xml"));
-			
 			
 			XMLEasyCC testProxy = new XMLEasyCC(doc.getDocumentElement());
 			
