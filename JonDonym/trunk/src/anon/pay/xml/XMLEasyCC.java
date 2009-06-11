@@ -206,10 +206,11 @@ public class XMLEasyCC implements IXMLEncodable
 				}
 			}
 		}
-		createConcatenatedPriceCertHashes();
+		m_priceCertHashesConcatenated = 
+			createConcatenatedPriceCertHashes(m_priceCerts, !m_bOldHashFormat);
 
 	}
-
+	
 	private Element internal_toXmlElement(Document a_doc)
 	{
 		Element elemRoot = a_doc.createElement(XML_ELEMENT_NAME);
@@ -364,7 +365,57 @@ public class XMLEasyCC implements IXMLEncodable
 		return m_priceCertHashesConcatenated;
 	}
 
-	private void createConcatenatedPriceCertHashes()
+	private static String createConcatenatedPriceCertHashes(
+			Hashtable priceCerts, boolean newFormat)
+	{
+		// sort hashes after their position in cascade
+
+		String[] ids, hashes;
+		Enumeration enumer;
+		Object currentKey;
+		StringBuffer priceCertHashesConcatenated = new StringBuffer();
+		
+		if (priceCerts != null)
+		{
+			synchronized (priceCerts)
+			{
+				ids = new String[priceCerts.size()];
+				hashes = new String[priceCerts.size()];
+
+				enumer = priceCerts.keys();
+				for (int i = 0; i < priceCerts.size(); i++)
+				{
+					currentKey = enumer.nextElement();
+					if (!newFormat)
+					{
+						// the position does not tell anything about the real position...
+						ids[i] = ( (MixPosition) currentKey).getId();
+					}
+					else
+					{
+						ids[i] = Integer.toString( ( (MixPosition) currentKey).getPosition());
+					}
+					hashes[i] = priceCerts.get(currentKey).toString();
+				}
+				if (!newFormat)
+				{
+					Util.sort(hashes, ids); //sort alphabetically
+				}
+				else
+				{
+					Util.sort(ids, hashes); //sort by position
+				}
+
+				for (int i = 0; i < hashes.length; i++)
+				{
+					priceCertHashesConcatenated.append(hashes[i]);
+				}
+			}
+		}
+		return priceCertHashesConcatenated.toString();
+	}
+	
+	/*private void createConcatenatedPriceCertHashes()
 	{
 		// sort hashes after their position in cascade
 
@@ -394,14 +445,14 @@ public class XMLEasyCC implements IXMLEncodable
 					}
 					hashes[i] = m_priceCerts.get(currentKey).toString();
 				}
-				//if (m_bOldHashFormat)
-				//{
-					Util.sort(ids, hashes);
-				//}
-				//else
-				//{
-				//	Util.sort(hashes, ids);
-				//}
+				if (m_bOldHashFormat)
+				{
+					Util.sort(hashes, ids); //sort alphabetically
+				}
+				else
+				{
+					Util.sort(ids, hashes); //sort by psoition
+				}
 
 				m_priceCertHashesConcatenated = "";
 				for (int i = 0; i < hashes.length; i++)
@@ -410,7 +461,7 @@ public class XMLEasyCC implements IXMLEncodable
 				}
 			}
 		}
-	}
+	}*/
 
 	public int getNrOfPriceCerts()
 	{
@@ -426,7 +477,8 @@ public class XMLEasyCC implements IXMLEncodable
 	{
 		m_bOldHashFormat = false;
 		m_priceCerts = a_priceCertHashes;
-		createConcatenatedPriceCertHashes();
+		m_priceCertHashesConcatenated = 
+			createConcatenatedPriceCertHashes(m_priceCerts, !m_bOldHashFormat);
 
 		m_docTheEasyCC = XMLUtil.createDocument();
 		m_docTheEasyCC.appendChild(internal_toXmlElement(m_docTheEasyCC));
