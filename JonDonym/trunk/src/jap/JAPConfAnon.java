@@ -3018,7 +3018,8 @@ class JAPConfAnon extends AbstractJAPConfModule implements MouseListener, Action
 						if (mixCertificate != null)
 						{
 							//return new ServiceOperator(null, mixCertificate, 0);
-							return (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(mixCertificate.getId());
+							return (ServiceOperator) Database.getInstance(ServiceOperator.class).getEntryById(
+									mixCertificate.getId());
 						}
 					}
 				}

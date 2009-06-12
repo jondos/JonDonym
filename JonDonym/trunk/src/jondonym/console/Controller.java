@@ -1014,8 +1014,9 @@ public class Controller
 			try
 			{
 				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Starting socket listener...");
-				ms_socketListener = new ServerSocket(4001);
-				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Socket listener is running!");
+				ms_socketListener = new ServerSocket(4001);				
+				LogHolder.log(LogLevel.NOTICE, LogType.NET, "Socket listener is running on " +
+						ms_socketListener.getInetAddress().getHostName() + ":" + ms_socketListener.getLocalPort());
 			}
 			catch (Exception e)
 			{

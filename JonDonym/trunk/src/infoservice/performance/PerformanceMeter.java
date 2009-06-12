@@ -739,8 +739,16 @@ public class PerformanceMeter implements Runnable, Observer
 					
 					LogHolder.log(LogLevel.NOTICE, LogType.PAY, "Trying to add " + file.getName());
 					payAccountXMLFile = XMLUtil.readXMLDocument(file);
-					Element payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountXMLFile.getDocumentElement(), "Account");
-					if(payAccountElem != null)
+					
+					
+					Element payAccountElem;
+					
+					payAccountElem = payAccountXMLFile.getDocumentElement();
+					if (!payAccountElem.getNodeName().equals(PayAccount.XML_ELEMENT_NAME))
+					{
+						payAccountElem = (Element) XMLUtil.getFirstChildByName(payAccountElem, PayAccount.XML_ELEMENT_NAME);
+					}
+					if (payAccountElem != null)
 					{
 						PayAccount payAccount = new PayAccount(payAccountElem,new PerformanceAccountPasswordReader());
 						
@@ -763,7 +771,7 @@ public class PerformanceMeter implements Runnable, Observer
 				catch (XMLParseException e) 
 				{
 					LogHolder.log(LogLevel.WARNING, LogType.PAY, 
-						"Cannot parse account file " + files[i] +" for performance monitoring.");
+						"Cannot parse account file " + files[i] +" for performance monitoring.", e);
 				}
 			}
 		}
