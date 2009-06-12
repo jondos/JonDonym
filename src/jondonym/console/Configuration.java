@@ -44,7 +44,7 @@ public interface Configuration
 	public void write(String a_configurationContent) throws Exception;
 	
 	/**
-	 * Optional: an sqlite Ddatabase interface for caching the database entries.
+	 * Optional: an sqlite database interface for caching the database entries.
 	 * Leads to a faster startup. May be null.
 	 * @return 
 	 */
