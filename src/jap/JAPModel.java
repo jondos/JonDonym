@@ -1754,7 +1754,8 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	
 	public synchronized void setDllWarning(boolean a_bWarn)
 	{
-		String version = JAPDll.getDllVersion();
+		String version = JAPDll.JAP_DLL_REQUIRED_VERSION; 
+			//JAPDll.getDllVersion();
 		long newValue = m_noWarningForDllVersionBelow;
 		if (a_bWarn)
 		{
@@ -1792,7 +1793,7 @@ public final class JAPModel extends Observable implements IHelpModel, IServiceCo
 	{
 		long currentVersion = Util.convertVersionStringToNumber(JAPDll.JAP_DLL_REQUIRED_VERSION);
 
-		if (m_noWarningForDllVersionBelow >= currentVersion)
+		if (m_noWarningForDllVersionBelow == currentVersion)
 		{
 			return false;
 		}		
