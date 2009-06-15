@@ -103,23 +103,39 @@ final public class JAPDll {
 
 	private static void loadDll()
 	{
-		//Load either 32 bit or 64 bit version of dll
+		String strDataModel;
+		
 		try
-			{
-				System.loadLibrary(DLL_LIBRARY_NAME_32bit);
-			}
-		catch(Throwable t)
-			{
-				
-			}
-		try
+		{
+			strDataModel = System.getProperty("sun.arch.data.model");
+		}
+		catch (SecurityException a_e)
+		{
+			strDataModel = null;
+		}
+		
+		if (strDataModel != null && strDataModel.equals("64"))
+		{
+			try
 			{
 				System.loadLibrary(DLL_LIBRARY_NAME_64bit);
 			}
-		catch(Throwable t)
+			catch(Throwable t)
 			{
-				
+				t.printStackTrace();
 			}
+		}
+		else
+		{
+			try
+			{
+				System.loadLibrary(DLL_LIBRARY_NAME_32bit);
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace();
+			}
+		}
 	}
 	static
 	{
@@ -285,7 +301,7 @@ final public class JAPDll {
 											}
 											public boolean isConfigFileSaved()
 											{
-												// prevent an older version from distroying the config file
+												// prevent an older version from destroying the config file
 												return false;
 											}
 											public boolean hideWarnings()
