@@ -133,6 +133,29 @@ public final class Util
 
 		return strWriter.toString();
 	}
+	
+	public static String decodeString(String a_compressed)
+	{
+		String decodedString = a_compressed;
+		byte[] decodedBytes;
+		
+		try
+		{
+			decodedBytes = Base64.decode(a_compressed);
+			if (decodedBytes != null)
+			{
+				decodedString = new String(ZLibTools.decompress(decodedBytes));
+			}
+			
+		}
+		catch (Exception a_e)
+		{
+			// this String has not been compressed
+			LogHolder.log(LogLevel.ALERT, LogType.MISC, a_e); 			
+		}
+		
+		return decodedString;
+	}
 
 	/**
 	 * Tests if two byte arrays are equal.
