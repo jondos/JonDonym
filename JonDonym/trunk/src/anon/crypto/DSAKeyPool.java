@@ -135,7 +135,7 @@ public class DSAKeyPool
 	{
 		public void run()
 		{
-			DSAKeyPair keyPair;
+			DSAKeyPair keyPair = null;
 			
 			LogHolder.log(LogLevel.NOTICE, LogType.CRYPTO, "Starting DSA key pool...");
 			

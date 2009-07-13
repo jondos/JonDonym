@@ -33,17 +33,23 @@ import org.w3c.dom.Element;
 import anon.util.XMLUtil;
 import anon.util.IXMLEncodable;
 import anon.crypto.IMyPrivateKey;
+import anon.crypto.PKCS12;
 import anon.crypto.XMLSignature;
 import anon.crypto.IMyPublicKey;
 import java.util.Enumeration;
 import java.util.Hashtable;
+
+import logging.LogHolder;
+import logging.LogLevel;
+import logging.LogType;
+
 import org.w3c.dom.NodeList;
 import anon.util.XMLParseException;
 import anon.util.Util;
 import anon.infoservice.MixPosition;
 
 /**
- * XML structure for a easy cost confirmation (without mircopayment function) which is sent to the AI by the Jap
+ * XML structure for a easy cost confirmation (without micropayment function) which is sent to the AI by the Jap
  *
  * @author Grischan Gl&auml;nzel, Bastian Voigt, Tobias Bayer, Elmar Schraml
  */
@@ -57,7 +63,6 @@ public class XMLEasyCC implements IXMLEncodable
 	private long m_lTransferredBytes;
 	private long m_lAccountNumber;
 	private int m_id = 0; //to be used as primary key in the BI database, 0 if not yet stored in db
-	//private static final String ms_strElemName = "CC";
 	private Hashtable m_priceCerts = new Hashtable(); //key: Subjectkeyidentifier of Mix (String, id attribute of pricecerthash element)
 									//value: value of PriceCerthash element (String)
 	private String m_cascadeID; //stored as its own variable, since Hashtable doesnt guarantee order (so we don't know which mix is the first one)
@@ -70,11 +75,6 @@ public class XMLEasyCC implements IXMLEncodable
 	private String m_strPIID;
 	//~ Constructors ***********************************************************
 
-	public static String getXMLElementName()
-	{
-		return XML_ELEMENT_NAME;
-	}
-
 	/**
 	 * XMLEasyCC
 	 *  construct a CC including a Vector of price certificates (one per mix of the cascade)
@@ -83,18 +83,21 @@ public class XMLEasyCC implements IXMLEncodable
 	 * @param transferred long
 	 * @param a_certificate PKCS12
 	 * @param a_priceCerts Vector
+	 * @throws XMLParseException 
 	 * @throws Exception
 	 */
-	/*
-	public XMLEasyCC(long accountNumber, long transferred, PKCS12 a_certificate, Hashtable a_priceCerts, String a_AiName) throws
-		Exception
+	
+	public XMLEasyCC(long accountNumber, long transferred, PKCS12 a_certificate, 
+			Hashtable a_priceCerts, String a_AiName, String a_strPIID) throws XMLParseException
 	{
 		m_priceCerts = a_priceCerts;
-		createConcatenatedPriceCertHashes();
+		m_priceCertHashesConcatenated = 
+			createConcatenatedPriceCertHashes(a_priceCerts, true);
 
 		m_lTransferredBytes = transferred;
 		m_lAccountNumber = accountNumber;
 		m_cascadeID = a_AiName;
+		m_strPIID = a_strPIID;
 		m_docTheEasyCC = XMLUtil.createDocument();
 		m_docTheEasyCC.appendChild(internal_toXmlElement(m_docTheEasyCC));
 
@@ -102,7 +105,7 @@ public class XMLEasyCC implements IXMLEncodable
 		{
 			XMLSignature.sign(m_docTheEasyCC, a_certificate);
 		}
-	}*/
+	}
 
 
 	public XMLEasyCC(byte[] data) throws Exception
@@ -144,16 +147,6 @@ public class XMLEasyCC implements IXMLEncodable
 													   a_copiedCc.m_docTheEasyCC.getDocumentElement(), true));
 		 m_priceCertHashesConcatenated = a_copiedCc.m_priceCertHashesConcatenated;
 		 m_strPIID = a_copiedCc.m_strPIID;
-	 }
-
-	 /**
-	  *
-	  * @return boolean: true if old hash format, i.e. no position given, or all positions given as -1 (meaning not present in xml)
-	  * Note that even if hasOldHashFormat is true, the keys of the hashtable will still be MixCascade.MixPosition objects, not Strings as in previous versions of this class
-	  */
-	 public boolean hasOldHashFormat()
-	 {
-		 return m_bOldHashFormat;
 	 }
 
 	private void setValues(Element element) throws XMLParseException
@@ -208,7 +201,10 @@ public class XMLEasyCC implements IXMLEncodable
 		}
 		m_priceCertHashesConcatenated = 
 			createConcatenatedPriceCertHashes(m_priceCerts, !m_bOldHashFormat);
-
+		if (m_bOldHashFormat)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.PAY, "Found old hash format for CC: " + m_priceCertHashesConcatenated);
+		}
 	}
 	
 	private Element internal_toXmlElement(Document a_doc)
@@ -365,7 +361,7 @@ public class XMLEasyCC implements IXMLEncodable
 		return m_priceCertHashesConcatenated;
 	}
 
-	private static String createConcatenatedPriceCertHashes(
+	public static String createConcatenatedPriceCertHashes(
 			Hashtable priceCerts, boolean newFormat)
 	{
 		// sort hashes after their position in cascade
@@ -479,6 +475,10 @@ public class XMLEasyCC implements IXMLEncodable
 		m_priceCerts = a_priceCertHashes;
 		m_priceCertHashesConcatenated = 
 			createConcatenatedPriceCertHashes(m_priceCerts, !m_bOldHashFormat);
+		if (m_bOldHashFormat)
+		{
+			LogHolder.log(LogLevel.WARNING, LogType.PAY, "Found old hash format for CC: " + m_priceCertHashesConcatenated);
+		}
 
 		m_docTheEasyCC = XMLUtil.createDocument();
 		m_docTheEasyCC.appendChild(internal_toXmlElement(m_docTheEasyCC));
@@ -530,6 +530,11 @@ public class XMLEasyCC implements IXMLEncodable
 		}
 	}
 
+	public Document getDocument()
+	{
+		return m_docTheEasyCC;
+	}
+	
 	public synchronized Element toXmlElement(Document a_doc)
 	{
 		try
@@ -540,5 +545,60 @@ public class XMLEasyCC implements IXMLEncodable
 		{
 			return null;
 		}
+	}
+	
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (m_bOldHashFormat ? 1231 : 1237);
+		result = prime * result + ((m_cascadeID == null) ? 0 : m_cascadeID.hashCode());
+		result = prime * result + (int) (m_lAccountNumber ^ (m_lAccountNumber >>> 32));
+		result = prime * result + (int) (m_lTransferredBytes ^ (m_lTransferredBytes >>> 32));
+		result = prime
+				* result
+				+ ((m_priceCertHashesConcatenated == null) ? 0 : m_priceCertHashesConcatenated
+						.hashCode());
+		result = prime * result + ((m_strPIID == null) ? 0 : m_strPIID.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		XMLEasyCC other = (XMLEasyCC) obj;
+		if (m_bOldHashFormat != other.m_bOldHashFormat)
+			return false;
+		if (m_cascadeID == null)
+		{
+			if (other.m_cascadeID != null)
+				return false;
+		}
+		else if (!m_cascadeID.equals(other.m_cascadeID))
+			return false;
+		if (m_lAccountNumber != other.m_lAccountNumber)
+			return false;
+		if (m_lTransferredBytes != other.m_lTransferredBytes)
+			return false;
+		if (m_priceCertHashesConcatenated == null)
+		{
+			if (other.m_priceCertHashesConcatenated != null)
+				return false;
+		}
+		else if (!m_priceCertHashesConcatenated.equals(other.m_priceCertHashesConcatenated))
+			return false;
+		if (m_strPIID == null)
+		{
+			if (other.m_strPIID != null)
+				return false;
+		}
+		else if (!m_strPIID.equals(other.m_strPIID))
+			return false;
+		return true;
 	}
 }

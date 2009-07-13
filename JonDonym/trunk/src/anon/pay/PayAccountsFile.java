@@ -967,4 +967,13 @@ public class PayAccountsFile extends Observable implements IXMLEncodable, IBICon
 	{
 		fireMessageRemoved(message);
 	}
+	
+	//the DSA keyPool is a daemon thread!
+	protected void finalize()
+	{
+		if(m_keyPool != null)
+		{
+			m_keyPool.stop();
+		}
+	}
 }
