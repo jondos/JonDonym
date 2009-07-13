@@ -257,15 +257,23 @@ public class InfoService implements Observer
 			
 		if(a_dir == null)
 		{
+			LogHolder.log(LogLevel.WARNING, LogType.DB, "No terms and conditions template diretory available!");
 			return;
 		}
 		
 		String[] files = a_dir.list();
 			
-		if(files == null)
+		if (files == null)
 		{
+			LogHolder.log(LogLevel.WARNING, LogType.DB, "No terms and conditions templates found in directory " + 
+					a_dir.getAbsolutePath() + ".");
 			return;
 		}
+		
+		/*
+		LogHolder.log(LogLevel.WARNING, LogType.DB, "Found " + files.length + " terms and conditions templates in directory " + 
+				a_dir.getAbsolutePath() + ".");
+		*/
 			
 		/* Loop through all files in the directory to find XML files */
 		for (int i = 0; i < files.length; i++)
