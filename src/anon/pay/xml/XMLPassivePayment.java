@@ -181,7 +181,7 @@ public class XMLPassivePayment implements IXMLEncodable
 	}
 
 	/**
-	 * Sets the payment method IP Adress
+	 * Sets the payment method IP Address
 	 * @param a_sErrorCode String
 	 */
 	public void setIP(String a_sIP)
@@ -190,7 +190,7 @@ public class XMLPassivePayment implements IXMLEncodable
 	}
 
 	/**
-	 * Gets the payment method IP Adress
+	 * Gets the payment method IP Address
 	 * @return String
 	 */
 	public String getIP()

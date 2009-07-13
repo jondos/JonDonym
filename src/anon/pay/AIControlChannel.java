@@ -237,7 +237,7 @@ public AIControlChannel(Multiplexer a_multiplexer,
 		  {
 			  processChallenge(new XMLChallenge(elemRoot));
 		  }
-		  else if (tagName.equals(XMLEasyCC.getXMLElementName()))
+		  else if (tagName.equals(XMLEasyCC.XML_ELEMENT_NAME))
 		  {
 			  processInitialCC(new XMLEasyCC(elemRoot));
 		  }

@@ -161,11 +161,15 @@ public class XMLPriceCertificate implements IXMLEncodable
 		//do NOT pass the raw double .setValue(),
 		//since we need to make sure the xml contains exactly two decimal digits
 		//set locale to english to make sure a full stop is used as decimal point, not a comma
-		NumberFormat twoDecDigits = NumberFormat.getInstance(Locale.ENGLISH);
-		twoDecDigits.setMinimumFractionDigits(2);
-		twoDecDigits.setMaximumFractionDigits(2);
-		String rateString = twoDecDigits.format(m_rate);
-		XMLUtil.setValue(elem, rateString);
+		
+		//@deprecated: set the rate in the database but don't append it to the XML structure
+		//which is distributed by the mixes.
+		//NumberFormat twoDecDigits = NumberFormat.getInstance(Locale.ENGLISH);
+		//twoDecDigits.setMinimumFractionDigits(2);
+		//twoDecDigits.setMaximumFractionDigits(2);
+		//String rateString = twoDecDigits.format(m_rate);
+		
+		XMLUtil.setValue(elem, "0.0");
 		elemRoot.appendChild(elem);
 
 		elem = a_doc.createElement("SignatureTime");
@@ -192,6 +196,16 @@ public class XMLPriceCertificate implements IXMLEncodable
 		setValues(doc.getDocumentElement());
 		m_docThePriceCert = doc;
 		m_hashValue = XMLSignature.getHashValueOfElement(m_docThePriceCert);
+	}
+	
+	//Aargh, the only reason for this hot-fix is that someone didn't
+	//check if the hashValue calculated by the mix matches the one calculated in this class.
+	//So we have to pass it directly to the constructor.
+	public XMLPriceCertificate(String xml,  String hashValue, double rate) throws Exception
+	{
+		this(xml);
+		m_rate = rate;
+		m_hashValue = hashValue;
 	}
 	
 	public XMLPriceCertificate(char[] xmldata) throws Exception
@@ -232,6 +246,7 @@ public class XMLPriceCertificate implements IXMLEncodable
 			XMLSignature theSignature = XMLSignature.sign(m_docThePriceCert, key);
 			//removing the certificates saves bandwidth, and all parties involved have the BI's cert anyway
 			theSignature.clearCertificates();
+			m_hashValue = XMLSignature.getHashValueOfElement(m_docThePriceCert);
 			return true;
 		}
 		catch (Exception e)

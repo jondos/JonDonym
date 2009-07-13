@@ -60,6 +60,11 @@ public class XMLGenericText implements IXMLEncodable
 		return m_text;
 	}
 
+	public String toString()
+	{
+		return getText();
+	}
+	
 	public XMLGenericText(Element xml) throws Exception
 	{
 		setValues(xml);
@@ -102,8 +107,6 @@ public class XMLGenericText implements IXMLEncodable
 		return elemRoot;
 	}
 
-
-
 	private void setValues(Element xml) throws Exception
 	{
 		String rootTagName = xml.getTagName();
@@ -121,5 +124,30 @@ public class XMLGenericText implements IXMLEncodable
 		//might very well be empty
 	}
 
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((m_text == null) ? 0 : m_text.hashCode());
+		return result;
+	}
 
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		XMLGenericText other = (XMLGenericText) obj;
+		if (m_text == null)
+		{
+			if (other.m_text != null)
+				return false;
+		}
+		else if (!m_text.equals(other.m_text))
+			return false;
+		return true;
+	}
 }
