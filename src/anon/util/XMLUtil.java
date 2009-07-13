@@ -604,6 +604,11 @@ public class XMLUtil
 		return null;
 	}
 	
+	public static Node getFirstChildByName(Node a_node, String a_childname, boolean a_bDeepSearch)
+	{
+		return getFirstChildByNameUsingDeepSearch(a_node, a_childname);
+	}
+	
 	/**
 	 * Returns the child node of the given node with the given name. If the node is not found
 	 * in the direct children of the parent node, then all child nodes will be searched and then
