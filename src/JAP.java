@@ -84,6 +84,7 @@ import platform.MacOS;
  *  class that wants to initialize platform depending features, e.g. see
  *  <A HREF="JAPMacintosh.html">JAPMacintosh.html</A>
  *  as an example.
+ *  
  */
 public class JAP
 {
