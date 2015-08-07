@@ -2,6 +2,7 @@
 <project name="JonDonym" default="dist" basedir=".">
 	<description>Ant Build file for the various components of the JonDonym project</description>
 
+
 	<!-- set global properties for this build -->
 	<property file="build_properties/global.properties"/>
 	<property file="build_properties/jondo-global.properties"/>	
